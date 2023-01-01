@@ -19,7 +19,8 @@
         "symfony/security-bundle": "6.2.*",
         "symfony/yaml": "6.2.*",
         "syndesi/cypher-entity-manager": "^0.0",
-        "syndesi/mongo-entity-manager": "^0.0"
+        "syndesi/mongo-entity-manager": "^0.0",
+        "syndesi/elastic-entity-manager": "^0.0"
     },
     "config": {
         "allow-plugins": {

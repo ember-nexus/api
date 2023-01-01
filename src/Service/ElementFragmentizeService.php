@@ -9,11 +9,12 @@ use App\Event\RelationElementFragmentizeEvent;
 use App\Type\FragmentGroup;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
-class ElementFragmentizeService {
-
+class ElementFragmentizeService
+{
     public function __construct(
         private EventDispatcherInterface $eventDispatcher
-    ){}
+    ) {
+    }
 
     public function fragmentize(NodeElementInterface|RelationElementInterface $element): FragmentGroup
     {
@@ -25,7 +26,7 @@ class ElementFragmentizeService {
             $event = new RelationElementFragmentizeEvent($element);
         }
         $this->eventDispatcher->dispatch($event);
+
         return $event->getAsFragmentGroup();
     }
-
 }

@@ -4,51 +4,52 @@ namespace App\Type;
 
 use Syndesi\CypherDataStructures\Contract\NodeInterface;
 use Syndesi\CypherDataStructures\Contract\RelationInterface;
-use Syndesi\CypherDataStructures\Type\Node;
-use Syndesi\MongoDataStructures\Contract\DocumentInterface;
-use Syndesi\MongoDataStructures\Type\Document;
+use Syndesi\ElasticDataStructures\Contract\DocumentInterface as ElasticDocumentInterface;
+use Syndesi\MongoDataStructures\Contract\DocumentInterface as MongoDocumentInterface;
 
-class FragmentGroup {
-
+class FragmentGroup
+{
     private NodeInterface|RelationInterface $cypherFragment;
-    private DocumentInterface $documentFragment;
+    private MongoDocumentInterface $mongoFragment;
+    private ElasticDocumentInterface $elasticFragment;
 
-    public function __construct(){}
+    public function __construct()
+    {
+    }
 
-    /**
-     * @return NodeInterface|RelationInterface
-     */
     public function getCypherFragment(): RelationInterface|NodeInterface
     {
         return $this->cypherFragment;
     }
 
-    /**
-     * @param NodeInterface|RelationInterface $cypherFragment
-     * @return FragmentGroup
-     */
     public function setCypherFragment(RelationInterface|NodeInterface $cypherFragment): FragmentGroup
     {
         $this->cypherFragment = $cypherFragment;
+
         return $this;
     }
 
-    /**
-     * @return DocumentInterface
-     */
-    public function getDocumentFragment(): DocumentInterface
+    public function getMongoFragment(): MongoDocumentInterface
     {
-        return $this->documentFragment;
+        return $this->mongoFragment;
     }
 
-    /**
-     * @param DocumentInterface $documentFragment
-     * @return FragmentGroup
-     */
-    public function setDocumentFragment(DocumentInterface $documentFragment): FragmentGroup
+    public function setMongoFragment(MongoDocumentInterface $mongoFragment): FragmentGroup
     {
-        $this->documentFragment = $documentFragment;
+        $this->mongoFragment = $mongoFragment;
+
         return $this;
     }
 
+    public function getElasticFragment(): ElasticDocumentInterface
+    {
+        return $this->elasticFragment;
+    }
+
+    public function setElasticFragment(ElasticDocumentInterface $elasticFragment): FragmentGroup
+    {
+        $this->elasticFragment = $elasticFragment;
+
+        return $this;
+    }
 }

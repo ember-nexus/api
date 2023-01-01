@@ -24,7 +24,8 @@ class GenericPropertyElementFragmentizeEventListener
     private function handleEvent(NodeElementFragmentizeEvent|RelationElementFragmentizeEvent $event): void
     {
         $cypherFragment = $event->getCypherFragment();
-        $documentFragment = $event->getDocumentFragment();
+        $mongoFragment = $event->getMongoFragment();
+        $elasticFragment = $event->getElasticFragment();
         $element = null;
         if ($event instanceof NodeElementFragmentizeEvent) {
             $element = $event->getNodeElement();
@@ -33,12 +34,13 @@ class GenericPropertyElementFragmentizeEventListener
             $element = $event->getRelationElement();
         }
         foreach ($element->getProperties() as $name => $value) {
+            $elasticFragment->addProperty($name, $value);
             if (is_array($value)) {
-                $documentFragment->addProperty($name, $value);
+                $mongoFragment->addProperty($name, $value);
                 continue;
             }
             if (is_object($value)) {
-                $documentFragment->addProperty($name, $value);
+                $mongoFragment->addProperty($name, $value);
                 continue;
             }
             if (is_numeric($value)) {
@@ -51,7 +53,7 @@ class GenericPropertyElementFragmentizeEventListener
             }
             if (is_string($value)) {
                 if (strlen($value) > 1024) {
-                    $documentFragment->addProperty($name, $value);
+                    $mongoFragment->addProperty($name, $value);
                 } else {
                     $cypherFragment->addProperty($name, $value);
                 }

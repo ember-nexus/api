@@ -5,47 +5,52 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Helper\Neo4jClientHelper;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
-use Syndesi\MongoEntityManager\Type\EntityManager as DocumentEntityManager;
-use Laudis\Neo4j\Databags\Statement;
+use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
+use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 
-class ElementManager {
-
+class ElementManager
+{
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
-        private DocumentEntityManager $documentEntityManager,
+        private MongoEntityManager $mongoEntityManager,
+        private ElasticEntityManager $elasticEntityManager,
         private ElementFragmentizeService $elementFragmentizeService,
         private ElementDefragmentizeService $elementDefragmentizeService
-    ){
+    ) {
     }
 
     public function create(NodeElementInterface|RelationElementInterface $element): void
     {
         $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
         $this->cypherEntityManager->create($fragmentGroup->getCypherFragment());
-        $this->documentEntityManager->create($fragmentGroup->getDocumentFragment());
+        $this->mongoEntityManager->create($fragmentGroup->getMongoFragment());
+        $this->elasticEntityManager->create($fragmentGroup->getElasticFragment());
     }
 
     public function merge(NodeElementInterface|RelationElementInterface $element): void
     {
         $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
         $this->cypherEntityManager->merge($fragmentGroup->getCypherFragment());
-        $this->documentEntityManager->merge($fragmentGroup->getDocumentFragment());
+        $this->mongoEntityManager->merge($fragmentGroup->getMongoFragment());
+        $this->elasticEntityManager->merge($fragmentGroup->getElasticFragment());
     }
 
     public function delete(NodeElementInterface|RelationElementInterface $element): void
     {
         $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
         $this->cypherEntityManager->delete($fragmentGroup->getCypherFragment());
-        $this->documentEntityManager->delete($fragmentGroup->getDocumentFragment());
+        $this->mongoEntityManager->delete($fragmentGroup->getMongoFragment());
+        $this->elasticEntityManager->delete($fragmentGroup->getElasticFragment());
     }
 
     public function flush(): void
     {
         $this->cypherEntityManager->flush();
-        $this->documentEntityManager->flush();
+        $this->mongoEntityManager->flush();
+        $this->elasticEntityManager->flush();
     }
 
     public function getNode(UuidInterface $uuid): ?NodeElementInterface
@@ -54,7 +59,7 @@ class ElementManager {
             Statement::create(
                 'MATCH (node {id: $id}) RETURN node',
                 [
-                    'id' => $uuid->toString()
+                    'id' => $uuid->toString(),
                 ]
             )
         );
@@ -62,19 +67,8 @@ class ElementManager {
         if (!$cypherFragment) {
             return null;
         }
-        $documentFragment = $this->documentEntityManager->getClient()->selectDatabase('tion')->selectCollection($cypherFragment->getLabels()[0])->findOne([
-            '_id' => $uuid->toString()
-        ]);
+        $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $uuid->toString());
 
-        print_r($documentFragment);
-        exit;
-
-
-        return null;
+        return $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
     }
-
-    public function get(UuidInterface $uuid): NodeElementInterface|RelationElementInterface
-    {
-    }
-
 }

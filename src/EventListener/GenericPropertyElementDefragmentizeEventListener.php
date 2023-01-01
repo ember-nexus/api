@@ -33,11 +33,13 @@ class GenericPropertyElementDefragmentizeEventListener
         if ($event instanceof RelationElementDefragmentizeEvent) {
             $element = $event->getRelationElement();
         }
+        if ($documentFragment) {
+            $documentProperties = $documentFragment->getProperties();
+            $documentProperties = ReservedPropertyNameHelper::removeReservedPropertyNamesFromArray($documentProperties);
+            $element->addProperties($documentProperties);
+        }
         $cypherProperties = $cypherFragment->getProperties();
         $cypherProperties = ReservedPropertyNameHelper::removeReservedPropertyNamesFromArray($cypherProperties);
-        $documentProperties = $documentFragment->getProperties();
-        $documentProperties = ReservedPropertyNameHelper::removeReservedPropertyNamesFromArray($documentProperties);
-        $element->addProperties($documentProperties);
         $element->addProperties($cypherProperties);
     }
 }

@@ -28,8 +28,11 @@ class RelationElementFragmentizeEventListener
             )
             ->addProperty('id', $relationElement->getIdentifier()->toString())
             ->addIdentifier('id');
-        $event->getDocumentFragment()
+        $event->getMongoFragment()
             ->setCollection($relationElement->getType())
+            ->setIdentifier($relationElement->getIdentifier()->toString());
+        $event->getElasticFragment()
+            ->setIndex($relationElement->getType())
             ->setIdentifier($relationElement->getIdentifier()->toString());
     }
 }

@@ -40,14 +40,21 @@ class GenericPropertyElementFragmentizeEventListenerTest extends TestCase
         $listener = new GenericPropertyElementFragmentizeEventListener();
         $listener->onNodeElementFragmentizeEvent($event);
         $cypherFragment = $event->getCypherFragment();
-        $documentFragment = $event->getDocumentFragment();
+        $mongoFragment = $event->getMongoFragment();
+        $elasticFragment = $event->getElasticFragment();
 
         $this->assertCount(3, $cypherFragment->getProperties());
         $this->assertSame('short string', $cypherFragment->getProperty('shortString'));
         $this->assertSame(1234, $cypherFragment->getProperty('integer'));
         $this->assertSame(1.234, $cypherFragment->getProperty('float'));
-        $this->assertCount(2, $documentFragment->getProperties());
-        $this->assertStringStartsWith('Lorem', $documentFragment->getProperty('longString'));
-        $this->assertIsArray($documentFragment->getProperty('array'));
+        $this->assertCount(2, $mongoFragment->getProperties());
+        $this->assertStringStartsWith('Lorem', $mongoFragment->getProperty('longString'));
+        $this->assertIsArray($mongoFragment->getProperty('array'));
+        $this->assertCount(5, $elasticFragment->getProperties());
+        $this->assertSame('short string', $elasticFragment->getProperty('shortString'));
+        $this->assertSame(1234, $elasticFragment->getProperty('integer'));
+        $this->assertSame(1.234, $elasticFragment->getProperty('float'));
+        $this->assertStringStartsWith('Lorem', $elasticFragment->getProperty('longString'));
+        $this->assertIsArray($elasticFragment->getProperty('array'));
     }
 }

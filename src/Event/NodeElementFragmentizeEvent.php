@@ -8,29 +8,34 @@ use App\Trait\StoppableEventTrait;
 use App\Type\FragmentGroup;
 use Syndesi\CypherDataStructures\Contract\NodeInterface;
 use Syndesi\CypherDataStructures\Type\Node;
-use Syndesi\MongoDataStructures\Contract\DocumentInterface;
-use Syndesi\MongoDataStructures\Type\Document;
+use Syndesi\ElasticDataStructures\Contract\DocumentInterface as ElasticDocumentInterface;
+use Syndesi\ElasticDataStructures\Type\Document as ElasticDocument;
+use Syndesi\MongoDataStructures\Contract\DocumentInterface as MongoDocumentInterface;
+use Syndesi\MongoDataStructures\Type\Document as MongoDocument;
 
 class NodeElementFragmentizeEvent implements EventInterface
 {
     use StoppableEventTrait;
 
     private NodeInterface $cypherFragment;
-    private DocumentInterface $documentFragment;
+    private MongoDocumentInterface $mongoFragment;
+    private ElasticDocumentInterface $elasticFragment;
     private mixed $fileFragment = null;
 
     public function __construct(
         private NodeElementInterface $nodeElement
     ) {
         $this->cypherFragment = new Node();
-        $this->documentFragment = new Document();
+        $this->mongoFragment = new MongoDocument();
+        $this->elasticFragment = new ElasticDocument();
     }
 
     public function getAsFragmentGroup(): FragmentGroup
     {
         return (new FragmentGroup())
             ->setCypherFragment($this->cypherFragment)
-            ->setDocumentFragment($this->documentFragment);
+            ->setMongoFragment($this->mongoFragment)
+            ->setElasticFragment($this->elasticFragment);
     }
 
     public function getCypherFragment(): NodeInterface
@@ -45,14 +50,26 @@ class NodeElementFragmentizeEvent implements EventInterface
         return $this;
     }
 
-    public function getDocumentFragment(): DocumentInterface
+    public function getMongoFragment(): MongoDocumentInterface
     {
-        return $this->documentFragment;
+        return $this->mongoFragment;
     }
 
-    public function setDocumentFragment(DocumentInterface $documentFragment): self
+    public function setMongoFragment(MongoDocumentInterface $mongoFragment): self
     {
-        $this->documentFragment = $documentFragment;
+        $this->mongoFragment = $mongoFragment;
+
+        return $this;
+    }
+
+    public function getElasticFragment(): ElasticDocumentInterface
+    {
+        return $this->elasticFragment;
+    }
+
+    public function setElasticFragment(ElasticDocumentInterface $elasticFragment): self
+    {
+        $this->elasticFragment = $elasticFragment;
 
         return $this;
     }

@@ -17,7 +17,7 @@ class NodeElementDefragmentizeEvent implements EventInterface
 
     public function __construct(
         private NodeInterface $cypherFragment,
-        private DocumentInterface $documentFragment,
+        private ?DocumentInterface $documentFragment,
         private mixed $fileFragment = null
     ) {
         $this->nodeElement = new NodeElement();
@@ -47,12 +47,12 @@ class NodeElementDefragmentizeEvent implements EventInterface
         return $this;
     }
 
-    public function getDocumentFragment(): DocumentInterface
+    public function getDocumentFragment(): ?DocumentInterface
     {
         return $this->documentFragment;
     }
 
-    public function setDocumentFragment(DocumentInterface $documentFragment): self
+    public function setDocumentFragment(?DocumentInterface $documentFragment): self
     {
         $this->documentFragment = $documentFragment;
 

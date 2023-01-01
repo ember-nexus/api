@@ -23,9 +23,11 @@ class NamePropertyElementFragmentizeEventListenerTest extends TestCase
         $listener = new NamePropertyElementFragmentizeEventListener();
         $listener->onNodeElementFragmentizeEvent($event);
         $cypherFragment = $event->getCypherFragment();
-        $documentFragment = $event->getDocumentFragment();
+        $mongoFragment = $event->getMongoFragment();
+        $elasticFragment = $event->getElasticFragment();
 
         $this->assertSame('some name', $cypherFragment->getProperty('name'));
-        $this->assertSame('some name', $documentFragment->getProperty('name'));
+        $this->assertSame('some name', $mongoFragment->getProperty('name'));
+        $this->assertSame('some name', $elasticFragment->getProperty('name'));
     }
 }

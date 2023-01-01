@@ -17,8 +17,11 @@ class NodeElementFragmentizeEventListener
             ->addLabel($nodeElement->getLabel())
             ->addProperty('id', $nodeElement->getIdentifier()->toString())
             ->addIdentifier('id');
-        $event->getDocumentFragment()
+        $event->getMongoFragment()
             ->setCollection($nodeElement->getLabel())
+            ->setIdentifier($nodeElement->getIdentifier()->toString());
+        $event->getElasticFragment()
+            ->setIndex($nodeElement->getLabel())
             ->setIdentifier($nodeElement->getIdentifier()->toString());
     }
 }
