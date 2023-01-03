@@ -32,7 +32,10 @@ class RelationElementFragmentizeEventListener
             ->setCollection($relationElement->getType())
             ->setIdentifier($relationElement->getIdentifier()->toString());
         $event->getElasticFragment()
-            ->setIndex($relationElement->getType())
+            ->setIndex(sprintf(
+                "relation_%s",
+                strtolower($relationElement->getType())
+            ))
             ->setIdentifier($relationElement->getIdentifier()->toString());
     }
 }

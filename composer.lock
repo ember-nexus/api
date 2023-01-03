@@ -5040,16 +5040,16 @@
         },
         {
             "name": "syndesi/elastic-entity-manager",
-            "version": "0.0.1",
+            "version": "0.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Syndesi/elastic-entity-manager.git",
-                "reference": "9a521ba5bf6a320b75c9ae52a8c772efc7438cec"
+                "reference": "11875ee09a42450817f7a0b0a4512d8a37ab930c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Syndesi/elastic-entity-manager/zipball/9a521ba5bf6a320b75c9ae52a8c772efc7438cec",
-                "reference": "9a521ba5bf6a320b75c9ae52a8c772efc7438cec",
+                "url": "https://api.github.com/repos/Syndesi/elastic-entity-manager/zipball/11875ee09a42450817f7a0b0a4512d8a37ab930c",
+                "reference": "11875ee09a42450817f7a0b0a4512d8a37ab930c",
                 "shasum": ""
             },
             "require": {
@@ -5100,9 +5100,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Syndesi/elastic-entity-manager/issues",
-                "source": "https://github.com/Syndesi/elastic-entity-manager/tree/0.0.1"
+                "source": "https://github.com/Syndesi/elastic-entity-manager/tree/0.0.2"
             },
-            "time": "2023-01-01T15:45:14+00:00"
+            "time": "2023-01-01T16:20:06+00:00"
         },
         {
             "name": "syndesi/mongo-data-structures",

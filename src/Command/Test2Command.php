@@ -25,8 +25,9 @@ class Test2Command extends Command
         $output->writeln('hello world :D');
 
         $data = [
-            'id' => '78f61245-8cfd-4039-ac7e-61407fa7e969',
+            'id' => 'fdc8cfa2-8467-4368-8746-10def3c8297b',
             'type' => 'SomeNode',
+            'name' => 'Test :D',
             'shortString' => 'hello world :D',
             'integer' => 1234,
             'float' => 1.234,
@@ -43,6 +44,17 @@ class Test2Command extends Command
                 'dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit '.
                 'praesent luptatu',
             'array' => [1, 2, 3, 4],
+            'setting' => [
+                'frontend' => [
+                    'theme' => 'light',
+                    'heighContrast' => 'false',
+                    'units' => [
+                        'temperature' => 'k',
+                        'distance' => 'km',
+                        'weight' => 'kg'
+                    ]
+                ]
+            ]
         ];
 
         $element = $this->rawToElementService->rawToElement($data);

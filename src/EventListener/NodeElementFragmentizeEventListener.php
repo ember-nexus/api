@@ -21,7 +21,10 @@ class NodeElementFragmentizeEventListener
             ->setCollection($nodeElement->getLabel())
             ->setIdentifier($nodeElement->getIdentifier()->toString());
         $event->getElasticFragment()
-            ->setIndex($nodeElement->getLabel())
+            ->setIndex(sprintf(
+                "node_%s",
+                strtolower($nodeElement->getLabel())
+            ))
             ->setIdentifier($nodeElement->getIdentifier()->toString());
     }
 }

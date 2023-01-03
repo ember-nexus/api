@@ -6,6 +6,7 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Helper\Neo4jClientHelper;
 use Laudis\Neo4j\Databags\Statement;
+use OutOfBoundsException;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
@@ -63,8 +64,12 @@ class ElementManager
                 ]
             )
         );
-        $cypherFragment = Neo4jClientHelper::getNodeFromLaudisNode($res->first()->get('node'));
-        if (!$cypherFragment) {
+        try {
+            $cypherFragment = Neo4jClientHelper::getNodeFromLaudisNode($res->first()->get('node'));
+            if (!$cypherFragment) {
+                return null;
+            }
+        } catch (OutOfBoundsException $e) {
             return null;
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $uuid->toString());

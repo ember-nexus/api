@@ -215,6 +215,9 @@ services:
     Syndesi\MongoEntityManager\Type\EntityManager:
       factory: ['@App\Factory\MongoEntityManagerFactory', 'createMongoEntityManager']
 
+    Syndesi\ElasticEntityManager\Type\EntityManager:
+      factory: ['@App\Factory\ElasticEntityManagerFactory', 'createElasticEntityManager']
+
 
 
     # add more service definitions when explicit configuration is needed
