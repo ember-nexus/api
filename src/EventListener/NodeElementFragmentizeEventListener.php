@@ -22,7 +22,7 @@ class NodeElementFragmentizeEventListener
             ->setIdentifier($nodeElement->getIdentifier()->toString());
         $event->getElasticFragment()
             ->setIndex(sprintf(
-                "node_%s",
+                'node_%s',
                 strtolower($nodeElement->getLabel())
             ))
             ->setIdentifier($nodeElement->getIdentifier()->toString());

@@ -51,10 +51,10 @@ class Test2Command extends Command
                     'units' => [
                         'temperature' => 'k',
                         'distance' => 'km',
-                        'weight' => 'kg'
-                    ]
-                ]
-            ]
+                        'weight' => 'kg',
+                    ],
+                ],
+            ],
         ];
 
         $element = $this->rawToElementService->rawToElement($data);

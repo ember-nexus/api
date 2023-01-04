@@ -18,6 +18,7 @@ class ElasticEntityManagerFactory
         $client = ClientBuilder::create()
             ->setHosts(['neo4j-php-elasticsearch:9200'])
             ->build();
+
         return new EntityManager($client, $this->eventDispatcher, $this->logger);
     }
 }

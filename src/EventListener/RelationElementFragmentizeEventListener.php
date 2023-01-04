@@ -33,7 +33,7 @@ class RelationElementFragmentizeEventListener
             ->setIdentifier($relationElement->getIdentifier()->toString());
         $event->getElasticFragment()
             ->setIndex(sprintf(
-                "relation_%s",
+                'relation_%s',
                 strtolower($relationElement->getType())
             ))
             ->setIdentifier($relationElement->getIdentifier()->toString());

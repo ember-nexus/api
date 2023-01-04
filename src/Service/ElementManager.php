@@ -6,7 +6,6 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Helper\Neo4jClientHelper;
 use Laudis\Neo4j\Databags\Statement;
-use OutOfBoundsException;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
@@ -69,7 +68,7 @@ class ElementManager
             if (!$cypherFragment) {
                 return null;
             }
-        } catch (OutOfBoundsException $e) {
+        } catch (\OutOfBoundsException $e) {
             return null;
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $uuid->toString());

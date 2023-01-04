@@ -17,6 +17,8 @@ use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 #[AsCommand(name: 'app:test')]
 class TestCommand extends Command
 {
+    public const USER_A = '6ce3006b-6b7f-4770-8075-d2bf91804d14';
+
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
         private MongoEntityManager $mongoEntityManager,
@@ -29,6 +31,15 @@ class TestCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $elements = [];
+
+        $rawElements = [];
+        $rawElements[] = [
+            'type' => 'User',
+            'id' => self::USER_A,
+            'name' => 'User A',
+            'email' => 'user-a@localhost.de',
+        ];
+
         $elements[] = $userA = (new Node())
             ->addLabel('User')
             ->addProperty('id', '6ce3006b-6b7f-4770-8075-d2bf91804d14')
