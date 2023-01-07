@@ -3,15 +3,20 @@
 namespace App\Controller;
 
 use App\Helper\Regex;
+use App\Service\ElementManager;
+use App\Service\ElementToRawService;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class GetUuidController extends AbstractController
 {
-    public function __construct(private CypherEntityManager $cypherEntityManager)
-    {
+    public function __construct(
+        private ElementManager $elementManager,
+        private ElementToRawService $elementToRawService
+    ) {
     }
 
     #[Route(
@@ -24,6 +29,9 @@ class GetUuidController extends AbstractController
     )]
     public function getUuid(string $uuid): Response
     {
-        return new Response('it worked :D');
+        $element = $this->elementManager->getElement(UuidV4::fromString($uuid));
+        $rawElement = $this->elementToRawService->elementToRaw($element);
+
+        return new JsonResponse($rawElement);
     }
 }

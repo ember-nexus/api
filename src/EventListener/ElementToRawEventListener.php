@@ -17,8 +17,8 @@ class ElementToRawEventListener
     {
         $element = $event->getElement();
         $metadata = [
-            'id' => $element->getIdentifier()->toString(),
             'type' => '',
+            'id' => $element->getIdentifier()->toString(),
         ];
         if ($element instanceof NodeElementInterface) {
             $metadata['type'] = $element->getLabel();

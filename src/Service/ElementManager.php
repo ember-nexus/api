@@ -18,7 +18,8 @@ class ElementManager
         private MongoEntityManager $mongoEntityManager,
         private ElasticEntityManager $elasticEntityManager,
         private ElementFragmentizeService $elementFragmentizeService,
-        private ElementDefragmentizeService $elementDefragmentizeService
+        private ElementDefragmentizeService $elementDefragmentizeService,
+        private Neo4jClientHelper $neo4jClientHelper
     ) {
     }
 
@@ -53,6 +54,20 @@ class ElementManager
         $this->elasticEntityManager->flush();
     }
 
+    public function getElement(UuidInterface $uuid): null|NodeElementInterface|RelationElementInterface
+    {
+        $node = $this->getNode($uuid);
+        if ($node) {
+            return $node;
+        }
+        $relation = $this->getRelation($uuid);
+        if ($relation) {
+            return $relation;
+        }
+
+        return null;
+    }
+
     public function getNode(UuidInterface $uuid): ?NodeElementInterface
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(
@@ -64,7 +79,7 @@ class ElementManager
             )
         );
         try {
-            $cypherFragment = Neo4jClientHelper::getNodeFromLaudisNode($res->first()->get('node'));
+            $cypherFragment = $this->neo4jClientHelper->getNodeFromLaudisNode($res->first()->get('node'));
             if (!$cypherFragment) {
                 return null;
             }
@@ -72,6 +87,33 @@ class ElementManager
             return null;
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $uuid->toString());
+
+        return $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
+    }
+
+    public function getRelation(UuidInterface $uuid): ?RelationElementInterface
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(
+            Statement::create(
+                'MATCH (startNode)-[relation {id: $id}]->(endNode) RETURN startNode, relation, endNode',
+                [
+                    'id' => $uuid->toString(),
+                ]
+            )
+        );
+        try {
+            $cypherFragment = $this->neo4jClientHelper->getRelationFromLaudisRelation(
+                $res->first()->get('relation'),
+                $res->first()->get('startNode'),
+                $res->first()->get('endNode')
+            );
+            if (!$cypherFragment) {
+                return null;
+            }
+        } catch (\OutOfBoundsException $e) {
+            return null;
+        }
+        $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getType(), $uuid->toString());
 
         return $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
     }
