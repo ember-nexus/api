@@ -8,8 +8,8 @@ class ReservedPropertyNameHelper
         'id',
         '_id',
         'type',
-        'startNode',
-        'endNode',
+        'start',
+        'end',
     ];
 
     public static function removeReservedPropertyNamesFromArray(array $array): array

@@ -7,11 +7,15 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "league/flysystem": "^3.0",
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "league/flysystem-bundle": "^3.1",
         "mongodb/mongodb": "^1.13",
         "ramsey/uuid": "^4.7",
         "symfony/console": "6.2.*",
         "symfony/dotenv": "6.2.*",
         "symfony/event-dispatcher": "6.2.*",
+        "symfony/filesystem": "6.2.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "6.2.*",
         "symfony/monolog-bundle": "^3.8",
@@ -19,8 +23,9 @@
         "symfony/security-bundle": "6.2.*",
         "symfony/yaml": "6.2.*",
         "syndesi/cypher-entity-manager": "^0.0",
+        "syndesi/elastic-entity-manager": "^0.0",
         "syndesi/mongo-entity-manager": "^0.0",
-        "syndesi/elastic-entity-manager": "^0.0"
+        "tuupola/base58": "^2.1"
     },
     "config": {
         "allow-plugins": {
