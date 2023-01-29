@@ -47,7 +47,6 @@ class TokenGenerator
             ->addProperty('hash', $hash);
         $this->elementManager->create($tokenNode);
         $this->elementManager->flush();
-        echo "---- 1\n";
 
         $tokenOwnedByUserRelation = (new RelationElement())
             ->setType('OWNS')

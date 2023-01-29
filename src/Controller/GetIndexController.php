@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Exception\Exception;
 use App\Helper\Neo4jClientHelper;
+use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
 use Laudis\Neo4j\Databags\Statement;
@@ -19,7 +21,8 @@ class GetIndexController extends AbstractController
         private CypherEntityManager $cypherEntityManager,
         private Neo4jClientHelper $neo4jClientHelper,
         private ElementManager $elementManager,
-        private ElementToRawService $elementToRawService
+        private ElementToRawService $elementToRawService,
+        private AuthProvider $authProvider
     ) {
     }
 
@@ -30,13 +33,16 @@ class GetIndexController extends AbstractController
     )]
     public function getIndex(): Response
     {
+        if (null === $this->authProvider->getUserUuid()) {
+            throw new Exception('No user uuid found');
+        }
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (user)-[:PART_OF_GROUP*0..]->()-[:OWNS]->(element)\n".
             'RETURN element',
             [
-                'userId' => '6ce3006b-6b7f-4770-8075-d2bf91804d14',
+                'userId' => $this->authProvider->getUserUuid()->toString(),
             ]
         ));
         $nodes = [];

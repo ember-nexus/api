@@ -2,20 +2,19 @@
 
 namespace App\Command;
 
+use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
 use App\Exception\LogicException;
 use App\Service\ElementManager;
 use App\Service\RawToElementService;
 use App\Style\EonStyle;
-use App\Type\RelationElement;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Syndesi\CypherDataStructures\Type\Relation;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[AsCommand(name: 'backup:load')]
@@ -25,13 +24,14 @@ class BackupLoadCommand extends Command
     private int $relationCount = 0;
     private int $fileCount = 0;
     private int $nodeCount = 0;
-    private int $pageSize = 10;
+    private int $pageSize = 250;
 
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private FilesystemOperator $backupStorage,
         private RawToElementService $rawToElementService,
+        private ?EventDispatcherInterface $eventDispatcher
     ) {
         parent::__construct();
     }
@@ -46,31 +46,17 @@ class BackupLoadCommand extends Command
         $this->io = new EonStyle($input, $output);
 
         $this->checkDatabaseIsEmpty();
+
+        if ($this->eventDispatcher instanceof DeactivatableTraceableEventDispatcher) {
+            $this->eventDispatcher->deactivate();
+        }
+
         $this->backupName = $this->checkBackupName($input->getArgument('name'));
 
         $this->loadSummary();
 
         $this->loadNodes();
         $this->loadRelations();
-
-//        $relationPaths = scandir($backupPath.'/relation/');
-//        foreach ($relationPaths as $relationPath) {
-//            if ($relationPath === '.' || $relationPath === '..') {
-//                continue;
-//            }
-//            $data = file_get_contents($backupPath.'/relation/'.$relationPath);
-//            $data = json_decode($data, true);
-//
-//            $element = (new RelationElement())
-//                ->setType($data['type'])
-//                ->setIdentifier(Uuid::fromString($data['id']))
-//                ->setStartNode(Uuid::fromString($data['start']))
-//                ->setEndNode(Uuid::fromString($data['end']))
-//                ->addProperties($data['data']);
-//            $this->elementManager->merge($element);
-//        }
-//        $this->elementManager->flush();
-//        $output->writeln('hello world :D');
 
         return Command::SUCCESS;
     }
@@ -88,6 +74,7 @@ class BackupLoadCommand extends Command
             }
             $data = \Safe\json_decode($this->backupStorage->read($nodeFile->path()), true);
             $nodeElement = $this->rawToElementService->rawToElement($data);
+            unset($data);
             $this->elementManager->create($nodeElement);
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {
@@ -120,6 +107,7 @@ class BackupLoadCommand extends Command
             }
             $data = \Safe\json_decode($this->backupStorage->read($relationFile->path()), true);
             $relationElement = $this->rawToElementService->rawToElement($data);
+            unset($data);
             $this->elementManager->create($relationElement);
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {

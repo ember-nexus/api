@@ -20,7 +20,6 @@
         "symfony/framework-bundle": "6.2.*",
         "symfony/monolog-bundle": "^3.8",
         "symfony/runtime": "6.2.*",
-        "symfony/security-bundle": "6.2.*",
         "symfony/yaml": "6.2.*",
         "syndesi/cypher-entity-manager": "^0.0",
         "syndesi/elastic-entity-manager": "^0.0",

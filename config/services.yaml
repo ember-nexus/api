@@ -147,6 +147,18 @@ services:
 
 # tion events
 
+    App\EventListener\ApiKeyCheckOnKernelRequestEventListener:
+      tags:
+        - name: kernel.event_listener
+          event: 'kernel.request'
+          method: 'onKernelRequest'
+
+    App\EventListener\ExceptionEventListener:
+      tags:
+        - name: kernel.event_listener
+          event: 'kernel.exception'
+          method: 'onKernelException'
+
     App\EventListener\ElementToRawEventListener:
       tags:
         - name: kernel.event_listener
