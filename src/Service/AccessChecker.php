@@ -15,6 +15,17 @@ class AccessChecker
 
     public function checkAccessToNode(UuidInterface $user, UuidInterface $action, UuidInterface $node): bool
     {
+        $nodeLabels = [];
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            'MATCH (node {id: $nodeUuid}) RETURN DISTINCT labels(node) AS labels',
+            [
+                'nodeUuid' => $node->toString(),
+            ]
+        ));
+
+        print_r($res->first());
+        exit;
+
         /**
          * @var $res SummarizedResult
          */
