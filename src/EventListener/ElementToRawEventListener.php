@@ -15,21 +15,21 @@ class ElementToRawEventListener
     public function onElementToRawEvent(ElementToRawEvent $event): void
     {
         $element = $event->getElement();
-        $properties = $element->getProperties();
-        ksort($properties);
         $rawData = [
             'type' => '',
             'id' => $element->getIdentifier()->toString(),
-            'data' => $properties,
         ];
         if ($element instanceof NodeElementInterface) {
             $rawData['type'] = $element->getLabel();
         }
         if ($element instanceof RelationElementInterface) {
             $rawData['type'] = $element->getType();
-            $rawData['startNode'] = $element->getStartNode()->toString();
-            $rawData['endNode'] = $element->getEndNode()->toString();
+            $rawData['start'] = $element->getStartNode()->toString();
+            $rawData['end'] = $element->getEndNode()->toString();
         }
+        $properties = $element->getProperties();
+        ksort($properties);
+        $rawData['data'] = $properties;
         $event->setRawData($rawData);
         $event->stopPropagation();
     }

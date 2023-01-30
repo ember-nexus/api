@@ -12,7 +12,7 @@ class TraceableEventDispatcherDependencyInjection implements CompilerPassInterfa
     {
         if ($container->has('debug.event_dispatcher')) {
             if ('cli' === PHP_SAPI) {
-                $container->setDefinition('debug.event_dispatcher', new Definition(DeactivatableTraceableEventDispatcher::class));
+                // $container->setDefinition('debug.event_dispatcher', new Definition(DeactivatableTraceableEventDispatcher::class));
             }
         }
     }
