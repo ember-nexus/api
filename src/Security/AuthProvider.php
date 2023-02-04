@@ -2,28 +2,38 @@
 
 namespace App\Security;
 
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class AuthProvider
 {
-    private ?UuidInterface $userUuid = null;
+    private bool $isAnonymous;
+    private ?UuidInterface $userUuid;
     private ?UuidInterface $tokenUuid = null;
 
-    public function __construct()
-    {
+    public function __construct(
+        private ParameterBagInterface $bag
+    ) {
+        $this->userUuid = UuidV4::fromString($this->bag->get('anonymousUserUUID'));
+        $this->isAnonymous = true;
     }
 
-    public function setUserAndToken(?UuidInterface $userUuid = null, ?UuidInterface $tokenUuid = null): self
-    {
+    public function setUserAndToken(
+        ?UuidInterface $userUuid = null,
+        ?UuidInterface $tokenUuid = null,
+        bool $isAnonymous = false
+    ): self {
         $this->userUuid = $userUuid;
         $this->tokenUuid = $tokenUuid;
+        $this->isAnonymous = $isAnonymous;
 
         return $this;
     }
 
     public function isAnonymous(): bool
     {
-        return null !== $this->userUuid && null !== $this->tokenUuid;
+        return $this->isAnonymous();
     }
 
     public function getUserUuid(): ?UuidInterface
