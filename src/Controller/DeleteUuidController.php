@@ -10,8 +10,9 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class DeleteUuidController extends AbstractController
 {
-    public function __construct(private CypherEntityManager $cypherEntityManager)
-    {
+    public function __construct(
+        private CypherEntityManager $cypherEntityManager,
+    ) {
     }
 
     #[Route(

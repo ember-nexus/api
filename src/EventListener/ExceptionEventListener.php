@@ -3,7 +3,7 @@
 namespace App\EventListener;
 
 use App\Exception\SecurityException;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Response\ProblemJsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -45,12 +45,9 @@ class ExceptionEventListener
             unset($data['instance']);
         }
 
-        $event->setResponse(new JsonResponse(
+        $event->setResponse(new ProblemJsonResponse(
             $data,
-            $status,
-            [
-                'Content-Type' => 'application/problem+json',
-            ]
+            $status
         ));
         $event->stopPropagation();
     }
