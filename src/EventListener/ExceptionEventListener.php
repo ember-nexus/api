@@ -39,6 +39,7 @@ class ExceptionEventListener
             'title' => $exception->getMessage(),
             'status' => $status,
             'instance' => $instance,
+            'details' => $exception->getTraceAsString(),
         ];
 
         if (!$instance) {

@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Repository\UserRepository;
-use App\Service\AccessChecker;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
@@ -22,7 +21,6 @@ class TestCommand extends Command
 {
     public function __construct(
         private ElementManager $elementManager,
-        private AccessChecker $accessChecker,
         private UserRepository $userRepository,
         private ElasticEntityManager $elasticEntityManager
     ) {
@@ -101,12 +99,12 @@ class TestCommand extends Command
 //        $rule = Neo4jClientHelper::getNodeFromLaudisNode($res->first()->get('rule'));
 //        print_r($rule);
 
-        $res = $this->accessChecker->checkAccessToNode(
-            UuidV4::fromString('4ecb295f-693e-423b-9c7e-1994158d1da8'),
-            UuidV4::fromString('033cef01-eeb6-4503-9903-66138aee2666'),
-//            UuidV4::fromString('e65c2224-3949-455a-b08a-cf150348982a')
-            UuidV4::fromString('13ba4480-1310-44b1-9ebd-b0236069d250')
-        );
+//        $res = $this->accessChecker->checkAccessToNode(
+//            UuidV4::fromString('4ecb295f-693e-423b-9c7e-1994158d1da8'),
+//            UuidV4::fromString('033cef01-eeb6-4503-9903-66138aee2666'),
+        // //            UuidV4::fromString('e65c2224-3949-455a-b08a-cf150348982a')
+//            UuidV4::fromString('13ba4480-1310-44b1-9ebd-b0236069d250')
+//        );
         if (true === $res) {
             $output->writeln('Access granted');
         } else {

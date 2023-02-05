@@ -10,8 +10,8 @@ parameters:
     min: 5
     default: 25
     max: 100
-  errorDocumentationLinks:
-    405-not-found: https://google.de
+  errorDocumentationLinks:          # null can be replaced by links to redirect to external problem documentation sites
+    404-not-found: null
 
 services:
     # default configuration for services in *this* file
