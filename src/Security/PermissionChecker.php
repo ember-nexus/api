@@ -15,13 +15,15 @@ class PermissionChecker
     ) {
     }
 
-    /*
-     * Todo: check labels on security relevant operations, e.g. WRITE @ Users
+    /**
+     * Todo: check labels on security relevant operations, e.g. WRITE @ Users.
+     *
+     * @param string $permission e.g. 'READ', 'CREATE', 'WRITE
      */
     public function checkPermissionToElement(
         UuidInterface $userUuid,
         UuidInterface $elementUuid,
-        string $permission = 'READ'
+        string $permission
     ): bool {
         $isNode = $this->checkIsNode($elementUuid);
         if (null === $isNode) {
@@ -61,7 +63,7 @@ class PermissionChecker
     public function checkPermissionToNode(
         UuidInterface $userUuid,
         UuidInterface $nodeUuid,
-        string $permission = 'READ'
+        string $permission
     ): bool {
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
@@ -110,7 +112,7 @@ class PermissionChecker
     public function checkPermissionToRelation(
         UuidInterface $userUuid,
         UuidInterface $relationUuid,
-        string $permission = 'READ'
+        string $permission
     ): bool {
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(

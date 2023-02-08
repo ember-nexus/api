@@ -6,19 +6,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class Problem404Controller extends AbstractController
+class ClientTooManyRequestsController extends AbstractController
 {
     public function __construct(
     ) {
     }
 
     #[Route(
-        '/problem/404-not-found',
-        name: 'problem-404-not-found',
+        '/problem/429-too-many-requests',
+        name: 'problem-client-too-many-requests',
         methods: ['GET']
     )]
-    public function problem404NotFound(): Response
+    public function clientTooManyRequests(): Response
     {
-        return new Response('some info for 404 errors lol');
+        return new Response('some info for 429 errors lol');
     }
 }

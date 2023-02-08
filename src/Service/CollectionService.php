@@ -115,6 +115,11 @@ class CollectionService
         );
     }
 
+    public function buildEmptyCollection(): CollectionResponse
+    {
+        return $this->buildCollectionFromUuids([], [], 0);
+    }
+
     /**
      * @param UuidInterface[] $nodeUuids
      * @param UuidInterface[] $relationUuids

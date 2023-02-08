@@ -33,7 +33,7 @@ class AuthProvider
 
     public function isAnonymous(): bool
     {
-        return $this->isAnonymous();
+        return $this->isAnonymous;
     }
 
     public function getUserUuid(): ?UuidInterface

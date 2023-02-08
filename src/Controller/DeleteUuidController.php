@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use App\Exception\ClientNotFoundException;
+use App\Exception\ClientUnauthorizedException;
 use App\Helper\Regex;
+use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
 use App\Security\PermissionChecker;
 use App\Service\ElementManager;
-use App\Service\ProblemJsonGeneratorService;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +20,6 @@ class DeleteUuidController extends AbstractController
     public function __construct(
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
-        private ProblemJsonGeneratorService $problemJsonGeneratorService,
         private PermissionChecker $permissionChecker
     ) {
     }
@@ -46,16 +47,15 @@ class DeleteUuidController extends AbstractController
         );
         if (!$hasDeletePermission) {
             if (!$hasReadPermission) {
-                return $this->problemJsonGeneratorService->createProblemJsonFor404();
+                throw new ClientNotFoundException();
             }
-
-            return $this->problemJsonGeneratorService->createProblemJsonFor403();
+            throw new ClientUnauthorizedException(detail: 'You do not have permission to delete the requested resource.');
         }
 
         $element = $this->elementManager->getElement($elementUuid);
         $this->elementManager->delete($element);
         $this->elementManager->flush();
 
-        return new Response('', Response::HTTP_NO_CONTENT);
+        return new NoContentResponse();
     }
 }

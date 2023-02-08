@@ -6,19 +6,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class Problem403Controller extends AbstractController
+class ClientUnauthorizedController extends AbstractController
 {
     public function __construct(
     ) {
     }
 
     #[Route(
-        '/problem/403-forbidden',
-        name: 'problem-403-forbidden',
+        '/problem/401-unauthorized',
+        name: 'problem-client-unauthorized',
         methods: ['GET']
     )]
-    public function problem403NotFound(): Response
+    public function clientUnauthorized(): Response
     {
-        return new Response('some info for 403 errors lol');
+        return new Response('some info for 401 errors lol');
     }
 }

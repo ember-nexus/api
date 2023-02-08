@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Exception\ClientNotFoundException;
 use App\Helper\Regex;
 use App\Security\AuthProvider;
+use App\Security\PermissionChecker;
 use App\Service\CollectionService;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -13,37 +15,46 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\UnicodeString;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
-class GetUuidParentsController extends AbstractController
+class GetChildrenController extends AbstractController
 {
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
         private CollectionService $collectionService,
-        private AuthProvider $authProvider
+        private AuthProvider $authProvider,
+        private PermissionChecker $permissionChecker
     ) {
     }
 
     #[Route(
-        '/{uuid}/parents',
-        name: 'getUuidParents',
+        '/{uuid}/children',
+        name: 'getChildren',
         requirements: [
             'uuid' => Regex::UUID_V4,
         ],
         methods: ['GET']
     )]
-    public function getUuidParents(string $uuid): Response
+    public function getChildren(string $uuid): Response
     {
-        $childUuid = UuidV4::fromString($uuid);
+        $parentUuid = UuidV4::fromString($uuid);
+        $hasUserReadPermissionToParentElement = $this->permissionChecker->checkPermissionToNode(
+            $this->authProvider->getUserUuid(),
+            $parentUuid,
+            'READ'
+        );
+        if (!$hasUserReadPermissionToParentElement) {
+            throw new ClientNotFoundException();
+        }
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
-            "MATCH (child {id: \$childId})\n".
-            "MATCH (child)<-[:OWNS]-(parent)\n".
-            'RETURN count(parent) AS count, labels(parent) AS labels',
+            "MATCH (parent {id: \$parentId})\n".
+            "MATCH (parent)-[:OWNS]->(child)\n".
+            'RETURN count(child) AS count, labels(child) AS labels',
             [
-                'childId' => $childUuid->toString(),
+                'parentId' => $parentUuid->toString(),
             ]
         ));
         if (0 === $res->count()) {
-            return $this->collectionService->buildCollectionFromUuids([], [], 0);
+            return $this->collectionService->buildEmptyCollection();
         }
         $labels = $res->first()->get('labels');
         $totalCount = $res->first()->get('count');
@@ -51,7 +62,7 @@ class GetUuidParentsController extends AbstractController
         $permissionQueries = [];
         foreach ($labels as $label) {
             $permissionQueries[] = sprintf(
-                '(user)-[:PART_OF_GROUP*0..]->()-[:OWNS|READ_PERMISSION|READ_PERMISSION_ON_%s*]->(parent)',
+                '(user)-[:PART_OF_GROUP*0..]->()-[:OWNS|READ_PERMISSION|READ_PERMISSION_ON_%s*]->(child)',
                 (new UnicodeString($label))
                     ->snake()
                     ->upper()
@@ -62,19 +73,19 @@ class GetUuidParentsController extends AbstractController
         $res = $cypherClient->runStatement(Statement::create(
             sprintf(
                 "MATCH (user {id: \$userId})\n".
-                "MATCH (child {id: \$childId})\n".
-                "MATCH (child)<-[:OWNS]-(parent)\n".
-                "MATCH (child)-[r]-(parent)\n".
+                "MATCH (parent {id: \$parentId})\n".
+                "MATCH (parent)-[:OWNS]->(child)\n".
+                "MATCH (parent)-[r]-(child)\n".
                 "%s\n".
-                "RETURN parent.id, collect(r.id), count(parent) AS totalCount\n".
-                "ORDER BY parent.id\n".
+                "RETURN child.id, collect(r.id), count(child) AS totalCount\n".
+                "ORDER BY child.id\n".
                 "SKIP \$skip\n".
                 'LIMIT $limit',
                 $permissionQueries
             ),
             [
                 'userId' => $this->authProvider->getUserUuid()->toString(),
-                'childId' => $childUuid->toString(),
+                'parentId' => $parentUuid->toString(),
                 'skip' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
                 'limit' => $this->collectionService->getPageSize(),
             ]
@@ -82,7 +93,7 @@ class GetUuidParentsController extends AbstractController
         $nodeUuids = [];
         $relationUuids = [];
         foreach ($res as $resultSet) {
-            $nodeUuids[] = UuidV4::fromString($resultSet->get('parent.id'));
+            $nodeUuids[] = UuidV4::fromString($resultSet->get('child.id'));
             foreach ($resultSet->get('collect(r.id)') as $relationId) {
                 $relationUuids[] = UuidV4::fromString($relationId);
             }

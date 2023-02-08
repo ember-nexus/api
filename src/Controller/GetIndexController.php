@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Exception\Exception;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use Laudis\Neo4j\Databags\Statement;
@@ -28,9 +27,6 @@ class GetIndexController extends AbstractController
     )]
     public function getIndex(): Response
     {
-        if (null === $this->authProvider->getUserUuid()) {
-            throw new Exception('No user uuid found');
-        }
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".

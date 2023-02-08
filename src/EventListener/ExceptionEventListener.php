@@ -2,53 +2,63 @@
 
 namespace App\EventListener;
 
-use App\Exception\SecurityException;
+use App\Exception\ExtendedException;
+use App\Exception\ServerException;
 use App\Response\ProblemJsonResponse;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ExceptionEventListener
 {
     public function __construct(
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private KernelInterface $kernel,
+        private ParameterBagInterface $bag
     ) {
     }
 
     public function onKernelException(ExceptionEvent $event): void
     {
-        $exception = $event->getThrowable();
-        $status = 500;
-        if ($exception instanceof SecurityException) {
-            $status = 403;
+        $originalException = $extendedException = $event->getThrowable();
+        if (!($originalException instanceof ExtendedException)) {
+            $extendedException = new ServerException();
         }
 
-        $instance = null;
+        $instance = $extendedException->getInstance();
+        $instanceLink = $this->urlGenerator->generate(
+            sprintf(
+                'problem-%s',
+                $instance
+            )
+        );
 
-        if ($event->getResponse()?->headers?->has('X-Debug-Token')) {
-            $this->urlGenerator->generate(
-                '_profiler',
-                [
-                    'token' => $event->getResponse()?->headers?->get('X-Debug-Token'),
-                ],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
+        // check if there are configured alternatives for the instance links
+        if ($this->bag->has('problemInstanceLinks')) {
+            if (array_key_exists($instance, $this->bag->get('problemInstanceLinks'))) {
+                $instanceLink = $this->bag->get('problemInstanceLinks')[$instance];
+            }
         }
 
         $data = [
-            'type' => get_class($exception),
-            'title' => $exception->getMessage(),
-            'status' => $status,
-            'instance' => $instance,
-            'details' => $exception->getTraceAsString(),
+            'type' => $extendedException->getType(),
+            'title' => $extendedException->getTitle(),
+            'status' => $extendedException->getStatus(),
+            'instance' => $instanceLink,
+            'detail' => $extendedException->getDetail(),
         ];
 
-        if (!$instance) {
-            unset($data['instance']);
+        if ($this->kernel->isDebug()) {
+            $data['exception'] = [
+                'message' => $originalException->getMessage(),
+                'trace' => $originalException->getTrace(),
+            ];
         }
 
         $event->setResponse(new ProblemJsonResponse(
             $data,
-            $status
+            $data['status']
         ));
         $event->stopPropagation();
     }

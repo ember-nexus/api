@@ -17,7 +17,9 @@ class RawToElementEventListenerTest extends TestCase
         $rawData = [
             'type' => 'Node',
             'id' => '59303c75-316b-4a4f-b554-26bdaee91a0e',
-            'someProperty' => 'some value',
+            'data' => [
+                'someProperty' => 'some value',
+            ],
         ];
         $event = new RawToElementEvent($rawData);
         $rawToElementListener = new RawToElementEventListener();
@@ -34,9 +36,11 @@ class RawToElementEventListenerTest extends TestCase
         $rawData = [
             'type' => 'RELATION',
             'id' => '59303c75-316b-4a4f-b554-26bdaee91a0e',
-            'startNode' => '813bd638-5465-4f3b-a15b-a32773c2e8a4',
-            'endNode' => 'a3a6531f-d1d4-4c2b-a0f9-7f55e3d6c40c',
-            'someProperty' => 'some value',
+            'start' => '813bd638-5465-4f3b-a15b-a32773c2e8a4',
+            'end' => 'a3a6531f-d1d4-4c2b-a0f9-7f55e3d6c40c',
+            'data' => [
+                'someProperty' => 'some value',
+            ],
         ];
         $event = new RawToElementEvent($rawData);
         $rawToElementListener = new RawToElementEventListener();

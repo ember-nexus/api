@@ -28,10 +28,10 @@ class ElementToRawEventListenerTest extends TestCase
         $this->assertIsArray($rawData);
         $this->assertSame('78f61245-8cfd-4039-ac7e-61407fa7e969', $rawData['id']);
         $this->assertSame('Node', $rawData['type']);
-        $this->assertSame('some value', $rawData['someProperty']);
-        $this->assertSame('id', array_keys($rawData)[0]);
-        $this->assertSame('type', array_keys($rawData)[1]);
-        $this->assertSame('someProperty', array_keys($rawData)[2]);
+        $this->assertSame('some value', $rawData['data']['someProperty']);
+        $this->assertSame('type', array_keys($rawData)[0]);
+        $this->assertSame('id', array_keys($rawData)[1]);
+        $this->assertSame('data', array_keys($rawData)[2]);
     }
 
     public function testRelationElementToRaw(): void
@@ -51,13 +51,13 @@ class ElementToRawEventListenerTest extends TestCase
         $this->assertIsArray($rawData);
         $this->assertSame('78f61245-8cfd-4039-ac7e-61407fa7e969', $rawData['id']);
         $this->assertSame('RELATION', $rawData['type']);
-        $this->assertSame('2f84b61f-e062-4006-8915-45c951d58b68', $rawData['startNode']);
-        $this->assertSame('74f354c2-8367-4e61-98da-2a032137af34', $rawData['endNode']);
-        $this->assertSame('some value', $rawData['someProperty']);
-        $this->assertSame('id', array_keys($rawData)[0]);
-        $this->assertSame('type', array_keys($rawData)[1]);
-        $this->assertSame('startNode', array_keys($rawData)[2]);
-        $this->assertSame('endNode', array_keys($rawData)[3]);
-        $this->assertSame('someProperty', array_keys($rawData)[4]);
+        $this->assertSame('2f84b61f-e062-4006-8915-45c951d58b68', $rawData['start']);
+        $this->assertSame('74f354c2-8367-4e61-98da-2a032137af34', $rawData['end']);
+        $this->assertSame('some value', $rawData['data']['someProperty']);
+        $this->assertSame('type', array_keys($rawData)[0]);
+        $this->assertSame('id', array_keys($rawData)[1]);
+        $this->assertSame('start', array_keys($rawData)[2]);
+        $this->assertSame('end', array_keys($rawData)[3]);
+        $this->assertSame('data', array_keys($rawData)[4]);
     }
 }
