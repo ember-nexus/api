@@ -27,12 +27,16 @@ class ExceptionEventListener
         }
 
         $instance = $extendedException->getInstance();
-        $instanceLink = $this->urlGenerator->generate(
-            sprintf(
-                'problem-%s',
-                $instance
-            )
-        );
+        $instanceLink = null;
+        try {
+            $instanceLink = $this->urlGenerator->generate(
+                sprintf(
+                    'problem-%s',
+                    $instance
+                )
+            );
+        } catch (\Exception $e) {
+        }
 
         // check if there are configured alternatives for the instance links
         if ($this->bag->has('problemInstanceLinks')) {
@@ -48,6 +52,10 @@ class ExceptionEventListener
             'instance' => $instanceLink,
             'detail' => $extendedException->getDetail(),
         ];
+
+        if (null === $instanceLink) {
+            unset($data['instance']);
+        }
 
         if ($this->kernel->isDebug()) {
             $data['exception'] = [

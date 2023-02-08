@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Repository\UserRepository;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
@@ -21,8 +20,6 @@ class TestCommand extends Command
 {
     public function __construct(
         private ElementManager $elementManager,
-        private UserRepository $userRepository,
-        private ElasticEntityManager $elasticEntityManager
     ) {
         parent::__construct();
     }
@@ -105,11 +102,11 @@ class TestCommand extends Command
         // //            UuidV4::fromString('e65c2224-3949-455a-b08a-cf150348982a')
 //            UuidV4::fromString('13ba4480-1310-44b1-9ebd-b0236069d250')
 //        );
-        if (true === $res) {
-            $output->writeln('Access granted');
-        } else {
-            $output->writeln('Access denied');
-        }
+//        if (true === $res) {
+//            $output->writeln('Access granted');
+//        } else {
+//            $output->writeln('Access denied');
+//        }
 
         $output->writeln('hello world :D');
 

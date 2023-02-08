@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\EventListener\Neo4j;
+namespace App\Tests\UnitTests\EventListener;
 
 use App\Event\ElementToRawEvent;
 use App\EventListener\ElementToRawEventListener;

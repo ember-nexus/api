@@ -94,6 +94,7 @@
     "require-dev": {
         "boesing/psalm-plugin-stringf": "^1.1",
         "friendsofphp/php-cs-fixer": "^3.8",
+        "guzzlehttp/guzzle": "^7.5",
         "infection/infection": "^0.26.10",
         "phpbench/phpbench": "^1.2",
         "phpstan/phpstan": "^1.6",
