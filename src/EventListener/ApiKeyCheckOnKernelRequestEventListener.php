@@ -2,7 +2,7 @@
 
 namespace App\EventListener;
 
-use App\Exception\SecurityException;
+use App\Exception\ClientUnauthorizedException;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use Laudis\Neo4j\Databags\Statement;
@@ -19,7 +19,7 @@ class ApiKeyCheckOnKernelRequestEventListener
     ) {
     }
 
-    public function onKernelRequest(RequestEvent $event)
+    public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
             return;
@@ -29,13 +29,13 @@ class ApiKeyCheckOnKernelRequestEventListener
             return;
         }
 
-        $tokenParts = explode(' ', $event->getRequest()->headers->get('Authorization'), 2);
+        $tokenParts = explode(' ', $event->getRequest()->headers->get('Authorization') ?? '', 2);
         if (2 !== count($tokenParts)) {
-            throw new SecurityException('Invalid authorization token');
+            throw new ClientUnauthorizedException('Invalid authorization token');
         }
         $token = $tokenParts[1];
         if (!str_starts_with($token, 'secret-token:')) {
-            throw new SecurityException('Invalid authorization token');
+            throw new ClientUnauthorizedException('Invalid authorization token');
         }
 
         $res = $this->cypherEntityManager->getClient()->runStatement(
@@ -48,7 +48,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         );
 
         if (0 === count($res)) {
-            throw new SecurityException('Invalid authorization token');
+            throw new ClientUnauthorizedException('Invalid authorization token');
         }
 
         $userUuid = Uuid::fromString($res->first()->get('user.id'));

@@ -26,11 +26,9 @@ class GenericPropertyElementDefragmentizeEventListener
     {
         $cypherFragment = $event->getCypherFragment();
         $documentFragment = $event->getDocumentFragment();
-        $element = null;
         if ($event instanceof NodeElementDefragmentizeEvent) {
             $element = $event->getNodeElement();
-        }
-        if ($event instanceof RelationElementDefragmentizeEvent) {
+        } else {
             $element = $event->getRelationElement();
         }
         if ($documentFragment) {

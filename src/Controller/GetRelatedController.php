@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Exception\ClientNotFoundException;
+use App\Exception\ClientUnauthorizedException;
 use App\Helper\Regex;
 use App\Security\AuthProvider;
 use App\Security\PermissionChecker;
@@ -35,9 +36,13 @@ class GetRelatedController extends AbstractController
     )]
     public function getRelated(string $uuid): Response
     {
+        $userUuid = $this->authProvider->getUserUuid();
+        if (null === $userUuid) {
+            throw new ClientUnauthorizedException();
+        }
         $centerUuid = UuidV4::fromString($uuid);
         $hasUserReadPermissionToCenterElement = $this->permissionChecker->checkPermissionToNode(
-            $this->authProvider->getUserUuid(),
+            $userUuid,
             $centerUuid,
             'READ'
         );
@@ -66,6 +71,7 @@ class GetRelatedController extends AbstractController
                 (new UnicodeString($label))
                     ->snake()
                     ->upper()
+                    ->toString()
             );
         }
         $permissionQueries = 'WHERE '.implode("\nOR ", $permissionQueries);
@@ -83,7 +89,7 @@ class GetRelatedController extends AbstractController
                 $permissionQueries
             ),
             [
-                'userId' => $this->authProvider->getUserUuid()->toString(),
+                'userId' => $userUuid->toString(),
                 'centerId' => $centerUuid->toString(),
                 'skip' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
                 'limit' => $this->collectionService->getPageSize(),

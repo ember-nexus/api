@@ -17,15 +17,15 @@ class ElementToRawEventListener
         $element = $event->getElement();
         $rawData = [
             'type' => '',
-            'id' => $element->getIdentifier()->toString(),
+            'id' => $element->getIdentifier()?->toString(),
         ];
         if ($element instanceof NodeElementInterface) {
             $rawData['type'] = $element->getLabel();
         }
         if ($element instanceof RelationElementInterface) {
             $rawData['type'] = $element->getType();
-            $rawData['start'] = $element->getStartNode()->toString();
-            $rawData['end'] = $element->getEndNode()->toString();
+            $rawData['start'] = $element->getStart()?->toString();
+            $rawData['end'] = $element->getEnd()?->toString();
         }
         $properties = $element->getProperties();
         ksort($properties);

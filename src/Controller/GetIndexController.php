@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Exception\ClientUnauthorizedException;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use Laudis\Neo4j\Databags\Statement;
@@ -27,6 +28,10 @@ class GetIndexController extends AbstractController
     )]
     public function getIndex(): Response
     {
+        $userUuid = $this->authProvider->getUserUuid();
+        if (null === $userUuid) {
+            throw new ClientUnauthorizedException();
+        }
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
@@ -35,7 +40,7 @@ class GetIndexController extends AbstractController
             "SKIP \$skip\n".
             'LIMIT $limit',
             [
-                'userId' => $this->authProvider->getUserUuid()->toString(),
+                'userId' => $userUuid->toString(),
                 'skip' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
                 'limit' => $this->collectionService->getPageSize(),
             ]

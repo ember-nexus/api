@@ -19,6 +19,9 @@ class ExceptionEventListener
     ) {
     }
 
+    /**
+     * @psalm-suppress UndefinedInterfaceMethod
+     */
     public function onKernelException(ExceptionEvent $event): void
     {
         $originalException = $extendedException = $event->getThrowable();
@@ -40,8 +43,11 @@ class ExceptionEventListener
 
         // check if there are configured alternatives for the instance links
         if ($this->bag->has('problemInstanceLinks')) {
-            if (array_key_exists($instance, $this->bag->get('problemInstanceLinks'))) {
-                $instanceLink = $this->bag->get('problemInstanceLinks')[$instance];
+            $problemInstanceLinksConfig = $this->bag->get('problemInstanceLinks');
+            if (is_array($problemInstanceLinksConfig)) {
+                if (array_key_exists($instance, $problemInstanceLinksConfig)) {
+                    $instanceLink = $problemInstanceLinksConfig[$instance];
+                }
             }
         }
 

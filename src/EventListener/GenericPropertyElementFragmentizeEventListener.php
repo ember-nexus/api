@@ -26,11 +26,9 @@ class GenericPropertyElementFragmentizeEventListener
         $cypherFragment = $event->getCypherFragment();
         $mongoFragment = $event->getMongoFragment();
         $elasticFragment = $event->getElasticFragment();
-        $element = null;
         if ($event instanceof NodeElementFragmentizeEvent) {
             $element = $event->getNodeElement();
-        }
-        if ($event instanceof RelationElementFragmentizeEvent) {
+        } else {
             $element = $event->getRelationElement();
         }
         foreach ($element->getProperties() as $name => $value) {

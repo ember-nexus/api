@@ -12,6 +12,11 @@ class ReservedPropertyNameHelper
         'end',
     ];
 
+    /**
+     * @param array<string, mixed> $array
+     *
+     * @return array<string, mixed>
+     */
     public static function removeReservedPropertyNamesFromArray(array $array): array
     {
         foreach (self::RESERVED_PROPERTY_NAMES as $name) {

@@ -25,7 +25,7 @@ class NodeElementFragmentizeEventListener
             throw new \InvalidArgumentException();
         }
 
-        /*
+        /**
          * @psalm-suppress UndefinedInterfaceMethod
          */
         $event->getCypherFragment()

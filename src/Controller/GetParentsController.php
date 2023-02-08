@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Exception\ClientNotFoundException;
+use App\Exception\ClientUnauthorizedException;
 use App\Helper\Regex;
 use App\Security\AuthProvider;
 use App\Security\PermissionChecker;
@@ -35,9 +36,13 @@ class GetParentsController extends AbstractController
     )]
     public function getParents(string $uuid): Response
     {
+        $userUuid = $this->authProvider->getUserUuid();
+        if (null === $userUuid) {
+            throw new ClientUnauthorizedException();
+        }
         $childUuid = UuidV4::fromString($uuid);
         $hasUserReadPermissionToChildElement = $this->permissionChecker->checkPermissionToNode(
-            $this->authProvider->getUserUuid(),
+            $userUuid,
             $childUuid,
             'READ'
         );
@@ -66,6 +71,7 @@ class GetParentsController extends AbstractController
                 (new UnicodeString($label))
                     ->snake()
                     ->upper()
+                    ->toString()
             );
         }
         $permissionQueries = 'WHERE '.implode("\nOR ", $permissionQueries);
@@ -84,7 +90,7 @@ class GetParentsController extends AbstractController
                 $permissionQueries
             ),
             [
-                'userId' => $this->authProvider->getUserUuid()->toString(),
+                'userId' => $userUuid->toString(),
                 'childId' => $childUuid->toString(),
                 'skip' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
                 'limit' => $this->collectionService->getPageSize(),

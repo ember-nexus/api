@@ -26,11 +26,9 @@ class CreatedPropertyElementFragmentizeEventListener
         $cypherFragment = $event->getCypherFragment();
         $mongoFragment = $event->getMongoFragment();
         $elasticFragment = $event->getElasticFragment();
-        $element = null;
         if ($event instanceof NodeElementFragmentizeEvent) {
             $element = $event->getNodeElement();
-        }
-        if ($event instanceof RelationElementFragmentizeEvent) {
+        } else {
             $element = $event->getRelationElement();
         }
         if (!$element->hasProperty('created')) {

@@ -21,10 +21,13 @@ class PermissionChecker
      * @param string $permission e.g. 'READ', 'CREATE', 'WRITE
      */
     public function checkPermissionToElement(
-        UuidInterface $userUuid,
+        ?UuidInterface $userUuid,
         UuidInterface $elementUuid,
         string $permission
     ): bool {
+        if (null === $userUuid) {
+            return false;
+        }
         $isNode = $this->checkIsNode($elementUuid);
         if (null === $isNode) {
             return false;

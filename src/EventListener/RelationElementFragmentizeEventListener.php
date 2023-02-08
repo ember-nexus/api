@@ -38,7 +38,7 @@ class RelationElementFragmentizeEventListener
         }
         $endUuid = $endUuid->toString();
 
-        /*
+        /**
          * @psalm-suppress UndefinedInterfaceMethod
          */
         $event->getCypherFragment()

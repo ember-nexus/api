@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
-use App\Exception\LogicException;
 use App\Service\ElementManager;
 use App\Service\RawToElementService;
 use App\Style\EonStyle;
@@ -14,9 +13,13 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor $io
+ */
 #[AsCommand(name: 'backup:load')]
 class BackupLoadCommand extends Command
 {
@@ -25,6 +28,8 @@ class BackupLoadCommand extends Command
     private int $fileCount = 0;
     private int $nodeCount = 0;
     private int $pageSize = 250;
+
+    private OutputStyle $io;
 
     public function __construct(
         private ElementManager $elementManager,
@@ -36,7 +41,7 @@ class BackupLoadCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addArgument('name', InputArgument::REQUIRED, 'Name of the backup');
     }
@@ -132,19 +137,19 @@ class BackupLoadCommand extends Command
         $backupName = trim($backupName);
 
         if ('' === $backupName) {
-            throw new LogicException("Backup name can not be ''");
+            throw new \LogicException("Backup name can not be ''");
         }
 
         if ('.' === $backupName) {
-            throw new LogicException("Backup name can not be '.'");
+            throw new \LogicException("Backup name can not be '.'");
         }
 
         if ('..' === $backupName) {
-            throw new LogicException("Backup name can not be '..'");
+            throw new \LogicException("Backup name can not be '..'");
         }
 
         if (!$this->backupStorage->directoryExists($backupName)) {
-            throw new LogicException(sprintf("Backup with the name '%s' does not exist", $backupName));
+            throw new \LogicException(sprintf("Backup with the name '%s' does not exist", $backupName));
         }
 
         return $backupName;
@@ -153,7 +158,7 @@ class BackupLoadCommand extends Command
     private function loadSummary(): void
     {
         if (!$this->backupStorage->fileExists($this->backupName.'/summary.json')) {
-            throw new LogicException(sprintf("Backup with the name '%s' does not contain a summary.json", $this->backupName));
+            throw new \LogicException(sprintf("Backup with the name '%s' does not contain a summary.json", $this->backupName));
         }
         $data = \Safe\json_decode($this->backupStorage->read($this->backupName.'/summary.json'), true);
         $nodeCount = 0;
@@ -182,7 +187,7 @@ class BackupLoadCommand extends Command
             Statement::create('MATCH ()-[r]->() RETURN count(r) as count')
         )->first()->get('count');
         if ($nodeCount > 0 || $relationCount > 0) {
-            throw new LogicException('Loading backups into non-empty databases is not supported');
+            throw new \LogicException('Loading backups into non-empty databases is not supported');
         }
     }
 }

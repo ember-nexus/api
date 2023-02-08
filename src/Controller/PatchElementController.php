@@ -47,6 +47,9 @@ class PatchElementController extends AbstractController
         $data = \Safe\json_decode($data, true);
 
         $element = $this->elementManager->getElement($elementUuid);
+        if (null === $element) {
+            throw new ClientNotFoundException();
+        }
         $element->addProperties($data);
         $this->elementManager->merge($element);
         $this->elementManager->flush();

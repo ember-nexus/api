@@ -56,6 +56,9 @@ class PostIndexController extends AbstractController
             throw new ClientBadRequestException(detail: "When creating a relation, both properties 'start' as well as 'end' must be set.");
         }
 
+        /**
+         * @psalm-suppress RedundantCondition
+         */
         if (null !== $startId && null !== $endId) {
             $createAtStartPermission = $this->permissionChecker->checkPermissionToElement(
                 $this->authProvider->getUserUuid(),

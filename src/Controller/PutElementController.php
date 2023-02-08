@@ -40,13 +40,16 @@ class PutElementController extends AbstractController
             'WRITE'
         );
         if (!$hasPermission) {
-            throw new ClientNotFoundException('', '');
+            throw new ClientNotFoundException();
         }
 
         $data = $request->getContent();
         $data = \Safe\json_decode($data, true);
 
         $element = $this->elementManager->getElement($elementUuid);
+        if (null === $element) {
+            throw new ClientNotFoundException();
+        }
         foreach ($element->getProperties() as $name => $value) {
             $element->addProperty($name, null);
         }

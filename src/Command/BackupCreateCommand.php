@@ -2,12 +2,12 @@
 
 namespace App\Command;
 
-use App\Exception\LogicException;
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
 use App\Style\EonStyle;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
+use LogicException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
@@ -21,6 +21,9 @@ use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor $io
+ */
 #[AsCommand(name: 'backup:create')]
 class BackupCreateCommand extends Command
 {
@@ -30,6 +33,7 @@ class BackupCreateCommand extends Command
     private string $backupName = '';
     private int $pageSize = 10;
     private bool $prettyPrint = false;
+
     private OutputStyle $io;
 
     public function __construct(
@@ -42,7 +46,7 @@ class BackupCreateCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addArgument(
             'name',
@@ -125,6 +129,9 @@ class BackupCreateCommand extends Command
 
             foreach ($nodeIds as $nodeId) {
                 $node = $this->elementManager->getNode($nodeId);
+                if (null === $node) {
+                    throw new \LogicException('Node can not be null');
+                }
                 $data = $this->elementToRawService->elementToRaw($node);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
                 $path = $this->getNodePath($nodeId);
@@ -171,8 +178,11 @@ class BackupCreateCommand extends Command
             }
 
             foreach ($relationIds as $relationId) {
-                $node = $this->elementManager->getRelation($relationId);
-                $data = $this->elementToRawService->elementToRaw($node);
+                $relation = $this->elementManager->getRelation($relationId);
+                if (null === $relation) {
+                    throw new \LogicException('Relation can not be null');
+                }
+                $data = $this->elementToRawService->elementToRaw($relation);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
                 $path = $this->getRelationPath($relationId);
                 $this->backupStorage->write($path, $json);
@@ -191,7 +201,7 @@ class BackupCreateCommand extends Command
 
     private function getNodePath(UuidInterface $nodeUuid): string
     {
-        $nodeUuidAsHex = $nodeUuid->getHex();
+        $nodeUuidAsHex = $nodeUuid->getHex()->toString();
         $folders = ceil(log($this->nodeCount, 256));
         $folderParts = [];
         for ($i = 0; $i < $folders; ++$i) {
@@ -208,7 +218,7 @@ class BackupCreateCommand extends Command
 
     private function getRelationPath(UuidInterface $relationUuid): string
     {
-        $relationUuidAsHex = $relationUuid->getHex();
+        $relationUuidAsHex = $relationUuid->getHex()->toString();
         $folders = ceil(log($this->relationCount, 256));
         $folderParts = [];
         for ($i = 0; $i < $folders; ++$i) {
@@ -228,17 +238,18 @@ class BackupCreateCommand extends Command
         $backupName = trim($backupName);
 
         if ('' === $backupName) {
-            throw new LogicException("Backup name can not be ''");
+            throw new \LogicException("Backup name can not be ''");
         }
 
         if ('.' === $backupName) {
-            throw new LogicException("Backup name can not be '.'");
+            throw new \LogicException("Backup name can not be '.'");
         }
 
         if ('..' === $backupName) {
-            throw new LogicException("Backup name can not be '..'");
+            throw new \LogicException("Backup name can not be '..'");
         }
 
+        // todo remove comment block
 //        if ($this->backupStorage->directoryExists($backupName)) {
 //            throw new LogicException(sprintf(
 //                "Backup with name %s already exists",

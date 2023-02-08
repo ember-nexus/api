@@ -31,7 +31,10 @@ class DatabaseDropCommand extends Command
         $output->writeln('Successfully deleted cypher data');
 
         $output->writeln('Deleting Mongo data..');
-        $this->mongoEntityManager->getClient()->dropDatabase($this->mongoEntityManager->getDatabase());
+        $mongoDatabase = $this->mongoEntityManager->getDatabase();
+        if ($mongoDatabase) {
+            $this->mongoEntityManager->getClient()->dropDatabase($mongoDatabase);
+        }
         $output->writeln('Successfully deleted Mongo data');
 
         $output->writeln('Deleting Elastic data...');

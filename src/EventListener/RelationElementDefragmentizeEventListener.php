@@ -41,7 +41,7 @@ class RelationElementDefragmentizeEventListener
         }
         $end = UuidV4::fromString($end);
 
-        /*
+        /**
          * @psalm-suppress UndefinedInterfaceMethod
          */
         $event->getRelationElement()

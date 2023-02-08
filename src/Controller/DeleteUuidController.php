@@ -53,6 +53,9 @@ class DeleteUuidController extends AbstractController
         }
 
         $element = $this->elementManager->getElement($elementUuid);
+        if (null === $element) {
+            throw new ClientNotFoundException();
+        }
         $this->elementManager->delete($element);
         $this->elementManager->flush();
 

@@ -12,4 +12,11 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+    <issueHandlers>
+        <PropertyNotSetInConstructor>
+            <errorLevel type="suppress">
+                <referencedProperty name="Symfony\Bundle\FrameworkBundle\Controller\AbstractController::$container"/>
+            </errorLevel>
+        </PropertyNotSetInConstructor>
+    </issueHandlers>
 <plugins><pluginClass class="Boesing\PsalmPluginStringf\Plugin"/></plugins></psalm>

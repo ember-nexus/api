@@ -61,8 +61,8 @@ class TestCommand extends Command
             $element = (new RelationElement())
                 ->setType($data['type'])
                 ->setIdentifier(Uuid::fromString($data['id']))
-                ->setStartNode(Uuid::fromString($data['start']))
-                ->setEndNode(Uuid::fromString($data['end']))
+                ->setStart(Uuid::fromString($data['start']))
+                ->setEnd(Uuid::fromString($data['end']))
                 ->addProperties($data['data']);
             $this->elementManager->merge($element);
         }
