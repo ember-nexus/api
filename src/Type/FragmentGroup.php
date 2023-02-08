@@ -9,12 +9,11 @@ use Syndesi\MongoDataStructures\Contract\DocumentInterface as MongoDocumentInter
 
 class FragmentGroup
 {
-    private NodeInterface|RelationInterface $cypherFragment;
-    private MongoDocumentInterface $mongoFragment;
-    private ElasticDocumentInterface $elasticFragment;
-
-    public function __construct()
-    {
+    public function __construct(
+        private NodeInterface|RelationInterface $cypherFragment,
+        private MongoDocumentInterface $mongoFragment,
+        private ElasticDocumentInterface $elasticFragment,
+    ) {
     }
 
     public function getCypherFragment(): RelationInterface|NodeInterface

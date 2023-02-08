@@ -13,8 +13,8 @@ class RelationElement implements RelationElementInterface
     use IdentifierTrait;
 
     private ?string $type = null;
-    private ?UuidInterface $startNode = null;
-    private ?UuidInterface $endNode = null;
+    private ?UuidInterface $start = null;
+    private ?UuidInterface $end = null;
 
     public function __construct()
     {
@@ -32,26 +32,26 @@ class RelationElement implements RelationElementInterface
         return $this;
     }
 
-    public function getStartNode(): ?UuidInterface
+    public function getStart(): ?UuidInterface
     {
-        return $this->startNode;
+        return $this->start;
     }
 
-    public function setStartNode(?UuidInterface $startNode): self
+    public function setStart(?UuidInterface $uuid): self
     {
-        $this->startNode = $startNode;
+        $this->start = $uuid;
 
         return $this;
     }
 
-    public function getEndNode(): ?UuidInterface
+    public function getEnd(): ?UuidInterface
     {
-        return $this->endNode;
+        return $this->end;
     }
 
-    public function setEndNode(?UuidInterface $endNode): self
+    public function setEnd(?UuidInterface $uuid): self
     {
-        $this->endNode = $endNode;
+        $this->end = $uuid;
 
         return $this;
     }

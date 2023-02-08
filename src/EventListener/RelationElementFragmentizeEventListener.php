@@ -14,28 +14,55 @@ class RelationElementFragmentizeEventListener
     public function onRelationElementFragmentizeEvent(RelationElementFragmentizeEvent $event): void
     {
         $relationElement = $event->getRelationElement();
+
+        $relationUuid = $relationElement->getIdentifier();
+        if (null === $relationUuid) {
+            throw new \LogicException();
+        }
+        $relationUuid = $relationUuid->toString();
+
+        $relationType = $relationElement->getType();
+        if (null === $relationType) {
+            throw new \LogicException();
+        }
+
+        $startUuid = $relationElement->getStart();
+        if (null === $startUuid) {
+            throw new \LogicException();
+        }
+        $startUuid = $startUuid->toString();
+
+        $endUuid = $relationElement->getEnd();
+        if (null === $endUuid) {
+            throw new \LogicException();
+        }
+        $endUuid = $endUuid->toString();
+
+        /*
+         * @psalm-suppress UndefinedInterfaceMethod
+         */
         $event->getCypherFragment()
             ->setType($relationElement->getType())
             ->setStartNode(
                 (new Node())
-                    ->addProperty('id', $relationElement->getStartNode()->toString())
+                    ->addProperty('id', $startUuid)
                     ->addIdentifier('id')
             )
             ->setEndNode(
                 (new Node())
-                    ->addProperty('id', $relationElement->getEndNode()->toString())
+                    ->addProperty('id', $endUuid)
                     ->addIdentifier('id')
             )
-            ->addProperty('id', $relationElement->getIdentifier()->toString())
+            ->addProperty('id', $relationUuid)
             ->addIdentifier('id');
         $event->getMongoFragment()
-            ->setCollection($relationElement->getType())
-            ->setIdentifier($relationElement->getIdentifier()->toString());
+            ->setCollection($relationType)
+            ->setIdentifier($relationUuid);
         $event->getElasticFragment()
             ->setIndex(sprintf(
                 'relation_%s',
-                strtolower($relationElement->getType())
+                strtolower($relationType)
             ))
-            ->setIdentifier($relationElement->getIdentifier()->toString());
+            ->setIdentifier($relationUuid);
     }
 }

@@ -8,7 +8,7 @@ use Ramsey\Uuid\UuidInterface;
 
 trait IdentifierTrait
 {
-    private ?UuidInterface $identifier;
+    private ?UuidInterface $identifier = null;
 
     public function getIdentifier(): ?UuidInterface
     {

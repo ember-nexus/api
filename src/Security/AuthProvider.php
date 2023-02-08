@@ -15,7 +15,11 @@ class AuthProvider
     public function __construct(
         private ParameterBagInterface $bag
     ) {
-        $this->userUuid = UuidV4::fromString($this->bag->get('anonymousUserUUID'));
+        $anonymousUserUuid = $this->bag->get('anonymousUserUUID');
+        if (!is_string($anonymousUserUuid)) {
+            throw new \LogicException('anonymousUserUUID must be set to a valid UUID');
+        }
+        $this->userUuid = UuidV4::fromString($anonymousUserUuid);
         $this->isAnonymous = true;
     }
 

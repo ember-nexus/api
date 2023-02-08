@@ -51,8 +51,8 @@ class TokenGenerator
         $tokenOwnedByUserRelation = (new RelationElement())
             ->setType('OWNS')
             ->setIdentifier(Uuid::uuid4())
-            ->setStartNode($userUuid)
-            ->setEndNode($tokenUuid);
+            ->setStart($userUuid)
+            ->setEnd($tokenUuid);
         $this->elementManager->create($tokenOwnedByUserRelation);
         $this->elementManager->flush();
 

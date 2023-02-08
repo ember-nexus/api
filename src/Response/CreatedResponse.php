@@ -11,6 +11,7 @@ class CreatedResponse extends Response
         int $status = self::HTTP_CREATED,
         array $headers = []
     ) {
+        $this->charset = 'UTF-8';
         parent::__construct($content, $status, $headers);
     }
 }

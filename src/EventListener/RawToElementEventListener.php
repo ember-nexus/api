@@ -26,8 +26,8 @@ class RawToElementEventListener
         }
         if (array_key_exists('start', $rawData) && array_key_exists('end', $rawData)) {
             $element = new RelationElement();
-            $element->setStartNode(UuidV4::fromString($rawData['start']));
-            $element->setEndNode(UuidV4::fromString($rawData['end']));
+            $element->setStart(UuidV4::fromString($rawData['start']));
+            $element->setEnd(UuidV4::fromString($rawData['end']));
             $element->setType($rawData['type']);
         }
         if (array_key_exists('id', $rawData)) {

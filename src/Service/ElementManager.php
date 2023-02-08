@@ -80,15 +80,17 @@ class ElementManager
         );
         try {
             $cypherFragment = $this->neo4jClientHelper->getNodeFromLaudisNode($res->first()->get('node'));
-            if (!$cypherFragment) {
-                return null;
-            }
         } catch (\OutOfBoundsException $e) {
             return null;
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $uuid->toString());
 
-        return $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
+        $node = $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
+        if (!($node instanceof NodeElementInterface)) {
+            return null;
+        }
+
+        return $node;
     }
 
     public function getRelation(UuidInterface $uuid): ?RelationElementInterface
@@ -107,14 +109,20 @@ class ElementManager
                 $res->first()->get('startNode'),
                 $res->first()->get('endNode')
             );
-            if (!$cypherFragment) {
-                return null;
-            }
         } catch (\OutOfBoundsException $e) {
             return null;
         }
-        $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getType(), $uuid->toString());
+        $type = $cypherFragment->getType();
+        if (null === $type) {
+            throw new \LogicException('Unable to get relationship type');
+        }
+        $documentFragment = $this->mongoEntityManager->getOneByIdentifier($type, $uuid->toString());
 
-        return $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
+        $relation = $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
+        if (!($relation instanceof RelationElementInterface)) {
+            return null;
+        }
+
+        return $relation;
     }
 }

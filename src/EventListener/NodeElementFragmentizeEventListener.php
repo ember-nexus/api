@@ -13,18 +13,33 @@ class NodeElementFragmentizeEventListener
     public function onNodeElementFragmentizeEvent(NodeElementFragmentizeEvent $event): void
     {
         $nodeElement = $event->getNodeElement();
+
+        $nodeElementIdentifier = $nodeElement->getIdentifier();
+        if (null === $nodeElementIdentifier) {
+            throw new \InvalidArgumentException();
+        }
+        $nodeElementIdentifier = $nodeElementIdentifier->toString();
+
+        $nodeLabel = $nodeElement->getLabel();
+        if (null === $nodeLabel) {
+            throw new \InvalidArgumentException();
+        }
+
+        /*
+         * @psalm-suppress UndefinedInterfaceMethod
+         */
         $event->getCypherFragment()
-            ->addLabel($nodeElement->getLabel())
-            ->addProperty('id', $nodeElement->getIdentifier()->toString())
+            ->addLabel($nodeLabel)
+            ->addProperty('id', $nodeElementIdentifier)
             ->addIdentifier('id');
         $event->getMongoFragment()
-            ->setCollection($nodeElement->getLabel())
-            ->setIdentifier($nodeElement->getIdentifier()->toString());
+            ->setCollection($nodeLabel)
+            ->setIdentifier($nodeElementIdentifier);
         $event->getElasticFragment()
             ->setIndex(sprintf(
                 'node_%s',
-                strtolower($nodeElement->getLabel())
+                strtolower($nodeLabel)
             ))
-            ->setIdentifier($nodeElement->getIdentifier()->toString());
+            ->setIdentifier($nodeElementIdentifier);
     }
 }

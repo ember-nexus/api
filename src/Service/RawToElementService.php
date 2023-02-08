@@ -22,6 +22,11 @@ class RawToElementService
         $event = new RawToElementEvent($rawData);
         $this->eventDispatcher->dispatch($event);
 
-        return $event->getElement();
+        $element = $event->getElement();
+        if (null === $element) {
+            throw new \LogicException('Unable to convert raw data to element');
+        }
+
+        return $element;
     }
 }

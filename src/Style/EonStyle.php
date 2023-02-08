@@ -34,7 +34,7 @@ class EonStyle extends SymfonyStyle
         parent::__construct($input, $output);
     }
 
-    public function title(string $message)
+    public function title(string $message): void
     {
         $this->writeln([
             sprintf('<eon>%s</>', str_repeat(' ', $this->lineLength)),

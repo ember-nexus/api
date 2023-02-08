@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Response\CollectionResponse;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CollectionService
@@ -20,7 +21,10 @@ class CollectionService
     public function getCurrentPage(): int
     {
         $firstPage = 1;
-        $query = $this->requestStack->getCurrentRequest()->query;
+        $query = $this->requestStack->getCurrentRequest()?->query;
+        if (!($query instanceof InputBag)) {
+            throw new \LogicException();
+        }
         if (!$query->has('page')) {
             return $firstPage;
         }
@@ -34,10 +38,17 @@ class CollectionService
 
     public function getPageSize(): int
     {
-        $defaultPageSize = $this->bag->get('pageSize')['default'];
-        $minPageSize = $this->bag->get('pageSize')['min'];
-        $maxPageSize = $this->bag->get('pageSize')['max'];
-        $query = $this->requestStack->getCurrentRequest()->query;
+        $pageSizeConfig = $this->bag->get('pageSize');
+        if (!is_array($pageSizeConfig)) {
+            throw new \LogicException();
+        }
+        $defaultPageSize = $pageSizeConfig['default'] ?? 25;
+        $minPageSize = $pageSizeConfig['min'] ?? 10;
+        $maxPageSize = $pageSizeConfig['max'] ?? 100;
+        $query = $this->requestStack->getCurrentRequest()?->query;
+        if (!($query instanceof InputBag)) {
+            throw new \LogicException();
+        }
         if (!$query->has('pageSize')) {
             return $defaultPageSize;
         }
@@ -54,7 +65,7 @@ class CollectionService
 
     public function getTotalPages(int $totalElements = 0): int
     {
-        return ceil(((float) $totalElements) / ((float) $this->getPageSize()));
+        return (int) ceil(((float) $totalElements) / ((float) $this->getPageSize()));
     }
 
     /**
@@ -63,9 +74,9 @@ class CollectionService
     public function getPageLink(?int $page = null): string
     {
         $currentRequest = $this->requestStack->getCurrentRequest();
-        $basePath = $currentRequest->getBasePath();
+        $basePath = $currentRequest?->getBasePath();
 
-        if ('' === $basePath) {
+        if ('' === $basePath || null === $basePath) {
             $basePath = '/';
         }
 
@@ -79,20 +90,25 @@ class CollectionService
         }
 
         $pageSize = $this->getPageSize();
-        if ($pageSize !== $this->bag->get('pageSize')['default']) {
-            $params['pageSize'] = $pageSize;
+        if ($this->bag->has('pageSize')) {
+            $pageSizeConfig = $this->bag->get('pageSize');
+            if (is_array($pageSizeConfig)) {
+                if ($pageSize !== $pageSizeConfig['default']) {
+                    $params['pageSize'] = $pageSize;
+                }
+            }
         }
 
-        if ($currentRequest->query->has('sort')) {
-            $params['sort'] = $currentRequest->query->get('sort');
+        if ($currentRequest?->query->has('sort')) {
+            $params['sort'] = $currentRequest?->query->get('sort');
         }
 
-        if ($currentRequest->query->has('filter')) {
-            $params['filter'] = $currentRequest->query->get('filter');
+        if ($currentRequest?->query->has('filter')) {
+            $params['filter'] = $currentRequest?->query->get('filter');
         }
 
-        if ($currentRequest->query->has('query')) {
-            $params['query'] = $currentRequest->query->get('query');
+        if ($currentRequest?->query->has('query')) {
+            $params['query'] = $currentRequest?->query->get('query');
         }
 
         $queryString = [];
@@ -100,7 +116,7 @@ class CollectionService
             $queryString[] = sprintf(
                 '%s=%s',
                 $name,
-                urlencode($param)
+                urlencode((string) $param)
             );
         }
         $queryString = implode('&', $queryString);
@@ -129,29 +145,24 @@ class CollectionService
         array $relationUuids = [],
         int $totalNodes = 0
     ): CollectionResponse {
-        $currentRequest = $this->requestStack->getCurrentRequest();
-        $currentRequest->getBasePath();
-
         $nodeData = [];
         $relationData = [];
 
         foreach ($nodeUuids as $nodeUuid) {
-            $nodeData[] = $this->elementToRawService->elementToRaw(
-                $this->elementManager->getNode($nodeUuid)
-            );
+            $nodeElement = $this->elementManager->getNode($nodeUuid);
+            if ($nodeElement) {
+                $nodeData[] = $this->elementToRawService->elementToRaw(
+                    $nodeElement
+                );
+            }
         }
         foreach ($relationUuids as $relationUuid) {
-            $relationData[] = $this->elementToRawService->elementToRaw(
-                $this->elementManager->getRelation($relationUuid)
-            );
-        }
-
-        $currentPageId = $currentRequest->getRequestUri();
-        if (!str_starts_with($currentPageId, '/')) {
-            $currentPageId = sprintf(
-                '/%s',
-                $currentPageId
-            );
+            $relationElement = $this->elementManager->getRelation($relationUuid);
+            if ($relationElement) {
+                $relationData[] = $this->elementToRawService->elementToRaw(
+                    $relationElement
+                );
+            }
         }
 
         $totalPages = $this->getTotalPages($totalNodes);

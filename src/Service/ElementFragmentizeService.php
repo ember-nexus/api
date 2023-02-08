@@ -18,11 +18,9 @@ class ElementFragmentizeService
 
     public function fragmentize(NodeElementInterface|RelationElementInterface $element): FragmentGroup
     {
-        $event = null;
         if ($element instanceof NodeElementInterface) {
             $event = new NodeElementFragmentizeEvent($element);
-        }
-        if ($element instanceof RelationElementInterface) {
+        } else {
             $event = new RelationElementFragmentizeEvent($element);
         }
         $this->eventDispatcher->dispatch($event);

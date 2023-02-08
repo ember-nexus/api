@@ -85,6 +85,7 @@ class PermissionChecker
                 (new UnicodeString($label))
                     ->snake()
                     ->upper()
+                    ->toString()
             );
         }
         $permissionTypes = implode('|', $permissionTypes);
@@ -136,6 +137,7 @@ class PermissionChecker
                 (new UnicodeString($label))
                     ->snake()
                     ->upper()
+                    ->toString()
             );
         }
         $startPermissionTypes = implode('|', $startPermissionTypes);
@@ -148,6 +150,7 @@ class PermissionChecker
                 (new UnicodeString($label))
                     ->snake()
                     ->upper()
+                    ->toString()
             );
         }
         $endPermissionTypes = implode('|', $endPermissionTypes);

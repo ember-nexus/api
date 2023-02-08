@@ -26,11 +26,9 @@ class ElementDefragmentizeService
 
             return $event->getNodeElement();
         }
-        if ($cypherFragment instanceof RelationInterface) {
-            $event = new RelationElementDefragmentizeEvent($cypherFragment, $documentFragment);
-            $this->eventDispatcher->dispatch($event);
+        $event = new RelationElementDefragmentizeEvent($cypherFragment, $documentFragment);
+        $this->eventDispatcher->dispatch($event);
 
-            return $event->getRelationElement();
-        }
+        return $event->getRelationElement();
     }
 }

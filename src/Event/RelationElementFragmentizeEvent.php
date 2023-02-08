@@ -32,10 +32,11 @@ class RelationElementFragmentizeEvent implements EventInterface
 
     public function getAsFragmentGroup(): FragmentGroup
     {
-        return (new FragmentGroup())
-            ->setCypherFragment($this->cypherFragment)
-            ->setMongoFragment($this->mongoFragment)
-            ->setElasticFragment($this->elasticFragment);
+        return new FragmentGroup(
+            $this->cypherFragment,
+            $this->mongoFragment,
+            $this->elasticFragment
+        );
     }
 
     public function getCypherFragment(): RelationInterface

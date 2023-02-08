@@ -11,8 +11,8 @@ class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
 
-    protected function build(ContainerBuilder $containerBuilder): void
+    protected function build(ContainerBuilder $container): void
     {
-        $containerBuilder->addCompilerPass(new TraceableEventDispatcherDependencyInjection());
+        $container->addCompilerPass(new TraceableEventDispatcherDependencyInjection());
     }
 }

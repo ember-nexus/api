@@ -21,6 +21,9 @@ class ElementResponseService
         UuidInterface $uuid
     ): ElementResponse {
         $element = $this->elementManager->getElement($uuid);
+        if (null === $element) {
+            throw new \LogicException(sprintf("Unable to find element with the id '%s'.", $uuid->toString()));
+        }
         $rawData = $this->elementToRawService->elementToRaw($element);
 
         return new ElementResponse(

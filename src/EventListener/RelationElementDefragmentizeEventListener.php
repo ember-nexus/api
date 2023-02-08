@@ -14,10 +14,40 @@ class RelationElementDefragmentizeEventListener
     public function onRelationElementDefragmentizeEvent(RelationElementDefragmentizeEvent $event): void
     {
         $cypherFragment = $event->getCypherFragment();
+
+        $identifier = $cypherFragment->getProperty('id');
+        if (null === $identifier) {
+            throw new \InvalidArgumentException();
+        }
+        $identifier = UuidV4::fromString($identifier);
+
+        $start = $cypherFragment->getStartNode();
+        if (null === $start) {
+            throw new \InvalidArgumentException();
+        }
+        $start = $start->getProperty('id');
+        if (null === $start) {
+            throw new \InvalidArgumentException();
+        }
+        $start = UuidV4::fromString($start);
+
+        $end = $cypherFragment->getEndNode();
+        if (null === $end) {
+            throw new \InvalidArgumentException();
+        }
+        $end = $end->getProperty('id');
+        if (null === $end) {
+            throw new \InvalidArgumentException();
+        }
+        $end = UuidV4::fromString($end);
+
+        /*
+         * @psalm-suppress UndefinedInterfaceMethod
+         */
         $event->getRelationElement()
             ->setType($cypherFragment->getType())
-            ->setIdentifier(UuidV4::fromString($cypherFragment->getProperty('id')))
-            ->setStartNode(UuidV4::fromString($cypherFragment->getStartNode()->getProperty('id')))
-            ->setEndNode(UuidV4::fromString($cypherFragment->getEndNode()->getProperty('id')));
+            ->setIdentifier($identifier)
+            ->setStart($start)
+            ->setEnd($end);
     }
 }
