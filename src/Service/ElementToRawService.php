@@ -14,6 +14,9 @@ class ElementToRawService
     ) {
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function elementToRaw(NodeElementInterface|RelationElementInterface $element): array
     {
         $event = new ElementToRawEvent($element);

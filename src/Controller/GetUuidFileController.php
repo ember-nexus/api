@@ -6,11 +6,10 @@ use App\Helper\Regex;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class GetUuidFileController extends AbstractController
 {
-    public function __construct(private CypherEntityManager $cypherEntityManager)
+    public function __construct()
     {
     }
 

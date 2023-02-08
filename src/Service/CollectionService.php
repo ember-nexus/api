@@ -74,9 +74,12 @@ class CollectionService
     public function getPageLink(?int $page = null): string
     {
         $currentRequest = $this->requestStack->getCurrentRequest();
-        $basePath = $currentRequest?->getBasePath();
+        if (null === $currentRequest) {
+            throw new \LogicException();
+        }
+        $basePath = $currentRequest->getBasePath();
 
-        if ('' === $basePath || null === $basePath) {
+        if ('' === $basePath) {
             $basePath = '/';
         }
 
@@ -99,16 +102,16 @@ class CollectionService
             }
         }
 
-        if ($currentRequest?->query->has('sort')) {
-            $params['sort'] = $currentRequest?->query->get('sort');
+        if ($currentRequest->query->has('sort')) {
+            $params['sort'] = $currentRequest->query->get('sort');
         }
 
-        if ($currentRequest?->query->has('filter')) {
-            $params['filter'] = $currentRequest?->query->get('filter');
+        if ($currentRequest->query->has('filter')) {
+            $params['filter'] = $currentRequest->query->get('filter');
         }
 
-        if ($currentRequest?->query->has('query')) {
-            $params['query'] = $currentRequest?->query->get('query');
+        if ($currentRequest->query->has('query')) {
+            $params['query'] = $currentRequest->query->get('query');
         }
 
         $queryString = [];

@@ -12,7 +12,7 @@ class ElementToRawEvent implements EventInterface
     use StoppableEventTrait;
 
     /**
-     * @param array<string, mixed> $rawData
+     * @var array<string, mixed>
      */
     private array $rawData = [];
 
@@ -21,11 +21,17 @@ class ElementToRawEvent implements EventInterface
     ) {
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getRawData(): array
     {
         return $this->rawData;
     }
 
+    /**
+     * @param array<string, mixed> $rawData
+     */
     public function setRawData(array $rawData): void
     {
         $this->rawData = $rawData;

@@ -13,10 +13,6 @@ class ElementResponseService
     ) {
     }
 
-    /**
-     * @param UuidInterface[] $nodeUuids
-     * @param UuidInterface[] $relationUuids
-     */
     public function buildElementResponseFromUuid(
         UuidInterface $uuid
     ): ElementResponse {

@@ -31,11 +31,17 @@ class RawToElementEvent implements EventInterface
         $this->element = $element;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getRawData(): array
     {
         return $this->rawData;
     }
 
+    /**
+     * @param array<string, mixed> $rawData
+     */
     public function setRawData(array $rawData): void
     {
         $this->rawData = $rawData;

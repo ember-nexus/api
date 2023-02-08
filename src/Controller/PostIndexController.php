@@ -8,7 +8,6 @@ use App\Exception\ClientNotFoundException;
 use App\Response\CreatedResponse;
 use App\Security\AuthProvider;
 use App\Security\PermissionChecker;
-use App\Service\ElementManager;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
 class PostIndexController extends AbstractController
 {
     public function __construct(
-        private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private PermissionChecker $permissionChecker
     ) {

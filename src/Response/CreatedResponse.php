@@ -6,6 +6,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CreatedResponse extends Response
 {
+    /**
+     * @param array<string, string> $headers
+     */
     public function __construct(
         ?string $content = '',
         int $status = self::HTTP_CREATED,
