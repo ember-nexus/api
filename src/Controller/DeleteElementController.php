@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class DeleteUuidController extends AbstractController
+class DeleteElementController extends AbstractController
 {
     public function __construct(
         private ElementManager $elementManager,
@@ -26,13 +26,13 @@ class DeleteUuidController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'deleteUuid',
+        name: 'deleteElement',
         requirements: [
             'uuid' => Regex::UUID_V4,
         ],
         methods: ['DELETE']
     )]
-    public function deleteUuid(string $uuid, Request $request): Response
+    public function deleteElement(string $uuid, Request $request): Response
     {
         $elementUuid = UuidV4::fromString($uuid);
         $hasReadPermission = $this->permissionChecker->checkPermissionToElement(

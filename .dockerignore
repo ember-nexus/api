@@ -1,0 +1,11 @@
+.git/
+var/
+vendor/
+tests/
+.env.local
+.php-cs-fixer.cache
+.php-cs-fixer.dist.php
+.phpunit.result.cache
+phpstan.neon
+phpunit.xml.dist
+psalm.xml
