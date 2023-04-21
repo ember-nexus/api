@@ -1,7 +1,7 @@
 # Read the documentation at https://github.com/thephpleague/flysystem-bundle/blob/master/docs/1-getting-started.md
 flysystem:
-    storages:
-        backup.storage:
-            adapter: 'local'
-            options:
-                directory: '%kernel.project_dir%/var/backup'
+  storages:
+    backup.storage:
+      adapter: 'local'
+      options:
+        directory: '%kernel.project_dir%/var/backup'

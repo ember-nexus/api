@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap');
+
+.markdown-section code,
+.markdown-section pre,
+.markdown-section output::after {
+  font-family: 'Fira Code', 'Roboto Mono', Monaco, courier, monospace;
+}
+
+.app-sub-sidebar li::before {
+  display: none;
+}
+
+.markdown-section p.tip {
+  border-left-color: var(--theme-color);
+}
+
+.markdown-section p.tip::before {
+  background-color: var(--theme-color);
+}
+
+.sidebar-nav li {
+  font-size: 14px;
+}

@@ -83,7 +83,7 @@ RUN set -eux; \
 	\
 	apk del --no-network .fetch-deps
 
-COPY ./docker/php-embed/docker-php-source /usr/local/bin/
+COPY ./php-embed/docker-php-source /usr/local/bin/
 
 RUN set -eux; \
 	apk add --no-cache --virtual .build-deps \
@@ -199,7 +199,7 @@ RUN set -eux; \
 # smoke test
 	php --version
 
-COPY ./docker/php-embed/docker-php-ext-* /usr/local/bin/
+COPY ./php-embed/docker-php-ext-* /usr/local/bin/
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium \
@@ -251,7 +251,7 @@ RUN set -ex \
 
 
 
-FROM php_embed as production
+FROM php_embed as php
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
@@ -270,8 +270,8 @@ COPY --from=nginx_unit_builder /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=nginx_unit_builder /usr/sbin/unitd-debug /usr/sbin/unitd-debug
 COPY --from=nginx_unit_builder /usr/lib/unit/ /usr/lib/unit/
 COPY --from=nginx_unit_builder /requirements.apt /requirements.apt
-COPY ./docker/nginx-unit/docker-entrypoint.sh /usr/local/bin/
-COPY ./docker/nginx-unit/unit.json /docker-entrypoint.d/unit.json
+COPY ./nginx-unit/docker-entrypoint.sh /usr/local/bin/
+COPY ./nginx-unit/unit.json /docker-entrypoint.d/unit.json
 #RUN ldconfig # this command seems to not work on alpine & image works without it?
 RUN set -x \
     && chmod +x /usr/local/bin/docker-entrypoint.sh \
@@ -296,7 +296,24 @@ CMD ["unitd", "--no-daemon", "--control", "unix:/var/run/control.unit.sock"]
 WORKDIR /var/www/html
 
 
-FROM production as development
+
+FROM php as production
+
+COPY ../bin /var/www/html/bin
+COPY ../config /var/www/html/config
+COPY ../public /var/www/html/public
+COPY ../src /var/www/html/src
+COPY ../templates /var/www/html/templates
+COPY ../.env /var/www/html/.env
+COPY ../composer.json /var/www/html/composer.json
+COPY ../composer.lock /var/www/html/composer.lock
+COPY ../LICENSE /var/www/html/LICENSE
+COPY ../composer.lock /var/www/html/composer.lock
+COPY ../composer.lock /var/www/html/composer.lock
+
+
+
+FROM php as development
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS linux-headers judy-dev bsd-compat-headers \
     && pecl install xdebug-3.2.1 memprof \
