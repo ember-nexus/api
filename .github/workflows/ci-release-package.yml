@@ -45,12 +45,8 @@ jobs:
         run: |
           sudo apt-get install -y moreutils
           docker pull usvc/semver:latest
-          pwd
-          ls -la
           version=$(cat composer.json | jq -r .version)
-          echo $version
           newVersion="$(docker run usvc/semver:latest bump ${{ github.event.inputs.release-type }} $version | tr -d '\r')"
-          echo $newVersion
           jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
           echo "New version: $newVersion"
           echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
@@ -67,7 +63,7 @@ jobs:
       # Commit changes
       - name: Commit CHANGELOG.md and package.json changes and create tag
         run: |
-          git add "package.json"
+          git add "composer.json"
           git add "CHANGELOG.md"
           git commit -m "chore: release ${{ env.NEW_VERSION }}"
           git tag ${{ env.NEW_VERSION }}
