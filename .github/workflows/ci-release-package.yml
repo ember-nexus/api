@@ -50,7 +50,7 @@ jobs:
           echo $version
           newVersion="$(docker run usvc/semver:latest bump github.event.inputs.release-type $version | tr -d '\r')"
           echo $newVersion
-          jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json > composer.json.tmp && mv composer.json.tmp composer.json
+          jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
           echo "New version: $newVersion"
           echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
           echo "RELEASE_TAG=latest" >> $GITHUB_ENV
