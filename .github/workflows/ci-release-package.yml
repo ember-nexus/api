@@ -76,13 +76,13 @@ jobs:
 
       - name: Build
         run: |
-          docker build -t api:local --target production -f ./docker/Dockerfile .
+          docker build --target production -t api:local -f ./docker/Dockerfile .
 
       - name: Release on Docker Hub
         run: |
-          docker tag api:local embernexus/api:${{ env.RELEASE_TAG }}
+          docker tag api:local embernexus/api:${{ env.NEW_VERSION }}
           docker tag api:local embernexus/api:latest
-          docker push embernexus/api:${{ env.RELEASE_TAG }}
+          docker push embernexus/api:${{ env.NEW_VERSION }}
           docker push embernexus/api:latest
 
       # Push repository changes
