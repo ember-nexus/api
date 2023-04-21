@@ -68,17 +68,20 @@ jobs:
           git commit -m "chore: release ${{ env.NEW_VERSION }}"
           git tag ${{ env.NEW_VERSION }}
 
-#      # Build library
-#      - name: Build
-#        run: |
-#          yarn install --dev
-#          yarn build:release
-#
-#      # Publish version to public repository
-#      - name: Publish
-#        run: yarn publish --verbose --access public --tag ${{ env.RELEASE_TAG }}
-#        env:
-#          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build project
+      - name: Build
+        run: |
+          docker build -t api:local --target production ./docker
+          docker tag api:local embernexus/api:${{ env.RELEASE_TAG }}
+          docker tag api:local embernexus/api:latest
+          docker push embernexus/api:${{ env.RELEASE_TAG }}
+          docker push embernexus/api:latest
 
       # Push repository changes
       - name: Push changes to repository
