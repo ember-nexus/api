@@ -48,7 +48,7 @@ jobs:
           ls -la
           version=$(cat composer.json | jq -r .version)
           echo $version
-          newVersion="$(docker run usvc/semver:latest bump github.event.inputs.release-type $version | tr -d '\r')"
+          newVersion="$(docker run usvc/semver:latest bump ${{ github.event.inputs.release-type }} $version | tr -d '\r')"
           echo $newVersion
           jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
           echo "New version: $newVersion"
