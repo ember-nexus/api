@@ -1,7 +1,0 @@
-services:
-
-  neo4j-php-nginx:
-    container_name: test-eon
-    build: .
-    ports:
-      - "80:80"
