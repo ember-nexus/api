@@ -41,7 +41,9 @@ jobs:
           git config --global user.name "${{ steps.import-gpg.outputs.name }}"
 
       - name: Bump version
+        shell: bash
         run: |
+          docker pull usvc/semver:latest
           version=$(cat composer.json| jq -r .version)
           newVersion="$(docker run -it usvc/semver:latest bump github.event.inputs.release-type $version | tr -d '\r')"
           jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json > composer.json.tmp && mv composer.json.tmp composer.json
