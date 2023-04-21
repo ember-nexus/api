@@ -44,6 +44,8 @@ jobs:
         shell: bash
         run: |
           docker pull usvc/semver:latest
+          pwd
+          ls -la
           version=$(cat composer.json| jq -r .version)
           newVersion="$(docker run usvc/semver:latest bump github.event.inputs.release-type $version | tr -d '\r')"
           jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json > composer.json.tmp && mv composer.json.tmp composer.json
