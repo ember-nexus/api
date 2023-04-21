@@ -310,7 +310,7 @@ COPY ./composer.lock /var/www/html/composer.lock
 COPY ./LICENSE /var/www/html/LICENSE
 COPY ./composer.lock /var/www/html/composer.lock
 COPY ./composer.lock /var/www/html/composer.lock
-RUN composer install --no-dev --optimize-autoloader
+RUN APP_ENV=prod composer install --no-dev --optimize-autoloader
 
 
 
