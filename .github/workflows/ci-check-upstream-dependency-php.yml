@@ -1,0 +1,32 @@
+name: "Check upstream dependency - PHP"
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check-upstream-dependency-php:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Load latest PHP releases
+        run: |
+          url=https://www.php.net/releases/active
+          versions=$(wget -O - -o /dev/null $url)
+          major=$(echo $versions | jq -r '. | keys | sort_by(. | tonumber) | last')
+          minor=$(echo $versions | jq -r --arg major "$major" '.[$major] | keys | sort_by(. | tonumber) | last')
+          version=$(echo $versions | jq -r --arg major "$major" --arg minor "$minor" '.[$major] | .[$minor] | .version')
+          echo "Latest PHP version: $version"
+          echo "VERSION=$version" >> $GITHUB_ENV
+
+      - name: Create new GitHub issue
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+        with:
+          filename: .github/ISSUE_TEMPLATE_CHECK_UPSTREAM_DEPENDENCY_PHP.md
+          update_existing: false
+          search_existing: all

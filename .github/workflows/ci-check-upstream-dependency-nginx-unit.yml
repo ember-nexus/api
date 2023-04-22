@@ -1,4 +1,4 @@
-name: "Check upstream dependency: Nginx Unit"
+name: "Check upstream dependency - Nginx Unit"
 on:
   workflow_dispatch:
 permissions:
