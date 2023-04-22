@@ -304,17 +304,16 @@ WORKDIR /var/www/html
 
 FROM php as production
 
-COPY ./bin /var/www/html/bin
-COPY ./config /var/www/html/config
-COPY ./public /var/www/html/public
-COPY ./src /var/www/html/src
-COPY ./templates /var/www/html/templates
-COPY ./.env /var/www/html/.env
-COPY ./composer.json /var/www/html/composer.json
-COPY ./composer.lock /var/www/html/composer.lock
-COPY ./LICENSE /var/www/html/LICENSE
-COPY ./composer.lock /var/www/html/composer.lock
-COPY ./composer.lock /var/www/html/composer.lock
+COPY ./bin \
+    ./config \
+    ./public \
+    ./src \
+    ./templates \
+    ./.env.docker \
+    ./composer.json \
+    ./composer.lock \
+    ./LICENSE \
+    /var/www/html/
 RUN APP_ENV=prod composer install --no-dev --optimize-autoloader
 
 
