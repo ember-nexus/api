@@ -27,3 +27,4 @@ jobs:
         with:
           filename: .github/ISSUE_TEMPLATE_CHECK_UPSTREAM_DEPENDENCY_NGINX_UNIT.md
           update_existing: false
+          search_existing: all
