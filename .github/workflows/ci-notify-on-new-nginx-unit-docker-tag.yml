@@ -1,0 +1,29 @@
+name: "Notify on updated upstream dependency: Nginx Unit"
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release-package:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Load latest Docker Hub tags for Nginx Unit PHP
+        run: |
+          url=https://hub.docker.com/v2/namespaces/nginx/repositories/unit/tags
+          latestTags=$(wget -O - -o /dev/null $url)
+          latestTag=$(echo $latestTags | jq -r '.results[] | select(.name | contains("php")) | .name' | head -n1)
+          echo "Latest tag: $latestTag"
+          echo "TAG=$latestTag" >> $GITHUB_ENV
+
+      - name: Create new GitHub issue
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          TAG: ${{ env.TAG }}
+        with:
+          filename: .github/ISSUE_TEMPLATE_NOTIFY_ON_UPDATED_UPSTREAM_DEPENDENCY_NGINX_UNIT.md
+          update_existing: false
