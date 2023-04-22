@@ -314,6 +314,11 @@ COPY ./bin \
     ./composer.lock \
     ./LICENSE \
     /var/www/html/
+RUN pwd \
+    && ls -la \
+    && cd /var/www/html \
+    && pwd \
+    && ls -la
 RUN APP_ENV=prod composer install --no-dev --optimize-autoloader
 
 
