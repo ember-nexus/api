@@ -11,30 +11,27 @@ jobs:
   release-package:
     runs-on: ubuntu-latest
     steps:
-      # Checkout project repository
-      - name: Checkout
+
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Import GPG
       # see also https://github.com/Nautilus-Cyberneering/pygithub
       - name: Import GPG key
         id: import-gpg
-        uses: crazy-max/ghaction-import-gpg@v4
+        uses: crazy-max/ghaction-import-gpg@v5
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      # Debug GPG
-      - name: GPG user IDs
+      - name: Debug GPG
         run: |
           echo "fingerprint: ${{ steps.import-gpg.outputs.fingerprint }}"
           echo "keyid:       ${{ steps.import-gpg.outputs.keyid }}"
           echo "name:        ${{ steps.import-gpg.outputs.name }}"
           echo "email:       ${{ steps.import-gpg.outputs.email }}"
 
-      # Configure Git
       - name: Git configuration
         run: |
           git config --global user.email "${{ steps.import-gpg.outputs.email }}"
@@ -46,22 +43,21 @@ jobs:
           sudo apt-get install -y moreutils
           docker pull usvc/semver:latest
           version=$(cat composer.json | jq -r .version)
-          newVersion="$(docker run usvc/semver:latest bump ${{ github.event.inputs.release-type }} $version | tr -d '\r')"
+          bumpType=${{ github.event.inputs.release-type }}
+          newVersion="$(docker run usvc/semver:latest bump $bumpType $version | tr -d '\r')"
           jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
           echo "New version: $newVersion"
           echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
           echo "RELEASE_TAG=latest" >> $GITHUB_ENV
 
-      # Update changelog unreleased section with new version
-      - name: Update changelog
+      - name: Update changelog unreleased section with new version
         uses: superfaceai/release-changelog-action@v1
         with:
           path-to-changelog: CHANGELOG.md
           version: ${{ env.NEW_VERSION }}
           operation: release
 
-      # Commit changes
-      - name: Commit CHANGELOG.md and package.json changes and create tag
+      - name: Commit changes and create tag
         run: |
           git add "composer.json"
           git add "CHANGELOG.md"
@@ -74,9 +70,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build
+      - name: Build Docker image
         run: |
-          docker build --target production -t api:local -f ./docker/Dockerfile .
+          docker build \
+            --target production \
+            --build-arg VERSION=${{ env.NEW_VERSION }} \
+            -t api:local \
+            -f ./docker/Dockerfile \
+            .
 
       - name: Release on Docker Hub
         run: |
@@ -85,24 +86,29 @@ jobs:
           docker push embernexus/api:${{ env.NEW_VERSION }}
           docker push embernexus/api:latest
 
-      # Push repository changes
-      - name: Push changes to repository
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: embernexus/api
+          short-description: ${{ github.event.repository.description }}
+
+      - name: Push repository changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git push origin && git push --tags
 
-      # Read version changelog
-      - id: get-changelog
-        name: Get version changelog
+      - name: Read version changelog
+        id: get-changelog
         uses: superfaceai/release-changelog-action@v1
         with:
           path-to-changelog: CHANGELOG.md
           version: ${{ env.NEW_VERSION }}
           operation: read
 
-      # Update GitHub release with changelog
-      - name: Update GitHub release documentation
+      - name: Update GitHub release changelog
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.NEW_VERSION }}

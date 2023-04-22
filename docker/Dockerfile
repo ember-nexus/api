@@ -1,3 +1,7 @@
+# The environment variable VERSION is set to dev by default, only release builds get their actual release version set.
+# Background: If the en user uses the dev mode, it is epected that he knows what he does.
+ARG VERSION=dev
+
 FROM alpine:3.17 as php_embed
 LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.2/alpine3.17/cli" \
     org.opencontainers.image.title="Adapted php:8.2-cli-alpine3.17" \
@@ -259,6 +263,7 @@ LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.source="https://github.com/ember-nexus/api" \
     org.opencontainers.image.title="Ember Nexus: API" \
     org.opencontainers.image.description="Flexible graph based API for the modern web."
+ENV VERSION=$VERSION
 
 RUN apk add pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev \
     && pecl install mongodb \

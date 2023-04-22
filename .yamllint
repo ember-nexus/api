@@ -1,6 +1,5 @@
 extends: default
 
-
 ignore: |
   vendor/
 
@@ -11,8 +10,8 @@ rules:
 
   line-length:
     max: 120
-#      allow-non-breakable-words: true
-#      allow-non-breakable-inline-mappings: false
+#    allow-non-breakable-words: true
+#    allow-non-breakable-inline-mappings: false
 
   comments-indentation: false
   truthy: false
