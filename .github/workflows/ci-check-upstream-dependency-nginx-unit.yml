@@ -1,10 +1,10 @@
-name: "Notify on updated upstream dependency: Nginx Unit"
+name: "Check upstream dependency: Nginx Unit"
 on:
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
-  release-package:
+  check-upstream-dependency-nginx-unit:
     runs-on: ubuntu-latest
     steps:
 
@@ -25,5 +25,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           TAG: ${{ env.TAG }}
         with:
-          filename: .github/ISSUE_TEMPLATE_NOTIFY_ON_UPDATED_UPSTREAM_DEPENDENCY_NGINX_UNIT.md
+          filename: .github/ISSUE_TEMPLATE_CHECK_UPSTREAM_DEPENDENCY_NGINX_UNIT.md
           update_existing: false

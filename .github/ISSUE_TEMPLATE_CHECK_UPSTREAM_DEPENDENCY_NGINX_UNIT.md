@@ -1,5 +1,5 @@
 ---
-title: Upstream dependency got updated: Nginx Unit with tag {{ env.TAG }}
+title: Upstream dependency got updated - Nginx Unit with tag {{ env.TAG }}
 assignees: Syndesi
 labels: update dependency
 ---
