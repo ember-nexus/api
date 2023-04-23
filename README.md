@@ -36,4 +36,4 @@ Ember Nexus is a powerful tool for a range of use cases, including:
 - **Interface Between Multiple Systems**: Ember Nexus can serve as a bridge between multiple systems, making it easy
   to integrate and manage data across your entire infrastructure.
 
-Experience the power of Ember Nexus for yourself - [try it out today](/getting-started/tech-stack)!
+Experience the power of Ember Nexus for yourself - [try it out today](https://ember-nexus.github.io/api/#/)!
