@@ -20,7 +20,8 @@ The following setups are possible:
 ### Neo4j
 
 - Self-hosted community edition: At least 1 GB RAM, 1+ vCPU, and 10+ GB storage ([source](https://neo4j.com/docs/operations-manual/current/installation/requirements/#deployment-requirements-hardware)).
-- Self-hosted clusters: At least 3 compute instances with 1+ GB RAM, 1+ vCPU, and 10+ GB storage each ([requires the enterprise edition](https://neo4j.com/docs/operations-manual/current/clustering/setup/deploy/)).
+- Self-hosted clusters: At least 3 compute instances with 1+ GB RAM, 1+ vCPU, and 10+ GB storage each
+  ([requires the enterprise edition](https://neo4j.com/docs/operations-manual/current/clustering/setup/deploy/)).
 - SaaS: [Neo4j's AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/) can be used.
 
 Alternatively, other graph databases which support OpenCypher and Bolt 4.4+ can be used, e.g., Memgraph.
