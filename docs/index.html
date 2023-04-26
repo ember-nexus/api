@@ -50,7 +50,73 @@
         subMaxLevel: 2,
         loadNavbar: true,
         themeColor: '#d82739',
+        executeScript: true
       };
+      function renderGraph(container, data, direction = "LR"){
+        console.log(container);
+        const graph = new G6.Graph({
+          container: container,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+          modes: {
+            default: ['drag-canvas', 'zoom-canvas']
+          },
+          layout: {
+            type: 'dagre',
+            controlPoints: true,
+            rankdir: direction,
+            align: 'UL',
+            nodesep: 50,
+            ranksep: 50,
+          },
+          fitView: true,
+          maxZoom: 1.5,
+          minZoom: 0.5,
+          fitViewPadding: [20, 40, 50, 20],
+          animate: true,
+          defaultNode: {
+            type: 'circle',
+            size: [80, 80],
+            style: {
+              fill: '#d82739',
+              lineWidth: 0,
+            },
+            labelCfg: {
+              style: {
+                fill: '#fff',
+                fontSize: 14,
+                fontFamiliy: 'Fira Code'
+              },
+            },
+          },
+          defaultEdge: {
+            type: 'polyline',
+            style: {
+              radius: 20,
+              offset: 45,
+              endArrow: true,
+              lineWidth: 2,
+              stroke: '#C2C8D5',
+            },
+            labelCfg: {
+              style: {
+                fill: '#000',
+                fontSize: 14,
+                textAlign: 'center',
+                textBaseline: 'middle',
+              }
+            },
+          },
+          data
+        });
+        graph.render();
+      }
+      let userNode = {label: 'User', style: {fill: '#276ed8'}};
+      let dataNode = {label: 'Data'};
+      let documentNode = {label: 'Doc', style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
+      let redNode = {};
+      let yellowNode = {style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
+      let groupNode = {label: 'Group', style: {fill: '#27d87b' }, labelCfg: {style: {fill: '#000' } }};
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
@@ -59,5 +125,8 @@
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-cypher.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6@4.8.10/dist/g6.min.js"></script>
   </body>
 </html>

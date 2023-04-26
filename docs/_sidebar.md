@@ -6,3 +6,6 @@
 - API Basics
   - [Graph Database Fundamentals](/api-basics/graph-database-fundamentals)
   - [Security](/api-basics/security)
+- Security
+  - [Ownership](/security/ownership)
+  - [Access](/security/access)
