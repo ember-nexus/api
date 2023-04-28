@@ -50,10 +50,27 @@
         subMaxLevel: 2,
         loadNavbar: true,
         themeColor: '#d82739',
-        executeScript: true
+        executeScript: true,
+        mermaidConfig: {
+          querySelector: ".mermaid"
+        }
       };
+    </script>
+    <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-cypher.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/g6@4.8.10/dist/g6.min.js"></script>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({ startOnLoad: true });
+      window.mermaid = mermaid;
+    </script>
+    <script src="//unpkg.com/docsify-mermaid@2.0.0/dist/docsify-mermaid.js"></script>
+    <script>
       function renderGraph(container, data, direction = "LR"){
-        console.log(container);
         const graph = new G6.Graph({
           container: container,
           width: container.offsetWidth,
@@ -66,7 +83,7 @@
             controlPoints: true,
             rankdir: direction,
             align: 'UL',
-            nodesep: 50,
+            nodesep: 60,
             ranksep: 50,
           },
           fitView: true,
@@ -85,7 +102,7 @@
               style: {
                 fill: '#fff',
                 fontSize: 14,
-                fontFamiliy: 'Fira Code'
+                fontFamily: 'Fira Code'
               },
             },
           },
@@ -104,6 +121,7 @@
                 fontSize: 14,
                 textAlign: 'center',
                 textBaseline: 'middle',
+                fontFamily: 'Fira Code'
               }
             },
           },
@@ -117,16 +135,75 @@
       let redNode = {};
       let yellowNode = {style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
       let groupNode = {label: 'Group', style: {fill: '#27d87b' }, labelCfg: {style: {fill: '#000' } }};
-    </script>
-    <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-js.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-ts.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-cypher.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+      G6.registerNode('autosize-rect', {
+          draw(cfg, group) {
+            const labelText = (cfg.label || '');
+            const width = G6.Util.getTextSize('-'.repeat(labelText.length + 2), cfg.labelCfg.style.fontSize, {fontFamily: 'Fira Code'})[0];
+            const height = 50;
+            const shape = group.addShape('rect', {
+              attrs: {
+                x: -width / 2,
+                y: -height / 2,
+                width: width,
+                height: height,
+                fill: cfg.style.fill
+              },
+              name: 'rect-shape'
+            });
+            group.addShape('text', {
+              attrs: {
+                x: 0,
+                y: 0,
+                textAlign: 'center',
+                textBaseline: 'middle',
+                text: labelText,
+                fill: cfg.labelCfg.style.fill,
+                fontSize: cfg.labelCfg.style.fontSize,
+                fontFamily: 'Fira Code'
+              },
+              name: 'text'
+            });
+            return shape;
+          }
+        }
+      );
+      G6.registerNode('autosize-flat-hexagon', {
+        draw(cfg, group) {
+          const hexWidth = 50;
+          const hexHeight = hexWidth * Math.sqrt(3) / 2;
+          const labelText = (cfg.label || '');
+          const width = G6.Util.getTextSize('-'.repeat(Math.max(labelText.length - 2, 0)), cfg.labelCfg.style.fontSize, {fontFamily: 'Fira Code'})[0];
 
-    <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@antv/g6@4.8.10/dist/g6.min.js"></script>
+          const shape = group.addShape('polygon', {
+            attrs: {
+              points: [
+                [(-hexWidth / 2) - width / 2, 0],
+                [(-hexWidth / 4) - width / 2, -hexHeight / 2],
+                [(hexWidth / 4) + width / 2, -hexHeight / 2],
+                [(hexWidth / 2) + width / 2, 0],
+                [(hexWidth / 4) + width / 2, hexHeight / 2],
+                [(-hexWidth / 4) - width / 2, hexHeight / 2]
+              ],
+              fill: cfg.style.fill,
+            },
+            name: 'polygon-shape',
+          });
+          group.addShape('text', {
+            attrs: {
+              x: 0,
+              y: 0,
+              textAlign: 'center',
+              textBaseline: 'middle',
+              text: labelText,
+              fill: cfg.labelCfg.style.fill,
+              fontSize: cfg.labelCfg.style.fontSize,
+              fontFamily: 'Fira Code'
+            },
+            name: 'text'
+          });
+          return shape;
+        }
+      });
+    </script>
   </body>
 </html>

@@ -6,6 +6,8 @@
 - API Basics
   - [Graph Database Fundamentals](/api-basics/graph-database-fundamentals)
   - [Security](/api-basics/security)
+- API Endpoints
+  - [GET /&lt;uuid&gt;](/api-endpoints/get-element)
 - Security
   - [Ownership](/security/ownership)
   - [Access](/security/access)
