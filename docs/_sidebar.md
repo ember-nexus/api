@@ -8,4 +8,13 @@
   - [Ownership](/security/ownership)
   - [Access](/security/access)
 - API Endpoints
+  - [`GET / -` Get Index](/api-endpoints/get-index)
   - [`GET /<uuid> -` Get Element](/api-endpoints/get-element)
+  - [`GET /<uuid>/parents -` Get Parents](/api-endpoints/get-parents)
+  - [`GET /<uuid>/children -` Get Children](/api-endpoints/get-children)
+  - [`GET /<uuid>/related -` Get Related](/api-endpoints/get-related)
+  - [`POST / -` Create Root Element](/api-endpoints/post-index)
+  - [`POST /<uuid> -` Create Element](/api-endpoints/post-element)
+  - [`PUT /<uuid> -` Replace Element](/api-endpoints/put-element)
+  - [`PATCH /<uuid> -` Update Element](/api-endpoints/patch-element)
+  - [`DELETE /<uuid> -` Delete Element](/api-endpoints/delete-element)
