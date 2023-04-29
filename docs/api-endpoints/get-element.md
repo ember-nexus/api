@@ -7,8 +7,6 @@ Once the server receives such a request, it checks several things internally:
 
 <div id="graph-container-1" class="graph-container" style="height:1000px"></div>
 
-
-
 <script>
 G6.registerEdge('polyline-edge', {
   draw(cfg, group) {
@@ -53,10 +51,6 @@ G6.registerEdge('polyline-edge', {
     return shape;
   },
 });
-
-
-
-
 renderWorkflow(document.getElementById('graph-container-1'), {
   nodes: [
     { id: 'init', ...workflowStart, label: 'server receives GET-request' },

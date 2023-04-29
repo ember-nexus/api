@@ -200,7 +200,8 @@ renderGraph(document.getElementById('graph-container-5'), {
     { source: 'user2', target: 'comment2', label: 'CREATED' },
     { source: 'user1', target: 'group', label: 'IS_IN_GROUP' },
     { source: 'user2', target: 'group', label: 'IS_IN_GROUP' },
-    { source: 'group', target: 'blog', label: "HAS_READ_ACCESS\n\nHAS_CREATE_ACCESS\nonLabel: Post\nonType:Comment\n\nHAS_UPDATE_ACCESS\nonCreatedByUser: true\n\nHAS_DELETE_ACCESS\nonCreatedByUser: true" },
+    { source: 'group', target: 'blog', label: "HAS_READ_ACCESS\n\nHAS_CREATE_ACCESS\nonLabel: Post\n"+
+      "onType:Comment\n\nHAS_UPDATE_ACCESS\nonCreatedByUser: true\n\nHAS_DELETE_ACCESS\nonCreatedByUser: true" },
   ]
 });
 </script>

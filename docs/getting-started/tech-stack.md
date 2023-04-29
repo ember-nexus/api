@@ -1,6 +1,6 @@
 # Tech Stack
 
-![](../assets/tech-stack.png)
+![Illustration of the APIs tech stack](../assets/tech-stack.png)
 
 Ember Nexus API is powered by a powerful tech stack, consisting of six different databases, each chosen for its unique
 advantages:
