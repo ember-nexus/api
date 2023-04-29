@@ -50,10 +50,7 @@
         subMaxLevel: 2,
         loadNavbar: true,
         themeColor: '#d82739',
-        executeScript: true,
-        mermaidConfig: {
-          querySelector: ".mermaid"
-        }
+        executeScript: true
       };
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
@@ -63,13 +60,67 @@
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@antv/g6@4.8.10/dist/g6.min.js"></script>
-    <script type="module">
-      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-      mermaid.initialize({ startOnLoad: true });
-      window.mermaid = mermaid;
-    </script>
-    <script src="//unpkg.com/docsify-mermaid@2.0.0/dist/docsify-mermaid.js"></script>
     <script>
+      function renderWorkflow(container, data, direction = "LR"){
+        const graph = new G6.Graph({
+          container: container,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+          modes: {
+            default: ['drag-canvas', 'zoom-canvas']
+          },
+          layout: {
+            type: 'dagre',
+            controlPoints: true,
+            rankdir: direction,
+            align: 'UL',
+            nodesep: 60,
+            ranksep: 30,
+          },
+          fitView: true,
+          maxZoom: 1.5,
+          minZoom: 0.5,
+          fitViewPadding: [20, 40, 50, 20],
+          animate: true,
+          defaultNode: {
+            type: 'node',
+            style: {
+              fill: '#d82739'
+            },
+            labelCfg: {
+              style: {
+                fill: '#fff',
+                fontSize: 14,
+                fontFamily: 'Fira Code'
+              },
+            },
+          },
+          defaultEdge: {
+            type: 'polyline',
+            style: {
+              radius: 20,
+              offset: 45,
+              endArrow: true,
+              lineWidth: 2,
+              stroke: '#000',
+            },
+            labelCfg: {
+              style: {
+                fill: '#000',
+                fontSize: 14,
+                textAlign: 'center',
+                textBaseline: 'middle',
+                fontFamily: 'Fira Code'
+              },
+              backgroundStyle: {
+                fill: 'yellow'
+              }
+            },
+          },
+          data
+        });
+        graph.render();
+      }
       function renderGraph(container, data, direction = "LR"){
         const graph = new G6.Graph({
           container: container,
@@ -84,7 +135,7 @@
             rankdir: direction,
             align: 'UL',
             nodesep: 60,
-            ranksep: 50,
+            ranksep: 60,
           },
           fitView: true,
           maxZoom: 1.5,
@@ -92,11 +143,9 @@
           fitViewPadding: [20, 40, 50, 20],
           animate: true,
           defaultNode: {
-            type: 'circle',
-            size: [80, 80],
+            type: 'node',
             style: {
-              fill: '#d82739',
-              lineWidth: 0,
+              fill: '#d82739'
             },
             labelCfg: {
               style: {
@@ -129,24 +178,61 @@
         });
         graph.render();
       }
-      let userNode = {label: 'User', style: {fill: '#276ed8'}};
-      let dataNode = {label: 'Data'};
-      let documentNode = {label: 'Doc', style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
-      let redNode = {};
-      let yellowNode = {style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
-      let groupNode = {label: 'Group', style: {fill: '#27d87b' }, labelCfg: {style: {fill: '#000' } }};
-      G6.registerNode('autosize-rect', {
+      let userNode = {label: 'User', icon: 'user', style: {fill: '#276ed8'}};
+      let dataNode = {label: 'Data', icon: 'data'};
+      let documentNode = {label: 'Doc', icon: 'data', style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
+      let groupNode = {label: 'Group', icon: 'group', style: {fill: '#27d87b' }, labelCfg: {style: {fill: '#000' } }};
+      let commentNode = {label: 'Group', icon: 'comment', style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
+      let workflowStateNode = {label: 'Group', icon: 'workflow', style: {fill: '#952bb9' }, labelCfg: {style: {fill: '#fff' } }};
+      let workflowDecision = {type: 'workflow-decision', style: {fill: '#fff', stroke: '#000' }, labelCfg: {style: {fill: '#000' } }};
+      let workflowStep = {type: 'workflow-step', style: { fill: '#fff', stroke: '#000' }, labelCfg: {style: {fill: '#000' } }};
+      let workflowStart = {type: 'workflow-start', style: { fill: '#fff', stroke: '#000' }, labelCfg: {style: {fill: '#000' } }};
+      let workflowEndError = {...workflowStart, style: { fill: '#fff', stroke: '#d82739' }};
+      let workflowEndSuccess = {...workflowStart, style: { fill: '#fff', stroke: '#27d87b' }};
+      function getIcon(name, size, color){
+        const icons = {
+          'user': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><title>account</title><path fill="${color}" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" /></svg>`,
+          'group': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><title>account-multiple</title><path fill="${color}" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z" /></svg>`,
+          'data': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><title>code-json</title><path fill="${color}" d="M5,3H7V5H5V10A2,2 0 0,1 3,12A2,2 0 0,1 5,14V19H7V21H5C3.93,20.73 3,20.1 3,19V15A2,2 0 0,0 1,13H0V11H1A2,2 0 0,0 3,9V5A2,2 0 0,1 5,3M19,3A2,2 0 0,1 21,5V9A2,2 0 0,0 23,11H24V13H23A2,2 0 0,0 21,15V19A2,2 0 0,1 19,21H17V19H19V14A2,2 0 0,1 21,12A2,2 0 0,1 19,10V5H17V3H19M12,15A1,1 0 0,1 13,16A1,1 0 0,1 12,17A1,1 0 0,1 11,16A1,1 0 0,1 12,15M8,15A1,1 0 0,1 9,16A1,1 0 0,1 8,17A1,1 0 0,1 7,16A1,1 0 0,1 8,15M16,15A1,1 0 0,1 17,16A1,1 0 0,1 16,17A1,1 0 0,1 15,16A1,1 0 0,1 16,15Z" /></svg>`,
+          'post': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><title>text</title><path fill="${color}" d="M21,6V8H3V6H21M3,18H12V16H3V18M3,13H21V11H3V13Z" /></svg>`,
+          'comment': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><title>comment-text</title><path fill="${color}" d="M9,22A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V4C2,2.89 2.9,2 4,2H20A2,2 0 0,1 22,4V16A2,2 0 0,1 20,18H13.9L10.2,21.71C10,21.9 9.75,22 9.5,22V22H9M5,5V7H19V5H5M5,9V11H13V9H5M5,13V15H15V13H5Z" /></svg>`,
+          'workflow': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><title>state-machine</title><path fill="${color}" d="M6.27 17.05C6.72 17.58 7 18.25 7 19C7 20.66 5.66 22 4 22S1 20.66 1 19 2.34 16 4 16C4.18 16 4.36 16 4.53 16.05L7.6 10.69L5.86 9.7L9.95 8.58L11.07 12.67L9.33 11.68L6.27 17.05M20 16C18.7 16 17.6 16.84 17.18 18H11V16L8 19L11 22V20H17.18C17.6 21.16 18.7 22 20 22C21.66 22 23 20.66 23 19S21.66 16 20 16M12 8C12.18 8 12.36 8 12.53 7.95L15.6 13.31L13.86 14.3L17.95 15.42L19.07 11.33L17.33 12.32L14.27 6.95C14.72 6.42 15 5.75 15 5C15 3.34 13.66 2 12 2S9 3.34 9 5 10.34 8 12 8Z" /></svg>`
+        };
+        return `data:image/svg+xml;utf-8,${encodeURIComponent(icons[name])}`;
+      }
+      function getTextSize(group, text, fontSize, fontFamily){
+        const textShape = group.addShape('text', {
+          attrs: {
+            x: 0,
+            y: 0,
+            textAlign: 'center',
+            textBaseline: 'middle',
+            text,
+            fontSize,
+            fontFamily
+          },
+          name: 'text'
+        });
+        const textShapeBBox = textShape.calculateBBox();
+        textShape.destroy();
+        return [textShapeBBox.width, textShapeBBox.height]
+      }
+      G6.registerNode('workflow-step', {
           draw(cfg, group) {
             const labelText = (cfg.label || '');
-            const width = G6.Util.getTextSize('-'.repeat(labelText.length + 2), cfg.labelCfg.style.fontSize, {fontFamily: 'Fira Code'})[0];
-            const height = 50;
+            const textSize = getTextSize(group, labelText, cfg.labelCfg.style.fontSize, 'Fira Code');
+            const singleCharacterWidth = getTextSize(group, ' ', cfg.labelCfg.style.fontSize, 'Fira Code')[0];
+            const width = textSize[0] + 2 * singleCharacterWidth;
+            const height = textSize[1] + 3 * singleCharacterWidth;
             const shape = group.addShape('rect', {
               attrs: {
                 x: -width / 2,
                 y: -height / 2,
                 width: width,
                 height: height,
-                fill: cfg.style.fill
+                fill: cfg.style.fill,
+                stroke: cfg.style.stroke,
+                lineWidth: 2
               },
               name: 'rect-shape'
             });
@@ -167,24 +253,67 @@
           }
         }
       );
-      G6.registerNode('autosize-flat-hexagon', {
+      G6.registerNode('workflow-start', {
+          draw(cfg, group) {
+            const labelText = (cfg.label || '');
+            const textSize = getTextSize(group, labelText, cfg.labelCfg.style.fontSize, 'Fira Code');
+            const singleCharacterWidth = getTextSize(group, ' ', cfg.labelCfg.style.fontSize, 'Fira Code')[0];
+            const width = textSize[0] + 3 * singleCharacterWidth;
+            const height = textSize[1] + 3 * singleCharacterWidth;
+            const shape = group.addShape('rect', {
+              attrs: {
+                x: -width / 2,
+                y: -height / 2,
+                width: width,
+                height: height,
+                fill: cfg.style.fill,
+                stroke: cfg.style.stroke,
+                lineWidth: 2,
+                radius: height / 2
+              },
+              name: 'rect-shape'
+            });
+            group.addShape('text', {
+              attrs: {
+                x: 0,
+                y: 0,
+                textAlign: 'center',
+                textBaseline: 'middle',
+                text: labelText,
+                fill: cfg.labelCfg.style.fill,
+                fontSize: cfg.labelCfg.style.fontSize,
+                fontFamily: 'Fira Code'
+              },
+              name: 'text'
+            });
+            return shape;
+          }
+        }
+      );
+      G6.registerNode('workflow-decision', {
         draw(cfg, group) {
-          const hexWidth = 50;
-          const hexHeight = hexWidth * Math.sqrt(3) / 2;
           const labelText = (cfg.label || '');
-          const width = G6.Util.getTextSize('-'.repeat(Math.max(labelText.length - 2, 0)), cfg.labelCfg.style.fontSize, {fontFamily: 'Fira Code'})[0];
+          const textSize = getTextSize(group, labelText, cfg.labelCfg.style.fontSize, 'Fira Code');
+          const singleCharacterWidth = getTextSize(group, ' ', cfg.labelCfg.style.fontSize, 'Fira Code')[0];
+          const width = textSize[0] - singleCharacterWidth;
+          const hexWidth = textSize[1] + 3 * singleCharacterWidth;
+          const hexHeight = hexWidth * Math.sqrt(3) / 2;
+
+          const points = [
+            [(-hexWidth / 2) - width / 2, 0],
+            [(-hexWidth / 4) - width / 2, -hexHeight / 2],
+            [(hexWidth / 4) + width / 2, -hexHeight / 2],
+            [(hexWidth / 2) + width / 2, 0],
+            [(hexWidth / 4) + width / 2, hexHeight / 2],
+            [(-hexWidth / 4) - width / 2, hexHeight / 2]
+          ];
 
           const shape = group.addShape('polygon', {
             attrs: {
-              points: [
-                [(-hexWidth / 2) - width / 2, 0],
-                [(-hexWidth / 4) - width / 2, -hexHeight / 2],
-                [(hexWidth / 4) + width / 2, -hexHeight / 2],
-                [(hexWidth / 2) + width / 2, 0],
-                [(hexWidth / 4) + width / 2, hexHeight / 2],
-                [(-hexWidth / 4) - width / 2, hexHeight / 2]
-              ],
+              points,
               fill: cfg.style.fill,
+              stroke: cfg.style.stroke,
+              lineWidth: 2
             },
             name: 'polygon-shape',
           });
@@ -200,6 +329,83 @@
               fontFamily: 'Fira Code'
             },
             name: 'text'
+          });
+          return shape;
+        }
+      });
+      G6.registerNode('node', {
+        draw(cfg, group) {
+          const labelText = (cfg.label || '');
+          const _icon = cfg.icon || 'data';
+          const iconSize = 24;
+          const textSize = getTextSize(group, labelText, cfg.labelCfg.style.fontSize, 'Fira Code');
+          const singleCharacterWidth = getTextSize(group, ' ', cfg.labelCfg.style.fontSize, 'Fira Code')[0];
+          const _textRadius = Math.sqrt(textSize[0] ** 2 + textSize[1] ** 2) / 2 + singleCharacterWidth;
+          const _iconRadius = Math.max(
+            Math.sqrt(2 * (iconSize ** 2)) / 2 + singleCharacterWidth,
+            iconSize / 2 + singleCharacterWidth
+          );
+          const _distanceBetweenTextCenterAndIconCenter = (iconSize / 2) + singleCharacterWidth + (textSize[1] / 2);
+          const _uncoveredDistance = Math.max(0, (_distanceBetweenTextCenterAndIconCenter + _iconRadius) - _textRadius);
+          const _outerCircleX = 0;
+          const _outerCircleY = 0;
+          const _outerCircleRadius = _textRadius + _uncoveredDistance / 2;
+          const _iconX = 0;
+          const _iconYTop = -_outerCircleRadius + _iconRadius;
+          const _iconYBottom = _outerCircleRadius - _textRadius - textSize[1] / 2 - singleCharacterWidth - _iconRadius;
+          const _iconYMiddle = (_iconYBottom - _iconYTop) / 2 + _iconYTop;
+          const _iconY = Math.max(_iconYTop, _iconYMiddle);
+          const _textCenterX = 0;
+          const _textCenterY = _outerCircleRadius - _textRadius + singleCharacterWidth / 2;
+          const shape = group.addShape('circle', {
+            attrs: {
+              x: _outerCircleX,
+              y: _outerCircleY,
+              r: _outerCircleRadius,
+              fill: cfg.style.fill
+            },
+            name: 'circle-shape'
+          });
+          // group.addShape('circle', {
+          //   attrs: {
+          //     x: _textCenterX,
+          //     y: _textCenterY,
+          //     r: _textRadius,
+          //     fill: 'orange'
+          //   },
+          //   name: 'circle-text-shape'
+          // });
+          // group.addShape('circle', {
+          //   attrs: {
+          //     x: _iconX,
+          //     y: _iconY,
+          //     r: _iconRadius,
+          //     fill: 'lime'
+          //   },
+          //   name: 'circle-icon-shape'
+          // });
+          group.addShape('text', {
+            attrs: {
+              x: _textCenterX,
+              y: _textCenterY,
+              textAlign: 'center',
+              textBaseline: 'middle',
+              text: labelText,
+              fill: cfg.labelCfg.style.fill,
+              fontSize: cfg.labelCfg.style.fontSize,
+              fontFamily: 'Fira Code'
+            },
+            name: 'text'
+          });
+          group.addShape('image', {
+            attrs: {
+              x: Math.round(_iconX - (iconSize / 2)),
+              y: Math.round(_iconY - (iconSize / 2)),
+              width: iconSize,
+              height: iconSize,
+              img: getIcon(_icon, `${iconSize}px`, cfg.labelCfg.style.fill)
+            },
+            name: 'image-shape',
           });
           return shape;
         }

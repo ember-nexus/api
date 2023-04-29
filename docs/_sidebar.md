@@ -3,11 +3,9 @@
   - [Tech stack](/getting-started/tech-stack)
   - [Hardware Requirements](/getting-started/hardware-requirements)
   - [Local Deployment](/getting-started/local-deployment)
-- API Basics
-  - [Graph Database Fundamentals](/api-basics/graph-database-fundamentals)
-  - [Security](/api-basics/security)
-- API Endpoints
-  - [GET /&lt;uuid&gt;](/api-endpoints/get-element)
+  - [Graph Database Fundamentals](/getting-started/graph-database-fundamentals)
 - Security
   - [Ownership](/security/ownership)
   - [Access](/security/access)
+- API Endpoints
+  - [`GET /<uuid> -` Get Element](/api-endpoints/get-element)

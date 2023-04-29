@@ -1,8 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap')
 
+/* required in order to load Fira Code instantly */
+{}
+
 .markdown-section code,
 .markdown-section pre,
-.markdown-section output::after {
+.markdown-section output::after,
+aside code {
   font-family: 'Fira Code', 'Roboto Mono', Monaco, courier, monospace;
 }
 

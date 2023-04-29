@@ -150,9 +150,9 @@ renderGraph(document.getElementById('graph-container-3'), {
     { id: 'blog', ...dataNode, label: 'Blog' },
     { id: 'post1', ...dataNode, label: 'Post 1' },
     { id: 'post2', ...dataNode, label: 'Post 2' },
-    { id: 'comment1', ...yellowNode, label: 'Comment 1' },
-    { id: 'comment2', ...yellowNode, label: 'Comment 2' },
-    { id: 'comment3', ...yellowNode, label: 'Comment 3' },
+    { id: 'comment1', ...commentNode, label: 'Comment 1' },
+    { id: 'comment2', ...commentNode, label: 'Comment 2' },
+    { id: 'comment3', ...commentNode, label: 'Comment 3' },
   ],
   edges: [
     { source: 'admin', target: 'blog', label: 'OWNS' },
@@ -172,7 +172,7 @@ renderGraph(document.getElementById('graph-container-4'), {
     { id: 'blog', ...dataNode, label: 'Blog' },
     { id: 'post1', ...dataNode, label: 'Post 1' },
     { id: 'post2', ...dataNode, label: 'Post 2' },
-    { id: 'state1', ...yellowNode, label: 'Active' },
+    { id: 'state1', ...workflowStateNode, label: 'Active' },
   ],
   edges: [
     { source: 'admin', target: 'blog', label: 'OWNS' },
@@ -186,11 +186,11 @@ renderGraph(document.getElementById('graph-container-5'), {
   nodes: [
     { id: 'user1', ...userNode, label: 'User A' },
     { id: 'user2', ...userNode, label: 'User B' },
-    { id: 'group', ...groupNode, label: 'Public Group' },
+    { id: 'group', ...groupNode, label: "Public\nGroup" },
     { id: 'blog', ...dataNode, label: 'Blog' },
     { id: 'post', ...dataNode, label: 'Post' },
-    { id: 'comment1', ...yellowNode, label: 'Comment 1' },
-    { id: 'comment2', ...yellowNode, label: 'Comment 2' }
+    { id: 'comment1', ...commentNode, label: 'Comment 1' },
+    { id: 'comment2', ...commentNode, label: 'Comment 2' }
   ],
   edges: [
     { source: 'blog', target: 'post', label: 'OWNS' },
