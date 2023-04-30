@@ -1,11 +1,95 @@
 # GET /&lt;uuid&gt; - Get Element
 
+<!-- panels:start -->
+<!-- div:left-panel -->
+
 The get element endpoint at `GET /<uuid>` is used to retrieve the data of a single element, which can be either
 a node or a relationship.
+
+## Request Example
+
+```bash
+curl \
+  -H "Authorization: Bearer secret-token:XtNzGLwxpDFtrjv68nvoUG" \
+  https://api.localhost/904a5f37-785e-428d-96ba-4fa58cd2bea8
+```
+
+<!-- tabs:start -->
+
+### **Success 200**
+
+Response for nodes:
+
+```json
+{
+  "type": "Data",
+  "id": "904a5f37-785e-428d-96ba-4fa58cd2bea8",
+  "data": {
+    "name": "Some data element",
+    "description": "demo"
+  }
+}
+```
+
+Response for relations:
+
+```json
+{
+  "type": "HAS_DATA",
+  "id": "904a5f37-785e-428d-96ba-4fa58cd2bea8",
+  "start": "ce0fde7f-851a-4933-bd1b-8d8a12f082f5",
+  "end": "1c7e0a52-b0dc-441a-9fbc-9e30bedbf812",
+  "data": {
+    "name": "Some data relation",
+    "description": "demo"
+  }
+}
+```
+
+### **Error 401**
+
+```problem+json
+{
+  "type": "Invalid authorization token",
+  "title": "Unauthorized",
+  "status": "401",
+  "detail": "Request requires authorization."
+}
+```
+
+### **Error 404**
+
+```problem+json
+{
+  "type": "404-not-found",
+  "title": "Not Found",
+  "status": "404",
+  "detail": "The requested resource was not found."
+}
+```
+
+### **Error 429**
+
+```problem+json
+{
+  "type": "429-too-many-requests",
+  "title": "Too Many Requests",
+  "status": "429",
+  "detail": "The client sent too many requests in a given timeframe; rate limiting is active."
+}
+```
+
+<!-- tabs:end -->
+
+<!-- div:right-panel -->
+
+## Internal Workflow
 
 Once the server receives such a request, it checks several things internally:
 
 <div id="graph-container-1" class="graph-container" style="height:1000px"></div>
+
+<!-- panels:end -->
 
 <script>
 G6.registerEdge('polyline-edge', {

@@ -50,10 +50,19 @@
         subMaxLevel: 3,
         loadNavbar: true,
         themeColor: '#d82739',
-        executeScript: true
+        executeScript: true,
+        tabs: {
+          persist    : true,
+          sync       : true,
+          theme      : 'material',
+          tabComments: true,
+          tabHeadings: true
+        }
       };
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-example-panels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-cypher.min.js"></script>
@@ -61,6 +70,7 @@
     <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@antv/g6@4.8.10/dist/g6.min.js"></script>
     <script>
+      Prism.languages['problem+json'] = Prism.languages['json'];
       function renderWorkflow(container, data, direction = "LR"){
         const graph = new G6.Graph({
           container: container,
