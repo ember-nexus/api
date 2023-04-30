@@ -10,6 +10,16 @@ aside code {
   font-family: 'Fira Code', 'Roboto Mono', Monaco, courier, monospace;
 }
 
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+  color: inherit !important;
+  background: transparent !important;
+}
+
 .app-sub-sidebar li::before {
   display: none;
 }
@@ -30,47 +40,4 @@ aside code {
   width: 100%;
   height: 500px;
   background-color: #f8f8f8;
-}
-
-/* mermaid.js custom styles */
-
-.mermaid rect,
-.mermaid polygon {
-  stroke-width: 2px !important;
-  fill: #F7F9FA !important;
-  stroke: #67728A !important;
-}
-
-.mermaid .flowchart-link {
-  stroke-width: 2px !important;
-  stroke: #67728A !important;
-}
-
-.mermaid .unofficial > rect {
-  stroke-dasharray: 6;
-}
-
-.mermaid .init > rect {
-  fill: #E8F5FF !important;
-  stroke: #036FE3 !important;
-}
-
-.mermaid .status2xx > rect {
-  fill: #EAF9E8 !important;
-  stroke: #008539 !important;
-}
-
-.mermaid .status3xx > rect {
-  fill: #EAF9E8 !important;
-  stroke: #008539 !important;
-}
-
-.mermaid .status4xx > rect {
-  fill: #FFF2E4 !important;
-  stroke: #F07F23 !important;
-}
-
-.mermaid .status5xx > rect {
-  fill: #FFF2F2 !important;
-  stroke: #DA294A !important;
 }

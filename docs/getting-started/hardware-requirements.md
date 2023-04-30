@@ -2,9 +2,9 @@
 
 ## Local and Development Setups
 
-For local and development purposes, the whole stack can be hosted on a single machine with at least 12 GB of RAM,
-6+ vCPUs, and 20 GB of SSD storage. However, it's important to note that this setup is not recommended for production
-use as certain services like ElasticSearch can consume so much RAM that other services are starved. Additionally, the
+For local and development purposes, the whole stack can be hosted on a single machine with at least 8 GB of RAM,
+4+ vCPUs, and 10 GB of SSD storage. However, it is important to note that this setup is not recommended for production
+use, as certain services like ElasticSearch can consume so much RAM, that other services are starved. Additionally, the
 lack of service distribution means that if one storage layer service crashes, the entire stack becomes unavailable.
 
 A Docker Compose configuration is available [here](/getting-started/local-deployment).

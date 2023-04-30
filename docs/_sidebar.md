@@ -7,7 +7,11 @@
 - Security
   - [Ownership](/security/ownership)
   - [Access](/security/access)
+  - [Workflow](/security/workflow)
+  - [Session and Rate Limiting](/security/session-and-rate-limiting)
+  - [Predefined Data Types](/security/predefined-data-types)
 - API Endpoints
+  - Generic Endpoints
   - [`GET / -` Get Index](/api-endpoints/get-index)
   - [`GET /<uuid> -` Get Element](/api-endpoints/get-element)
   - [`GET /<uuid>/parents -` Get Parents](/api-endpoints/get-parents)
@@ -18,3 +22,9 @@
   - [`PUT /<uuid> -` Replace Element](/api-endpoints/put-element)
   - [`PATCH /<uuid> -` Update Element](/api-endpoints/patch-element)
   - [`DELETE /<uuid> -` Delete Element](/api-endpoints/delete-element)
+  - User Endpoints
+  - [`POST /register -` Register New Account](/api-endpoints/post-register)
+  - [`POST /sessions -` Create Session](/api-endpoints/post-sessions)
+  - [`GET /sessions -` Get Sessions](/api-endpoints/get-sessions)
+  - [`GET /sessions/<uuid> -` Get Specific Session](/api-endpoints/get-specific-session)
+  - [`DELETE /sessions/<uuid> -` Delete Session](/api-endpoints/delete-session)
