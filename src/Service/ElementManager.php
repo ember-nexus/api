@@ -23,35 +23,43 @@ class ElementManager
     ) {
     }
 
-    public function create(NodeElementInterface|RelationElementInterface $element): void
+    public function create(NodeElementInterface|RelationElementInterface $element): self
     {
         $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
         $this->cypherEntityManager->create($fragmentGroup->getCypherFragment());
         $this->mongoEntityManager->create($fragmentGroup->getMongoFragment());
         $this->elasticEntityManager->create($fragmentGroup->getElasticFragment());
+
+        return $this;
     }
 
-    public function merge(NodeElementInterface|RelationElementInterface $element): void
+    public function merge(NodeElementInterface|RelationElementInterface $element): self
     {
         $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
         $this->cypherEntityManager->merge($fragmentGroup->getCypherFragment());
         $this->mongoEntityManager->merge($fragmentGroup->getMongoFragment());
         $this->elasticEntityManager->merge($fragmentGroup->getElasticFragment());
+
+        return $this;
     }
 
-    public function delete(NodeElementInterface|RelationElementInterface $element): void
+    public function delete(NodeElementInterface|RelationElementInterface $element): self
     {
         $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
         $this->cypherEntityManager->delete($fragmentGroup->getCypherFragment());
         $this->mongoEntityManager->delete($fragmentGroup->getMongoFragment());
         $this->elasticEntityManager->delete($fragmentGroup->getElasticFragment());
+
+        return $this;
     }
 
-    public function flush(): void
+    public function flush(): self
     {
         $this->cypherEntityManager->flush();
         $this->mongoEntityManager->flush();
         $this->elasticEntityManager->flush();
+
+        return $this;
     }
 
     public function getElement(UuidInterface $uuid): null|NodeElementInterface|RelationElementInterface

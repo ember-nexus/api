@@ -250,12 +250,12 @@ class BackupCreateCommand extends Command
         }
 
         // todo remove comment block
-//        if ($this->backupStorage->directoryExists($backupName)) {
-//            throw new LogicException(sprintf(
-//                "Backup with name %s already exists",
-//                $backupName
-//            ));
-//        }
+        //        if ($this->backupStorage->directoryExists($backupName)) {
+        //            throw new LogicException(sprintf(
+        //                "Backup with name %s already exists",
+        //                $backupName
+        //            ));
+        //        }
 
         return $backupName;
     }

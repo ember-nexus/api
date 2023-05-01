@@ -13,8 +13,7 @@ class ElasticEntityManagerFactory
         private EventDispatcherInterface $eventDispatcher,
         private LoggerInterface $logger,
         private string $elasticAuth
-    )
-    {
+    ) {
     }
 
     public function createElasticEntityManager(): EntityManager

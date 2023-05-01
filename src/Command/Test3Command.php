@@ -22,8 +22,8 @@ class Test3Command extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-//        $token = $this->tokenGenerator->createNewToken(UuidV4::fromString('6ce3006b-6b7f-4770-8075-d2bf91804d14'));
-//        $output->writeln($token);
+        //        $token = $this->tokenGenerator->createNewToken(UuidV4::fromString('6ce3006b-6b7f-4770-8075-d2bf91804d14'));
+        //        $output->writeln($token);
 
         $combinedJSON = [];
         $files = $this->backupStorage->listContents('manual/node/', true);

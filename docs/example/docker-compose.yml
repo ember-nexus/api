@@ -13,7 +13,7 @@ services:
       - MONGO_AUTH=mongodb://mongodb:password@ember-nexus-mongodb:27017
       - S3_AUTH=currently-not-used
       - ELASTIC_AUTH=ember-nexus-elasticsearch:9200
-      - REDIS_AUTH=currently-not-used
+      - REDIS_AUTH=tls://ember-nexus-redis
       - RABBITMQ_AUTH=currently-not-used
 
   ember-nexus-neo4j:

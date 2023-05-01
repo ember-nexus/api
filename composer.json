@@ -12,6 +12,7 @@
     "league/flysystem-aws-s3-v3": "^3.0",
     "league/flysystem-bundle": "^3.1",
     "mongodb/mongodb": "^1.13",
+    "predis/predis": "*",
     "ramsey/uuid": "^4.7",
     "symfony/asset": "6.2.*",
     "symfony/console": "6.2.*",

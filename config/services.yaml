@@ -208,6 +208,12 @@ services:
         event: 'App\Event\RelationElementFragmentizeEvent'
         method: 'onRelationElementFragmentizeEvent'
 
+  App\EventListener\UsernamePropertyElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+
   App\EventListener\NodeElementDefragmentizeEventListener:
     tags:
       - name: kernel.event_listener
@@ -258,3 +264,11 @@ services:
 
   Syndesi\ElasticEntityManager\Type\EntityManager:
     factory: ['@App\Factory\ElasticEntityManagerFactory', 'createElasticEntityManager']
+
+  App\Factory\RedisFactory:
+    arguments:
+      $redisAuth: '%env(REDIS_AUTH)%'
+
+  Redis:
+    factory: ['@App\Factory\RedisFactory', 'createRedis']
+    class: Redis

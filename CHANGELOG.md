@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Database connection strings are now configurable via environment variables
+- Redis is now used.
+- Add `user:create` command.
+- Add `user:session:create` command.
 
 ## 0.0.4 - 2023-04-22
 

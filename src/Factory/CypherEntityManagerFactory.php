@@ -13,8 +13,7 @@ class CypherEntityManagerFactory
         private EventDispatcherInterface $eventDispatcher,
         private LoggerInterface $logger,
         private string $cypherAuth
-    )
-    {
+    ) {
     }
 
     public function createCypherEntityManager(): EntityManager

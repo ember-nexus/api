@@ -13,14 +13,13 @@ class MongoEntityManagerFactory
         private EventDispatcherInterface $eventDispatcher,
         private LoggerInterface $logger,
         private string $mongoAuth
-    )
-    {
+    ) {
     }
 
     public function createMongoEntityManager(): EntityManager
     {
         $client = new Client($this->mongoAuth);
 
-        return new EntityManager('tion', $client, $this->eventDispatcher, $this->logger);
+        return new EntityManager('ember-nexus', $client, $this->eventDispatcher, $this->logger);
     }
 }
