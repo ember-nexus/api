@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Redis is now used.
 - Add `user:create` command.
 - Add `user:session:create` command.
+- Update dependencies.
 
 ## 0.0.4 - 2023-04-22
 
