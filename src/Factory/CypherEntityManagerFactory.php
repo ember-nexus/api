@@ -9,14 +9,18 @@ use Syndesi\CypherEntityManager\Type\EntityManager;
 
 class CypherEntityManagerFactory
 {
-    public function __construct(private EventDispatcherInterface $eventDispatcher, private LoggerInterface $logger)
+    public function __construct(
+        private EventDispatcherInterface $eventDispatcher,
+        private LoggerInterface $logger,
+        private string $cypherAuth
+    )
     {
     }
 
-    public function createCypherEntityManager(EventDispatcherInterface $eventDispatcher, LoggerInterface $logger): EntityManager
+    public function createCypherEntityManager(): EntityManager
     {
         $client = ClientBuilder::create()
-            ->withDriver('bolt', 'bolt://neo4j:password@neo4j-php-neo4j')
+            ->withDriver('default', $this->cypherAuth)
             ->build();
 
         return new EntityManager($client, $this->eventDispatcher, $this->logger);

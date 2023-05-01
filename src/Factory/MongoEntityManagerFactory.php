@@ -9,13 +9,17 @@ use Syndesi\MongoEntityManager\Type\EntityManager;
 
 class MongoEntityManagerFactory
 {
-    public function __construct(private EventDispatcherInterface $eventDispatcher, private LoggerInterface $logger)
+    public function __construct(
+        private EventDispatcherInterface $eventDispatcher,
+        private LoggerInterface $logger,
+        private string $mongoAuth
+    )
     {
     }
 
     public function createMongoEntityManager(): EntityManager
     {
-        $client = new Client('mongodb://mongodb:password@neo4j-php-mongodb:27017');
+        $client = new Client($this->mongoAuth);
 
         return new EntityManager('tion', $client, $this->eventDispatcher, $this->logger);
     }

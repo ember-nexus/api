@@ -9,14 +9,18 @@ use Syndesi\ElasticEntityManager\Type\EntityManager;
 
 class ElasticEntityManagerFactory
 {
-    public function __construct(private EventDispatcherInterface $eventDispatcher, private LoggerInterface $logger)
+    public function __construct(
+        private EventDispatcherInterface $eventDispatcher,
+        private LoggerInterface $logger,
+        private string $elasticAuth
+    )
     {
     }
 
     public function createElasticEntityManager(): EntityManager
     {
         $client = ClientBuilder::create()
-            ->setHosts(['neo4j-php-elasticsearch:9200'])
+            ->setHosts([$this->elasticAuth])
             ->build();
 
         return new EntityManager($client, $this->eventDispatcher, $this->logger);

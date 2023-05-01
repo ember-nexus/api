@@ -238,11 +238,23 @@ services:
         event: 'App\Event\RelationElementFragmentizeEvent'
         method: 'onRelationElementFragmentizeEvent'
 
+  App\Factory\CypherEntityManagerFactory:
+    arguments:
+      $cypherAuth: '%env(CYPHER_AUTH)%'
+
   Syndesi\CypherEntityManager\Type\EntityManager:
     factory: ['@App\Factory\CypherEntityManagerFactory', 'createCypherEntityManager']
 
+  App\Factory\MongoEntityManagerFactory:
+    arguments:
+      $mongoAuth: '%env(MONGO_AUTH)%'
+
   Syndesi\MongoEntityManager\Type\EntityManager:
     factory: ['@App\Factory\MongoEntityManagerFactory', 'createMongoEntityManager']
+
+  App\Factory\ElasticEntityManagerFactory:
+    arguments:
+      $elasticAuth: '%env(ELASTIC_AUTH)%'
 
   Syndesi\ElasticEntityManager\Type\EntityManager:
     factory: ['@App\Factory\ElasticEntityManagerFactory', 'createElasticEntityManager']

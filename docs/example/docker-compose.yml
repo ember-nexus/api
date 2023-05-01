@@ -10,9 +10,9 @@ services:
     environment:
       - APP_ENV=prod
       - CYPHER_AUTH=bolt://neo4j:password@ember-nexus-neo4j
-      - MONGODB_AUTH=mongodb://mongodb:password@ember-nexus-mongodb:27017
+      - MONGO_AUTH=mongodb://mongodb:password@ember-nexus-mongodb:27017
       - S3_AUTH=currently-not-used
-      - ELASTIC_SEARCH_AUTH=ember-nexus-elasticsearch:9200
+      - ELASTIC_AUTH=ember-nexus-elasticsearch:9200
       - REDIS_AUTH=currently-not-used
       - RABBITMQ_AUTH=currently-not-used
 
