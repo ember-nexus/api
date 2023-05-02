@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `user:create` command.
 - Add `user:session:create` command.
 - Update dependencies.
-- Reworked `database:drop` command.
+- Rework `database:drop` command.
 
 ## 0.0.4 - 2023-04-22
 
