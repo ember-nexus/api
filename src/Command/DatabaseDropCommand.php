@@ -67,9 +67,13 @@ class DatabaseDropCommand extends Command
 
         $this->deleteMongo();
 
+        $this->deleteObjectStorage();
+
         $this->deleteElastic();
 
         $this->deleteRedis();
+
+        $this->deleteRabbitMQ();
 
         $this->io->writeln('  Commend ended successfully');
         $this->io->newLine();
@@ -79,7 +83,7 @@ class DatabaseDropCommand extends Command
 
     private function deleteCypher(): void
     {
-        $this->io->startSection('Task 1 of 4: Cypher');
+        $this->io->startSection('Task 1 of 6: Cypher');
         $this->io->writeln('Deleting Cypher data...');
         $this->cypherEntityManager->getClient()->runStatement(
             Statement::create('MATCH (n) DETACH DELETE n')
@@ -89,7 +93,7 @@ class DatabaseDropCommand extends Command
 
     private function deleteMongo(): void
     {
-        $this->io->startSection('Task 2 of 4: MongoDB');
+        $this->io->startSection('Task 2 of 6: MongoDB');
         $this->io->writeln('Deleting Mongo data...');
         $mongoDatabase = $this->mongoEntityManager->getDatabase();
         if ($mongoDatabase) {
@@ -98,9 +102,17 @@ class DatabaseDropCommand extends Command
         $this->io->stopSection('Successfully deleted Mongo data.');
     }
 
+    private function deleteObjectStorage(): void
+    {
+        $this->io->startSection('Task 3 of 6: Object Storage');
+        $this->io->writeln('Deleting object storage data...');
+        // todo
+        $this->io->stopSection('Object storage is currently not implemented, nothing to delete.');
+    }
+
     private function deleteElastic(): void
     {
-        $this->io->startSection('Task 3 of 4: Elastic Search');
+        $this->io->startSection('Task 4 of 6: Elastic Search');
         $this->io->writeln('Deleting Elastic data...');
         $rawIndices = $this->elasticEntityManager->getClient()->cat()->indices(['index' => '*'])->asString();
         $rawIndices = explode("\n", $rawIndices);
@@ -119,9 +131,17 @@ class DatabaseDropCommand extends Command
 
     private function deleteRedis(): void
     {
-        $this->io->startSection('Task 4 of 4: Redis');
+        $this->io->startSection('Task 5 of 6: Redis');
         $this->io->writeln('Deleting Redis data...');
         $this->redisClient->flushdb();
         $this->io->stopSection('Successfully deleted Redis data.');
+    }
+
+    private function deleteRabbitMQ(): void
+    {
+        $this->io->startSection('Task 6 of 6: RabbitMQ');
+        $this->io->writeln('Deleting RabbitMQ data...');
+        // todo
+        $this->io->stopSection('RabbitMQ is currently not implemented, nothing to delete.');
     }
 }

@@ -52,7 +52,9 @@ class EonStyle extends SymfonyStyle
         }
         $envVersion = getenv('VERSION');
         if (is_string($envVersion)) {
-            $versionString = 'v'.preg_replace('/[^0-9.]/', '', $envVersion);
+            if ($envVersion) {
+                $versionString = 'v'.preg_replace('/[^0-9.]/', '', $envVersion);
+            }
         }
         $this->newLine();
         $this->writeln(sprintf(
@@ -85,7 +87,7 @@ class EonStyle extends SymfonyStyle
     }
 
     /**
-     * @param iterable<string>|string $messages
+     * @param iterable<mixed, mixed>|string $messages
      *
      * @psalm-suppress ParamNameMismatch
      */
