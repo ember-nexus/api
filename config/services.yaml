@@ -269,6 +269,6 @@ services:
     arguments:
       $redisAuth: '%env(REDIS_AUTH)%'
 
-  Redis:
+  Predis\Client:
     factory: ['@App\Factory\RedisFactory', 'createRedis']
-    class: Redis
+    class: Predis\Client

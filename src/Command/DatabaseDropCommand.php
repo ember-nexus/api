@@ -2,42 +2,106 @@
 
 namespace App\Command;
 
+use App\Style\EonStyle;
 use Laudis\Neo4j\Databags\Statement;
+use Predis\Client;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 #[AsCommand(name: 'database:drop')]
 class DatabaseDropCommand extends Command
 {
+    private EonStyle $io;
+
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
         private MongoEntityManager $mongoEntityManager,
-        private ElasticEntityManager $elasticEntityManager
+        private ElasticEntityManager $elasticEntityManager,
+        private Client $redisClient
     ) {
         parent::__construct();
     }
 
+    public function configure(): void
+    {
+        $this->addOption(
+            'force',
+            'f',
+            InputOption::VALUE_NEGATABLE,
+            'If enabled, command will not ask for manual confirmation.',
+            false
+        );
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln('Deleting Cypher data...');
+        $this->io = new EonStyle($input, $output);
+
+        $this->io->title('Database Drop');
+
+        if (!$input->getOption('force')) {
+            /**
+             * @var QuestionHelper $helper
+             */
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion('Are you sure you want to drop all databases? [y/N]: ', false);
+            if (!$helper->ask($input, $output, $question)) {
+                $this->io->writeln('Aborted dropping databases.');
+
+                return self::FAILURE;
+            }
+        }
+
+        $this->deleteCypher();
+
+        $this->deleteMongo();
+
+        $this->deleteElastic();
+
+        $this->deleteRedis();
+
+        $this->io->writeln('  Commend ended successfully');
+        $this->io->newLine();
+
+        return Command::SUCCESS;
+    }
+
+    private function deleteCypher(): void
+    {
+        $this->io->startSection('Task 1 of 4: Cypher');
+        $this->io->writeln('Deleting Cypher data...');
         $this->cypherEntityManager->getClient()->runStatement(
             Statement::create('MATCH (n) DETACH DELETE n')
         );
-        $output->writeln('Successfully deleted cypher data');
+        $this->io->stopSection('Successfully deleted cypher data.');
+    }
 
-        $output->writeln('Deleting Mongo data..');
+    private function deleteMongo(): void
+    {
+        $this->io->startSection('Task 2 of 4: MongoDB');
+        $this->io->writeln('Deleting Mongo data...');
         $mongoDatabase = $this->mongoEntityManager->getDatabase();
         if ($mongoDatabase) {
             $this->mongoEntityManager->getClient()->dropDatabase($mongoDatabase);
         }
-        $output->writeln('Successfully deleted Mongo data');
+        $this->io->stopSection('Successfully deleted Mongo data.');
+    }
 
-        $output->writeln('Deleting Elastic data...');
+    private function deleteElastic(): void
+    {
+        $this->io->startSection('Task 3 of 4: Elastic Search');
+        $this->io->writeln('Deleting Elastic data...');
         $rawIndices = $this->elasticEntityManager->getClient()->cat()->indices(['index' => '*'])->asString();
         $rawIndices = explode("\n", $rawIndices);
         $indices = [];
@@ -50,10 +114,14 @@ class DatabaseDropCommand extends Command
         foreach ($indices as $index) {
             $this->elasticEntityManager->getClient()->indices()->delete(['index' => $index]);
         }
-        $output->writeln('Successfully deleted Elastic data');
+        $this->io->stopSection('Successfully deleted Elastic data.');
+    }
 
-        $output->writeln('Done');
-
-        return Command::SUCCESS;
+    private function deleteRedis(): void
+    {
+        $this->io->startSection('Task 4 of 4: Redis');
+        $this->io->writeln('Deleting Redis data...');
+        $this->redisClient->flushdb();
+        $this->io->stopSection('Successfully deleted Redis data.');
     }
 }

@@ -14,6 +14,7 @@ use Symfony\Component\Console\Terminal;
 class EonStyle extends SymfonyStyle
 {
     private int $lineLength = 120;
+    private bool $isInSection = false;
 
     public function __construct(
         private InputInterface $input,
@@ -24,23 +25,81 @@ class EonStyle extends SymfonyStyle
             $this->lineLength = $terminal->getWidth();
         }
         $output->getFormatter()->setStyle(
-            'eon',
-            new OutputFormatterStyle('#ffffff', '#ff073a')
+            'ember-nexus',
+            new OutputFormatterStyle('#ffffff', '#D82739')
+        );
+        $output->getFormatter()->setStyle(
+            'ember-nexus-purple',
+            new OutputFormatterStyle('#2C1D32', '#D82739')
+        );
+        $output->getFormatter()->setStyle(
+            'ember-nexus-orange',
+            new OutputFormatterStyle('#FA9640', '#D82739')
         );
         $output->getFormatter()->setStyle(
             'info',
-            new OutputFormatterStyle('#ff073a')
+            new OutputFormatterStyle('#D82739')
         );
         parent::__construct($input, $output);
     }
 
     public function title(string $message): void
     {
-        $this->writeln([
-            sprintf('<eon>%s</>', str_repeat(' ', $this->lineLength)),
-            sprintf('<eon> %s </>', str_pad($message, $this->lineLength - 2, ' ')),
-            sprintf('<eon>%s</>', str_repeat(' ', $this->lineLength)),
-        ]);
+        $versionString = 'development version';
+        $appMode = 'prod';
+        if ('prod' !== getenv('APP_ENV')) {
+            $appMode = 'dev';
+        }
+        $envVersion = getenv('VERSION');
+        if (is_string($envVersion)) {
+            $versionString = 'v'.preg_replace('/[^0-9.]/', '', $envVersion);
+        }
+        $this->newLine();
+        $this->writeln(sprintf(
+            "    <fg=magenta>▄</>   \n".
+            "  <fg=magenta>▄<fg=magenta;bg=bright-red>▀ ▀</>▄</>  <options=bold>Ember Nexus API</>\n".
+            "   <fg=bright-red>▀<fg=bright-yellow>█</>▀</>   %s, %s mode\n".
+            "\n".
+            "  <options=bold>%s</>\n",
+            $versionString,
+            $appMode,
+            $message
+        ));
+    }
+
+    public function startSection(string $message): void
+    {
+        $this->writeln(sprintf(
+            '┌<options=bold> %s </>%s',
+            $message,
+            str_repeat('─', max(0, $this->lineLength - strlen($message) - 3))
+        ));
+        $this->isInSection = true;
+    }
+
+    public function stopSection(string $message): void
+    {
+        $this->isInSection = false;
+        $this->writeln('└ '.$message);
+        $this->newLine();
+    }
+
+    /**
+     * @param iterable<string>|string $messages
+     *
+     * @psalm-suppress ParamNameMismatch
+     */
+    public function writeln(iterable|string $messages, int $type = self::OUTPUT_NORMAL): void
+    {
+        if (is_iterable($messages)) {
+            parent::writeln($messages, $type);
+
+            return;
+        }
+        if ($this->isInSection) {
+            $messages = '│ '.$messages;
+        }
+        parent::writeln($messages, $type);
     }
 
     public function createTable(): Table
