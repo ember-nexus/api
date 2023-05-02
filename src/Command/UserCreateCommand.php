@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Event\UserCreateEvent;
 use App\Service\ElementManager;
-use App\Style\EonStyle;
+use App\Style\EmberNexusStyle;
 use App\Type\NodeElement;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
@@ -42,7 +42,7 @@ class UserCreateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->io = new EonStyle($input, $output);
+        $this->io = new EmberNexusStyle($input, $output);
 
         $username = $input->getArgument('username');
 

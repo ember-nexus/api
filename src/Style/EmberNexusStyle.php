@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 
-class EonStyle extends SymfonyStyle
+class EmberNexusStyle extends SymfonyStyle
 {
     private int $lineLength = 120;
     private bool $isInSection = false;

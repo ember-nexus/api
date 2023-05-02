@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Style\EonStyle;
+use App\Style\EmberNexusStyle;
 use League\Flysystem\FilesystemOperator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -28,7 +28,7 @@ class BackupListCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->io = new EonStyle($input, $output);
+        $this->io = new EmberNexusStyle($input, $output);
 
         $rows = [];
         $header = [

@@ -5,7 +5,7 @@ namespace App\Command;
 use App\Helper\Regex;
 use App\Security\TokenGenerator;
 use App\Service\ElementManager;
-use App\Style\EonStyle;
+use App\Style\EmberNexusStyle;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -40,7 +40,7 @@ class UserSessionCreateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->io = new EonStyle($input, $output);
+        $this->io = new EmberNexusStyle($input, $output);
 
         $identifier = $input->getArgument('identifier');
 

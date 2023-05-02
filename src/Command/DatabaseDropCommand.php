@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Style\EonStyle;
+use App\Style\EmberNexusStyle;
 use Laudis\Neo4j\Databags\Statement;
 use Predis\Client;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -22,7 +22,7 @@ use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 #[AsCommand(name: 'database:drop')]
 class DatabaseDropCommand extends Command
 {
-    private EonStyle $io;
+    private EmberNexusStyle $io;
 
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
@@ -46,7 +46,7 @@ class DatabaseDropCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->io = new EonStyle($input, $output);
+        $this->io = new EmberNexusStyle($input, $output);
 
         $this->io->title('Database Drop');
 

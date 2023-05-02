@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
-use App\Style\EonStyle;
+use App\Style\EmberNexusStyle;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
@@ -65,7 +65,7 @@ class BackupCreateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->io = new EonStyle($input, $output);
+        $this->io = new EmberNexusStyle($input, $output);
 
         $this->backupName = $this->checkBackupName($input->getArgument('name'));
         $this->prettyPrint = $input->getOption('pretty');

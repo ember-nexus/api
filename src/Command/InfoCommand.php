@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Style\EonStyle;
+use App\Style\EmberNexusStyle;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,7 +26,7 @@ class InfoCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io = new EonStyle($input, $output);
+        $io = new EmberNexusStyle($input, $output);
 
         $io->title('Info');
 

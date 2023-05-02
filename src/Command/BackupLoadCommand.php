@@ -5,7 +5,7 @@ namespace App\Command;
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
 use App\Service\ElementManager;
 use App\Service\RawToElementService;
-use App\Style\EonStyle;
+use App\Style\EmberNexusStyle;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -48,7 +48,7 @@ class BackupLoadCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->io = new EonStyle($input, $output);
+        $this->io = new EmberNexusStyle($input, $output);
 
         $this->checkDatabaseIsEmpty();
 
