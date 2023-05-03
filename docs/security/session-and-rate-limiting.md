@@ -31,7 +31,6 @@ it accordingly:
 
 <div id="graph-container-1" class="graph-container" style="height:1000px"></div>
 
-
 <script>
 renderWorkflow(document.getElementById('graph-container-1'), {
   nodes: [
