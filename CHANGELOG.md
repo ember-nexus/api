@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `user:create` command.
 - Add `user:session:create` command.
 - Update dependencies.
-- Rework `database:drop` command.
+- Rework several commands.
 - Token management now uses Redis.
+- Remove Twig from production requirements, as it is not used.
 
 ## 0.0.4 - 2023-04-22
 
