@@ -2,6 +2,7 @@
 
 namespace App\Style;
 
+use App\Console\EmberNexusOutputWrapper;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -69,6 +70,23 @@ class EmberNexusStyle extends SymfonyStyle
         ));
     }
 
+    public function success(array|string $message): void
+    {
+        if ($this->isInSection) {
+            throw new \Exception('Function success() should only be called at end of command, not within sections.');
+        }
+        $this->newLine();
+        if (is_string($message)) {
+            $message = [$message];
+        }
+        $prefix = '> ';
+        foreach ($message as $line) {
+            $this->writeln($prefix.$line);
+            $prefix = '  ';
+        }
+        $this->newLine();
+    }
+
     public function startSection(string $message): void
     {
         $this->writeln(sprintf(
@@ -110,6 +128,20 @@ class EmberNexusStyle extends SymfonyStyle
         $style = clone Table::getStyleDefinition('borderless');
         $style->setCellHeaderFormat('<info>%s</info>');
 
-        return (new Table($output))->setStyle($style);
+        $emberNexusOutputWrapper = new EmberNexusOutputWrapper($output);
+
+        return (new Table($emberNexusOutputWrapper))->setStyle($style);
+    }
+
+    public function createCompactTable(): Table
+    {
+        $output = $this->output instanceof ConsoleOutputInterface ? $this->output->section() : $this->output;
+        $style = clone Table::getStyleDefinition('compact');
+        $style->setCellHeaderFormat('<options=bold>%s</>');
+        $style->setVerticalBorderChars('', ' ');
+
+        $emberNexusOutputWrapper = new EmberNexusOutputWrapper($output);
+
+        return (new Table($emberNexusOutputWrapper))->setStyle($style);
     }
 }

@@ -30,15 +30,17 @@ class BackupListCommand extends Command
     {
         $this->io = new EmberNexusStyle($input, $output);
 
+        $this->io->title('Backup List');
+
         $rows = [];
         $header = [
             'Name',
             'Hostname',
             'Version',
             'Date',
-            'Node Count',
-            'Relation Count',
-            'File Count',
+            'Nodes',
+            'Edges',
+            'Files',
         ];
 
         $backupFolders = $this->backupStorage->listContents('/');
@@ -62,13 +64,12 @@ class BackupListCommand extends Command
             ];
         }
 
-        $table = $this->io->createTable();
+        $table = $this->io->createCompactTable();
         $table->setHeaders($header);
         $table->setRows($rows);
-        $table->setStyle('compact');
         $table->render();
 
-        $this->io->newLine();
+        $this->io->success('Command finished successfully.');
 
         return Command::SUCCESS;
     }
