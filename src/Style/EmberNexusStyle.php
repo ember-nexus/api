@@ -75,7 +75,6 @@ class EmberNexusStyle extends SymfonyStyle
         if ($this->isInSection) {
             throw new \Exception('Function success() should only be called at end of command, not within sections.');
         }
-        $this->newLine();
         if (is_string($message)) {
             $message = [$message];
         }

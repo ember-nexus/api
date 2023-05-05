@@ -68,6 +68,7 @@ class BackupListCommand extends Command
         $table->setHeaders($header);
         $table->setRows($rows);
         $table->render();
+        $this->io->newLine();
 
         $this->io->success('Command finished successfully.');
 

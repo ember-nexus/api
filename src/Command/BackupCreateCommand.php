@@ -17,7 +17,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
@@ -33,8 +32,9 @@ class BackupCreateCommand extends Command
     private string $backupName = '';
     private int $pageSize = 10;
     private bool $prettyPrint = false;
+    private bool $ndjson = false;
 
-    private OutputStyle $io;
+    private EmberNexusStyle $io;
 
     public function __construct(
         private ElementManager $elementManager,
@@ -51,14 +51,21 @@ class BackupCreateCommand extends Command
         $this->addArgument(
             'name',
             InputArgument::OPTIONAL,
-            'Name of the backup, defaults to the current timestamp',
+            'Name of the backup, defaults to the current timestamp.',
             (new DateTime())->format('YmdHis')
         );
         $this->addOption(
             'pretty',
             'p',
             InputOption::VALUE_NEGATABLE,
-            'Activates pretty print of JSON',
+            'Activates pretty print of JSON.',
+            false
+        );
+        $this->addOption(
+            'ndjson',
+            null,
+            InputOption::VALUE_NEGATABLE,
+            'Saves multiple JSON documents in a few .ndjson files.',
             false
         );
     }
@@ -69,14 +76,20 @@ class BackupCreateCommand extends Command
 
         $this->backupName = $this->checkBackupName($input->getArgument('name'));
         $this->prettyPrint = $input->getOption('pretty');
+        $this->ndjson = $input->getOption('ndjson');
+        if ($this->prettyPrint && $this->ndjson) {
+            throw new \Exception('Pretty print and ndjson are mutually exclusive.');
+        }
+        $this->io->title('Backup Create');
         $this->createBackupFolders();
         $this->initCount();
 
         $this->backupNodes();
         $this->backupRelations();
+        $this->backupFiles();
         $this->writeSummary();
 
-        $this->io->success('Backup finished successfully');
+        $this->io->success('Backup finished successfully.');
 
         return Command::SUCCESS;
     }
@@ -101,8 +114,9 @@ class BackupCreateCommand extends Command
 
     private function backupNodes(): void
     {
-        $this->io->section(sprintf(
-            'Backing up %d nodes...',
+        $this->io->startSection('Step 1 of 3: Backing up Nodes');
+        $this->io->writeln(sprintf(
+            'Found %d nodes.',
             $this->nodeCount
         ));
         $progressBar = $this->io->createProgressBar($this->nodeCount);
@@ -143,16 +157,17 @@ class BackupCreateCommand extends Command
             $progressBar->display();
         }
         $progressBar->clear();
-        $this->io->writeln(sprintf(
-            'Successfully backed up %d nodes',
+        $this->io->stopSection(sprintf(
+            'Successfully backed up %d nodes.',
             $this->nodeCount
         ));
     }
 
     private function backupRelations(): void
     {
-        $this->io->section(sprintf(
-            'Backing up %d relations...',
+        $this->io->startSection('Step 2 of 3: Backing up Relations');
+        $this->io->writeln(sprintf(
+            'Found %d relations.',
             $this->relationCount
         ));
         $progressBar = $this->io->createProgressBar($this->relationCount);
@@ -193,9 +208,19 @@ class BackupCreateCommand extends Command
             $progressBar->display();
         }
         $progressBar->clear();
-        $this->io->writeln(sprintf(
-            'Successfully backed up %d relations',
+        $this->io->stopSection(sprintf(
+            'Successfully backed up %d relations.',
             $this->relationCount
+        ));
+    }
+
+    private function backupFiles(): void
+    {
+        $this->io->startSection('Step 3 of 3: Backing up Files');
+        $this->io->writeln('Currently not implemented.');
+        $this->io->stopSection(sprintf(
+            'Successfully backed up %d files.',
+            $this->fileCount
         ));
     }
 
