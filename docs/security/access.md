@@ -80,25 +80,25 @@ WHERE
     type(r) = "HAS_X_ACCESS"
     AND
     (
-      NOT EXISTS(r.onLabel)
+      r.onLabel IS NOT NULL
       OR
       r.onLabel IN labels(element)
     )
     AND
     (
-      NOT EXISTS(r.onParentLabel)
+      r.onParentLabel IS NOT NULL
       OR
-      r.onParentLabel IN labels(element) # todo
+      r.onParentLabel IN labels(element)
     )
     AND
     (
-      NOT EXISTS(r.onState)
+      r.onState IS NOT NULL
       OR
       (element)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: r.onState})
     )
     AND
     (
-      NOT EXISTS(r.onCreatedByUser)
+      r.onCreatedByUser IS NOT NULL
       OR
       (element)<-[:REATED_BY*]-(user)
     )
