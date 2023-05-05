@@ -61,6 +61,7 @@ class DatabaseDropCommand extends Command
 
                 return self::FAILURE;
             }
+            $this->io->newLine();
         }
 
         $this->deleteCypher();

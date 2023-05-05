@@ -29,7 +29,7 @@ class BackupLoadCommand extends Command
     private int $nodeCount = 0;
     private int $pageSize = 250;
 
-    private OutputStyle $io;
+    private EmberNexusStyle $io;
 
     public function __construct(
         private ElementManager $elementManager,
@@ -50,6 +50,8 @@ class BackupLoadCommand extends Command
     {
         $this->io = new EmberNexusStyle($input, $output);
 
+        $this->io->title("Backup Load");
+
         $this->checkDatabaseIsEmpty();
 
         if ($this->eventDispatcher instanceof DeactivatableTraceableEventDispatcher) {
@@ -62,12 +64,14 @@ class BackupLoadCommand extends Command
 
         $this->loadNodes();
         $this->loadRelations();
+        $this->loadFiles();
 
         return Command::SUCCESS;
     }
 
     private function loadNodes(): void
     {
+        $this->io->startSection("Step 1 of 3: Loading Nodes");
         $progressBar = $this->io->createProgressBar($this->nodeCount);
         $progressBar->display();
         $nodeFiles = $this->backupStorage->listContents($this->backupName.'/node/', true);
@@ -93,7 +97,7 @@ class BackupLoadCommand extends Command
         $progressBar->advance($pageCount);
         $progressBar->clear();
         $totalCount += $pageCount;
-        $this->io->writeln(sprintf(
+        $this->io->stopSection(sprintf(
             'Loaded %d nodes',
             $totalCount
         ));
@@ -101,6 +105,7 @@ class BackupLoadCommand extends Command
 
     private function loadRelations(): void
     {
+        $this->io->startSection("Step 2 of 3: Loading Relations");
         $progressBar = $this->io->createProgressBar($this->relationCount);
         $progressBar->display();
         $relationFiles = $this->backupStorage->listContents($this->backupName.'/relation/', true);
@@ -126,9 +131,19 @@ class BackupLoadCommand extends Command
         $progressBar->advance($pageCount);
         $progressBar->clear();
         $totalCount += $pageCount;
-        $this->io->writeln(sprintf(
+        $this->io->stopSection(sprintf(
             'Loaded %d relations',
             $totalCount
+        ));
+    }
+
+    private function loadFiles(): void
+    {
+        $this->io->startSection("Step 3 of 3: Loading Files");
+        $this->io->writeln("Currently not implemented.");
+        $this->io->stopSection(sprintf(
+            'Loaded %d relations',
+            0
         ));
     }
 
