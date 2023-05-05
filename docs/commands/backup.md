@@ -20,7 +20,6 @@ php bin/console backup:create
 
 ![Screenshot of a terminal running the backup:create command](../assets/command-backup-create.png)
 
-
 ## Backup Load
 
 Loads a backup. Database must be empty.
