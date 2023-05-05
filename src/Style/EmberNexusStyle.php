@@ -78,7 +78,7 @@ class EmberNexusStyle extends SymfonyStyle
         if (is_string($message)) {
             $message = [$message];
         }
-        $prefix = '> ';
+        $prefix = '▶ ';
         foreach ($message as $line) {
             $this->writeln($prefix.$line);
             $prefix = '  ';
@@ -142,5 +142,10 @@ class EmberNexusStyle extends SymfonyStyle
         $emberNexusOutputWrapper = new EmberNexusOutputWrapper($output);
 
         return (new Table($emberNexusOutputWrapper))->setStyle($style);
+    }
+
+    public function getLineLength(): int
+    {
+        return $this->lineLength;
     }
 }

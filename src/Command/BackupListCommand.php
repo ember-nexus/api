@@ -53,11 +53,15 @@ class BackupListCommand extends Command
                 continue;
             }
             $data = \Safe\json_decode($this->backupStorage->read($backupFolder->path().'/summary.json'), true);
+            $backupCreated = $data['backupCreated'] ?? '-';
+            if ($this->io->getLineLength() <= 100) {
+                $backupCreated = explode(' ', $backupCreated)[0];
+            }
             $rows[] = [
                 $backupFolder->path(),
                 $data['hostname'] ?? '-',
                 $data['version'] ?? '-',
-                $data['backupCreated'] ?? '-',
+                $backupCreated,
                 $data['nodeCount'] ?? '-',
                 $data['relationCount'] ?? '-',
                 $data['fileCount'] ?? '-',

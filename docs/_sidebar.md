@@ -30,4 +30,5 @@
   - [`GET /sessions/<uuid> -` Get Specific Session](/api-endpoints/get-specific-session)
   - [`DELETE /sessions/<uuid> -` Delete Session](/api-endpoints/delete-session)
 - Commands
+  - [Backup Commands](/commands/backup)
   - [Database Commands](/commands/database)
