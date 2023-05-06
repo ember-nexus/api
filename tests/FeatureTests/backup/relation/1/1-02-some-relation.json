@@ -1,0 +1,9 @@
+{
+  "type": "SOME_RELATION",
+  "id": "aac81a63-2d2e-40ab-b0bb-471f30a2b119",
+  "start": "c83935f7-bdd6-4eda-ad41-b85e22f5a68f",
+  "end": "6a8a8afb-2a07-4fa2-b467-0afa359a4b7e",
+  "data": {
+    "test": "1-02"
+  }
+}

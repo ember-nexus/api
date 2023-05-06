@@ -1,0 +1,9 @@
+{
+  "type": "IS_IN_GROUP",
+  "id": "1b9c5238-335c-4023-af50-673178e7734f",
+  "start": "32c3da1e-4fe2-49b9-bcbb-1cd5ff2b8890",
+  "end": "a42beeb2-4c8f-4c31-ada8-fc1f127beb77",
+  "data": {
+    "test": "99-01"
+  }
+}

@@ -67,46 +67,122 @@ To achieve this, you have to set the `onCreatedByUser`-property of the `HAS_X_AC
 
 ## Internal Cypher Query
 
-Internally the access permissions are checked with the following Cypher query:
+Internally the access permissions are checked with the following Cypher query for nodes:
 
 ```cypher
 MATCH (user:User {id: "<uuid>"})
 MATCH (element {id: "<uuid>"})
-MATCH (user)-[:IS_IN_GROUP*0..]->()-[r:OWNS|HAS_X_ACCESS]->(element)
+MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_X_ACCESS*1..]->(element)
 WHERE
-  type(r) = "OWNS"
-  OR
-  (
-    type(r) = "HAS_X_ACCESS"
-    AND
+  ALL(relation in relations WHERE
+    type(relation) = "OWNS"
+    OR
     (
-      r.onLabel IS NOT NULL
-      OR
-      r.onLabel IN labels(element)
-    )
-    AND
-    (
-      r.onParentLabel IS NOT NULL
-      OR
-      r.onParentLabel IN labels(element)
-    )
-    AND
-    (
-      r.onState IS NOT NULL
-      OR
-      (element)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: r.onState})
-    )
-    AND
-    (
-      r.onCreatedByUser IS NOT NULL
-      OR
-      (element)<-[:REATED_BY*]-(user)
+      type(relation) = "HAS_X_ACCESS"
+      AND
+      (
+        relation.onLabel IS NULL
+        OR
+        relation.onLabel IN labels(element)
+      )
+      AND
+      (
+        relation.onParentLabel IS NULL
+        OR
+        relation.onParentLabel IN labels(element)
+      )
+      AND
+      (
+        relation.onState IS NULL
+        OR
+        (element)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})
+      )
+      AND
+      (
+        relation.onCreatedByUser IS NULL
+        OR
+        (element)<-[:CREATED_BY*]-(user)
+      )
     )
   )
 RETURN user, element;
 ```
 
 `HAS_X_ACCESS` is replaced by the requested action, e.g. `HAS_READ_ACCESS`.
+
+And the following query is used for relationships:
+
+```cypher
+MATCH (user:User {id: "<uuid>"})
+MATCH (start)-[element {id: "<uuid>"}]->(end)
+MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_X_ACCESS*1..]->(start)
+MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_X_ACCESS*1..]->(end)
+WHERE
+  ALL(startRelation in startRelations WHERE
+    type(startRelation) = "OWNS"
+    OR
+    (
+      type(startRelation) = "HAS_X_ACCESS"
+      AND
+      (
+        startRelation.onLabel IS NULL
+        OR
+        startRelation.onLabel IN labels(start)
+      )
+      AND
+      (
+        startRelation.onParentLabel IS NULL
+        OR
+        startRelation.onParentLabel IN labels(start)
+      )
+      AND
+      (
+        startRelation.onState IS NULL
+        OR
+        (start)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: startRelation.onState})
+      )
+      AND
+      (
+        startRelation.onCreatedByUser IS NULL
+        OR
+        (start)<-[:CREATED_BY*]-(user)
+      )
+    )
+  )
+  AND
+  ALL(endRelation in endRelations WHERE
+    type(endRelation) = "OWNS"
+    OR
+    (
+      type(endRelation) = "HAS_X_ACCESS"
+      AND
+      (
+        endRelation.onLabel IS NULL
+        OR
+        endRelation.onLabel IN labels(end)
+      )
+      AND
+      (
+        endRelation.onParentLabel IS NULL
+        OR
+        endRelation.onParentLabel IN labels(end)
+      )
+      AND
+      (
+        endRelation.onState IS NULL
+        OR
+        (end)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: endRelation.onState})
+      )
+      AND
+      (
+        endRelation.onCreatedByUser IS NULL
+        OR
+        (end)<-[:CREATED_BY*]-(user)
+      )
+    )
+  )
+RETURN user, element, start, end;
+```
 
 <script>
 renderGraph(document.getElementById('graph-container-1'), {

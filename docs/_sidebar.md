@@ -11,6 +11,7 @@
   - [Session and Rate Limiting](/security/session-and-rate-limiting)
   - [Predefined Data Types](/security/predefined-data-types)
   - [Passwords, Tokens and Hashing](/security/passwords-tokens-and-hashing)
+  - [Security Tests](/security/security-tests)
 - API Endpoints
   - Generic Endpoints
   - [`GET / -` Get Index](/api-endpoints/get-index)

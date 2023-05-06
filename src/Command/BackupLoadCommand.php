@@ -13,7 +13,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
@@ -50,7 +49,7 @@ class BackupLoadCommand extends Command
     {
         $this->io = new EmberNexusStyle($input, $output);
 
-        $this->io->title("Backup Load");
+        $this->io->title('Backup Load');
 
         $this->checkDatabaseIsEmpty();
 
@@ -71,7 +70,7 @@ class BackupLoadCommand extends Command
 
     private function loadNodes(): void
     {
-        $this->io->startSection("Step 1 of 3: Loading Nodes");
+        $this->io->startSection('Step 1 of 3: Loading Nodes');
         $progressBar = $this->io->createProgressBar($this->nodeCount);
         $progressBar->display();
         $nodeFiles = $this->backupStorage->listContents($this->backupName.'/node/', true);
@@ -105,7 +104,7 @@ class BackupLoadCommand extends Command
 
     private function loadRelations(): void
     {
-        $this->io->startSection("Step 2 of 3: Loading Relations");
+        $this->io->startSection('Step 2 of 3: Loading Relations');
         $progressBar = $this->io->createProgressBar($this->relationCount);
         $progressBar->display();
         $relationFiles = $this->backupStorage->listContents($this->backupName.'/relation/', true);
@@ -139,8 +138,8 @@ class BackupLoadCommand extends Command
 
     private function loadFiles(): void
     {
-        $this->io->startSection("Step 3 of 3: Loading Files");
-        $this->io->writeln("Currently not implemented.");
+        $this->io->startSection('Step 3 of 3: Loading Files');
+        $this->io->writeln('Currently not implemented.');
         $this->io->stopSection(sprintf(
             'Loaded %d relations',
             0
