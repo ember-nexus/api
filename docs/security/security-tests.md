@@ -172,6 +172,12 @@ In the following example, the user has owning access to the data nodes 1 and 2, 
 
 <div id="test-99-02" class="graph-container" style="height:400px"></div>
 
+### Test 99-03: Users which are part of a group, should have read access to the group itself
+
+With the current security system, users are granted the same rights as the group, but not to the group itself.
+
+Refactoring / edge case prevention work is required.
+
 <script>
 renderGraph(document.getElementById('test-1-01'), {
   nodes: [

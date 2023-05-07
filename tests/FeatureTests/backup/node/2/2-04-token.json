@@ -1,0 +1,10 @@
+{
+  "type": "Token",
+  "id": "cc020040-2e3a-4ff3-bea2-d121b7b91c11",
+  "data": {
+    "token": "secret-token:JbPPgmVodPsBPGOpbS2NdD",
+    "hash": "eb3150d76f3291ba20015ec8b1d7d4a117a8a2a96fc83ae58e7f6eacfc922d2c",
+    "test": "2-04",
+    "note": "Token contains token only due to testing purposes."
+  }
+}
