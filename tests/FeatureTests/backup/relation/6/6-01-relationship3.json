@@ -1,0 +1,9 @@
+{
+  "type": "RELATIONSHIP",
+  "id": "b6fe1d8c-4e19-4359-8f51-dbfed781c513",
+  "start": "5fd5f92f-a144-4c89-ad16-f3562fb0f18c",
+  "end": "4fc780e0-ad5f-431a-916e-52e24b38874a",
+  "data": {
+    "test": "6-01"
+  }
+}

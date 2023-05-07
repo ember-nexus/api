@@ -1,0 +1,9 @@
+{
+  "type": "HAS_READ_ACCESS",
+  "id": "3f52e3f5-018c-418a-8a2a-8bd09356c4f7",
+  "start": "60d78f99-4ba5-4a05-8902-4145fdb88892",
+  "end": "135a2d64-8c7a-41d5-9f4b-75fef057846a",
+  "data": {
+    "test": "6-01"
+  }
+}
