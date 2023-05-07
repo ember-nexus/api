@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rework several commands.
 - Token management now uses Redis.
 - Remove Twig from production requirements, as it is not used.
+- Add security test cases, part of feature tests.
 
 ## 0.0.4 - 2023-04-22
 

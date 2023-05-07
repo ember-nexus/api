@@ -181,8 +181,8 @@ class CollectionService
 
         return new CollectionResponse(
             [
-                '@type' => '_PartialCollection',
-                '@id' => $this->getPageLink(),
+                'type' => '_PartialCollection',
+                'id' => $this->getPageLink(),
                 'totalNodes' => $totalNodes,
                 'links' => [
                     'first' => $this->getPageLink(1),
