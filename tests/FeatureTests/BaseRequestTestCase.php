@@ -62,6 +62,22 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertIsArray($body['data']);
     }
 
+    public function assertIsRelationResponse(ResponseInterface $response, string $type): void
+    {
+        $this->assertSame(200, $response->getStatusCode());
+
+        $this->assertSame('application/json', $response->getHeader('content-type')[0]);
+
+        $body = \Safe\json_decode((string) $response->getBody(), true);
+
+        $this->assertSame($type, $body['type']);
+        $this->assertArrayHasKey('id', $body);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('start', $body);
+        $this->assertArrayHasKey('end', $body);
+        $this->assertIsArray($body['data']);
+    }
+
     public function assertIsProblemResponse(ResponseInterface $response, int $status): void
     {
         $this->assertSame($status, $response->getStatusCode());
