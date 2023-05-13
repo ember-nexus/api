@@ -87,7 +87,7 @@ RUN set -eux; \
 	\
 	apk del --no-network .fetch-deps
 
-COPY ./php-embed/docker-php-source /usr/local/bin/
+COPY ./docker/php-embed/docker-php-source /usr/local/bin/
 
 RUN set -eux; \
 	apk add --no-cache --virtual .build-deps \
@@ -203,7 +203,7 @@ RUN set -eux; \
 # smoke test
 	php --version
 
-COPY ./php-embed/docker-php-ext-* /usr/local/bin/
+COPY ./docker/php-embed/docker-php-ext-* /usr/local/bin/
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium \
@@ -275,8 +275,8 @@ COPY --from=nginx_unit_builder /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=nginx_unit_builder /usr/sbin/unitd-debug /usr/sbin/unitd-debug
 COPY --from=nginx_unit_builder /usr/lib/unit/ /usr/lib/unit/
 COPY --from=nginx_unit_builder /requirements.apt /requirements.apt
-COPY ./nginx-unit/docker-entrypoint.sh /usr/local/bin/
-COPY ./nginx-unit/unit.json /docker-entrypoint.d/unit.json
+COPY ./docker/nginx-unit/docker-entrypoint.sh /usr/local/bin/
+COPY ./docker/nginx-unit/unit.json /docker-entrypoint.d/unit.json
 #RUN ldconfig # this command seems to not work on alpine & image works without it?
 RUN set -x \
     && chmod +x /usr/local/bin/docker-entrypoint.sh \
