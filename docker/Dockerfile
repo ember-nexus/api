@@ -2,10 +2,10 @@
 # Background: If the en user uses the dev mode, it is epected that he knows what he does.
 ARG VERSION=dev
 
-FROM alpine:3.17 as php_embed
-LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.2/alpine3.17/cli" \
-    org.opencontainers.image.title="Adapted php:8.2-cli-alpine3.17" \
-    org.opencontainers.image.description="Based on php:8.2-cli-alpine3.17, without sql, with embed."
+FROM alpine:3.18 as php_embed
+LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.2/alpine3.18/cli" \
+    org.opencontainers.image.title="Adapted php:8.2-cli-alpine3.18" \
+    org.opencontainers.image.description="Based on php:8.2-cli-alpine3.18, without sql, with embed."
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)

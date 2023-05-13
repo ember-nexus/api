@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove Twig from production requirements, as it is not used.
 - Add security test cases, part of feature tests.
 - Upgrade to PHP 8.2.6
+- Upgrade to Alpine 3.18
 
 ## 0.0.4 - 2023-04-22
 
