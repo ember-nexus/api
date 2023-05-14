@@ -17,7 +17,7 @@ class AccessChecker
 
     public function hasAccessToElement(UuidInterface $userUuid, UuidInterface $elementUuid, AccessType $accessType): bool
     {
-        if (ElementType::NODE === $this->checkElementType($elementUuid)) {
+        if (ElementType::NODE === $this->getElementType($elementUuid)) {
             return $this->hasAccessToNode($userUuid, $elementUuid, $accessType);
         } else {
             return $this->hasAccessToRelation($userUuid, $elementUuid, $accessType);
@@ -183,7 +183,7 @@ class AccessChecker
         return true;
     }
 
-    public function checkElementType(UuidInterface $elementUuid): ?ElementType
+    public function getElementType(UuidInterface $elementUuid): ?ElementType
     {
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(

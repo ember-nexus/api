@@ -10,12 +10,83 @@ abstract class BaseRequestTestCase extends TestCase
 {
     public function runGetRequest(string $uri, string $token): ResponseInterface
     {
+        return $this->runRequest('GET', $uri, $token);
+    }
+
+    public function runPostRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('POST', $uri, $token);
+    }
+
+    public function runPutRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('PUT', $uri, $token);
+    }
+
+    public function runPatchRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('PATCH', $uri, $token);
+    }
+
+    public function runDeleteRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('DELETE', $uri, $token);
+    }
+
+    public function runOptionsRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('OPTIONS', $uri, $token);
+    }
+
+    public function runHeadRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('HEAD', $uri, $token);
+    }
+
+    public function runCopyRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('COPY', $uri, $token);
+    }
+
+    public function runLockRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('LOCK', $uri, $token);
+    }
+
+    public function runMkcolRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('MKCOL', $uri, $token);
+    }
+
+    public function runMoveRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('MOVE', $uri, $token);
+    }
+
+    public function runPropfindRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('PROPFIND', $uri, $token);
+    }
+
+    public function runProppatchRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('PROPPATCH', $uri, $token);
+    }
+
+    public function runUnlockRequest(string $uri, string $token): ResponseInterface
+    {
+        return $this->runRequest('UNLOCK', $uri, $token);
+    }
+
+    public function runRequest(string $method, string $uri, string $token): ResponseInterface
+    {
         $client = new Client([
             'base_uri' => $_ENV['API_DOMAIN'],
             'http_errors' => false,
         ]);
 
-        return $client->get(
+        return $client->request(
+            $method,
             $uri,
             [
                 'headers' => [
