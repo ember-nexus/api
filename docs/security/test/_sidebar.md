@@ -1,0 +1,33 @@
+- [Back to Index](/)
+- [General](/security/test/general)
+- Security Tests
+  - `01` Basic Negative Tests
+    - [`01-01` No Connection](/security/test/01-basic-negative-tests/01-01-no-connection)
+    - [`01-02` No Relevant Connection](/security/test/01-basic-negative-tests/01-02-no-relevant-connection)
+    - [`01-03` Missing access to either the start or end node of relation](/security/test/01-basic-negative-tests/01-03-missing-access-to-either-the-start-node-or-end-node-of-relation)
+    - [`01-04` OWNS-relations are directional](/security/test/01-basic-negative-tests/01-04-owns-relations-are-directional)
+  - `02` Basic Positive Tests
+    - [`02-01` Immediate Node Ownership](/security/test/02-basic-positive-tests/02-01-immediate-node-ownership)
+    - [`02-02` Immediate Relation Ownership](/security/test/02-basic-positive-tests/02-02-immediate-relation-ownership)
+    - [`02-03` Path Node Ownership](/security/test/02-basic-positive-tests/02-03-path-node-ownership)
+    - [`02-04` Path Relation Ownership](/security/test/02-basic-positive-tests/02-04-path-relation-ownership)
+  - `03` Single Group Positive Tests
+    - [`03-01` Immediate Node Ownership](/security/test/03-single-group-positive-tests/03-01-immediate-node-ownership)
+    - [`03-02` Immediate Relation Ownership](/security/test/03-single-group-positive-tests/03-02-immediate-relation-ownership)
+    - [`03-03` Path Node Ownership](/security/test/03-single-group-positive-tests/03-03-path-node-ownership)
+    - [`03-04` Path Relation Ownership](/security/test/03-single-group-positive-tests/03-04-path-relation-ownership)
+  - `04` Multiple Group Positive Tests
+    - [`04-01` Immediate Node Ownership](/security/test/04-multiple-group-positive-tests/04-01-immediate-node-ownership)
+    - [`04-02` Immediate Relation Ownership](/security/test/04-multiple-group-positive-tests/04-02-immediate-relation-ownership)
+    - [`04-03` Path Node Ownership](/security/test/04-multiple-group-positive-tests/04-03-path-node-ownership)
+    - [`04-04` Path Relation Ownership](/security/test/04-multiple-group-positive-tests/04-04-path-relation-ownersip)
+  - `05` Mixed Group Ownership Tests
+    - [`05-01` Mixed Node Ownership](/security/test/05-mixed-group-ownership-tests/05-01-mixed-node-ownership)
+    - [`05-02` Mixed Relation Ownership](/security/test/05-mixed-group-ownership-tests/05-02-mixed-relation-ownership)
+  - `06` Limited Access Tests
+    - [`06-01` Limited Read Access](/security/test/06-limited-access-tests/06-01-limited-read-access)
+  - `99` Edge Cases
+    - [`99-01` IS_IN_GROUP after OWNS has no effect](/security/test/99-edge-cases/99-01-is-in-group-after-owns-has-no-effect)
+    - [`99-02` Owning groups give direct access but not to related groups](/security/test/99-edge-cases/99-02-owning-groups-give-direct-access-but-not-to-related-groups)
+    - [`99-03` Users which are part of a group, should have read access to the group itself](/security/test/99-edge-cases/99-03-users-which-are-part-of-group-should-have-read-access-to-the-group-itself)
+    - [`99-04` Users should have access to direct ownership relations](/security/test/99-edge-cases/99-04-users-should-have-access-to-direct-ownership-relations)

@@ -20,6 +20,18 @@ h6 code {
   background: transparent !important;
 }
 
+td code {
+  color: inherit !important;
+  background: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+table {
+  display: table !important;
+  width: 100%;
+}
+
 .app-sub-sidebar li::before {
   display: none;
 }
@@ -40,4 +52,5 @@ h6 code {
   width: 100%;
   height: 500px;
   background-color: #f8f8f8;
+  margin-bottom: 1rem;
 }

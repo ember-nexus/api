@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade to PHP 8.2.6
 - Upgrade to Alpine 3.18
 - Remove templates from Dockerfile
+- Refactor security tests.
 
 ## 0.0.4 - 2023-04-22
 
