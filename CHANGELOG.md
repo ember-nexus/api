@@ -6,10 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Refactor security tests.
 
 ## 0.0.5 - 2023-05-13
 ### Added
-- Database connection strings are now configurable via environment variables
+- Database connection strings are now configurable via environment variables.
 - Redis is now used.
 - Add `user:create` command.
 - Add `user:session:create` command.
@@ -18,10 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Token management now uses Redis.
 - Remove Twig from production requirements, as it is not used.
 - Add security test cases, part of feature tests.
-- Upgrade to PHP 8.2.6
-- Upgrade to Alpine 3.18
-- Remove templates from Dockerfile
-- Refactor security tests.
+- Upgrade to PHP 8.2.6.
+- Upgrade to Alpine 3.18.
+- Remove templates from Dockerfile.
 
 ## 0.0.4 - 2023-04-22
 
