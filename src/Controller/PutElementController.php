@@ -27,7 +27,7 @@ class PutElementController extends AbstractController
         '/{uuid}',
         name: 'putElement',
         requirements: [
-            'uuid' => Regex::UUID_V4,
+            'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['PUT']
     )]

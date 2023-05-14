@@ -17,7 +17,7 @@ class GetUuidFileController extends AbstractController
         '/{uuid}/file',
         name: 'getUuidFile',
         requirements: [
-            'uuid' => Regex::UUID_V4,
+            'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['GET']
     )]

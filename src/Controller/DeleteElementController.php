@@ -28,7 +28,7 @@ class DeleteElementController extends AbstractController
         '/{uuid}',
         name: 'deleteElement',
         requirements: [
-            'uuid' => Regex::UUID_V4,
+            'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['DELETE']
     )]

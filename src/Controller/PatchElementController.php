@@ -27,7 +27,7 @@ class PatchElementController extends AbstractController
         '/{uuid}',
         name: 'patchElement',
         requirements: [
-            'uuid' => Regex::UUID_V4,
+            'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['PATCH']
     )]

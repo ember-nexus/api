@@ -30,7 +30,7 @@ class GetRelatedController extends AbstractController
         '/{uuid}/related',
         name: 'getRelated',
         requirements: [
-            'uuid' => Regex::UUID_V4,
+            'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['GET']
     )]

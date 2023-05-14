@@ -30,7 +30,7 @@ class GetChildrenController extends AbstractController
         '/{uuid}/children',
         name: 'getChildren',
         requirements: [
-            'uuid' => Regex::UUID_V4,
+            'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['GET']
     )]
