@@ -4,9 +4,6 @@ namespace App\tests\FeatureTests\Security\Scenario01BasicNegativeTests;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-/**
- * @group test
- */
 class _01_01_NoConnectionTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:451NiderFjTRW7TpoLoSWA';
