@@ -27,7 +27,6 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010102(): void
     {
-        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s', self::USER), self::TOKEN);
         $this->assertIsNodeResponse($response, 'User');
     }
@@ -46,7 +45,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010202(): void
     {
-        $this->markTestIncomplete();
+        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/parents', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -56,7 +55,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010203(): void
     {
-        $this->markTestIncomplete();
+        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/children', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -66,7 +65,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010204(): void
     {
-        $this->markTestIncomplete();
+        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/related', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -76,8 +75,16 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010205(): void
     {
-        $this->markTestIncomplete();
-        $response = $this->runPostRequest(sprintf('/%s', self::DATA), self::TOKEN);
+        $response = $this->runPostRequest(
+            sprintf('/%s', self::DATA),
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => 'I shall not exist.',
+                ],
+            ]
+        );
         $this->assertIsProblemResponse($response, 404);
     }
 
@@ -122,15 +129,28 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-21
+     *
+     * @todo refactor in v0.2.0 with actual body content required
      */
     public function test1010221(): void
     {
-        $response = $this->runPostRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
+        $response = $this->runPostRequest(
+            sprintf('/%s/file', self::DATA),
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => 'I shall not exist.',
+                ],
+            ]
+        );
         $this->assertIsProblemResponse($response, 404);
     }
 
     /**
      * @description test 1-01-02-22
+     *
+     * @todo refactor in v0.2.0 with actual body content required
      */
     public function test1010222(): void
     {
@@ -140,6 +160,8 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-23
+     *
+     * @todo refactor in v0.2.0 with actual body content required
      */
     public function test1010223(): void
     {
@@ -158,6 +180,8 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-30
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1010230(): void
     {
@@ -167,6 +191,8 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-31
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1010231(): void
     {
@@ -176,6 +202,8 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-32
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1010232(): void
     {
@@ -185,6 +213,8 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-33
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1010233(): void
     {
@@ -194,6 +224,8 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-34
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1010234(): void
     {
@@ -203,6 +235,8 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-35
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1010235(): void
     {
@@ -212,6 +246,8 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-01-02-36
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1010236(): void
     {

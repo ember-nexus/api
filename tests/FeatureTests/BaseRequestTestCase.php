@@ -13,9 +13,9 @@ abstract class BaseRequestTestCase extends TestCase
         return $this->runRequest('GET', $uri, $token);
     }
 
-    public function runPostRequest(string $uri, string $token): ResponseInterface
+    public function runPostRequest(string $uri, string $token, array $data): ResponseInterface
     {
-        return $this->runRequest('POST', $uri, $token);
+        return $this->runRequest('POST', $uri, $token, $data);
     }
 
     public function runPutRequest(string $uri, string $token): ResponseInterface
@@ -78,24 +78,31 @@ abstract class BaseRequestTestCase extends TestCase
         return $this->runRequest('UNLOCK', $uri, $token);
     }
 
-    public function runRequest(string $method, string $uri, string $token): ResponseInterface
+    public function runRequest(string $method, string $uri, string $token, ?array $data = null): ResponseInterface
     {
         $client = new Client([
             'base_uri' => $_ENV['API_DOMAIN'],
             'http_errors' => false,
         ]);
 
+        $options = [
+            'headers' => [
+                'Authorization' => sprintf(
+                    'Bearer %s',
+                    $token
+                ),
+            ],
+        ];
+
+        if ($data) {
+            $options['headers']['Content-Type'] = 'application/json';
+            $options['body'] = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
         return $client->request(
             $method,
             $uri,
-            [
-                'headers' => [
-                    'Authorization' => sprintf(
-                        'Bearer %s',
-                        $token
-                    ),
-                ],
-            ]
+            $options
         );
     }
 

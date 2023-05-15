@@ -29,8 +29,10 @@ class AccessChecker
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (element {id: \$elementId})\n".
-            'MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*1..]->(element)\n".
+            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*1..]->(element)\n".
             "WHERE\n".
+            "  user.id = element.id\n".
+            "  OR\n".
             "  ALL(relation in relations WHERE\n".
             "    type(relation) = \"OWNS\"\n".
             "    OR\n".
@@ -62,13 +64,21 @@ class AccessChecker
             "      )\n".
             "    )\n".
             "  )\n".
-            'RETURN user, element;',
+            "WITH user, element, relations\n".
+            "WHERE\n".
+            "  user.id = element.id\n".
+            "  OR\n".
+            "  relations IS NOT NULL\n".
+            'RETURN count(*) as count;',
             [
                 'userId' => $userUuid->toString(),
                 'elementId' => $elementUuid->toString(),
             ]
         ));
-        if (0 === $res->count()) {
+        if (1 !== $res->count()) {
+            return false;
+        }
+        if (0 === $res->first()->get('count')) {
             return false;
         }
 
@@ -80,8 +90,8 @@ class AccessChecker
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (start)-[element {id: \$elementId}]->(end)\n".
-            "OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_READ_ACCESS*1..]->(start)\n".
-            "OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_READ_ACCESS*1..]->(end)\n".
+            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_'.$accessType->value."_ACCESS*1..]->(start)\n".
+            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_'.$accessType->value."_ACCESS*1..]->(end)\n".
             "WHERE\n".
             "  (\n".
             "    user.id = start.id\n".
@@ -167,7 +177,7 @@ class AccessChecker
             "    OR\n".
             "    endRelations IS NOT NULL\n".
             "  )\n".
-            'RETURN count(*) as count',
+            'RETURN count(*) as count;',
             [
                 'userId' => $userUuid->toString(),
                 'elementId' => $elementUuid->toString(),
