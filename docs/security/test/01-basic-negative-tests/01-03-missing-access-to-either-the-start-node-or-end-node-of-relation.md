@@ -10,8 +10,8 @@ second data node.
 
 | Test         | Token  | Action                          | Options | Result | Idempotent | State of Test  |
 |:-------------|:-------|:--------------------------------|:--------|:-------|:-----------|:---------------|
-| `1-02-01-01` | `User` | `🔵 GET /`                      | -       | ✔️ 200 | yes        | ✔️ implemented |
-| `1-02-01-02` | `User` | `🔵 GET /<User>`                | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-03-01-01` | `User` | `🔵 GET /`                      | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-03-01-02` | `User` | `🔵 GET /<User>`                | -       | ✔️ 200 | yes        | ✔️ implemented |
 | `1-03-02-01` | `User` | `🔵 GET /<OWNS>`                | -       | ✔️ 200 | yes        | ✔️ implemented |
 | `1-03-03-01` | `User` | `🔵 GET /<Data 1>`              | -       | ✔️ 200 | yes        | ✔️ implemented |
 | `1-03-04-01` | `User` | `🔵 GET /<RELATION 1>`          | -       | ❌ 404  | yes        | ✔️ implemented |

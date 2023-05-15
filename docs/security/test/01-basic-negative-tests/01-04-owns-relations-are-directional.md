@@ -9,6 +9,25 @@ while the relationship is ignored for owners of data 2 (user 2):
 
 <div id="graph" class="graph-container" style="height:400px"></div>
 
+| Test         | Token    | Action             | Options | Result | Idempotent | State of Test  |
+|:-------------|:---------|:-------------------|:--------|:-------|:-----------|:---------------|
+| `1-04-01-01` | `User 1` | `🔵 GET /`         | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-01-02` | `User 1` | `🔵 GET /<User 1>` | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-02-01` | `User 1` | `🔵 GET /<OWNS 1>` | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-03-01` | `User 1` | `🔵 GET /<Data 1>` | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-04-01` | `User 1` | `🔵 GET /<OWNS 2>` | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-05-01` | `User 1` | `🔵 GET /<Data 2>` | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-06-01` | `User 1` | `🔵 GET /<OWNS 3>` | -       | ❌ 404  | yes        | ✔️ implemented |
+| `1-04-07-01` | `User 1` | `🔵 GET /<User 2>` | -       | ❌ 404  | yes        | ✔️ implemented |
+| `1-04-01-03` | `User 2` | `🔵 GET /`         | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-01-04` | `User 2` | `🔵 GET /<User 1>` | -       | ❌ 404 | yes        | ✔️ implemented |
+| `1-04-02-02` | `User 2` | `🔵 GET /<OWNS 1>` | -       | ❌ 404 | yes        | ✔️ implemented |
+| `1-04-03-02` | `User 2` | `🔵 GET /<Data 1>` | -       | ❌ 404 | yes        | ✔️ implemented |
+| `1-04-04-02` | `User 2` | `🔵 GET /<OWNS 2>` | -       | ❌ 404 | yes        | ✔️ implemented |
+| `1-04-05-02` | `User 2` | `🔵 GET /<Data 2>` | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-06-02` | `User 2` | `🔵 GET /<OWNS 3>` | -       | ✔️ 200 | yes        | ✔️ implemented |
+| `1-04-07-02` | `User 2` | `🔵 GET /<User 2>` | -       | ✔️ 200  | yes        | ✔️ implemented |
+
 <script>
 renderGraph(document.getElementById('graph'), {
   nodes: [
@@ -18,9 +37,9 @@ renderGraph(document.getElementById('graph'), {
     { id: 'data2', ...dataNode, label: 'Data 2' },
   ],
   edges: [
-    { source: 'user1', target: 'data1', label: 'OWNS' },
-    { source: 'data1', target: 'data2', label: 'OWNS' },
-    { source: 'user2', target: 'data2', label: 'OWNS' },
+    { source: 'user1', target: 'data1', label: 'OWNS 1' },
+    { source: 'data1', target: 'data2', label: 'OWNS 2' },
+    { source: 'user2', target: 'data2', label: 'OWNS 3' },
   ]
 });
 </script>
