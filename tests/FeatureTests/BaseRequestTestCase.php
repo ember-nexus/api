@@ -106,7 +106,7 @@ abstract class BaseRequestTestCase extends TestCase
         );
     }
 
-    public function assertIsCollectionResponse(ResponseInterface $response): void
+    public function assertIsCollectionResponse(ResponseInterface $response, ?int $countNodes = null, ?int $countRelations = null): void
     {
         $this->assertSame(200, $response->getStatusCode());
 
@@ -124,6 +124,12 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertArrayHasKey('last', $body['links']);
         $this->assertIsArray($body['nodes']);
         $this->assertIsArray($body['relations']);
+        if ($countNodes) {
+            $this->assertCount($countNodes, $body['nodes']);
+        }
+        if ($countRelations) {
+            $this->assertCount($countRelations, $body['relations']);
+        }
     }
 
     public function assertIsNodeResponse(ResponseInterface $response, string $type): void
@@ -169,5 +175,53 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertArrayHasKey('detail', $body);
         $this->assertArrayHasKey('type', $body);
         $this->assertSame($status, $body['status']);
+    }
+
+    public function assertIsCreatedResponse(ResponseInterface $response): void
+    {
+        $this->assertSame(201, $response->getStatusCode());
+        $this->assertEmpty((string) $response->getBody());
+        $this->assertIsString($response->getHeader('Location')[0]);
+    }
+
+    public function assertHasSingleOwner(string $token, string $childUuid, string $parentUuid): void
+    {
+        $parentsResponse = $this->runGetRequest(
+            sprintf('/%s/parents', $childUuid),
+            $token
+        );
+        $this->assertIsCollectionResponse($parentsResponse);
+        $parentsResponseData = json_decode((string) $parentsResponse->getBody(), true);
+        $this->assertSame(1, $parentsResponseData['totalNodes']);
+        $this->assertSame($parentUuid, $parentsResponseData['nodes'][0]['id']);
+        $this->assertSame('OWNS', $parentsResponseData['relations'][0]['type']);
+    }
+
+    public function assertIsCreatedBy(string $token, string $nodeUuid, string $userUuid): void
+    {
+        $relatedResponse = $this->runGetRequest(
+            sprintf('/%s/related', $nodeUuid),
+            $token
+        );
+        $this->assertIsCollectionResponse($relatedResponse);
+        $relatedResponseData = json_decode((string) $relatedResponse->getBody(), true);
+        foreach ($relatedResponseData['relations'] as $relation) {
+            if ('CREATED' === $relation['type']) {
+                $this->assertSame($userUuid, $relation['start']);
+
+                return;
+            }
+        }
+        $this->fail(sprintf(
+            'Unable to find CREATED relation for node with UUID %s.',
+            $nodeUuid
+        ));
+    }
+
+    public function getUuidFromLocation(ResponseInterface $response): string
+    {
+        $location = $response->getHeader('Location')[0];
+
+        return array_reverse(explode('/', $location))[0];
     }
 }

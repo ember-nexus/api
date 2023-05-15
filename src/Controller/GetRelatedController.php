@@ -5,15 +5,16 @@ namespace App\Controller;
 use App\Exception\ClientNotFoundException;
 use App\Exception\ClientUnauthorizedException;
 use App\Helper\Regex;
+use App\Security\AccessChecker;
 use App\Security\AuthProvider;
-use App\Security\PermissionChecker;
 use App\Service\CollectionService;
+use App\Type\AccessType;
+use App\Type\ElementType;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\String\UnicodeString;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class GetRelatedController extends AbstractController
@@ -22,7 +23,7 @@ class GetRelatedController extends AbstractController
         private CypherEntityManager $cypherEntityManager,
         private CollectionService $collectionService,
         private AuthProvider $authProvider,
-        private PermissionChecker $permissionChecker
+        private AccessChecker $accessChecker
     ) {
     }
 
@@ -36,58 +37,75 @@ class GetRelatedController extends AbstractController
     )]
     public function getRelated(string $uuid): Response
     {
+        $centerUuid = UuidV4::fromString($uuid);
         $userUuid = $this->authProvider->getUserUuid();
-        if (null === $userUuid) {
+
+        if (!$userUuid) {
             throw new ClientUnauthorizedException();
         }
-        $centerUuid = UuidV4::fromString($uuid);
-        $hasUserReadPermissionToCenterElement = $this->permissionChecker->checkPermissionToNode(
-            $userUuid,
-            $centerUuid,
-            'READ'
-        );
-        if (!$hasUserReadPermissionToCenterElement) {
+
+        $type = $this->accessChecker->getElementType($centerUuid);
+        if (ElementType::RELATION === $type) {
+            // relations can not be center nodes
             throw new ClientNotFoundException();
         }
+
+        if (!$this->accessChecker->hasAccessToElement($userUuid, $centerUuid, AccessType::READ)) {
+            throw new ClientNotFoundException();
+        }
+
         $cypherClient = $this->cypherEntityManager->getClient();
+
         $res = $cypherClient->runStatement(Statement::create(
+            "MATCH (user:User {id: \$userId})\n".
             "MATCH (center {id: \$centerId})\n".
-            "MATCH (center)-[]-(outer)\n".
-            'RETURN count(outer) AS count, labels(outer) AS labels',
-            [
-                'centerId' => $centerUuid->toString(),
-            ]
-        ));
-        if (0 === $res->count()) {
-            return $this->collectionService->buildEmptyCollection();
-        }
-        $labels = $res->first()->get('labels');
-        $totalCount = $res->first()->get('count');
-
-        $permissionQueries = [];
-        foreach ($labels as $label) {
-            $permissionQueries[] = sprintf(
-                '(user)-[:PART_OF_GROUP*0..]->()-[:OWNS|READ_PERMISSION|READ_PERMISSION_ON_%s*]->(outer)',
-                (new UnicodeString($label))
-                    ->snake()
-                    ->upper()
-                    ->toString()
-            );
-        }
-        $permissionQueries = 'WHERE '.implode("\nOR ", $permissionQueries);
-
-        $res = $cypherClient->runStatement(Statement::create(
-            sprintf(
-                "MATCH (user {id: \$userId})\n".
-                "MATCH (center {id: \$centerId})\n".
-                "MATCH (center)-[r]-(outer)\n".
-                "%s\n".
-                "RETURN outer.id, collect(r.id), count(outer) AS totalCount\n".
-                "ORDER BY outer.id\n".
-                "SKIP \$skip\n".
-                'LIMIT $limit',
-                $permissionQueries
-            ),
+            "MATCH (center)-[r]-(outer)\n".
+            "OPTIONAL MATCH path=(user)-[:IS_IN_GROUP*0..]->()-[:OWNS|HAS_READ_ACCESS*0..]->(outer)\n".
+            "WHERE\n".
+            "  user.id = outer.id\n".
+            "  OR\n".
+            "  ALL(relation in relationships(path) WHERE\n".
+            "    type(relation) = \"IS_IN_GROUP\"\n".
+            "    OR\n".
+            "    type(relation) = \"OWNS\"\n".
+            "    OR\n".
+            "    (\n".
+            "      type(relation) = \"HAS_READ_ACCESS\"\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onLabel IS NULL\n".
+            "        OR\n".
+            "        relation.onLabel IN labels(outer)\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onParentLabel IS NULL\n".
+            "        OR\n".
+            "        relation.onParentLabel IN labels(outer)\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onState IS NULL\n".
+            "        OR\n".
+            "        (outer)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onCreatedByUser IS NULL\n".
+            "        OR\n".
+            "        (outer)<-[:CREATED_BY*]-(user)\n".
+            "      )\n".
+            "    )\n".
+            "  )\n".
+            "WITH user, r, outer, path\n".
+            "WHERE\n".
+            "  user.id = outer.id\n".
+            "  OR\n".
+            "  path IS NOT NULL\n".
+            "RETURN outer.id, collect(r.id), count(outer) AS totalCount\n".
+            "ORDER BY outer.id\n".
+            "SKIP \$skip\n".
+            'LIMIT $limit',
             [
                 'userId' => $userUuid->toString(),
                 'centerId' => $centerUuid->toString(),
@@ -95,6 +113,7 @@ class GetRelatedController extends AbstractController
                 'limit' => $this->collectionService->getPageSize(),
             ]
         ));
+        $totalCount = $res->first()->get('totalCount');
         $nodeUuids = [];
         $relationUuids = [];
         foreach ($res as $resultSet) {

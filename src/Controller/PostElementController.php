@@ -20,13 +20,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class PostElementController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private ElementManager $elementManager
+        private ElementManager $elementManager,
+        private UrlGeneratorInterface $router
     ) {
     }
 
@@ -101,6 +103,13 @@ class PostElementController extends AbstractController
             ->create($newNodeCreatedRelation)
             ->flush();
 
-        return new CreatedResponse();
+        return new CreatedResponse(
+            $this->router->generate(
+                'getElement',
+                [
+                    'uuid' => $newNodeUuid,
+                ]
+            )
+        );
     }
 }

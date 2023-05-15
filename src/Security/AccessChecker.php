@@ -18,13 +18,80 @@ class AccessChecker
     public function hasAccessToElement(UuidInterface $userUuid, UuidInterface $elementUuid, AccessType $accessType): bool
     {
         if (ElementType::NODE === $this->getElementType($elementUuid)) {
-            return $this->hasAccessToNode($userUuid, $elementUuid, $accessType);
+            if (AccessType::READ === $accessType) {
+                return $this->hasReadAccessToNode($userUuid, $elementUuid);
+            } else {
+                return $this->hasGeneralAccessToNode($userUuid, $elementUuid, $accessType);
+            }
         } else {
             return $this->hasAccessToRelation($userUuid, $elementUuid, $accessType);
         }
     }
 
-    public function hasAccessToNode(UuidInterface $userUuid, UuidInterface $elementUuid, AccessType $accessType): bool
+    public function hasReadAccessToNode(UuidInterface $userUuid, UuidInterface $elementUuid): bool
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            "MATCH (user:User {id: \$userId})\n".
+            "MATCH (element {id: \$elementId})\n".
+            "OPTIONAL MATCH path=(user)-[:IS_IN_GROUP*0..]->()-[:OWNS|HAS_READ_ACCESS*0..]->(element)\n".
+            "WHERE\n".
+            "  user.id = element.id\n".
+            "  OR\n".
+            "  ALL(relation in relationships(path) WHERE\n".
+            "    type(relation) = \"IS_IN_GROUP\"\n".
+            "    OR\n".
+            "    type(relation) = \"OWNS\"\n".
+            "    OR\n".
+            "    (\n".
+            "      type(relation) = \"HAS_READ_ACCESS\"\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onLabel IS NULL\n".
+            "        OR\n".
+            "        relation.onLabel IN labels(element)\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onParentLabel IS NULL\n".
+            "        OR\n".
+            "        relation.onParentLabel IN labels(element)\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onState IS NULL\n".
+            "        OR\n".
+            "        (element)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onCreatedByUser IS NULL\n".
+            "        OR\n".
+            "        (element)<-[:CREATED_BY*]-(user)\n".
+            "      )\n".
+            "    )\n".
+            "  )\n".
+            "WITH user, element, path\n".
+            "WHERE\n".
+            "  user.id = element.id\n".
+            "  OR\n".
+            "  path IS NOT NULL\n".
+            'RETURN count(*) as count;',
+            [
+                'userId' => $userUuid->toString(),
+                'elementId' => $elementUuid->toString(),
+            ]
+        ));
+        if (1 !== $res->count()) {
+            return false;
+        }
+        if (0 === $res->first()->get('count')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function hasGeneralAccessToNode(UuidInterface $userUuid, UuidInterface $elementUuid, AccessType $accessType): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
