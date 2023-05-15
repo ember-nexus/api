@@ -37,41 +37,50 @@ class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
      */
     public function test2010201(): void
     {
+        $response = $this->runGetRequest(sprintf('/%s', self::OWNS), self::TOKEN);
+        $this->assertIsRelationResponse($response, 'OWNS');
+    }
+
+    /**
+     * @description test 2-01-03-01
+     */
+    public function test2010301(): void
+    {
         $response = $this->runGetRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
     }
 
     /**
-     * @description test 2-01-02-02
+     * @description test 2-01-03-02
      */
-    public function test2010202(): void
+    public function test2010302(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/parents', self::DATA), self::TOKEN);
         $this->assertIsCollectionResponse($response, 1, 1);
     }
 
     /**
-     * @description test 2-01-02-03
+     * @description test 2-01-03-03
      */
-    public function test2010203(): void
+    public function test2010303(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/children', self::DATA), self::TOKEN);
         $this->assertIsCollectionResponse($response, 0, 0);
     }
 
     /**
-     * @description test 2-01-02-04
+     * @description test 2-01-03-04
      */
-    public function test2010204(): void
+    public function test2010304(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/related', self::DATA), self::TOKEN);
         $this->assertIsCollectionResponse($response, 1, 1);
     }
 
     /**
-     * @description test 2-01-02-05
+     * @description test 2-01-03-05
      */
-    public function test2010205(): void
+    public function test2010305(): void
     {
         $response = $this->runPostRequest(
             sprintf('/%s', self::DATA),
@@ -94,179 +103,186 @@ class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
         $this->assertIsCreatedBy(self::TOKEN, $newUuid, self::USER);
     }
 
-//    /**
-//     * @description test 2-01-02-06
-//     */
-//    public function test2010206(): void
-//    {
-//        $response = $this->runPutRequest(
-//            sprintf('/%s', self::DATA),
-//            self::TOKEN,
-//            [
-//                'name' => 'I shall not be updated.',
-//            ]
-//        );
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-07
-//     */
-//    public function test2010207(): void
-//    {
-//        $response = $this->runPatchRequest(
-//            sprintf('/%s', self::DATA),
-//            self::TOKEN,
-//            [
-//                'name' => 'I shall not be updated.',
-//            ]
-//        );
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-08
-//     */
-//    public function test2010208(): void
-//    {
-//        $response = $this->runDeleteRequest(sprintf('/%s', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-20
-//     */
-//    public function test2010220(): void
-//    {
-//        $response = $this->runGetRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-21
-//     *
-//     * @todo refactor in v0.2.0 with actual body content required
-//     */
-//    public function test2010221(): void
-//    {
-//        $response = $this->runPostRequest(
-//            sprintf('/%s/file', self::DATA),
-//            self::TOKEN,
-//            [
-//                'type' => 'Data',
-//                'data' => [
-//                    'name' => 'I shall not exist.',
-//                ],
-//            ]
-//        );
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-22
-//     *
-//     * @todo refactor in v0.2.0 with actual body content required
-//     */
-//    public function test2010222(): void
-//    {
-//        $response = $this->runPutRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-23
-//     *
-//     * @todo refactor in v0.2.0 with actual body content required
-//     */
-//    public function test2010223(): void
-//    {
-//        $response = $this->runPatchRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-24
-//     */
-//    public function test2010224(): void
-//    {
-//        $response = $this->runDeleteRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-30
-//     *
-//     * @todo refactor in v0.2.0 with actual request required
-//     */
-//    public function test2010230(): void
-//    {
-//        $response = $this->runCopyRequest(sprintf('/%s', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-31
-//     *
-//     * @todo refactor in v0.2.0 with actual request required
-//     */
-//    public function test2010231(): void
-//    {
-//        $response = $this->runLockRequest(sprintf('/%s', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-32
-//     *
-//     * @todo refactor in v0.2.0 with actual request required
-//     */
-//    public function test2010232(): void
-//    {
-//        $response = $this->runUnlockRequest(sprintf('/%s', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-33
-//     *
-//     * @todo refactor in v0.2.0 with actual request required
-//     */
-//    public function test2010233(): void
-//    {
-//        $response = $this->runMkcolRequest(sprintf('/%s', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-34
-//     *
-//     * @todo refactor in v0.2.0 with actual request required
-//     */
-//    public function test2010234(): void
-//    {
-//        $response = $this->runMoveRequest(sprintf('/%s', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-35
-//     *
-//     * @todo refactor in v0.2.0 with actual request required
-//     */
-//    public function test2010235(): void
-//    {
-//        $response = $this->runPropfindRequest(sprintf('/%s', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
-//
-//    /**
-//     * @description test 2-01-02-36
-//     *
-//     * @todo refactor in v0.2.0 with actual request required
-//     */
-//    public function test2010236(): void
-//    {
-//        $response = $this->runProppatchRequest(sprintf('/%s', self::DATA), self::TOKEN);
-//        $this->assertIsProblemResponse($response, 404);
-//    }
+    /**
+     * @description test 2-01-03-06
+     */
+    public function test2010306(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runPutRequest(
+            sprintf('/%s', self::DATA),
+            self::TOKEN,
+            [
+                'name' => 'I shall not be updated.',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 404);
+    }
+
+    /**
+     * @description test 2-01-03-07
+     */
+    public function test2010307(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::DATA),
+            self::TOKEN,
+            [
+                'name' => 'I shall not be updated.',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 404);
+    }
+
+    /**
+     * @description test 2-01-03-08
+     */
+    public function test2010308(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runDeleteRequest(sprintf('/%s', self::DATA), self::TOKEN);
+        $this->assertIsProblemResponse($response, 404);
+    }
+
+    /**
+     * @description test 2-01-03-20
+     *
+     * @todo refactor for v0.2.0
+     */
+    public function test2010320(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runGetRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
+        $this->assertIsProblemResponse($response, 404);
+    }
+
+    /**
+     * @description test 2-01-03-21
+     *
+     * @todo refactor in v0.2.0 with actual body content required
+     */
+    public function test2010321(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runPostRequest(
+            sprintf('/%s/file', self::DATA),
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => 'I shall not exist.',
+                ],
+            ]
+        );
+        $this->assertIsProblemResponse($response, 404);
+    }
+
+    /**
+     * @description test 2-01-03-22
+     *
+     * @todo refactor in v0.2.0 with actual body content required
+     */
+    public function test2010322(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runPutRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
+    }
+
+    /**
+     * @description test 2-01-03-23
+     *
+     * @todo refactor in v0.2.0 with actual body content required
+     */
+    public function test2010323(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runPatchRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
+    }
+
+    /**
+     * @description test 2-01-03-24
+     */
+    public function test2010324(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runDeleteRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
+    }
+
+    /**
+     * @description test 2-01-03-30
+     *
+     * @todo refactor in v0.2.0 with actual request required
+     */
+    public function test2010330(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runCopyRequest(sprintf('/%s', self::DATA), self::TOKEN);
+    }
+
+    /**
+     * @description test 2-01-03-31
+     *
+     * @todo refactor in v0.2.0 with actual request required
+     */
+    public function test2010331(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runLockRequest(sprintf('/%s', self::DATA), self::TOKEN);
+    }
+
+    /**
+     * @description test 2-01-03-32
+     *
+     * @todo refactor in v0.2.0 with actual request required
+     */
+    public function test2010332(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runUnlockRequest(sprintf('/%s', self::DATA), self::TOKEN);
+    }
+
+    /**
+     * @description test 2-01-03-33
+     *
+     * @todo refactor in v0.2.0 with actual request required
+     */
+    public function test2010333(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runMkcolRequest(sprintf('/%s', self::DATA), self::TOKEN);
+    }
+
+    /**
+     * @description test 2-01-03-34
+     *
+     * @todo refactor in v0.2.0 with actual request required
+     */
+    public function test2010334(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runMoveRequest(sprintf('/%s', self::DATA), self::TOKEN);
+    }
+
+    /**
+     * @description test 2-01-03-35
+     *
+     * @todo refactor in v0.2.0 with actual request required
+     */
+    public function test2010335(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runPropfindRequest(sprintf('/%s', self::DATA), self::TOKEN);
+    }
+
+    /**
+     * @description test 2-01-03-36
+     *
+     * @todo refactor in v0.2.0 with actual request required
+     */
+    public function test2010336(): void
+    {
+        $this->markTestSkipped();
+        $response = $this->runProppatchRequest(sprintf('/%s', self::DATA), self::TOKEN);
+    }
 }

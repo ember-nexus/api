@@ -113,13 +113,16 @@ class GetRelatedController extends AbstractController
                 'limit' => $this->collectionService->getPageSize(),
             ]
         ));
-        $totalCount = $res->first()->get('totalCount');
+        $totalCount = 0;
         $nodeUuids = [];
         $relationUuids = [];
-        foreach ($res as $resultSet) {
-            $nodeUuids[] = UuidV4::fromString($resultSet->get('outer.id'));
-            foreach ($resultSet->get('collect(r.id)') as $relationId) {
-                $relationUuids[] = UuidV4::fromString($relationId);
+        if (count($res) > 0) {
+            $totalCount = $res->first()->get('totalCount');
+            foreach ($res as $resultSet) {
+                $nodeUuids[] = UuidV4::fromString($resultSet->get('outer.id'));
+                foreach ($resultSet->get('collect(r.id)') as $relationId) {
+                    $relationUuids[] = UuidV4::fromString($relationId);
+                }
             }
         }
 
