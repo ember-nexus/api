@@ -93,8 +93,13 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010206(): void
     {
-        $this->markTestIncomplete();
-        $response = $this->runPutRequest(sprintf('/%s', self::DATA), self::TOKEN);
+        $response = $this->runPutRequest(
+            sprintf('/%s', self::DATA),
+            self::TOKEN,
+            [
+                'name' => 'I shall not be updated.',
+            ]
+        );
         $this->assertIsProblemResponse($response, 404);
     }
 
@@ -103,8 +108,13 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010207(): void
     {
-        $this->markTestIncomplete();
-        $response = $this->runPatchRequest(sprintf('/%s', self::DATA), self::TOKEN);
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::DATA),
+            self::TOKEN,
+            [
+                'name' => 'I shall not be updated.',
+            ]
+        );
         $this->assertIsProblemResponse($response, 404);
     }
 
@@ -113,7 +123,6 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010208(): void
     {
-        $this->markTestIncomplete();
         $response = $this->runDeleteRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -154,7 +163,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010222(): void
     {
-        $response = $this->runPutRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
+        $response = $this->runPutRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
         $this->assertIsProblemResponse($response, 404);
     }
 
@@ -165,7 +174,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010223(): void
     {
-        $response = $this->runPatchRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
+        $response = $this->runPatchRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
         $this->assertIsProblemResponse($response, 404);
     }
 

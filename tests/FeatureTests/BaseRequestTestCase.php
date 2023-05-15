@@ -18,14 +18,14 @@ abstract class BaseRequestTestCase extends TestCase
         return $this->runRequest('POST', $uri, $token, $data);
     }
 
-    public function runPutRequest(string $uri, string $token): ResponseInterface
+    public function runPutRequest(string $uri, string $token, array $data): ResponseInterface
     {
-        return $this->runRequest('PUT', $uri, $token);
+        return $this->runRequest('PUT', $uri, $token, $data);
     }
 
-    public function runPatchRequest(string $uri, string $token): ResponseInterface
+    public function runPatchRequest(string $uri, string $token, array $data): ResponseInterface
     {
-        return $this->runRequest('PATCH', $uri, $token);
+        return $this->runRequest('PATCH', $uri, $token, $data);
     }
 
     public function runDeleteRequest(string $uri, string $token): ResponseInterface
