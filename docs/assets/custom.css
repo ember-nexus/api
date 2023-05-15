@@ -36,6 +36,12 @@ table {
   display: none;
 }
 
+@media screen and (max-width: 768px) {
+  main {
+    overflow-x: auto !important;
+  }
+}
+
 .markdown-section p.tip {
   border-left-color: var(--theme-color);
 }
