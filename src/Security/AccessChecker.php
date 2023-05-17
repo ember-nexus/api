@@ -203,7 +203,11 @@ class AccessChecker
             "      type(endRelation) = \"OWNS\"\n".
             "      OR\n".
             "      (\n".
-            '        type(endRelation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "        (\n".
+            "          type(endRelation) = \"HAS_READ_ACCESS\"\n".
+            "          OR\n".
+            '          type(endRelation) = "'.$accessType->value."\"\n".
+            "        )\n".
             "        AND\n".
             "        (\n".
             "          endRelation.onLabel IS NULL\n".

@@ -1,0 +1,9 @@
+{
+  "type": "User",
+  "id": "a70e49dc-ec45-414a-beb2-43e6fa56eb41",
+  "data": {
+    "name": "User",
+    "email": "user@e1-02.localhost.de",
+    "test": "e2-02"
+  }
+}

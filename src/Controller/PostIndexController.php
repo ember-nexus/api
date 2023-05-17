@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Exception\ClientBadRequestException;
 use App\Exception\ClientNotFoundException;
+use App\Exception\ClientUnauthorizedException;
 use App\Response\CreatedResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
@@ -115,6 +116,9 @@ class PostIndexController extends AbstractController
     private function createRelation(string $type, UuidInterface $relationId, UuidInterface $startId, UuidInterface $endId, array $data): Response
     {
         $userId = $this->authProvider->getUserUuid();
+        if (!$userId) {
+            throw new ClientUnauthorizedException();
+        }
 
         if (!$this->accessChecker->hasAccessToElement($userId, $startId, AccessType::CREATE)) {
             throw new ClientNotFoundException();

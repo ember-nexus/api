@@ -6,4 +6,7 @@ enum AccessType: string
 {
     case READ = 'READ';
     case CREATE = 'CREATE';
+    case UPDATE = 'UPDATE';
+    case DELETE = 'DELETE';
+    case SEARCH = 'SEARCH';
 }

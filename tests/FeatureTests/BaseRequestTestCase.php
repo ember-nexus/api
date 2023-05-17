@@ -184,6 +184,13 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertIsString($response->getHeader('Location')[0]);
     }
 
+    public function assertIsDeletedResponse(ResponseInterface $response): void
+    {
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertEmpty((string) $response->getBody());
+        $this->assertFalse($response->hasHeader('Location'));
+    }
+
     public function assertHasSingleOwner(string $token, string $childUuid, string $parentUuid): void
     {
         $parentsResponse = $this->runGetRequest(
