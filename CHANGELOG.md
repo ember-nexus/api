@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor security tests of scenario 1.
 - Fix table overflow issue in documentation.
 - Rework GetChildrenController, GetParentsController, GetRelatedController and PostElementController.
+- Update PHP dependencies.
 
 ## 0.0.5 - 2023-05-13
 ### Added
