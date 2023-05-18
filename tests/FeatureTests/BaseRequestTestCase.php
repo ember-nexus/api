@@ -106,6 +106,18 @@ abstract class BaseRequestTestCase extends TestCase
         );
     }
 
+    public function getBody(ResponseInterface $response): array
+    {
+        return \Safe\json_decode((string) $response->getBody(), true);
+    }
+
+    public function assertArrayHasNoNullValues(array $array): void
+    {
+        foreach ($array as $value) {
+            $this->assertNotNull($value);
+        }
+    }
+
     public function assertIsCollectionResponse(ResponseInterface $response, ?int $countNodes = null, ?int $countRelations = null): void
     {
         $this->assertSame(200, $response->getStatusCode());
@@ -182,6 +194,13 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertSame(201, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
         $this->assertIsString($response->getHeader('Location')[0]);
+    }
+
+    public function assertNoContentResponse(ResponseInterface $response): void
+    {
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertEmpty((string) $response->getBody());
+        $this->assertFalse($response->hasHeader('Location'));
     }
 
     public function assertIsDeletedResponse(ResponseInterface $response): void

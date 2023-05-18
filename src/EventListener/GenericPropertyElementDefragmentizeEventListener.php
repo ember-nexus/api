@@ -39,5 +39,10 @@ class GenericPropertyElementDefragmentizeEventListener
         $cypherProperties = $cypherFragment->getProperties();
         $cypherProperties = ReservedPropertyNameHelper::removeReservedPropertyNamesFromArray($cypherProperties);
         $element->addProperties($cypherProperties);
+        foreach ($element->getProperties() as $key => $value) {
+            if (null === $value) {
+                $element->removeProperty($key);
+            }
+        }
     }
 }

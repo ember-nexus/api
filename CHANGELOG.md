@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
-- Rework PostIndexController and DeleteElementController.
+- Rework PostIndexController, DeleteElementController, PatchElementController and PutElementController.
 - Update PHP dependencies.
 - Add endpoint feature tests, prefixed with `e`.
 

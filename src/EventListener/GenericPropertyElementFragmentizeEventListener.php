@@ -58,7 +58,6 @@ class GenericPropertyElementFragmentizeEventListener
                 continue;
             }
             if (is_null($value)) {
-                // todo null on level 0 -> delete key-value-pair?
                 $mongoFragment->addProperty($name, $value);
                 $cypherFragment->addProperty($name, $value);
                 $elasticFragment->addProperty($name, $value);

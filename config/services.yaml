@@ -199,6 +199,15 @@ services:
         event: 'App\Event\RelationElementFragmentizeEvent'
         method: 'onRelationElementFragmentizeEvent'
 
+  App\EventListener\UpdatedPropertyElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+      - name: kernel.event_listener
+        event: 'App\Event\RelationElementFragmentizeEvent'
+        method: 'onRelationElementFragmentizeEvent'
+
   App\EventListener\NamePropertyElementFragmentizeEventListener:
     tags:
       - name: kernel.event_listener
@@ -207,6 +216,42 @@ services:
       - name: kernel.event_listener
         event: 'App\Event\RelationElementFragmentizeEvent'
         method: 'onRelationElementFragmentizeEvent'
+
+  App\EventListener\CreatedElementPropertyWriteEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPropertyWriteEvent'
+        method: 'onElementPropertyWriteEvent'
+
+  App\EventListener\EndElementPropertyWriteEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPropertyWriteEvent'
+        method: 'onElementPropertyWriteEvent'
+
+  App\EventListener\IdElementPropertyWriteEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPropertyWriteEvent'
+        method: 'onElementPropertyWriteEvent'
+
+  App\EventListener\StartElementPropertyWriteEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPropertyWriteEvent'
+        method: 'onElementPropertyWriteEvent'
+
+  App\EventListener\TypeElementPropertyWriteEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPropertyWriteEvent'
+        method: 'onElementPropertyWriteEvent'
+
+  App\EventListener\UpdatedElementPropertyWriteEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPropertyWriteEvent'
+        method: 'onElementPropertyWriteEvent'
 
   App\EventListener\UsernamePropertyElementFragmentizeEventListener:
     tags:

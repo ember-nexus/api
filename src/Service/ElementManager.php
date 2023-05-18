@@ -19,12 +19,14 @@ class ElementManager
         private ElasticEntityManager $elasticEntityManager,
         private ElementFragmentizeService $elementFragmentizeService,
         private ElementDefragmentizeService $elementDefragmentizeService,
-        private Neo4jClientHelper $neo4jClientHelper
+        private Neo4jClientHelper $neo4jClientHelper,
+        private ElementPropertyWriteEventService $elementPropertyWriteEventService
     ) {
     }
 
     public function create(NodeElementInterface|RelationElementInterface $element): self
     {
+        $this->elementPropertyWriteEventService->updateProperties($element);
         $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
         $this->cypherEntityManager->create($fragmentGroup->getCypherFragment());
         $this->mongoEntityManager->create($fragmentGroup->getMongoFragment());
@@ -33,12 +35,29 @@ class ElementManager
         return $this;
     }
 
+    public function createWithUserDefinedData(NodeElementInterface|RelationElementInterface $element, array $userDefinedProperties = []): self
+    {
+        $this->elementPropertyWriteEventService->updateProperties($element, $userDefinedProperties);
+        $this->create($element);
+
+        return $this;
+    }
+
     public function merge(NodeElementInterface|RelationElementInterface $element): self
     {
+        $this->elementPropertyWriteEventService->updateProperties($element);
         $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
         $this->cypherEntityManager->merge($fragmentGroup->getCypherFragment());
         $this->mongoEntityManager->merge($fragmentGroup->getMongoFragment());
         $this->elasticEntityManager->merge($fragmentGroup->getElasticFragment());
+
+        return $this;
+    }
+
+    public function mergeWithUserDefinedData(NodeElementInterface|RelationElementInterface $element, array $userDefinedProperties = []): self
+    {
+        $this->elementPropertyWriteEventService->updateProperties($element, $userDefinedProperties);
+        $this->merge($element);
 
         return $this;
     }

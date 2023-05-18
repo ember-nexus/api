@@ -6,7 +6,7 @@ use App\Event\NodeElementFragmentizeEvent;
 use App\Event\RelationElementFragmentizeEvent;
 use App\Exception\ServerException;
 
-class CreatedPropertyElementFragmentizeEventListener
+class UpdatedPropertyElementFragmentizeEventListener
 {
     public function __construct()
     {
@@ -32,12 +32,12 @@ class CreatedPropertyElementFragmentizeEventListener
         } else {
             $element = $event->getRelationElement();
         }
-        if (!$element->hasProperty('created')) {
-            throw new ServerException(detail: 'Server must set created property before persisting element');
+        if (!$element->hasProperty('updated')) {
+            throw new ServerException(detail: 'Server must set updated property before persisting element');
         }
-        $created = $element->getProperty('created');
-        $cypherFragment->addProperty('created', $created);
-        $mongoFragment->addProperty('created', $created);
-        $elasticFragment->addProperty('created', $created);
+        $updated = $element->getProperty('updated');
+        $cypherFragment->addProperty('updated', $updated);
+        $mongoFragment->addProperty('updated', $updated);
+        $elasticFragment->addProperty('updated', $updated);
     }
 }

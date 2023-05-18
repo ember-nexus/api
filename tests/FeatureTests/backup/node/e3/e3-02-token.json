@@ -1,0 +1,10 @@
+{
+  "type": "Token",
+  "id": "84e32a4f-840b-435a-a064-2e72f19d8b20",
+  "data": {
+    "token": "secret-token:7Sm1i6YAFHCW2FFf5KmG3j",
+    "hash": "f8fc81b5d739df4cae113fc5f74518690c6b3195f46023581bcdd3ca589c47fd",
+    "test": "e3-02",
+    "note": "Token contains token only due to testing purposes."
+  }
+}
