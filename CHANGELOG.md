@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Rework PostIndexController and DeleteElementController.
+- Update PHP dependencies.
+- Add endpoint feature tests, prefixed with `e`.
 
 ## 0.0.6 - 2023-05-15
 ### Added
@@ -15,9 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add PostElementController.
 - Refactor security tests of scenario 1.
 - Fix table overflow issue in documentation.
-- Rework GetChildrenController, GetParentsController, GetRelatedController, PostElementController, PostIndexController
-  and DeleteElementController.
-- Update PHP dependencies.
+- Rework GetChildrenController, GetParentsController, GetRelatedController and PostElementController.
 
 ## 0.0.5 - 2023-05-13
 ### Added
