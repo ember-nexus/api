@@ -18,6 +18,8 @@ ENV PHPIZE_DEPS="\
 		libc-dev \
 		make \
 		pkgconf \
+		zlib-dev \
+		icu-dev \
 		re2c" \
     PHP_INI_DIR="/usr/local/etc/php" \
 # Apply stack smash protection to functions using local buffers and alloca()
@@ -43,6 +45,7 @@ RUN apk add --no-cache \
 		xz \
         bash \
         pcre \
+        icu \
 # https://github.com/docker-library/php/issues/494
 		openssl
 
@@ -268,7 +271,9 @@ ENV VERSION=$VERSION
 
 RUN apk add pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev \
     && pecl install mongodb \
-    && docker-php-ext-enable mongodb \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install intl \
+    && docker-php-ext-enable mongodb intl \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && apk del pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev
 
