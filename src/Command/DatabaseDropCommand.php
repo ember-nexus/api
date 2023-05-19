@@ -3,7 +3,9 @@
 namespace App\Command;
 
 use App\Style\EmberNexusStyle;
+use App\Type\RabbitMQQueueType;
 use Laudis\Neo4j\Databags\Statement;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 use Predis\Client;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -28,7 +30,8 @@ class DatabaseDropCommand extends Command
         private CypherEntityManager $cypherEntityManager,
         private MongoEntityManager $mongoEntityManager,
         private ElasticEntityManager $elasticEntityManager,
-        private Client $redisClient
+        private Client $redisClient,
+        private AMQPStreamConnection $AMQPStreamConnection
     ) {
         parent::__construct();
     }
@@ -141,7 +144,11 @@ class DatabaseDropCommand extends Command
     {
         $this->io->startSection('Task 6 of 6: RabbitMQ');
         $this->io->writeln('Deleting RabbitMQ data...');
-        // todo
-        $this->io->stopSection('RabbitMQ is currently not implemented, nothing to delete.');
+        $channel = $this->AMQPStreamConnection->channel();
+        foreach (RabbitMQQueueType::cases() as $queue) {
+            $channel->queue_delete($queue->value);
+        }
+        $channel->close();
+        $this->io->stopSection('Successfully deleted RabbitMQ data.');
     }
 }

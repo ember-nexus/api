@@ -272,8 +272,8 @@ ENV VERSION=$VERSION
 RUN apk add pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev \
     && pecl install mongodb \
     && docker-php-ext-configure intl \
-    && docker-php-ext-install intl \
-    && docker-php-ext-enable mongodb intl \
+    && docker-php-ext-install intl bcmath \
+    && docker-php-ext-enable mongodb intl bcmath \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && apk del pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev
 

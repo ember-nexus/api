@@ -289,6 +289,10 @@ services:
         event: 'App\Event\RelationElementFragmentizeEvent'
         method: 'onRelationElementFragmentizeEvent'
 
+  App\EventListener\RabbitMqConnectionListener:
+    tags:
+      - { name: kernel.event_listener, event: kernel.terminate }
+
   App\Factory\CypherEntityManagerFactory:
     arguments:
       $cypherAuth: '%env(CYPHER_AUTH)%'
@@ -317,3 +321,11 @@ services:
   Predis\Client:
     factory: ['@App\Factory\RedisFactory', 'createRedis']
     class: Predis\Client
+
+  App\Factory\RabbitMQFactory:
+    arguments:
+      $rabbitMQAuth: '%env(RABBITMQ_AUTH)%'
+
+  PhpAmqpLib\Connection\AMQPStreamConnection:
+    factory: ['@App\Factory\RabbitMQFactory', 'createRabbitMQ']
+    class: PhpAmqpLib\Connection\AMQPStreamConnection
