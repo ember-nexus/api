@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use Laudis\Neo4j\Databags\Statement;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
@@ -286,5 +287,132 @@ class AccessChecker
         }
 
         return null;
+    }
+
+    /**
+     * @note will only return direct groups. I.e. if group a has access to the element through group b, then only group
+     *       b will be returned.
+     *
+     * @todo check if element is a group itself?
+     *
+     * @return array<UuidInterface>
+     */
+    public function getDirectGroupsWithAccessToElement(UuidInterface $elementUuid, AccessType $accessType): array
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            'MATCH (group:Group)-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
+            "WHERE\n".
+            "  ALL(relation in relations WHERE\n".
+            "    type(relation) = \"OWNS\"\n".
+            "    OR\n".
+            "    (\n".
+            '      type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onLabel IS NULL\n".
+            "        OR\n".
+            "        relation.onLabel IN labels(element)\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onParentLabel IS NULL\n".
+            "        OR\n".
+            "        relation.onParentLabel IN labels(element)\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        relation.onState IS NULL\n".
+            "        OR\n".
+            "        (element)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
+            "      )\n".
+            "      AND\n".
+            "      relation.onCreatedByUser IS NULL\n".
+            "    )\n".
+            "  )\n".
+            'RETURN group.id;',
+            [
+                'elementId' => $elementUuid->toString(),
+            ]
+        ));
+        $groups = [];
+        foreach ($res as $row) {
+            $groups[] = UuidV4::fromString($row->get('group.id'));
+        }
+
+        return $groups;
+    }
+
+    /**
+     * @note will only return direct users. I.e. only users which are connected via OWNS-chain. Also, if the user is
+     *       connected via groups & owns *and also* satisfies an onCreatedByUser test.
+     *
+     * @return array<UuidInterface>
+     */
+    public function getDirectUsersWithAccessToElement(UuidInterface $elementUuid, AccessType $accessType): array
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            'MATCH (user:User)-[groups:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
+            "WHERE\n".
+            "  user.id = element.id\n".
+            "  OR\n".
+            "  (\n".
+            "    ALL(relation in relations WHERE\n".
+            "      type(relation) = \"OWNS\"\n".
+            "      OR\n".
+            "      (\n".
+            '        type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onLabel IS NULL\n".
+            "          OR\n".
+            "          relation.onLabel IN labels(element)\n".
+            "        )\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onParentLabel IS NULL\n".
+            "          OR\n".
+            "          relation.onParentLabel IN labels(element)\n".
+            "        )\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onState IS NULL\n".
+            "          OR\n".
+            "          (element)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
+            "        )\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onCreatedByUser IS NULL\n".
+            "          OR\n".
+            "          (element)<-[:CREATED_BY*]-(user)\n".
+            "        )\n".
+            "      )\n".
+            "    )\n".
+            "    AND\n".
+            "    (\n".
+            "      isEmpty(groups)\n".
+            "      OR\n".
+            "      ANY(relation in relations WHERE\n".
+            '        type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "        AND\n".
+            "        (element)<-[:CREATED_BY*]-(user)\n".
+            "      )\n".
+            "    )\n".
+            "  )\n".
+            "WITH user, element, relations\n".
+            "WHERE\n".
+            "  user.id = element.id\n".
+            "  OR\n".
+            "  relations IS NOT NULL\n".
+            'RETURN user.id;',
+            [
+                'elementId' => $elementUuid->toString(),
+            ]
+        ));
+        $users = [];
+        foreach ($res as $row) {
+            $users[] = UuidV4::fromString($row->get('user.id'));
+        }
+
+        return $users;
     }
 }

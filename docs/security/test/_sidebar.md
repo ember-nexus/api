@@ -26,6 +26,8 @@
     - [`05-02` Mixed Relation Ownership](/security/test/05-mixed-group-ownership-tests/05-02-mixed-relation-ownership)
   - `06` Limited Access Tests
     - [`06-01` Limited Read Access](/security/test/06-limited-access-tests/06-01-limited-read-access)
+  - `07` Search Access Tests
+    - [`07-01` Search Access Test](/security/test/07-search-access-tests/07-01-search-access-test)
   - `99` Edge Cases
     - [`99-01` IS_IN_GROUP after OWNS has no effect](/security/test/99-edge-cases/99-01-is-in-group-after-owns-has-no-effect)
     - [`99-02` Owning groups give direct access but not to related groups](/security/test/99-edge-cases/99-02-owning-groups-give-direct-access-but-not-to-related-groups)

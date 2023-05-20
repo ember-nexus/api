@@ -1,7 +1,7 @@
 {
     "backupCreated": "2023-05-06 12:00:00 UTC",
-    "nodeCount": 0,
-    "relationCount": 0,
+    "nodeCount": 187,
+    "relationCount": 174,
     "fileCount": 0,
     "hostname": "ember-nexus",
     "version": "dev"
