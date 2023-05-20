@@ -291,7 +291,8 @@ services:
 
   App\EventListener\RabbitMqConnectionListener:
     tags:
-      - { name: kernel.event_listener, event: kernel.terminate }
+      - name: kernel.event_listener
+        event: kernel.terminate
 
   App\Factory\CypherEntityManagerFactory:
     arguments:
