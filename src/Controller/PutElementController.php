@@ -8,6 +8,7 @@ use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Security\PropertyChecker;
 use App\Service\ElementManager;
 use App\Type\AccessType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -21,7 +22,8 @@ class PutElementController extends AbstractController
     public function __construct(
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
-        private AccessChecker $accessChecker
+        private AccessChecker $accessChecker,
+        private PropertyChecker $propertyChecker
     ) {
     }
 
@@ -50,6 +52,13 @@ class PutElementController extends AbstractController
         if (null === $element) {
             throw new ClientNotFoundException();
         }
+
+        /**
+         * @var array<string, mixed> $data
+         */
+        $data = \Safe\json_decode($request->getContent(), true);
+        $this->propertyChecker->runCheckUserSuppliedProperties($element, $data);
+
         foreach ($element->getProperties() as $name => $value) {
             if ('id' === $name) {
                 continue;
@@ -57,11 +66,14 @@ class PutElementController extends AbstractController
             if ('created' === $name) {
                 continue;
             }
+            if ('updated' === $name) {
+                continue;
+            }
             $element->addProperty($name, null);
         }
-        $data = \Safe\json_decode($request->getContent(), true);
 
-        $this->elementManager->mergeWithUserDefinedData($element, $data);
+        $element->addProperties($data);
+        $this->elementManager->merge($element);
         $this->elementManager->flush();
 
         return new NoContentResponse();

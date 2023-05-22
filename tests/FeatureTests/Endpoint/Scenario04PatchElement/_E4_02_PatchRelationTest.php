@@ -1,6 +1,6 @@
 <?php
 
-namespace App\tests\FeatureTests\Endpoint\Scenario03PutElement;
+namespace App\tests\FeatureTests\Endpoint\Scenario04PatchElement;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 

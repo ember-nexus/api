@@ -3,22 +3,17 @@
 namespace App\Event;
 
 use App\Contract\EventInterface;
-use App\Contract\HasPropertiesInterface;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\Trait\PropertiesTrait;
 use App\Trait\StoppableEventTrait;
 
-class ElementPropertyWriteEvent implements EventInterface, HasPropertiesInterface
+class ElementPreDeleteEvent implements EventInterface
 {
     use StoppableEventTrait;
-    use PropertiesTrait;
 
     public function __construct(
-        private NodeElementInterface|RelationElementInterface $element,
-        array $newProperties
+        private NodeElementInterface|RelationElementInterface $element
     ) {
-        $this->addProperties($newProperties);
     }
 
     public function getElement(): RelationElementInterface|NodeElementInterface

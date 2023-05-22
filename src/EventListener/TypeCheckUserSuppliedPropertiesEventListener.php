@@ -2,12 +2,12 @@
 
 namespace App\EventListener;
 
-use App\Event\ElementPropertyWriteEvent;
+use App\Event\CheckUserSuppliedPropertiesEvent;
 use App\Exception\ClientBadRequestException;
 
-class TypeElementPropertyWriteEventListener
+class TypeCheckUserSuppliedPropertiesEventListener
 {
-    public function onElementPropertyWriteEvent(ElementPropertyWriteEvent $event): void
+    public function onCheckUserSuppliedPropertiesEvent(CheckUserSuppliedPropertiesEvent $event): void
     {
         if ($event->hasProperty('type')) {
             throw new ClientBadRequestException(detail: 'Manually setting the type property is forbidden.');

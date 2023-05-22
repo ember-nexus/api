@@ -152,7 +152,7 @@ services:
         event: 'Syndesi\CypherEntityManager\Event\ActionCypherElementToStatementEvent'
         method: 'onActionCypherElementToStatementEvent'
 
-# tion events
+# Ember Nexus events
 
   App\EventListener\ApiKeyCheckOnKernelRequestEventListener:
     tags:
@@ -217,47 +217,56 @@ services:
         event: 'App\Event\RelationElementFragmentizeEvent'
         method: 'onRelationElementFragmentizeEvent'
 
-  App\EventListener\CreatedElementPropertyWriteEventListener:
-    tags:
-      - name: kernel.event_listener
-        event: 'App\Event\ElementPropertyWriteEvent'
-        method: 'onElementPropertyWriteEvent'
-
-  App\EventListener\EndElementPropertyWriteEventListener:
-    tags:
-      - name: kernel.event_listener
-        event: 'App\Event\ElementPropertyWriteEvent'
-        method: 'onElementPropertyWriteEvent'
-
-  App\EventListener\IdElementPropertyWriteEventListener:
-    tags:
-      - name: kernel.event_listener
-        event: 'App\Event\ElementPropertyWriteEvent'
-        method: 'onElementPropertyWriteEvent'
-
-  App\EventListener\StartElementPropertyWriteEventListener:
-    tags:
-      - name: kernel.event_listener
-        event: 'App\Event\ElementPropertyWriteEvent'
-        method: 'onElementPropertyWriteEvent'
-
-  App\EventListener\TypeElementPropertyWriteEventListener:
-    tags:
-      - name: kernel.event_listener
-        event: 'App\Event\ElementPropertyWriteEvent'
-        method: 'onElementPropertyWriteEvent'
-
-  App\EventListener\UpdatedElementPropertyWriteEventListener:
-    tags:
-      - name: kernel.event_listener
-        event: 'App\Event\ElementPropertyWriteEvent'
-        method: 'onElementPropertyWriteEvent'
-
-  App\EventListener\UsernamePropertyElementFragmentizeEventListener:
+  App\EventListener\SearchAccessElementFragmentizeEventListener:
     tags:
       - name: kernel.event_listener
         event: 'App\Event\NodeElementFragmentizeEvent'
         method: 'onNodeElementFragmentizeEvent'
+      - name: kernel.event_listener
+        event: 'App\Event\RelationElementFragmentizeEvent'
+        method: 'onRelationElementFragmentizeEvent'
+
+  App\EventListener\CreatedElementPreWriteEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPreCreateEvent'
+        method: 'onElementPreCreateEvent'
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPreMergeEvent'
+        method: 'onElementPreMergeEvent'
+
+  App\EventListener\EndCheckUserSuppliedPropertiesEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\CheckUserSuppliedPropertiesEvent'
+        method: 'onCheckUserSuppliedPropertiesEvent'
+
+  App\EventListener\IdCheckUserSuppliedPropertiesEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\CheckUserSuppliedPropertiesEvent'
+        method: 'onCheckUserSuppliedPropertiesEvent'
+
+  App\EventListener\StartCheckUserSuppliedPropertiesEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\CheckUserSuppliedPropertiesEvent'
+        method: 'onCheckUserSuppliedPropertiesEvent'
+
+  App\EventListener\TypeCheckUserSuppliedPropertiesEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\CheckUserSuppliedPropertiesEvent'
+        method: 'onCheckUserSuppliedPropertiesEvent'
+
+  App\EventListener\UpdatedElementPreWriteEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPreCreateEvent'
+        method: 'onElementPreCreateEvent'
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPreMergeEvent'
+        method: 'onElementPreMergeEvent'
 
   App\EventListener\NodeElementDefragmentizeEventListener:
     tags:
@@ -288,6 +297,27 @@ services:
       - name: kernel.event_listener
         event: 'App\Event\RelationElementFragmentizeEvent'
         method: 'onRelationElementFragmentizeEvent'
+
+  App\EventListener\OwnershipChangeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPostCreateEvent'
+        method: 'onElementPostCreate'
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPostMergeEvent'
+        method: 'onElementPostMerge'
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPostDeleteEvent'
+        method: 'onElementPostDelete'
+
+  App\EventListener\CalculateSearchAccessEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\ElementPostCreateEvent'
+        method: 'onElementPostCreate'
+      - name: kernel.event_listener
+        event: 'App\Event\ElementUpdateAfterBackupLoadEvent'
+        method: 'onElementUpdateAfterBackupLoadEvent'
 
   App\EventListener\RabbitMqConnectionListener:
     tags:

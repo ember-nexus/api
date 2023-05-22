@@ -6,7 +6,6 @@ be explored via related/children requests.
 
 <div id="graph" class="graph-container" style="height:1000px"></div>
 
-
 <script>
 renderGraph(document.getElementById('graph'), {
   nodes: [

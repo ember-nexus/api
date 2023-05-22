@@ -3,11 +3,15 @@
 namespace App\Command;
 
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
+use App\Event\ElementUpdateAfterBackupLoadEvent;
+use App\Service\AppStateService;
 use App\Service\ElementManager;
 use App\Service\RawToElementService;
 use App\Style\EmberNexusStyle;
+use App\Type\AppStateType;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,6 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
+use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
@@ -35,7 +40,9 @@ class BackupLoadCommand extends Command
         private CypherEntityManager $cypherEntityManager,
         private FilesystemOperator $backupStorage,
         private RawToElementService $rawToElementService,
-        private ?EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
+        private AppStateService $appStateService,
+        private ElasticEntityManager $elasticEntityManager
     ) {
         parent::__construct();
     }
@@ -47,6 +54,7 @@ class BackupLoadCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->appStateService->setAppState(AppStateType::LOADING_BACKUP);
         $this->io = new EmberNexusStyle($input, $output);
 
         $this->io->title('Backup Load');
@@ -64,13 +72,14 @@ class BackupLoadCommand extends Command
         $this->loadNodes();
         $this->loadRelations();
         $this->loadFiles();
+        $this->afterBackupTasks();
 
         return Command::SUCCESS;
     }
 
     private function loadNodes(): void
     {
-        $this->io->startSection('Step 1 of 3: Loading Nodes');
+        $this->io->startSection('Step 1 of 4: Loading Nodes');
         $progressBar = $this->io->createProgressBar($this->nodeCount);
         $progressBar->display();
         $nodeFiles = $this->backupStorage->listContents($this->backupName.'/node/', true);
@@ -97,14 +106,14 @@ class BackupLoadCommand extends Command
         $progressBar->clear();
         $totalCount += $pageCount;
         $this->io->stopSection(sprintf(
-            'Loaded %d nodes',
+            'Loaded %d nodes.',
             $totalCount
         ));
     }
 
     private function loadRelations(): void
     {
-        $this->io->startSection('Step 2 of 3: Loading Relations');
+        $this->io->startSection('Step 2 of 4: Loading Relations');
         $progressBar = $this->io->createProgressBar($this->relationCount);
         $progressBar->display();
         $relationFiles = $this->backupStorage->listContents($this->backupName.'/relation/', true);
@@ -131,19 +140,76 @@ class BackupLoadCommand extends Command
         $progressBar->clear();
         $totalCount += $pageCount;
         $this->io->stopSection(sprintf(
-            'Loaded %d relations',
+            'Loaded %d relations.',
             $totalCount
         ));
     }
 
     private function loadFiles(): void
     {
-        $this->io->startSection('Step 3 of 3: Loading Files');
+        $this->io->startSection('Step 3 of 4: Loading Files');
         $this->io->writeln('Currently not implemented.');
         $this->io->stopSection(sprintf(
-            'Loaded %d relations',
+            'Loaded %d relations.',
             0
         ));
+    }
+
+    private function afterBackupTasks(): void
+    {
+        $this->io->startSection('Step 4 of 4: After Backup Tasks');
+
+        $pageSize = 200;
+        $page = 0;
+        $endReached = false;
+        while (!$endReached) {
+            $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+                'MATCH (n) RETURN n.id ORDER BY n.id SKIP $skip LIMIT $limit;',
+                [
+                    'skip' => $page * $pageSize,
+                    'limit' => $pageSize,
+                ]
+            ));
+            if (0 === count($res)) {
+                $endReached = true;
+            }
+            foreach ($res as $row) {
+                $uuid = UuidV4::fromString($row->get('n.id'));
+                $element = $this->elementManager->getNode($uuid);
+                if ($element) {
+                    $event = new ElementUpdateAfterBackupLoadEvent($element);
+                    $this->eventDispatcher->dispatch($event);
+                }
+            }
+            $this->elasticEntityManager->flush();
+            ++$page;
+        }
+        $page = 0;
+        $endReached = false;
+        while (!$endReached) {
+            $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+                'MATCH ()-[r]->() RETURN r.id ORDER BY r.id SKIP $skip LIMIT $limit;',
+                [
+                    'skip' => $page * $pageSize,
+                    'limit' => $pageSize,
+                ]
+            ));
+            if (0 === count($res)) {
+                $endReached = true;
+            }
+            foreach ($res as $row) {
+                $uuid = UuidV4::fromString($row->get('r.id'));
+                $element = $this->elementManager->getRelation($uuid);
+                if ($element) {
+                    $event = new ElementUpdateAfterBackupLoadEvent($element);
+                    $this->eventDispatcher->dispatch($event);
+                }
+            }
+            $this->elasticEntityManager->flush();
+            ++$page;
+        }
+
+        $this->io->stopSection('Finished all after backup tasks.');
     }
 
     private function checkBackupName(string $backupName): string

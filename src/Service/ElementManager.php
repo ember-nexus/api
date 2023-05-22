@@ -4,8 +4,15 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\Event\ElementPostCreateEvent;
+use App\Event\ElementPostDeleteEvent;
+use App\Event\ElementPostMergeEvent;
+use App\Event\ElementPreCreateEvent;
+use App\Event\ElementPreDeleteEvent;
+use App\Event\ElementPreMergeEvent;
 use App\Helper\Neo4jClientHelper;
 use Laudis\Neo4j\Databags\Statement;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
@@ -13,6 +20,19 @@ use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 
 class ElementManager
 {
+    /**
+     * @var array<NodeElementInterface|RelationElementInterface>
+     */
+    private array $createQueue = [];
+    /**
+     * @var array<NodeElementInterface|RelationElementInterface>
+     */
+    private array $mergeQueue = [];
+    /**
+     * @var array<NodeElementInterface|RelationElementInterface>
+     */
+    private array $deleteQueue = [];
+
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
         private MongoEntityManager $mongoEntityManager,
@@ -20,63 +40,76 @@ class ElementManager
         private ElementFragmentizeService $elementFragmentizeService,
         private ElementDefragmentizeService $elementDefragmentizeService,
         private Neo4jClientHelper $neo4jClientHelper,
-        private ElementPropertyWriteEventService $elementPropertyWriteEventService
+        private EventDispatcherInterface $eventDispatcher
     ) {
     }
 
     public function create(NodeElementInterface|RelationElementInterface $element): self
     {
-        $this->elementPropertyWriteEventService->updateProperties($element);
-        $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
-        $this->cypherEntityManager->create($fragmentGroup->getCypherFragment());
-        $this->mongoEntityManager->create($fragmentGroup->getMongoFragment());
-        $this->elasticEntityManager->create($fragmentGroup->getElasticFragment());
-
-        return $this;
-    }
-
-    public function createWithUserDefinedData(NodeElementInterface|RelationElementInterface $element, array $userDefinedProperties = []): self
-    {
-        $this->elementPropertyWriteEventService->updateProperties($element, $userDefinedProperties);
-        $this->create($element);
+        $this->createQueue[] = $element;
 
         return $this;
     }
 
     public function merge(NodeElementInterface|RelationElementInterface $element): self
     {
-        $this->elementPropertyWriteEventService->updateProperties($element);
-        $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
-        $this->cypherEntityManager->merge($fragmentGroup->getCypherFragment());
-        $this->mongoEntityManager->merge($fragmentGroup->getMongoFragment());
-        $this->elasticEntityManager->merge($fragmentGroup->getElasticFragment());
-
-        return $this;
-    }
-
-    public function mergeWithUserDefinedData(NodeElementInterface|RelationElementInterface $element, array $userDefinedProperties = []): self
-    {
-        $this->elementPropertyWriteEventService->updateProperties($element, $userDefinedProperties);
-        $this->merge($element);
+        $this->mergeQueue[] = $element;
 
         return $this;
     }
 
     public function delete(NodeElementInterface|RelationElementInterface $element): self
     {
-        $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
-        $this->cypherEntityManager->delete($fragmentGroup->getCypherFragment());
-        $this->mongoEntityManager->delete($fragmentGroup->getMongoFragment());
-        $this->elasticEntityManager->delete($fragmentGroup->getElasticFragment());
+        $this->deleteQueue[] = $element;
 
         return $this;
     }
 
     public function flush(): self
     {
+        foreach ($this->createQueue as $element) {
+            $this->eventDispatcher->dispatch(new ElementPreCreateEvent($element));
+            $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
+            $this->cypherEntityManager->create($fragmentGroup->getCypherFragment());
+            $this->mongoEntityManager->create($fragmentGroup->getMongoFragment());
+            $this->elasticEntityManager->create($fragmentGroup->getElasticFragment());
+        }
+
+        foreach ($this->mergeQueue as $element) {
+            $this->eventDispatcher->dispatch(new ElementPreMergeEvent($element));
+            $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
+            $this->cypherEntityManager->merge($fragmentGroup->getCypherFragment());
+            $this->mongoEntityManager->merge($fragmentGroup->getMongoFragment());
+            $this->elasticEntityManager->merge($fragmentGroup->getElasticFragment());
+        }
+
+        foreach ($this->deleteQueue as $element) {
+            $this->eventDispatcher->dispatch(new ElementPreDeleteEvent($element));
+            $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
+            $this->cypherEntityManager->delete($fragmentGroup->getCypherFragment());
+            $this->mongoEntityManager->delete($fragmentGroup->getMongoFragment());
+            $this->elasticEntityManager->delete($fragmentGroup->getElasticFragment());
+        }
+
         $this->cypherEntityManager->flush();
         $this->mongoEntityManager->flush();
         $this->elasticEntityManager->flush();
+
+        foreach ($this->createQueue as $element) {
+            $this->eventDispatcher->dispatch(new ElementPostCreateEvent($element));
+        }
+
+        foreach ($this->mergeQueue as $element) {
+            $this->eventDispatcher->dispatch(new ElementPostMergeEvent($element));
+        }
+
+        foreach ($this->deleteQueue as $element) {
+            $this->eventDispatcher->dispatch(new ElementPostDeleteEvent($element));
+        }
+
+        $this->createQueue = [];
+        $this->mergeQueue = [];
+        $this->deleteQueue = [];
 
         return $this;
     }
