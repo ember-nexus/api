@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Exception\ClientBadRequestException;
 use App\Exception\ClientUnauthorizedException;
 use App\Exception\ServerException;
 use App\Security\AccessChecker;
@@ -47,14 +48,37 @@ class PostSearchController extends AbstractController
             $stringUserGroups[] = $userGroup->toString();
         }
 
-        //        $body = [
-        //            'match' => [
-        //                'note' => 'contains token',
-        //            ],
-        //        ];
+        if (!array_key_exists('query', $body)) {
+            throw new ClientBadRequestException(detail: "Body parameter 'query' is required.");
+        }
+        $userQuery = $body['query'];
+
+        $nodeTypes = [];
+        if (array_key_exists('nodeType', $body)) {
+            foreach ($body['nodeType'] as $nodeType) {
+                $nodeTypes[] = sprintf('node_%s', strtolower($nodeType));
+            }
+        }
+
+        $relationTypes = [];
+        if (array_key_exists('relationType', $body)) {
+            foreach ($body['relationType'] as $relationType) {
+                $relationTypes[] = sprintf('relation_%s', strtolower($relationType));
+            }
+        }
+
+        $indices = [...$nodeTypes, ...$relationTypes];
+        /**
+         * @psalm-suppress TypeDoesNotContainType
+         */
+        if (0 === count($indices)) {
+            $indices = '*';
+        } else {
+            $indices = implode(',', $indices);
+        }
 
         $res = $this->elasticEntityManager->getClient()->search([
-            'index' => '*',
+            'index' => $indices,
             'body' => [
                 '_source' => [
                     '_id',
@@ -62,7 +86,7 @@ class PostSearchController extends AbstractController
                 'query' => [
                     'bool' => [
                         'must' => [
-                            $body,
+                            $userQuery,
                             [
                                 'bool' => [
                                     'should' => [
