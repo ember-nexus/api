@@ -16,6 +16,25 @@ class AccessChecker
     ) {
     }
 
+    /**
+     * @return UuidInterface[]
+     */
+    public function getUsersGroups(UuidInterface $userUuid): array
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            'MATCH (user:User {id: $userId})-[:IS_IN_GROUP*1..]->(group:Group) RETURN group.id',
+            [
+                'userId' => $userUuid->toString(),
+            ]
+        ));
+        $groupUuids = [];
+        foreach ($res as $row) {
+            $groupUuids[] = UuidV4::fromString($row['group.id']);
+        }
+
+        return $groupUuids;
+    }
+
     public function hasAccessToElement(UuidInterface $userUuid, UuidInterface $elementUuid, AccessType $accessType): bool
     {
         if (ElementType::NODE === $this->getElementType($elementUuid)) {
@@ -290,6 +309,22 @@ class AccessChecker
     }
 
     /**
+     * @return array<UuidInterface>
+     */
+    public function getDirectGroupsWithAccessToElement(UuidInterface $elementUuid, AccessType $accessType): array
+    {
+        $type = $this->getElementType($elementUuid);
+        if (!$type) {
+            return [];
+        }
+        if (ElementType::NODE === $type) {
+            return $this->getDirectGroupsWithAccessToNode($elementUuid, $accessType);
+        } else {
+            return $this->getDirectGroupsWithAccessToRelation($elementUuid, $accessType);
+        }
+    }
+
+    /**
      * @note will only return direct groups. I.e. if group a has access to the element through group b, then only group
      *       b will be returned.
      *
@@ -297,7 +332,7 @@ class AccessChecker
      *
      * @return array<UuidInterface>
      */
-    public function getDirectGroupsWithAccessToElement(UuidInterface $elementUuid, AccessType $accessType): array
+    public function getDirectGroupsWithAccessToNode(UuidInterface $elementUuid, AccessType $accessType): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (group:Group)-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
@@ -343,12 +378,136 @@ class AccessChecker
     }
 
     /**
+     * @note will only return direct groups. I.e. if group a has access to the element through group b, then only group
+     *       b will be returned.
+     *
+     * @return array<UuidInterface>
+     */
+    public function getDirectGroupsWithAccessToRelation(UuidInterface $elementUuid, AccessType $accessType): array
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            "MATCH (start)-[element {id: \$elementId}]->(end)\n".
+            "OPTIONAL MATCH (startGroup:Group)-[startRelations:OWNS|HAS_SEARCH_ACCESS*1..]->(start)\n".
+            "OPTIONAL MATCH (endGroup:Group)-[endRelations:OWNS|HAS_READ_ACCESS|HAS_SEARCH_ACCESS*1..]->(end)\n".
+            "WHERE\n".
+            "  (\n".
+            "    startGroup.id = start.id\n".
+            "    OR\n".
+            "    ALL(relation in startRelations WHERE\n".
+            "      type(relation) = \"OWNS\"\n".
+            "      OR\n".
+            "      (\n".
+            '        type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onLabel IS NULL\n".
+            "          OR\n".
+            "          relation.onLabel IN labels(start)\n".
+            "        )\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onParentLabel IS NULL\n".
+            "          OR\n".
+            "          relation.onParentLabel IN labels(start)\n".
+            "        )\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onState IS NULL\n".
+            "          OR\n".
+            "          (start)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
+            "        )\n".
+            "        AND\n".
+            "        relation.onCreatedByUser IS NULL\n".
+            "      )\n".
+            "    )\n".
+            "  )\n".
+            "  AND\n".
+            "  (\n".
+            "    endGroup.id = end.id\n".
+            "    OR\n".
+            "    ALL(relation in endRelations WHERE\n".
+            "      type(relation) = \"OWNS\"\n".
+            "      OR\n".
+            "      (\n".
+            "        (\n".
+            "          type(relation) = \"HAS_READ_ACCESS\"\n".
+            "          OR\n".
+            '          type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "        )\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onLabel IS NULL\n".
+            "          OR\n".
+            "          relation.onLabel IN labels(end)\n".
+            "        )\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onParentLabel IS NULL\n".
+            "          OR\n".
+            "          relation.onParentLabel IN labels(end)\n".
+            "        )\n".
+            "        AND\n".
+            "        (\n".
+            "          relation.onState IS NULL\n".
+            "          OR\n".
+            "          (end)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
+            "        )\n".
+            "        AND\n".
+            "        relation.onCreatedByUser IS NULL\n".
+            "      )\n".
+            "    )\n".
+            "  )\n".
+            "WITH element, start, end, startGroup, endGroup, startRelations, endRelations\n".
+            "WHERE\n".
+            "  startGroup.id = endGroup.id\n".
+            "  AND\n".
+            "  (\n".
+            "    start.id = element.id\n".
+            "    OR\n".
+            "    startRelations IS NOT NULL\n".
+            "  )\n".
+            "  AND\n".
+            "  (\n".
+            "    end.id = element.id\n".
+            "    OR\n".
+            "    endRelations IS NOT NULL\n".
+            "  )\n".
+            'RETURN DISTINCT startGroup.id AS group;',
+            [
+                'elementId' => $elementUuid->toString(),
+            ]
+        ));
+        $groups = [];
+        foreach ($res as $row) {
+            $groups[] = UuidV4::fromString($row->get('group'));
+        }
+
+        return $groups;
+    }
+
+    /**
+     * @return array<UuidInterface>
+     */
+    public function getDirectUsersWithAccessToElement(UuidInterface $elementUuid, AccessType $accessType): array
+    {
+        $type = $this->getElementType($elementUuid);
+        if (!$type) {
+            return [];
+        }
+        if (ElementType::NODE === $type) {
+            return $this->getDirectUsersWithAccessToNode($elementUuid, $accessType);
+        } else {
+            return $this->getDirectUsersWithAccessToRelation($elementUuid, $accessType);
+        }
+    }
+
+    /**
      * @note will only return direct users. I.e. only users which are connected via OWNS-chain. Also, if the user is
      *       connected via groups & owns *and also* satisfies an onCreatedByUser test.
      *
      * @return array<UuidInterface>
      */
-    public function getDirectUsersWithAccessToElement(UuidInterface $elementUuid, AccessType $accessType): array
+    public function getDirectUsersWithAccessToNode(UuidInterface $elementUuid, AccessType $accessType): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (user:User)-[groups:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
@@ -411,6 +570,150 @@ class AccessChecker
         $users = [];
         foreach ($res as $row) {
             $users[] = UuidV4::fromString($row->get('user.id'));
+        }
+
+        return $users;
+    }
+
+    /**
+     * @note will only return direct users. I.e. only users which are connected via OWNS-chain. Also, if the user is
+     *       connected via groups & owns *and also* satisfies an onCreatedByUser test.
+     *
+     * @return array<UuidInterface>
+     */
+    public function getDirectUsersWithAccessToRelation(UuidInterface $elementUuid, AccessType $accessType): array
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            "MATCH (start)-[element {id: \$elementId}]->(end)\n".
+            "OPTIONAL MATCH (startUser:User)-[startGroups:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_SEARCH_ACCESS*1..]->(start)\n".
+            "OPTIONAL MATCH (endUser:User)-[endGroups:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_READ_ACCESS|HAS_SEARCH_ACCESS*1..]->(end)\n".
+            "WHERE\n".
+            "  (\n".
+            "    startUser.id = start.id\n".
+            "    OR\n".
+            "    (\n".
+            "      ALL(relation in startRelations WHERE\n".
+            "        type(relation) = \"OWNS\"\n".
+            "        OR\n".
+            "        (\n".
+            '          type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "          AND\n".
+            "          (\n".
+            "            relation.onLabel IS NULL\n".
+            "            OR\n".
+            "            relation.onLabel IN labels(start)\n".
+            "          )\n".
+            "          AND\n".
+            "          (\n".
+            "            relation.onParentLabel IS NULL\n".
+            "            OR\n".
+            "            relation.onParentLabel IN labels(start)\n".
+            "          )\n".
+            "          AND\n".
+            "          (\n".
+            "            relation.onState IS NULL\n".
+            "            OR\n".
+            "            (start)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
+            "          )\n".
+            "          AND\n".
+            "          (\n".
+            "            relation.onCreatedByUser IS NULL\n".
+            "            OR\n".
+            "            (start)<-[:CREATED_BY*]-(startUser)\n".
+            "          )\n".
+            "        )\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        isEmpty(startGroups)\n".
+            "        OR\n".
+            "        ANY(relation in startRelations WHERE\n".
+            '          type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "          AND\n".
+            "          (start)<-[:CREATED_BY*]-(startUser)\n".
+            "        )\n".
+            "      )\n".
+            "    )\n".
+            "  )\n".
+            "  AND\n".
+            "  (\n".
+            "    endUser.id = start.id\n".
+            "    OR\n".
+            "    (\n".
+            "      ALL(relation in endRelations WHERE\n".
+            "        type(relation) = \"OWNS\"\n".
+            "        OR\n".
+            "        (\n".
+            "          (\n".
+            "            type(relation) = \"HAS_READ_ACCESS\"\n".
+            "            OR\n".
+            '            type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "          )\n".
+            "          AND\n".
+            "          (\n".
+            "            relation.onLabel IS NULL\n".
+            "            OR\n".
+            "            relation.onLabel IN labels(end)\n".
+            "          )\n".
+            "          AND\n".
+            "          (\n".
+            "            relation.onParentLabel IS NULL\n".
+            "            OR\n".
+            "            relation.onParentLabel IN labels(end)\n".
+            "          )\n".
+            "          AND\n".
+            "          (\n".
+            "            relation.onState IS NULL\n".
+            "            OR\n".
+            "            (end)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
+            "          )\n".
+            "          AND\n".
+            "          (\n".
+            "            relation.onCreatedByUser IS NULL\n".
+            "            OR\n".
+            "            (end)<-[:CREATED_BY*]-(endUser)\n".
+            "          )\n".
+            "        )\n".
+            "      )\n".
+            "      AND\n".
+            "      (\n".
+            "        isEmpty(endGroups)\n".
+            "        OR\n".
+            "        ANY(relation in endRelations WHERE\n".
+            "          (\n".
+            "            type(relation) = \"HAS_READ_ACCESS\"\n".
+            "            OR\n".
+            '            type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
+            "          )\n".
+            "          AND\n".
+            "          (end)<-[:CREATED_BY*]-(endUser)\n".
+            "        )\n".
+            "      )\n".
+            "    )\n".
+            "  )\n".
+            "WITH element, start, end, startUser, endUser, startRelations, endRelations\n".
+            "WHERE\n".
+            "  startUser.id = endUser.id\n".
+            "  AND\n".
+            "  (\n".
+            "    start.id = startUser.id\n".
+            "    OR\n".
+            "    startRelations IS NOT NULL\n".
+            "  )\n".
+            "  AND\n".
+            "  (\n".
+            "    end.id = endUser.id\n".
+            "    OR\n".
+            "    endRelations IS NOT NULL\n".
+            "  )\n".
+            'RETURN DISTINCT startUser.id AS user;',
+            [
+                'elementId' => $elementUuid->toString(),
+            ]
+        ));
+        $users = [];
+        foreach ($res as $row) {
+            $users[] = UuidV4::fromString($row->get('user'));
         }
 
         return $users;

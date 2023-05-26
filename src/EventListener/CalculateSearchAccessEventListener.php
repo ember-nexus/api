@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Event\ElementPostCreateEvent;
 use App\Event\ElementUpdateAfterBackupLoadEvent;
@@ -9,6 +10,7 @@ use App\Security\AccessChecker;
 use App\Service\AppStateService;
 use App\Type\AccessType;
 use App\Type\AppStateType;
+use Ramsey\Uuid\UuidInterface;
 use Syndesi\ElasticDataStructures\Type\Document;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
@@ -39,23 +41,22 @@ class CalculateSearchAccessEventListener
     {
         $element = $event->getElement();
         if ($element instanceof RelationElementInterface) {
-            /**
-             * @todo remove if condition; requires changing $this->accessChecker->getDirectGroupsWithAccessToElement() etc.
-             */
-            return;
+            $this->handleRelation($element);
+        } else {
+            $this->handleNode($element);
         }
+    }
+
+    private function handleNode(NodeElementInterface $element): void
+    {
         $elementId = $element->getIdentifier();
         if (!$elementId) {
             return;
         }
-        $groupsWithSearchAccess = $this->accessChecker->getDirectGroupsWithAccessToElement($elementId, AccessType::SEARCH);
-        $usersWithSearchAccess = $this->accessChecker->getDirectUsersWithAccessToElement($elementId, AccessType::SEARCH);
-        foreach ($groupsWithSearchAccess as $key => $value) {
-            $groupsWithSearchAccess[$key] = $value->toString();
-        }
-        foreach ($usersWithSearchAccess as $key => $value) {
-            $usersWithSearchAccess[$key] = $value->toString();
-        }
+        $groupsWithSearchAccess = $this->accessChecker->getDirectGroupsWithAccessToNode($elementId, AccessType::SEARCH);
+        $usersWithSearchAccess = $this->accessChecker->getDirectUsersWithAccessToNode($elementId, AccessType::SEARCH);
+        $groupsWithSearchAccess = $this->convertArrayOfUuidsToArrayOfStrings($groupsWithSearchAccess);
+        $usersWithSearchAccess = $this->convertArrayOfUuidsToArrayOfStrings($usersWithSearchAccess);
 
         $document = new Document();
         $document
@@ -70,5 +71,46 @@ class CalculateSearchAccessEventListener
             ]);
 
         $this->elasticEntityManager->merge($document);
+    }
+
+    private function handleRelation(RelationElementInterface $element): void
+    {
+        $elementId = $element->getIdentifier();
+        if (!$elementId) {
+            return;
+        }
+        $groupsWithSearchAccess = $this->accessChecker->getDirectGroupsWithAccessToRelation($elementId, AccessType::SEARCH);
+        $usersWithSearchAccess = $this->accessChecker->getDirectUsersWithAccessToRelation($elementId, AccessType::SEARCH);
+        $groupsWithSearchAccess = $this->convertArrayOfUuidsToArrayOfStrings($groupsWithSearchAccess);
+        $usersWithSearchAccess = $this->convertArrayOfUuidsToArrayOfStrings($usersWithSearchAccess);
+
+        $document = new Document();
+        $document
+            ->setIdentifier($element->getIdentifier()?->toString())
+            ->setIndex(sprintf(
+                'relation_%s',
+                strtolower($element->getType() ?? '')
+            ))
+            ->addProperties([
+                '_groupsWithSearchAccess' => $groupsWithSearchAccess,
+                '_usersWithSearchAccess' => $usersWithSearchAccess,
+            ]);
+
+        $this->elasticEntityManager->merge($document);
+    }
+
+    /**
+     * @param UuidInterface[] $uuids
+     *
+     * @return string[]
+     */
+    private function convertArrayOfUuidsToArrayOfStrings(array $uuids): array
+    {
+        $output = [];
+        foreach ($uuids as $uuid) {
+            $output[] = $uuid->toString();
+        }
+
+        return $output;
     }
 }
