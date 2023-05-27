@@ -107,6 +107,10 @@ class ElementManager
             $this->eventDispatcher->dispatch(new ElementPostDeleteEvent($element));
         }
 
+        $this->cypherEntityManager->flush();
+        $this->mongoEntityManager->flush();
+        $this->elasticEntityManager->flush();
+
         $this->createQueue = [];
         $this->mergeQueue = [];
         $this->deleteQueue = [];
