@@ -127,9 +127,11 @@ class PostIndexController extends AbstractController
             throw new ClientNotFoundException();
         }
 
-        $newRelation = (new NodeElement())
+        $newRelation = (new RelationElement())
             ->setIdentifier($relationId)
-            ->setLabel($type)
+            ->setType($type)
+            ->setStart($startId)
+            ->setEnd($endId)
             ->addProperties($data);
 
         $this->elementManager
