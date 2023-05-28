@@ -56,14 +56,14 @@ The combined query will look like this:
 }
 ```
 
-### NodeType
+### NodeTypes
 
-The `nodeType` property is optional and if present, must be an array of node types, to which the search will be limited
+The `nodeTypes` property is optional and if present, must be an array of node types, to which the search will be limited
 to. Internally these types are matched to the correct Elasticsearch indices.
 
-### RelationType
+### RelationTypes
 
-The `relationType` property is optional and if present, must be an array of relation types, to which the search will be
+The `relationTypes` property is optional and if present, must be an array of relation types, to which the search will be
 limited to. Internally these types are matched to the correct Elasticsearch indices.
 
 ## Request Example
@@ -85,7 +85,7 @@ curl \
 {
   "type": "_PartialUnifiedCollection",
   "id": "/",
-  "totalNodes": 10,
+  "totalElements": 10,
   "links": {
     "first": "/",
     "previous": null,

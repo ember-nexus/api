@@ -13,7 +13,7 @@ class RabbitMqConnectionListener
         $this->connection = $connection;
     }
 
-    public function onTerminate(): void
+    public function onKernelTerminate(): void
     {
         $this->connection->close();
     }

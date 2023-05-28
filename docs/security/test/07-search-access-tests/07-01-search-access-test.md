@@ -1,10 +1,35 @@
-# Scenario 2-01: Search Access Test
+# Scenario 7-01: Search Access Test
 
 All users and groups which own elements or have access to them via HAS_SEARCH_ACCESS, should be able to search for them.
 In the following example, all users and groups have search access to data nodes 1, 2 and 3, while data node 4 can only
 be explored via related/children requests.
 
 <div id="graph" class="graph-container" style="height:1000px"></div>
+
+| Test         | Token    | Action            | Options | Result          | Idempotent | State of Test  |
+|:-------------|:---------|:------------------|:--------|:----------------|:-----------|:---------------|
+| `7-01-01-01` | `User 1` | `🟢 POST /search` | 1       | ✔️ 200, count 3 | yes        | ✔️ implemented |
+| `7-01-02-01` | `User 2` | `🟢 POST /search` | 1       | ✔️ 200, count 3 | yes        | ✔️ implemented |
+| `7-01-03-01` | `User 3` | `🟢 POST /search` | 1       | ✔️ 200, count 3 | yes        | ✔️ implemented |
+| `7-01-04-01` | `User 4` | `🟢 POST /search` | 1       | ✔️ 200, count 3 | yes        | ✔️ implemented |
+| `7-01-05-01` | `User 5` | `🟢 POST /search` | 1       | ✔️ 200, count 3 | yes        | ✔️ implemented |
+| `7-01-06-01` | `User 6` | `🟢 POST /search` | 1       | ✔️ 200, count 3 | yes        | ✔️ implemented |
+| `7-01-07-01` | `User 7` | `🟢 POST /search` | 1       | ✔️ 200, count 3 | yes        | ✔️ implemented |
+
+## Options
+
+### Option 1
+
+```json
+{
+  "query": {
+    "term": {
+      "test.keyword": "7-01"
+    }
+  },
+  "nodeTypes": ["Data"]
+}
+```
 
 <script>
 renderGraph(document.getElementById('graph'), {

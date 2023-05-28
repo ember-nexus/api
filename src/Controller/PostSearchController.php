@@ -47,21 +47,29 @@ class PostSearchController extends AbstractController
         }
 
         if (!array_key_exists('query', $body)) {
-            throw new ClientBadRequestException(detail: "Body parameter 'query' is required.");
+            throw new ClientBadRequestException(detail: "Body property 'query' is required.");
         }
         $userQuery = $body['query'];
 
         $nodeTypes = [];
-        if (array_key_exists('nodeType', $body)) {
-            foreach ($body['nodeType'] as $nodeType) {
-                $nodeTypes[] = sprintf('node_%s', strtolower($nodeType));
+        if (array_key_exists('nodeTypes', $body)) {
+            $rawNodeTypes = $body['nodeTypes'];
+            if (!is_array($rawNodeTypes)) {
+                throw new ClientBadRequestException(detail: 'Property "nodeTypes" must be an array of node types.');
+            }
+            foreach ($rawNodeTypes as $rawNodeType) {
+                $nodeTypes[] = sprintf('node_%s', strtolower($rawNodeType));
             }
         }
 
         $relationTypes = [];
-        if (array_key_exists('relationType', $body)) {
-            foreach ($body['relationType'] as $relationType) {
-                $relationTypes[] = sprintf('relation_%s', strtolower($relationType));
+        if (array_key_exists('relationTypes', $body)) {
+            $rawRelationTypes = $body['relationTypes'];
+            if (!is_array($rawRelationTypes)) {
+                throw new ClientBadRequestException(detail: 'Property "relationTypes" must be an array of relation types.');
+            }
+            foreach ($rawRelationTypes as $rawRelationType) {
+                $relationTypes[] = sprintf('relation_%s', strtolower($rawRelationType));
             }
         }
 
@@ -111,15 +119,15 @@ class PostSearchController extends AbstractController
         ]);
 
         if (!($res instanceof Elasticsearch)) {
-            throw new ServerException('Unknown response type for elastic search query.');
+            throw new ServerException(detail: 'Unknown response type for elastic search query.');
         }
 
         $elementIds = [];
-
         foreach ($res->asArray()['hits']['hits'] as $element) {
             $elementIds[] = UuidV4::fromString($element['_id']);
         }
+        $totalElements = $res->asArray()['hits']['total']['value'];
 
-        return $this->collectionService->buildUnifiedCollectionFromUuids($elementIds, 0);
+        return $this->collectionService->buildUnifiedCollectionFromUuids($elementIds, $totalElements);
     }
 }

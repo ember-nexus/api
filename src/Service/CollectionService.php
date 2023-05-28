@@ -226,7 +226,7 @@ class CollectionService
             [
                 'type' => '_PartialUnifiedCollection',
                 'id' => $this->getPageLink(),
-                'totalNodes' => $totalElements,
+                'totalElements' => $totalElements,
                 'links' => [
                     'first' => $this->getPageLink(1),
                     'previous' => $previousPageLink,

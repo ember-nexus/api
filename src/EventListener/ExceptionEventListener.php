@@ -5,6 +5,7 @@ namespace App\EventListener;
 use App\Exception\ExtendedException;
 use App\Exception\ServerException;
 use App\Response\ProblemJsonResponse;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -15,7 +16,8 @@ class ExceptionEventListener
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private KernelInterface $kernel,
-        private ParameterBagInterface $bag
+        private ParameterBagInterface $bag,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -24,9 +26,10 @@ class ExceptionEventListener
      */
     public function onKernelException(ExceptionEvent $event): void
     {
+        $this->logger->error($event->getThrowable());
         $originalException = $extendedException = $event->getThrowable();
         if (!($originalException instanceof ExtendedException)) {
-            $extendedException = new ServerException();
+            $extendedException = new ServerException(detail: 'Other internal exception.');
         }
 
         $instance = $extendedException->getInstance();

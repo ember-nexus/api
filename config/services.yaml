@@ -323,6 +323,7 @@ services:
     tags:
       - name: kernel.event_listener
         event: kernel.terminate
+        method: 'onKernelTerminate'
 
   App\Factory\CypherEntityManagerFactory:
     arguments:

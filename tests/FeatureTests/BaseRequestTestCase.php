@@ -144,6 +144,42 @@ abstract class BaseRequestTestCase extends TestCase
         }
     }
 
+    /**
+     * @param string[] $elementIds
+     */
+    public function assertIsUnifiedCollectionResponse(ResponseInterface $response, int $countElements = null, array $elementIds = []): void
+    {
+        $this->assertSame(200, $response->getStatusCode());
+
+        $this->assertSame('application/json', $response->getHeader('content-type')[0]);
+
+        $body = \Safe\json_decode((string) $response->getBody(), true);
+
+        $this->assertSame('_PartialUnifiedCollection', $body['type']);
+        $this->assertArrayHasKey('id', $body);
+        $this->assertIsNumeric($body['totalElements']);
+        $this->assertIsArray($body['links']);
+        $this->assertArrayHasKey('first', $body['links']);
+        $this->assertArrayHasKey('previous', $body['links']);
+        $this->assertArrayHasKey('next', $body['links']);
+        $this->assertArrayHasKey('last', $body['links']);
+        $this->assertIsArray($body['elements']);
+        if ($countElements) {
+            $this->assertCount($countElements, $body['elements']);
+        }
+        foreach ($elementIds as $elementId) {
+            foreach ($body['elements'] as $element) {
+                if ($element['id'] === $elementId) {
+                    continue 2;
+                }
+            }
+            $this->fail(sprintf(
+                "Element with UUID '%s' not found.",
+                $elementId
+            ));
+        }
+    }
+
     public function assertIsNodeResponse(ResponseInterface $response, string $type): void
     {
         $this->assertSame(200, $response->getStatusCode());

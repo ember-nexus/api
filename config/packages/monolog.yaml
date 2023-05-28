@@ -48,7 +48,6 @@ when@prod:
         process_psr_3_messages: false
         channels: ["!event", "!doctrine", "!deprecation"]
       deprecation:
-        type: rotating_file
-        max_files: 2
-        channels: [deprecation]
-        path: "%kernel.logs_dir%/%kernel.environment%.deprecations.log"
+        type: stream
+        path: php://stderr
+        level: error
