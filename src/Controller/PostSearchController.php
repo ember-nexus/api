@@ -8,7 +8,6 @@ use App\Exception\ServerException;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
-use App\Service\ElementManager;
 use Elastic\Elasticsearch\Response\Elasticsearch;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,7 +20,6 @@ class PostSearchController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
-        private ElementManager $elementManager,
         private AccessChecker $accessChecker,
         private ElasticEntityManager $elasticEntityManager,
         private CollectionService $collectionService
@@ -116,17 +114,12 @@ class PostSearchController extends AbstractController
             throw new ServerException('Unknown response type for elastic search query.');
         }
 
-        $nodeIds = [];
-        $relationIds = [];
+        $elementIds = [];
 
         foreach ($res->asArray()['hits']['hits'] as $element) {
-            if (str_starts_with($element['_index'], 'node_')) {
-                $nodeIds[] = UuidV4::fromString($element['_id']);
-            } else {
-                $relationIds[] = UuidV4::fromString($element['_id']);
-            }
+            $elementIds[] = UuidV4::fromString($element['_id']);
         }
 
-        return $this->collectionService->buildCollectionFromUuids($nodeIds, $relationIds);
+        return $this->collectionService->buildUnifiedCollectionFromUuids($elementIds, 0);
     }
 }

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add PHP sockets extension, upgrade PhpAmqpLib.
+- Improve post search endpoint, add documentation.
 
 ## 0.0.10 - 2023-05-27
 ### Fixed

@@ -24,6 +24,7 @@
   - [`PUT /<uuid> -` Replace Element](/api-endpoints/put-element)
   - [`PATCH /<uuid> -` Update Element](/api-endpoints/patch-element)
   - [`DELETE /<uuid> -` Delete Element](/api-endpoints/delete-element)
+  - [`POST /search -` Search](/api-endpoints/post-search)
   - User Endpoints
   - [`POST /register -` Register New Account](/api-endpoints/post-register)
   - [`POST /sessions -` Create Session](/api-endpoints/post-sessions)

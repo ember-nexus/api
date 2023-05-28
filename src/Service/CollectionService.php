@@ -195,4 +195,46 @@ class CollectionService
             ]
         );
     }
+
+    public function buildUnifiedCollectionFromUuids(
+        array $elementUuids = [],
+        int $totalElements = 0
+    ): CollectionResponse {
+        $elementData = [];
+
+        foreach ($elementUuids as $elementUuid) {
+            $element = $this->elementManager->getElement($elementUuid);
+            if ($element) {
+                $elementData[] = $this->elementToRawService->elementToRaw(
+                    $element
+                );
+            }
+        }
+
+        $totalPages = $this->getTotalPages($totalElements);
+        $currentPage = $this->getCurrentPage();
+        $previousPageLink = null;
+        if ($currentPage > 1 && $currentPage <= $totalPages) {
+            $previousPageLink = $this->getPageLink($currentPage - 1);
+        }
+        $nextPageLink = null;
+        if ($currentPage < $totalPages) {
+            $nextPageLink = $this->getPageLink($currentPage + 1);
+        }
+
+        return new CollectionResponse(
+            [
+                'type' => '_PartialUnifiedCollection',
+                'id' => $this->getPageLink(),
+                'totalNodes' => $totalElements,
+                'links' => [
+                    'first' => $this->getPageLink(1),
+                    'previous' => $previousPageLink,
+                    'next' => $nextPageLink,
+                    'last' => $this->getPageLink($totalPages),
+                ],
+                'elements' => $elementData,
+            ]
+        );
+    }
 }
