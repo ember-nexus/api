@@ -78,7 +78,7 @@ abstract class BaseRequestTestCase extends TestCase
         return $this->runRequest('UNLOCK', $uri, $token);
     }
 
-    public function runRequest(string $method, string $uri, string $token, ?array $data = null): ResponseInterface
+    public function runRequest(string $method, string $uri, string $token, array $data = null): ResponseInterface
     {
         $client = new Client([
             'base_uri' => $_ENV['API_DOMAIN'],
@@ -118,7 +118,7 @@ abstract class BaseRequestTestCase extends TestCase
         }
     }
 
-    public function assertIsCollectionResponse(ResponseInterface $response, ?int $countNodes = null, ?int $countRelations = null): void
+    public function assertIsCollectionResponse(ResponseInterface $response, int $countNodes = null, int $countRelations = null): void
     {
         $this->assertSame(200, $response->getStatusCode());
 

@@ -24,8 +24,8 @@ class AuthProvider
     }
 
     public function setUserAndToken(
-        ?UuidInterface $userUuid = null,
-        ?UuidInterface $tokenUuid = null,
+        UuidInterface $userUuid = null,
+        UuidInterface $tokenUuid = null,
         bool $isAnonymous = false
     ): self {
         $this->userUuid = $userUuid;

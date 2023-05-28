@@ -9,8 +9,8 @@ class ClientForbiddenException extends ClientException
         string $title = 'Forbidden',
         int $status = 403,
         string $detail = 'Client does not have permissions to perform action.',
-        ?string $instance = null,
-        ?\Throwable $previous = null
+        string $instance = null,
+        \Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

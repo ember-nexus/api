@@ -9,8 +9,8 @@ class NotImplementedException extends ClientException
         string $title = 'Not Implemented',
         int $status = 404,
         string $detail = 'The requested resource is not implemented.',
-        ?string $instance = null,
-        ?\Throwable $previous = null
+        string $instance = null,
+        \Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

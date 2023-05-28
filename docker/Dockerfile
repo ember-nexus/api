@@ -20,6 +20,7 @@ ENV PHPIZE_DEPS="\
 		pkgconf \
 		zlib-dev \
 		icu-dev \
+		linux-headers \
 		re2c" \
     PHP_INI_DIR="/usr/local/etc/php" \
 # Apply stack smash protection to functions using local buffers and alloca()
@@ -102,7 +103,6 @@ RUN set -eux; \
 		gnu-libiconv-dev \
 		libsodium-dev \
 		libxml2-dev \
-		linux-headers \
 		oniguruma-dev \
 		openssl-dev \
 		readline-dev \
@@ -272,8 +272,8 @@ ENV VERSION=$VERSION
 RUN apk add pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev \
     && pecl install mongodb \
     && docker-php-ext-configure intl \
-    && docker-php-ext-install intl bcmath \
-    && docker-php-ext-enable mongodb intl bcmath \
+    && docker-php-ext-install intl bcmath sockets \
+    && docker-php-ext-enable mongodb intl bcmath sockets \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && apk del pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev
 
@@ -324,7 +324,7 @@ RUN APP_ENV=prod composer install --no-dev --optimize-autoloader
 
 FROM php as development
 
-RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS linux-headers judy-dev bsd-compat-headers \
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers \
     && pecl install xdebug-3.2.1 memprof \
     && docker-php-ext-enable xdebug memprof \
     && apk del --no-network .build-deps \

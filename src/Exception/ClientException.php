@@ -9,8 +9,8 @@ class ClientException extends ExtendedException
         string $title = 'Generic client error',
         int $status = 400,
         string $detail = '',
-        ?string $instance = null,
-        ?\Throwable $previous = null
+        string $instance = null,
+        \Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

@@ -9,8 +9,8 @@ class ClientUnauthorizedException extends ClientException
         string $title = 'Unauthorized',
         int $status = 401,
         string $detail = 'Request requires authorization.',
-        ?string $instance = null,
-        ?\Throwable $previous = null
+        string $instance = null,
+        \Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

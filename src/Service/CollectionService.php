@@ -71,7 +71,7 @@ class CollectionService
     /**
      * @param int|null $page if null, then the current page is used
      */
-    public function getPageLink(?int $page = null): string
+    public function getPageLink(int $page = null): string
     {
         $currentRequest = $this->requestStack->getCurrentRequest();
         if (null === $currentRequest) {

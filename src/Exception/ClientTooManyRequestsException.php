@@ -9,8 +9,8 @@ class ClientTooManyRequestsException extends ClientException
         string $title = 'Too Many Requests',
         int $status = 429,
         string $detail = 'The client sent too many requests in a given timeframe; rate limiting is active.',
-        ?string $instance = null,
-        ?\Throwable $previous = null
+        string $instance = null,
+        \Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

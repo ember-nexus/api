@@ -9,8 +9,8 @@ class ClientBadIdException extends ClientException
         string $title = 'Bad Id',
         int $status = 400,
         string $detail = 'Requested UUID already exists in database.',
-        ?string $instance = null,
-        ?\Throwable $previous = null
+        string $instance = null,
+        \Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

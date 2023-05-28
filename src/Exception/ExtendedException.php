@@ -27,8 +27,8 @@ class ExtendedException extends \Exception implements ExceptionInterface
         string $title,
         int $status,
         string $detail,
-        ?string $instance = null,
-        ?\Throwable $previous = null
+        string $instance = null,
+        \Throwable $previous = null
     ) {
         parent::__construct('', 0, $previous);
         $this->type = $type;
