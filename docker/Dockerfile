@@ -220,41 +220,46 @@ LABEL org.opencontainers.image.source="https://github.com/nginx/unit/blob/master
     org.opencontainers.image.title="Adapted nginx/unit:8.1" \
     org.opencontainers.image.description="Based on nginx/unit:8.1, updated to PHP 8.2 and rewritten to work on Alpine."
 
-RUN set -ex \
-    && apk update \
-    && apk add mercurial gcc g++ make pcre-dev openssl-dev \
-    && mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules \
-    && hg clone https://hg.nginx.org/unit \
-    && cd unit \
-    && hg up 1.29.1 \
+RUN set -ex
+RUN apk update
+RUN apk add mercurial gcc g++ make pcre-dev openssl-dev
+RUN mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules
+RUN hg clone -u 1.30.0-1 https://hg.nginx.org/unit
+RUN  cd unit \
     && NCPU="$(getconf _NPROCESSORS_ONLN)" \
     && CC_OPT="-fPIC" \
     && LD_OPT="-Wl,--as-needed" \
-    && CONFIGURE_ARGS="--prefix=/usr \
-                --state=/var/lib/unit \
-                --control=unix:/var/run/control.unit.sock \
-                --pid=/var/run/unit.pid \
-                --log=/var/log/unit.log \
-                --tmp=/var/tmp \
-                --user=unit \
-                --group=unit \
-                --openssl \
-                --libdir=/usr/lib/amd64" \
-    && ./configure $CONFIGURE_ARGS --cc-opt="$CC_OPT" --ld-opt="$LD_OPT" --modules=/usr/lib/unit/debug-modules --debug \
+    && CONFIGURE_ARGS_MODULES="--prefix=/usr \
+        --statedir=/var/lib/unit \
+        --control=unix:/var/run/control.unit.sock \
+        --pid=/var/run/unit.pid \
+        --log=/var/log/unit.log \
+        --tmpdir=/var/tmp \
+        --user=unit \
+        --group=unit \
+        --openssl \
+        --libdir=/usr/lib/amd64" \
+    && CONFIGURE_ARGS="$CONFIGURE_ARGS_MODULES \
+        --njs" \
+    && make -j $NCPU -C pkg/contrib .njs \
+    && export PKG_CONFIG_PATH=$(pwd)/pkg/contrib/njs/build \
+    && ./configure $CONFIGURE_ARGS --cc-opt="$CC_OPT" --ld-opt="$LD_OPT" --modulesdir=/usr/lib/unit/debug-modules --debug \
     && make -j $NCPU unitd \
-    && install -pm755 build/unitd /usr/sbin/unitd-debug \
+    && install -pm755 build/sbin/unitd /usr/sbin/unitd-debug \
     && make clean \
-    && ./configure $CONFIGURE_ARGS --cc-opt="$CC_OPT" --ld-opt="$LD_OPT" --modules=/usr/lib/unit/modules \
+    && ./configure $CONFIGURE_ARGS --cc-opt="$CC_OPT" --ld-opt="$LD_OPT" --modulesdir=/usr/lib/unit/modules \
     && make -j $NCPU unitd \
-    && install -pm755 build/unitd /usr/sbin/unitd \
+    && install -pm755 build/sbin/unitd /usr/sbin/unitd \
     && make clean \
-    && ./configure $CONFIGURE_ARGS --cc-opt="$CC_OPT" --modules=/usr/lib/unit/debug-modules --debug \
+    && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/debug-modules --debug \
     && ./configure php \
     && make -j $NCPU php-install \
     && make clean \
-    && ./configure $CONFIGURE_ARGS --cc-opt="$CC_OPT" --modules=/usr/lib/unit/modules \
+    && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/modules \
     && ./configure php \
     && make -j $NCPU php-install \
+    && cd ../ \
+    && rm -rf ./unit \
     && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do dpkg-query -S $n; done | sed 's/^\([^:]\+\):.*$/\1/' | sort | uniq > /requirements.apt
 
 
