@@ -6,8 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.14 - 2023-06-12
 ### Added
-- Upgrade PHP to version 8.2.7, fixes issue #8.
+- Upgrade PHP to version 8.2.7, fixes issue [#8].
 - Upgrade NGINX Unit to version 1.30.
 - Update "Check upstream dependency - Nginx Unit" action from nginx/unit to unit.
 
