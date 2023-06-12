@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Upgrade PHP to version 8.2.7, fixes issue #8.
 - Upgrade NGINX Unit to version 1.30.
+- Update "Check upstream dependency - Nginx Unit" action from nginx/unit to unit.
 
 ## 0.0.13 - 2023-05-30
 ### Added
