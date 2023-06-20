@@ -14,7 +14,7 @@ jobs:
 
       - name: Load latest Docker Hub tags for Nginx Unit PHP
         run: |
-          url=https://hub.docker.com/v2/namespaces/library/repositories/unit/tags
+          url="https://hub.docker.com/v2/namespaces/library/repositories/unit/tags?page_size=25&name=php"
           latestTags=$(wget -O - -o /dev/null $url)
           latestTag=$(echo $latestTags | jq -r '.results[] | select(.name | contains("-php")) | .name' | head -n1)
           echo "Latest tag: $latestTag"
