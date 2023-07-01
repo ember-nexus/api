@@ -6,11 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.15 - 2023-07-01
 ### Added
 - Add PHP ZIP extension.
 - Add backup:fetch command.
+
 ### Changed
 - Feature tests are now loaded from ember-nexus/reference-dataset directly.
+
 ### Fixed
 - Fixed NGINX Unit upstream dependency check action, will no longer return empty strings as version numbers.
 
