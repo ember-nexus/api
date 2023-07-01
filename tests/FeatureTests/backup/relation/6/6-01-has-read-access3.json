@@ -1,9 +1,0 @@
-{
-  "type": "HAS_READ_ACCESS",
-  "id": "aa65540b-3c62-4e9a-b55d-959b3942fd6e",
-  "start": "c3a1868f-dc95-4c2d-bee7-8a6a7fc6a306",
-  "end": "26470e60-daf1-4225-8abb-30eb8d42188f",
-  "data": {
-    "test": "6-01"
-  }
-}

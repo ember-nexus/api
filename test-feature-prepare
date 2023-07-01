@@ -1,7 +1,7 @@
 #!/bin/bash
 
-mkdir -p ./var/backup/test-feature
-rm -rf ./var/backup/test-feature/*
-cp -R ./tests/FeatureTests/backup/* ./var/backup/test-feature/
+REFERENCE_DATASET_VERSION=$(grep -E '^REFERENCE_DATASET_VERSION=' .env | cut -d '=' -f 2)
+
+php bin/console backup:fetch reference-dataset "https://github.com/ember-nexus/reference-dataset/archive/refs/tags/$REFERENCE_DATASET_VERSION.zip" --force
 php bin/console database:drop -f
-php bin/console backup:load test-feature
+php bin/console backup:load reference-dataset
