@@ -27,6 +27,8 @@ class NodeElementFragmentizeEventListener
 
         /**
          * @psalm-suppress UndefinedInterfaceMethod
+         *
+         * @phpstan-ignore-next-line
          */
         $event->getCypherFragment()
             ->addLabel($nodeLabel)

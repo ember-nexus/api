@@ -40,6 +40,8 @@ class RelationElementFragmentizeEventListener
 
         /**
          * @psalm-suppress UndefinedInterfaceMethod
+         *
+         * @phpstan-ignore-next-line
          */
         $event->getCypherFragment()
             ->setType($relationElement->getType())

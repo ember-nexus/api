@@ -16,6 +16,10 @@ class RabbitMQFactory
     {
         $parsed = parse_url($this->rabbitMQAuth);
 
+        if (!is_array($parsed)) {
+            throw new \Exception('Unable to correctly parse RabbitMQ DSN.');
+        }
+
         if (!array_key_exists('user', $parsed)) {
             throw new ServerException(detail: 'RabbitMQ DSN requires user.');
         }

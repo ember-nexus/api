@@ -31,21 +31,23 @@ class ExceptionEventListener
         if (!($originalException instanceof ExtendedException)) {
             $extendedException = new ServerException(detail: 'Other internal exception.');
         }
-
+        /**
+         * @var ExtendedException $extendedException
+         */
         $instance = $extendedException->getInstance();
         $instanceLink = null;
         try {
             $instanceLink = $this->urlGenerator->generate(
                 sprintf(
                     'problem-%s',
-                    $instance
+                    $instance ?? 'unknown'
                 )
             );
         } catch (\Exception $e) {
         }
 
         // check if there are configured alternatives for the instance links
-        if ($this->bag->has('problemInstanceLinks')) {
+        if ($this->bag->has('problemInstanceLinks') && $instance) {
             $problemInstanceLinksConfig = $this->bag->get('problemInstanceLinks');
             if (is_array($problemInstanceLinksConfig)) {
                 if (array_key_exists($instance, $problemInstanceLinksConfig)) {

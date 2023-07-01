@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add command descriptions.
+### Fixed
+- Fix phpstan, psalm and code style problems.
 
 ## 0.0.15 - 2023-07-01
 ### Added

@@ -12,6 +12,9 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 class OwnershipChangeEventListener
 {
+    /**
+     * @var string[]
+     */
     private array $relationshipTypesWhichCanTriggerOwnershipChange = [
         'OWNS',
         'CREATED',
@@ -69,6 +72,9 @@ class OwnershipChangeEventListener
         $jsonMessage = json_encode([
             'element' => $elementId->toString(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($jsonMessage)) {
+            throw new \Exception('Internal server exception.');
+        }
         $message = new AMQPMessage($jsonMessage);
         $channel->basic_publish($message, '', $queue);
         $channel->close();

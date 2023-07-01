@@ -52,10 +52,14 @@ class BackupFetchCommand extends Command
             sys_get_temp_dir(),
             uniqid()
         );
+        $fileSize = filesize($tempFilePath);
+        if (!$fileSize) {
+            $fileSize = 0;
+        }
         file_put_contents($tempFilePath, file_get_contents($input->getArgument('source')));
         $this->io->writeln(sprintf(
             'Loaded archive is <info>%s</info> big.',
-            $this->formatBytes(filesize($tempFilePath))
+            $this->formatBytes($fileSize)
         ));
         $this->io->writeln(sprintf(
             'SHA1 sum of file is <info>%s</info>.',

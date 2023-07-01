@@ -196,6 +196,9 @@ class CollectionService
         );
     }
 
+    /**
+     * @param UuidInterface[] $elementUuids
+     */
     public function buildUnifiedCollectionFromUuids(
         array $elementUuids = [],
         int $totalElements = 0

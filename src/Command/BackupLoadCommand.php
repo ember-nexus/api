@@ -29,6 +29,9 @@ class BackupLoadCommand extends Command
 {
     private string $backupName;
     private int $relationCount = 0;
+    /**
+     * @phpstan-ignore-next-line
+     */
     private int $fileCount = 0;
     private int $nodeCount = 0;
     private int $pageSize = 250;

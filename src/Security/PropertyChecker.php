@@ -16,6 +16,8 @@ class PropertyChecker
 
     /**
      * Checks different things, throws Exception if something is wrong.
+     *
+     * @param array<string, mixed> $newProperties
      */
     public function runCheckUserSuppliedProperties(NodeElementInterface|RelationElementInterface $element, array $newProperties = []): void
     {
