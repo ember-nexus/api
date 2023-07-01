@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add PHP ZIP extension.
+- Add backup:fetch command.
 ### Fixed
 - Fixed NGINX Unit upstream dependency check action, will no longer return empty strings as version numbers.
 
