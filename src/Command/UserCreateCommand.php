@@ -20,7 +20,7 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'user:create')]
+#[AsCommand(name: 'user:create', description: 'Creates a new user.')]
 class UserCreateCommand extends Command
 {
     private OutputStyle $io;

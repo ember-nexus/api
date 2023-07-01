@@ -18,7 +18,7 @@ class EmberNexusStyle extends SymfonyStyle
     private bool $isInSection = false;
 
     public function __construct(
-        private InputInterface $input,
+        private InputInterface $input, /** @phpstan-ignore-line */
         private OutputInterface $output
     ) {
         if ($output instanceof ConsoleOutput) {
@@ -70,6 +70,7 @@ class EmberNexusStyle extends SymfonyStyle
         ));
     }
 
+    /** @phpstan-ignore-next-line */
     public function success(array|string $message): void
     {
         if ($this->isInSection) {

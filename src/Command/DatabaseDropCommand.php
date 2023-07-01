@@ -21,7 +21,7 @@ use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-#[AsCommand(name: 'database:drop')]
+#[AsCommand(name: 'database:drop', description: 'Resets all connected databases.')]
 class DatabaseDropCommand extends Command
 {
     private EmberNexusStyle $io;
@@ -117,6 +117,9 @@ class DatabaseDropCommand extends Command
     {
         $this->io->startSection('Task 4 of 6: Elastic Search');
         $this->io->writeln('Deleting Elastic data...');
+        /**
+         * @phpstan-ignore-next-line
+         */
         $rawIndices = $this->elasticEntityManager->getClient()->cat()->indices(['index' => '*'])->asString();
         $rawIndices = explode("\n", $rawIndices);
         $indices = [];

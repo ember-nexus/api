@@ -6,7 +6,7 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class RabbitMqConnectionListener
 {
-    private $connection;
+    private AMQPStreamConnection $connection;
 
     public function __construct(AMQPStreamConnection $connection)
     {

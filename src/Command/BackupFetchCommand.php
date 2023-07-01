@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'backup:fetch')]
+#[AsCommand(name: 'backup:fetch', description: 'Downloads backup from remote source to local storage.')]
 class BackupFetchCommand extends Command
 {
     private EmberNexusStyle $io;
@@ -52,10 +52,14 @@ class BackupFetchCommand extends Command
             sys_get_temp_dir(),
             uniqid()
         );
+        $fileSize = filesize($tempFilePath);
+        if (!$fileSize) {
+            $fileSize = 0;
+        }
         file_put_contents($tempFilePath, file_get_contents($input->getArgument('source')));
         $this->io->writeln(sprintf(
             'Loaded archive is <info>%s</info> big.',
-            $this->formatBytes(filesize($tempFilePath))
+            $this->formatBytes($fileSize)
         ));
         $this->io->writeln(sprintf(
             'SHA1 sum of file is <info>%s</info>.',

@@ -14,6 +14,9 @@ class CheckUserSuppliedPropertiesEvent implements EventInterface, HasPropertiesI
     use StoppableEventTrait;
     use PropertiesTrait;
 
+    /**
+     * @param array<string, mixed> $newProperties
+     */
     public function __construct(
         private NodeElementInterface|RelationElementInterface $element,
         array $newProperties

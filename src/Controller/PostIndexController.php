@@ -76,6 +76,9 @@ class PostIndexController extends AbstractController
         throw new ClientBadRequestException(detail: "When creating a relation, both properties 'start' as well as 'end' must be set.");
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function createNode(string $type, UuidInterface $nodeId, array $data): Response
     {
         $userId = $this->authProvider->getUserUuid();
@@ -113,6 +116,9 @@ class PostIndexController extends AbstractController
         );
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function createRelation(string $type, UuidInterface $relationId, UuidInterface $startId, UuidInterface $endId, array $data): Response
     {
         $userId = $this->authProvider->getUserUuid();

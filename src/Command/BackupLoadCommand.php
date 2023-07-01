@@ -24,11 +24,14 @@ use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'backup:load')]
+#[AsCommand(name: 'backup:load', description: 'Loads a local backup into the empty database.')]
 class BackupLoadCommand extends Command
 {
     private string $backupName;
     private int $relationCount = 0;
+    /**
+     * @phpstan-ignore-next-line
+     */
     private int $fileCount = 0;
     private int $nodeCount = 0;
     private int $pageSize = 250;
