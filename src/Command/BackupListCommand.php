@@ -14,7 +14,7 @@ use Symfony\Component\Console\Style\OutputStyle;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'backup:list')]
+#[AsCommand(name: 'backup:list', description: 'Lists all available local backups.')]
 class BackupListCommand extends Command
 {
     private OutputStyle $io;

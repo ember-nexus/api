@@ -19,7 +19,7 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'user:session:create')]
+#[AsCommand(name: 'user:session:create', description: 'Creates a new session for an user.')]
 class UserSessionCreateCommand extends Command
 {
     private OutputStyle $io;

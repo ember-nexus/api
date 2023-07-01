@@ -23,7 +23,7 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'backup:create')]
+#[AsCommand(name: 'backup:create', description: 'Creates a new backup.')]
 class BackupCreateCommand extends Command
 {
     private int $nodeCount = 0;

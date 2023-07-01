@@ -21,7 +21,7 @@ use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-#[AsCommand(name: 'database:drop')]
+#[AsCommand(name: 'database:drop', description: 'Resets all connected databases.')]
 class DatabaseDropCommand extends Command
 {
     private EmberNexusStyle $io;

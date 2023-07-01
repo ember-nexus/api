@@ -24,7 +24,7 @@ use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'backup:load')]
+#[AsCommand(name: 'backup:load', description: 'Loads a local backup into the empty database.')]
 class BackupLoadCommand extends Command
 {
     private string $backupName;

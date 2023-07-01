@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'backup:fetch')]
+#[AsCommand(name: 'backup:fetch', description: 'Downloads backup from remote source to local storage.')]
 class BackupFetchCommand extends Command
 {
     private EmberNexusStyle $io;
