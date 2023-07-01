@@ -19,6 +19,7 @@ ENV PHPIZE_DEPS="\
 		make \
 		pkgconf \
 		zlib-dev \
+        libzip-dev \
 		icu-dev \
 		linux-headers \
 		re2c" \
@@ -47,6 +48,8 @@ RUN apk add --no-cache \
         bash \
         pcre \
         icu \
+        libzip \
+        zlib \
 # https://github.com/docker-library/php/issues/494
 		openssl
 
@@ -277,8 +280,8 @@ ENV VERSION=$VERSION
 RUN apk add pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev \
     && pecl install mongodb \
     && docker-php-ext-configure intl \
-    && docker-php-ext-install intl bcmath sockets \
-    && docker-php-ext-enable mongodb intl bcmath sockets \
+    && docker-php-ext-install intl bcmath sockets zip \
+    && docker-php-ext-enable mongodb intl bcmath sockets zip \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && apk del pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev
 
