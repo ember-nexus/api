@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add command descriptions.
 ### Fixed
 - Fix phpstan, psalm and code style problems.
-- Fix pagination problem in GetChildrenController, GetParentsController.
+- Fix pagination problem in GetChildrenController, GetParentsController, GetRelatedController.
 
 ## 0.0.15 - 2023-07-01
 ### Added
