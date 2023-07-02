@@ -102,8 +102,12 @@ class GetParentsController extends AbstractController
             "  user.id = parent.id\n".
             "  OR\n".
             "  path IS NOT NULL\n".
-            "RETURN parent.id, collect(r.id), count(parent) AS totalCount\n".
-            "ORDER BY parent.id\n".
+            "WITH parent, collect(DISTINCT r.id) AS rCol\n".
+            "WITH parent, collect(parent.id) + collect(rCol) AS row\n".
+            "WITH collect(DISTINCT row) AS allRows, count(parent) AS totalCount\n".
+            "UNWIND allRows AS row\n".
+            "RETURN row[0] AS parent, row[1] AS r, totalCount\n".
+            "ORDER BY parent\n".
             "SKIP \$skip\n".
             'LIMIT $limit',
             [
@@ -119,8 +123,8 @@ class GetParentsController extends AbstractController
         if (count($res) > 0) {
             $totalCount = $res->first()->get('totalCount');
             foreach ($res as $resultSet) {
-                $nodeUuids[] = UuidV4::fromString($resultSet->get('parent.id'));
-                foreach ($resultSet->get('collect(r.id)') as $relationId) {
+                $nodeUuids[] = UuidV4::fromString($resultSet->get('parent'));
+                foreach ($resultSet->get('r') as $relationId) {
                     $relationUuids[] = UuidV4::fromString($relationId);
                 }
             }

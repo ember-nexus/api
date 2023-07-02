@@ -102,8 +102,12 @@ class GetRelatedController extends AbstractController
             "  user.id = outer.id\n".
             "  OR\n".
             "  path IS NOT NULL\n".
-            "RETURN outer.id, collect(r.id), count(outer) AS totalCount\n".
-            "ORDER BY outer.id\n".
+            "WITH outer, collect(DISTINCT r.id) AS rCol\n".
+            "WITH outer, collect(outer.id) + collect(rCol) AS row\n".
+            "WITH collect(DISTINCT row) AS allRows, count(outer) AS totalCount\n".
+            "UNWIND allRows AS row\n".
+            "RETURN row[0] AS outer, row[1] AS r, totalCount\n".
+            "ORDER BY outer\n".
             "SKIP \$skip\n".
             'LIMIT $limit',
             [
@@ -119,8 +123,8 @@ class GetRelatedController extends AbstractController
         if (count($res) > 0) {
             $totalCount = $res->first()->get('totalCount');
             foreach ($res as $resultSet) {
-                $nodeUuids[] = UuidV4::fromString($resultSet->get('outer.id'));
-                foreach ($resultSet->get('collect(r.id)') as $relationId) {
+                $nodeUuids[] = UuidV4::fromString($resultSet->get('outer'));
+                foreach ($resultSet->get('r') as $relationId) {
                     $relationUuids[] = UuidV4::fromString($relationId);
                 }
             }
