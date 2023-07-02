@@ -4,9 +4,6 @@ namespace App\tests\FeatureTests\Security\Scenario07SearchAccessTests;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-/**
- * @group test
- */
 class _07_01_SearchAccessTest extends BaseRequestTestCase
 {
     public const TOKEN_1 = 'secret-token:Dp6FGPhJplengl8NSAI7vO';
