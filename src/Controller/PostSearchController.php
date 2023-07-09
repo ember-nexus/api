@@ -89,6 +89,8 @@ class PostSearchController extends AbstractController
                 '_source' => [
                     '_id',
                 ],
+                'from' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
+                'size' => $this->collectionService->getPageSize(),
                 'query' => [
                     'bool' => [
                         'must' => [

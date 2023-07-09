@@ -26,7 +26,7 @@ class _07_01_SearchAccessTest extends BaseRequestTestCase
             [
                 'query' => [
                     'term' => [
-                        'test.keyword' => '7-01',
+                        'test.keyword' => 'security.limitedAccess.searchAccess',
                     ],
                 ],
                 'nodeTypes' => ['Data'],
