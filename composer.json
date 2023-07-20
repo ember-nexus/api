@@ -1,6 +1,6 @@
 {
   "type": "project",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "license": "proprietary",
   "minimum-stability": "dev",
   "prefer-stable": true,
