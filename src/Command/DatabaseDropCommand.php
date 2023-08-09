@@ -119,6 +119,8 @@ class DatabaseDropCommand extends Command
         $this->io->writeln('Deleting Elastic data...');
         /**
          * @phpstan-ignore-next-line
+         * @psalm-suppress PossiblyUndefinedMethod
+         * @psalm-suppress InvalidArgument
          */
         $rawIndices = $this->elasticEntityManager->getClient()->cat()->indices(['index' => '*'])->asString();
         $rawIndices = explode("\n", $rawIndices);
@@ -130,6 +132,9 @@ class DatabaseDropCommand extends Command
             }
         }
         foreach ($indices as $index) {
+            /**
+             * @psalm-suppress InvalidArgument
+             */
             $this->elasticEntityManager->getClient()->indices()->delete(['index' => $index]);
         }
         $this->io->stopSection('Successfully deleted Elastic data.');
