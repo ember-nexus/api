@@ -18,7 +18,7 @@ services:
 
   ember-nexus-neo4j:
     container_name: ember-nexus-neo4j
-    image: neo4j:5.1.0
+    image: neo4j:5.10.0
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -38,7 +38,7 @@ services:
 
   ember-nexus-elasticsearch:
     container_name: ember-nexus-elasticsearch
-    image: elasticsearch:8.5.3
+    image: elasticsearch:8.8.1
     ports:
       - "9200:9200"
     environment:
@@ -49,7 +49,7 @@ services:
   # optional, only for debugging purposes of elastic search required
   ember-nexus-kibana:
     container_name: ember-nexus-kibana
-    image: kibana:8.5.3
+    image: kibana:8.8.1
     ports:
       - "5601:5601"
     depends_on:
