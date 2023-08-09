@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Change theme colors in documentation, update favicon.
 - Update dependencies.
+- Enhance API endpoint documentation.
+  - Get element endpoint.
+  - Get index endpoint.
 
 ## 0.0.18 - 2023-07-20
 ### Changed

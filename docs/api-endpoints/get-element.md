@@ -10,8 +10,8 @@ a node or a relationship.
 
 ```bash
 curl \
-  -H "Authorization: Bearer secret-token:XtNzGLwxpDFtrjv68nvoUG" \
-  https://api.localhost/904a5f37-785e-428d-96ba-4fa58cd2bea8
+  -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
+  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
 ```
 
 <!-- tabs:start -->
@@ -22,11 +22,13 @@ Response for nodes:
 
 ```json
 {
-  "type": "Data",
-  "id": "904a5f37-785e-428d-96ba-4fa58cd2bea8",
+  "type": "Comment",
+  "id": "74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac",
   "data": {
-    "name": "Some data element",
-    "description": "demo"
+    "content": "Blue is one of the three primary colours in the RYB colour model ...",
+    "created": "2023-08-09 21:17:16",
+    "name": "Blue",
+    "updated": "2023-08-09 21:17:16"
   }
 }
 ```
