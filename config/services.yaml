@@ -1,17 +1,10 @@
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
 
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
-parameters:
-  version: '%env(VERSION)%'
-  anonymousUserUUID: '%env(ANONYMOUS_USER_UUID)%'
-  pageSize:
-    min: 5
-    default: 25
-    max: 100
-  problemInstanceLinks:          # null can be replaced by links to redirect to external problem documentation sites
-    404-not-found: null
+imports:
+  - { resource: internal-parameters.yaml }
+  - { resource: default-parameters.yaml }
+  - { resource: custom-parameters.yaml }
 
 services:
   # default configuration for services in *this* file
@@ -275,6 +268,12 @@ services:
         method: 'onNodeElementDefragmentizeEvent'
 
   App\EventListener\NodeElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+
+  App\EventListener\UserIdentifierPropertyElementFragmentizeEventListener:
     tags:
       - name: kernel.event_listener
         event: 'App\Event\NodeElementFragmentizeEvent'

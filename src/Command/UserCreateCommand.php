@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Event\UserCreateEvent;
+use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
 use App\Type\NodeElement;
@@ -28,7 +29,8 @@ class UserCreateCommand extends Command
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
+        private UserPasswordHasher $userPasswordHasher
     ) {
         parent::__construct();
     }
@@ -71,7 +73,7 @@ class UserCreateCommand extends Command
             ->setLabel('User')
             ->addProperties([
                 'username' => $username,
-                '_passwordHash' => password_hash($input->getArgument('password'), PASSWORD_ARGON2I),
+                '_passwordHash' => $this->userPasswordHasher->hashPassword($input->getArgument('password')),
             ])
             ->setIdentifier($userId);
 

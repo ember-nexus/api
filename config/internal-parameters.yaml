@@ -1,0 +1,4 @@
+parameters:
+  _dev_version: 'dev'
+  version: '%env(default:_dev_version:VERSION)%'
+  anonymousUserUUID: '%env(ANONYMOUS_USER_UUID)%'

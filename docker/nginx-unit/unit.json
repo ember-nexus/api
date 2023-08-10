@@ -1,4 +1,10 @@
 {
+    "settings": {
+        "http": {
+            "server_version": false
+        }
+    },
+
     "listeners": {
         "*:80": {
             "pass": "routes"

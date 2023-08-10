@@ -3,6 +3,7 @@
   - [Tech stack](/getting-started/tech-stack)
   - [Hardware Requirements](/getting-started/hardware-requirements)
   - [Local Deployment](/getting-started/local-deployment)
+  - [Configuration](/getting-started/configuration)
   - [Graph Database Fundamentals](/getting-started/graph-database-fundamentals)
 - Security
   - [Ownership](/security/ownership)
@@ -25,6 +26,7 @@
   - [`PATCH /<uuid> -` Update Element](/api-endpoints/patch-element)
   - [`DELETE /<uuid> -` Delete Element](/api-endpoints/delete-element)
   - [`POST /search -` Search](/api-endpoints/post-search)
+  - [`GET /instance-configuration -` Get Instance Configuration](/api-endpoints/get-instance-configuration)
   - User Endpoints
   - [`POST /register -` Register New Account](/api-endpoints/post-register)
   - [`POST /sessions -` Create Session](/api-endpoints/post-sessions)

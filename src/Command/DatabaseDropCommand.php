@@ -119,6 +119,7 @@ class DatabaseDropCommand extends Command
         $this->io->writeln('Deleting Elastic data...');
         /**
          * @phpstan-ignore-next-line
+         *
          * @psalm-suppress PossiblyUndefinedMethod
          * @psalm-suppress InvalidArgument
          */

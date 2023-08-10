@@ -95,7 +95,7 @@ abstract class BaseRequestTestCase extends TestCase
         ];
 
         if ($data) {
-            $options['headers']['Content-Type'] = 'application/json';
+            $options['headers']['Content-Type'] = 'application/json; charset=utf-8';
             $options['body'] = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
 
@@ -122,7 +122,7 @@ abstract class BaseRequestTestCase extends TestCase
     {
         $this->assertSame(200, $response->getStatusCode());
 
-        $this->assertSame('application/json', $response->getHeader('content-type')[0]);
+        $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
 
         $body = \Safe\json_decode((string) $response->getBody(), true);
 
@@ -151,7 +151,7 @@ abstract class BaseRequestTestCase extends TestCase
     {
         $this->assertSame(200, $response->getStatusCode());
 
-        $this->assertSame('application/json', $response->getHeader('content-type')[0]);
+        $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
 
         $body = \Safe\json_decode((string) $response->getBody(), true);
 
@@ -184,7 +184,7 @@ abstract class BaseRequestTestCase extends TestCase
     {
         $this->assertSame(200, $response->getStatusCode());
 
-        $this->assertSame('application/json', $response->getHeader('content-type')[0]);
+        $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
 
         $body = \Safe\json_decode((string) $response->getBody(), true);
 
@@ -198,7 +198,7 @@ abstract class BaseRequestTestCase extends TestCase
     {
         $this->assertSame(200, $response->getStatusCode());
 
-        $this->assertSame('application/json', $response->getHeader('content-type')[0]);
+        $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
 
         $body = \Safe\json_decode((string) $response->getBody(), true);
 
@@ -214,7 +214,7 @@ abstract class BaseRequestTestCase extends TestCase
     {
         $this->assertSame($status, $response->getStatusCode());
 
-        $this->assertSame('application/problem+json', $response->getHeader('content-type')[0]);
+        $this->assertSame('application/problem+json; charset=utf-8', $response->getHeader('content-type')[0]);
 
         $body = \Safe\json_decode((string) $response->getBody(), true);
 

@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add `/instance-configuration` endpoint for retrieving instance specific configurations.
+- Add `charset=utf-8` property in response headers.
 ### Changed
 - Change theme colors in documentation, update favicon.
 - Update dependencies.
@@ -13,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Get element endpoint.
   - Get index endpoint.
 - Update docker-compose.yml for local deployment.
+- Disable NGINX Unit version in response header, see
+  [commit](https://github.com/nginx/unit/commit/1a485fed6a8353ecc09e6c0f050e44c0a2d30419).
+- Disabled PHP version in response header.
+- Split services.yaml file into smaller ones for easier customization.
 
 ## 0.0.18 - 2023-07-20
 ### Changed
