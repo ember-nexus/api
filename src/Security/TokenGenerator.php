@@ -8,6 +8,8 @@ use App\Type\RelationElement;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use Safe\DateTime;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Tuupola\Base58;
 
@@ -17,12 +19,13 @@ class TokenGenerator
 
     public function __construct(
         private ElementManager $elementManager,
-        private CypherEntityManager $cypherEntityManager
+        private CypherEntityManager $cypherEntityManager,
+        private ParameterBagInterface $bag
     ) {
         $this->encoder = new Base58();
     }
 
-    public function createNewToken(UuidInterface $userUuid): string
+    public function createNewToken(UuidInterface $userUuid, string $name = null, int $lifetimeInSeconds = null): string
     {
         for ($i = 0; $i < 3; ++$i) {
             $token = $this->createToken();
@@ -40,11 +43,41 @@ class TokenGenerator
                 break;
             }
         }
+
+        $tokenConfig = $this->bag->get('token');
+        if (null === $tokenConfig) {
+            throw new \Exception("Unable to get config; key 'token' must exist.");
+        }
+        if (!is_array($tokenConfig)) {
+            throw new \Exception("Configuration key 'token' must be an array.");
+        }
+
+        if (null === $lifetimeInSeconds) {
+            $lifetimeInSeconds = $tokenConfig['defaultLifetimeInSeconds'];
+        }
+
+        if ($lifetimeInSeconds > $tokenConfig['maxLifetimeInSeconds']) {
+            $lifetimeInSeconds = $tokenConfig['maxLifetimeInSeconds'];
+        }
+        if ($lifetimeInSeconds < $tokenConfig['minLifetimeInSeconds']) {
+            $lifetimeInSeconds = $tokenConfig['minLifetimeInSeconds'];
+        }
+
+        $expirationDate = (new DateTime())
+            ->add(new \DateInterval(sprintf('PT%sS', $lifetimeInSeconds)))
+            ->format('Y-m-d H:i:s');
+
+        $name ??= (new DateTime())->format('Y-m-d H:i:s');
+
         $tokenUuid = Uuid::uuid4();
         $tokenNode = (new NodeElement())
             ->setLabel('Token')
             ->setIdentifier($tokenUuid)
-            ->addProperty('hash', $hash);
+            ->addProperties([
+                'hash' => $hash,
+                'expirationDate' => $expirationDate,
+                'name' => $name,
+            ]);
         $this->elementManager->create($tokenNode);
         $this->elementManager->flush();
 
