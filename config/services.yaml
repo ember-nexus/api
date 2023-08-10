@@ -2,9 +2,9 @@
 # Files in the packages/ subdirectory configure your dependencies.
 
 imports:
-  - { resource: internal-parameters.yaml }
-  - { resource: default-parameters.yaml }
-  - { resource: custom-parameters.yaml }
+  - {resource: internal-parameters.yaml}
+  - {resource: default-parameters.yaml}
+  - {resource: custom-parameters.yaml}
 
 services:
   # default configuration for services in *this* file
