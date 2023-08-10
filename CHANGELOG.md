@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.19 - 2023-08-10
 ### Added
 - Add `/instance-configuration` endpoint for retrieving instance specific configurations.
 - Add `charset=utf-8` property in response headers.
+
 ### Changed
 - Change theme colors in documentation, update favicon.
 - Update dependencies.
