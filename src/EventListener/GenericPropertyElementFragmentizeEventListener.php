@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use App\Event\NodeElementFragmentizeEvent;
 use App\Event\RelationElementFragmentizeEvent;
+use Laudis\Neo4j\Types\DateTimeZoneId;
 
 class GenericPropertyElementFragmentizeEventListener
 {
@@ -40,6 +41,11 @@ class GenericPropertyElementFragmentizeEventListener
             if ($value instanceof \DateTimeInterface) {
                 $cypherFragment->addProperty($name, $value);
                 $elasticFragment->addProperty($name, $value->format('Uu'));
+                continue;
+            }
+            if ($value instanceof DateTimeZoneId) {
+                $cypherFragment->addProperty($name, $value);
+                $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
                 continue;
             }
             if (is_object($value)) {

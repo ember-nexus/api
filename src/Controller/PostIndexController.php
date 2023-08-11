@@ -53,6 +53,16 @@ class PostIndexController extends AbstractController
         $data = [];
         if (array_key_exists('data', $body)) {
             $data = $body['data'];
+            foreach ($data as $key => $value) {
+                if (is_string($value)) {
+                    if (strlen($value) >= 22 && strlen($value) <= 26) {
+                        $possibleDate = \DateTime::createFromFormat(\DateTime::ATOM, $value);
+                        if (false !== $possibleDate) {
+                            $data[$key] = $possibleDate;
+                        }
+                    }
+                }
+            }
         }
 
         $startId = null;

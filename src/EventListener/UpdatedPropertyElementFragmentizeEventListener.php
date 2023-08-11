@@ -5,6 +5,8 @@ namespace App\EventListener;
 use App\Event\NodeElementFragmentizeEvent;
 use App\Event\RelationElementFragmentizeEvent;
 use App\Exception\ServerException;
+use Laudis\Neo4j\Types\DateTimeZoneId;
+use MongoDB\BSON\UTCDateTime;
 
 class UpdatedPropertyElementFragmentizeEventListener
 {
@@ -36,8 +38,14 @@ class UpdatedPropertyElementFragmentizeEventListener
             throw new ServerException(detail: 'Server must set updated property before persisting element');
         }
         $updated = $element->getProperty('updated');
+        if ($updated instanceof DateTimeZoneId) {
+            $updated = $updated->toDateTime();
+        }
+        if (!($updated instanceof \DateTimeInterface)) {
+            throw new \Exception("Unable to get datetime info from updated property of type '".get_class($updated)."'.");
+        }
         $cypherFragment->addProperty('updated', $updated);
-        $mongoFragment->addProperty('updated', $updated);
-        $elasticFragment->addProperty('updated', $updated);
+        $mongoFragment->addProperty('updated', new UTCDateTime($updated));
+        $elasticFragment->addProperty('updated', $updated->format('Uu'));
     }
 }

@@ -5,6 +5,8 @@ namespace App\EventListener;
 use App\Event\NodeElementFragmentizeEvent;
 use App\Event\RelationElementFragmentizeEvent;
 use App\Exception\ServerException;
+use Laudis\Neo4j\Types\DateTimeZoneId;
+use MongoDB\BSON\UTCDateTime;
 
 class CreatedPropertyElementFragmentizeEventListener
 {
@@ -36,8 +38,14 @@ class CreatedPropertyElementFragmentizeEventListener
             throw new ServerException(detail: 'Server must set created property before persisting element');
         }
         $created = $element->getProperty('created');
+        if ($created instanceof DateTimeZoneId) {
+            $created = $created->toDateTime();
+        }
+        if (!($created instanceof \DateTimeInterface)) {
+            throw new \Exception("Unable to get datetime info from created property of type '".get_class($created)."'.");
+        }
         $cypherFragment->addProperty('created', $created);
-        $mongoFragment->addProperty('created', $created);
-        $elasticFragment->addProperty('created', $created);
+        $mongoFragment->addProperty('created', new UTCDateTime($created));
+        $elasticFragment->addProperty('created', $created->format('Uu'));
     }
 }

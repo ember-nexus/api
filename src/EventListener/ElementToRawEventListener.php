@@ -5,6 +5,7 @@ namespace App\EventListener;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Event\ElementToRawEvent;
+use Laudis\Neo4j\Types\DateTimeZoneId;
 
 class ElementToRawEventListener
 {
@@ -28,6 +29,11 @@ class ElementToRawEventListener
             $rawData['end'] = $element->getEnd()?->toString();
         }
         $properties = $element->getProperties();
+        foreach ($properties as $key => $value) {
+            if ($value instanceof DateTimeZoneId) {
+                $properties[$key] = $value->toDateTime()->format(\DateTime::ATOM);
+            }
+        }
         ksort($properties);
         $rawData['data'] = $properties;
         $event->setRawData($rawData);

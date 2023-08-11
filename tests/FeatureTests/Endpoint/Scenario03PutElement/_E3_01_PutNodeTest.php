@@ -28,6 +28,7 @@ class _E3_01_PutNodeTest extends BaseRequestTestCase
                 'test' => 'e3-01',
             ]
         );
+        print_r((string) $response->getBody());
         $this->assertNoContentResponse($response);
 
         $response = $this->runGetRequest(sprintf('/%s', self::DATA), self::TOKEN);

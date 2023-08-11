@@ -12,6 +12,7 @@ class JsonResponse extends SymfonyJsonResponse
     public function __construct(mixed $data = null, int $status = 200, array $headers = [], bool $json = false)
     {
         $this->charset = 'UTF-8';
+        $this->encodingOptions = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
         parent::__construct(
             $data,
             $status,

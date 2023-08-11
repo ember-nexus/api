@@ -8,10 +8,10 @@ use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,8 +24,8 @@ class PostRegisterController extends AbstractController
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private UrlGeneratorInterface $router,
-        private ParameterBagInterface $bag,
-        private UserPasswordHasher $userPasswordHasher
+        private UserPasswordHasher $userPasswordHasher,
+        private EmberNexusConfiguration $emberNexusConfiguration
     ) {
     }
 
@@ -38,14 +38,7 @@ class PostRegisterController extends AbstractController
     {
         $body = \Safe\json_decode($request->getContent(), true);
 
-        $registerConfig = $this->bag->get('register');
-        if (null === $registerConfig) {
-            throw new \Exception("Unable to get unique identifier from config; key 'register' must exist.");
-        }
-        if (!is_array($registerConfig)) {
-            throw new \Exception("Configuration key 'register' must be an array.");
-        }
-        if (($registerConfig['enabled'] ?? false) === false) {
+        if (!$this->emberNexusConfiguration->isRegisterEnabled()) {
             throw new ClientForbiddenException();
         }
 
@@ -63,10 +56,7 @@ class PostRegisterController extends AbstractController
         }
         $password = $body['password'];
 
-        $uniqueIdentifier = $registerConfig['uniqueIdentifier'];
-        if (null === $uniqueIdentifier) {
-            throw new \Exception("Unable to get unique identifier from config; key 'register.uniqueIdentifier' must exist.");
-        }
+        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         if (!array_key_exists($uniqueIdentifier, $data)) {
             throw new ClientBadRequestException(detail: sprintf("Property '%s' must be set.", $uniqueIdentifier));
         }

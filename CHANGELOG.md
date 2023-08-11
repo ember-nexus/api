@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Reword application configuration, via internal Symfony bundle.
 - Switch datetime format from temporary string type to datetime.
+- Change default JSON encoding options.
+- Replaced configuration, documentation WIP.
 
 ## 0.0.19 - 2023-08-10
 ### Added

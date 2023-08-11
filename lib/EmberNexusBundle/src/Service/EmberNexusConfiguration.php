@@ -4,12 +4,32 @@ namespace EmberNexusBundle\Service;
 
 class EmberNexusConfiguration
 {
+    public const PAGE_SIZE = 'pageSize';
+    public const PAGE_SIZE_MIN = 'min';
+    public const PAGE_SIZE_DEFAULT = 'default';
+    public const PAGE_SIZE_MAX = 'max';
+
+    public const REGISTER = 'register';
+    public const REGISTER_ENABLED = 'enabled';
+    public const REGISTER_UNIQUE_IDENTIFIER = 'uniqueIdentifier';
+    public const REGISTER_UNIQUE_IDENTIFIER_REGEX = 'uniqueIdentifierRegex';
+
+    public const INSTANCE_CONFIGURATION = 'instanceConfiguration';
+    public const INSTANCE_CONFIGURATION_ENABLED = 'enabled';
+    public const INSTANCE_CONFIGURATION_SHOW_VERSION = 'showVersion';
+
+    public const TOKEN = 'token';
+    public const TOKEN_MIN_LIFETIME_IN_SECONDS = 'minLifetimeInSeconds';
+    public const TOKEN_DEFAULT_LIFETIME_IN_SECONDS = 'defaultLifetimeInSeconds';
+    public const TOKEN_MAX_LIFETIME_IN_SECONDS = 'maxLifetimeInSeconds';
+    public const TOKEN_DELETE_EXPIRED_TOKENS_AUTOMATICALLY_IN_SECONDS = 'tokenDeleteExpiredTokensAutomaticallyInSeconds';
+
     private int $pageSizeMin;
     private int $pageSizeDefault;
     private int $pageSizeMax;
     private bool $registerEnabled;
     private string $registerUniqueIdentifier;
-    private ?string $registerUniqueIdentifierRegex;
+    private string|false $registerUniqueIdentifierRegex;
     private bool $instanceConfigurationEnabled;
     private bool $instanceConfigurationShowVersion;
     private int $tokenMinLifetimeInSeconds;
@@ -17,25 +37,45 @@ class EmberNexusConfiguration
     private int|false $tokenMaxLifetimeInSeconds;
     private int|false $tokenDeleteExpiredTokensAutomaticallyInSeconds;
 
+    private static function getValueFromConfig(array $configuration, array $keyParts): mixed
+    {
+        $currentKeyParts = [];
+        foreach ($keyParts as $i => $keyPart) {
+            $currentKeyParts[] = $keyPart;
+            if (!array_key_exists($keyPart, $configuration)) {
+                throw new \Exception(sprintf("Configuration must contain key '%s'.", implode('.', $currentKeyParts)));
+            }
+            $configuration = $configuration[$keyPart];
+        }
+
+        return $configuration;
+    }
+
     public static function createFromConfiguration(array $configuration): self
     {
         $emberNexusConfiguration = new EmberNexusConfiguration();
 
-        if (!array_key_exists('pageSize', $configuration)) {
-            throw new \Exception("Configuration must contain key 'pageSize'.");
-        }
-        if (!array_key_exists('min', $configuration['pageSize'])) {
-            throw new \Exception("Configuration must contain key 'pageSize.min'.");
-        }
-        $emberNexusConfiguration->setPageSizeMin((int) $configuration['pageSize']['min']);
-        if (!array_key_exists('default', $configuration['pageSize'])) {
-            throw new \Exception("Configuration must contain key 'pageSize.default'.");
-        }
-        $emberNexusConfiguration->setPageSizeDefault((int) $configuration['pageSize']['default']);
-        if (!array_key_exists('max', $configuration['pageSize'])) {
-            throw new \Exception("Configuration must contain key 'pageSize.max'.");
-        }
-        $emberNexusConfiguration->setPageSizeMax((int) $configuration['pageSize']['max']);
+        $emberNexusConfiguration->setPageSizeMin((int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::PAGE_SIZE,
+                self::PAGE_SIZE_MIN,
+            ]
+        ));
+        $emberNexusConfiguration->setPageSizeDefault((int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::PAGE_SIZE,
+                self::PAGE_SIZE_DEFAULT,
+            ]
+        ));
+        $emberNexusConfiguration->setPageSizeMax((int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::PAGE_SIZE,
+                self::PAGE_SIZE_MAX,
+            ]
+        ));
 
         if ($emberNexusConfiguration->getPageSizeMax() < $emberNexusConfiguration->getPageSizeMin()) {
             throw new \Exception('pagesize max must be smaller or equal to pagesize min.');
@@ -47,57 +87,76 @@ class EmberNexusConfiguration
             throw new \Exception('default page size must be equal or less than max page size.');
         }
 
-        if (!array_key_exists('register', $configuration)) {
-            throw new \Exception("Configuration must contain key 'register'.");
-        }
-        if (!array_key_exists('enabled', $configuration['register'])) {
-            throw new \Exception("Configuration must contain key 'register.enabled'.");
-        }
-        $emberNexusConfiguration->setRegisterEnabled((bool) $configuration['register']['enabled']);
-        if (!array_key_exists('uniqueIdentifier', $configuration['register'])) {
-            throw new \Exception("Configuration must contain key 'register.uniqueIdentifier'.");
-        }
-        $emberNexusConfiguration->setRegisterUniqueIdentifier((string) $configuration['register']['uniqueIdentifier']);
-        if (!array_key_exists('uniqueIdentifierRegex', $configuration['register'])) {
-            throw new \Exception("Configuration must contain key 'register.uniqueIdentifierRegex'.");
-        }
-        $emberNexusConfiguration->setRegisterUniqueIdentifierRegex((string) $configuration['register']['uniqueIdentifierRegex']);
-
-        if (!array_key_exists('instanceConfiguration', $configuration)) {
-            throw new \Exception("Configuration must contain key 'instanceConfiguration'.");
-        }
-        if (!array_key_exists('enabled', $configuration['instanceConfiguration'])) {
-            throw new \Exception("Configuration must contain key 'instanceConfiguration.enabled'.");
-        }
-        $emberNexusConfiguration->setInstanceConfigurationEnabled((bool) $configuration['instanceConfiguration']['enabled']);
-        if (!array_key_exists('showVersion', $configuration['instanceConfiguration'])) {
-            throw new \Exception("Configuration must contain key 'instanceConfiguration.showVersion'.");
-        }
-        $emberNexusConfiguration->setInstanceConfigurationShowVersion((bool) $configuration['instanceConfiguration']['showVersion']);
-
-        if (!array_key_exists('token', $configuration)) {
-            throw new \Exception("Configuration must contain key 'token'.");
-        }
-        if (!array_key_exists('minLifetimeInSeconds', $configuration['token'])) {
-            throw new \Exception("Configuration must contain key 'token.minLifetimeInSeconds'.");
-        }
-        $emberNexusConfiguration->setTokenMinLifetimeInSeconds((int) $configuration['token']['minLifetimeInSeconds']);
-        if (!array_key_exists('defaultLifetimeInSeconds', $configuration['token'])) {
-            throw new \Exception("Configuration must contain key 'token.defaultLifetimeInSeconds'.");
-        }
-        $emberNexusConfiguration->setTokenDefaultLifetimeInSeconds((int) $configuration['token']['defaultLifetimeInSeconds']);
-        if (!array_key_exists('maxLifetimeInSeconds', $configuration['token'])) {
-            throw new \Exception("Configuration must contain key 'token.maxLifetimeInSeconds'.");
-        }
-        $value = $configuration['token']['maxLifetimeInSeconds'];
+        $emberNexusConfiguration->setRegisterEnabled((bool) self::getValueFromConfig(
+            $configuration,
+            [
+                self::REGISTER,
+                self::REGISTER_ENABLED,
+            ]
+        ));
+        $emberNexusConfiguration->setRegisterUniqueIdentifier((string) self::getValueFromConfig(
+            $configuration,
+            [
+                self::REGISTER,
+                self::REGISTER_UNIQUE_IDENTIFIER,
+            ]
+        ));
+        $value = self::getValueFromConfig(
+            $configuration,
+            [
+                self::REGISTER,
+                self::REGISTER_UNIQUE_IDENTIFIER_REGEX,
+            ]
+        );
         if (false !== $value) {
-            $value = (int) $value;
+            $value = (string) $value;
         }
+        $emberNexusConfiguration->setRegisterUniqueIdentifierRegex($value);
+
+        $emberNexusConfiguration->setInstanceConfigurationEnabled((bool) self::getValueFromConfig(
+            $configuration,
+            [
+                self::INSTANCE_CONFIGURATION,
+                self::INSTANCE_CONFIGURATION_ENABLED,
+            ]
+        ));
+        $emberNexusConfiguration->setInstanceConfigurationShowVersion((bool) self::getValueFromConfig(
+            $configuration,
+            [
+                self::INSTANCE_CONFIGURATION,
+                self::INSTANCE_CONFIGURATION_SHOW_VERSION,
+            ]
+        ));
+
+        $emberNexusConfiguration->setTokenMinLifetimeInSeconds((int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::TOKEN,
+                self::TOKEN_MIN_LIFETIME_IN_SECONDS,
+            ]
+        ));
+        $emberNexusConfiguration->setTokenDefaultLifetimeInSeconds((int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::TOKEN,
+                self::TOKEN_DEFAULT_LIFETIME_IN_SECONDS,
+            ]
+        ));
+        $value = self::getValueFromConfig(
+            $configuration,
+            [
+                self::TOKEN,
+                self::TOKEN_MAX_LIFETIME_IN_SECONDS,
+            ]
+        );
         $emberNexusConfiguration->setTokenMaxLifetimeInSeconds($value);
-        if (!array_key_exists('deleteExpiredTokensAutomaticallyInSeconds', $configuration['token'])) {
-            throw new \Exception("Configuration must contain key 'token.deleteExpiredTokensAutomaticallyInSeconds'.");
-        }
-        $value = $configuration['token']['deleteExpiredTokensAutomaticallyInSeconds'];
+        $value = self::getValueFromConfig(
+            $configuration,
+            [
+                self::TOKEN,
+                self::TOKEN_DELETE_EXPIRED_TOKENS_AUTOMATICALLY_IN_SECONDS,
+            ]
+        );
         if (false !== $value) {
             $value = (int) $value;
         }
@@ -181,12 +240,12 @@ class EmberNexusConfiguration
         return $this;
     }
 
-    public function getRegisterUniqueIdentifierRegex(): ?string
+    public function getRegisterUniqueIdentifierRegex(): string|false
     {
         return $this->registerUniqueIdentifierRegex;
     }
 
-    public function setRegisterUniqueIdentifierRegex(?string $registerUniqueIdentifierRegex): EmberNexusConfiguration
+    public function setRegisterUniqueIdentifierRegex(string|false $registerUniqueIdentifierRegex): EmberNexusConfiguration
     {
         $this->registerUniqueIdentifierRegex = $registerUniqueIdentifierRegex;
 

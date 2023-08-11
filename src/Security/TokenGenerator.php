@@ -47,14 +47,18 @@ class TokenGenerator
         if (null === $lifetimeInSeconds) {
             $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenDefaultLifetimeInSeconds();
         } else {
-            if ($lifetimeInSeconds > $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
-                $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds();
+            if (false !== $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
+                if ($lifetimeInSeconds > $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
+                    $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds();
+                }
             }
             if ($lifetimeInSeconds < $this->emberNexusConfiguration->getTokenMinLifetimeInSeconds()) {
                 $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMinLifetimeInSeconds();
             }
         }
-
+        /**
+         * @var int $lifetimeInSeconds
+         */
         $name ??= (new DateTime())->format('Y-m-d H:i:s');
 
         $tokenUuid = Uuid::uuid4();
