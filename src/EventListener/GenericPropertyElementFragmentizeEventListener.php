@@ -37,6 +37,11 @@ class GenericPropertyElementFragmentizeEventListener
                 $mongoFragment->addProperty($name, $value);
                 continue;
             }
+            if ($value instanceof \DateTimeInterface) {
+                $cypherFragment->addProperty($name, $value);
+                $elasticFragment->addProperty($name, $value->format('Uu'));
+                continue;
+            }
             if (is_object($value)) {
                 $mongoFragment->addProperty($name, $value);
                 continue;

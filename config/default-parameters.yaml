@@ -21,7 +21,7 @@ parameters:
   register:
 
     # If true, the /register endpoint is active and anonymous users can create accounts.
-    enabled: false
+    enabled: true
 
     # The property name of the identifier. Identifier must be unique across the API, usually the email.
     uniqueIdentifier: email

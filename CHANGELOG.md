@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add POST '/token' endpoint.
 - Add expiration date to tokens.
 
+### Changed
+- Reword application configuration, via internal Symfony bundle.
+- Switch datetime format from temporary string type to datetime.
+
 ## 0.0.19 - 2023-08-10
 ### Added
 - Add `/instance-configuration` endpoint for retrieving instance specific configurations.

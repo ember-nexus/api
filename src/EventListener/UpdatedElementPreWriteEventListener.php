@@ -23,7 +23,6 @@ class UpdatedElementPreWriteEventListener
         if ($element->hasProperty('updated')) {
             return;
         }
-        $now = (new \DateTime())->format('Y-m-d H:i:s');
-        $element->addProperty('updated', $now);
+        $element->addProperty('updated', new \DateTime());
     }
 }

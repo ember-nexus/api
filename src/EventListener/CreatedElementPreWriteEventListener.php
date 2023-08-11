@@ -23,7 +23,6 @@ class CreatedElementPreWriteEventListener
         if ($element->hasProperty('created')) {
             return;
         }
-        $now = (new \DateTime())->format('Y-m-d H:i:s');
-        $element->addProperty('created', $now);
+        $element->addProperty('created', new \DateTime());
     }
 }

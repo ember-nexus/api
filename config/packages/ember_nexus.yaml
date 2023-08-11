@@ -1,0 +1,5 @@
+ember_nexus:
+  register:
+    enabled: true
+  instanceConfiguration:
+    showVersion: false

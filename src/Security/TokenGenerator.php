@@ -5,11 +5,11 @@ namespace App\Security;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Tuupola\Base58;
 
@@ -20,7 +20,7 @@ class TokenGenerator
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
-        private ParameterBagInterface $bag
+        private EmberNexusConfiguration $emberNexusConfiguration
     ) {
         $this->encoder = new Base58();
     }
@@ -44,28 +44,16 @@ class TokenGenerator
             }
         }
 
-        $tokenConfig = $this->bag->get('token');
-        if (null === $tokenConfig) {
-            throw new \Exception("Unable to get config; key 'token' must exist.");
-        }
-        if (!is_array($tokenConfig)) {
-            throw new \Exception("Configuration key 'token' must be an array.");
-        }
-
         if (null === $lifetimeInSeconds) {
-            $lifetimeInSeconds = $tokenConfig['defaultLifetimeInSeconds'];
+            $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenDefaultLifetimeInSeconds();
+        } else {
+            if ($lifetimeInSeconds > $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
+                $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds();
+            }
+            if ($lifetimeInSeconds < $this->emberNexusConfiguration->getTokenMinLifetimeInSeconds()) {
+                $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMinLifetimeInSeconds();
+            }
         }
-
-        if ($lifetimeInSeconds > $tokenConfig['maxLifetimeInSeconds']) {
-            $lifetimeInSeconds = $tokenConfig['maxLifetimeInSeconds'];
-        }
-        if ($lifetimeInSeconds < $tokenConfig['minLifetimeInSeconds']) {
-            $lifetimeInSeconds = $tokenConfig['minLifetimeInSeconds'];
-        }
-
-        $expirationDate = (new DateTime())
-            ->add(new \DateInterval(sprintf('PT%sS', $lifetimeInSeconds)))
-            ->format('Y-m-d H:i:s');
 
         $name ??= (new DateTime())->format('Y-m-d H:i:s');
 
@@ -75,7 +63,7 @@ class TokenGenerator
             ->setIdentifier($tokenUuid)
             ->addProperties([
                 'hash' => $hash,
-                'expirationDate' => $expirationDate,
+                'expirationDate' => (new DateTime())->add(new \DateInterval(sprintf('PT%sS', $lifetimeInSeconds))),
                 'name' => $name,
             ]);
         $this->elementManager->create($tokenNode);

@@ -60,6 +60,7 @@
   },
   "autoload": {
     "psr-4": {
+      "EmberNexusBundle\\": "lib/EmberNexusBundle/src/",
       "App\\": "src/"
     }
   },
