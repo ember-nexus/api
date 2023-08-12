@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\Event\RawToElementEvent;
+use App\EventSystem\RawToElement\Event\RawToElementEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 class RawToElementService

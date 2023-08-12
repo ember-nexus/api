@@ -1,0 +1,68 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\ElementFragmentize\EventListener\GenericPropertyElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent'
+        method: 'onRelationElementFragmentizeEvent'
+
+  App\EventSystem\ElementFragmentize\EventListener\CreatedPropertyElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent'
+        method: 'onRelationElementFragmentizeEvent'
+
+  App\EventSystem\ElementFragmentize\EventListener\UpdatedPropertyElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent'
+        method: 'onRelationElementFragmentizeEvent'
+
+  App\EventSystem\ElementFragmentize\EventListener\NamePropertyElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent'
+        method: 'onRelationElementFragmentizeEvent'
+
+  App\EventSystem\ElementFragmentize\EventListener\SearchAccessElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent'
+        method: 'onRelationElementFragmentizeEvent'
+
+  App\EventSystem\ElementFragmentize\EventListener\NodeElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+
+  App\EventSystem\ElementFragmentize\EventListener\UserIdentifierPropertyElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent'
+        method: 'onNodeElementFragmentizeEvent'
+
+  App\EventSystem\ElementFragmentize\EventListener\RelationElementFragmentizeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent'
+        method: 'onRelationElementFragmentizeEvent'

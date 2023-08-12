@@ -1,0 +1,11 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\Request\EventListener\ApiKeyCheckOnKernelRequestEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'kernel.request'
+        method: 'onKernelRequest'

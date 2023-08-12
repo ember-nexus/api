@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\Event\ElementToRawEvent;
+use App\EventSystem\ElementToRaw\Event\ElementToRawEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 class ElementToRawService

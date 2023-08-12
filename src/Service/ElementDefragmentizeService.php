@@ -4,8 +4,8 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\Event\NodeElementDefragmentizeEvent;
-use App\Event\RelationElementDefragmentizeEvent;
+use App\EventSystem\ElementDefragmentize\Event\NodeElementDefragmentizeEvent;
+use App\EventSystem\ElementDefragmentize\Event\RelationElementDefragmentizeEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherDataStructures\Contract\NodeInterface;
 use Syndesi\CypherDataStructures\Contract\RelationInterface;

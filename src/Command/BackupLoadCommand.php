@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
-use App\Event\ElementUpdateAfterBackupLoadEvent;
+use App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
 use App\Service\RawToElementService;

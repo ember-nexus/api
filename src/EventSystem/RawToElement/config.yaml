@@ -1,0 +1,11 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\RawToElement\EventListener\RawToElementEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\RawToElement\Event\RawToElementEvent'
+        method: 'onRawToElementEvent'

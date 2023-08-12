@@ -4,8 +4,8 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\Event\NodeElementFragmentizeEvent;
-use App\Event\RelationElementFragmentizeEvent;
+use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
+use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
 use App\Type\FragmentGroup;
 use Psr\EventDispatcher\EventDispatcherInterface;
 

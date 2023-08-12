@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Event\UserCreateEvent;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
@@ -80,8 +79,6 @@ class UserCreateCommand extends Command
         $this->elementManager
             ->create($userNode)
             ->flush();
-
-        $this->eventDispatcher->dispatch(new UserCreateEvent($username, $userId));
 
         $this->io->writeln(sprintf(
             "Created user '%s' successfully, UUID is %s",
