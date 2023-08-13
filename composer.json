@@ -89,7 +89,7 @@
     "post-update-cmd": [
       "@auto-scripts"
     ],
-    "test:unit": "php vendor/phpunit/phpunit/phpunit",
+    "test:unit": "php vendor/phpunit/phpunit/phpunit ./tests/UnitTests",
     "test:feature": "./test-feature-prepare && php vendor/phpunit/phpunit/phpunit ./tests/FeatureTests",
     "test:feature:test": "./test-feature-prepare && php vendor/phpunit/phpunit/phpunit ./tests/FeatureTests --group test",
     "test:coverage:xml": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --coverage-clover coverage.xml",

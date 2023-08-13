@@ -11,6 +11,8 @@ imports:
   - {resource: ../src/EventSystem/Kernel/config.yaml}
   - {resource: ../src/EventSystem/RawToElement/config.yaml}
   - {resource: ../src/EventSystem/Request/config.yaml}
+  - {resource: ../src/EventSystem/NormalizedValueToRawValue/config.yaml}
+  - {resource: ../src/EventSystem/RawValueToNormalizedValue/config.yaml}
 
 services:
   # default configuration for services in *this* file
