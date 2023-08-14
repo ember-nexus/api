@@ -39,6 +39,7 @@
     "guzzlehttp/guzzle": "^7.5",
     "infection/infection": "^0.27",
     "phpbench/phpbench": "^1.2",
+    "phpspec/prophecy-phpunit": "^2.0",
     "phpstan/phpstan": "^1.6",
     "phpunit/php-code-coverage": "^9.2",
     "phpunit/phpunit": "^9.5",
