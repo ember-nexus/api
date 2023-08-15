@@ -323,6 +323,7 @@ COPY bin /var/www/html/bin
 COPY config /var/www/html/config
 COPY public /var/www/html/public
 COPY src /var/www/html/src
+COPY lib /var/www/html/lib
 COPY .env.docker /var/www/html/.env
 COPY composer.json /var/www/html/composer.json
 COPY composer.lock /var/www/html/composer.lock

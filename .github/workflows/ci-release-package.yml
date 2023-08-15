@@ -75,6 +75,7 @@ jobs:
           docker build \
             --target production \
             --build-arg VERSION=${{ env.NEW_VERSION }} \
+            --no-cache \
             -t api:local \
             -f ./docker/Dockerfile \
             .
