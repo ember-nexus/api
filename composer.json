@@ -39,6 +39,7 @@
     "guzzlehttp/guzzle": "^7.5",
     "infection/infection": "^0.27",
     "phpbench/phpbench": "^1.2",
+    "phpspec/prophecy-phpunit": "^2.0",
     "phpstan/phpstan": "^1.6",
     "phpunit/php-code-coverage": "^9.2",
     "phpunit/phpunit": "^9.5",
@@ -60,6 +61,7 @@
   },
   "autoload": {
     "psr-4": {
+      "EmberNexusBundle\\": "lib/EmberNexusBundle/src/",
       "App\\": "src/"
     }
   },
@@ -88,7 +90,7 @@
     "post-update-cmd": [
       "@auto-scripts"
     ],
-    "test:unit": "php vendor/phpunit/phpunit/phpunit",
+    "test:unit": "php vendor/phpunit/phpunit/phpunit ./tests/UnitTests",
     "test:feature": "./test-feature-prepare && php vendor/phpunit/phpunit/phpunit ./tests/FeatureTests",
     "test:feature:test": "./test-feature-prepare && php vendor/phpunit/phpunit/phpunit ./tests/FeatureTests --group test",
     "test:coverage:xml": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --coverage-clover coverage.xml",

@@ -3,8 +3,8 @@
 namespace App\Service;
 
 use App\Response\CollectionResponse;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -14,7 +14,7 @@ class CollectionService
         private RequestStack $requestStack,
         private ElementManager $elementManager,
         private ElementToRawService $elementToRawService,
-        private ParameterBagInterface $bag
+        private EmberNexusConfiguration $emberNexusConfiguration
     ) {
     }
 
@@ -38,26 +38,19 @@ class CollectionService
 
     public function getPageSize(): int
     {
-        $pageSizeConfig = $this->bag->get('pageSize');
-        if (!is_array($pageSizeConfig)) {
-            throw new \LogicException();
-        }
-        $defaultPageSize = $pageSizeConfig['default'] ?? 25;
-        $minPageSize = $pageSizeConfig['min'] ?? 10;
-        $maxPageSize = $pageSizeConfig['max'] ?? 100;
         $query = $this->requestStack->getCurrentRequest()?->query;
         if (!($query instanceof InputBag)) {
             throw new \LogicException();
         }
         if (!$query->has('pageSize')) {
-            return $defaultPageSize;
+            return $this->emberNexusConfiguration->getPageSizeDefault();
         }
         $requestPageSize = (int) $query->get('pageSize');
-        if ($requestPageSize < 1 || $requestPageSize < $minPageSize) {
-            return $minPageSize;
+        if ($requestPageSize < $this->emberNexusConfiguration->getPageSizeMin()) {
+            return $this->emberNexusConfiguration->getPageSizeMin();
         }
-        if ($requestPageSize > $maxPageSize) {
-            return $maxPageSize;
+        if ($requestPageSize > $this->emberNexusConfiguration->getPageSizeMax()) {
+            return $this->emberNexusConfiguration->getPageSizeMax();
         }
 
         return $requestPageSize;
@@ -93,13 +86,8 @@ class CollectionService
         }
 
         $pageSize = $this->getPageSize();
-        if ($this->bag->has('pageSize')) {
-            $pageSizeConfig = $this->bag->get('pageSize');
-            if (is_array($pageSizeConfig)) {
-                if ($pageSize !== $pageSizeConfig['default']) {
-                    $params['pageSize'] = $pageSize;
-                }
-            }
+        if ($pageSize !== $this->emberNexusConfiguration->getPageSizeDefault()) {
+            $params['pageSize'] = $pageSize;
         }
 
         if ($currentRequest->query->has('sort')) {
@@ -132,11 +120,6 @@ class CollectionService
             $basePath,
             $queryString
         );
-    }
-
-    public function buildEmptyCollection(): CollectionResponse
-    {
-        return $this->buildCollectionFromUuids([], [], 0);
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Event\UserCreateEvent;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
@@ -15,7 +14,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\OutputStyle;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
@@ -29,7 +27,6 @@ class UserCreateCommand extends Command
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
-        private EventDispatcherInterface $eventDispatcher,
         private UserPasswordHasher $userPasswordHasher
     ) {
         parent::__construct();
@@ -80,8 +77,6 @@ class UserCreateCommand extends Command
         $this->elementManager
             ->create($userNode)
             ->flush();
-
-        $this->eventDispatcher->dispatch(new UserCreateEvent($username, $userId));
 
         $this->io->writeln(sprintf(
             "Created user '%s' successfully, UUID is %s",

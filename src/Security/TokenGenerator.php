@@ -5,9 +5,11 @@ namespace App\Security;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use Safe\DateTime;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Tuupola\Base58;
 
@@ -17,12 +19,13 @@ class TokenGenerator
 
     public function __construct(
         private ElementManager $elementManager,
-        private CypherEntityManager $cypherEntityManager
+        private CypherEntityManager $cypherEntityManager,
+        private EmberNexusConfiguration $emberNexusConfiguration
     ) {
         $this->encoder = new Base58();
     }
 
-    public function createNewToken(UuidInterface $userUuid): string
+    public function createNewToken(UuidInterface $userUuid, string $name = null, int $lifetimeInSeconds = null): string
     {
         for ($i = 0; $i < 3; ++$i) {
             $token = $this->createToken();
@@ -40,11 +43,33 @@ class TokenGenerator
                 break;
             }
         }
+
+        if (null === $lifetimeInSeconds) {
+            $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenDefaultLifetimeInSeconds();
+        } else {
+            if (false !== $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
+                if ($lifetimeInSeconds > $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
+                    $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds();
+                }
+            }
+            if ($lifetimeInSeconds < $this->emberNexusConfiguration->getTokenMinLifetimeInSeconds()) {
+                $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMinLifetimeInSeconds();
+            }
+        }
+        /**
+         * @var int $lifetimeInSeconds
+         */
+        $name ??= (new DateTime())->format('Y-m-d H:i:s');
+
         $tokenUuid = Uuid::uuid4();
         $tokenNode = (new NodeElement())
             ->setLabel('Token')
             ->setIdentifier($tokenUuid)
-            ->addProperty('hash', $hash);
+            ->addProperties([
+                'hash' => $hash,
+                'expirationDate' => (new DateTime())->add(new \DateInterval(sprintf('PT%sS', $lifetimeInSeconds))),
+                'name' => $name,
+            ]);
         $this->elementManager->create($tokenNode);
         $this->elementManager->flush();
 

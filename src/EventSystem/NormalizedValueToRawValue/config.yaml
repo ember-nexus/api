@@ -1,0 +1,19 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\NormalizedValueToRawValue\EventListener\DateTimeNormalizedValueToRawValueEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent'
+        method: 'onNormalizedValueToRawValueEvent'
+        priority: 16
+
+  App\EventSystem\NormalizedValueToRawValue\EventListener\GenericNormalizedValueToRawValueEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent'
+        method: 'onNormalizedValueToRawValueEvent'
+        priority: 0

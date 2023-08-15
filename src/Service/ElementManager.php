@@ -4,12 +4,12 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\Event\ElementPostCreateEvent;
-use App\Event\ElementPostDeleteEvent;
-use App\Event\ElementPostMergeEvent;
-use App\Event\ElementPreCreateEvent;
-use App\Event\ElementPreDeleteEvent;
-use App\Event\ElementPreMergeEvent;
+use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
+use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
+use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
+use App\EventSystem\EntityManager\Event\ElementPreCreateEvent;
+use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
+use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
 use App\Helper\Neo4jClientHelper;
 use Laudis\Neo4j\Databags\Statement;
 use Psr\EventDispatcher\EventDispatcherInterface;

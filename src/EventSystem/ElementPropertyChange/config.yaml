@@ -1,0 +1,35 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\ElementPropertyChange\EventListener\CreatedElementPropertyChangeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementPropertyChange\Event'
+        method: 'onElementPropertyChangeEvent'
+
+  App\EventSystem\ElementPropertyChange\EventListener\IdElementPropertyChangeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementPropertyChange\Event'
+        method: 'onElementPropertyChangeEvent'
+
+  App\EventSystem\ElementPropertyChange\EventListener\TokenElementPropertyChangeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementPropertyChange\Event'
+        method: 'onElementPropertyChangeEvent'
+
+  App\EventSystem\ElementPropertyChange\EventListener\UpdatedElementPropertyChangeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementPropertyChange\Event'
+        method: 'onElementPropertyChangeEvent'
+
+  App\EventSystem\ElementPropertyChange\EventListener\UserElementPropertyChangeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementPropertyChange\Event'
+        method: 'onElementPropertyChangeEvent'

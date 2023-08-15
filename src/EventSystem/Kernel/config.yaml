@@ -1,0 +1,35 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+#  App\EventListener\EndCheckUserSuppliedPropertiesEventListener:
+#    tags:
+#      - name: kernel.event_listener
+#        event: 'App\Event\CheckUserSuppliedPropertiesEvent'
+#        method: 'onCheckUserSuppliedPropertiesEvent'
+#
+#  App\EventListener\IdCheckUserSuppliedPropertiesEventListener:
+#    tags:
+#      - name: kernel.event_listener
+#        event: 'App\Event\CheckUserSuppliedPropertiesEvent'
+#        method: 'onCheckUserSuppliedPropertiesEvent'
+#
+#  App\EventListener\StartCheckUserSuppliedPropertiesEventListener:
+#    tags:
+#      - name: kernel.event_listener
+#        event: 'App\Event\CheckUserSuppliedPropertiesEvent'
+#        method: 'onCheckUserSuppliedPropertiesEvent'
+#
+#  App\EventListener\TypeCheckUserSuppliedPropertiesEventListener:
+#    tags:
+#      - name: kernel.event_listener
+#        event: 'App\Event\CheckUserSuppliedPropertiesEvent'
+#        method: 'onCheckUserSuppliedPropertiesEvent'
+
+  App\EventSystem\Kernel\EventListener\RabbitMqConnectionListener:
+    tags:
+      - name: kernel.event_listener
+        event: kernel.terminate
+        method: 'onKernelTerminate'

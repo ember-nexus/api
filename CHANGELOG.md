@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add POST '/token' endpoint.
+- Add expiration date to tokens.
+
+### Changed
+- Reword application configuration, via internal Symfony bundle.
+- Switch datetime format from temporary string type to datetime.
+- Change default JSON encoding options.
+- Replaced configuration, documentation WIP.
+- Rework event system.
+
+### Fixed
+- Fix #22.
 
 ## 0.0.19 - 2023-08-10
 ### Added

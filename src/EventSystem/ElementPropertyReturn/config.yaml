@@ -1,0 +1,23 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\ElementPropertyReturn\EventListener\IdElementPropertyReturnEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent'
+        method: 'onElementPropertyReturnEvent'
+
+  App\EventSystem\ElementPropertyReturn\EventListener\TokenElementPropertyReturnEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent'
+        method: 'onElementPropertyReturnEvent'
+
+  App\EventSystem\ElementPropertyReturn\EventListener\UserElementPropertyReturnEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent'
+        method: 'onElementPropertyReturnEvent'
