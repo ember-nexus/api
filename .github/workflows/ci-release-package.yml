@@ -88,12 +88,19 @@ jobs:
             --target production \
             --build-arg VERSION=$NEW_VERSION \
             --no-cache \
-            -t api:local \
+            -t api:latest-amd \
             -f ./docker/Dockerfile \
             .
+          docker save api:latest-amd | gzip > api-latest-amd.tar.gz
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: docker-image-api-latest-amd
+          path: api-latest-amd.tar.gz
+          retention-days: 7
 
   build-docker-image-arm:
-    runs-on: buildjet-8vcpu-ubuntu-2204-arm
+    runs-on: buildjet-4vcpu-ubuntu-2204-arm
     name: Build Docker Image - ARM
     needs: checkout-repo-and-bump-version
     steps:
@@ -133,9 +140,16 @@ jobs:
             --target production \
             --build-arg VERSION=$NEW_VERSION \
             --no-cache \
-            -t api:local \
+            -t api:latest-arm \
             -f ./docker/Dockerfile \
             .
+          docker save api:latest-arm | gzip > api-latest-arm.tar.gz
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: docker-image-api-latest-arm
+          path: api-latest-arm.tar.gz
+          retention-days: 7
 
 
   publish-release:
