@@ -8,34 +8,12 @@ on:
 permissions:
   contents: write
 jobs:
-  release-package:
-    runs-on: ubuntu-latest
+  checkout-repo-and-bump-version:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    name: Check out Repo and Bump Version
     steps:
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # see also https://github.com/Nautilus-Cyberneering/pygithub
-      - name: Import GPG key
-        id: import-gpg
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-
-      - name: Debug GPG
-        run: |
-          echo "fingerprint: ${{ steps.import-gpg.outputs.fingerprint }}"
-          echo "keyid:       ${{ steps.import-gpg.outputs.keyid }}"
-          echo "name:        ${{ steps.import-gpg.outputs.name }}"
-          echo "email:       ${{ steps.import-gpg.outputs.email }}"
-
-      - name: Git configuration
-        run: |
-          git config --global user.email "${{ steps.import-gpg.outputs.email }}"
-          git config --global user.name "${{ steps.import-gpg.outputs.name }}"
+      - uses: actions/checkout@v3
 
       - name: Bump version
         shell: bash
@@ -47,8 +25,9 @@ jobs:
           newVersion="$(docker run usvc/semver:latest bump $bumpType $version | tr -d '\r')"
           jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
           echo "New version: $newVersion"
+          mkdir .ci
+          echo "NEW_VERSION=$newVersion" >> .ci/NEW_VERSION.txt
           echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
-          echo "RELEASE_TAG=latest" >> $GITHUB_ENV
 
       - name: Update changelog unreleased section with new version
         uses: superfaceai/release-changelog-action@v1
@@ -57,65 +36,135 @@ jobs:
           version: ${{ env.NEW_VERSION }}
           operation: release
 
-      - name: Commit changes and create tag
-        run: |
-          git add "composer.json"
-          git add "CHANGELOG.md"
-          git commit -m "chore: release ${{ env.NEW_VERSION }}"
-          git tag ${{ env.NEW_VERSION }}
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+      - uses: actions/upload-artifact@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          name: bumped-repo
+          path: .
 
-      - name: Build Docker image
-        run: |
-          docker build \
-            --target production \
-            --build-arg VERSION=${{ env.NEW_VERSION }} \
-            --no-cache \
-            -t api:local \
-            -f ./docker/Dockerfile \
-            .
+  build-docker-image-amd:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    name: Build Docker Image - AMD
+    steps:
 
-      - name: Release on Docker Hub
-        run: |
-          docker tag api:local embernexus/api:${{ env.NEW_VERSION }}
-          docker tag api:local embernexus/api:latest
-          docker push embernexus/api:${{ env.NEW_VERSION }}
-          docker push embernexus/api:latest
-
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
+      - uses: actions/download-artifact@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: embernexus/api
-          short-description: ${{ github.event.repository.description }}
+          name: bumped-repo
 
-      - name: Push repository changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Load version from artifact
+        shell: bash
         run: |
-          git push origin && git push --tags
+          ls -la
+          ls -la .ci
+          cat .ci/NEW_VERSION.txt
+          cat .ci/NEW_VERSION.txt >> $GITHUB_ENV
 
-      - name: Read version changelog
-        id: get-changelog
-        uses: superfaceai/release-changelog-action@v1
-        with:
-          path-to-changelog: CHANGELOG.md
-          version: ${{ env.NEW_VERSION }}
-          operation: read
+      - name: Debug version
+        run: |
+          echo $NEW_VERSION
 
-      - name: Update GitHub release changelog
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.NEW_VERSION }}
-          body: ${{ steps.get-changelog.outputs.changelog }}
-          prerelease: ${{ startsWith(github.event.inputs.release-type, 'pre') }}
-          token: ${{ secrets.RELEASE_TOKEN }}
+
+#  release-package:
+#    runs-on: ubuntu-latest
+#    steps:
+#
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      # see also https://github.com/Nautilus-Cyberneering/pygithub
+#      - name: Import GPG key
+#        id: import-gpg
+#        uses: crazy-max/ghaction-import-gpg@v5
+#        with:
+#          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+#          passphrase: ${{ secrets.PASSPHRASE }}
+#          git_user_signingkey: true
+#          git_commit_gpgsign: true
+#
+#      - name: Debug GPG
+#        run: |
+#          echo "fingerprint: ${{ steps.import-gpg.outputs.fingerprint }}"
+#          echo "keyid:       ${{ steps.import-gpg.outputs.keyid }}"
+#          echo "name:        ${{ steps.import-gpg.outputs.name }}"
+#          echo "email:       ${{ steps.import-gpg.outputs.email }}"
+#
+#      - name: Git configuration
+#        run: |
+#          git config --global user.email "${{ steps.import-gpg.outputs.email }}"
+#          git config --global user.name "${{ steps.import-gpg.outputs.name }}"
+#
+#      - name: Bump version
+#        shell: bash
+#        run: |
+#          sudo apt-get install -y moreutils
+#          docker pull usvc/semver:latest
+#          version=$(cat composer.json | jq -r .version)
+#          bumpType=${{ github.event.inputs.release-type }}
+#          newVersion="$(docker run usvc/semver:latest bump $bumpType $version | tr -d '\r')"
+#          jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
+#          echo "New version: $newVersion"
+#          echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
+#          echo "RELEASE_TAG=latest" >> $GITHUB_ENV
+#
+#
+#      - name: Commit changes and create tag
+#        run: |
+#          git add "composer.json"
+#          git add "CHANGELOG.md"
+#          git commit -m "chore: release ${{ env.NEW_VERSION }}"
+#          git tag ${{ env.NEW_VERSION }}
+#
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#
+#      - name: Build Docker image
+#        run: |
+#          docker build \
+#            --target production \
+#            --build-arg VERSION=${{ env.NEW_VERSION }} \
+#            --no-cache \
+#            -t api:local \
+#            -f ./docker/Dockerfile \
+#            .
+#
+#      - name: Release on Docker Hub
+#        run: |
+#          docker tag api:local embernexus/api:${{ env.NEW_VERSION }}
+#          docker tag api:local embernexus/api:latest
+#          docker push embernexus/api:${{ env.NEW_VERSION }}
+#          docker push embernexus/api:latest
+#
+#      - name: Docker Hub Description
+#        uses: peter-evans/dockerhub-description@v3
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#          repository: embernexus/api
+#          short-description: ${{ github.event.repository.description }}
+#
+#      - name: Push repository changes
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          git push origin && git push --tags
+#
+#      - name: Read version changelog
+#        id: get-changelog
+#        uses: superfaceai/release-changelog-action@v1
+#        with:
+#          path-to-changelog: CHANGELOG.md
+#          version: ${{ env.NEW_VERSION }}
+#          operation: read
+#
+#      - name: Update GitHub release changelog
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          tag_name: ${{ env.NEW_VERSION }}
+#          body: ${{ steps.get-changelog.outputs.changelog }}
+#          prerelease: ${{ startsWith(github.event.inputs.release-type, 'pre') }}
+#          token: ${{ secrets.RELEASE_TOKEN }}
 
 # disabled due to low credits in free tier (5 per month)
 #      - name: Initiate Originstamp certificate
