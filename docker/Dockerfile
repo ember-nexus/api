@@ -333,8 +333,24 @@ RUN APP_ENV=prod composer install --no-dev --optimize-autoloader
 
 
 FROM scratch as production
+# see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
+LABEL org.opencontainers.image.vendor="Ember Nexus" \
+    org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
+    org.opencontainers.image.licenses="OSL-3.0" \
+    org.opencontainers.image.source="https://github.com/ember-nexus/api" \
+    org.opencontainers.image.title="Ember Nexus: API" \
+    org.opencontainers.image.description="Flexible graph based API for the modern web."
+ENV VERSION=$VERSION
+
 COPY --from=production-build / /
 
+STOPSIGNAL SIGTERM
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+CMD ["unitd", "--no-daemon", "--control", "unix:/var/run/control.unit.sock"]
+
+WORKDIR /var/www/html
 
 
 FROM php as development
