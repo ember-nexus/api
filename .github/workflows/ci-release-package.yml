@@ -8,8 +8,9 @@ on:
 permissions:
   contents: write
 jobs:
+
   checkout-repo-and-bump-version:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: buildjet-2vcpu-ubuntu-2204
     name: Check out Repo and Bump Version
     steps:
 
