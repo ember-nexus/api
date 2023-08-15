@@ -45,6 +45,7 @@ jobs:
         with:
           name: bumped-repo
           path: /tmp/bumped-repo.tar.gz
+          retention-days: 7
 
   build-docker-image-amd:
     runs-on: buildjet-4vcpu-ubuntu-2204
@@ -55,11 +56,12 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: bumped-repo
-          path: /tmp/bumped-repo.tar.gz
+          path: /tmp
 
       - name: Extract working folder from artifact
         shell: bash
         run: |
+          ls -la /tmp
           tar xvfz /tmp/bumped-repo.tar.gz -C ./
           ls -la
 
@@ -83,11 +85,12 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: bumped-repo
-          path: /tmp/bumped-repo.tar.gz
+          path: /tmp
 
       - name: Extract working folder from artifact
         shell: bash
         run: |
+          ls -la /tmp
           tar xvfz /tmp/bumped-repo.tar.gz -C ./
           ls -la
 
@@ -112,11 +115,12 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: bumped-repo
-          path: /tmp/bumped-repo.tar.gz
+          path: /tmp
 
       - name: Extract working folder from artifact
         shell: bash
         run: |
+          ls -la /tmp
           tar xvfz /tmp/bumped-repo.tar.gz -C ./
           ls -la
 
