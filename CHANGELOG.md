@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced configuration, documentation WIP.
 - Rework event system.
 
+### Fixed
+- Fix #22.
+
 ## 0.0.19 - 2023-08-10
 ### Added
 - Add `/instance-configuration` endpoint for retrieving instance specific configurations.
