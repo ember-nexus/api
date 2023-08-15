@@ -44,6 +44,7 @@ jobs:
   build-docker-image-amd:
     runs-on: buildjet-4vcpu-ubuntu-2204
     name: Build Docker Image - AMD
+    needs: checkout-repo-and-bump-version
     steps:
 
       - uses: actions/download-artifact@v3
