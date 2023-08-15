@@ -55,6 +55,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: bumped-repo
+          path: /tmp/bumped-repo.tar.gz
 
       - name: Extract working folder from artifact
         shell: bash
@@ -82,6 +83,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: bumped-repo
+          path: /tmp/bumped-repo.tar.gz
 
       - name: Extract working folder from artifact
         shell: bash
@@ -110,6 +112,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: bumped-repo
+          path: /tmp/bumped-repo.tar.gz
 
       - name: Extract working folder from artifact
         shell: bash
