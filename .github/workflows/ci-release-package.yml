@@ -36,10 +36,15 @@ jobs:
           version: ${{ env.NEW_VERSION }}
           operation: release
 
+      - name: Archive working folder for artifact
+        shell: bash
+        run: |
+          tar -czf /tmp/bumped-repo.tar.gz .
+
       - uses: actions/upload-artifact@v3
         with:
           name: bumped-repo
-          path: .
+          path: /tmp/bumped-repo.tar.gz
 
   build-docker-image-amd:
     runs-on: buildjet-4vcpu-ubuntu-2204
@@ -51,10 +56,15 @@ jobs:
         with:
           name: bumped-repo
 
+      - name: Extract working folder from artifact
+        shell: bash
+        run: |
+          tar xvfz /tmp/bumped-repo.tar.gz -C ./
+          ls -la
+
       - name: Load version from artifact
         shell: bash
         run: |
-          ls -la
           ls -la .ci
           cat .ci/NEW_VERSION.txt
           cat .ci/NEW_VERSION.txt >> $GITHUB_ENV
@@ -73,10 +83,15 @@ jobs:
         with:
           name: bumped-repo
 
+      - name: Extract working folder from artifact
+        shell: bash
+        run: |
+          tar xvfz /tmp/bumped-repo.tar.gz -C ./
+          ls -la
+
       - name: Load version from artifact
         shell: bash
         run: |
-          ls -la
           ls -la .ci
           cat .ci/NEW_VERSION.txt
           cat .ci/NEW_VERSION.txt >> $GITHUB_ENV
@@ -95,6 +110,23 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: bumped-repo
+
+      - name: Extract working folder from artifact
+        shell: bash
+        run: |
+          tar xvfz /tmp/bumped-repo.tar.gz -C ./
+          ls -la
+
+      - name: Load version from artifact
+        shell: bash
+        run: |
+          ls -la .ci
+          cat .ci/NEW_VERSION.txt
+          cat .ci/NEW_VERSION.txt >> $GITHUB_ENV
+
+      - name: Debug version
+        run: |
+          echo $NEW_VERSION
 
       - name: Load version from artifact
         shell: bash
