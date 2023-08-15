@@ -5,6 +5,7 @@ namespace App\EventSystem\ElementDefragmentize\EventListener;
 use App\EventSystem\ElementDefragmentize\Event\NodeElementDefragmentizeEvent;
 use App\EventSystem\ElementDefragmentize\Event\RelationElementDefragmentizeEvent;
 use App\Helper\ReservedPropertyNameHelper;
+use Laudis\Neo4j\Types\DateTimeZoneId;
 
 class GenericPropertyElementDefragmentizeEventListener
 {
@@ -38,6 +39,11 @@ class GenericPropertyElementDefragmentizeEventListener
         }
         $cypherProperties = $cypherFragment->getProperties();
         $cypherProperties = ReservedPropertyNameHelper::removeReservedPropertyNamesFromArray($cypherProperties);
+        foreach ($cypherProperties as $key => $value) {
+            if ($value instanceof DateTimeZoneId) {
+                $cypherProperties[$key] = $value->toDateTime();
+            }
+        }
         $element->addProperties($cypherProperties);
         foreach ($element->getProperties() as $key => $value) {
             if (null === $value) {

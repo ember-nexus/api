@@ -8,7 +8,6 @@ use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
-use App\Security\PropertyChecker;
 use App\Service\ElementManager;
 use App\Type\AccessType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -22,8 +21,7 @@ class PatchElementController extends AbstractController
     public function __construct(
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
-        private AccessChecker $accessChecker,
-        private PropertyChecker $propertyChecker
+        private AccessChecker $accessChecker
     ) {
     }
 
@@ -57,7 +55,6 @@ class PatchElementController extends AbstractController
          * @var array<string, mixed> $data
          */
         $data = \Safe\json_decode($request->getContent(), true);
-        $this->propertyChecker->runCheckUserSuppliedProperties($element, $data);
         $element->addProperties($data);
 
         $this->elementManager->merge($element);

@@ -8,7 +8,6 @@ use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
-use App\Security\PropertyChecker;
 use App\Service\ElementManager;
 use App\Type\AccessType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -23,7 +22,6 @@ class PutElementController extends AbstractController
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private PropertyChecker $propertyChecker
     ) {
     }
 
@@ -57,7 +55,6 @@ class PutElementController extends AbstractController
          * @var array<string, mixed> $data
          */
         $data = \Safe\json_decode($request->getContent(), true);
-        $this->propertyChecker->runCheckUserSuppliedProperties($element, $data);
 
         foreach ($element->getProperties() as $name => $value) {
             if ('id' === $name) {

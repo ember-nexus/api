@@ -14,7 +14,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\OutputStyle;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
@@ -28,7 +27,6 @@ class UserCreateCommand extends Command
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
-        private EventDispatcherInterface $eventDispatcher,
         private UserPasswordHasher $userPasswordHasher
     ) {
         parent::__construct();

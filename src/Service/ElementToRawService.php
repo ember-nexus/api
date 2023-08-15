@@ -4,7 +4,8 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\EventSystem\ElementToRaw\Event\ElementToRawEvent;
+use App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent;
+use App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 class ElementToRawService
@@ -19,9 +20,35 @@ class ElementToRawService
      */
     public function elementToRaw(NodeElementInterface|RelationElementInterface $element): array
     {
-        $event = new ElementToRawEvent($element);
-        $this->eventDispatcher->dispatch($event);
+        $rawData = [
+            'type' => null,
+            'id' => $element->getIdentifier()?->toString(),
+            'start' => null,
+            'end' => null,
+            'data' => [],
+        ];
 
-        return $event->getRawData();
+        if ($element instanceof NodeElementInterface) {
+            $rawData['type'] = $element->getLabel();
+            unset($rawData['start']);
+            unset($rawData['end']);
+        }
+        if ($element instanceof RelationElementInterface) {
+            $rawData['type'] = $element->getType();
+            $rawData['start'] = $element->getStart()?->toString();
+            $rawData['end'] = $element->getEnd()?->toString();
+        }
+
+        $elementPropertyReturnEvent = new ElementPropertyReturnEvent($element);
+        $this->eventDispatcher->dispatch($elementPropertyReturnEvent);
+        $normalizedProperties = $elementPropertyReturnEvent->getElementPropertiesWhichAreNotOnBlacklist();
+
+        foreach ($normalizedProperties as $normalizedPropertyName => $normalizedPropertyValue) {
+            $normalizedValueToRawValueEvent = new NormalizedValueToRawValueEvent($normalizedPropertyValue);
+            $this->eventDispatcher->dispatch($normalizedValueToRawValueEvent);
+            $rawData['data'][$normalizedPropertyName] = $normalizedValueToRawValueEvent->getRawValue();
+        }
+
+        return $rawData;
     }
 }

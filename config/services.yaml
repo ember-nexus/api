@@ -5,14 +5,14 @@ imports:
   - {resource: internal-parameters.yaml}
   - {resource: ../src/EventSystem/ElementDefragmentize/config.yaml}
   - {resource: ../src/EventSystem/ElementFragmentize/config.yaml}
-  - {resource: ../src/EventSystem/ElementToRaw/config.yaml}
   - {resource: ../src/EventSystem/EntityManager/config.yaml}
   - {resource: ../src/EventSystem/Exception/config.yaml}
   - {resource: ../src/EventSystem/Kernel/config.yaml}
-  - {resource: ../src/EventSystem/RawToElement/config.yaml}
   - {resource: ../src/EventSystem/Request/config.yaml}
   - {resource: ../src/EventSystem/NormalizedValueToRawValue/config.yaml}
   - {resource: ../src/EventSystem/RawValueToNormalizedValue/config.yaml}
+  - {resource: ../src/EventSystem/ElementPropertyChange/config.yaml}
+  - {resource: ../src/EventSystem/ElementPropertyReturn/config.yaml}
 
 services:
   # default configuration for services in *this* file

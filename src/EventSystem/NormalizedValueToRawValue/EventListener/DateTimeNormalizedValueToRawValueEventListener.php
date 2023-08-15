@@ -9,7 +9,7 @@ class DateTimeNormalizedValueToRawValueEventListener
     public function onNormalizedValueToRawValueEvent(NormalizedValueToRawValueEvent $event): void
     {
         $normalizedValue = $event->getNormalizedValue();
-        if (!($normalizedValue instanceof \DateTime)) {
+        if (!($normalizedValue instanceof \DateTimeInterface)) {
             return;
         }
         $event->setRawValue($normalizedValue->format(\DateTime::ATOM));
