@@ -22,5 +22,6 @@ class TokenElementPropertyReturnEventListener
         }
         $event->addBlockedProperty('token');
         $event->addBlockedProperty('_tokenHash');
+        $event->addBlockedProperty('hash');
     }
 }
