@@ -9,7 +9,7 @@ permissions:
   contents: write
 jobs:
   checkout-repo-and-bump-version:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: buildjet-4vcpu-ubuntu-2204
     name: Check out Repo and Bump Version
     steps:
 
@@ -63,6 +63,43 @@ jobs:
         run: |
           echo $NEW_VERSION
 
+  build-docker-image-arm:
+    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    name: Build Docker Image - ARM
+    needs: checkout-repo-and-bump-version
+    steps:
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: bumped-repo
+
+      - name: Load version from artifact
+        shell: bash
+        run: |
+          ls -la
+          ls -la .ci
+          cat .ci/NEW_VERSION.txt
+          cat .ci/NEW_VERSION.txt >> $GITHUB_ENV
+
+      - name: Debug version
+        run: |
+          echo $NEW_VERSION
+
+
+  publish-release:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    name: Publish release
+    needs: [build-docker-image-amd, build-docker-image-arm]
+    steps:
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: bumped-repo
+
+      - name: Load version from artifact
+        shell: bash
+        run: |
+          echo "Hello world :D"
 
 #  release-package:
 #    runs-on: ubuntu-latest
