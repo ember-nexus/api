@@ -30,7 +30,7 @@ jobs:
           echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
 
       - name: Update changelog unreleased section with new version
-        uses: superfaceai/release-changelog-action@v1
+        uses: @superfaceai/release-changelog-action@v2
         with:
           path-to-changelog: CHANGELOG.md
           version: ${{ env.NEW_VERSION }}
