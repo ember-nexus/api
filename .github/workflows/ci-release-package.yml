@@ -93,7 +93,7 @@ jobs:
             .
 
   build-docker-image-arm:
-    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    runs-on: buildjet-8vcpu-ubuntu-2204-arm
     name: Build Docker Image - ARM
     needs: checkout-repo-and-bump-version
     steps:
