@@ -204,13 +204,19 @@ jobs:
           ls -la /tmp/docker
           docker load < /tmp/docker/api-latest-amd.tar.gz
           docker load < /tmp/docker/api-latest-arm.tar.gz
-          docker tag api:latest-amd embernexus/api:test-amd
-          docker tag api:latest-arm embernexus/api:test-arm
+          docker tag api:latest-amd embernexus/api:tmp-latest-amd
+          docker tag api:latest-arm embernexus/api:tmp-latest-arm
+          docker push embernexus/api:tmp-latest-amd
+          docker push embernexus/api:tmp-latest-arm
           docker manifest create \
             embernexus/api:test \
-            --amend embernexus/api:test-amd \
-            --amend embernexus/api:test-arm
+            --amend embernexus/api:tmp-latest-amd \
+            --amend embernexus/api:tmp-latest-arm
           docker manifest push embernexus/api:test
+          export TMP_DOCKERHUB_JWT_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${DOCKERHUB_USERNAME}'", "password": "'${DOCKERHUB_TOKEN}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+          curl -X DELETE -H "Authorization: JWT ${TMP_DOCKERHUB_JWT_TOKEN}" https://hub.docker.com/v2/repositories/embernexus/api/tags/tmp-latest-amd
+          curl -X DELETE -H "Authorization: JWT ${TMP_DOCKERHUB_JWT_TOKEN}" https://hub.docker.com/v2/repositories/embernexus/api/tags/tmp-latest-arm
+          unset TMP_DOCKERHUB_JWT_TOKEN
 
 #  release-package:
 #    runs-on: ubuntu-latest
