@@ -41,7 +41,7 @@ jobs:
       - name: Archive working folder for artifact
         shell: bash
         run: |
-          tar -czf /tmp/bumped-repo.tar.gz .
+          tar --exclude='.git' -czf /tmp/bumped-repo.tar.gz .
           cd /tmp/ci-env/
           tar -czf /tmp/ci-env.tar.gz .
 
