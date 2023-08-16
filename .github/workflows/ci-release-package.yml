@@ -27,7 +27,7 @@ jobs:
           newVersion="$(docker run usvc/semver:latest bump $bumpType $version | tr -d '\r')"
           jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
           echo "New version: $newVersion"
-          mkdir .ci
+          mkdir -p /tmp/ci-env
           echo "NEW_VERSION=$newVersion" >> /tmp/ci-env/NEW_VERSION.txt
           echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
 
