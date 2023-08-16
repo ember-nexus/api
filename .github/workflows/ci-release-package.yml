@@ -186,7 +186,18 @@ jobs:
     needs: [build-docker-image-amd, build-docker-image-arm]
     steps:
 
+      - shell: bash
+        run: |
+          pwd
+          ls -la
+
       - uses: actions/checkout@v3
+
+      - shell: bash
+        run: |
+          pwd
+          ls -la
+          git config -l | cat
 
       - uses: actions/download-artifact@v3
         with:
@@ -207,6 +218,12 @@ jobs:
           mkdir -p /tmp/ci-env
           tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
           ls -la /tmp/ci-env
+
+      - shell: bash
+        run: |
+          pwd
+          ls -la
+          git config -l | cat
 
       - name: Load version from artifact
         shell: bash
