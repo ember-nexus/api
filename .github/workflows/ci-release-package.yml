@@ -206,8 +206,8 @@ jobs:
           docker load < /tmp/docker/api-latest-arm.tar.gz
           docker tag api:latest-amd embernexus/api:test-amd
           docker tag api:latest-arm embernexus/api:test-arm
-          docker push embernexus/api:test-amd
-          docker push embernexus/api:test-arm
+#          docker push embernexus/api:test-amd
+#          docker push embernexus/api:test-arm
           docker manifest create \
             embernexus/api:test \
             --amend embernexus/api:test-amd \
