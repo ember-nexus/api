@@ -182,10 +182,37 @@ jobs:
         run: |
           echo $NEW_VERSION
 
-      - name: Load version from artifact
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-latest-amd
+          path: /tmp/docker
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-latest-arm
+          path: /tmp/docker
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create multi arch Docker image
         shell: bash
         run: |
-          echo "Hello world :D"
+          ls -la /tmp/docker
+          docker load < /tmp/docker/api-latest-amd.tar.gz
+          docker load < /tmp/docker/api-latest-arm.tar.gz
+          docker tag api:latest-amd embernexus/api:test-amd
+          docker tag api:latest-arm embernexus/api:test-arm
+          docker push embernexus/api:test-amd
+          docker push embernexus/api:test-arm
+          docker manifest create \
+            embernexus/api:test \
+            --amend embernexus/api:manifest-amd \
+            --amend embernexus/api:manifest-arm
+          docker manifest push embernexus/api:test
 
 #  release-package:
 #    runs-on: ubuntu-latest
