@@ -201,6 +201,7 @@ jobs:
           ls -la /tmp
           tar xvfz /tmp/bumped-repo.tar.gz -C ./
           ls -la
+          mkdir -p /tmp/ci-env
           tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
           ls -la /tmp/ci-env
 
