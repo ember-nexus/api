@@ -8,12 +8,210 @@ on:
 permissions:
   contents: write
 jobs:
-  release-package:
-    runs-on: ubuntu-latest
+
+
+  checkout-repo-and-bump-version:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    name: Check out Repo and Bump Version
     steps:
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+
+      - name: Bump version
+        shell: bash
+        run: |
+          sudo apt-get install -y moreutils
+          docker pull usvc/semver:latest
+          version=$(cat composer.json | jq -r .version)
+          bumpType=${{ github.event.inputs.release-type }}
+          newVersion="$(docker run usvc/semver:latest bump $bumpType $version | tr -d '\r')"
+          jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
+          echo "New version: $newVersion"
+          mkdir .ci
+          echo "NEW_VERSION=$newVersion" >> /tmp/ci-env/NEW_VERSION.txt
+          echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
+
+      - name: Update changelog unreleased section with new version
+        uses: superfaceai/release-changelog-action@v2
+        with:
+          path-to-changelog: CHANGELOG.md
+          version: ${{ env.NEW_VERSION }}
+          operation: release
+
+      - name: Archive working folder for artifact
+        shell: bash
+        run: |
+          tar -czf /tmp/bumped-repo.tar.gz .
+          tar -czf /tmp/ci-env.tar.gz /tmp/ci-env/
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: bumped-repo
+          path: /tmp/bumped-repo.tar.gz
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ci-env
+          path: /tmp/ci-env.tar.gz
+          retention-days: 7
+
+
+  build-docker-image-amd:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    name: Build Docker Image - AMD
+    needs: checkout-repo-and-bump-version
+    steps:
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: bumped-repo
+          path: /tmp
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: ci-env
+          path: /tmp
+
+      - name: Extract artifacts
+        shell: bash
+        run: |
+          ls -la /tmp
+          tar xvfz /tmp/bumped-repo.tar.gz -C ./
+          ls -la
+          tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
+          ls -la /tmp/ci-env
+
+      - name: Load version from artifact
+        shell: bash
+        run: |
+          ls -la .ci
+          cat /tmp/ci-env/NEW_VERSION.txt
+          cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
+
+      - name: Debug version
+        run: |
+          echo $NEW_VERSION
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image - AMD
+        run: |
+          docker build \
+            --target production \
+            --build-arg VERSION="${{ env.NEW_VERSION }}" \
+            --no-cache \
+            -t api:latest-amd \
+            -f ./docker/Dockerfile \
+            .
+          docker save api:latest-amd | gzip > api-latest-amd.tar.gz
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: docker-image-api-latest-amd
+          path: api-latest-amd.tar.gz
+          retention-days: 7
+
+
+  build-docker-image-arm:
+    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    name: Build Docker Image - ARM
+    needs: checkout-repo-and-bump-version
+    steps:
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: bumped-repo
+          path: /tmp
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: ci-env
+          path: /tmp
+
+      - name: Extract artifacts
+        shell: bash
+        run: |
+          ls -la /tmp
+          tar xvfz /tmp/bumped-repo.tar.gz -C ./
+          ls -la
+          tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
+          ls -la /tmp/ci-env
+
+      - name: Load version from artifact
+        shell: bash
+        run: |
+          ls -la .ci
+          cat /tmp/ci-env/NEW_VERSION.txt
+          cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
+
+      - name: Debug version
+        run: |
+          echo $NEW_VERSION
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image - ARM
+        run: |
+          docker build \
+            --target production \
+            --build-arg VERSION="${{ env.NEW_VERSION }}" \
+            --no-cache \
+            -t api:latest-arm \
+            -f ./docker/Dockerfile \
+            .
+          docker save api:latest-arm | gzip > api-latest-arm.tar.gz
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: docker-image-api-latest-arm
+          path: api-latest-arm.tar.gz
+          retention-days: 7
+
+
+  publish-release:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    name: Publish release
+    needs: [build-docker-image-amd, build-docker-image-arm]
+    steps:
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: bumped-repo
+          path: /tmp
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: ci-env
+          path: /tmp
+
+      - name: Extract artifacts
+        shell: bash
+        run: |
+          ls -la /tmp
+          tar xvfz /tmp/bumped-repo.tar.gz -C ./
+          ls -la
+          tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
+          ls -la /tmp/ci-env
+
+      - name: Load version from artifact
+        shell: bash
+        run: |
+          ls -la .ci
+          cat /tmp/ci-env/NEW_VERSION.txt
+          cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
+
+      - name: Debug version
+        run: |
+          echo $NEW_VERSION
 
       # see also https://github.com/Nautilus-Cyberneering/pygithub
       - name: Import GPG key
@@ -37,26 +235,6 @@ jobs:
           git config --global user.email "${{ steps.import-gpg.outputs.email }}"
           git config --global user.name "${{ steps.import-gpg.outputs.name }}"
 
-      - name: Bump version
-        shell: bash
-        run: |
-          sudo apt-get install -y moreutils
-          docker pull usvc/semver:latest
-          version=$(cat composer.json | jq -r .version)
-          bumpType=${{ github.event.inputs.release-type }}
-          newVersion="$(docker run usvc/semver:latest bump $bumpType $version | tr -d '\r')"
-          jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
-          echo "New version: $newVersion"
-          echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
-          echo "RELEASE_TAG=latest" >> $GITHUB_ENV
-
-      - name: Update changelog unreleased section with new version
-        uses: superfaceai/release-changelog-action@v1
-        with:
-          path-to-changelog: CHANGELOG.md
-          version: ${{ env.NEW_VERSION }}
-          operation: release
-
       - name: Commit changes and create tag
         run: |
           git add "composer.json"
@@ -64,36 +242,55 @@ jobs:
           git commit -m "chore: release ${{ env.NEW_VERSION }}"
           git tag ${{ env.NEW_VERSION }}
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-latest-amd
+          path: /tmp/docker
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-latest-arm
+          path: /tmp/docker
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
+      - name: Create multi arch Docker image
+        shell: bash
         run: |
-          docker build \
-            --target production \
-            --build-arg VERSION=${{ env.NEW_VERSION }} \
-            --no-cache \
-            -t api:local \
-            -f ./docker/Dockerfile \
-            .
-
-      - name: Release on Docker Hub
-        run: |
-          docker tag api:local embernexus/api:${{ env.NEW_VERSION }}
-          docker tag api:local embernexus/api:latest
-          docker push embernexus/api:${{ env.NEW_VERSION }}
-          docker push embernexus/api:latest
-
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: embernexus/api
-          short-description: ${{ github.event.repository.description }}
+          ls -la /tmp/docker
+          docker load < /tmp/docker/api-latest-amd.tar.gz
+          docker load < /tmp/docker/api-latest-arm.tar.gz
+          docker tag api:latest-amd embernexus/api:tmp-latest-amd
+          docker tag api:latest-arm embernexus/api:tmp-latest-arm
+          docker tag api:latest-amd embernexus/api:${{ env.NEW_VERSION }}-amd
+          docker tag api:latest-arm embernexus/api:${{ env.NEW_VERSION }}-arm
+          docker save embernexus/api:${{ env.NEW_VERSION }}-amd | gzip > /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-amd.tar.gz
+          docker save embernexus/api:${{ env.NEW_VERSION }}-arm | gzip > /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
+          docker push embernexus/api:tmp-latest-amd
+          docker push embernexus/api:tmp-latest-arm
+          docker manifest create \
+            embernexus/api:latest \
+            --amend embernexus/api:tmp-latest-amd \
+            --amend embernexus/api:tmp-latest-arm
+          docker manifest push embernexus/api:latest
+          docker manifest create \
+            embernexus/api:${{ env.NEW_VERSION }} \
+            --amend embernexus/api:tmp-latest-amd \
+            --amend embernexus/api:tmp-latest-arm
+          docker manifest push embernexus/api:${{ env.NEW_VERSION }}
+          echo "Creating temporary JWT key for Docker Hub"
+          export TMP_DOCKERHUB_JWT_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${{ secrets.DOCKERHUB_USERNAME}}'", "password": "'${{ secrets.DOCKERHUB_TOKEN }}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+          echo "Deleting Docker Hub tag embernexus/api:tmp-latest-amd"
+          curl -s -X DELETE -H "Authorization: JWT ${TMP_DOCKERHUB_JWT_TOKEN}" https://hub.docker.com/v2/repositories/embernexus/api/tags/tmp-latest-amd
+          echo "Deleting Docker Hub tag embernexus/api:tmp-latest-arm"
+          curl -s -X DELETE -H "Authorization: JWT ${TMP_DOCKERHUB_JWT_TOKEN}" https://hub.docker.com/v2/repositories/embernexus/api/tags/tmp-latest-arm
+          echo "Unsetting temporary Docker Hub JWT key"
+          unset TMP_DOCKERHUB_JWT_TOKEN
+          echo "Finished"
 
       - name: Push repository changes
         env:
@@ -116,6 +313,9 @@ jobs:
           body: ${{ steps.get-changelog.outputs.changelog }}
           prerelease: ${{ startsWith(github.event.inputs.release-type, 'pre') }}
           token: ${{ secrets.RELEASE_TOKEN }}
+          files: |
+            /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-amd.tar.gz
+            /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
 
 # disabled due to low credits in free tier (5 per month)
 #      - name: Initiate Originstamp certificate
