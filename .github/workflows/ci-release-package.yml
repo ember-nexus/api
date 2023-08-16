@@ -42,7 +42,7 @@ jobs:
         shell: bash
         run: |
           tar -czf /tmp/bumped-repo.tar.gz .
-          tar -czf /tmp/ci-env.tar.gz /tmp/ci-env/
+          tar -czf -C /tmp/ci-env /tmp/ci-env.tar.gz /tmp/ci-env/
 
       - uses: actions/upload-artifact@v3
         with:
@@ -86,7 +86,7 @@ jobs:
       - name: Load version from artifact
         shell: bash
         run: |
-          ls -la .ci
+          ls -la /tmp/ci-env
           cat /tmp/ci-env/NEW_VERSION.txt
           cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
 
@@ -147,7 +147,7 @@ jobs:
       - name: Load version from artifact
         shell: bash
         run: |
-          ls -la .ci
+          ls -la /tmp/ci-env
           cat /tmp/ci-env/NEW_VERSION.txt
           cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
 
@@ -208,7 +208,7 @@ jobs:
       - name: Load version from artifact
         shell: bash
         run: |
-          ls -la .ci
+          ls -la /tmp/ci-env
           cat /tmp/ci-env/NEW_VERSION.txt
           cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
 
