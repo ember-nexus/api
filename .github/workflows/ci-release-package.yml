@@ -202,11 +202,9 @@ jobs:
       - name: Create multi arch Docker image
         shell: bash
         run: |
-          ls -la /tmp/docker
+          #ls -la /tmp/docker
           #docker load < /tmp/docker/api-latest-amd.tar.gz
           #docker load < /tmp/docker/api-latest-arm.tar.gz
-          docker pull embernexus/api:tmp-latest-amd
-          docker pull embernexus/api:tmp-latest-arm
           #docker tag api:latest-amd embernexus/api:tmp-latest-amd
           #docker tag api:latest-arm embernexus/api:tmp-latest-arm
           #docker push embernexus/api:tmp-latest-amd
