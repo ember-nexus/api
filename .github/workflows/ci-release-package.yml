@@ -42,7 +42,8 @@ jobs:
         shell: bash
         run: |
           tar -czf /tmp/bumped-repo.tar.gz .
-          tar -czf -C /tmp/ci-env /tmp/ci-env.tar.gz /tmp/ci-env/
+          cd /tmp/ci-env/
+          tar -czf /tmp/ci-env.tar.gz .
 
       - uses: actions/upload-artifact@v3
         with:
