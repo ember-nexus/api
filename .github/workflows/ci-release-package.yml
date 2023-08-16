@@ -210,8 +210,8 @@ jobs:
           docker push embernexus/api:test-arm
           docker manifest create \
             embernexus/api:test \
-            --amend embernexus/api:manifest-amd \
-            --amend embernexus/api:manifest-arm
+            --amend embernexus/api:test-amd \
+            --amend embernexus/api:test-arm
           docker manifest push embernexus/api:test
 
 #  release-package:
