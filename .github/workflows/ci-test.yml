@@ -177,4 +177,7 @@ jobs:
           chmod 777 test-feature-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker compose -f ./tests/FeatureTests/docker-compose.yml up --quiet-pull -d
+          echo "waiting for containers to star tup (10s)"
+          sleep 10
+          echo "finished waiting"
           docker exec ember-nexus-api bash -c "composer install --quiet && composer test:feature"
