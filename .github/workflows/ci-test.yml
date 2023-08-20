@@ -164,6 +164,7 @@ jobs:
       - psalm
       - cs-lint
       - test-mutant
+      - test-leak
     steps:
       - uses: actions/checkout@v3
       - run: mkdir -p /tmp/docker
