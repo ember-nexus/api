@@ -1,0 +1,71 @@
+name: Test
+
+on:
+  - push
+  - fork
+  - pull_request
+
+jobs:
+
+  yml-lint:
+    runs-on: ubuntu-latest
+    name: 'YML lint'
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker pull cytopia/yamllint
+      - run: docker run --rm -t -v $(pwd):/data cytopia/yamllint .
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+    name: 'Markdown lint'
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker pull tmknom/markdownlint
+      - run: docker run --rm -v $(pwd):/work tmknom/markdownlint '**/*.md' --ignore vendor --ignore CHANGELOG.md
+
+  build-docker-image:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    name: 'Build Docker Image'
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image - AMD
+        run: |
+          docker build \
+            --target development \
+            --no-cache \
+            -t api:dev-amd \
+            -f ./docker/Dockerfile \
+            .
+          docker save api:dev-amd | gzip > api-dev-amd.tar.gz
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: api-dev-amd.tar.gz
+          retention-days: 7
+
+  cs-lint:
+    name: 'CS Lint'
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - run: mkdir -p /tmp/docker
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+
+      - name: CS Lint
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install && composer cs:list"
