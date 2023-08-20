@@ -53,6 +53,7 @@ jobs:
           retention-days: 7
 
   cs-lint:
+    runs-on: ubuntu-latest
     name: 'CS Lint'
     steps:
 
