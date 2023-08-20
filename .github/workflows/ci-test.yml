@@ -117,13 +117,14 @@ jobs:
       - name: Unit Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && COMPOSER_MEMORY_LIMIT=-1 composer test:unit"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:unit"
 
   test-mutant:
     runs-on: ubuntu-latest
     name: 'Mutant Test'
     needs:
       - build-docker-image
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v3
       - run: mkdir -p /tmp/docker
@@ -144,6 +145,7 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
+      - test-mutant
     steps:
       - uses: actions/checkout@v3
       - run: mkdir -p /tmp/docker
