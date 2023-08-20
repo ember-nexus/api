@@ -90,9 +90,9 @@
     "post-update-cmd": [
       "@auto-scripts"
     ],
-    "test:unit": "php vendor/phpunit/phpunit/phpunit ./tests/UnitTests",
-    "test:feature": "./test-feature-prepare && php vendor/phpunit/phpunit/phpunit ./tests/FeatureTests",
-    "test:feature:test": "./test-feature-prepare && php vendor/phpunit/phpunit/phpunit ./tests/FeatureTests --group test",
+    "test:unit": "php vendor/phpunit/phpunit/phpunit",
+    "test:feature": "./test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration phpunit.feature.xml.dist ./tests/FeatureTests",
+    "test:feature:test": "./test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration phpunit.feature.xml.dist ./tests/FeatureTests --group test",
     "test:coverage:xml": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --coverage-clover coverage.xml",
     "test:coverage:html": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --coverage-html ./tmp",
     "test:mutant": "export XDEBUG_MODE=coverage && php vendor/infection/infection/bin/infection --threads=4",
