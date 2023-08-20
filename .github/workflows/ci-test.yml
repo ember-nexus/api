@@ -30,15 +30,12 @@ jobs:
       - yml-lint
       - markdown-lint
     steps:
-
       - uses: actions/checkout@v3
-
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Build Docker image - AMD
         run: |
           docker build \
@@ -48,7 +45,6 @@ jobs:
             -f ./docker/Dockerfile \
             .
           docker save api:dev-amd | gzip > api-dev-amd.tar.gz
-
       - uses: actions/upload-artifact@v3
         with:
           name: docker-image-api-dev-amd
@@ -61,17 +57,47 @@ jobs:
     needs:
       - build-docker-image
     steps:
-
       - uses: actions/checkout@v3
-
       - run: mkdir -p /tmp/docker
-
       - uses: actions/download-artifact@v3
         with:
           name: docker-image-api-dev-amd
           path: /tmp/docker
-
       - name: CS Lint
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install && composer cs:list"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer cs:list"
+
+  psalm:
+    runs-on: ubuntu-latest
+    name: 'Psalm'
+    needs:
+      - build-docker-image
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: CS Lint
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer psalm"
+
+  phpstan:
+    runs-on: ubuntu-latest
+    name: 'Psalm'
+    needs:
+      - build-docker-image
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: CS Lint
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer phpstan"
