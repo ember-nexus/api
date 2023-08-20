@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Improve CI/CD.
+- Upgrade PHP to 8.2.9.
 
 ## 0.0.23 - 2023-08-16
 ### Changed

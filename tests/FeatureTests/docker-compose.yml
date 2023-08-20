@@ -1,40 +1,40 @@
 services:
 
-  ember-nexus-test-api:
-    container_name: ember-nexus-test-api
+  ember-nexus-api:
+    container_name: ember-nexus-api
     image: api:dev-amd
     volumes:
       - ../../:/var/www/html
 
-  ember-nexus-test-neo4j:
-    container_name: ember-nexus-test-neo4j
+  ember-nexus-neo4j:
+    container_name: ember-nexus-neo4j
     image: neo4j:5.10.0-enterprise
     environment:
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
       - NEO4J_AUTH=neo4j/password
 
-  ember-nexus-test-mongodb:
-    container_name: ember-nexus-test-mongodb
+  ember-nexus-mongodb:
+    container_name: ember-nexus-mongodb
     image: mongo:6
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongodb
       - MONGO_INITDB_ROOT_PASSWORD=password
 
-  ember-nexus-test-elasticsearch:
-    container_name: ember-nexus-test-elasticsearch
+  ember-nexus-elasticsearch:
+    container_name: ember-nexus-elasticsearch
     image: elasticsearch:8.8.1
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.enrollment.enabled=true
 
-  ember-nexus-test-redis:
-    container_name: ember-nexus-test-redis
+  ember-nexus-redis:
+    container_name: ember-nexus-redis
     image: redis:7-alpine
     command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
 
-  ember-nexus-test-rabbitmq:
-    container_name: ember-nexus-test-rabbitmq
+  ember-nexus-rabbitmq:
+    container_name: ember-nexus-rabbitmq
     image: rabbitmq:3-management
     environment:
       - RABBITMQ_DEFAULT_USER=user
