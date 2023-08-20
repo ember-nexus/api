@@ -26,6 +26,9 @@ jobs:
   build-docker-image:
     runs-on: buildjet-4vcpu-ubuntu-2204
     name: 'Build Docker Image'
+    needs:
+      - yml-lint
+      - markdown-lint
     steps:
 
       - uses: actions/checkout@v3
@@ -55,6 +58,8 @@ jobs:
   cs-lint:
     runs-on: ubuntu-latest
     name: 'CS Lint'
+    needs:
+      - build-docker-image
     steps:
 
       - uses: actions/checkout@v3
