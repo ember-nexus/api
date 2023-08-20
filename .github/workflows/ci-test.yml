@@ -135,7 +135,25 @@ jobs:
       - name: Mutant Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && COMPOSER_MEMORY_LIMIT=-1 composer test:mutant"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:mutant"
+
+  test-leak:
+    runs-on: ubuntu-latest
+    name: 'Leak Test'
+    needs:
+      - build-docker-image
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Mutant Test
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:leak"
 
   test-feature:
     runs-on: ubuntu-latest
@@ -156,5 +174,5 @@ jobs:
       - name: Feature Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker compose -f ./tests/FeatureTests/docker-compose.yml up -d
-          docker exec -it ember-nexus-test-api bash -c "composer install --quiet && composer test:feature"
+          docker compose -f ./tests/FeatureTests/docker-compose.yml up --quiet-pull -d
+          docker exec ember-nexus-test-api bash -c "composer install --quiet && composer test:feature"

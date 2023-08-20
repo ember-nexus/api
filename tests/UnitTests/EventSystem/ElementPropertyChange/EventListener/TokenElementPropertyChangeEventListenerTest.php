@@ -26,6 +26,9 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
 
     public function testTokenWithTokenPropertyTriggersException(): void
     {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
         $event = new ElementPropertyChangeEvent('Token', null, ['token' => true]);
         $eventListener = new TokenElementPropertyChangeEventListener();
         $this->expectException(\Exception::class);
@@ -34,6 +37,9 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
 
     public function testTokenWithTokenHashPropertyTriggersException(): void
     {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
         $event = new ElementPropertyChangeEvent('Token', null, ['_tokenHash' => true]);
         $eventListener = new TokenElementPropertyChangeEventListener();
         $this->expectException(\Exception::class);

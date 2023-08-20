@@ -96,7 +96,7 @@
     "test:coverage:xml": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --coverage-clover coverage.xml",
     "test:coverage:html": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --coverage-html ./tmp",
     "test:mutant": "export XDEBUG_MODE=coverage && php vendor/infection/infection/bin/infection --threads=4",
-    "test:leak": "export LEAK=true && php vendor/bin/roave-no-leaks",
+    "test:leak": "export LEAK=true && php vendor/bin/roave-no-leaks --configuration phpunit.xml.dist",
     "cs:list": "php vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix --allow-risky=yes --dry-run ./src",
     "cs:fix": "php vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix --allow-risky=yes",
     "psalm": "php vendor/bin/psalm --show-info=true --no-cache",
