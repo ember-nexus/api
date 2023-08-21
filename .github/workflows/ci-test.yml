@@ -165,6 +165,13 @@ jobs:
       - cs-lint
       - test-mutant
       - test-leak
+    strategy:
+      matrix:
+        dockerCompose:
+          - "docker-compose-neo4j-5.1-community.yml"
+          - "docker-compose-neo4j-5.9-community.yml"
+          - "docker-compose-neo4j-5.10-community.yml"
+          - "docker-compose-neo4j-5.11-community.yml"
     steps:
       - uses: actions/checkout@v3
       - run: mkdir -p /tmp/docker
@@ -172,11 +179,16 @@ jobs:
         with:
           name: docker-image-api-dev-amd
           path: /tmp/docker
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Feature Test
         run: |
           chmod 777 test-feature-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker compose -f ./tests/FeatureTests/docker-compose.yml up --quiet-pull -d
+          docker compose -f ./tests/FeatureTests/${{ matrix.dockerCompose }} up --quiet-pull -d
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
