@@ -18,6 +18,9 @@ class IdElementPropertyChangeEventListenerTest extends TestCase
 
     public function testElementWithIdPropertyTriggersException(): void
     {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
         $event = new ElementPropertyChangeEvent('Test', null, ['id' => true]);
         $eventListener = new IdElementPropertyChangeEventListener();
         $this->expectException(\Exception::class);

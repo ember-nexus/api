@@ -9,6 +9,9 @@ class NormalizedValueToRawValueEventTest extends TestCase
 {
     public function testRawValueIsNotInitializedOnCreation(): void
     {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
         $event = new NormalizedValueToRawValueEvent('normalized value');
         $this->expectExceptionMessage('Typed property App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent::$rawValue must not be accessed before initialization');
         $event->getRawValue();

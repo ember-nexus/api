@@ -18,6 +18,9 @@ class CreatedElementPropertyChangeEventListenerTest extends TestCase
 
     public function testElementWithCreatedPropertyTriggersException(): void
     {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
         $event = new ElementPropertyChangeEvent('Test', null, ['created' => true]);
         $eventListener = new CreatedElementPropertyChangeEventListener();
         $this->expectException(\Exception::class);

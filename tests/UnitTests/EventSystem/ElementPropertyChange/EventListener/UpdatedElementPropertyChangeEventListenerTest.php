@@ -18,6 +18,9 @@ class UpdatedElementPropertyChangeEventListenerTest extends TestCase
 
     public function testElementWithUpdatedPropertyTriggersException(): void
     {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
         $event = new ElementPropertyChangeEvent('Test', null, ['updated' => true]);
         $eventListener = new UpdatedElementPropertyChangeEventListener();
         $this->expectException(\Exception::class);

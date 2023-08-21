@@ -1,0 +1,195 @@
+name: Test
+
+on:
+  - push
+  - fork
+  - pull_request
+
+jobs:
+
+  yml-lint:
+    runs-on: ubuntu-latest
+    name: 'YML lint'
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker pull cytopia/yamllint
+      - run: docker run --rm -t -v $(pwd):/data cytopia/yamllint .
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+    name: 'Markdown lint'
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker pull tmknom/markdownlint
+      - run: docker run --rm -v $(pwd):/work tmknom/markdownlint '**/*.md' --ignore vendor --ignore CHANGELOG.md
+
+  build-docker-image:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    name: 'Build Docker Image'
+    needs:
+      - yml-lint
+      - markdown-lint
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build Docker image - AMD
+        run: |
+          docker build \
+            --target development \
+            --no-cache \
+            -t api:dev-amd \
+            -f ./docker/Dockerfile \
+            .
+          docker save api:dev-amd | gzip > api-dev-amd.tar.gz
+      - uses: actions/upload-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: api-dev-amd.tar.gz
+          retention-days: 7
+
+  cs-lint:
+    runs-on: ubuntu-latest
+    name: 'CS Lint'
+    needs:
+      - build-docker-image
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: CS Lint
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer cs:list"
+
+  psalm:
+    runs-on: ubuntu-latest
+    name: 'Psalm'
+    needs:
+      - build-docker-image
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Psalm
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer psalm"
+
+  phpstan:
+    runs-on: ubuntu-latest
+    name: 'Phpstan'
+    needs:
+      - build-docker-image
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Phpstan
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer phpstan"
+
+  test-unit:
+    runs-on: ubuntu-latest
+    name: 'Unit Test'
+    needs:
+      - build-docker-image
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Unit Test
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:unit"
+
+  test-mutant:
+    runs-on: ubuntu-latest
+    name: 'Mutant Test'
+    needs:
+      - build-docker-image
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Mutant Test
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:mutant"
+
+  test-leak:
+    runs-on: ubuntu-latest
+    name: 'Leak Test'
+    needs:
+      - build-docker-image
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Mutant Test
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:leak"
+
+  test-feature:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    name: 'Feature Test'
+    needs:
+      - test-unit
+      - phpstan
+      - psalm
+      - cs-lint
+      - test-mutant
+      - test-leak
+    strategy:
+      matrix:
+        dockerCompose:
+          - "neo4j-5.1"
+          - "neo4j-5.9"
+          - "neo4j-5.10"
+          - "neo4j-5.11"
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Feature Test
+        run: |
+          chmod 777 test-feature-prepare
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml up --quiet-pull -d
+          echo "waiting for containers to star tup (10s)"
+          sleep 10
+          echo "finished waiting"
+          docker exec ember-nexus-api bash -c "composer install --quiet && composer test:feature"
