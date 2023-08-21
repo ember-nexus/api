@@ -156,7 +156,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:leak"
 
   test-feature:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-4vcpu-ubuntu-2204
     name: 'Feature Test'
     needs:
       - test-unit
