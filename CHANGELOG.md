@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add CI workflow to check for upstream Alpine updated.
+### Changed
+- Improve documentation.
 
 ## 0.0.24 - 2023-08-21
 ### Changed

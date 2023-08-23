@@ -1,5 +1,49 @@
 # Hardware Requirements
 
+Computer Architectures
+
+The Ember Nexus API stack currently supports the following CPU architectures:
+
+| Software        | amd64 | arm64 | riscv64 | ppc64le | s390x | mips64le |
+| --------------- | ----- | ----- | ------- | ------- | ----- | -------- |
+| **Ember Nexus API** | ✅ <sup>1</sup> | ✅ <sup>2</sup> | 🚧 <sup>3</sup>    | ⛔ <sup>4</sup> | ⛔ <sup>4</sup> | ⛔ <sup>4</sup> |
+| Neo4j | ✅ <sup>5</sup> | ✅ <sup>5</sup> | 🚧 <sup>6</sup> | 🚧 <sup>6</sup> | 🚧 <sup>6</sup> | ⛔ <sup>7</sup> |
+| MongoDB | ✅ <sup>8</sup> | ✅ <sup>8</sup> | ⛔ <sup>7</sup> | ✅ <sup>9</sup> | ✅ <sup>9</sup> | ⛔ <sup>7</sup> |
+| Elasticsearch | ✅ <sup>10</sup> | ✅ <sup>10</sup> | 🚧 <sup>6</sup> | 🚧 <sup>6</sup> | 🚧 <sup>6</sup> | ⛔ <sup>7</sup> |
+| Redis | ✅ <sup>11</sup> | ✅ <sup>11</sup> | 🚧 <sup>12</sup> | ✅ <sup>11</sup> | ✅ <sup>11</sup> | ✅ <sup>11</sup> |
+| RabbitMQ | ✅ <sup>13</sup> | ✅ <sup>13</sup> | ⛔ <sup>14</sup> | ✅ <sup>13</sup> | ✅ <sup>13</sup> | ⛔ <sup>7</sup> |
+| MinIO | ✅ <sup>15</sup> | ✅ <sup>15</sup> | ⛔ <sup>16</sup> | ✅ <sup>15</sup> | ✅ <sup>15</sup> | ✅ <sup>17</sup> |
+
+1: The architecture amd64 is supported by default.  
+2: The architecture arm64 is supported since 0.0.23.  
+3: The architecture riscv64 will likely be supported once a) computers and CI/CD infrastructure get more available and
+b) upstream dependencies get official support; see also [PHP](https://github.com/docker-library/php/issues/1279) and
+[NGINX Unit](https://github.com/nginx/unit/issues/926).  
+4: No support is planned, although you can ask for it by opening a [GitHub issue](https://github.com/ember-nexus/api/issues).
+It likely requires hardware donation or general collaboration.  
+5: Neo4j [officially supports](https://neo4j.com/docs/operations-manual/current/installation/requirements/)
+amd64 and arm64.  
+6: No official support, although Java applications should be able to run on these architectures.  
+7: Software is not runnable on this architecture.  
+8: MongoDB [officially supports](https://www.mongodb.com/docs/manual/installation/#supported-platforms) amd64 and arm64
+in their community and enterprise versions.  
+9: MongoDB supports these architectures in
+[enterprise-only versions](https://www.mongodb.com/docs/manual/installation/#supported-platforms).  
+10: Elasticsearch [officially supports](https://www.elastic.co/support/matrix) amd64 and arm64.  
+11: Redis [supports most architectures](https://hub.docker.com/_/redis).  
+12: Redis seems to be [experimentally runable](https://github.com/redis/redis/pull/12349) on RISC V.  
+13: RabbitMQ supports [most platforms Erlang covers](https://www.rabbitmq.com/platforms.html).  
+14: RabbitMQ [might support](https://www.rabbitmq.com/platforms.html) RISC V once it is
+[supported by Erlang](https://github.com/erlang/otp/issues/7498).  
+15: MinIO [supports](https://min.io/docs/minio/linux/operations/install-deploy-manage/deploy-minio-single-node-multi-drive.html#download-the-minio-server)
+amd64, arm64, ppc64le as well as s390x.  
+16: MinIO [does not support](https://github.com/minio/minio/pull/17161) RISC V yet, although there is some community
+work done.  
+17: MinIO [seems to support](https://github.com/minio/minio/blob/adb8be069ee18f5360c2a9dcd22054b113493fec/buildscripts/cross-compile.sh#L12C34-L12C44)
+mips64, although it is not available through Docker.
+
+If this information needs to be corrected, please open a [GitHub issue](https://github.com/ember-nexus/api/issues).
+
 ## Local and Development Setups
 
 For local and development purposes, the whole stack can be hosted on a single machine with at least 8 GB of RAM,
