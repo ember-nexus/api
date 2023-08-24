@@ -1,0 +1,31 @@
+name: "Check upstream dependency - Alpine"
+on:
+  schedule:
+    - cron: "10 2 * * *"
+permissions:
+  contents: write
+jobs:
+  check-upstream-dependency-alpine:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Load latest Docker Hub tags for Alpine
+        run: |
+          url="https://hub.docker.com/v2/namespaces/library/repositories/alpine/tags?page_size=25"
+          latestTags=$(wget -O - -o /dev/null $url)
+          latestTag=$(echo $latestTags | jq -r '.results[] | .name' | sed -E -n '/^[0-9]+\.[0-9]+\.[0-9]+/ s/^([0-9]+\.[0-9]+)\..*$/\1/p' | sort -V | uniq | tail -n 1)
+          echo "Latest tag: $latestTag"
+          echo "TAG=$latestTag" >> $GITHUB_ENV
+
+      - name: Create new GitHub issue
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          TAG: ${{ env.TAG }}
+        with:
+          filename: .github/ISSUE_TEMPLATE_CHECK_UPSTREAM_DEPENDENCY_ALPINE.md
+          update_existing: false
+          search_existing: all
