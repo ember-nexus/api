@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Response\CollectionResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
+use LogicException;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -23,7 +24,7 @@ class CollectionService
         $firstPage = 1;
         $query = $this->requestStack->getCurrentRequest()?->query;
         if (!($query instanceof InputBag)) {
-            throw new \LogicException();
+            throw new LogicException();
         }
         if (!$query->has('page')) {
             return $firstPage;
@@ -40,7 +41,7 @@ class CollectionService
     {
         $query = $this->requestStack->getCurrentRequest()?->query;
         if (!($query instanceof InputBag)) {
-            throw new \LogicException();
+            throw new LogicException();
         }
         if (!$query->has('pageSize')) {
             return $this->emberNexusConfiguration->getPageSizeDefault();
@@ -68,7 +69,7 @@ class CollectionService
     {
         $currentRequest = $this->requestStack->getCurrentRequest();
         if (null === $currentRequest) {
-            throw new \LogicException();
+            throw new LogicException();
         }
         $basePath = $currentRequest->getBasePath();
 

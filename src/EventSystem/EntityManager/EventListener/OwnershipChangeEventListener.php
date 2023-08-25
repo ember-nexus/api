@@ -7,6 +7,7 @@ use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\Type\RabbitMQQueueType;
+use Exception;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
@@ -73,7 +74,7 @@ class OwnershipChangeEventListener
             'element' => $elementId->toString(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if (!is_string($jsonMessage)) {
-            throw new \Exception('Internal server exception.');
+            throw new Exception('Internal server exception.');
         }
         $message = new AMQPMessage($jsonMessage);
         $channel->basic_publish($message, '', $queue);

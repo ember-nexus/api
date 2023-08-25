@@ -2,15 +2,17 @@
 
 namespace App\Exception;
 
-class ServerException extends ExtendedException
+use Throwable;
+
+class Server500InternalServerErrorException extends ProblemJsonException
 {
     public function __construct(
-        string $type = '500-generic-server-error',
-        string $title = 'Generic server error',
+        string $type,
+        string $title = 'Internal server error',
         int $status = 500,
         string $detail = '',
         string $instance = null,
-        \Throwable $previous = null
+        Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

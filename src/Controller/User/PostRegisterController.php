@@ -2,8 +2,9 @@
 
 namespace App\Controller\User;
 
-use App\Exception\ClientBadRequestException;
-use App\Exception\ClientForbiddenException;
+use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
+use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
+use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
@@ -25,7 +26,10 @@ class PostRegisterController extends AbstractController
         private CypherEntityManager $cypherEntityManager,
         private UrlGeneratorInterface $router,
         private UserPasswordHasher $userPasswordHasher,
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
+        private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
+        private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
     ) {
     }
 
@@ -39,7 +43,7 @@ class PostRegisterController extends AbstractController
         $body = \Safe\json_decode($request->getContent(), true);
 
         if (!$this->emberNexusConfiguration->isRegisterEnabled()) {
-            throw new ClientForbiddenException();
+            throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
 
         $userId = UuidV4::uuid4();
@@ -52,13 +56,13 @@ class PostRegisterController extends AbstractController
          * @var array<string, mixed> $data
          */
         if (!array_key_exists('password', $body)) {
-            throw new ClientBadRequestException(detail: 'Property password must be set.');
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('password', 'string');
         }
         $password = $body['password'];
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         if (!array_key_exists($uniqueIdentifier, $data)) {
-            throw new ClientBadRequestException(detail: sprintf("Property '%s' must be set.", $uniqueIdentifier));
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate($uniqueIdentifier, 'string');
         }
         $uniqueIdentifierValue = $data[$uniqueIdentifier];
 
@@ -72,7 +76,7 @@ class PostRegisterController extends AbstractController
             ]
         ));
         if ($res->first()->get('count') > 0) {
-            throw new ClientBadRequestException(sprintf("Value '%s' for property '%s' is not available.", $uniqueIdentifierValue, $uniqueIdentifier));
+            throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($uniqueIdentifierValue);
         }
 
         $userNode = (new NodeElement())

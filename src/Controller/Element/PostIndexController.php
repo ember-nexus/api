@@ -2,9 +2,10 @@
 
 namespace App\Controller\Element;
 
-use App\Exception\ClientBadRequestException;
-use App\Exception\ClientNotFoundException;
-use App\Exception\ClientUnauthorizedException;
+use App\Factory\Exception\Client400IncompleteMutualDependencyExceptionFactory;
+use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
+use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
@@ -12,6 +13,7 @@ use App\Service\ElementManager;
 use App\Type\AccessType;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use DateTime;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,7 +28,11 @@ class PostIndexController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
-        private UrlGeneratorInterface $router
+        private UrlGeneratorInterface $router,
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
+        private Client400IncompleteMutualDependencyExceptionFactory $client400IncompleteMutualDependencyExceptionFactory,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
 
@@ -37,6 +43,11 @@ class PostIndexController extends AbstractController
     )]
     public function postIndex(Request $request): Response
     {
+        $userId = $this->authProvider->getUserUuid();
+        if (!$userId) {
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
+        }
+
         $body = \Safe\json_decode($request->getContent(), true);
 
         if (array_key_exists('id', $body)) {
@@ -46,7 +57,7 @@ class PostIndexController extends AbstractController
         }
 
         if (!array_key_exists('type', $body)) {
-            throw new ClientBadRequestException(detail: 'Type must be set.');
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'a valid type');
         }
         $type = $body['type'];
 
@@ -56,7 +67,7 @@ class PostIndexController extends AbstractController
             foreach ($data as $key => $value) {
                 if (is_string($value)) {
                     if (strlen($value) >= 22 && strlen($value) <= 26) {
-                        $possibleDate = \DateTime::createFromFormat(\DateTime::ATOM, $value);
+                        $possibleDate = DateTime::createFromFormat(DateTime::ATOM, $value);
                         if (false !== $possibleDate) {
                             $data[$key] = $possibleDate;
                         }
@@ -83,7 +94,19 @@ class PostIndexController extends AbstractController
             return $this->createRelation($type, $elementId, $startId, $endId, $data);
         }
 
-        throw new ClientBadRequestException(detail: "When creating a relation, both properties 'start' as well as 'end' must be set.");
+        $setProperties = [];
+        $missingProperties = [];
+        if (null !== $startId) {
+            $setProperties[] = 'start';
+        } else {
+            $missingProperties[] = 'start';
+        }
+        if (null !== $endId) {
+            $setProperties[] = 'end';
+        } else {
+            $missingProperties[] = 'end';
+        }
+        throw $this->client400IncompleteMutualDependencyExceptionFactory->createFromTemplate(['start', 'end'], $setProperties, $missingProperties);
     }
 
     /**
@@ -132,15 +155,12 @@ class PostIndexController extends AbstractController
     private function createRelation(string $type, UuidInterface $relationId, UuidInterface $startId, UuidInterface $endId, array $data): Response
     {
         $userId = $this->authProvider->getUserUuid();
-        if (!$userId) {
-            throw new ClientUnauthorizedException();
-        }
 
         if (!$this->accessChecker->hasAccessToElement($userId, $startId, AccessType::CREATE)) {
-            throw new ClientNotFoundException();
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
         if (!$this->accessChecker->hasAccessToElement($userId, $endId, AccessType::READ)) {
-            throw new ClientNotFoundException();
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         $newRelation = (new RelationElement())

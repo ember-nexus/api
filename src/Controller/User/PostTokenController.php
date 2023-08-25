@@ -2,7 +2,7 @@
 
 namespace App\Controller\User;
 
-use App\Exception\ClientUnauthorizedException;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Response\JsonResponse;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
@@ -15,7 +15,8 @@ class PostTokenController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
-        private TokenGenerator $tokenGenerator
+        private TokenGenerator $tokenGenerator,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory
     ) {
     }
 
@@ -29,7 +30,7 @@ class PostTokenController extends AbstractController
         $userUuid = $this->authProvider->getUserUuid();
 
         if (!$userUuid) {
-            throw new ClientUnauthorizedException();
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         $body = \Safe\json_decode($request->getContent(), true);

@@ -4,6 +4,7 @@ namespace App\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPreCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
+use DateTime;
 
 class UpdatedElementPreWriteEventListener
 {
@@ -23,6 +24,6 @@ class UpdatedElementPreWriteEventListener
         if ($element->hasProperty('updated')) {
             return;
         }
-        $element->addProperty('updated', new \DateTime());
+        $element->addProperty('updated', new DateTime());
     }
 }

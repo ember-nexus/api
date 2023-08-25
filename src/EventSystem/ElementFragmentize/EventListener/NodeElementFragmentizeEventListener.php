@@ -3,6 +3,7 @@
 namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
+use InvalidArgumentException;
 
 class NodeElementFragmentizeEventListener
 {
@@ -16,13 +17,13 @@ class NodeElementFragmentizeEventListener
 
         $nodeElementIdentifier = $nodeElement->getIdentifier();
         if (null === $nodeElementIdentifier) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         $nodeElementIdentifier = $nodeElementIdentifier->toString();
 
         $nodeLabel = $nodeElement->getLabel();
         if (null === $nodeLabel) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
 
         /**

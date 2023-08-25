@@ -3,6 +3,7 @@
 namespace App\EventSystem\RawValueToNormalizedValue\EventListener;
 
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
+use DateTime;
 
 class DateTimeRawValueToNormalizedValueEventListener
 {
@@ -18,7 +19,7 @@ class DateTimeRawValueToNormalizedValueEventListener
         ) {
             return;
         }
-        $possibleDate = \DateTime::createFromFormat(\DateTime::ATOM, $rawValue);
+        $possibleDate = DateTime::createFromFormat(DateTime::ATOM, $rawValue);
         if (false === $possibleDate) {
             return;
         }

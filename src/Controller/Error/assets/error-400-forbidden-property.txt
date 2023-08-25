@@ -1,0 +1,7 @@
+ Error 400 - Forbidden Property
+
+ This error is thrown when the request body contains a property, which is either generally not allowed or can not be
+ changed manually.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

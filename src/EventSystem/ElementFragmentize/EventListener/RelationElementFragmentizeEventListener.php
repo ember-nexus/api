@@ -3,6 +3,7 @@
 namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
+use LogicException;
 use Syndesi\CypherDataStructures\Type\Node;
 
 class RelationElementFragmentizeEventListener
@@ -17,24 +18,24 @@ class RelationElementFragmentizeEventListener
 
         $relationUuid = $relationElement->getIdentifier();
         if (null === $relationUuid) {
-            throw new \LogicException();
+            throw new LogicException();
         }
         $relationUuid = $relationUuid->toString();
 
         $relationType = $relationElement->getType();
         if (null === $relationType) {
-            throw new \LogicException();
+            throw new LogicException();
         }
 
         $startUuid = $relationElement->getStart();
         if (null === $startUuid) {
-            throw new \LogicException();
+            throw new LogicException();
         }
         $startUuid = $startUuid->toString();
 
         $endUuid = $relationElement->getEnd();
         if (null === $endUuid) {
-            throw new \LogicException();
+            throw new LogicException();
         }
         $endUuid = $endUuid->toString();
 

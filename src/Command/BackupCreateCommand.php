@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
 use App\Style\EmberNexusStyle;
+use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
@@ -78,7 +79,7 @@ class BackupCreateCommand extends Command
         $this->prettyPrint = $input->getOption('pretty');
         $this->ndjson = $input->getOption('ndjson');
         if ($this->prettyPrint && $this->ndjson) {
-            throw new \Exception('Pretty print and ndjson are mutually exclusive.');
+            throw new Exception('Pretty print and ndjson are mutually exclusive.');
         }
         $this->io->title('Backup Create');
         $this->createBackupFolders();
@@ -144,7 +145,7 @@ class BackupCreateCommand extends Command
             foreach ($nodeIds as $nodeId) {
                 $node = $this->elementManager->getNode($nodeId);
                 if (null === $node) {
-                    throw new \LogicException('Node can not be null');
+                    throw new LogicException('Node can not be null');
                 }
                 $data = $this->elementToRawService->elementToRaw($node);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
@@ -195,7 +196,7 @@ class BackupCreateCommand extends Command
             foreach ($relationIds as $relationId) {
                 $relation = $this->elementManager->getRelation($relationId);
                 if (null === $relation) {
-                    throw new \LogicException('Relation can not be null');
+                    throw new LogicException('Relation can not be null');
                 }
                 $data = $this->elementToRawService->elementToRaw($relation);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
@@ -263,15 +264,15 @@ class BackupCreateCommand extends Command
         $backupName = trim($backupName);
 
         if ('' === $backupName) {
-            throw new \LogicException("Backup name can not be ''");
+            throw new LogicException("Backup name can not be ''");
         }
 
         if ('.' === $backupName) {
-            throw new \LogicException("Backup name can not be '.'");
+            throw new LogicException("Backup name can not be '.'");
         }
 
         if ('..' === $backupName) {
-            throw new \LogicException("Backup name can not be '..'");
+            throw new LogicException("Backup name can not be '..'");
         }
 
         // todo remove comment block

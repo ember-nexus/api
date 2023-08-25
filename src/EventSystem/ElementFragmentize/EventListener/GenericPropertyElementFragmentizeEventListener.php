@@ -4,6 +4,8 @@ namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
+use DateTimeInterface;
+use Exception;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 
 class GenericPropertyElementFragmentizeEventListener
@@ -38,7 +40,7 @@ class GenericPropertyElementFragmentizeEventListener
                 $mongoFragment->addProperty($name, $value);
                 continue;
             }
-            if ($value instanceof \DateTimeInterface) {
+            if ($value instanceof DateTimeInterface) {
                 $cypherFragment->addProperty($name, $value);
                 $elasticFragment->addProperty($name, $value->format('Uu'));
                 continue;
@@ -74,7 +76,7 @@ class GenericPropertyElementFragmentizeEventListener
                 $elasticFragment->addProperty($name, $value);
                 continue;
             }
-            throw new \Exception('unknown data type');
+            throw new Exception('unknown data type');
         }
     }
 }

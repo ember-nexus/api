@@ -3,6 +3,7 @@
 namespace App\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
+use Exception;
 
 class UpdatedElementPropertyChangeEventListener
 {
@@ -15,6 +16,6 @@ class UpdatedElementPropertyChangeEventListener
         if (!array_key_exists('updated', $event->getChangedProperties())) {
             return;
         }
-        throw new \Exception("Setting the property 'updated' is forbidden.");
+        throw new Exception("Setting the property 'updated' is forbidden.");
     }
 }

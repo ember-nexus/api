@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use LogicException;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -17,7 +18,7 @@ class AuthProvider
     ) {
         $anonymousUserUuid = $this->bag->get('anonymousUserUUID');
         if (!is_string($anonymousUserUuid)) {
-            throw new \LogicException('anonymousUserUUID must be set to a valid UUID');
+            throw new LogicException('anonymousUserUUID must be set to a valid UUID');
         }
         $this->userUuid = UuidV4::fromString($anonymousUserUuid);
         $this->isAnonymous = true;

@@ -2,9 +2,10 @@
 
 namespace App\EventSystem\Exception\EventListener;
 
-use App\Exception\ExtendedException;
-use App\Exception\ServerException;
+use App\Exception\ProblemJsonException;
+use App\Exception\Server500InternalServerErrorException;
 use App\Response\ProblemJsonResponse;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -28,11 +29,11 @@ class ExceptionEventListener
     {
         $this->logger->error($event->getThrowable());
         $originalException = $extendedException = $event->getThrowable();
-        if (!($originalException instanceof ExtendedException)) {
-            $extendedException = new ServerException(detail: 'Other internal exception.');
+        if (!($originalException instanceof ProblemJsonException)) {
+            $extendedException = Server500InternalServerErrorException::createFromTemplate('Other internal exception.');
         }
         /**
-         * @var ExtendedException $extendedException
+         * @var ProblemJsonException $extendedException
          */
         $instance = $extendedException->getInstance();
         $instanceLink = null;
@@ -43,7 +44,7 @@ class ExceptionEventListener
                     $instance ?? 'unknown'
                 )
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         // check if there are configured alternatives for the instance links
@@ -66,6 +67,10 @@ class ExceptionEventListener
 
         if (null === $instanceLink) {
             unset($data['instance']);
+        }
+
+        if ('' === $data['detail']) {
+            unset($data['detail']);
         }
 
         if ($this->kernel->isDebug()) {

@@ -2,7 +2,7 @@
 
 namespace App\Controller\File;
 
-use App\Exception\NotImplementedException;
+use App\Factory\Exception\Server501NotImplementedExceptionFactory;
 use App\Helper\Regex;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,6 +11,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DeleteElementFileController extends AbstractController
 {
+    public function __construct(
+        private Server501NotImplementedExceptionFactory $server501NotImplementedExceptionFactory
+    ) {
+    }
+
     #[Route(
         '/{uuid}/file',
         name: 'deleteElementFile',
@@ -21,6 +26,6 @@ class DeleteElementFileController extends AbstractController
     )]
     public function deleteElementFile(string $uuid, Request $request): Response
     {
-        throw new NotImplementedException();
+        throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }
 }

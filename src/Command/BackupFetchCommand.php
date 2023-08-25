@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Style\EmberNexusStyle;
+use Exception;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\MountManager;
@@ -71,17 +72,17 @@ class BackupFetchCommand extends Command
         $backupName = $input->getArgument('name');
         $backupLocation = $this->findBackupRootFolder($filesystem);
         if (null === $backupLocation) {
-            throw new \Exception('Unable to find the file summary.json in backup archive.');
+            throw new Exception('Unable to find the file summary.json in backup archive.');
         }
         $this->io->writeln(sprintf('Found backup inside ZIP in folder <info>%s</info>.', $backupLocation));
         if (!$filesystem->directoryExists(sprintf('%s/node', $backupLocation))) {
-            throw new \Exception('ZIP archive does not contain required node folder.');
+            throw new Exception('ZIP archive does not contain required node folder.');
         }
         if (!$filesystem->directoryExists(sprintf('%s/relation', $backupLocation))) {
-            throw new \Exception('ZIP archive does not contain required relation folder.');
+            throw new Exception('ZIP archive does not contain required relation folder.');
         }
         if (!$filesystem->directoryExists(sprintf('%s/file', $backupLocation))) {
-            throw new \Exception('ZIP archive does not contain required file folder.');
+            throw new Exception('ZIP archive does not contain required file folder.');
         }
         $this->io->writeln('Required folders exist.');
         $this->io->stopSection('Download complete.');
@@ -235,7 +236,7 @@ class BackupFetchCommand extends Command
     {
         if ($this->backupStorage->directoryExists($name)) {
             if (!$force) {
-                throw new \Exception(sprintf("Unable to fetch remote backup with name '%s', as another backup with the same name already exists. Delete it or use --force to overwrite existing backup.", $name));
+                throw new Exception(sprintf("Unable to fetch remote backup with name '%s', as another backup with the same name already exists. Delete it or use --force to overwrite existing backup.", $name));
             }
             $this->backupStorage->deleteDirectory($name);
         }

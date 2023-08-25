@@ -2,7 +2,7 @@
 
 namespace App\Controller\Element;
 
-use App\Exception\ClientUnauthorizedException;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use Laudis\Neo4j\Databags\Statement;
@@ -17,7 +17,8 @@ class GetIndexController extends AbstractController
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
         private AuthProvider $authProvider,
-        private CollectionService $collectionService
+        private CollectionService $collectionService,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory
     ) {
     }
 
@@ -30,7 +31,7 @@ class GetIndexController extends AbstractController
     {
         $userUuid = $this->authProvider->getUserUuid();
         if (null === $userUuid) {
-            throw new ClientUnauthorizedException();
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(

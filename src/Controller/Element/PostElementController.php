@@ -2,10 +2,10 @@
 
 namespace App\Controller\Element;
 
-use App\Exception\ClientBadIdException;
-use App\Exception\ClientBadRequestException;
-use App\Exception\ClientNotFoundException;
-use App\Exception\ClientUnauthorizedException;
+use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
+use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
+use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Response\CreatedResponse;
 use App\Security\AccessChecker;
@@ -28,7 +28,11 @@ class PostElementController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
-        private UrlGeneratorInterface $router
+        private UrlGeneratorInterface $router,
+        private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
 
@@ -46,17 +50,17 @@ class PostElementController extends AbstractController
         $userUuid = $this->authProvider->getUserUuid();
 
         if (!$userUuid) {
-            throw new ClientUnauthorizedException();
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         $type = $this->accessChecker->getElementType($elementUuid);
         if (ElementType::RELATION === $type) {
             // relations can not own nodes
-            throw new ClientNotFoundException();
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         if (!$this->accessChecker->hasAccessToElement($userUuid, $elementUuid, AccessType::CREATE)) {
-            throw new ClientNotFoundException();
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         $body = \Safe\json_decode($request->getContent(), true);
@@ -64,19 +68,19 @@ class PostElementController extends AbstractController
         $newNodeUuid = UuidV4::uuid4();
         if (array_key_exists('id', $body)) {
             $newNodeUuid = UuidV4::fromString($body['id']);
-            $elementTypeOfNewNodeUuid = $this->accessChecker->getElementType($newNodeUuid);
-            if (null !== $elementTypeOfNewNodeUuid) {
-                throw new ClientBadIdException();
+            $uuidConflict = null !== $this->accessChecker->getElementType($newNodeUuid);
+            if ($uuidConflict) {
+                throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($newNodeUuid->toString());
             }
         }
 
         if (!array_key_exists('type', $body)) {
-            throw new ClientBadRequestException(detail: 'Required property "type" is not set.');
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'a valid type');
         }
         $type = $body['type'];
 
         if (!array_key_exists('data', $body)) {
-            throw new ClientBadRequestException(detail: 'Required property "data" is not set.');
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('data', 'an object');
         }
         $data = $body['data'];
 

@@ -3,6 +3,7 @@
 namespace App\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
+use Exception;
 
 class IdElementPropertyChangeEventListener
 {
@@ -15,6 +16,6 @@ class IdElementPropertyChangeEventListener
         if (!array_key_exists('id', $event->getChangedProperties())) {
             return;
         }
-        throw new \Exception("Setting the property 'id' is forbidden.");
+        throw new Exception("Setting the property 'id' is forbidden.");
     }
 }

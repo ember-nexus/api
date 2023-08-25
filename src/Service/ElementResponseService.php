@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Response\ElementResponse;
+use LogicException;
 use Ramsey\Uuid\UuidInterface;
 
 class ElementResponseService
@@ -18,7 +19,7 @@ class ElementResponseService
     ): ElementResponse {
         $element = $this->elementManager->getElement($uuid);
         if (null === $element) {
-            throw new \LogicException(sprintf("Unable to find element with the id '%s'.", $uuid->toString()));
+            throw new LogicException(sprintf("Unable to find element with the id '%s'.", $uuid->toString()));
         }
         $rawData = $this->elementToRawService->elementToRaw($element);
 

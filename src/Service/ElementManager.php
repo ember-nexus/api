@@ -12,6 +12,8 @@ use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
 use App\Helper\Neo4jClientHelper;
 use Laudis\Neo4j\Databags\Statement;
+use LogicException;
+use OutOfBoundsException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -144,7 +146,7 @@ class ElementManager
         );
         try {
             $cypherFragment = $this->neo4jClientHelper->getNodeFromLaudisNode($res->first()->get('node'));
-        } catch (\OutOfBoundsException $e) {
+        } catch (OutOfBoundsException $e) {
             return null;
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $uuid->toString());
@@ -173,12 +175,12 @@ class ElementManager
                 $res->first()->get('startNode'),
                 $res->first()->get('endNode')
             );
-        } catch (\OutOfBoundsException $e) {
+        } catch (OutOfBoundsException $e) {
             return null;
         }
         $type = $cypherFragment->getType();
         if (null === $type) {
-            throw new \LogicException('Unable to get relationship type');
+            throw new LogicException('Unable to get relationship type');
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($type, $uuid->toString());
 

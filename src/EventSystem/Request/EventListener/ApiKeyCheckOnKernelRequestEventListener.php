@@ -2,7 +2,7 @@
 
 namespace App\EventSystem\Request\EventListener;
 
-use App\Exception\ClientUnauthorizedException;
+use App\Exception\Client401UnauthorizedException;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use App\Type\UserUuidAndTokenUuidObject;
@@ -13,6 +13,8 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
+
+use function str_starts_with;
 
 class ApiKeyCheckOnKernelRequestEventListener
 {
@@ -61,7 +63,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         );
 
         if (0 === count($res)) {
-            throw new ClientUnauthorizedException('Invalid authorization token');
+            throw new Client401UnauthorizedException('Invalid authorization token');
         }
 
         $userUuid = Uuid::fromString($res->first()->get('user.id'));
@@ -108,11 +110,11 @@ class ApiKeyCheckOnKernelRequestEventListener
     {
         $tokenParts = explode(' ', $request->headers->get('Authorization') ?? '', 2);
         if (2 !== count($tokenParts)) {
-            throw new ClientUnauthorizedException('Invalid authorization token');
+            throw new Client401UnauthorizedException('Invalid authorization token');
         }
         $token = $tokenParts[1];
-        if (!\str_starts_with($token, 'secret-token:')) {
-            throw new ClientUnauthorizedException('Invalid authorization token');
+        if (!str_starts_with($token, 'secret-token:')) {
+            throw new Client401UnauthorizedException('Invalid authorization token');
         }
 
         return $token;

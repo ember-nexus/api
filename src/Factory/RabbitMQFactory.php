@@ -3,6 +3,7 @@
 namespace App\Factory;
 
 use App\Exception\ServerException;
+use Exception;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class RabbitMQFactory
@@ -17,7 +18,7 @@ class RabbitMQFactory
         $parsed = parse_url($this->rabbitMQAuth);
 
         if (!is_array($parsed)) {
-            throw new \Exception('Unable to correctly parse RabbitMQ DSN.');
+            throw new Exception('Unable to correctly parse RabbitMQ DSN.');
         }
 
         if (!array_key_exists('user', $parsed)) {

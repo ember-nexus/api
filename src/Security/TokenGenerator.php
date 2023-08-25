@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
@@ -67,7 +68,7 @@ class TokenGenerator
             ->setIdentifier($tokenUuid)
             ->addProperties([
                 'hash' => $hash,
-                'expirationDate' => (new DateTime())->add(new \DateInterval(sprintf('PT%sS', $lifetimeInSeconds))),
+                'expirationDate' => (new DateTime())->add(new DateInterval(sprintf('PT%sS', $lifetimeInSeconds))),
                 'name' => $name,
             ]);
         $this->elementManager->create($tokenNode);
