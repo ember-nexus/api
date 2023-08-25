@@ -9,8 +9,6 @@ List of all exceptions:
   - `404-not-found`: Default error if data does not exist, or user has no permission to read it.
   - `405-method-not-allowed`: Returned if user has READ access, but access to current method.
 
-
-
 | HTTP Status Code | Type                                      | Title                        | Example Detail (prod)                                        | Example Detail (dev)                                         |
 | ---------------- | ----------------------------------------- | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 400              | `/error/400/missing-property`             | Missing property             | Endpoint requires that the request contains property 'x' to be set to Y. | Endpoint requires that the request contains property 'x' to be set to Y. |
@@ -25,6 +23,3 @@ List of all exceptions:
 | 500              | `/error/500/internal-server-error`        | Internal server error        | Internal server error, see log.                              | 'error message'.                                             |
 | 501              | `/error/501/not-implemented`              | Not implemented              | Endpoint is currently not implemented.                       | Endpoint is currently not implemented.                       |
 | 503              | `/error/503/service-unavailable`          | Service unavailable          | The service itself or an internal component is currently unavailable. | Service 'x' is currently unavailable.                        |
-|                  |                                           |                              |                                                              |                                                              |
-|                  |                                           |                              |                                                              |                                                              |
-
