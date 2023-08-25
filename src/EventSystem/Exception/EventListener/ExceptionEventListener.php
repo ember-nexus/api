@@ -3,7 +3,7 @@
 namespace App\EventSystem\Exception\EventListener;
 
 use App\Exception\ProblemJsonException;
-use App\Exception\Server500InternalServerErrorException;
+use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Response\ProblemJsonResponse;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -18,7 +18,8 @@ class ExceptionEventListener
         private UrlGeneratorInterface $urlGenerator,
         private KernelInterface $kernel,
         private ParameterBagInterface $bag,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
     ) {
     }
 
@@ -30,7 +31,7 @@ class ExceptionEventListener
         $this->logger->error($event->getThrowable());
         $originalException = $extendedException = $event->getThrowable();
         if (!($originalException instanceof ProblemJsonException)) {
-            $extendedException = Server500InternalServerErrorException::createFromTemplate('Other internal exception.');
+            $extendedException = $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Other internal exception.');
         }
         /**
          * @var ProblemJsonException $extendedException

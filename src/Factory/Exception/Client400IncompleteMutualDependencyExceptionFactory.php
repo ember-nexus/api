@@ -3,13 +3,13 @@
 namespace App\Factory\Exception;
 
 use App\Exception\Client400IncompleteMutualDependencyException;
-use App\Exception\Server500LogicException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class Client400IncompleteMutualDependencyExceptionFactory
 {
     public function __construct(
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
     ) {
     }
 
@@ -23,7 +23,7 @@ class Client400IncompleteMutualDependencyExceptionFactory
     public function createFromTemplate(array $properties, array $setProperties, array $missingProperties): Client400IncompleteMutualDependencyException
     {
         if (count($properties) < 2) {
-            throw Server500LogicException::createFromTemplate('Mutual dependency requires at least two properties.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Mutual dependency requires at least two properties.');
         }
 
         $message = sprintf(
@@ -48,7 +48,7 @@ class Client400IncompleteMutualDependencyExceptionFactory
         }
 
         if (0 === count($missingProperties)) {
-            throw Server500LogicException::createFromTemplate('At least one missing property is required.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('At least one missing property is required.');
         } elseif (1 === count($missingProperties)) {
             $message .= sprintf(
                 " property '%s' is missing.",

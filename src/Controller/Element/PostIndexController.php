@@ -115,6 +115,9 @@ class PostIndexController extends AbstractController
     private function createNode(string $type, UuidInterface $nodeId, array $data): Response
     {
         $userId = $this->authProvider->getUserUuid();
+        if (!$userId) {
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
+        }
 
         $newNode = (new NodeElement())
             ->setIdentifier($nodeId)
@@ -155,6 +158,9 @@ class PostIndexController extends AbstractController
     private function createRelation(string $type, UuidInterface $relationId, UuidInterface $startId, UuidInterface $endId, array $data): Response
     {
         $userId = $this->authProvider->getUserUuid();
+        if (!$userId) {
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
+        }
 
         if (!$this->accessChecker->hasAccessToElement($userId, $startId, AccessType::CREATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();

@@ -127,11 +127,13 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
 
     /**
      * @description test 1-02-02-20
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1020220(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -151,7 +153,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
                 ],
             ]
         );
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -162,7 +164,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020222(): void
     {
         $response = $this->runPutRequest(sprintf('/%s/file', self::RELATION), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -173,16 +175,18 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020223(): void
     {
         $response = $this->runPatchRequest(sprintf('/%s/file', self::RELATION), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
      * @description test 1-02-02-24
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test1020224(): void
     {
         $response = $this->runDeleteRequest(sprintf('/%s/file', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -193,7 +197,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020230(): void
     {
         $response = $this->runCopyRequest(sprintf('/%s', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -204,7 +208,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020231(): void
     {
         $response = $this->runLockRequest(sprintf('/%s', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -215,7 +219,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020232(): void
     {
         $response = $this->runUnlockRequest(sprintf('/%s', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -226,7 +230,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020233(): void
     {
         $response = $this->runMkcolRequest(sprintf('/%s', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -237,7 +241,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020234(): void
     {
         $response = $this->runMoveRequest(sprintf('/%s', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -248,7 +252,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020235(): void
     {
         $response = $this->runPropfindRequest(sprintf('/%s', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
@@ -259,7 +263,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
     public function test1020236(): void
     {
         $response = $this->runProppatchRequest(sprintf('/%s', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsProblemResponse($response, 501);
     }
 
     /**
