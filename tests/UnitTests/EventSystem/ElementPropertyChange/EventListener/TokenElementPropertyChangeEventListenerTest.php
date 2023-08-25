@@ -4,6 +4,7 @@ namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\ElementPropertyChange\EventListener\TokenElementPropertyChangeEventListener;
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 class TokenElementPropertyChangeEventListenerTest extends TestCase
@@ -31,7 +32,7 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
         }
         $event = new ElementPropertyChangeEvent('Token', null, ['token' => true]);
         $eventListener = new TokenElementPropertyChangeEventListener();
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
 
@@ -42,7 +43,7 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
         }
         $event = new ElementPropertyChangeEvent('Token', null, ['_tokenHash' => true]);
         $eventListener = new TokenElementPropertyChangeEventListener();
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
 }

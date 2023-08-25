@@ -4,6 +4,7 @@ namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\ElementPropertyChange\EventListener\IdElementPropertyChangeEventListener;
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 class IdElementPropertyChangeEventListenerTest extends TestCase
@@ -23,7 +24,7 @@ class IdElementPropertyChangeEventListenerTest extends TestCase
         }
         $event = new ElementPropertyChangeEvent('Test', null, ['id' => true]);
         $eventListener = new IdElementPropertyChangeEventListener();
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
 }

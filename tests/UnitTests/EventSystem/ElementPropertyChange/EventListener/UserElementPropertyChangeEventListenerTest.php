@@ -5,6 +5,7 @@ namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\ElementPropertyChange\EventListener\UserElementPropertyChangeEventListener;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
+use Exception;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -41,7 +42,7 @@ class UserElementPropertyChangeEventListenerTest extends TestCase
         $emberNexusConfiguration->getRegisterUniqueIdentifier()->willReturn('email');
         $event = new ElementPropertyChangeEvent('User', null, ['_passwordHash' => true]);
         $eventListener = new UserElementPropertyChangeEventListener($emberNexusConfiguration->reveal());
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
 
@@ -54,7 +55,7 @@ class UserElementPropertyChangeEventListenerTest extends TestCase
         $emberNexusConfiguration->getRegisterUniqueIdentifier()->willReturn('email');
         $event = new ElementPropertyChangeEvent('User', null, ['email' => true]);
         $eventListener = new UserElementPropertyChangeEventListener($emberNexusConfiguration->reveal());
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
 }

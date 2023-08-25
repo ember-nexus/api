@@ -4,6 +4,8 @@ namespace App\Tests\UnitTests\EventSystem\RawValueToNormalizedValue\EventListene
 
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
 use App\EventSystem\RawValueToNormalizedValue\EventListener\DateTimeRawValueToNormalizedValueEventListener;
+use DateTime;
+use DateTimeInterface;
 use PHPUnit\Framework\TestCase;
 
 class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
@@ -67,11 +69,11 @@ class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
         $eventListener->onRawValueToNormalizedValueEvent($event);
         $this->assertTrue($event->isPropagationStopped());
         $normalizedValue = $event->getNormalizedValue();
-        $this->assertInstanceOf(\DateTimeInterface::class, $normalizedValue);
+        $this->assertInstanceOf(DateTimeInterface::class, $normalizedValue);
         /**
          * @var $normalizedValue \DateTimeInterface
          */
-        $this->assertSame('2005-08-15T15:52:01+00:00', $normalizedValue->format(\DateTime::ATOM));
+        $this->assertSame('2005-08-15T15:52:01+00:00', $normalizedValue->format(DateTime::ATOM));
     }
 
     public function testShortDateStringValuesAreNormalized(): void
@@ -81,10 +83,10 @@ class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
         $eventListener->onRawValueToNormalizedValueEvent($event);
         $this->assertTrue($event->isPropagationStopped());
         $normalizedValue = $event->getNormalizedValue();
-        $this->assertInstanceOf(\DateTimeInterface::class, $normalizedValue);
+        $this->assertInstanceOf(DateTimeInterface::class, $normalizedValue);
         /**
          * @var $normalizedValue \DateTimeInterface
          */
-        $this->assertSame('0001-08-15T15:52:01+00:00', $normalizedValue->format(\DateTime::ATOM));
+        $this->assertSame('0001-08-15T15:52:01+00:00', $normalizedValue->format(DateTime::ATOM));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\ElementPropertyChange\EventListener\CreatedElementPropertyChangeEventListener;
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 class CreatedElementPropertyChangeEventListenerTest extends TestCase
@@ -23,7 +24,7 @@ class CreatedElementPropertyChangeEventListenerTest extends TestCase
         }
         $event = new ElementPropertyChangeEvent('Test', null, ['created' => true]);
         $eventListener = new CreatedElementPropertyChangeEventListener();
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
 }

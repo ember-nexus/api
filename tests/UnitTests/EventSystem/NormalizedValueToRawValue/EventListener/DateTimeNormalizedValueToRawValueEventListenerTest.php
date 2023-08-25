@@ -4,6 +4,7 @@ namespace App\Tests\UnitTests\EventSystem\NormalizedValueToRawValue\EventListene
 
 use App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent;
 use App\EventSystem\NormalizedValueToRawValue\EventListener\DateTimeNormalizedValueToRawValueEventListener;
+use DateTime;
 use PHPUnit\Framework\TestCase;
 
 class DateTimeNormalizedValueToRawValueEventListenerTest extends TestCase
@@ -24,7 +25,7 @@ class DateTimeNormalizedValueToRawValueEventListenerTest extends TestCase
     public function testDatetimeValuesAreDenormalized(): void
     {
         $eventListener = new DateTimeNormalizedValueToRawValueEventListener();
-        $event = new NormalizedValueToRawValueEvent(\DateTime::createFromFormat(\DateTime::ATOM, '2005-08-15T15:52:01+00:00'));
+        $event = new NormalizedValueToRawValueEvent(DateTime::createFromFormat(DateTime::ATOM, '2005-08-15T15:52:01+00:00'));
         $eventListener->onNormalizedValueToRawValueEvent($event);
         $this->assertTrue($event->isPropagationStopped());
         $rawValue = $event->getRawValue();

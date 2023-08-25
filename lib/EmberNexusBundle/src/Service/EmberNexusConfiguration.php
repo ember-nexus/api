@@ -2,6 +2,8 @@
 
 namespace EmberNexusBundle\Service;
 
+use Exception;
+
 class EmberNexusConfiguration
 {
     public const PAGE_SIZE = 'pageSize';
@@ -43,7 +45,7 @@ class EmberNexusConfiguration
         foreach ($keyParts as $i => $keyPart) {
             $currentKeyParts[] = $keyPart;
             if (!array_key_exists($keyPart, $configuration)) {
-                throw new \Exception(sprintf("Configuration must contain key '%s'.", implode('.', $currentKeyParts)));
+                throw new Exception(sprintf("Configuration must contain key '%s'.", implode('.', $currentKeyParts)));
             }
             $configuration = $configuration[$keyPart];
         }
@@ -78,13 +80,13 @@ class EmberNexusConfiguration
         ));
 
         if ($emberNexusConfiguration->getPageSizeMax() < $emberNexusConfiguration->getPageSizeMin()) {
-            throw new \Exception('pagesize max must be smaller or equal to pagesize min.');
+            throw new Exception('pagesize max must be smaller or equal to pagesize min.');
         }
         if ($emberNexusConfiguration->getPageSizeDefault() < $emberNexusConfiguration->getPageSizeMin()) {
-            throw new \Exception('default page size must be at least as big as min pagesize');
+            throw new Exception('default page size must be at least as big as min pagesize');
         }
         if ($emberNexusConfiguration->getPageSizeMax() < $emberNexusConfiguration->getPageSizeDefault()) {
-            throw new \Exception('default page size must be equal or less than max page size.');
+            throw new Exception('default page size must be equal or less than max page size.');
         }
 
         $emberNexusConfiguration->setRegisterEnabled((bool) self::getValueFromConfig(
@@ -164,14 +166,14 @@ class EmberNexusConfiguration
 
         if (false !== $emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
             if ($emberNexusConfiguration->getTokenMaxLifetimeInSeconds() < $emberNexusConfiguration->getTokenMinLifetimeInSeconds()) {
-                throw new \Exception('token max lifetime must be longer than min lifetime.');
+                throw new Exception('token max lifetime must be longer than min lifetime.');
             }
             if ($emberNexusConfiguration->getTokenDefaultLifetimeInSeconds() > $emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
-                throw new \Exception('Token default lifetime must by shorter or equal to max lifetime.');
+                throw new Exception('Token default lifetime must by shorter or equal to max lifetime.');
             }
         }
         if ($emberNexusConfiguration->getTokenDefaultLifetimeInSeconds() < $emberNexusConfiguration->getTokenMinLifetimeInSeconds()) {
-            throw new \Exception('token default lifetime must be equal or longer to min lifetime.');
+            throw new Exception('token default lifetime must be equal or longer to min lifetime.');
         }
 
         return $emberNexusConfiguration;
@@ -233,7 +235,7 @@ class EmberNexusConfiguration
     public function setRegisterUniqueIdentifier(string $registerUniqueIdentifier): EmberNexusConfiguration
     {
         if (0 === strlen($registerUniqueIdentifier)) {
-            throw new \Exception('Unique identifier can not be an empty string.');
+            throw new Exception('Unique identifier can not be an empty string.');
         }
         $this->registerUniqueIdentifier = $registerUniqueIdentifier;
 
