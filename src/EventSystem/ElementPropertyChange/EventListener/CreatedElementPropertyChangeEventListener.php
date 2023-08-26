@@ -3,12 +3,13 @@
 namespace App\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
-use Exception;
+use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 
 class CreatedElementPropertyChangeEventListener
 {
-    public function __construct()
-    {
+    public function __construct(
+        private Client400ForbiddenPropertyExceptionFactory $client400ForbiddenPropertyExceptionFactory
+    ) {
     }
 
     public function onElementPropertyChangeEvent(ElementPropertyChangeEvent $event): void
@@ -16,6 +17,6 @@ class CreatedElementPropertyChangeEventListener
         if (!array_key_exists('created', $event->getChangedProperties())) {
             return;
         }
-        throw new Exception("Setting the property 'created' is forbidden.");
+        throw $this->client400ForbiddenPropertyExceptionFactory->createFromTemplate('created');
     }
 }

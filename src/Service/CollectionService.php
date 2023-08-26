@@ -2,9 +2,10 @@
 
 namespace App\Service;
 
+use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\CollectionResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
-use LogicException;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -15,7 +16,9 @@ class CollectionService
         private RequestStack $requestStack,
         private ElementManager $elementManager,
         private ElementToRawService $elementToRawService,
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
     ) {
     }
 
@@ -24,7 +27,7 @@ class CollectionService
         $firstPage = 1;
         $query = $this->requestStack->getCurrentRequest()?->query;
         if (!($query instanceof InputBag)) {
-            throw new LogicException();
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Query must be an instance of InputBag.');
         }
         if (!$query->has('page')) {
             return $firstPage;
@@ -41,7 +44,7 @@ class CollectionService
     {
         $query = $this->requestStack->getCurrentRequest()?->query;
         if (!($query instanceof InputBag)) {
-            throw new LogicException();
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Query must be an instance of InputBag.');
         }
         if (!$query->has('pageSize')) {
             return $this->emberNexusConfiguration->getPageSizeDefault();
@@ -69,7 +72,7 @@ class CollectionService
     {
         $currentRequest = $this->requestStack->getCurrentRequest();
         if (null === $currentRequest) {
-            throw new LogicException();
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Current request can not be null.');
         }
         $basePath = $currentRequest->getBasePath();
 

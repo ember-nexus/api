@@ -75,6 +75,9 @@ class EmberNexusStyle extends SymfonyStyle
     public function success(array|string $message): void
     {
         if ($this->isInSection) {
+            /*
+             * todo replace exception with new exception factory - requires ember nexus style factory itself
+             */
             throw new Exception('Function success() should only be called at end of command, not within sections.');
         }
         if (is_string($message)) {

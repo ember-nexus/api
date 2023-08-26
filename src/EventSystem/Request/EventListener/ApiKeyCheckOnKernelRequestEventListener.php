@@ -2,7 +2,7 @@
 
 namespace App\EventSystem\Request\EventListener;
 
-use App\Exception\Client401UnauthorizedException;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use App\Type\UserUuidAndTokenUuidObject;
@@ -22,7 +22,8 @@ class ApiKeyCheckOnKernelRequestEventListener
         private TokenGenerator $tokenGenerator,
         private CypherEntityManager $cypherEntityManager,
         private Client $redisClient,
-        private AuthProvider $authProvider
+        private AuthProvider $authProvider,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory
     ) {
     }
 
@@ -63,7 +64,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         );
 
         if (0 === count($res)) {
-            throw new Client401UnauthorizedException('Invalid authorization token');
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         $userUuid = Uuid::fromString($res->first()->get('user.id'));
@@ -110,11 +111,11 @@ class ApiKeyCheckOnKernelRequestEventListener
     {
         $tokenParts = explode(' ', $request->headers->get('Authorization') ?? '', 2);
         if (2 !== count($tokenParts)) {
-            throw new Client401UnauthorizedException('Invalid authorization token');
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
         $token = $tokenParts[1];
         if (!str_starts_with($token, 'secret-token:')) {
-            throw new Client401UnauthorizedException('Invalid authorization token');
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         return $token;

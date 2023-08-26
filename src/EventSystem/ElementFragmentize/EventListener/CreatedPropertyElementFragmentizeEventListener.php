@@ -6,7 +6,6 @@ use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use DateTimeInterface;
-use Exception;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 use MongoDB\BSON\UTCDateTime;
 
@@ -45,7 +44,7 @@ class CreatedPropertyElementFragmentizeEventListener
             $created = $created->toDateTime();
         }
         if (!($created instanceof DateTimeInterface)) {
-            throw new Exception("Unable to get datetime info from created property of type '".get_class($created)."'.");
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from created property of type '".get_class($created)."'.");
         }
         $cypherFragment->addProperty('created', $created);
         $mongoFragment->addProperty('created', new UTCDateTime($created));

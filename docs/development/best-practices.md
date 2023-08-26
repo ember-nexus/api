@@ -46,6 +46,7 @@ Both log messages and exceptions should adhere to a few key principles:
 - Messages should provide context why they are created.
 - Messages should provide one specific reason, ideally a unique property or identifier.
 - Messages should not contain sensitive data like passwords, hashes, and tokens.
+- Messages are sentences, they end with a dot.
 
 Log messages should be created in the following scenarios:
 

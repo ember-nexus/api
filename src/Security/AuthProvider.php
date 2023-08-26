@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use LogicException;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -14,11 +14,12 @@ class AuthProvider
     private ?UuidInterface $tokenUuid = null;
 
     public function __construct(
-        private ParameterBagInterface $bag
+        private ParameterBagInterface $bag,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
     ) {
         $anonymousUserUuid = $this->bag->get('anonymousUserUUID');
         if (!is_string($anonymousUserUuid)) {
-            throw new LogicException('anonymousUserUUID must be set to a valid UUID');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('anonymousUserUUID must be set to a valid UUID');
         }
         $this->userUuid = UuidV4::fromString($anonymousUserUuid);
         $this->isAnonymous = true;

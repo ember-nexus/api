@@ -4,10 +4,13 @@ namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\ElementPropertyChange\EventListener\UserElementPropertyChangeEventListener;
+use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class UserElementPropertyChangeEventListenerTest extends TestCase
 {
@@ -18,7 +21,8 @@ class UserElementPropertyChangeEventListenerTest extends TestCase
         self::expectNotToPerformAssertions();
         $event = new ElementPropertyChangeEvent('Test', null, ['name' => 'Test']);
         $eventListener = new UserElementPropertyChangeEventListener(
-            $this->prophesize(EmberNexusConfiguration::class)->reveal()
+            $this->prophesize(EmberNexusConfiguration::class)->reveal(),
+            $this->prophesize(Client400ForbiddenPropertyExceptionFactory::class)->reveal()
         );
         $eventListener->onElementPropertyChangeEvent($event);
     }
@@ -29,7 +33,15 @@ class UserElementPropertyChangeEventListenerTest extends TestCase
         $emberNexusConfiguration->getRegisterUniqueIdentifier()->willReturn('email');
         self::expectNotToPerformAssertions();
         $event = new ElementPropertyChangeEvent('User', null, ['name' => 'Test']);
-        $eventListener = new UserElementPropertyChangeEventListener($emberNexusConfiguration->reveal());
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())
+            ->willReturn('http://example.com/url-to-error');
+        $eventListener = new UserElementPropertyChangeEventListener(
+            $emberNexusConfiguration->reveal(),
+            new Client400ForbiddenPropertyExceptionFactory(
+                $urlGenerator->reveal()
+            )
+        );
         $eventListener->onElementPropertyChangeEvent($event);
     }
 
@@ -41,7 +53,15 @@ class UserElementPropertyChangeEventListenerTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getRegisterUniqueIdentifier()->willReturn('email');
         $event = new ElementPropertyChangeEvent('User', null, ['_passwordHash' => true]);
-        $eventListener = new UserElementPropertyChangeEventListener($emberNexusConfiguration->reveal());
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())
+            ->willReturn('http://example.com/url-to-error');
+        $eventListener = new UserElementPropertyChangeEventListener(
+            $emberNexusConfiguration->reveal(),
+            new Client400ForbiddenPropertyExceptionFactory(
+                $urlGenerator->reveal()
+            )
+        );
         $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
@@ -54,7 +74,15 @@ class UserElementPropertyChangeEventListenerTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getRegisterUniqueIdentifier()->willReturn('email');
         $event = new ElementPropertyChangeEvent('User', null, ['email' => true]);
-        $eventListener = new UserElementPropertyChangeEventListener($emberNexusConfiguration->reveal());
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())
+            ->willReturn('http://example.com/url-to-error');
+        $eventListener = new UserElementPropertyChangeEventListener(
+            $emberNexusConfiguration->reveal(),
+            new Client400ForbiddenPropertyExceptionFactory(
+                $urlGenerator->reveal()
+            )
+        );
         $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }

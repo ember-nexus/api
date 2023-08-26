@@ -6,7 +6,6 @@ use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use DateTimeInterface;
-use Exception;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 use MongoDB\BSON\UTCDateTime;
 
@@ -45,7 +44,7 @@ class UpdatedPropertyElementFragmentizeEventListener
             $updated = $updated->toDateTime();
         }
         if (!($updated instanceof DateTimeInterface)) {
-            throw new Exception("Unable to get datetime info from updated property of type '".get_class($updated)."'.");
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from updated property of type '".get_class($updated)."'.");
         }
         $cypherFragment->addProperty('updated', $updated);
         $mongoFragment->addProperty('updated', new UTCDateTime($updated));

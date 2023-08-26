@@ -3,13 +3,14 @@
 namespace App\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
+use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
-use Exception;
 
 class UserElementPropertyChangeEventListener
 {
     public function __construct(
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private Client400ForbiddenPropertyExceptionFactory $client400ForbiddenPropertyExceptionFactory
     ) {
     }
 
@@ -19,10 +20,10 @@ class UserElementPropertyChangeEventListener
             return;
         }
         if (array_key_exists('_passwordHash', $event->getChangedProperties())) {
-            throw new Exception("Setting the property '_passwordHash' is forbidden.");
+            throw $this->client400ForbiddenPropertyExceptionFactory->createFromTemplate('_passwordHash');
         }
         if (array_key_exists($this->emberNexusConfiguration->getRegisterUniqueIdentifier(), $event->getChangedProperties())) {
-            throw new Exception(sprintf("Setting the property '%s' is forbidden.", $this->emberNexusConfiguration->getRegisterUniqueIdentifier()));
+            throw $this->client400ForbiddenPropertyExceptionFactory->createFromTemplate($this->emberNexusConfiguration->getRegisterUniqueIdentifier());
         }
     }
 }

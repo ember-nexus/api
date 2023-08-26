@@ -4,14 +4,15 @@ namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
+use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use DateTimeInterface;
-use Exception;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 
 class GenericPropertyElementFragmentizeEventListener
 {
-    public function __construct()
-    {
+    public function __construct(
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
+    ) {
     }
 
     public function onNodeElementFragmentizeEvent(NodeElementFragmentizeEvent $event): void
@@ -76,7 +77,7 @@ class GenericPropertyElementFragmentizeEventListener
                 $elasticFragment->addProperty($name, $value);
                 continue;
             }
-            throw new Exception('unknown data type');
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate(sprintf("Unknown data type with value '%s'.", $value));
         }
     }
 }

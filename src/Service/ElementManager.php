@@ -10,9 +10,9 @@ use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Helper\Neo4jClientHelper;
 use Laudis\Neo4j\Databags\Statement;
-use LogicException;
 use OutOfBoundsException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\UuidInterface;
@@ -42,7 +42,8 @@ class ElementManager
         private ElementFragmentizeService $elementFragmentizeService,
         private ElementDefragmentizeService $elementDefragmentizeService,
         private Neo4jClientHelper $neo4jClientHelper,
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
     ) {
     }
 
@@ -180,7 +181,7 @@ class ElementManager
         }
         $type = $cypherFragment->getType();
         if (null === $type) {
-            throw new LogicException('Unable to get relationship type');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to get relationship type.');
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($type, $uuid->toString());
 

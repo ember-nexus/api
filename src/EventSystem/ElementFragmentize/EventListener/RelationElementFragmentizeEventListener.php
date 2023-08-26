@@ -3,13 +3,14 @@
 namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
-use LogicException;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use Syndesi\CypherDataStructures\Type\Node;
 
 class RelationElementFragmentizeEventListener
 {
-    public function __construct()
-    {
+    public function __construct(
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+    ) {
     }
 
     public function onRelationElementFragmentizeEvent(RelationElementFragmentizeEvent $event): void
@@ -18,24 +19,24 @@ class RelationElementFragmentizeEventListener
 
         $relationUuid = $relationElement->getIdentifier();
         if (null === $relationUuid) {
-            throw new LogicException();
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element fragmentize event listener requires relation to contain valid UUID.');
         }
         $relationUuid = $relationUuid->toString();
 
         $relationType = $relationElement->getType();
         if (null === $relationType) {
-            throw new LogicException();
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element fragmentize event listener requires relation to contain valid type.');
         }
 
         $startUuid = $relationElement->getStart();
         if (null === $startUuid) {
-            throw new LogicException();
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element fragmentize event listener requires relation to have valid start UUID.');
         }
         $startUuid = $startUuid->toString();
 
         $endUuid = $relationElement->getEnd();
         if (null === $endUuid) {
-            throw new LogicException();
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element fragmentize event listener requires relation to have valid end UUID.');
         }
         $endUuid = $endUuid->toString();
 
