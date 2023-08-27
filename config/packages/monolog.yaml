@@ -7,7 +7,7 @@ when@dev:
     handlers:
       main:
         type: stream
-        path: "%kernel.logs_dir%/%kernel.environment%.log"
+        path: "%kernel.logs_dir%/log.log"
         level: debug
         channels: ["!event"]
       console:
@@ -26,7 +26,7 @@ when@test:
         channels: ["!event"]
       nested:
         type: stream
-        path: "%kernel.logs_dir%/%kernel.environment%.log"
+        path: "%kernel.logs_dir%/log.log"
         level: debug
 
 when@prod:
