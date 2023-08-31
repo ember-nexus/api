@@ -31,7 +31,7 @@ class GetParentsController extends AbstractController
 
     #[Route(
         '/{uuid}/parents',
-        name: 'getParents',
+        name: 'get-parents',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

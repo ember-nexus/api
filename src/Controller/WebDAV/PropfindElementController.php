@@ -18,7 +18,7 @@ class PropfindElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'propfindElement',
+        name: 'propfind-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

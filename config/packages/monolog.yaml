@@ -9,7 +9,8 @@ when@dev:
         type: stream
         path: "%kernel.logs_dir%/log.log"
         level: debug
-        channels: ["!event"]
+        channels: ["!event", "!request"]
+        formatter: monolog_json_formatter
       console:
         type: console
         process_psr_3_messages: false

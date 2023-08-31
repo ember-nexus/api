@@ -29,7 +29,7 @@ class PutElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'putElement',
+        name: 'put-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

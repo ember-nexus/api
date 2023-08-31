@@ -35,7 +35,7 @@ class PostRegisterController extends AbstractController
 
     #[Route(
         '/register',
-        name: 'postRegister',
+        name: 'post-register',
         methods: ['POST']
     )]
     public function postRegister(Request $request): Response
@@ -92,7 +92,7 @@ class PostRegisterController extends AbstractController
 
         return new CreatedResponse(
             $this->router->generate(
-                'getElement',
+                'get-element',
                 [
                     'uuid' => $userId,
                 ]

@@ -38,7 +38,7 @@ class PostIndexController extends AbstractController
 
     #[Route(
         '/',
-        name: 'postIndex',
+        name: 'post-index',
         methods: ['POST']
     )]
     public function postIndex(Request $request): Response
@@ -144,7 +144,7 @@ class PostIndexController extends AbstractController
 
         return new CreatedResponse(
             $this->router->generate(
-                'getElement',
+                'get-element',
                 [
                     'uuid' => $nodeId,
                 ]
@@ -182,7 +182,7 @@ class PostIndexController extends AbstractController
 
         return new CreatedResponse(
             $this->router->generate(
-                'getElement',
+                'get-element',
                 [
                     'uuid' => $relationId,
                 ]

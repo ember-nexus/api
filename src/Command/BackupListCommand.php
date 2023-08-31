@@ -32,6 +32,8 @@ class BackupListCommand extends Command
 
         $this->io->title('Backup List');
 
+        $this->logger->notice('Notice :D 789');
+
         $rows = [];
         $header = [
             'Name',

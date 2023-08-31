@@ -18,7 +18,7 @@ class UnlockElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'unlockElement',
+        name: 'unlock-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

@@ -21,7 +21,7 @@ class GetInstanceConfigurationController extends AbstractController
 
     #[Route(
         '/instance-configuration',
-        name: 'getInstanceConfiguration',
+        name: 'get-instance-configuration',
         methods: ['GET']
     )]
     public function getInstanceConfiguration(): Response

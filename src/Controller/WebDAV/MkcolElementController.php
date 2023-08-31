@@ -18,7 +18,7 @@ class MkcolElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'mkcolElement',
+        name: 'mkcol-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

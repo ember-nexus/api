@@ -23,3 +23,6 @@
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
+
+supervisord.log
+supervisord.pid

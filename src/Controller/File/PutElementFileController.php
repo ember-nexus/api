@@ -18,7 +18,7 @@ class PutElementFileController extends AbstractController
 
     #[Route(
         '/{uuid}/file',
-        name: 'putElementFile',
+        name: 'put-element-file',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

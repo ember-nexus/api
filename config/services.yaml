@@ -31,6 +31,9 @@ services:
 
   # library services
 
+  monolog_json_formatter:
+    class: Monolog\Formatter\JsonFormatter
+
   Syndesi\CypherEntityManager\EventListener\OpenCypher\NodeCreateToStatementEventListener:
     tags:
       - name: kernel.event_listener

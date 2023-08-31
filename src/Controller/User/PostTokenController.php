@@ -22,7 +22,7 @@ class PostTokenController extends AbstractController
 
     #[Route(
         '/token',
-        name: 'postToken',
+        name: 'post-token',
         methods: ['POST']
     )]
     public function postToken(Request $request): Response

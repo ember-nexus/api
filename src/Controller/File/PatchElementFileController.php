@@ -18,7 +18,7 @@ class PatchElementFileController extends AbstractController
 
     #[Route(
         '/{uuid}/file',
-        name: 'patchElementFile',
+        name: 'patch-element-file',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

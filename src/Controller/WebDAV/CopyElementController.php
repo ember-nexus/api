@@ -18,7 +18,7 @@ class CopyElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'copyElement',
+        name: 'copy-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

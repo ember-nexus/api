@@ -18,7 +18,7 @@ class DeleteElementFileController extends AbstractController
 
     #[Route(
         '/{uuid}/file',
-        name: 'deleteElementFile',
+        name: 'delete-element-file',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

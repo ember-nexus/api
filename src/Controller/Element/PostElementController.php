@@ -38,7 +38,7 @@ class PostElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'postElement',
+        name: 'post-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
@@ -109,7 +109,7 @@ class PostElementController extends AbstractController
 
         return new CreatedResponse(
             $this->router->generate(
-                'getElement',
+                'get-element',
                 [
                     'uuid' => $newNodeUuid,
                 ]

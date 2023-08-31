@@ -28,7 +28,7 @@ class ExceptionEventListener
      */
     public function onKernelException(ExceptionEvent $event): void
     {
-        $this->logger->error($event->getThrowable());
+        //        $this->logger->error($event->getThrowable());
         $originalException = $extendedException = $event->getThrowable();
         if (!($originalException instanceof ProblemJsonException)) {
             $extendedException = $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Other internal exception.');
@@ -80,6 +80,12 @@ class ExceptionEventListener
                 'trace' => $originalException->getTrace(),
             ];
         }
+        $this->logger->error(sprintf(
+            '%s %s: %s',
+            $extendedException->getType(),
+            $extendedException->getTitle(),
+            $extendedException->getMessage()
+        ));
 
         $event->setResponse(new ProblemJsonResponse(
             $data,

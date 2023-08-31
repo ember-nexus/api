@@ -27,7 +27,7 @@ class GetElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'getElement',
+        name: 'get-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

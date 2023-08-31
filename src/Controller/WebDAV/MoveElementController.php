@@ -18,7 +18,7 @@ class MoveElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'moveElement',
+        name: 'move-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

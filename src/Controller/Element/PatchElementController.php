@@ -29,7 +29,7 @@ class PatchElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'patchElement',
+        name: 'patch-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

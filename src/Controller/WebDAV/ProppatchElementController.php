@@ -18,7 +18,7 @@ class ProppatchElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'proppatchElement',
+        name: 'proppatch-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

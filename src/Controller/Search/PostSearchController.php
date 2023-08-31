@@ -33,7 +33,7 @@ class PostSearchController extends AbstractController
 
     #[Route(
         '/search',
-        name: 'postSearch',
+        name: 'post-search',
         methods: ['POST']
     )]
     public function postSearch(Request $request): Response

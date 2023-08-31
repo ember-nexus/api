@@ -18,7 +18,7 @@ class LockElementController extends AbstractController
 
     #[Route(
         '/{uuid}',
-        name: 'lockElement',
+        name: 'lock-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],

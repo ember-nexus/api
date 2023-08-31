@@ -24,7 +24,7 @@ class GetIndexController extends AbstractController
 
     #[Route(
         '/',
-        name: 'getIndex',
+        name: 'get-index',
         methods: ['GET']
     )]
     public function getIndex(): Response

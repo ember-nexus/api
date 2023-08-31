@@ -18,7 +18,7 @@ class PostElementFileController extends AbstractController
 
     #[Route(
         '/{uuid}/file',
-        name: 'postElementFile',
+        name: 'post-element-file',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
