@@ -3,11 +3,13 @@
 namespace App\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
+use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 
 class IdElementPropertyChangeEventListener
 {
-    public function __construct()
-    {
+    public function __construct(
+        private Client400ForbiddenPropertyExceptionFactory $client400ForbiddenPropertyExceptionFactory
+    ) {
     }
 
     public function onElementPropertyChangeEvent(ElementPropertyChangeEvent $event): void
@@ -15,6 +17,6 @@ class IdElementPropertyChangeEventListener
         if (!array_key_exists('id', $event->getChangedProperties())) {
             return;
         }
-        throw new \Exception("Setting the property 'id' is forbidden.");
+        throw $this->client400ForbiddenPropertyExceptionFactory->createFromTemplate('id');
     }
 }

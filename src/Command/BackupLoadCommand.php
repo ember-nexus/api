@@ -11,6 +11,7 @@ use App\Style\EmberNexusStyle;
 use App\Type\AppStateType;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
+use LogicException;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -220,19 +221,19 @@ class BackupLoadCommand extends Command
         $backupName = trim($backupName);
 
         if ('' === $backupName) {
-            throw new \LogicException("Backup name can not be ''");
+            throw new LogicException("Backup name can not be ''");
         }
 
         if ('.' === $backupName) {
-            throw new \LogicException("Backup name can not be '.'");
+            throw new LogicException("Backup name can not be '.'");
         }
 
         if ('..' === $backupName) {
-            throw new \LogicException("Backup name can not be '..'");
+            throw new LogicException("Backup name can not be '..'");
         }
 
         if (!$this->backupStorage->directoryExists($backupName)) {
-            throw new \LogicException(sprintf("Backup with the name '%s' does not exist", $backupName));
+            throw new LogicException(sprintf("Backup with the name '%s' does not exist", $backupName));
         }
 
         return $backupName;
@@ -241,7 +242,7 @@ class BackupLoadCommand extends Command
     private function loadSummary(): void
     {
         if (!$this->backupStorage->fileExists($this->backupName.'/summary.json')) {
-            throw new \LogicException(sprintf("Backup with the name '%s' does not contain a summary.json", $this->backupName));
+            throw new LogicException(sprintf("Backup with the name '%s' does not contain a summary.json", $this->backupName));
         }
         $data = \Safe\json_decode($this->backupStorage->read($this->backupName.'/summary.json'), true);
         $nodeCount = 0;
@@ -270,7 +271,7 @@ class BackupLoadCommand extends Command
             Statement::create('MATCH ()-[r]->() RETURN count(r) as count')
         )->first()->get('count');
         if ($nodeCount > 0 || $relationCount > 0) {
-            throw new \LogicException('Loading backups into non-empty databases is not supported');
+            throw new LogicException('Loading backups into non-empty databases is not supported');
         }
     }
 }

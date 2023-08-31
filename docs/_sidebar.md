@@ -36,3 +36,7 @@
 - Commands
   - [Backup Commands](/commands/backup)
   - [Database Commands](/commands/database)
+- Development
+  - [Long Term Plans](/development/long-term-plans)
+  - [Best Practices](/development/best-practices)
+  - [Exceptions](/development/exceptions)

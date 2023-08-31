@@ -219,9 +219,12 @@ abstract class BaseRequestTestCase extends TestCase
         $body = \Safe\json_decode((string) $response->getBody(), true);
 
         $this->assertArrayHasKey('type', $body);
+        $this->assertStringStartsWith('http', $body['type']);
         $this->assertArrayHasKey('title', $body);
-        $this->assertArrayHasKey('detail', $body);
-        $this->assertArrayHasKey('type', $body);
+        if (array_key_exists('detail', $body)) {
+            $this->assertNotEmpty($body['detail']);
+        }
+        $this->assertArrayHasKey('status', $body);
         $this->assertSame($status, $body['status']);
     }
 

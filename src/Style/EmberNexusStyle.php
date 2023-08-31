@@ -3,6 +3,7 @@
 namespace App\Style;
 
 use App\Console\EmberNexusOutputWrapper;
+use Exception;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -74,7 +75,10 @@ class EmberNexusStyle extends SymfonyStyle
     public function success(array|string $message): void
     {
         if ($this->isInSection) {
-            throw new \Exception('Function success() should only be called at end of command, not within sections.');
+            /*
+             * todo replace exception with new exception factory - requires ember nexus style factory itself
+             */
+            throw new Exception('Function success() should only be called at end of command, not within sections.');
         }
         if (is_string($message)) {
             $message = [$message];

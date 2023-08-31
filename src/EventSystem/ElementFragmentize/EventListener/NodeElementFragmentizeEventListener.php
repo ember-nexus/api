@@ -3,11 +3,13 @@
 namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 
 class NodeElementFragmentizeEventListener
 {
-    public function __construct()
-    {
+    public function __construct(
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+    ) {
     }
 
     public function onNodeElementFragmentizeEvent(NodeElementFragmentizeEvent $event): void
@@ -16,13 +18,13 @@ class NodeElementFragmentizeEventListener
 
         $nodeElementIdentifier = $nodeElement->getIdentifier();
         if (null === $nodeElementIdentifier) {
-            throw new \InvalidArgumentException();
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Node element fragmentize event listener requires node to contain valid UUID.');
         }
         $nodeElementIdentifier = $nodeElementIdentifier->toString();
 
         $nodeLabel = $nodeElement->getLabel();
         if (null === $nodeLabel) {
-            throw new \InvalidArgumentException();
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Node element fragmentize event listener requires node to contain valid label.');
         }
 
         /**

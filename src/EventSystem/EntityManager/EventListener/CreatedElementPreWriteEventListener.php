@@ -4,6 +4,7 @@ namespace App\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPreCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
+use DateTime;
 
 class CreatedElementPreWriteEventListener
 {
@@ -23,6 +24,6 @@ class CreatedElementPreWriteEventListener
         if ($element->hasProperty('created')) {
             return;
         }
-        $element->addProperty('created', new \DateTime());
+        $element->addProperty('created', new DateTime());
     }
 }

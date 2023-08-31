@@ -2,9 +2,10 @@
 
 namespace App\Controller\Search;
 
-use App\Exception\ClientBadRequestException;
-use App\Exception\ClientUnauthorizedException;
-use App\Exception\ServerException;
+use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
+use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
@@ -22,13 +23,17 @@ class PostSearchController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private ElasticEntityManager $elasticEntityManager,
-        private CollectionService $collectionService
+        private CollectionService $collectionService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
     ) {
     }
 
     #[Route(
         '/search',
-        name: 'postSearch',
+        name: 'post-search',
         methods: ['POST']
     )]
     public function postSearch(Request $request): Response
@@ -37,7 +42,7 @@ class PostSearchController extends AbstractController
 
         $currentUserUuid = $this->authProvider->getUserUuid();
         if (!$currentUserUuid) {
-            throw new ClientUnauthorizedException();
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         $userGroups = $this->accessChecker->getUsersGroups($currentUserUuid);
@@ -47,7 +52,7 @@ class PostSearchController extends AbstractController
         }
 
         if (!array_key_exists('query', $body)) {
-            throw new ClientBadRequestException(detail: "Body property 'query' is required.");
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('query', 'an valid Elasticsearch query object');
         }
         $userQuery = $body['query'];
 
@@ -55,7 +60,7 @@ class PostSearchController extends AbstractController
         if (array_key_exists('nodeTypes', $body)) {
             $rawNodeTypes = $body['nodeTypes'];
             if (!is_array($rawNodeTypes)) {
-                throw new ClientBadRequestException(detail: 'Property "nodeTypes" must be an array of node types.');
+                throw $this->client400BadContentExceptionFactory->createFromTemplate('nodeTypes', 'array', $rawNodeTypes);
             }
             foreach ($rawNodeTypes as $rawNodeType) {
                 $nodeTypes[] = sprintf('node_%s', strtolower($rawNodeType));
@@ -66,7 +71,7 @@ class PostSearchController extends AbstractController
         if (array_key_exists('relationTypes', $body)) {
             $rawRelationTypes = $body['relationTypes'];
             if (!is_array($rawRelationTypes)) {
-                throw new ClientBadRequestException(detail: 'Property "relationTypes" must be an array of relation types.');
+                throw $this->client400BadContentExceptionFactory->createFromTemplate('relationTypes', 'array', $rawRelationTypes);
             }
             foreach ($rawRelationTypes as $rawRelationType) {
                 $relationTypes[] = sprintf('relation_%s', strtolower($rawRelationType));
@@ -124,7 +129,7 @@ class PostSearchController extends AbstractController
         ]);
 
         if (!($res instanceof Elasticsearch)) {
-            throw new ServerException(detail: 'Unknown response type for elastic search query.');
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Unknown response type for elastic search query.');
         }
 
         $elementIds = [];

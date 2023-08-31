@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\ElementResponse;
 use Ramsey\Uuid\UuidInterface;
 
@@ -9,7 +10,8 @@ class ElementResponseService
 {
     public function __construct(
         private ElementManager $elementManager,
-        private ElementToRawService $elementToRawService
+        private ElementToRawService $elementToRawService,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
     ) {
     }
 
@@ -18,7 +20,7 @@ class ElementResponseService
     ): ElementResponse {
         $element = $this->elementManager->getElement($uuid);
         if (null === $element) {
-            throw new \LogicException(sprintf("Unable to find element with the id '%s'.", $uuid->toString()));
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Unable to find element with the id '%s'.", $uuid->toString()));
         }
         $rawData = $this->elementToRawService->elementToRaw($element);
 

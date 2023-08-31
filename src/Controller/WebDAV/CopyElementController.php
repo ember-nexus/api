@@ -2,7 +2,7 @@
 
 namespace App\Controller\WebDAV;
 
-use App\Exception\NotImplementedException;
+use App\Factory\Exception\Server501NotImplementedExceptionFactory;
 use App\Helper\Regex;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,9 +11,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CopyElementController extends AbstractController
 {
+    public function __construct(
+        private Server501NotImplementedExceptionFactory $server501NotImplementedExceptionFactory
+    ) {
+    }
+
     #[Route(
         '/{uuid}',
-        name: 'copyElement',
+        name: 'copy-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
@@ -21,6 +26,6 @@ class CopyElementController extends AbstractController
     )]
     public function copyElement(string $uuid, Request $request): Response
     {
-        throw new NotImplementedException();
+        throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }
 }

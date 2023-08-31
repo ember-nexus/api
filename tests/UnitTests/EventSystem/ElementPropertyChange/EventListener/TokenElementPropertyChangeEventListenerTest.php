@@ -4,15 +4,24 @@ namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\ElementPropertyChange\EventListener\TokenElementPropertyChangeEventListener;
+use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
+use Exception;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class TokenElementPropertyChangeEventListenerTest extends TestCase
 {
+    use ProphecyTrait;
+
     public function testElementsWhichAreNotTokensAreIgnored(): void
     {
         self::expectNotToPerformAssertions();
         $event = new ElementPropertyChangeEvent('Test', null, ['name' => 'Test']);
-        $eventListener = new TokenElementPropertyChangeEventListener();
+        $eventListener = new TokenElementPropertyChangeEventListener(
+            $this->prophesize(Client400ForbiddenPropertyExceptionFactory::class)->reveal()
+        );
         $eventListener->onElementPropertyChangeEvent($event);
     }
 
@@ -20,7 +29,14 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
     {
         self::expectNotToPerformAssertions();
         $event = new ElementPropertyChangeEvent('Token', null, ['name' => 'Test']);
-        $eventListener = new TokenElementPropertyChangeEventListener();
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())
+            ->willReturn('http://example.com/url-to-error');
+        $eventListener = new TokenElementPropertyChangeEventListener(
+            new Client400ForbiddenPropertyExceptionFactory(
+                $urlGenerator->reveal()
+            )
+        );
         $eventListener->onElementPropertyChangeEvent($event);
     }
 
@@ -30,8 +46,15 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
             $this->markTestSkipped();
         }
         $event = new ElementPropertyChangeEvent('Token', null, ['token' => true]);
-        $eventListener = new TokenElementPropertyChangeEventListener();
-        $this->expectException(\Exception::class);
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())
+            ->willReturn('http://example.com/url-to-error');
+        $eventListener = new TokenElementPropertyChangeEventListener(
+            new Client400ForbiddenPropertyExceptionFactory(
+                $urlGenerator->reveal()
+            )
+        );
+        $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
 
@@ -41,8 +64,15 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
             $this->markTestSkipped();
         }
         $event = new ElementPropertyChangeEvent('Token', null, ['_tokenHash' => true]);
-        $eventListener = new TokenElementPropertyChangeEventListener();
-        $this->expectException(\Exception::class);
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())
+            ->willReturn('http://example.com/url-to-error');
+        $eventListener = new TokenElementPropertyChangeEventListener(
+            new Client400ForbiddenPropertyExceptionFactory(
+                $urlGenerator->reveal()
+            )
+        );
+        $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }
 }

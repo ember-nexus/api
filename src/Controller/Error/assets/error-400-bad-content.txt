@@ -1,0 +1,6 @@
+ Error 400 - Bad Content
+
+ This error is thrown, when a required request property is set, but does not contain a valid value.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

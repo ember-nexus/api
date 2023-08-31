@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Exception;
+
+use Throwable;
+
+class Server500InternalServerErrorException extends ProblemJsonException
+{
+    public function __construct(
+        string $type,
+        string $title = 'Internal server error',
+        int $status = 500,
+        string $detail = '',
+        string $instance = null,
+        Throwable $previous = null
+    ) {
+        parent::__construct($type, $title, $status, $detail, $instance, $previous);
+    }
+}

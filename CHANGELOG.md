@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add CI workflow to check for upstream Alpine updated.
+- Add supervisord to combine all relevant logs and publish to docker logs.
 - Add endpoint DELETE `/token`.
+### Changed
+- Improve documentation.
+- Change PHP CS ruleset such that global objects are always imported.
+- Rework exception and logging.
 
 ## 0.0.24 - 2023-08-21
 ### Changed

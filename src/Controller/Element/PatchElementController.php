@@ -2,8 +2,8 @@
 
 namespace App\Controller\Element;
 
-use App\Exception\ClientNotFoundException;
-use App\Exception\ClientUnauthorizedException;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
+use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
@@ -21,13 +21,15 @@ class PatchElementController extends AbstractController
     public function __construct(
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
-        private AccessChecker $accessChecker
+        private AccessChecker $accessChecker,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
 
     #[Route(
         '/{uuid}',
-        name: 'patchElement',
+        name: 'patch-element',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
@@ -39,16 +41,16 @@ class PatchElementController extends AbstractController
         $userUuid = $this->authProvider->getUserUuid();
 
         if (!$userUuid) {
-            throw new ClientUnauthorizedException();
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         if (!$this->accessChecker->hasAccessToElement($userUuid, $elementUuid, AccessType::UPDATE)) {
-            throw new ClientNotFoundException();
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         $element = $this->elementManager->getElement($elementUuid);
         if (null === $element) {
-            throw new ClientNotFoundException();
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         /**

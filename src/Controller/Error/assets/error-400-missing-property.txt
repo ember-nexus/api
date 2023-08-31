@@ -1,0 +1,6 @@
+ Error 400 - Missing Property
+
+ This error is thrown when the request body does not contain a required property.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

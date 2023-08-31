@@ -2,7 +2,7 @@
 
 namespace App\EventSystem\Request\EventListener;
 
-use App\Exception\ClientUnauthorizedException;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use App\Type\UserUuidAndTokenUuidObject;
@@ -14,13 +14,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+use function str_starts_with;
+
 class ApiKeyCheckOnKernelRequestEventListener
 {
     public function __construct(
         private TokenGenerator $tokenGenerator,
         private CypherEntityManager $cypherEntityManager,
         private Client $redisClient,
-        private AuthProvider $authProvider
+        private AuthProvider $authProvider,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory
     ) {
     }
 
@@ -61,7 +64,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         );
 
         if (0 === count($res)) {
-            throw new ClientUnauthorizedException('Invalid authorization token');
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         $userUuid = Uuid::fromString($res->first()->get('user.id'));
@@ -108,11 +111,11 @@ class ApiKeyCheckOnKernelRequestEventListener
     {
         $tokenParts = explode(' ', $request->headers->get('Authorization') ?? '', 2);
         if (2 !== count($tokenParts)) {
-            throw new ClientUnauthorizedException('Invalid authorization token');
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
         $token = $tokenParts[1];
-        if (!\str_starts_with($token, 'secret-token:')) {
-            throw new ClientUnauthorizedException('Invalid authorization token');
+        if (!str_starts_with($token, 'secret-token:')) {
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         return $token;

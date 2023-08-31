@@ -290,10 +290,13 @@ COPY --from=nginx_unit_builder /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=nginx_unit_builder /usr/sbin/unitd-debug /usr/sbin/unitd-debug
 COPY --from=nginx_unit_builder /usr/lib/unit/ /usr/lib/unit/
 COPY --from=nginx_unit_builder /requirements.apt /requirements.apt
-COPY ./docker/nginx-unit/docker-entrypoint.sh /usr/local/bin/
+COPY ./docker/nginx-unit/unit-entrypoint.sh /usr/local/bin/
 COPY ./docker/nginx-unit/unit.json /docker-entrypoint.d/unit.json
+COPY ./docker/supervisord/supervisord.conf /etc/supervisord.conf
+COPY ./docker/supervisord/docker-entrypoint.sh /usr/local/bin/
 #RUN ldconfig # this command seems to not work on alpine & image works without it?
 RUN set -x \
+    && chmod +x /usr/local/bin/unit-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh \
     && if [ -f "/tmp/libunit.a" ]; then \
         mv /tmp/libunit.a /usr/lib/amd64/libunit.a; \
@@ -303,15 +306,13 @@ RUN set -x \
     && addgroup --system unit \
     && adduser -D -S -G unit unit \
     && apk update \
-    && apk add curl $(cat /requirements.apt) \
+    && apk add curl supervisor $(cat /requirements.apt) \
     && rm -f /requirements.apt \
     && ln -sf /dev/stdout /var/log/unit.log
 
 STOPSIGNAL SIGTERM
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
-CMD ["unitd", "--no-daemon", "--control", "unix:/var/run/control.unit.sock"]
 
 WORKDIR /var/www/html
 
@@ -347,8 +348,6 @@ COPY --from=production-build / /
 STOPSIGNAL SIGTERM
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
-CMD ["unitd", "--no-daemon", "--control", "unix:/var/run/control.unit.sock"]
 
 WORKDIR /var/www/html
 

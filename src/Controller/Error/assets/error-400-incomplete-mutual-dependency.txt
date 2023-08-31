@@ -1,0 +1,7 @@
+ Error 400 - Incomplete Mutual Dependency
+
+ This error is thrown when there are properties which depend on ech other, i.e. must be all defined, but at least one
+ is missing from the request body. Try to add the missing properties.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

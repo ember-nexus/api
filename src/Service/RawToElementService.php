@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
+use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -13,7 +14,8 @@ use Ramsey\Uuid\Uuid;
 class RawToElementService
 {
     public function __construct(
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory
     ) {
     }
 
@@ -23,12 +25,12 @@ class RawToElementService
     public function rawToElement(array $rawData): NodeElementInterface|RelationElementInterface
     {
         if (!array_key_exists('type', $rawData)) {
-            throw new \Exception("Unable to find required property 'type' in raw data.");
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'valid type');
         }
         $type = $rawData['type'];
 
         if (!array_key_exists('id', $rawData)) {
-            throw new \Exception("Unable to find required property 'id' in raw data.");
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('id', 'valid UUID');
         }
         $id = Uuid::fromString($rawData['id']);
 

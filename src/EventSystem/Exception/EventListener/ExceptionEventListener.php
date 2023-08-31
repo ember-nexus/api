@@ -2,9 +2,10 @@
 
 namespace App\EventSystem\Exception\EventListener;
 
-use App\Exception\ExtendedException;
-use App\Exception\ServerException;
+use App\Exception\ProblemJsonException;
+use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Response\ProblemJsonResponse;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -17,7 +18,8 @@ class ExceptionEventListener
         private UrlGeneratorInterface $urlGenerator,
         private KernelInterface $kernel,
         private ParameterBagInterface $bag,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
     ) {
     }
 
@@ -26,13 +28,13 @@ class ExceptionEventListener
      */
     public function onKernelException(ExceptionEvent $event): void
     {
-        $this->logger->error($event->getThrowable());
+        //        $this->logger->error($event->getThrowable());
         $originalException = $extendedException = $event->getThrowable();
-        if (!($originalException instanceof ExtendedException)) {
-            $extendedException = new ServerException(detail: 'Other internal exception.');
+        if (!($originalException instanceof ProblemJsonException)) {
+            $extendedException = $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Other internal exception.');
         }
         /**
-         * @var ExtendedException $extendedException
+         * @var ProblemJsonException $extendedException
          */
         $instance = $extendedException->getInstance();
         $instanceLink = null;
@@ -43,7 +45,7 @@ class ExceptionEventListener
                     $instance ?? 'unknown'
                 )
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         // check if there are configured alternatives for the instance links
@@ -68,12 +70,22 @@ class ExceptionEventListener
             unset($data['instance']);
         }
 
+        if ('' === $data['detail']) {
+            unset($data['detail']);
+        }
+
         if ($this->kernel->isDebug()) {
             $data['exception'] = [
                 'message' => $originalException->getMessage(),
                 'trace' => $originalException->getTrace(),
             ];
         }
+        $this->logger->error(sprintf(
+            '%s %s: %s',
+            $extendedException->getType(),
+            $extendedException->getTitle(),
+            $extendedException->getMessage()
+        ));
 
         $event->setResponse(new ProblemJsonResponse(
             $data,

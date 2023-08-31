@@ -2,7 +2,7 @@
 
 namespace App\Controller\System;
 
-use App\Exception\ClientForbiddenException;
+use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Response\JsonResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,19 +14,20 @@ class GetInstanceConfigurationController extends AbstractController
 {
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private ParameterBagInterface $bag
+        private ParameterBagInterface $bag,
+        private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory
     ) {
     }
 
     #[Route(
         '/instance-configuration',
-        name: 'getInstanceConfiguration',
+        name: 'get-instance-configuration',
         methods: ['GET']
     )]
     public function getInstanceConfiguration(): Response
     {
         if (!$this->emberNexusConfiguration->isInstanceConfigurationEnabled()) {
-            throw new ClientForbiddenException();
+            throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
 
         $instanceConfiguration = [

@@ -2,13 +2,14 @@
 
 namespace App\Factory;
 
-use App\Exception\ServerException;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class RabbitMQFactory
 {
     public function __construct(
-        private string $rabbitMQAuth
+        private string $rabbitMQAuth,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
     ) {
     }
 
@@ -17,31 +18,31 @@ class RabbitMQFactory
         $parsed = parse_url($this->rabbitMQAuth);
 
         if (!is_array($parsed)) {
-            throw new \Exception('Unable to correctly parse RabbitMQ DSN.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to correctly parse RabbitMQ DSN.');
         }
 
         if (!array_key_exists('user', $parsed)) {
-            throw new ServerException(detail: 'RabbitMQ DSN requires user.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('RabbitMQ DSN requires user.');
         }
         $user = $parsed['user'];
         if (!$user) {
-            throw new ServerException(detail: 'RabbitMQ DSN requires user.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('RabbitMQ DSN requires user.');
         }
 
         if (!array_key_exists('pass', $parsed)) {
-            throw new ServerException(detail: 'RabbitMQ DSN requires password.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('RabbitMQ DSN requires password.');
         }
         $pass = $parsed['pass'];
         if (!$pass) {
-            throw new ServerException(detail: 'RabbitMQ DSN requires password.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('RabbitMQ DSN requires password.');
         }
 
         if (!array_key_exists('host', $parsed)) {
-            throw new ServerException(detail: 'RabbitMQ DSN requires host.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('RabbitMQ DSN requires host.');
         }
         $host = $parsed['host'];
         if (!$host) {
-            throw new ServerException(detail: 'RabbitMQ DSN requires host.');
+            throw $this->server500LogicExceptionFactory->createFromTemplate('RabbitMQ DSN requires host.');
         }
 
         return new AMQPStreamConnection(

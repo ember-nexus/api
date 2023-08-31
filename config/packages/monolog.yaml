@@ -7,9 +7,10 @@ when@dev:
     handlers:
       main:
         type: stream
-        path: "%kernel.logs_dir%/%kernel.environment%.log"
+        path: "%kernel.logs_dir%/log.log"
         level: debug
-        channels: ["!event"]
+        channels: ["!event", "!request"]
+        formatter: monolog_json_formatter
       console:
         type: console
         process_psr_3_messages: false
@@ -26,7 +27,7 @@ when@test:
         channels: ["!event"]
       nested:
         type: stream
-        path: "%kernel.logs_dir%/%kernel.environment%.log"
+        path: "%kernel.logs_dir%/log.log"
         level: debug
 
 when@prod:

@@ -2,8 +2,8 @@
 
 namespace App\Controller\Element;
 
-use App\Exception\ClientNotFoundException;
-use App\Exception\ClientUnauthorizedException;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
+use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
@@ -23,13 +23,15 @@ class GetRelatedController extends AbstractController
         private CypherEntityManager $cypherEntityManager,
         private CollectionService $collectionService,
         private AuthProvider $authProvider,
-        private AccessChecker $accessChecker
+        private AccessChecker $accessChecker,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
 
     #[Route(
         '/{uuid}/related',
-        name: 'getRelated',
+        name: 'get-related',
         requirements: [
             'uuid' => Regex::UUID_V4_CONTROLLER,
         ],
@@ -41,17 +43,17 @@ class GetRelatedController extends AbstractController
         $userUuid = $this->authProvider->getUserUuid();
 
         if (!$userUuid) {
-            throw new ClientUnauthorizedException();
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         $type = $this->accessChecker->getElementType($centerUuid);
         if (ElementType::RELATION === $type) {
             // relations can not be center nodes
-            throw new ClientNotFoundException();
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         if (!$this->accessChecker->hasAccessToElement($userUuid, $centerUuid, AccessType::READ)) {
-            throw new ClientNotFoundException();
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         $cypherClient = $this->cypherEntityManager->getClient();
