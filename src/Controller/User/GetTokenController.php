@@ -2,7 +2,7 @@
 
 namespace App\Controller\User;
 
-use App\Exception\ClientUnauthorizedException;
+use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use Laudis\Neo4j\Databags\Statement;
@@ -17,7 +17,8 @@ class GetTokenController extends AbstractController
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
         private AuthProvider $authProvider,
-        private CollectionService $collectionService
+        private CollectionService $collectionService,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory
     ) {
     }
 
@@ -31,11 +32,11 @@ class GetTokenController extends AbstractController
         $userUuid = $this->authProvider->getUserUuid();
 
         if (!$userUuid) {
-            throw new ClientUnauthorizedException();
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         if ($this->authProvider->isAnonymous()) {
-            throw new ClientUnauthorizedException();
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
         $cypherClient = $this->cypherEntityManager->getClient();
