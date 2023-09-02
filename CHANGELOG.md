@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Upgrade upstream dependencies PHP to 8.2.10 and NGINX Unit to 1.31.
+- Unknown routes are handled by a custom problem handler (404).
 
 ## 0.0.26 - 2023-09-02
 ### Added
