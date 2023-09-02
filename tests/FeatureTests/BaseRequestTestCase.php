@@ -8,9 +8,24 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class BaseRequestTestCase extends TestCase
 {
+    private const IGNORED_HEAD_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link', 'Date'];
+
     public function runGetRequest(string $uri, string $token): ResponseInterface
     {
-        return $this->runRequest('GET', $uri, $token);
+        $headRequest = $this->runRequest('HEAD', $uri, $token);
+        $getRequest = $this->runRequest('GET', $uri, $token);
+
+        $headHeaders = $headRequest->getHeaders();
+        $getHeaders = $getRequest->getHeaders();
+        foreach ($headHeaders as $key => $value) {
+            $this->assertArrayHasKey($key, $getHeaders);
+            if (in_array($key, self::IGNORED_HEAD_HEADERS)) {
+                continue;
+            }
+            $this->assertSame($value, $getHeaders[$key]);
+        }
+
+        return $getRequest;
     }
 
     public function runPostRequest(string $uri, string $token, array $data): ResponseInterface
