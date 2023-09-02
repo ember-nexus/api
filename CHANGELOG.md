@@ -5,20 +5,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
-### Changed
-- Hotfix.
+
+## 0.0.26 - 2023-09-02
 ### Added
 - Add assertions to test identical headers in HEAD and GET requests automatically.
 
-## 0.0.25 - 2023-08-31
 ### Changed
-- **Note**: This release is broken.
+- Hotfix.
+
+## 0.0.25 - 2023-08-31
 ### Added
 - Add CI workflow to check for upstream Alpine updated.
 - Add supervisord to combine all relevant logs and publish to docker logs.
 - Add endpoint DELETE `/token`.
 
 ### Changed
+- **Note**: This release is broken.
 - Improve documentation.
 - Change PHP CS ruleset such that global objects are always imported.
 - Rework exception and logging.
