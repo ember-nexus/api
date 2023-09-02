@@ -4,6 +4,7 @@ namespace App\Factory\Exception;
 
 use App\Exception\Client404NotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Throwable;
 
 class Client404NotFoundExceptionFactory
 {
@@ -12,7 +13,7 @@ class Client404NotFoundExceptionFactory
     ) {
     }
 
-    public function createFromTemplate(): Client404NotFoundException
+    public function createFromTemplate(Throwable $previous = null): Client404NotFoundException
     {
         return new Client404NotFoundException(
             $this->urlGenerator->generate(
@@ -22,7 +23,8 @@ class Client404NotFoundExceptionFactory
                     'name' => 'not-found',
                 ],
                 UrlGeneratorInterface::ABSOLUTE_URL
-            )
+            ),
+            previous: $previous
         );
     }
 }
