@@ -109,7 +109,7 @@ abstract class BaseRequestTestCase extends TestCase
             ],
         ];
 
-        if ($data) {
+        if (null !== $data) {
             $options['headers']['Content-Type'] = 'application/json; charset=utf-8';
             $options['body'] = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }

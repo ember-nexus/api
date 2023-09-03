@@ -51,6 +51,7 @@ class PostTokenController extends AbstractController
         $token = $this->tokenGenerator->createNewToken($userUuid, $tokenName, $lifetimeInSeconds);
 
         return new JsonResponse([
+            'type' => '_TokenResponse',
             'token' => $token,
         ]);
     }
