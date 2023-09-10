@@ -1,7 +1,7 @@
 {
   "type": "project",
   "version": "0.0.27",
-  "license": "proprietary",
+  "license": "GPL-3.0-only",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
