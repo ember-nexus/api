@@ -1,4 +1,4 @@
-# PUT /&lt;uuid&gt; - Replace Element
+# <span class="method-put">PUT</span>` /<uuid> -` Replace Element
 
 Replaces the data of an individual data element.
 

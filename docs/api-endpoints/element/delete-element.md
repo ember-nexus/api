@@ -1,4 +1,4 @@
-# DELETE /&lt;uuid&gt; - Delete Element
+# <span class="method-delete">DELETE</span>` /<uuid> -` Delete Element
 
 Deletes a single element. If the delted element is a node, all connected relationships are deleted.
 

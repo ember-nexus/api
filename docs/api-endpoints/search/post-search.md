@@ -1,4 +1,4 @@
-# POST /search - Search
+# <span class="method-post">POST</span>` /search -` Search
 
 <!-- panels:start -->
 <!-- div:left-panel -->

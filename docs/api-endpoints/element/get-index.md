@@ -1,4 +1,4 @@
-# GET / - Get Index
+# <span class="method-get">GET</span>` / -` Get Index
 
 <!-- panels:start -->
 <!-- div:left-panel -->

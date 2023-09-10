@@ -1,4 +1,4 @@
-# PATCH /&lt;uuid&gt; - Update Element
+# <span class="method-patch">PATCH</span>` /<uuid> -` Update Element
 
 Updates an individual data element.
 
