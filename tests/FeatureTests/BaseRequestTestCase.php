@@ -28,72 +28,72 @@ abstract class BaseRequestTestCase extends TestCase
         return $getRequest;
     }
 
-    public function runPostRequest(string $uri, string $token, array $data): ResponseInterface
+    public function runPostRequest(string $uri, ?string $token, array $data): ResponseInterface
     {
         return $this->runRequest('POST', $uri, $token, $data);
     }
 
-    public function runPutRequest(string $uri, string $token, array $data): ResponseInterface
+    public function runPutRequest(string $uri, ?string $token, array $data): ResponseInterface
     {
         return $this->runRequest('PUT', $uri, $token, $data);
     }
 
-    public function runPatchRequest(string $uri, string $token, array $data): ResponseInterface
+    public function runPatchRequest(string $uri, ?string $token, array $data): ResponseInterface
     {
         return $this->runRequest('PATCH', $uri, $token, $data);
     }
 
-    public function runDeleteRequest(string $uri, string $token): ResponseInterface
+    public function runDeleteRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('DELETE', $uri, $token);
     }
 
-    public function runOptionsRequest(string $uri, string $token): ResponseInterface
+    public function runOptionsRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('OPTIONS', $uri, $token);
     }
 
-    public function runHeadRequest(string $uri, string $token): ResponseInterface
+    public function runHeadRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('HEAD', $uri, $token);
     }
 
-    public function runCopyRequest(string $uri, string $token): ResponseInterface
+    public function runCopyRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('COPY', $uri, $token);
     }
 
-    public function runLockRequest(string $uri, string $token): ResponseInterface
+    public function runLockRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('LOCK', $uri, $token);
     }
 
-    public function runMkcolRequest(string $uri, string $token): ResponseInterface
+    public function runMkcolRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('MKCOL', $uri, $token);
     }
 
-    public function runMoveRequest(string $uri, string $token): ResponseInterface
+    public function runMoveRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('MOVE', $uri, $token);
     }
 
-    public function runPropfindRequest(string $uri, string $token): ResponseInterface
+    public function runPropfindRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('PROPFIND', $uri, $token);
     }
 
-    public function runProppatchRequest(string $uri, string $token): ResponseInterface
+    public function runProppatchRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('PROPPATCH', $uri, $token);
     }
 
-    public function runUnlockRequest(string $uri, string $token): ResponseInterface
+    public function runUnlockRequest(string $uri, ?string $token): ResponseInterface
     {
         return $this->runRequest('UNLOCK', $uri, $token);
     }
 
-    public function runRequest(string $method, string $uri, string $token, array $data = null): ResponseInterface
+    public function runRequest(string $method, string $uri, string $token = null, array $data = null): ResponseInterface
     {
         $client = new Client([
             'base_uri' => $_ENV['API_DOMAIN'],
@@ -101,13 +101,14 @@ abstract class BaseRequestTestCase extends TestCase
         ]);
 
         $options = [
-            'headers' => [
-                'Authorization' => sprintf(
-                    'Bearer %s',
-                    $token
-                ),
-            ],
+            'headers' => [],
         ];
+        if (null !== $token) {
+            $options['headers']['Authorization'] = sprintf(
+                'Bearer %s',
+                $token
+            );
+        }
 
         if (null !== $data) {
             $options['headers']['Content-Type'] = 'application/json; charset=utf-8';

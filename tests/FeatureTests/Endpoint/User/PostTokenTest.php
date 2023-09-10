@@ -7,13 +7,23 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 class PostTokenTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:3tgEP9MhD81rkp3qiJcm1U';
+    public const EMAIL = '';
+    public const PASSWORD = '';
 
     public function testPostToken(): void
     {
         $getIndexResponse = $this->runGetRequest('/', self::TOKEN);
         $getIndexResponseCount = json_decode((string) $getIndexResponse->getBody(), true)['totalNodes'];
 
-        $response = $this->runPostRequest('/token', self::TOKEN, []);
+        $response = $this->runPostRequest(
+            '/token',
+            null,
+            [
+                'type' => 'Token',
+                'user' => self::EMAIL,
+                'password' => self::PASSWORD,
+            ]
+        );
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
@@ -34,9 +44,16 @@ class PostTokenTest extends BaseRequestTestCase
         $getIndexResponse = $this->runGetRequest('/', self::TOKEN);
         $getIndexResponseCount = json_decode((string) $getIndexResponse->getBody(), true)['totalNodes'];
 
-        $response = $this->runPostRequest('/token', self::TOKEN, [
-            'lifetime' => 3600,
-        ]);
+        $response = $this->runPostRequest(
+            '/token',
+            null,
+            [
+                'type' => 'Token',
+                'user' => self::EMAIL,
+                'password' => self::PASSWORD,
+                'lifetime' => 3600,
+            ]
+        );
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
@@ -57,9 +74,16 @@ class PostTokenTest extends BaseRequestTestCase
         $getIndexResponse = $this->runGetRequest('/', self::TOKEN);
         $getIndexResponseCount = json_decode((string) $getIndexResponse->getBody(), true)['totalNodes'];
 
-        $response = $this->runPostRequest('/token', self::TOKEN, [
-            'lifetime' => 0,
-        ]);
+        $response = $this->runPostRequest(
+            '/token',
+            null,
+            [
+                'type' => 'Token',
+                'user' => self::EMAIL,
+                'password' => self::PASSWORD,
+                'lifetime' => 0,
+            ]
+        );
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
@@ -80,9 +104,16 @@ class PostTokenTest extends BaseRequestTestCase
         $getIndexResponse = $this->runGetRequest('/', self::TOKEN);
         $getIndexResponseCount = json_decode((string) $getIndexResponse->getBody(), true)['totalNodes'];
 
-        $response = $this->runPostRequest('/token', self::TOKEN, [
-            'lifetime' => 100 * 365 * 24 * 3600, // 100 years
-        ]);
+        $response = $this->runPostRequest(
+            '/token',
+            null,
+            [
+                'type' => 'Token',
+                'user' => self::EMAIL,
+                'password' => self::PASSWORD,
+                'lifetime' => 100 * 365 * 24 * 3600, // 100 years
+            ]
+        );
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);

@@ -14,25 +14,47 @@
   - [Passwords, Tokens and Hashing](/security/passwords-tokens-and-hashing)
   - [Security Tests](/security/test/general)
 - API Endpoints
-  - Generic Endpoints
-  - [`GET / -` Get Index](/api-endpoints/get-index)
-  - [`GET /<uuid> -` Get Element](/api-endpoints/get-element)
-  - [`GET /<uuid>/parents -` Get Parents](/api-endpoints/get-parents)
-  - [`GET /<uuid>/children -` Get Children](/api-endpoints/get-children)
-  - [`GET /<uuid>/related -` Get Related](/api-endpoints/get-related)
-  - [`POST / -` Create Root Element](/api-endpoints/post-index)
-  - [`POST /<uuid> -` Create Element](/api-endpoints/post-element)
-  - [`PUT /<uuid> -` Replace Element](/api-endpoints/put-element)
-  - [`PATCH /<uuid> -` Update Element](/api-endpoints/patch-element)
-  - [`DELETE /<uuid> -` Delete Element](/api-endpoints/delete-element)
-  - [`POST /search -` Search](/api-endpoints/post-search)
-  - [`GET /instance-configuration -` Get Instance Configuration](/api-endpoints/get-instance-configuration)
-  - User Endpoints
-  - [`POST /register -` Register New Account](/api-endpoints/post-register)
-  - [`POST /sessions -` Create Session](/api-endpoints/post-sessions)
-  - [`GET /sessions -` Get Sessions](/api-endpoints/get-sessions)
-  - [`GET /sessions/<uuid> -` Get Specific Session](/api-endpoints/get-specific-session)
-  - [`DELETE /sessions/<uuid> -` Delete Session](/api-endpoints/delete-session)
+
+  - **User Endpoints**
+    - [<span class="method-post">POST</span>` /register -` Register New Account](/api-endpoints/user/post-register)
+    - [<span class="method-post">POST</span>` /token -` Create Token](/api-endpoints/user/post-token)
+    - [<span class="method-get">GET</span>` /token -` Get Token](/api-endpoints/user/get-token)
+    - [<span class="method-delete">DELETE</span>` /token -` Delete Token](/api-endpoints/user/delete-token)
+  - **Element Endpoints**
+    - [<span class="method-get">GET</span>` / -` Get Index](/api-endpoints/element/get-index)
+    - [<span class="method-get">GET</span>` /<uuid> -` Get Element](/api-endpoints/element/get-element)
+    - [<span class="method-get">GET</span>` /<uuid>/parents -` Get Parents](/api-endpoints/element/get-parents)
+    - [<span class="method-get">GET</span>` /<uuid>/children -` Get Children](/api-endpoints/element/get-children)
+    - [<span class="method-get">GET</span>` /<uuid>/related -` Get Related](/api-endpoints/element/get-related)
+    - [<span class="method-post">POST</span>` / -` Create Root Element](/api-endpoints/element/post-index)
+    - [<span class="method-post">POST</span>` /<uuid> -` Create Element](/api-endpoints/element/post-element)
+    - [<span class="method-put">PUT</span>` /<uuid> -` Replace Element](/api-endpoints/element/put-element)
+    - [<span class="method-patch">PATCH</span>` /<uuid> -` Update Element](/api-endpoints/element/patch-element)
+    - [<span class="method-delete">DELETE</span>` /<uuid> -` Delete Element](/api-endpoints/element/delete-element)
+  - **File Endpoints**
+    - [<span class="method-get">🚧 GET</span>` /<uuid>/file -` Get Element File](/api-endpoints/file/get-element-file)
+    - [<span class="method-post">🚧 POST</span>` /<uuid>/file -` Create Element File](/api-endpoints/file/post-element-file)
+    - [<span class="method-put">🚧 PUT</span>` /<uuid>/file -` Replace Element File](/api-endpoints/file/put-element-file)
+    - [<span class="method-patch">🚧 PATCH</span>` /<uuid>/file -` Update Element File](/api-endpoints/file/patch-element-file)
+    - [<span class="method-delete">🚧 DELETE</span>` /<uuid>/file -` Delete Element File](/api-endpoints/file/delete-element-file)
+  - **WebDAV Endpoints**
+    - [<span class="method-copy">🚧 COPY</span>` /<uuid> -` Copy Element](/api-endpoints/webdav/copy-element)
+    - [<span class="method-lock">🚧 LOCK</span>` /<uuid> -` Lock Element](/api-endpoints/webdav/lock-element)
+    - [<span class="method-unlock">🚧 UNLOCK</span>` /<uuid> -` Unlock Element](/api-endpoints/webdav/unlock-element)
+    - [<span class="method-mkcol">🚧 MKCOL</span>` /<uuid> -` Create Folder](/api-endpoints/webdav/mkcol-folder)
+    - [<span class="method-move">🚧 MOVE</span>` /<uuid> -` Move Element](/api-endpoints/webdav/move-element)
+    - [<span class="method-propfind">🚧 PROPFIND</span>` /<uuid> -` Find Element Property](/api-endpoints/webdav/propfind-element)
+    - [<span class="method-proppatch">🚧 PROPPATCH</span>` /<uuid> -` Change Element Property](/api-endpoints/webdav/proppatch-element)
+  - **Search Endpoints**
+    - [<span class="method-post">POST</span>` /search -` Search](/api-endpoints/search/post-search)
+  - **System Endpoints**
+    - [<span class="method-get">GET</span>` /instance-configuration -` Get Instance Configuration](/api-endpoints/system/get-instance-configuration)
+  - **Error Endpoints**
+    - [<span class="method-get">GET</span>` /error/400/bad-content`](/api-endpoints/error/get-400-bad-content)
+    - [<span class="method-get">GET</span>` /error/400/forbidden-property`](/api-endpoints/error/get-400-forbidden-property)
+    - [<span class="method-get">GET</span>` /error/400/incomplete-mutual-dependency`](/api-endpoints/error/get-400-incomplete-mutual-dependency)
+    - [<span class="method-get">GET</span>` /error/400/missing-property`](/api-endpoints/error/get-400-missing-property)
+
 - Commands
   - [Backup Commands](/commands/backup)
   - [Database Commands](/commands/database)

@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add feature test for POST `/token` endpoint
 - Add feature test for DELETE `/token` endpoint
 ### Changed
-- Increase reference dataset version to 0.0.7.
+- Increase reference dataset version to 0.0.8.
 
 ## 0.0.27 - 2023-09-02
 ### Changed

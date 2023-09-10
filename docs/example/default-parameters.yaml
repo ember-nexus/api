@@ -13,10 +13,6 @@ parameters:
     # performance problems may arise.
     max: 100
 
-  # Null can be replaced by links to redirect to external problem documentation sites.
-  problemInstanceLinks:
-    404-not-found: null
-
   # Handles the /register endpoint.
   register:
 

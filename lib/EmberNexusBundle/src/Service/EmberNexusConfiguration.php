@@ -302,7 +302,7 @@ class EmberNexusConfiguration
         return $this;
     }
 
-    public function getTokenMaxLifetimeInSeconds(): bool|int
+    public function getTokenMaxLifetimeInSeconds(): false|int
     {
         return $this->tokenMaxLifetimeInSeconds;
     }
