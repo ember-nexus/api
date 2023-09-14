@@ -3,3 +3,5 @@
 Returns the currently used token.
 
 To display all tokens, you can return all root elements and filter for the `Token` type.
+
+Currently under development.

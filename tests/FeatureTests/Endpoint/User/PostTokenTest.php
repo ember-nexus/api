@@ -4,11 +4,14 @@ namespace App\tests\FeatureTests\Endpoint\User;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
+/**
+ * @group test
+ */
 class PostTokenTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:3tgEP9MhD81rkp3qiJcm1U';
-    public const EMAIL = '';
-    public const PASSWORD = '';
+    public const EMAIL = 'user@postToken.user.endpoint.localhost.de';
+    public const PASSWORD = '1234';
 
     public function testPostToken(): void
     {
@@ -24,6 +27,8 @@ class PostTokenTest extends BaseRequestTestCase
                 'password' => self::PASSWORD,
             ]
         );
+
+        echo "\n\n".((string) $response->getBody())."\n\n";
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);

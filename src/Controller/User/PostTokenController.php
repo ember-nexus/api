@@ -42,15 +42,23 @@ class PostTokenController extends AbstractController
     public function postToken(Request $request): Response
     {
         $body = \Safe\json_decode($request->getContent(), true);
+
+        if (!array_key_exists('type', $body)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
+        }
+        if ('Token' !== $body['type']) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'Token', $body['type']);
+        }
+
         /**
          * @var array<string, mixed> $body
          */
-        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        if (!array_key_exists($uniqueIdentifier, $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate($uniqueIdentifier, 'string');
+        if (!array_key_exists('user', $body)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('user', 'string');
         }
-        $uniqueIdentifierValue = $body[$uniqueIdentifier];
+        $uniqueIdentifierValue = $body['user'];
 
+        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             sprintf(
                 'MATCH (u:User {%s: $identifier}) RETURN u.id AS id',
@@ -82,13 +90,6 @@ class PostTokenController extends AbstractController
         $lifetimeInSeconds = null;
         if (array_key_exists('lifetimeInSeconds', $body)) {
             $lifetimeInSeconds = (int) $body['lifetimeInSeconds'];
-        }
-
-        if (!array_key_exists('type', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
-        }
-        if ('Token' !== $body['type']) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'Token', $body['type']);
         }
 
         $data = [];

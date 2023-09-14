@@ -14,21 +14,18 @@ The posted request must be a valid JSON document.
 
 The request must contain the following attributes:
 
-- `type`: Containing the content "User". No other values are currently possible.
-- `password`: The plain text password of the new user. Can contain any string, will be hashed internally. Whitespace at
-  the start or end of the string will **not** be removed, though it is discouraged.  
-  No password complexity check is performed.
-- `data.<identifier>`: By default `data.email`, must contain a new unique string. While not required, it is encouraged
-  to keep the content within 256 bytes. Optional limits might be added at a later time.  
-  The required identifier name is returned by the
-  [instance configuration endpoint](/api-endpoints/get-instance-configuration) and in error messages.
+- `type`: Containing the content "Token". No other values are currently possible.
+- `user`: The value for the user's identifying property, by default the user's email address.
+- `password`: The plain text password of the user.
+- `data`: Object of properties, optional.
 
 ```json
 {
-  "type": "User",
+  "type": "Token",
+  "user": "test@localhost.dev",
   "password": "1234",
   "data": {
-    "<identifier>": "test@example.com"
+    "key": "value"
   }
 }
 ```
@@ -39,16 +36,20 @@ The request must contain the following attributes:
 curl \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"type": "User", "password": "1234", "data": {"email": "test@example.com"}}' \
-  https://api.localhost/register
+  -d '{"type": "Token", "user": "test@localhost.dev", "password": "1234"}' \
+  https://api.localhost/token
 ```
 
 <!-- tabs:start -->
 
 ### **Success 200**
 
-Success responses do not have a return body. The location of the new user, containing the user's UUID, is written in the
-`Location` header.
+```json
+{
+  "type": "_TokenResponse",
+  "token": "secret-token:ERgAAnWl0CY8bQs0m11nZ3"
+}
+```
 
 ### **Error 400**
 
@@ -57,20 +58,24 @@ Success responses do not have a return body. The location of the new user, conta
   "type": "400-bad-request",
   "title": "Bad Request",
   "status": 400,
-  "detail": "Property 'email' must be set."
+  "detail": "Property 'user' must be set."
 }
 ```
 
-### **Error 403**
+### **Error 401**
 
 ```problem+json
 {
-  "type": "403-forbidden",
-  "title": "Forbidden",
-  "status": 403,
-  "detail": "Client does not have permissions to perform action."
+  "type": "401-unauthorized",
+  "title": "Request does not contain valid token, or anonymous user is disabled.",
+  "status": 401,
+  "detail": ""
 }
 ```
+
+### **Error 500**
+
+wip
 
 <!-- tabs:end -->
 
@@ -131,32 +136,29 @@ G6.registerEdge('polyline-edge', {
 renderWorkflow(document.getElementById('graph-container-1'), {
   nodes: [
     { id: 'init', ...workflowStart, label: 'server receives POST-request' },
-    { id: 'checkEndpointEnabled', ...workflowDecision, label: 'is endpoint enabled?' },
-    { id: 'checkPassword', ...workflowDecision, label: 'is password given?' },
     { id: 'checkType', ...workflowDecision, label: 'is type given?' },
-    { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal to "User"?' },
-    { id: 'checkIdentifier', ...workflowDecision, label: "is identifier given?" },
-    { id: 'checkIdentifierUnique', ...workflowDecision, label: 'is identifier unique?' },
-    { id: 'createUser', ...workflowStep, label: "create user" },
+    { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal\nto "Token"?' },
+    { id: 'checkUserProperty', ...workflowDecision, label: 'is user given?' },
+    { id: 'checkPasswordProperty', ...workflowDecision, label: "is password given?" },
+    { id: 'checkCredentials', ...workflowDecision, label: 'are credentials ok?' },
+    { id: 'createToken', ...workflowStep, label: "create token" },
     { id: 'error400', ...workflowEndError, label: "return 400" },
-    { id: 'error403', ...workflowEndError, label: 'return 403' },
+    { id: 'error401', ...workflowEndError, label: 'return 401' },
     { id: 'success200', ...workflowEndSuccess , label: "return 200"},
   ],
   edges: [
-    { source: 'init', target: 'checkEndpointEnabled', label: '' },
-    { source: 'checkEndpointEnabled', target: 'checkPassword', label: 'yes' },
-    { source: 'checkEndpointEnabled', target: 'error403', label: 'no' },
-    { source: 'checkPassword', target: 'checkType', label: 'yes' },
-    { source: 'checkPassword', target: 'error400', label: 'no' },
+    { source: 'init', target: 'checkType', label: '' },
     { source: 'checkType', target: 'checkTypeContent', label: 'yes' },
     { source: 'checkType', target: 'error400', label: 'no' },
-    { source: 'checkTypeContent', target: 'checkIdentifier', label: 'yes' },
+    { source: 'checkTypeContent', target: 'checkUserProperty', label: 'yes' },
     { source: 'checkTypeContent', target: 'error400', label: 'no' },
-    { source: 'checkIdentifier', target: 'checkIdentifierUnique', label: 'yes' },
-    { source: 'checkIdentifier', target: 'error400', label: 'no' },
-    { source: 'checkIdentifierUnique', target: 'createUser', label: 'yes' },
-    { source: 'checkIdentifierUnique', target: 'error400', label: 'no' },
-    { source: 'createUser', target: 'success200', label: '' },
+    { source: 'checkUserProperty', target: 'checkPasswordProperty', label: 'yes' },
+    { source: 'checkUserProperty', target: 'error400', label: 'no' },
+    { source: 'checkPasswordProperty', target: 'checkCredentials', label: 'yes' },
+    { source: 'checkPasswordProperty', target: 'error400', label: 'no' },
+    { source: 'checkCredentials', target: 'createToken', label: 'yes' },
+    { source: 'checkCredentials', target: 'error401', label: 'no' },
+    { source: 'createToken', target: 'success200', label: '' },
   ],
 }, 'TB');
 </script>
