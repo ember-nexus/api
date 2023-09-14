@@ -1,7 +1,10 @@
-# POST /search - Search
+# <span class="method-post">POST</span>` /search -` Search
 
 <!-- panels:start -->
 <!-- div:left-panel -->
+
+!> **Note**: This endpoint might be changed during development to the
+[0.3.0](https://github.com/ember-nexus/api/milestone/3) version.
 
 The post search endpoint at `POST /search` is used to execute [Elasticsearch](https://www.elastic.co/) queries and
 return found elements.

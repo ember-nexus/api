@@ -1,4 +1,4 @@
-# GET /instance-configuration - Get Instance Configuration
+# <span class="method-get">GET</span>` /instance-configuration -` Get Instance Configuration
 
 <!-- panels:start -->
 <!-- div:left-panel -->

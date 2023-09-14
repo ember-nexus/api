@@ -1,4 +1,4 @@
-# POST /register - Register New Account
+# <span class="method-post">POST</span>` /register -` Register New Account
 
 <!-- panels:start -->
 <!-- div:left-panel -->
@@ -14,7 +14,7 @@ The posted request must be a valid JSON document.
 
 The request must contain the following attributes:
 
-- `type`: Containing the content "User". No other values are possible.
+- `type`: Containing the content "User". No other values are currently possible.
 - `password`: The plain text password of the new user. Can contain any string, will be hashed internally. Whitespace at
   the start or end of the string will **not** be removed, though it is discouraged.  
   No password complexity check is performed.
@@ -133,6 +133,8 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'init', ...workflowStart, label: 'server receives POST-request' },
     { id: 'checkEndpointEnabled', ...workflowDecision, label: 'is endpoint enabled?' },
     { id: 'checkPassword', ...workflowDecision, label: 'is password given?' },
+    { id: 'checkType', ...workflowDecision, label: 'is type given?' },
+    { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal to "User"?' },
     { id: 'checkIdentifier', ...workflowDecision, label: "is identifier given?" },
     { id: 'checkIdentifierUnique', ...workflowDecision, label: 'is identifier unique?' },
     { id: 'createUser', ...workflowStep, label: "create user" },
@@ -144,8 +146,12 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'init', target: 'checkEndpointEnabled', label: '' },
     { source: 'checkEndpointEnabled', target: 'checkPassword', label: 'yes' },
     { source: 'checkEndpointEnabled', target: 'error403', label: 'no' },
-    { source: 'checkPassword', target: 'checkIdentifier', label: 'yes' },
+    { source: 'checkPassword', target: 'checkType', label: 'yes' },
     { source: 'checkPassword', target: 'error400', label: 'no' },
+    { source: 'checkType', target: 'checkTypeContent', label: 'yes' },
+    { source: 'checkType', target: 'error400', label: 'no' },
+    { source: 'checkTypeContent', target: 'checkIdentifier', label: 'yes' },
+    { source: 'checkTypeContent', target: 'error400', label: 'no' },
     { source: 'checkIdentifier', target: 'checkIdentifierUnique', label: 'yes' },
     { source: 'checkIdentifier', target: 'error400', label: 'no' },
     { source: 'checkIdentifierUnique', target: 'createUser', label: 'yes' },

@@ -26,7 +26,10 @@ class TokenGenerator
         $this->encoder = new Base58();
     }
 
-    public function createNewToken(UuidInterface $userUuid, string $name = null, int $lifetimeInSeconds = null): string
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function createNewToken(UuidInterface $userUuid, array $data = [], int $lifetimeInSeconds = null): string
     {
         for ($i = 0; $i < 3; ++$i) {
             $token = $this->createToken();
@@ -48,28 +51,26 @@ class TokenGenerator
         if (null === $lifetimeInSeconds) {
             $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenDefaultLifetimeInSeconds();
         } else {
-            if (false !== $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
-                if ($lifetimeInSeconds > $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
-                    $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds();
+            $tokenMaxLifetimeInSeconds = $this->emberNexusConfiguration->getTokenMaxLifetimeInSeconds();
+            if (false !== $tokenMaxLifetimeInSeconds) {
+                if ($lifetimeInSeconds > $tokenMaxLifetimeInSeconds) {
+                    $lifetimeInSeconds = $tokenMaxLifetimeInSeconds;
                 }
             }
             if ($lifetimeInSeconds < $this->emberNexusConfiguration->getTokenMinLifetimeInSeconds()) {
                 $lifetimeInSeconds = $this->emberNexusConfiguration->getTokenMinLifetimeInSeconds();
             }
         }
-        /**
-         * @var int $lifetimeInSeconds
-         */
-        $name ??= (new DateTime())->format('Y-m-d H:i:s');
 
         $tokenUuid = Uuid::uuid4();
         $tokenNode = (new NodeElement())
             ->setLabel('Token')
             ->setIdentifier($tokenUuid)
+            ->addProperty('name', (new DateTime())->format('Y-m-d H:i:s'))
+            ->addProperties($data)
             ->addProperties([
                 'hash' => $hash,
                 'expirationDate' => (new DateTime())->add(new DateInterval(sprintf('PT%sS', $lifetimeInSeconds))),
-                'name' => $name,
             ]);
         $this->elementManager->create($tokenNode);
         $this->elementManager->flush();

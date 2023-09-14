@@ -1,59 +1,54 @@
-# GET / - Get Index
+# <span class="method-get">GET</span>` /<uuid> -` Get Element
 
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-Returns all top level elements, to which the current user has direct access.
+The get element endpoint at `GET /<uuid>` is used to retrieve the data of a single element, which can be either
+a node or a relationship.
 
 ## Request Example
 
 ```bash
 curl \
   -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
-  https://api.localhost/
+  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
 ```
 
 <!-- tabs:start -->
 
 ### **Success 200**
 
+Response for nodes:
+
 ```json
 {
-  "type": "_PartialCollection",
-  "id": "/",
-  "totalNodes": 2,
-  "links": {
-    "first": "/",
-    "previous": null,
-    "next": null,
-    "last": "/"
-  },
-  "nodes": [
-    {
-      "type": "Sphere",
-      "id": "7b80b203-2b82-40f5-accd-c7089fe6114e",
-      "data": {
-        "created": "2023-08-09 21:17:16",
-        "name": "Comment",
-        "updated": "2023-08-09 21:17:16"
-      }
-    },
-    {
-      "type": "Token",
-      "id": "e3b81351-fe0c-4f8f-ad22-78b6157edde8",
-      "data": {
-        "created": "2023-08-09 21:17:16",
-        "updated": "2023-08-09 21:17:16"
-      }
-    }
-  ],
-  "relations": []
+  "type": "Comment",
+  "id": "74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac",
+  "data": {
+    "content": "Blue is one of the three primary colours in the RYB colour model ...",
+    "created": "2023-08-09 21:17:16",
+    "name": "Blue",
+    "updated": "2023-08-09 21:17:16"
+  }
+}
+```
+
+Response for relations:
+
+```json
+{
+  "type": "HAS_DATA",
+  "id": "904a5f37-785e-428d-96ba-4fa58cd2bea8",
+  "start": "ce0fde7f-851a-4933-bd1b-8d8a12f082f5",
+  "end": "1c7e0a52-b0dc-441a-9fbc-9e30bedbf812",
+  "data": {
+    "name": "Some data relation",
+    "description": "demo"
+  }
 }
 ```
 
 ### **Error 401**
-
-This error can only be thrown, if the token is invalid or if there is no default anonymous user.
 
 ```problem+json
 {
@@ -61,6 +56,17 @@ This error can only be thrown, if the token is invalid or if there is no default
   "title": "Unauthorized",
   "status": "401",
   "detail": "Request requires authorization."
+}
+```
+
+### **Error 404**
+
+```problem+json
+{
+  "type": "404-not-found",
+  "title": "Not Found",
+  "status": "404",
+  "detail": "The requested resource was not found."
 }
 ```
 
@@ -138,8 +144,11 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'noTokenAction', ...workflowStep, label: "use default anonymous\nuser for auth" },
     { id: 'checkTokenValidity', ...workflowDecision, label: 'is token valid?' },
     { id: 'checkRateLimit', ...workflowDecision, label: "does request exceed\nrate limit?" },
-    { id: 'loadElementsData', ...workflowStep, label: 'Load root level elements' },
+    { id: 'checkElementExistence', ...workflowDecision, label: 'does element exist?' },
+    { id: 'checkElementAccess', ...workflowDecision, label: "does user has\naccess to element?" },
+    { id: 'loadElementData', ...workflowStep, label: 'Load element data' },
     { id: 'error401', ...workflowEndError, label: "return 401" },
+    { id: 'error404', ...workflowEndError, label: 'return 404' },
     { id: 'error429', ...workflowEndError, label: 'return 429' },
     { id: 'success200', ...workflowEndSuccess , label: "return 200"},
   ],
@@ -149,11 +158,13 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkToken', target: 'noTokenAction', label: 'no' },
     { source: 'checkTokenValidity', target: 'checkRateLimit', label: 'yes' },
     { source: 'checkTokenValidity', target: 'error401', label: 'no' },
-    { source: 'checkRateLimit', target: 'loadElementsData', label: 'no' },
+    { source: 'checkRateLimit', target: 'checkElementExistence', label: 'no' },
     { source: 'checkRateLimit', target: 'error429', label: 'yes' },
     { source: 'checkElementExistence', target: 'checkElementAccess', label: 'yes' },
-    { source: 'checkElementAccess', target: 'loadElementsData', label: 'yes' },
-    { source: 'loadElementsData', target: 'success200' },
+    { source: 'checkElementExistence', target: 'error404', label: 'no' },
+    { source: 'checkElementAccess', target: 'loadElementData', label: 'yes' },
+    { source: 'loadElementData', target: 'success200' },
+    { source: 'checkElementAccess', target: 'error404', label: 'no' },
     { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
   ],
 }, 'TB');

@@ -1,54 +1,31 @@
-# GET /&lt;uuid&gt; - Get Element
+# <span class="method-delete">DELETE</span>` /<uuid> -` Delete Element
 
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-The get element endpoint at `GET /<uuid>` is used to retrieve the data of a single element, which can be either
-a node or a relationship.
+Deletes a single element. If the deleted element is a node, all connected relationships are deleted.
+
+!> **Note**: In order to avoid orphaned nodes, children need to be deleted first or get other parents added.  
+This behaviour might be changed, see issue [#64: HTTP DELETE /&lt;uuid&gt; - DeleteElementController](https://github.com/ember-nexus/api/issues/64).
 
 ## Request Example
 
 ```bash
 curl \
+  -X DELETE
   -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
-  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
+  https://api.localhost/2f99440e-ca4c-4e83-bf86-1cd27a4b1b70
 ```
 
 <!-- tabs:start -->
 
-### **Success 200**
+### **Success 204**
 
-Response for nodes:
-
-```json
-{
-  "type": "Comment",
-  "id": "74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac",
-  "data": {
-    "content": "Blue is one of the three primary colours in the RYB colour model ...",
-    "created": "2023-08-09 21:17:16",
-    "name": "Blue",
-    "updated": "2023-08-09 21:17:16"
-  }
-}
-```
-
-Response for relations:
-
-```json
-{
-  "type": "HAS_DATA",
-  "id": "904a5f37-785e-428d-96ba-4fa58cd2bea8",
-  "start": "ce0fde7f-851a-4933-bd1b-8d8a12f082f5",
-  "end": "1c7e0a52-b0dc-441a-9fbc-9e30bedbf812",
-  "data": {
-    "name": "Some data relation",
-    "description": "demo"
-  }
-}
-```
+The element is now deleted. No content is returned.
 
 ### **Error 401**
+
+This error can only be thrown, if the token is invalid or if there is no default anonymous user.
 
 ```problem+json
 {
@@ -61,12 +38,15 @@ Response for relations:
 
 ### **Error 404**
 
+Error 404 is thrown if the element to be deleted does not exist, or if the use does not have permissions to delete the
+element.
+
 ```problem+json
 {
-  "type": "404-not-found",
-  "title": "Not Found",
+  "type": "Invalid authorization token",
+  "title": "wip",
   "status": "404",
-  "detail": "The requested resource was not found."
+  "detail": "wip"
 }
 ```
 
@@ -89,7 +69,7 @@ Response for relations:
 
 Once the server receives such a request, it checks several things internally:
 
-<div id="graph-container-1" class="graph-container" style="height:1000px"></div>
+<div id="graph-container-1" class="graph-container" style="height:1200px"></div>
 
 <!-- panels:end -->
 
@@ -139,18 +119,18 @@ G6.registerEdge('polyline-edge', {
 });
 renderWorkflow(document.getElementById('graph-container-1'), {
   nodes: [
-    { id: 'init', ...workflowStart, label: 'server receives GET-request' },
+    { id: 'init', ...workflowStart, label: 'server receives DELETE-request' },
     { id: 'checkToken', ...workflowDecision, label: 'does request contain token?' },
     { id: 'noTokenAction', ...workflowStep, label: "use default anonymous\nuser for auth" },
     { id: 'checkTokenValidity', ...workflowDecision, label: 'is token valid?' },
     { id: 'checkRateLimit', ...workflowDecision, label: "does request exceed\nrate limit?" },
-    { id: 'checkElementExistence', ...workflowDecision, label: 'does element exist?' },
-    { id: 'checkElementAccess', ...workflowDecision, label: "does user has\naccess to element?" },
-    { id: 'loadElementData', ...workflowStep, label: 'Load element data' },
+    { id: 'checkExistence', ...workflowDecision, label: 'does element exist?' },
+    { id: 'checkAccess', ...workflowDecision, label: 'has user permission\nto delete element?' },
+    { id: 'deleteElement', ...workflowStep, label: 'delete element' },
     { id: 'error401', ...workflowEndError, label: "return 401" },
-    { id: 'error404', ...workflowEndError, label: 'return 404' },
+    { id: 'error404', ...workflowEndError, label: "return 404" },
     { id: 'error429', ...workflowEndError, label: 'return 429' },
-    { id: 'success200', ...workflowEndSuccess , label: "return 200"},
+    { id: 'success204', ...workflowEndSuccess , label: "return 204"},
   ],
   edges: [
     { source: 'init', target: 'checkToken', label: '' },
@@ -158,13 +138,13 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkToken', target: 'noTokenAction', label: 'no' },
     { source: 'checkTokenValidity', target: 'checkRateLimit', label: 'yes' },
     { source: 'checkTokenValidity', target: 'error401', label: 'no' },
-    { source: 'checkRateLimit', target: 'checkElementExistence', label: 'no' },
+    { source: 'checkRateLimit', target: 'checkExistence', label: 'no' },
     { source: 'checkRateLimit', target: 'error429', label: 'yes' },
-    { source: 'checkElementExistence', target: 'checkElementAccess', label: 'yes' },
-    { source: 'checkElementExistence', target: 'error404', label: 'no' },
-    { source: 'checkElementAccess', target: 'loadElementData', label: 'yes' },
-    { source: 'loadElementData', target: 'success200' },
-    { source: 'checkElementAccess', target: 'error404', label: 'no' },
+    { source: 'checkExistence', target: 'checkAccess', label: 'yes' },
+    { source: 'checkExistence', target: 'error404', label: 'no' },
+    { source: 'checkAccess', target: 'deleteElement', label: 'yes' },
+    { source: 'checkAccess', target: 'error404', label: 'no' },
+    { source: 'deleteElement', target: 'success204' },
     { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
   ],
 }, 'TB');

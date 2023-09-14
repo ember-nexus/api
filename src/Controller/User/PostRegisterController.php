@@ -2,6 +2,7 @@
 
 namespace App\Controller\User;
 
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
@@ -27,6 +28,7 @@ class PostRegisterController extends AbstractController
         private UrlGeneratorInterface $router,
         private UserPasswordHasher $userPasswordHasher,
         private EmberNexusConfiguration $emberNexusConfiguration,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
@@ -59,6 +61,13 @@ class PostRegisterController extends AbstractController
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('password', 'string');
         }
         $password = $body['password'];
+
+        if (!array_key_exists('type', $body)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
+        }
+        if ('User' !== $body['type']) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'User', $body['type']);
+        }
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         if (!array_key_exists($uniqueIdentifier, $data)) {

@@ -47,7 +47,8 @@ class ApiKeyCheckOnKernelRequestEventListener
 
         $this->authProvider->setUserAndToken(
             $userUuidAndTokenUuidObject->getUserUuid(),
-            $userUuidAndTokenUuidObject->getTokenUuid()
+            $userUuidAndTokenUuidObject->getTokenUuid(),
+            $this->tokenGenerator->hashToken($token)
         );
     }
 
@@ -70,7 +71,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         $userUuid = Uuid::fromString($res->first()->get('user.id'));
         $tokenUuid = Uuid::fromString($res->first()->get('token.id'));
 
-        $redisKey = sprintf('token:%s', $hashedToken);
+        $redisKey = $this->authProvider->getRedisTokenKeyFromHashedToken($hashedToken);
         $this->redisClient->hset($redisKey, 'token', $tokenUuid->toString());
         $this->redisClient->hset($redisKey, 'user', $userUuid->toString());
         $this->redisClient->expire($redisKey, 60 * 30); // 30 minutes
@@ -81,12 +82,9 @@ class ApiKeyCheckOnKernelRequestEventListener
         );
     }
 
-    private function getUserUuidAndTokenUuidFromTokenObjectFromRedis(string $token): ?UserUuidAndTokenUuidObject
+    private function getUserUuidAndTokenUuidFromTokenObjectFromRedis(string $rawToken): ?UserUuidAndTokenUuidObject
     {
-        $data = $this->redisClient->hgetall(sprintf(
-            'token:%s',
-            $this->tokenGenerator->hashToken($token)
-        ));
+        $data = $this->redisClient->hgetall($this->authProvider->getRedisTokenKeyFromRawToken($rawToken));
 
         if (0 === count($data)) {
             return null;

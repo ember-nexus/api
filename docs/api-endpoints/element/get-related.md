@@ -1,4 +1,4 @@
-# GET /&lt;uuid&gt;/related - Get Related
+# <span class="method-get">GET</span>` /<uuid>/related -` Get Related
 
 Returns all nodes related to the current node.  
 Returned data is paginated, can be filtered/sorted (?) and each page contains all relations between the node and the

@@ -34,6 +34,8 @@ h5 code,
 h6 code {
   color: inherit !important;
   background: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 td code {
@@ -75,4 +77,47 @@ table {
   height: 500px;
   background-color: #f8f8f8;
   margin-bottom: 1rem;
+}
+
+.method-get,
+.method-post,
+.method-put,
+.method-patch,
+.method-delete,
+.method-copy,
+.method-lock,
+.method-unlock,
+.method-mkcol,
+.method-move,
+.method-propfind,
+.method-proppatch {
+  font-weight: 700 !important;
+  font-family: 'Fira Code', 'Roboto Mono', Monaco, courier, monospace !important;
+}
+
+.method-get {
+  color: #0074E4 !important;
+}
+
+.method-post {
+  color: #4CAF50 !important;
+}
+
+.method-put,
+.method-patch {
+  color: #FFA726 !important;
+}
+
+.method-delete {
+  color: #ff073a !important;
+}
+
+.method-copy,
+.method-lock,
+.method-unlock,
+.method-mkcol,
+.method-move,
+.method-propfind,
+.method-proppatch {
+  color: #7E57C2 !important;
 }
