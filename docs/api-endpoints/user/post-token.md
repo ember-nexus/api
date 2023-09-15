@@ -5,7 +5,7 @@
 
 Endpoint for creating new tokens.
 
-Endpoint can be configured, see
+The endpoint can be configured; see
 [application configuration](/getting-started/configuration?id=application-configuration) for details.
 
 ## Request Body

@@ -3,10 +3,10 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-Returns all parents of the specified node, where the current user has access to.  
-Returned data is paginated and each page contains all relations between the node and the returned parents.
+Returns all parents of the specified node which the current user can access.  
+Returned data is paginated; each page contains all relations between the node and the returned parents.
 
-!> **Note**: Usually a node only has one parent, although the security system allows multiple owners.
+!> **Note**: Usually, a node only has one parent, although the security system allows multiple owners.
 
 ## Request Example
 
@@ -30,7 +30,7 @@ curl \
 
 ### **🔴 Error 401**
 
-This error can only be thrown, if the token is invalid or if there is no default anonymous user.
+This error can only be thrown if the token is invalid or if there is no default anonymous user.
 
 <div class="code-title">Response Headers</div>
 

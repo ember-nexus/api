@@ -5,8 +5,8 @@
 
 Deletes a single element. If the deleted element is a node, all connected relationships are deleted.
 
-!> **Note**: In order to avoid orphaned nodes, children need to be deleted first or get other parents added.  
-This behaviour might be changed, see issue [#64: HTTP DELETE /&lt;uuid&gt; - DeleteElementController](https://github.com/ember-nexus/api/issues/64).
+!> **Note**: To avoid orphaned nodes, children need to be deleted first or get other parents added.  
+This behavior might be changed; see issue [#64: HTTP DELETE /&lt;uuid&gt; - DeleteElementController](https://github.com/ember-nexus/api/issues/64).
 
 ## Request Example
 
@@ -29,7 +29,7 @@ Success response does not have a return body.
 
 ### **🔴 Error 401**
 
-This error can only be thrown, if the token is invalid or if there is no default anonymous user.
+This error can only be thrown if the token is invalid or if there is no default anonymous user.
 
 <div class="code-title">Response Headers</div>
 
@@ -41,7 +41,7 @@ This error can only be thrown, if the token is invalid or if there is no default
 
 ### **🔴 Error 404**
 
-Error 404 is thrown if the element to be deleted does not exist, or if the use does not have permissions to delete the
+Error 404 is thrown if the element to be deleted does not exist or if the user does not have permission to delete the
 element.
 
 <div class="code-title">Response Headers</div>

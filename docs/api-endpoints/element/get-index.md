@@ -3,7 +3,7 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-Returns all top level elements, to which the current user has direct access.
+Returns all top-level elements to which the current user has direct access.
 
 ## Request Example
 
@@ -27,7 +27,7 @@ curl \
 
 ### **🔴 Error 401**
 
-This error can only be thrown, if the token is invalid or if there is no default anonymous user.
+This error can only be thrown if the token is invalid or if there is no default anonymous user.
 
 <div class="code-title">Response Headers</div>
 

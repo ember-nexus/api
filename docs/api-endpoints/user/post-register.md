@@ -5,7 +5,7 @@
 
 Endpoint for registering / creating new accounts.
 
-Endpoint can be disabled, see
+The endpoint can be disabled; see
 [application configuration](/getting-started/configuration?id=application-configuration) for details.
 
 ## Request Body
@@ -15,11 +15,11 @@ The posted request must be a valid JSON document.
 The request must contain the following attributes:
 
 - `type`: Containing the content "User". No other values are currently possible.
-- `password`: The plain text password of the new user. Can contain any string, will be hashed internally. Whitespace at
-  the start or end of the string will **not** be removed, though it is discouraged.  
+- `password`: The plain text password of the new user. It can contain any string and will be hashed internally.
+  Whitespace at the start or end of the string will **not** be removed, though it is discouraged.  
   No password complexity check is performed.
-- `data.<identifier>`: By default `data.email`, must contain a new unique string. While not required, it is encouraged
-  to keep the content within 256 bytes. Optional limits might be added at a later time.  
+- `data.<identifier>`: By default, `data.email` must contain a new unique string. While not required, keeping the
+  content within 256 bytes is encouraged. Optional limits might be added at a later time.  
   The required identifier name is returned by the
   [instance configuration endpoint](/api-endpoints/get-instance-configuration) and in error messages.
 

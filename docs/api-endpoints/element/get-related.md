@@ -4,7 +4,7 @@
 <!-- div:left-panel -->
 
 Returns all nodes related to the current node.  
-Returned data is paginated and each page contains all relations between the node and the returned nodes. Includes
+Returned data is paginated, and each page contains all relations between the node and the returned nodes. Includes
 parents and children.
 
 ## Request Example
@@ -29,7 +29,7 @@ curl \
 
 ### **🔴 Error 401**
 
-This error can only be thrown, if the token is invalid or if there is no default anonymous user.
+This error can only be thrown if the token is invalid or if there is no default anonymous user.
 
 <div class="code-title">Response Headers</div>
 
