@@ -1,0 +1,6 @@
+{
+  "type": "400-bad-request",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "Property 'user' must be set."
+}

@@ -41,6 +41,9 @@
       content="./assets/favicon/browserconfig.xml"
     />
     <meta name="theme-color" content="#ff073a" />
+    <meta property="og:title" content="Ember Nexus API"/>
+    <meta property="og:description" content=" Flexible graph based API for the modern web ">
+    <meta property="og:type" content="website">
   </head>
   <body>
     <div id="app"></div>
@@ -71,6 +74,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@antv/g6@4.8.10/dist/g6.min.js"></script>
     <script>
       Prism.languages['problem+json'] = Prism.languages['json'];
+      const emberNexusTextRed = '#e01b24';
+      const emberNexusTextGreen = '#33d17a';
+      const emberNexusTextYellow = '#f6d32d';
+      const emberNexusTextPurple = '#9141ac';
+      const emberNexusTextBlue = '#3584e4';
       function renderWorkflow(container, data, direction = "LR"){
         const graph = new G6.Graph({
           container: container,
@@ -95,7 +103,7 @@
           defaultNode: {
             type: 'node',
             style: {
-              fill: '#ff073a'
+              fill: emberNexusTextRed
             },
             labelCfg: {
               style: {
@@ -155,7 +163,7 @@
           defaultNode: {
             type: 'node',
             style: {
-              fill: '#ff073a'
+              fill: emberNexusTextRed
             },
             labelCfg: {
               style: {
@@ -188,17 +196,17 @@
         });
         graph.render();
       }
-      let userNode = {label: 'User', icon: 'user', style: {fill: '#276ed8'}};
+      let userNode = {label: 'User', icon: 'user', style: {fill: emberNexusTextBlue}};
       let dataNode = {label: 'Data', icon: 'data'};
-      let documentNode = {label: 'Doc', icon: 'data', style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
-      let groupNode = {label: 'Group', icon: 'group', style: {fill: '#27d87b' }, labelCfg: {style: {fill: '#000' } }};
-      let commentNode = {label: 'Group', icon: 'comment', style: {fill: '#d8c527' }, labelCfg: {style: {fill: '#000' } }};
-      let workflowStateNode = {label: 'Group', icon: 'workflow', style: {fill: '#952bb9' }, labelCfg: {style: {fill: '#fff' } }};
+      let documentNode = {label: 'Doc', icon: 'data', style: {fill: emberNexusTextYellow }, labelCfg: {style: {fill: '#000' } }};
+      let groupNode = {label: 'Group', icon: 'group', style: {fill: emberNexusTextGreen }, labelCfg: {style: {fill: '#000' } }};
+      let commentNode = {label: 'Group', icon: 'comment', style: {fill: emberNexusTextYellow }, labelCfg: {style: {fill: '#000' } }};
+      let workflowStateNode = {label: 'Group', icon: 'workflow', style: {fill: emberNexusTextPurple }, labelCfg: {style: {fill: '#fff' } }};
       let workflowDecision = {type: 'workflow-decision', style: {fill: '#fff', stroke: '#000' }, labelCfg: {style: {fill: '#000' } }};
       let workflowStep = {type: 'workflow-step', style: { fill: '#fff', stroke: '#000' }, labelCfg: {style: {fill: '#000' } }};
       let workflowStart = {type: 'workflow-start', style: { fill: '#fff', stroke: '#000' }, labelCfg: {style: {fill: '#000' } }};
-      let workflowEndError = {...workflowStart, style: { fill: '#fff', stroke: '#ff073a' }};
-      let workflowEndSuccess = {...workflowStart, style: { fill: '#fff', stroke: '#27d87b' }};
+      let workflowEndError = {...workflowStart, style: { fill: '#fff', stroke: emberNexusTextRed }};
+      let workflowEndSuccess = {...workflowStart, style: { fill: '#fff', stroke: emberNexusTextGreen }};
       function getIcon(name, size, color){
         const icons = {
           'user': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}"><title>account</title><path fill="${color}" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" /></svg>`,

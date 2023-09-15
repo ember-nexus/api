@@ -45,32 +45,34 @@ curl \
 
 <!-- tabs:start -->
 
-### **Success 200**
+### **🟢 Success 201**
 
-Success responses do not have a return body. The location of the new user, containing the user's UUID, is written in the
-`Location` header.
+<div class="code-title">Response Headers</div>
 
-### **Error 400**
+[Response Body](./post-register/201-response-header.txt ':include :type=code')
 
-```problem+json
-{
-  "type": "400-bad-request",
-  "title": "Bad Request",
-  "status": 400,
-  "detail": "Property 'email' must be set."
-}
-```
+Success response does not have a return body. The location of the new user, containing the user's UUID, is written in
+the `Location` header.
 
-### **Error 403**
+### **🔴 Error 400**
 
-```problem+json
-{
-  "type": "403-forbidden",
-  "title": "Forbidden",
-  "status": 403,
-  "detail": "Client does not have permissions to perform action."
-}
-```
+<div class="code-title">Response Headers</div>
+
+[Response Body](./post-register/400-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./post-register/400-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 403**
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./post-register/403-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./post-register/403-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 
@@ -140,7 +142,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'createUser', ...workflowStep, label: "create user" },
     { id: 'error400', ...workflowEndError, label: "return 400" },
     { id: 'error403', ...workflowEndError, label: 'return 403' },
-    { id: 'success200', ...workflowEndSuccess , label: "return 200"},
+    { id: 'success201', ...workflowEndSuccess , label: "return 201"},
   ],
   edges: [
     { source: 'init', target: 'checkEndpointEnabled', label: '' },
@@ -156,7 +158,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkIdentifier', target: 'error400', label: 'no' },
     { source: 'checkIdentifierUnique', target: 'createUser', label: 'yes' },
     { source: 'checkIdentifierUnique', target: 'error400', label: 'no' },
-    { source: 'createUser', target: 'success200', label: '' },
+    { source: 'createUser', target: 'success201', label: '' },
   ],
 }, 'TB');
 </script>

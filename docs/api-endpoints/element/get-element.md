@@ -16,70 +16,55 @@ curl \
 
 <!-- tabs:start -->
 
-### **Success 200**
+### **🟢 Success 200 - Node**
 
-Response for nodes:
+<div class="code-title">Response Headers</div>
 
-```json
-{
-  "type": "Comment",
-  "id": "74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac",
-  "data": {
-    "content": "Blue is one of the three primary colours in the RYB colour model ...",
-    "created": "2023-08-09 21:17:16",
-    "name": "Blue",
-    "updated": "2023-08-09 21:17:16"
-  }
-}
-```
+[Response Body](./get-element/200-node-response-header.txt ':include :type=code')
 
-Response for relations:
+<div class="code-title">Response Body</div>
 
-```json
-{
-  "type": "HAS_DATA",
-  "id": "904a5f37-785e-428d-96ba-4fa58cd2bea8",
-  "start": "ce0fde7f-851a-4933-bd1b-8d8a12f082f5",
-  "end": "1c7e0a52-b0dc-441a-9fbc-9e30bedbf812",
-  "data": {
-    "name": "Some data relation",
-    "description": "demo"
-  }
-}
-```
+[Response Body](./get-element/200-node-response-body.json ':include :type=code')
 
-### **Error 401**
+### **🟢 Success 200 - Relation**
 
-```problem+json
-{
-  "type": "Invalid authorization token",
-  "title": "Unauthorized",
-  "status": "401",
-  "detail": "Request requires authorization."
-}
-```
+<div class="code-title">Response Headers</div>
 
-### **Error 404**
+[Response Body](./get-element/200-relation-response-header.txt ':include :type=code')
 
-```problem+json
-{
-  "type": "404-not-found",
-  "title": "Not Found",
-  "status": "404",
-  "detail": "The requested resource was not found."
-}
-```
+<div class="code-title">Response Body</div>
 
-### **Error 429**
+[Response Body](./get-element/200-relation-response-body.json ':include :type=code')
 
-```problem+json
-{
-  "type": "429-too-many-requests",
-  "title": "Too Many Requests",
-  "status": "429",
-  "detail": "The client sent too many requests in a given timeframe; rate limiting is active."
-}
-```
+### **🔴 Error 401**
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./get-element/401-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./get-element/401-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 404**
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./get-element/404-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./get-element/404-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 429**
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./get-element/429-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./get-element/429-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 

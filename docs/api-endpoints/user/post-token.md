@@ -42,40 +42,45 @@ curl \
 
 <!-- tabs:start -->
 
-### **Success 200**
+### **🟢 Success 200**
 
-```json
-{
-  "type": "_TokenResponse",
-  "token": "secret-token:ERgAAnWl0CY8bQs0m11nZ3"
-}
-```
+<div class="code-title">Response Headers</div>
 
-### **Error 400**
+[Response Body](./post-token/200-response-header.txt ':include :type=code')
 
-```problem+json
-{
-  "type": "400-bad-request",
-  "title": "Bad Request",
-  "status": 400,
-  "detail": "Property 'user' must be set."
-}
-```
+<div class="code-title">Response Body</div>
 
-### **Error 401**
+[Response Body](./post-token/200-response-body.json ':include :type=code')
 
-```problem+json
-{
-  "type": "401-unauthorized",
-  "title": "Request does not contain valid token, or anonymous user is disabled.",
-  "status": 401,
-  "detail": ""
-}
-```
+### **🔴 Error 400**
 
-### **Error 500**
+<div class="code-title">Response Headers</div>
 
-wip
+[Response Body](./post-token/400-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./post-token/400-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 401**
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./post-token/401-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./post-token/401-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 500**
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./post-token/500-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./post-token/500-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 

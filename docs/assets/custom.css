@@ -3,6 +3,31 @@
 /* required in order to load Fira Code instantly */
 {}
 
+:root {
+  --ember-nexus-background-lightest: #ffffff;
+  --ember-nexus-background-lighter: #f6f5f4;
+  --ember-nexus-background-light: #deddda;
+  --ember-nexus-text-red: #e01b24;
+  --ember-nexus-text-orange: #ff7800;
+  --ember-nexus-text-green: #2ec27e;
+  --ember-nexus-text-blue: #3584e4;
+  --ember-nexus-text-purple: #9141ac;
+}
+
+.text-red {
+  color: var(--ember-nexus-text-red);
+}
+
+.text-green {
+  color: var(--ember-nexus-text-green);
+}
+
+.markdown-section pre,
+.markdown-section pre > code,
+.markdown-section code {
+  background-color: var(--ember-nexus-background-lighter);
+}
+
 .markdown-section code,
 .markdown-section pre,
 .markdown-section output::after,
@@ -75,7 +100,7 @@ table {
 .graph-container {
   width: 100%;
   height: 500px;
-  background-color: #f8f8f8;
+  background-color: var(--ember-nexus-background-lighter);
   margin-bottom: 1rem;
 }
 
@@ -96,20 +121,20 @@ table {
 }
 
 .method-get {
-  color: #0074E4 !important;
+  color: var(--ember-nexus-text-blue) !important;
 }
 
 .method-post {
-  color: #4CAF50 !important;
+  color: var(--ember-nexus-text-green) !important;
 }
 
 .method-put,
 .method-patch {
-  color: #FFA726 !important;
+  color: var(--ember-nexus-text-orange) !important;
 }
 
 .method-delete {
-  color: #ff073a !important;
+  color: var(--ember-nexus-text-red) !important;
 }
 
 .method-copy,
@@ -119,5 +144,20 @@ table {
 .method-move,
 .method-propfind,
 .method-proppatch {
-  color: #7E57C2 !important;
+  color: var(--ember-nexus-text-purple) !important;
+}
+
+.code-title {
+  margin-bottom: -1.2em;
+  background-color: var(--ember-nexus-background-light);
+  padding: 0.5rem 1.4rem;
+  font-weight: bold;
+}
+
+pre + .code-title {
+  margin-top: -1.2em;
+}
+
+.markdown-section pre > code {
+  padding: 2.2em 0;
 }
