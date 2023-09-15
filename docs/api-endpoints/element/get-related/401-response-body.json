@@ -1,0 +1,6 @@
+{
+  "type": "Invalid authorization token",
+  "title": "Unauthorized",
+  "status": "401",
+  "detail": "Request requires authorization."
+}
