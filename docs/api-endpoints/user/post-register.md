@@ -82,7 +82,7 @@ the `Location` header.
 
 Once the server receives such a request, it checks several things internally:
 
-<div id="graph-container-1" class="graph-container" style="height:1000px"></div>
+<div id="graph-container-1" class="graph-container" style="height:1200px"></div>
 
 <!-- panels:end -->
 

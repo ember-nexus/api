@@ -1,0 +1,9 @@
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
+Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE
+Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE
+Content-Type: text/plain; charset=utf-8
+Cache-Control: no-cache, private
+Date: Fri, 15 Sep 2023 10:37:35 GMT
+Server: Unit
+Transfer-Encoding: chunked
