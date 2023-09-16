@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.28 - 2023-09-14
 ### Added
 - Add feature test for GET `/token` endpoint
 - Add feature test for POST `/token` endpoint
@@ -12,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add new type of feature tests which check that the examples in the documentation are up-to-date, closes #116.
 - Add WebDAV HTTP methods to the allowed HTTP method lists.
 - Add 'Example Generation Test' to CI.
+
 ### Changed
 - Increase reference dataset version to 0.0.8.
+- **Switch license to GPL-3.0-only.**
 
 ## 0.0.27 - 2023-09-02
 ### Changed
