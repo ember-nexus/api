@@ -3,7 +3,7 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-Returns all top level elements, to which the current user has direct access.
+Returns all top-level elements to which the current user has direct access.
 
 ## Request Example
 
@@ -15,65 +15,37 @@ curl \
 
 <!-- tabs:start -->
 
-### **Success 200**
+### **🟢 Success 200**
 
-```json
-{
-  "type": "_PartialCollection",
-  "id": "/",
-  "totalNodes": 2,
-  "links": {
-    "first": "/",
-    "previous": null,
-    "next": null,
-    "last": "/"
-  },
-  "nodes": [
-    {
-      "type": "Sphere",
-      "id": "7b80b203-2b82-40f5-accd-c7089fe6114e",
-      "data": {
-        "created": "2023-08-09 21:17:16",
-        "name": "Comment",
-        "updated": "2023-08-09 21:17:16"
-      }
-    },
-    {
-      "type": "Token",
-      "id": "e3b81351-fe0c-4f8f-ad22-78b6157edde8",
-      "data": {
-        "created": "2023-08-09 21:17:16",
-        "updated": "2023-08-09 21:17:16"
-      }
-    }
-  ],
-  "relations": []
-}
-```
+<div class="code-title">Response Headers</div>
 
-### **Error 401**
+[Response Body](./get-index/200-response-header.txt ':include :type=code')
 
-This error can only be thrown, if the token is invalid or if there is no default anonymous user.
+<div class="code-title">Response Body</div>
 
-```problem+json
-{
-  "type": "Invalid authorization token",
-  "title": "Unauthorized",
-  "status": "401",
-  "detail": "Request requires authorization."
-}
-```
+[Response Body](./get-index/200-response-body.json ':include :type=code')
 
-### **Error 429**
+### **🔴 Error 401**
 
-```problem+json
-{
-  "type": "429-too-many-requests",
-  "title": "Too Many Requests",
-  "status": "429",
-  "detail": "The client sent too many requests in a given timeframe; rate limiting is active."
-}
-```
+This error can only be thrown if the token is invalid or if there is no default anonymous user.
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./get-index/401-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./get-index/401-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 429**
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./get-index/429-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./get-index/429-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 

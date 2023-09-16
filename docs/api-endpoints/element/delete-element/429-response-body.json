@@ -1,0 +1,6 @@
+{
+  "type": "429-too-many-requests",
+  "title": "Too Many Requests",
+  "status": "429",
+  "detail": "The client sent too many requests in a given timeframe; rate limiting is active."
+}

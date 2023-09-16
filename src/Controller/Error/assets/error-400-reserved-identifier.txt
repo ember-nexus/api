@@ -1,0 +1,6 @@
+ Error 400 - Reserved Identifier
+
+ The exception is thrown when an identifier is used which is already in use or reserved.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

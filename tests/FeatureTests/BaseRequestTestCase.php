@@ -10,7 +10,7 @@ abstract class BaseRequestTestCase extends TestCase
 {
     private const IGNORED_HEAD_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link', 'Date'];
 
-    public function runGetRequest(string $uri, string $token): ResponseInterface
+    public function runGetRequest(string $uri, ?string $token): ResponseInterface
     {
         $headRequest = $this->runRequest('HEAD', $uri, $token);
         $getRequest = $this->runRequest('GET', $uri, $token);
@@ -242,6 +242,17 @@ abstract class BaseRequestTestCase extends TestCase
         }
         $this->assertArrayHasKey('status', $body);
         $this->assertSame($status, $body['status']);
+
+        $typeDetailResponse = $this->runGetRequest($body['type'], null);
+        $this->assertSame(
+            200,
+            $typeDetailResponse->getStatusCode(),
+            sprintf(
+                'Expected error type detail page with URL %s to be available, got HTTP status code %d.',
+                $body['type'],
+                $typeDetailResponse->getStatusCode()
+            )
+        );
     }
 
     public function assertIsCreatedResponse(ResponseInterface $response): void

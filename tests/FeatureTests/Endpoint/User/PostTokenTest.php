@@ -28,8 +28,6 @@ class PostTokenTest extends BaseRequestTestCase
             ]
         );
 
-        echo "\n\n".((string) $response->getBody())."\n\n";
-
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
         $body = \Safe\json_decode((string) $response->getBody(), true);

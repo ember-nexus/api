@@ -1,0 +1,6 @@
+ Error 404 - Not Found
+
+ The requested element was not found.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

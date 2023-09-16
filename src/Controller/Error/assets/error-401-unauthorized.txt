@@ -1,0 +1,6 @@
+ Error 401 - Unauthorized
+
+ Request does not contain valid token, or anonymous user is disabled.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

@@ -1,0 +1,14 @@
+  _____           _                 _   _                          _    ____ ___
+ | ____|_ __ ___ | |__   ___ _ __  | \ | | _____  ___   _ ___     / \  |  _ \_ _|
+ |  _| | '_ ` _ \| '_ \ / _ \ '__| |  \| |/ _ \ \/ / | | / __|   / _ \ | |_) | |
+ | |___| | | | | | |_) |  __/ |    | |\  |  __/⟩  ⟨| |_| \__ \  / ___ \|  __/| |
+ |_____|_| |_| |_|_.__/ \___|_|    |_| \_|\___/_/\_\\__,_|___/ /_/   \_\_|  |___|
+
+
+ Error 400 - Incomplete Mutual Dependency
+
+ This error is thrown when there are properties which depend on ech other, i.e. must be all defined, but at least one
+ is missing from the request body. Try to add the missing properties.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

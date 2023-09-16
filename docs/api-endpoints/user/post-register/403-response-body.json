@@ -1,0 +1,5 @@
+{
+  "type": "http://ember-nexus-api/error/403/forbidden",
+  "title": "Requested endpoint, element or action is forbidden.",
+  "status": 403
+}

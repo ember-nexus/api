@@ -54,6 +54,11 @@
     - [<span class="method-get">GET</span>` /error/400/forbidden-property`](/api-endpoints/error/get-400-forbidden-property)
     - [<span class="method-get">GET</span>` /error/400/incomplete-mutual-dependency`](/api-endpoints/error/get-400-incomplete-mutual-dependency)
     - [<span class="method-get">GET</span>` /error/400/missing-property`](/api-endpoints/error/get-400-missing-property)
+    - [<span class="method-get">GET</span>` /error/400/reserved-identifier`](/api-endpoints/error/get-400-reserved-identifier)
+    - [<span class="method-get">GET</span>` /error/401/unauthorized`](/api-endpoints/error/get-401-unauthorized)
+    - [<span class="method-get">GET</span>` /error/403/forbidden`](/api-endpoints/error/get-403-forbidden)
+    - [<span class="method-get">GET</span>` /error/404/not-found`](/api-endpoints/error/get-404-not-found)
+    - [<span class="method-get">GET</span>` /error/501/not-implemented`](/api-endpoints/error/get-501-not-implemented)
 
 - Commands
   - [Backup Commands](/commands/backup)

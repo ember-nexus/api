@@ -193,3 +193,35 @@ jobs:
           sleep 10
           echo "finished waiting"
           docker exec ember-nexus-api bash -c "composer install --quiet && composer test:feature"
+
+  test-example-generation:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    name: 'Example Generation Test'
+    needs:
+      - test-unit
+      - phpstan
+      - psalm
+      - cs-lint
+      - test-mutant
+      - test-leak
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Feature Test
+        run: |
+          chmod 777 test-feature-prepare
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker compose -f ./tests/ExampleGeneration/docker-compose.yml up --quiet-pull -d
+          echo "waiting for containers to star tup (10s)"
+          sleep 10
+          echo "finished waiting"
+          docker exec ember-nexus-api bash -c "composer install --quiet && composer test:example-generation"

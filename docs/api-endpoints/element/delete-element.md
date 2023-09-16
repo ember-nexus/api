@@ -5,8 +5,8 @@
 
 Deletes a single element. If the deleted element is a node, all connected relationships are deleted.
 
-!> **Note**: In order to avoid orphaned nodes, children need to be deleted first or get other parents added.  
-This behaviour might be changed, see issue [#64: HTTP DELETE /&lt;uuid&gt; - DeleteElementController](https://github.com/ember-nexus/api/issues/64).
+!> **Note**: To avoid orphaned nodes, children need to be deleted first or get other parents added.  
+This behavior might be changed; see issue [#64: HTTP DELETE /&lt;uuid&gt; - DeleteElementController](https://github.com/ember-nexus/api/issues/64).
 
 ## Request Example
 
@@ -19,47 +19,48 @@ curl \
 
 <!-- tabs:start -->
 
-### **Success 204**
+### **🟢 Success 204**
 
-The element is now deleted. No content is returned.
+<div class="code-title">Response Headers</div>
 
-### **Error 401**
+[Response Body](./delete-element/204-response-header.txt ':include :type=code')
 
-This error can only be thrown, if the token is invalid or if there is no default anonymous user.
+Success response does not have a return body.
 
-```problem+json
-{
-  "type": "Invalid authorization token",
-  "title": "Unauthorized",
-  "status": "401",
-  "detail": "Request requires authorization."
-}
-```
+### **🔴 Error 401**
 
-### **Error 404**
+This error can only be thrown if the token is invalid or if there is no default anonymous user.
 
-Error 404 is thrown if the element to be deleted does not exist, or if the use does not have permissions to delete the
+<div class="code-title">Response Headers</div>
+
+[Response Body](./delete-element/401-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./delete-element/401-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 404**
+
+Error 404 is thrown if the element to be deleted does not exist or if the user does not have permission to delete the
 element.
 
-```problem+json
-{
-  "type": "Invalid authorization token",
-  "title": "wip",
-  "status": "404",
-  "detail": "wip"
-}
-```
+<div class="code-title">Response Headers</div>
 
-### **Error 429**
+[Response Body](./delete-element/404-response-header.txt ':include :type=code')
 
-```problem+json
-{
-  "type": "429-too-many-requests",
-  "title": "Too Many Requests",
-  "status": "429",
-  "detail": "The client sent too many requests in a given timeframe; rate limiting is active."
-}
-```
+<div class="code-title">Response Body</div>
+
+[Response Body](./delete-element/404-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 429**
+
+<div class="code-title">Response Headers</div>
+
+[Response Body](./delete-element/429-response-header.txt ':include :type=code')
+
+<div class="code-title">Response Body</div>
+
+[Response Body](./delete-element/429-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 
