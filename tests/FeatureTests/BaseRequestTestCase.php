@@ -242,6 +242,17 @@ abstract class BaseRequestTestCase extends TestCase
         }
         $this->assertArrayHasKey('status', $body);
         $this->assertSame($status, $body['status']);
+
+        $typeDetailResponse = $this->runGetRequest($body['type'], null);
+        $this->assertSame(
+            200,
+            $typeDetailResponse->getStatusCode(),
+            sprintf(
+                "Expected error type detail page with URL %s to be available, got HTTP status code %d.",
+                $body['type'],
+                $typeDetailResponse->getStatusCode()
+            )
+        );
     }
 
     public function assertIsCreatedResponse(ResponseInterface $response): void

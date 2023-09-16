@@ -1,0 +1,6 @@
+ Error 501 - Not Implemented
+
+ Endpoint is currently not implemented. Try upgrading the software.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+
