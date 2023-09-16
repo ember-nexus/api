@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add feature test for DELETE `/token` endpoint
 - Add new type of feature tests which check that the examples in the documentation are up-to-date, closes #116.
 - Add WebDAV HTTP methods to the allowed HTTP method lists.
+- Add 'Example Generation Test' to CI.
 ### Changed
 - Increase reference dataset version to 0.0.8.
 
