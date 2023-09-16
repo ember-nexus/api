@@ -5,9 +5,15 @@
  |_____|_| |_| |_|_.__/ \___|_|    |_| \_|\___/_/\_\\__,_|___/ /_/   \_\_|  |___|
 
 
- Error 400 - Missing Property
+ Error 403 - Forbidden
 
- This error is thrown when the request body does not contain a required property.
+ This error is thrown when the requested endpoint, element or action is forbidden.
+
+ There are a few things you can check:
+
+ - Is the endpoint available via the GET method?
+ - Do you have access to the endpoint?
+ - Is the endpoint disabled in the configuration?
 
  Link to the documentation: https://ember-nexus.github.io/api
 

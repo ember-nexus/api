@@ -47,7 +47,7 @@ curl \
 
 ### **🟢 Success 201**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-register/201-response-header.txt ':include :type=code')
 
@@ -56,21 +56,21 @@ the `Location` header.
 
 ### **🔴 Error 400**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-register/400-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-register/400-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 403**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-register/403-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-register/403-response-body.json ':include :type=code problem+json')
 

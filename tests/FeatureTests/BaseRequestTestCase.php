@@ -10,7 +10,7 @@ abstract class BaseRequestTestCase extends TestCase
 {
     private const IGNORED_HEAD_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link', 'Date'];
 
-    public function runGetRequest(string $uri, string $token): ResponseInterface
+    public function runGetRequest(string $uri, ?string $token): ResponseInterface
     {
         $headRequest = $this->runRequest('HEAD', $uri, $token);
         $getRequest = $this->runRequest('GET', $uri, $token);

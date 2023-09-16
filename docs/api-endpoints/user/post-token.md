@@ -72,16 +72,6 @@ curl \
 
 [Response Body](./post-token/401-response-body.json ':include :type=code problem+json')
 
-### **🔴 Error 500**
-
-<div class="code-title">Response Headers</div>
-
-[Response Body](./post-token/500-response-header.txt ':include :type=code')
-
-<div class="code-title">Response Body</div>
-
-[Response Body](./post-token/500-response-body.json ':include :type=code problem+json')
-
 <!-- tabs:end -->
 
 <!-- div:right-panel -->

@@ -152,6 +152,16 @@ table {
   background-color: var(--ember-nexus-background-light);
   padding: 0.5rem 1.4rem;
   font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-title.auto-refresh::after {
+  content: url(/assets/refresh-auto.svg);
+  width: 24px;
+  height: 24px;
+  display: block;
 }
 
 pre + .code-title {

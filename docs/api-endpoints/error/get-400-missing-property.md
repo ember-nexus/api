@@ -10,11 +10,11 @@ curl https://api.localhost/error/400/missing-property
 
 ### **🟢 Success 200**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./get-400-missing-property/200-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./get-400-missing-property/200-response-body.txt ':include :type=code')
 

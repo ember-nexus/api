@@ -54,6 +54,7 @@
     - [<span class="method-get">GET</span>` /error/400/forbidden-property`](/api-endpoints/error/get-400-forbidden-property)
     - [<span class="method-get">GET</span>` /error/400/incomplete-mutual-dependency`](/api-endpoints/error/get-400-incomplete-mutual-dependency)
     - [<span class="method-get">GET</span>` /error/400/missing-property`](/api-endpoints/error/get-400-missing-property)
+    - [<span class="method-get">GET</span>` /error/403/forbidden`](/api-endpoints/error/get-403-forbidden)
 
 - Commands
   - [Backup Commands](/commands/backup)
