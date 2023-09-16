@@ -7,11 +7,11 @@
   --ember-nexus-background-lightest: #ffffff;
   --ember-nexus-background-lighter: #f6f5f4;
   --ember-nexus-background-light: #deddda;
-  --ember-nexus-text-red: #e01b24;
-  --ember-nexus-text-orange: #ff7800;
-  --ember-nexus-text-green: #2ec27e;
-  --ember-nexus-text-blue: #3584e4;
-  --ember-nexus-text-purple: #9141ac;
+  --ember-nexus-text-red: #ff073a;
+  --ember-nexus-text-orange: #FFA726;
+  --ember-nexus-text-green: #4CAF50;
+  --ember-nexus-text-blue: #0074E4;
+  --ember-nexus-text-purple: #7E57C2;
 }
 
 .text-red {

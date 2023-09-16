@@ -248,7 +248,7 @@ abstract class BaseRequestTestCase extends TestCase
             200,
             $typeDetailResponse->getStatusCode(),
             sprintf(
-                "Expected error type detail page with URL %s to be available, got HTTP status code %d.",
+                'Expected error type detail page with URL %s to be available, got HTTP status code %d.',
                 $body['type'],
                 $typeDetailResponse->getStatusCode()
             )
