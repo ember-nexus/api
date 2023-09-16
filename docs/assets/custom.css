@@ -158,7 +158,7 @@ table {
 }
 
 .code-title.auto-refresh::after {
-  content: url(/assets/refresh-auto.svg);
+  content: url(./assets/refresh-auto.svg);
   width: 24px;
   height: 24px;
   display: block;
