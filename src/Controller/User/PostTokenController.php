@@ -19,6 +19,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+/**
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
+ */
 class PostTokenController extends AbstractController
 {
     public function __construct(

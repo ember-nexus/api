@@ -8,6 +8,10 @@ use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use DateTimeInterface;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 
+/**
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
+ */
 class GenericPropertyElementFragmentizeEventListener
 {
     public function __construct(

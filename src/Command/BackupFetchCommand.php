@@ -218,6 +218,9 @@ class BackupFetchCommand extends Command
         );
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.CountInLoopExpression)
+     */
     private function findBackupRootFolder(Filesystem $filesystem): ?string
     {
         $stack = ['/'];

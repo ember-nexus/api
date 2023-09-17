@@ -150,10 +150,28 @@ jobs:
         with:
           name: docker-image-api-dev-amd
           path: /tmp/docker
-      - name: Mutant Test
+      - name: Leak Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:leak"
+
+  test-mess-detector:
+    runs-on: ubuntu-latest
+    name: 'Mess Detector'
+    needs:
+      - build-docker-image
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v3
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Mess Detector
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer mess"
 
   test-feature:
     runs-on: buildjet-4vcpu-ubuntu-2204
@@ -216,7 +234,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Feature Test
+      - name: Example Generation Test
         run: |
           chmod 777 test-feature-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz

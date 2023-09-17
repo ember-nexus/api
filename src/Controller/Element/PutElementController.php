@@ -58,7 +58,7 @@ class PutElementController extends AbstractController
          */
         $data = \Safe\json_decode($request->getContent(), true);
 
-        foreach ($element->getProperties() as $name => $value) {
+        foreach (array_keys($element->getProperties()) as $name) {
             if ('id' === $name) {
                 continue;
             }

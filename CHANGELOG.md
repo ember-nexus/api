@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add WebDAV HTTP methods to the allowed HTTP method lists.
 - Add 'Example Generation Test' to CI.
 - Enable phpstan rule for enforcing [safe functions](https://github.com/thecodingmachine/safe), closes #55.
+- Add PHP Mess Detector, closes #114.
 
 ## 0.0.28 - 2023-09-14
 ### Added
