@@ -21,6 +21,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+use function Safe\gethostname;
+
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */

@@ -48,6 +48,7 @@
     "symfony/phpunit-bridge": "^6.3",
     "symfony/stopwatch": "6.3.*",
     "symfony/web-profiler-bundle": "6.3.*",
+    "thecodingmachine/phpstan-safe-rule": "^1.2",
     "vimeo/psalm": "^5.14"
   },
   "config": {

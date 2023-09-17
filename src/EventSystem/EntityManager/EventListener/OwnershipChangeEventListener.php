@@ -6,10 +6,11 @@ use App\Contract\RelationElementInterface;
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
-use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Type\RabbitMQQueueType;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+
+use function Safe\json_encode;
 
 class OwnershipChangeEventListener
 {
@@ -27,8 +28,7 @@ class OwnershipChangeEventListener
     ];
 
     public function __construct(
-        private AMQPStreamConnection $AMQPStreamConnection,
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
+        private AMQPStreamConnection $AMQPStreamConnection
     ) {
     }
 
@@ -74,9 +74,6 @@ class OwnershipChangeEventListener
         $jsonMessage = json_encode([
             'element' => $elementId->toString(),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if (!is_string($jsonMessage)) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Problem with internal JSON encoding.');
-        }
         $message = new AMQPMessage($jsonMessage);
         $channel->basic_publish($message, '', $queue);
         $channel->close();
