@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   closes #123.
 ### Changed
 - NGINX Unit strips all cookie headers from responses, closes #124.
+### Fixed
+- Software version is now correctly set in final Docker images, fixes #115.
 
 ## 0.0.28 - 2023-09-14
 ### Added

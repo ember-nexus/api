@@ -105,7 +105,7 @@ jobs:
         run: |
           docker build \
             --target production \
-            --build-arg VERSION="${{ env.NEW_VERSION }}" \
+            --build-arg="VERSION=${{ env.NEW_VERSION }}" \
             --no-cache \
             -t api:latest-amd \
             -f ./docker/Dockerfile \
@@ -166,7 +166,7 @@ jobs:
         run: |
           docker build \
             --target production \
-            --build-arg VERSION="${{ env.NEW_VERSION }}" \
+            --build-arg="VERSION=${{ env.NEW_VERSION }}" \
             --no-cache \
             -t api:latest-arm \
             -f ./docker/Dockerfile \
