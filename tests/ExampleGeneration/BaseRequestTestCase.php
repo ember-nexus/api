@@ -8,7 +8,7 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
 {
     private const IGNORED_HEADERS = ['Date', 'Location'];
 
-    private const REMOVED_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link', 'Set-Cookie', 'X-Robots-Tag'];
+    private const REMOVED_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link', 'Set-Cookie'];
 
     public function getHeadersFromRequest(ResponseInterface $response): string
     {

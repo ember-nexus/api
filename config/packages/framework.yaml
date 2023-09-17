@@ -3,6 +3,7 @@ framework:
   secret: '%env(APP_SECRET)%'
   http_method_override: false
   handle_all_throwables: true
+  disallow_search_engine_index: false
 
   php_errors:
     log: true

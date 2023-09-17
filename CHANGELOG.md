@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add 'Example Generation Test' to CI.
 - Enable phpstan rule for enforcing [safe functions](https://github.com/thecodingmachine/safe), closes #55.
 - Add PHP Mess Detector, closes #114.
+- Set configuration framework.disallow_search_engine_index explicitly to false to disable the HTTP tag X-Robots-Tag,
+  closes #123.
 
 ## 0.0.28 - 2023-09-14
 ### Added
