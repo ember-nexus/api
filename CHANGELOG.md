@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add PHP Mess Detector, closes #114.
 - Set configuration framework.disallow_search_engine_index explicitly to false to disable the HTTP tag X-Robots-Tag,
   closes #123.
+### Changed
+- NGINX Unit strips all cookie headers from responses, closes #124.
 
 ## 0.0.28 - 2023-09-14
 ### Added
