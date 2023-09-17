@@ -5,18 +5,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.29 - 2023-09-17
 ### Added
-- Add new type of feature tests which check that the examples in the documentation are up-to-date, closes #116.
+- Add new type of feature tests which check that the examples in the documentation are up-to-date, closes [#116].
 - Add WebDAV HTTP methods to the allowed HTTP method lists.
 - Add 'Example Generation Test' to CI.
-- Enable phpstan rule for enforcing [safe functions](https://github.com/thecodingmachine/safe), closes #55.
-- Add PHP Mess Detector, closes #114.
+- Enable phpstan rule for enforcing [safe functions](https://github.com/thecodingmachine/safe), closes [#55].
+- Add PHP Mess Detector, closes [#114].
 - Set configuration framework.disallow_search_engine_index explicitly to false to disable the HTTP tag X-Robots-Tag,
-  closes #123.
+  closes [#123].
+
 ### Changed
-- NGINX Unit strips all cookie headers from responses, closes #124.
+- NGINX Unit strips all cookie headers from responses, closes [#124].
+
 ### Fixed
-- Software version is now correctly set in final Docker images, fixes #115.
+- Software version is now correctly set in final Docker images, fixes [#115].
 
 ## 0.0.28 - 2023-09-14
 ### Added
