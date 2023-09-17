@@ -13,6 +13,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 
+use function Safe\preg_replace;
+
 class EmberNexusStyle extends SymfonyStyle
 {
     private int $lineLength = 120;
@@ -55,6 +57,9 @@ class EmberNexusStyle extends SymfonyStyle
         $envVersion = getenv('VERSION');
         if (is_string($envVersion)) {
             if ($envVersion) {
+                /**
+                 * @psalm-suppress PossiblyInvalidOperand
+                 */
                 $versionString = 'v'.preg_replace('/[^0-9.]/', '', $envVersion);
             }
         }

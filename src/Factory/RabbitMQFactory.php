@@ -5,6 +5,8 @@ namespace App\Factory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
+use function Safe\parse_url;
+
 class RabbitMQFactory
 {
     public function __construct(

@@ -4,7 +4,7 @@ namespace App\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPreCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
-use DateTime;
+use Safe\DateTime;
 
 class CreatedElementPreWriteEventListener
 {

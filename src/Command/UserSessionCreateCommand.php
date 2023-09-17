@@ -16,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\OutputStyle;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+use function Safe\preg_match;
+
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
