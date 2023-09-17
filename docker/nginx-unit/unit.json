@@ -29,6 +29,9 @@
                 "share": "/var/www/html/public$uri",
                 "fallback": {
                     "pass": "applications/symfony/index"
+                },
+                "response_headers": {
+                    "Set-Cookie": null
                 }
             }
         }
