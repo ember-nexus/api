@@ -4,6 +4,10 @@ namespace EmberNexusBundle\Service;
 
 use Exception;
 
+/**
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
+ */
 class EmberNexusConfiguration
 {
     public const PAGE_SIZE = 'pageSize';
@@ -42,7 +46,7 @@ class EmberNexusConfiguration
     private static function getValueFromConfig(array $configuration, array $keyParts): mixed
     {
         $currentKeyParts = [];
-        foreach ($keyParts as $i => $keyPart) {
+        foreach ($keyParts as $keyPart) {
             $currentKeyParts[] = $keyPart;
             if (!array_key_exists($keyPart, $configuration)) {
                 throw new Exception(sprintf("Configuration must contain key '%s'.", implode('.', $currentKeyParts)));

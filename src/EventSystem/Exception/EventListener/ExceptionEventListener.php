@@ -23,6 +23,8 @@ class ExceptionEventListener
 
     /**
      * @psalm-suppress UndefinedInterfaceMethod
+     *
+     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
      */
     public function onKernelException(ExceptionEvent $event): void
     {

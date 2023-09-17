@@ -19,6 +19,9 @@ class TestCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $dataUuid = UuidV4::fromString('3a3c2f8b-d1bd-40fd-b381-82de60539c9f');
