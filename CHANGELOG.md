@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.0.30 - 2023-09-20
+
 ## 0.0.29 - 2023-09-17
 ### Added
 - Add new type of feature tests which check that the examples in the documentation are up-to-date, closes [#116].
