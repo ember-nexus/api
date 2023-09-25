@@ -174,7 +174,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer mess"
 
   test-feature:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     name: 'Feature Test'
     needs:
       - test-unit
@@ -214,7 +214,7 @@ jobs:
           docker exec ember-nexus-api bash -c "composer install --quiet && composer test:feature"
 
   test-example-generation:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     name: 'Example Generation Test'
     needs:
       - test-unit
