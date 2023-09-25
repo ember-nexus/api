@@ -349,6 +349,9 @@ COPY --from=production-build / /
 
 STOPSIGNAL SIGTERM
 
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD php bin/console healthcheck
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 WORKDIR /var/www/html
@@ -361,3 +364,6 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-he
     && docker-php-ext-enable xdebug memprof \
     && apk del --no-network .build-deps \
     && apk add --no-cache judy
+
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD php bin/console healthcheck

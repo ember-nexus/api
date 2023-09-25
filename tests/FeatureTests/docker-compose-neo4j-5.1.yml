@@ -19,7 +19,7 @@ services:
 
   ember-nexus-mongodb:
     container_name: ember-nexus-mongodb
-    image: mongo:6
+    image: mongo:7
     expose:
       - "27017"
     environment:
