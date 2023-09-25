@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Upgrade MongoDB version from 6.x to 7.x in Docker Compose examples.
+- Move `guzzlehttp/guzzle` to production dependency, as it is required by healthcheck.
+### Added
+- Add healthcheck command.
+- Add healthcheck command in Docker image, closes #106.
 
 ## 0.0.30 - 2023-09-20
 
