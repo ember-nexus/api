@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade MongoDB version from 6.x to 7.x in Docker Compose examples.
 - Move `guzzlehttp/guzzle` to production dependency, as it is required by healthcheck.
 - Change test CI runner of feature test jobs to ubuntu-latest in order to reduce CI cost.
+- Feature test CI is back to using 4 vCPUs, although one of the 4 test scenarios is removed to save costs.
 ### Added
 - Add healthcheck command.
 - Add healthcheck command in Docker image, closes #106.
