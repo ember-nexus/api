@@ -4,9 +4,6 @@ namespace App\tests\FeatureTests\Endpoint\User;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-/**
- * @group test
- */
 class PostTokenTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:3tgEP9MhD81rkp3qiJcm1U';

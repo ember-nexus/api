@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add healthcheck command.
 - Add healthcheck command in Docker image, closes #106.
+- Add feature test to test that tokens not owned by any user are invalid, closes #118.
+- Add feature test to test that tokens owned by two or more users are invalid as well, closes #118.
 
 ## 0.0.30 - 2023-09-20
 
