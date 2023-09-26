@@ -5,16 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.31 - 2023-09-26
+### Added
+- Add healthcheck command.
+- Add healthcheck command in Docker image, closes [#106].
+- Add feature test to test that tokens not owned by any user are invalid, closes [#118].
+- Add feature test to test that tokens owned by two or more users are invalid as well, closes [#118].
+
 ### Changed
 - Upgrade MongoDB version from 6.x to 7.x in Docker Compose examples.
 - Move `guzzlehttp/guzzle` to production dependency, as it is required by healthcheck.
 - Change test CI runner of feature test jobs to ubuntu-latest in order to reduce CI cost.
 - Feature test CI is back to using 4 vCPUs, although one of the 4 test scenarios is removed to save costs.
-### Added
-- Add healthcheck command.
-- Add healthcheck command in Docker image, closes #106.
-- Add feature test to test that tokens not owned by any user are invalid, closes #118.
-- Add feature test to test that tokens owned by two or more users are invalid as well, closes #118.
 
 ## 0.0.30 - 2023-09-20
 
