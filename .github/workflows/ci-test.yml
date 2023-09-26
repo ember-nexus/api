@@ -174,7 +174,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer mess"
 
   test-feature:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: buildjet-4vcpu-ubuntu-2204
     name: 'Feature Test'
     needs:
       - test-unit
@@ -188,7 +188,6 @@ jobs:
       matrix:
         dockerCompose:
           - "neo4j-5.1"
-          - "neo4j-5.10"
           - "neo4j-5.11"
           - "neo4j-5.12"
     steps:

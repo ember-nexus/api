@@ -57,7 +57,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         $hashedToken = $this->tokenGenerator->hashToken($token);
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                'MATCH (user:User)-[:OWNS]->(token:Token {hash: $hash}) RETURN user.id, token.id LIMIT 1',
+                'MATCH (user:User)-[:OWNS]->(token:Token {hash: $hash}) RETURN user.id, token.id',
                 [
                     'hash' => $hashedToken,
                 ]
@@ -65,6 +65,10 @@ class ApiKeyCheckOnKernelRequestEventListener
         );
 
         if (0 === count($res)) {
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
+        }
+
+        if (count($res) > 1) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 

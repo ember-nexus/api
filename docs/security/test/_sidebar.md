@@ -33,3 +33,5 @@
     - [`99-02` Owning groups give direct access but not to related groups](/security/test/99-edge-cases/99-02-owning-groups-give-direct-access-but-not-to-related-groups)
     - [`99-03` Users which are part of a group, should have read access to the group itself](/security/test/99-edge-cases/99-03-users-which-are-part-of-group-should-have-read-access-to-the-group-itself)
     - [`99-04` Users should have access to direct ownership relations](/security/test/99-edge-cases/99-04-users-should-have-access-to-direct-ownership-relations)
+    - [`99-05` Token with no owner](/security/test/99-edge-cases/99-05-token-with-no-owner)
+    - [`99-06` Token with two owners](/security/test/99-edge-cases/99-06-token-with-two-owners)
