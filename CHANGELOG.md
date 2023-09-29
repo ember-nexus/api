@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Increase reference dataset version to 0.0.11, skipped 0.0.10.
 - Change default anonymous user to `2d376349-c5e2-42c8-8ce0-d6f525256cf7`.
+- Upgrade PHP to 8.2.11.
 ### Removed
 - Test command, closes #138.
 ### Fixed
