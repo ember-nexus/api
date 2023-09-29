@@ -20,8 +20,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+/**
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
+ */
 class PostChangePasswordController extends AbstractController
 {
+    /**
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     */
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
