@@ -93,6 +93,9 @@ class BackupLoadCommand extends Command
             if (!$nodeFile->isFile()) {
                 continue;
             }
+            if (!str_ends_with($nodeFile->path(), '.json')) {
+                continue;
+            }
             $data = \Safe\json_decode($this->backupStorage->read($nodeFile->path()), true);
             $nodeElement = $this->rawToElementService->rawToElement($data);
             unset($data);
@@ -125,6 +128,9 @@ class BackupLoadCommand extends Command
         $pageCount = 0;
         foreach ($relationFiles as $relationFile) {
             if (!$relationFile->isFile()) {
+                continue;
+            }
+            if (!str_ends_with($relationFile->path(), '.json')) {
                 continue;
             }
             $data = \Safe\json_decode($this->backupStorage->read($relationFile->path()), true);

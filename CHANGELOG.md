@@ -5,8 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add POST /change-password endpoint, including tests and documentation. Closes #121.
+### Changed
+- Increase reference dataset version to 0.0.10.
 ### Removed
 - Test command, closes #138.
+### Fixed
+- Backup will only load JSON files, before that every file was tried to be loaded.
 
 ## 0.0.31 - 2023-09-26
 ### Added
@@ -14,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add healthcheck command in Docker image, closes [#106].
 - Add feature test to test that tokens not owned by any user are invalid, closes [#118].
 - Add feature test to test that tokens owned by two or more users are invalid as well, closes [#118].
+### Changed
+- Increase reference dataset version to 0.0.9.
 
 ### Changed
 - Upgrade MongoDB version from 6.x to 7.x in Docker Compose examples.
