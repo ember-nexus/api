@@ -50,6 +50,13 @@ class PostChangePasswordController extends AbstractController
             $data = $body['data'];
         }
 
+        if (!array_key_exists('type', $body)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
+        }
+        if ('ActionChangePassword' !== $body['type']) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'ActionChangePassword', $body['type']);
+        }
+
         if (!array_key_exists('currentPassword', $body)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('currentPassword', 'string');
         }
@@ -59,13 +66,6 @@ class PostChangePasswordController extends AbstractController
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('newPassword', 'string');
         }
         $newPassword = $body['newPassword'];
-
-        if (!array_key_exists('type', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
-        }
-        if ('ActionChangePassword' !== $body['type']) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'ActionChangePassword', $body['type']);
-        }
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         if (!array_key_exists($uniqueIdentifier, $data)) {

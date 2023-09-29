@@ -51,7 +51,7 @@ curl \
 
 ### **🟢 Success 204**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-change-password/204-response-header.txt ':include :type=code')
 
@@ -60,31 +60,31 @@ new password.
 
 ### **🔴 Error 400**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-change-password/400-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-change-password/400-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 401**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-change-password/401-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-change-password/401-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 403**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-change-password/403-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-change-password/403-response-body.json ':include :type=code problem+json')
 
@@ -106,7 +106,7 @@ new password.
 
 Once the server receives such a request, it checks several things internally:
 
-<div id="graph-container-1" class="graph-container" style="height:1200px"></div>
+<div id="graph-container-1" class="graph-container" style="height:1400px"></div>
 
 <!-- panels:end -->
 
@@ -157,32 +157,42 @@ G6.registerEdge('polyline-edge', {
 renderWorkflow(document.getElementById('graph-container-1'), {
   nodes: [
     { id: 'init', ...workflowStart, label: 'server receives POST-request' },
-    { id: 'checkEndpointEnabled', ...workflowDecision, label: 'is endpoint enabled?' },
-    { id: 'checkPassword', ...workflowDecision, label: 'is password given?' },
     { id: 'checkType', ...workflowDecision, label: 'is type given?' },
-    { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal to "User"?' },
-    { id: 'checkIdentifier', ...workflowDecision, label: "is identifier given?" },
-    { id: 'checkIdentifierUnique', ...workflowDecision, label: 'is identifier unique?' },
-    { id: 'createUser', ...workflowStep, label: "create user" },
+    { id: 'checkTypeContent', ...workflowDecision, label: "is type equal to\n\"ActionChangePassword\"?" },
+    { id: 'checkCurrentPassword', ...workflowDecision, label: "is currentPassword given?" },
+    { id: 'checkNewPassword', ...workflowDecision, label: 'is newPassword given?' },
+    { id: 'checkUniqueIdentifier', ...workflowDecision, label: 'is unique identifier given?' },
+    { id: 'checkNewPasswordDifferentToCurrentPassword', ...workflowDecision, label: "is new password different\nto old password?" },
+    { id: 'checkUser', ...workflowDecision, label: 'does user exist?' },
+    { id: 'checkAnonymousUser', ...workflowDecision, label: 'is anonymous user?' },
+    { id: 'checkCurrentPasswordMatch', ...workflowDecision, label: 'does current password match?' },
+    { id: 'changePassword', ...workflowStep, label: "change password" },
     { id: 'error400', ...workflowEndError, label: "return 400" },
+    { id: 'error401', ...workflowEndError, label: "return 401" },
     { id: 'error403', ...workflowEndError, label: 'return 403' },
-    { id: 'success201', ...workflowEndSuccess , label: "return 201"},
+    { id: 'success204', ...workflowEndSuccess , label: "return 204"},
   ],
   edges: [
-    { source: 'init', target: 'checkEndpointEnabled', label: '' },
-    { source: 'checkEndpointEnabled', target: 'checkPassword', label: 'yes' },
-    { source: 'checkEndpointEnabled', target: 'error403', label: 'no' },
-    { source: 'checkPassword', target: 'checkType', label: 'yes' },
-    { source: 'checkPassword', target: 'error400', label: 'no' },
+    { source: 'init', target: 'checkType', label: '' },
     { source: 'checkType', target: 'checkTypeContent', label: 'yes' },
     { source: 'checkType', target: 'error400', label: 'no' },
-    { source: 'checkTypeContent', target: 'checkIdentifier', label: 'yes' },
+    { source: 'checkTypeContent', target: 'checkCurrentPassword', label: 'yes' },
     { source: 'checkTypeContent', target: 'error400', label: 'no' },
-    { source: 'checkIdentifier', target: 'checkIdentifierUnique', label: 'yes' },
-    { source: 'checkIdentifier', target: 'error400', label: 'no' },
-    { source: 'checkIdentifierUnique', target: 'createUser', label: 'yes' },
-    { source: 'checkIdentifierUnique', target: 'error400', label: 'no' },
-    { source: 'createUser', target: 'success201', label: '' },
+    { source: 'checkCurrentPassword', target: 'checkNewPassword', label: 'yes' },
+    { source: 'checkCurrentPassword', target: 'error400', label: 'no' },
+    { source: 'checkNewPassword', target: 'checkUniqueIdentifier', label: 'yes' },
+    { source: 'checkNewPassword', target: 'error400', label: 'no' },
+    { source: 'checkUniqueIdentifier', target: 'checkNewPasswordDifferentToCurrentPassword', label: 'yes' },
+    { source: 'checkUniqueIdentifier', target: 'error400', label: 'no' },
+    { source: 'checkNewPasswordDifferentToCurrentPassword', target: 'checkUser', label: 'yes' },
+    { source: 'checkNewPasswordDifferentToCurrentPassword', target: 'error400', label: 'no' },
+    { source: 'checkUser', target: 'checkAnonymousUser', label: 'yes' },
+    { source: 'checkUser', target: 'error401', label: 'no' },
+    { source: 'checkAnonymousUser', target: 'checkCurrentPasswordMatch', label: 'no' },
+    { source: 'checkAnonymousUser', target: 'error403', label: 'yes' },
+    { source: 'checkCurrentPasswordMatch', target: 'changePassword', label: 'yes' },
+    { source: 'checkCurrentPasswordMatch', target: 'error401', label: 'no' },
+    { source: 'changePassword', target: 'success204', label: '' },
   ],
 }, 'TB');
 </script>

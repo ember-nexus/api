@@ -1,6 +1,6 @@
 {
-  "type": "400-bad-request",
-  "title": "Bad Request",
+  "type": "http://ember-nexus-api/error/400/bad-content",
+  "title": "Bad content",
   "status": 400,
-  "detail": "Property 'user' must be set."
+  "detail": "Endpoint expects property 'type' to be ActionChangePassword, got 'NotActionChangePassword'."
 }

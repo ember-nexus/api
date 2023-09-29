@@ -1,6 +1,5 @@
 {
-  "type": "401-unauthorized",
-  "title": "Request does not contain valid token, or anonymous user is disabled.",
-  "status": 401,
-  "detail": ""
+  "type": "http://ember-nexus-api/error/403/forbidden",
+  "title": "Requested endpoint, element or action is forbidden.",
+  "status": 403
 }

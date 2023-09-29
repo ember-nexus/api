@@ -1,6 +1,5 @@
 {
-  "type": "401-unauthorized",
+  "type": "http://ember-nexus-api/error/401/unauthorized",
   "title": "Request does not contain valid token, or anonymous user is disabled.",
-  "status": 401,
-  "detail": ""
+  "status": 401
 }
