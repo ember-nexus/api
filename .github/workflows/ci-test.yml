@@ -26,6 +26,7 @@ jobs:
   build-docker-image:
     runs-on: buildjet-4vcpu-ubuntu-2204
     name: 'Build Docker Image'
+    timeout-minutes: 20
     needs:
       - yml-lint
       - markdown-lint
@@ -176,6 +177,7 @@ jobs:
   test-feature:
     runs-on: buildjet-4vcpu-ubuntu-2204
     name: 'Feature Test'
+    timeout-minutes: 10
     needs:
       - test-unit
       - phpstan
@@ -215,6 +217,7 @@ jobs:
   test-example-generation:
     runs-on: buildjet-2vcpu-ubuntu-2204
     name: 'Example Generation Test'
+    timeout-minutes: 10
     needs:
       - test-unit
       - phpstan

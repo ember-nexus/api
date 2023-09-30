@@ -7,10 +7,6 @@ use App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent;
 
 class TokenElementPropertyReturnEventListener
 {
-    public function __construct()
-    {
-    }
-
     public function onElementPropertyReturnEvent(ElementPropertyReturnEvent $event): void
     {
         $element = $event->getElement();
