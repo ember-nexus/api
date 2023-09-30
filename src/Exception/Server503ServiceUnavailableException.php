@@ -8,7 +8,7 @@ class Server503ServiceUnavailableException extends ProblemJsonException
 {
     public function __construct(
         string $type,
-        string $title = 'Internal server error',
+        string $title = 'Service unavailable',
         int $status = 503,
         string $detail = '',
         string $instance = null,

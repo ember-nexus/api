@@ -8,9 +8,9 @@ class Client404NotFoundException extends ProblemJsonException
 {
     public function __construct(
         string $type,
-        string $title = 'Requested element was not found.',
+        string $title = 'Not found',
         int $status = 404,
-        string $detail = '',
+        string $detail = 'Requested element was not found.',
         string $instance = null,
         Throwable $previous = null
     ) {
