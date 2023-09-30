@@ -5,13 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add diverse unit tests.
+- Add timeout to some GitHub Action jobs.
 
 ## 0.0.32 - 2023-09-30
 ### Added
 - Add POST /change-password endpoint, including tests and documentation. Closes [#121].
-- Add POST /change-password endpoint, including tests and documentation. Closes #121.
-- Add diverse unit tests.
-- Add timeout to some GitHub Action jobs.
 
 ### Changed
 - Increase reference dataset version to 0.0.11, skipped 0.0.10.
