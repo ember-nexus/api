@@ -5,14 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.32 - 2023-09-30
 ### Added
-- Add POST /change-password endpoint, including tests and documentation. Closes #121.
+- Add POST /change-password endpoint, including tests and documentation. Closes [#121].
+
 ### Changed
 - Increase reference dataset version to 0.0.11, skipped 0.0.10.
 - Change default anonymous user to `2d376349-c5e2-42c8-8ce0-d6f525256cf7`.
 - Upgrade PHP to 8.2.11.
+
 ### Removed
-- Test command, closes #138.
+- Test command, closes [#138].
+
 ### Fixed
 - Backup will only load JSON files, before that every file was tried to be loaded.
 
@@ -22,10 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add healthcheck command in Docker image, closes [#106].
 - Add feature test to test that tokens not owned by any user are invalid, closes [#118].
 - Add feature test to test that tokens owned by two or more users are invalid as well, closes [#118].
-### Changed
-- Increase reference dataset version to 0.0.9.
 
 ### Changed
+- Increase reference dataset version to 0.0.9.
 - Upgrade MongoDB version from 6.x to 7.x in Docker Compose examples.
 - Move `guzzlehttp/guzzle` to production dependency, as it is required by healthcheck.
 - Change test CI runner of feature test jobs to ubuntu-latest in order to reduce CI cost.
