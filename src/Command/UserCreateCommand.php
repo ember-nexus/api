@@ -6,6 +6,7 @@ use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
 use App\Type\NodeElement;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,14 +28,22 @@ class UserCreateCommand extends Command
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
-        private UserPasswordHasher $userPasswordHasher
+        private UserPasswordHasher $userPasswordHasher,
+        private EmberNexusConfiguration $emberNexusConfiguration
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
-        $this->addArgument('username', InputArgument::REQUIRED, 'Name of the user, must be unique');
+        $this->addArgument(
+            'identifier',
+            InputArgument::REQUIRED,
+            sprintf(
+                'Identifier of the user, %s, must be unique',
+                $this->emberNexusConfiguration->getRegisterUniqueIdentifier()
+            )
+        );
         // TODO: Make plaintext password insert optional, direct insert from console would be better
         $this->addArgument('password', InputArgument::REQUIRED, 'Password of the user');
     }
@@ -43,22 +52,27 @@ class UserCreateCommand extends Command
     {
         $this->io = new EmberNexusStyle($input, $output);
 
-        $username = $input->getArgument('username');
+        $this->io->title('User Create');
 
-        // check if username already exists
+        $identifier = $input->getArgument('identifier');
 
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                'MATCH (user:User {username: $username}) RETURN user',
+                sprintf(
+                    'MATCH (user:User {%s: $uniqueIdentifierValue}) RETURN user',
+                    $this->emberNexusConfiguration->getRegisterUniqueIdentifier()
+                ),
                 [
-                    'username' => $username,
+                    'uniqueIdentifierValue' => $identifier,
                 ]
             )
         );
         if ($res->count() > 0) {
-            $this->io->writeln(sprintf(
-                "Unable to create new user with username '%s', because username is already in use.",
-                $username
+            $this->io->finalMessage(sprintf(
+                "Unable to create new user with %s '%s', because %s is already in use.",
+                $this->emberNexusConfiguration->getRegisterUniqueIdentifier(),
+                $identifier,
+                $this->emberNexusConfiguration->getRegisterUniqueIdentifier()
             ));
 
             return self::FAILURE;
@@ -69,7 +83,7 @@ class UserCreateCommand extends Command
         $userNode = (new NodeElement())
             ->setLabel('User')
             ->addProperties([
-                'username' => $username,
+                $this->emberNexusConfiguration->getRegisterUniqueIdentifier() => $identifier,
                 '_passwordHash' => $this->userPasswordHasher->hashPassword($input->getArgument('password')),
             ])
             ->setIdentifier($userId);
@@ -78,9 +92,10 @@ class UserCreateCommand extends Command
             ->create($userNode)
             ->flush();
 
-        $this->io->writeln(sprintf(
-            "Created user '%s' successfully, UUID is %s",
-            $username,
+        $this->io->finalMessage(sprintf(
+            "Created user with %s '%s' successfully, UUID is %s",
+            $this->emberNexusConfiguration->getRegisterUniqueIdentifier(),
+            $identifier,
             $userId->toString()
         ));
 

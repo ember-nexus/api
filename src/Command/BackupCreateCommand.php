@@ -92,7 +92,7 @@ class BackupCreateCommand extends Command
         $this->backupFiles();
         $this->writeSummary();
 
-        $this->io->success('Backup finished successfully.');
+        $this->io->finalMessage('Backup finished successfully.');
 
         return Command::SUCCESS;
     }

@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap')
+
+/* required in order to load Fira Code instantly */
+{}
+
+:root {
+  --ember-nexus-background-lightest: #ffffff;
+  --ember-nexus-background-lighter: #f6f5f4;
+  --ember-nexus-background-light: #deddda;
+  --ember-nexus-text-red: #ff073a;
+  --ember-nexus-text-orange: #FFA726;
+  --ember-nexus-text-green: #4CAF50;
+  --ember-nexus-text-blue: #0074E4;
+  --ember-nexus-text-purple: #7E57C2;
+
+  /*--ember-nexus-cli-yellow: #C4A000;*/
+  /*--ember-nexus-cli-green: #4E9A06;*/
+  /*--ember-nexus-cli-red: #CC0000;*/
+
+  --ember-nexus-cli-yellow: #FCE94F;
+  --ember-nexus-cli-green: #8AE234;
+  --ember-nexus-cli-red: #EF2929;
+}
+
+body {
+  background-color: #1a1a1a !important;
+  padding-left: 22.4px;
+  padding-right: 22.4px;
+  margin: 0;
+}
+
+pre {
+  font-family: 'Fira Mono', 'Roboto Mono', Monaco, courier, monospace !important;
+  line-height: 1.4;
+  font-size: 12.8px;
+  vertical-align: middle;
+}
+
+pre .yellow {
+  color: var(--ember-nexus-cli-yellow);
+}
+
+pre .green {
+  color: var(--ember-nexus-cli-green);
+}
+
+pre span {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}

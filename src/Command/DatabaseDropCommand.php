@@ -79,7 +79,7 @@ class DatabaseDropCommand extends Command
 
         $this->deleteRabbitMQ();
 
-        $this->io->success('Command ended successfully.');
+        $this->io->finalMessage('Command ended successfully.');
 
         return Command::SUCCESS;
     }

@@ -148,6 +148,7 @@ table {
 }
 
 .code-title {
+  margin-top: 1.2em;
   margin-bottom: -1.2em;
   background-color: var(--ember-nexus-background-light);
   padding: 0.5rem 1.4rem;
@@ -170,4 +171,8 @@ pre + .code-title {
 
 .markdown-section pre > code {
   padding: 2.2em 0;
+}
+
+pre + iframe {
+  margin-top: -1.2em !important;
 }

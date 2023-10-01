@@ -242,8 +242,8 @@ jobs:
         run: |
           chmod 777 test-feature-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker compose -f ./tests/ExampleGeneration/docker-compose.yml up --quiet-pull -d
+          docker compose -f ./tests/ExampleGenerationController/docker-compose.yml up --quiet-pull -d
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api bash -c "composer install --quiet && composer test:example-generation"
+          docker exec ember-nexus-api bash -c "composer install --quiet && composer test:example-generation-controller"

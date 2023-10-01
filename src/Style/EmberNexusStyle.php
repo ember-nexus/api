@@ -65,9 +65,9 @@ class EmberNexusStyle extends SymfonyStyle
         }
         $this->newLine();
         $this->writeln(sprintf(
-            "    <fg=magenta>▄</>   \n".
-            "  <fg=magenta>▄<fg=magenta;bg=bright-red>▀ ▀</>▄</>  <options=bold>Ember Nexus API</>\n".
-            "   <fg=bright-red>▀<fg=bright-yellow>█</>▀</>   %s, %s mode\n".
+            "    <fg=gray>▄</>   \n".
+            "  <fg=gray>▄<fg=gray;bg=bright-red>▀ ▀</>▄</>  <options=bold>Ember Nexus API</>\n".
+            "   <fg=bright-red>▀<fg=bright-white>█</>▀</>   %s, %s mode\n".
             "\n".
             "  <options=bold>%s</>\n",
             $versionString,
@@ -77,7 +77,7 @@ class EmberNexusStyle extends SymfonyStyle
     }
 
     /** @phpstan-ignore-next-line */
-    public function success(array|string $message): void
+    public function finalMessage(array|string $message): void
     {
         if ($this->isInSection) {
             /*

@@ -51,7 +51,7 @@ Both log messages and exceptions should adhere to a few key principles:
 Log messages should be created in the following scenarios:
 
 - Important events in the lifetime of the API should be documented. This includes startup, shutdown, and backups.
-- Security events like creating or updating users, tokens, and sessions should always be logged. If possible, use the
+- Security events like creating or updating users and tokens should always be logged. If possible, use the
   user's unique identifier for context.
 - Administrative actions should be fully logged:
   - Interactions with the command line.
