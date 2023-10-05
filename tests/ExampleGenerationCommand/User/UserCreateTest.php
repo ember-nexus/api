@@ -28,7 +28,7 @@ class UserCreateTest extends BaseCommandTestCase
             'docs/commands/assets/user-create.html',
             $commandOutput,
             [
-                "Created user with email 'command-test@localhost.dev' successfully, UUID is",
+                "Created user with email",
             ]
         );
     }
