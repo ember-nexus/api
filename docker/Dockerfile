@@ -363,7 +363,7 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-he
     && pecl install xdebug-3.2.1 memprof \
     && docker-php-ext-enable xdebug memprof \
     && apk del --no-network .build-deps \
-    && apk add --no-cache judy aha git
+    && apk add --no-cache judy aha git ssh
 
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD php bin/console healthcheck

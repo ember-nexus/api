@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add timeout to some GitHub Action jobs.
 - Command examples are now automatically checked.
 - More commands are documented.
-- Add git to development Docker image.
+- Add git and ssh to development Docker image.
 ### Changed
 - Renamed term "session" to "token", closes #145.
 
