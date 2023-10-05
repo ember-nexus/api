@@ -67,7 +67,7 @@ jobs:
       - name: CS Lint
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer cs:list"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh "composer install --quiet && composer cs:list"
 
   psalm:
     runs-on: ubuntu-latest
@@ -84,7 +84,7 @@ jobs:
       - name: Psalm
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer psalm"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh "composer install --quiet && composer psalm"
 
   phpstan:
     runs-on: ubuntu-latest
@@ -101,7 +101,7 @@ jobs:
       - name: Phpstan
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer phpstan"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh "composer install --quiet && composer phpstan"
 
   test-unit:
     runs-on: ubuntu-latest
@@ -118,7 +118,7 @@ jobs:
       - name: Unit Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:unit"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh "composer install --quiet && composer test:unit"
 
   test-mutant:
     runs-on: ubuntu-latest
@@ -136,7 +136,7 @@ jobs:
       - name: Mutant Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:mutant"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh "composer install --quiet && composer test:mutant"
 
   test-leak:
     runs-on: ubuntu-latest
@@ -154,7 +154,7 @@ jobs:
       - name: Leak Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer test:leak"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh "composer install --quiet && composer test:leak"
 
   test-mess-detector:
     runs-on: ubuntu-latest
@@ -172,7 +172,7 @@ jobs:
       - name: Mess Detector
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --quiet && composer mess"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh "composer install --quiet && composer mess"
 
   test-feature:
     runs-on: buildjet-4vcpu-ubuntu-2204
@@ -212,7 +212,7 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api bash -c "composer install --quiet && composer test:feature"
+          docker exec ember-nexus-api bash "composer install --quiet && composer test:feature"
 
   test-example-generation-controller:
     runs-on: buildjet-2vcpu-ubuntu-2204
@@ -240,13 +240,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Controller Example Generation Test
         run: |
-          chmod 777 test-feature-prepare
+          chmod 777 test-feature-command-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker compose -f ./tests/ExampleGenerationController/docker-compose.yml up --quiet-pull -d
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api bash -c "composer install --quiet && composer test:example-generation-controller"
+          docker exec ember-nexus-api bash "composer install --quiet && composer test:example-generation-controller"
 
 
   test-example-generation-command:
@@ -281,4 +281,4 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api bash -c "composer install --quiet && BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"
+          docker exec ember-nexus-api bash "composer install --quiet && BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"
