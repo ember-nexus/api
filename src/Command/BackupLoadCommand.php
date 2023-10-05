@@ -78,6 +78,8 @@ class BackupLoadCommand extends Command
         $this->loadFiles();
         $this->afterBackupTasks();
 
+        $this->io->finalMessage('Backup successfully loaded.');
+
         return Command::SUCCESS;
     }
 
@@ -113,7 +115,7 @@ class BackupLoadCommand extends Command
         $progressBar->clear();
         $totalCount += $pageCount;
         $this->io->stopSection(sprintf(
-            'Loaded %d nodes.',
+            'Loaded <info>%d</info> nodes.',
             $totalCount
         ));
     }
@@ -150,7 +152,7 @@ class BackupLoadCommand extends Command
         $progressBar->clear();
         $totalCount += $pageCount;
         $this->io->stopSection(sprintf(
-            'Loaded %d relations.',
+            'Loaded <info>%d</info> relations.',
             $totalCount
         ));
     }
@@ -160,7 +162,7 @@ class BackupLoadCommand extends Command
         $this->io->startSection('Step 3 of 4: Loading Files');
         $this->io->writeln('Currently not implemented.');
         $this->io->stopSection(sprintf(
-            'Loaded %d relations.',
+            'Loaded <info>%d</info> files.',
             0
         ));
     }

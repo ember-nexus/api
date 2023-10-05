@@ -92,7 +92,7 @@ class BackupCreateCommand extends Command
         $this->backupFiles();
         $this->writeSummary();
 
-        $this->io->success('Backup finished successfully.');
+        $this->io->finalMessage('Backup finished successfully.');
 
         return Command::SUCCESS;
     }
@@ -119,7 +119,7 @@ class BackupCreateCommand extends Command
     {
         $this->io->startSection('Step 1 of 3: Backing up Nodes');
         $this->io->writeln(sprintf(
-            'Found %d nodes.',
+            'Found <info>%d</info> nodes.',
             $this->nodeCount
         ));
         $progressBar = $this->io->createProgressBar($this->nodeCount);
@@ -161,7 +161,7 @@ class BackupCreateCommand extends Command
         }
         $progressBar->clear();
         $this->io->stopSection(sprintf(
-            'Successfully backed up %d nodes.',
+            'Successfully backed up <info>%d</info> nodes.',
             $this->nodeCount
         ));
     }
@@ -170,7 +170,7 @@ class BackupCreateCommand extends Command
     {
         $this->io->startSection('Step 2 of 3: Backing up Relations');
         $this->io->writeln(sprintf(
-            'Found %d relations.',
+            'Found <info>%d</info> relations.',
             $this->relationCount
         ));
         $progressBar = $this->io->createProgressBar($this->relationCount);
@@ -212,7 +212,7 @@ class BackupCreateCommand extends Command
         }
         $progressBar->clear();
         $this->io->stopSection(sprintf(
-            'Successfully backed up %d relations.',
+            'Successfully backed up <info>%d</info> relations.',
             $this->relationCount
         ));
     }
@@ -222,7 +222,7 @@ class BackupCreateCommand extends Command
         $this->io->startSection('Step 3 of 3: Backing up Files');
         $this->io->writeln('Currently not implemented.');
         $this->io->stopSection(sprintf(
-            'Successfully backed up %d files.',
+            'Successfully backed up <info>%d</info> files.',
             $this->fileCount
         ));
     }
@@ -277,13 +277,9 @@ class BackupCreateCommand extends Command
             throw new LogicException("Backup name can not be '..'");
         }
 
-        // todo remove comment block
-        //        if ($this->backupStorage->directoryExists($backupName)) {
-        //            throw new LogicException(sprintf(
-        //                "Backup with name %s already exists",
-        //                $backupName
-        //            ));
-        //        }
+        if ($this->backupStorage->directoryExists($backupName)) {
+            throw new LogicException(sprintf('Backup with name %s already exists', $backupName));
+        }
 
         return $backupName;
     }

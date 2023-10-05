@@ -103,7 +103,7 @@ class BackupFetchCommand extends Command
         unlink($tempFilePath);
         $this->io->stopSection('Cleanup complete.');
 
-        $this->io->success('Fetched backup successfully.');
+        $this->io->finalMessage('Fetched backup successfully.');
 
         return Command::SUCCESS;
     }

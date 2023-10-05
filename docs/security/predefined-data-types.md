@@ -20,7 +20,7 @@ Required properties:
 
 - `name`
 
-### `Session`
+### `Token`
 
 Required properties:
 

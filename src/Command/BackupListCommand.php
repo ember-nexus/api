@@ -76,7 +76,7 @@ class BackupListCommand extends Command
         $table->render();
         $this->io->newLine();
 
-        $this->io->success('Command finished successfully.');
+        $this->io->finalMessage('Command finished successfully.');
 
         return Command::SUCCESS;
     }

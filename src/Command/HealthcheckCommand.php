@@ -143,7 +143,7 @@ class HealthcheckCommand extends Command
 
         $this->io->stopSection('API is ok.');
 
-        $this->io->success('Status is ok.');
+        $this->io->finalMessage('Status is ok.');
 
         return Command::SUCCESS;
     }

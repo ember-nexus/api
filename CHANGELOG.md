@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add diverse unit tests.
 - Add timeout to some GitHub Action jobs.
+- Command examples are now automatically checked.
+- More commands are documented.
+- Add git and ssh to development Docker image.
+### Changed
+- Renamed term "session" to "token", closes #145.
 
 ## 0.0.32 - 2023-09-30
 ### Added

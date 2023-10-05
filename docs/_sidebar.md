@@ -9,7 +9,7 @@
   - [Ownership](/security/ownership)
   - [Access](/security/access)
   - [Workflow](/security/workflow)
-  - [Session and Rate Limiting](/security/session-and-rate-limiting)
+  - [Token and Rate Limiting](/security/token-and-rate-limiting)
   - [Predefined Data Types](/security/predefined-data-types)
   - [Passwords, Tokens and Hashing](/security/passwords-tokens-and-hashing)
   - [Security Tests](/security/test/general)
@@ -62,9 +62,16 @@
     - [<span class="method-get">GET</span>` /error/501/not-implemented`](/api-endpoints/error/get-501-not-implemented)
 
 - Commands
-  - [Backup Commands](/commands/backup)
-  - [Database Commands](/commands/database)
+  - **User Commands**
+    - [`user:create`](/commands/user/user-create)
+    - [`user:token:create`](/commands/user/user-token-create)
+  - **Backup Commands**
+    - [`backup:list`](/commands/backup/backup-list)
+    - [`backup:fetch`](/commands/backup/backup-fetch)
+    - [`backup:create`](/commands/backup/backup-create)
+    - [`backup:load`](/commands/backup/backup-load)
+  - **Database Commands**
+    - [`database:drop`](/commands/database/database-drop)
 - Development
   - [Long Term Plans](/development/long-term-plans)
   - [Best Practices](/development/best-practices)
-  - [Exceptions](/development/exceptions)
