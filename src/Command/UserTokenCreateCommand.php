@@ -135,7 +135,7 @@ class UserTokenCreateCommand extends Command
 
         $this->io->finalMessage(
             sprintf(
-                'Successfully created new token: <info>%s</info>',
+                'Successfully created new token: <info>%s</info> .',
                 $token
             )
         );

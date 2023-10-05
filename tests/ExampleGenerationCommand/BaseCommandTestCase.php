@@ -42,19 +42,17 @@ abstract class BaseCommandTestCase extends TestCase
         }
 
         if (array_key_exists('FIX_COMMAND_OUTPUT', $_ENV)) {
-            if ($filteredDocumentationCommandOutput !== $filteredCommandOutput) {
-                $this->addWarning(sprintf(
-                    'Automatically updated file %s.',
-                    $pathToDocumentationFile
-                ));
-                \Safe\file_put_contents(
-                    $pathToProjectRoot.$pathToDocumentationFile,
-                    $commandOutput
-                );
-                $this->assertTrue(true);
+            $this->addWarning(sprintf(
+                'Automatically updated file %s.',
+                $pathToDocumentationFile
+            ));
+            \Safe\file_put_contents(
+                $pathToProjectRoot.$pathToDocumentationFile,
+                $commandOutput
+            );
+            $this->assertTrue(true);
 
-                return;
-            }
+            return;
         }
 
         $this->assertSame(

@@ -8,7 +8,6 @@ php bin/console backup:create --help
 
 [](../assets/backup-create-help.html ':include :type=html')
 
-
 <div class="code-title auto-refresh">Example Command</div>
 
 ```bash

@@ -8,7 +8,6 @@ php bin/console backup:fetch --help
 
 [](../assets/backup-fetch-help.html ':include :type=html')
 
-
 <div class="code-title auto-refresh">Example Command</div>
 
 ```bash

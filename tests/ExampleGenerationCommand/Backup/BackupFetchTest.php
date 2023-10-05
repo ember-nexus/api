@@ -26,13 +26,16 @@ class BackupFetchTest extends BaseCommandTestCase
     public function testBackupFetch(): void
     {
         $commandOutput = $this->runCommand(sprintf(
-            'APP_ENV=prod VERSION=%s php bin/console backup:fetch --ansi reference-dataset-432 https://github.com/ember-nexus/reference-dataset/archive/refs/tags/0.0.12.zip | aha -s --black --css "./cli-style.css"',
+            'APP_ENV=prod VERSION=%s php bin/console backup:fetch --ansi reference-dataset https://github.com/ember-nexus/reference-dataset/archive/refs/tags/0.0.12.zip | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
             'docs/commands/assets/backup-fetch.html',
-            $commandOutput
+            $commandOutput,
+            [
+                ' [',
+            ]
         );
     }
 }

@@ -40,10 +40,10 @@ class EmberNexusStyle extends SymfonyStyle
             'ember-nexus-orange',
             new OutputFormatterStyle('#FA9640', '#D82739')
         );
-        $output->getFormatter()->setStyle(
-            'info',
-            new OutputFormatterStyle('#D82739')
-        );
+        //        $output->getFormatter()->setStyle(
+        //            'info',
+        //            new OutputFormatterStyle('#D82739')
+        //        );
         parent::__construct($input, $output);
     }
 

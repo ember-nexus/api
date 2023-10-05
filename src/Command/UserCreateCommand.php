@@ -93,7 +93,7 @@ class UserCreateCommand extends Command
             ->flush();
 
         $this->io->finalMessage(sprintf(
-            "Created user with %s '%s' successfully, UUID is %s",
+            "Created user with %s '<info>%s</info>' successfully, UUID is <info>%s</info>.",
             $this->emberNexusConfiguration->getRegisterUniqueIdentifier(),
             $identifier,
             $userId->toString()

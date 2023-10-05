@@ -8,7 +8,6 @@ php bin/console user:token:create --help
 
 [](../assets/user-token-create-help.html ':include :type=html')
 
-
 <div class="code-title auto-refresh">Example Command</div>
 
 ```bash

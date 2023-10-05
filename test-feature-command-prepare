@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+if [ -z "$BACKUP_FOLDER_CAN_BE_RESET" ]; then
+  echo "This type of test requires that the backup folder is reset, i.e. all contained backups are deleted."
+  echo "Set the ENV variable BACKUP_FOLDER_CAN_BE_RESET to an not empty value and run the test again if you are ok with that."
+  exit 2;
+fi
+
+php bin/console database:drop -f
+rm -rf ./var/backup/*

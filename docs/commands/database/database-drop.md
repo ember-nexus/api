@@ -8,7 +8,6 @@ php bin/console database:drop --help
 
 [](../assets/database-drop-help.html ':include :type=html')
 
-
 <div class="code-title auto-refresh">Example Command</div>
 
 ```bash
