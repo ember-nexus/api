@@ -18,6 +18,7 @@
   - **User Endpoints**
     - [<span class="method-post">POST</span>` /register -` Register New Account](/api-endpoints/user/post-register)
     - [<span class="method-post">POST</span>` /change-password -` Change Password](/api-endpoints/user/post-change-password)
+    - [<span class="method-get">GET</span>` /me -` Get Me](/api-endpoints/user/get-me)
     - [<span class="method-post">POST</span>` /token -` Create Token](/api-endpoints/user/post-token)
     - [<span class="method-get">GET</span>` /token -` Get Token](/api-endpoints/user/get-token)
     - [<span class="method-delete">DELETE</span>` /token -` Delete Token](/api-endpoints/user/delete-token)
