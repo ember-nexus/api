@@ -1,6 +1,6 @@
 {
-  "type": "400-bad-request",
-  "title": "Bad Request",
+  "type": "http://ember-nexus-api/error/400/missing-property",
+  "title": "Missing property",
   "status": 400,
-  "detail": "Property 'user' must be set."
+  "detail": "Endpoint requires that the request contains property 'password' to be set to string."
 }
