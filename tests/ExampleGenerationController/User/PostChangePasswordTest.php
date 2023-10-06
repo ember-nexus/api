@@ -18,7 +18,7 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
                 'data' => [
-                    'email' => 'user@changePassword.user.endpoint.localhost.de',
+                    'email' => 'user@changePassword.user.endpoint.localhost.dev',
                 ],
             ]
         );
@@ -41,7 +41,7 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
                 'data' => [
-                    'email' => 'user@changePassword.user.endpoint.localhost.de',
+                    'email' => 'user@changePassword.user.endpoint.localhost.dev',
                 ],
             ]
         );

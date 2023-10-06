@@ -14,7 +14,7 @@ class _E4_01_PatchNodeTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $data = $this->getBody($response)['data'];
-        $this->assertArrayHasKey('test', $data);
+        $this->assertArrayHasKey('scenario', $data);
         $this->assertArrayHasKey('name', $data);
         $this->assertArrayHasKey('created', $data);
         $this->assertArrayHasKey('updated', $data);
@@ -32,7 +32,7 @@ class _E4_01_PatchNodeTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $data = $this->getBody($response)['data'];
-        $this->assertArrayHasKey('test', $data);
+        $this->assertArrayHasKey('scenario', $data);
         $this->assertArrayHasKey('created', $data);
         $this->assertArrayHasKey('new-property', $data);
         $this->assertArrayHasKey('updated', $data);

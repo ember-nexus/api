@@ -14,7 +14,7 @@ class _E4_02_PatchRelationTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsRelationResponse($response, 'RELATION');
         $data = $this->getBody($response)['data'];
-        $this->assertArrayHasKey('test', $data);
+        $this->assertArrayHasKey('scenario', $data);
         $this->assertArrayHasKey('created', $data);
         $this->assertArrayHasKey('updated', $data);
         $this->assertArrayHasNoNullValues($data);
@@ -31,7 +31,7 @@ class _E4_02_PatchRelationTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsRelationResponse($response, 'RELATION');
         $data = $this->getBody($response)['data'];
-        $this->assertArrayHasKey('test', $data);
+        $this->assertArrayHasKey('scenario', $data);
         $this->assertArrayHasKey('created', $data);
         $this->assertArrayHasKey('new-property', $data);
         $this->assertArrayHasKey('updated', $data);

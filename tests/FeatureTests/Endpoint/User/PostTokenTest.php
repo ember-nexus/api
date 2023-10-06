@@ -7,7 +7,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 class PostTokenTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:3tgEP9MhD81rkp3qiJcm1U';
-    public const EMAIL = 'user@postToken.user.endpoint.localhost.de';
+    public const EMAIL = 'user@postToken.user.endpoint.localhost.dev';
     public const PASSWORD = '1234';
 
     public function testPostToken(): void
