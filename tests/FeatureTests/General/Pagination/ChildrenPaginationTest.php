@@ -23,10 +23,10 @@ class ChildrenPaginationTest extends BaseRequestTestCase
 
         $data = json_decode((string) $response->getBody(), true);
         $this->assertSame(62, $data['totalNodes']);
-        $this->assertSame('/', $data['links']['first']);
+        $this->assertSame('/1ab54e88-a9cc-481a-b371-8873ca56c51b/children', $data['links']['first']);
         $this->assertSame(null, $data['links']['previous']);
-        $this->assertSame('/?page=2', $data['links']['next']);
-        $this->assertSame('/?page=3', $data['links']['last']);
+        $this->assertSame('/1ab54e88-a9cc-481a-b371-8873ca56c51b/children?page=2', $data['links']['next']);
+        $this->assertSame('/1ab54e88-a9cc-481a-b371-8873ca56c51b/children?page=3', $data['links']['last']);
         $this->assertCount(25, $data['nodes']);
         $this->assertCount(25, $data['relations']);
     }
@@ -44,10 +44,10 @@ class ChildrenPaginationTest extends BaseRequestTestCase
 
         $data = json_decode((string) $response->getBody(), true);
         $this->assertSame(1, $data['totalNodes']);
-        $this->assertSame('/', $data['links']['first']);
+        $this->assertSame('/12ac1946-0efd-43b2-8e8f-fc73a2413b03/children', $data['links']['first']);
         $this->assertSame(null, $data['links']['previous']);
         $this->assertSame(null, $data['links']['next']);
-        $this->assertSame('/', $data['links']['last']);
+        $this->assertSame('/12ac1946-0efd-43b2-8e8f-fc73a2413b03/children', $data['links']['last']);
         $this->assertCount(1, $data['nodes']);
         $this->assertCount(1, $data['relations']);
     }

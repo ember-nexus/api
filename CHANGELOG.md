@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename term "session" to "token", closes #145.
 - Finalise documentation for the POST /token endpoint, closes #49.
 - Implement changes from #161.
+### Fixed
+- Fix id and link properties in parents, children and related endpoints are wrong, closes #164.
 
 ## 0.0.32 - 2023-09-30
 ### Added

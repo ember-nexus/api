@@ -78,7 +78,7 @@ class CollectionService
         if (null === $currentRequest) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Current request can not be null.');
         }
-        $basePath = $currentRequest->getBasePath();
+        $basePath = $currentRequest->getPathInfo();
 
         if ('' === $basePath) {
             $basePath = '/';
