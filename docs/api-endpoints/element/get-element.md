@@ -18,41 +18,41 @@ curl \
 
 ### **🟢 Success 200 - Node**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./get-element/200-node-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./get-element/200-node-response-body.json ':include :type=code')
 
 ### **🟢 Success 200 - Relation**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./get-element/200-relation-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./get-element/200-relation-response-body.json ':include :type=code')
 
 ### **🔴 Error 401**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./get-element/401-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./get-element/401-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 404**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./get-element/404-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./get-element/404-response-body.json ':include :type=code problem+json')
 

@@ -18,11 +18,11 @@ curl \
 
 ### **🟢 Success 200**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./get-children/200-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./get-children/200-response-body.json ':include :type=code')
 
@@ -30,21 +30,21 @@ curl \
 
 This error can only be thrown if the token is invalid or if there is no default anonymous user.
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./get-children/401-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./get-children/401-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 404**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./get-element/404-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./get-element/404-response-body.json ':include :type=code problem+json')
 

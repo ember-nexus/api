@@ -1,31 +1,135 @@
 {
   "type": "_PartialCollection",
-  "id": "/72e6a603-34ec-47d9-84cb-a33233977a3c/children",
-  "totalNodes": 2,
+  "id": "/",
+  "totalNodes": 6,
   "links": {
-    "first": "/72e6a603-34ec-47d9-84cb-a33233977a3c/children",
+    "first": "/",
     "previous": null,
     "next": null,
-    "last": "/72e6a603-34ec-47d9-84cb-a33233977a3c/children"
+    "last": "/"
   },
   "nodes": [
     {
-      "type": "Sphere",
-      "id": "7b80b203-2b82-40f5-accd-c7089fe6114e",
+      "type": "Tag",
+      "id": "45482998-274a-43d0-a466-f31d0b24cc0a",
       "data": {
-        "created": "2023-08-09 21:17:16",
-        "name": "Comment",
-        "updated": "2023-08-09 21:17:16"
+        "created": "2023-10-06T20:49:33+00:00",
+        "updated": "2023-10-06T20:49:33+00:00",
+        "name": "Yellow",
+        "color": "#FFC835"
       }
     },
     {
-      "type": "Token",
-      "id": "e3b81351-fe0c-4f8f-ad22-78b6157edde8",
+      "type": "Tag",
+      "id": "6b8341ca-851a-4e98-8194-e57b87d30519",
       "data": {
-        "created": "2023-08-09 21:17:16",
-        "updated": "2023-08-09 21:17:16"
+        "created": "2023-10-06T20:49:33+00:00",
+        "updated": "2023-10-06T20:49:33+00:00",
+        "name": "Red",
+        "color": "#BD002A"
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "6d1ccab4-559b-4086-92ac-370e30e40946",
+      "data": {
+        "created": "2023-10-06T20:49:33+00:00",
+        "updated": "2023-10-06T20:49:33+00:00",
+        "name": "Magenta",
+        "color": "#ff00ff"
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "9f69f280-68ec-4dac-9ff3-c5608562060f",
+      "data": {
+        "created": "2023-10-06T20:49:33+00:00",
+        "updated": "2023-10-06T20:49:33+00:00",
+        "name": "Cyan",
+        "color": "#00ffff"
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "aee9e678-42fa-48cf-85e3-33638bebf0b1",
+      "data": {
+        "created": "2023-10-06T20:49:33+00:00",
+        "updated": "2023-10-06T20:49:33+00:00",
+        "name": "Green",
+        "color": "#006D23"
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "ce8abdea-2e6c-41d4-b779-87b803f77836",
+      "data": {
+        "created": "2023-10-06T20:49:33+00:00",
+        "updated": "2023-10-06T20:49:33+00:00",
+        "name": "Blue",
+        "color": "#0059C8"
       }
     }
   ],
-  "relations": []
+  "relations": [
+    {
+      "type": "OWNS",
+      "id": "bc1ba1ad-5866-4c23-a58e-15282994c72c",
+      "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+      "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
+      "data": {
+        "created": "2023-10-06T20:49:36+00:00",
+        "updated": "2023-10-06T20:49:36+00:00"
+      }
+    },
+    {
+      "type": "OWNS",
+      "id": "94ab04d8-c7a0-408c-aea7-59c66018b242",
+      "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+      "end": "6b8341ca-851a-4e98-8194-e57b87d30519",
+      "data": {
+        "created": "2023-10-06T20:49:36+00:00",
+        "updated": "2023-10-06T20:49:36+00:00"
+      }
+    },
+    {
+      "type": "OWNS",
+      "id": "feb5bd9b-32e7-43f2-8b7e-9f6b7f0a0390",
+      "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+      "end": "6d1ccab4-559b-4086-92ac-370e30e40946",
+      "data": {
+        "created": "2023-10-06T20:49:36+00:00",
+        "updated": "2023-10-06T20:49:36+00:00"
+      }
+    },
+    {
+      "type": "OWNS",
+      "id": "284d2787-9cae-42e4-98bb-aff84dcbfef8",
+      "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+      "end": "9f69f280-68ec-4dac-9ff3-c5608562060f",
+      "data": {
+        "created": "2023-10-06T20:49:36+00:00",
+        "updated": "2023-10-06T20:49:36+00:00"
+      }
+    },
+    {
+      "type": "OWNS",
+      "id": "ca8266a9-4864-4ab7-9a9e-64a454af4a7d",
+      "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+      "end": "aee9e678-42fa-48cf-85e3-33638bebf0b1",
+      "data": {
+        "created": "2023-10-06T20:49:36+00:00",
+        "updated": "2023-10-06T20:49:36+00:00"
+      }
+    },
+    {
+      "type": "OWNS",
+      "id": "eb5d2879-c5e6-43a6-b8ce-2a1188ca7073",
+      "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+      "end": "ce8abdea-2e6c-41d4-b779-87b803f77836",
+      "data": {
+        "created": "2023-10-06T20:49:36+00:00",
+        "updated": "2023-10-06T20:49:36+00:00"
+      }
+    }
+  ]
 }

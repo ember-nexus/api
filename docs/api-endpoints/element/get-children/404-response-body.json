@@ -1,6 +1,6 @@
 {
-  "type": "404-not-found",
-  "title": "Not Found",
-  "status": "404",
-  "detail": "The requested resource was not found."
+  "type": "http://ember-nexus-api/error/404/not-found",
+  "title": "Not found",
+  "status": 404,
+  "detail": "Requested element was not found."
 }
