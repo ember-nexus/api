@@ -44,31 +44,31 @@ curl \
 
 ### **🟢 Success 200**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-token/200-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-token/200-response-body.json ':include :type=code')
 
 ### **🔴 Error 400**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-token/400-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-token/400-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 401**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./post-token/401-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-token/401-response-body.json ':include :type=code problem+json')
 

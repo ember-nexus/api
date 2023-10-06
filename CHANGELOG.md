@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add git and ssh to development Docker image.
 - Add GET /me endpoint and associated documentation, examples and tests. Closes #142.
 ### Changed
-- Renamed term "session" to "token", closes #145.
+- Rename term "session" to "token", closes #145.
+- Finalise documentation for the POST /token endpoint, closes #49.
 
 ## 0.0.32 - 2023-09-30
 ### Added
