@@ -4,9 +4,6 @@ namespace App\tests\FeatureTests\Endpoint\User;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-/**
- * @group test
- */
 class PostChangePasswordTest extends BaseRequestTestCase
 {
     public const EMAIL = 'user@changePassword.user.endpoint.localhost.de';

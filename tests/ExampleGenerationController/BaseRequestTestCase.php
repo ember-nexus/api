@@ -72,15 +72,37 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         string $pathToProjectRoot,
         string $pathToDocumentationFile,
         ResponseInterface $response,
-        bool $isJson = true
+        bool $isJson = true,
+        array $ignoreLinesContainingString = []
     ): void {
         $body = (string) $response->getBody();
         if ($isJson) {
             $body = $this->getFormattedResponseBodyAsJsonString($response);
         }
         $documentationBody = file_get_contents($pathToProjectRoot.$pathToDocumentationFile);
+
+        $filteredBody = [];
+        foreach (explode("\n", $body) as $line) {
+            foreach ($ignoreLinesContainingString as $ignoredLine) {
+                if (str_contains($line, $ignoredLine)) {
+                    continue 2;
+                }
+            }
+            $filteredBody[] = $line;
+        }
+
+        $filteredDocumentationBody = [];
+        foreach (explode("\n", $documentationBody) as $line) {
+            foreach ($ignoreLinesContainingString as $ignoredLine) {
+                if (str_contains($line, $ignoredLine)) {
+                    continue 2;
+                }
+            }
+            $filteredDocumentationBody[] = $line;
+        }
+
         $this->assertTrue(
-            $documentationBody === $body,
+            $filteredDocumentationBody === $filteredBody,
             sprintf(
                 "Content of file %s should be as following:\n\n%s\n",
                 $pathToDocumentationFile,
