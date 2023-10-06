@@ -6,7 +6,7 @@ use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
 class PostTokenTest extends BaseRequestTestCase
 {
-    public const EMAIL = 'user@postToken.user.endpoint.localhost.de';
+    public const EMAIL = 'user@postToken.user.endpoint.localhost.dev';
     public const PASSWORD = '1234';
     private const PATH_TO_ROOT = __DIR__.'/../../../';
 

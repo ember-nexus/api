@@ -14,7 +14,7 @@ class _E3_02_PutRelationTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsRelationResponse($response, 'RELATION');
         $data = $this->getBody($response)['data'];
-        $this->assertArrayHasKey('test', $data);
+        $this->assertArrayHasKey('scenario', $data);
         $this->assertArrayHasKey('name', $data);
         $this->assertArrayHasKey('created', $data);
         $this->assertArrayHasKey('updated', $data);
@@ -25,7 +25,7 @@ class _E3_02_PutRelationTest extends BaseRequestTestCase
             self::TOKEN,
             [
                 'new-property' => 'new value',
-                'test' => 'e3-02',
+                'scenario' => 'e3-02',
             ]
         );
         $this->assertNoContentResponse($response);
@@ -33,7 +33,7 @@ class _E3_02_PutRelationTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsRelationResponse($response, 'RELATION');
         $data = $this->getBody($response)['data'];
-        $this->assertArrayHasKey('test', $data);
+        $this->assertArrayHasKey('scenario', $data);
         $this->assertArrayHasKey('created', $data);
         $this->assertArrayHasKey('new-property', $data);
         $this->assertArrayHasKey('updated', $data);

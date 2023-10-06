@@ -6,7 +6,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class PostChangePasswordTest extends BaseRequestTestCase
 {
-    public const EMAIL = 'user@changePassword.user.endpoint.localhost.de';
+    public const EMAIL = 'user@changePassword.user.endpoint.localhost.dev';
     public const PASSWORD = '1234';
     public const NEW_PASSWORD = 'abcd';
 

@@ -17,7 +17,7 @@ class _E1_01_CreateNodeTest extends BaseRequestTestCase
                 'type' => 'Data',
                 'data' => [
                     'name' => 'some name',
-                    'test' => 'e1-01',
+                    'scenario' => 'e1-01',
                 ],
             ]
         );
@@ -32,7 +32,7 @@ class _E1_01_CreateNodeTest extends BaseRequestTestCase
             [
                 'data' => [
                     'name' => 'some name',
-                    'test' => 'e1-01',
+                    'scenario' => 'e1-01',
                 ],
             ]
         );

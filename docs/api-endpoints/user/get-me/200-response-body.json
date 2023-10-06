@@ -8,6 +8,6 @@
     "email": "anonymous-user@localhost.dev",
     "note": "User contains password only due to testing purposes.",
     "password": "1234",
-    "test": "general.anonymousUser"
+    "scenario": "general.anonymousUser"
   }
 }

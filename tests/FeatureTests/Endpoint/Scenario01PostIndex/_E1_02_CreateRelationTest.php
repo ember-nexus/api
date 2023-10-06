@@ -19,7 +19,7 @@ class _E1_02_CreateRelationTest extends BaseRequestTestCase
                 'type' => 'RELATION',
                 'data' => [
                     'name' => 'some name',
-                    'test' => 'e1-02',
+                    'scenario' => 'e1-02',
                 ],
                 'start' => self::START,
                 'end' => self::END,
@@ -36,7 +36,7 @@ class _E1_02_CreateRelationTest extends BaseRequestTestCase
             [
                 'data' => [
                     'name' => 'some name',
-                    'test' => 'e1-02',
+                    'scenario' => 'e1-02',
                 ],
                 'start' => self::START,
                 'end' => self::END,
@@ -54,7 +54,7 @@ class _E1_02_CreateRelationTest extends BaseRequestTestCase
                 'type' => 'RELATION',
                 'data' => [
                     'name' => 'some name',
-                    'test' => 'e1-02',
+                    'scenario' => 'e1-02',
                 ],
                 'end' => self::END,
             ]
@@ -71,7 +71,7 @@ class _E1_02_CreateRelationTest extends BaseRequestTestCase
                 'type' => 'RELATION',
                 'data' => [
                     'name' => 'some name',
-                    'test' => 'e1-02',
+                    'scenario' => 'e1-02',
                 ],
                 'start' => self::START,
             ]

@@ -89,7 +89,7 @@ class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
                 'type' => 'Data',
                 'data' => [
                     'name' => 'I shall exist.',
-                    'test' => '2-01',
+                    'scenario' => '2-01',
                 ],
             ]
         );
