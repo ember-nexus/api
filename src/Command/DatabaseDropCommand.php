@@ -109,7 +109,6 @@ class DatabaseDropCommand extends Command
     {
         $this->io->startSection('Task 3 of 6: Object Storage');
         $this->io->writeln('Deleting object storage data...');
-        // todo
         $this->io->stopSection('Object storage is currently not implemented, nothing to delete.');
     }
 
