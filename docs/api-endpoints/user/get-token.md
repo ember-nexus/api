@@ -20,21 +20,31 @@ curl \
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./get-me/200-response-header.txt ':include :type=code')
+[Response Body](./get-token/200-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./get-me/200-response-body.json ':include :type=code')
+[Response Body](./get-token/200-response-body.json ':include :type=code')
 
-### **🔴 Error 429**
+### **🔴 Error 401**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./get-me/429-response-header.txt ':include :type=code')
+[Response Body](./get-token/401-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./get-me/429-response-body.json ':include :type=code problem+json')
+[Response Body](./get-token/401-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 403**
+
+<div class="code-title auto-refresh">Response Headers</div>
+
+[Response Body](./get-token/403-response-header.txt ':include :type=code')
+
+<div class="code-title auto-refresh">Response Body</div>
+
+[Response Body](./get-token/403-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 
@@ -96,23 +106,20 @@ renderWorkflow(document.getElementById('graph-container-1'), {
   nodes: [
     { id: 'init', ...workflowStart, label: 'server receives GET-request' },
     { id: 'checkToken', ...workflowDecision, label: 'does request contain token?' },
-    { id: 'noTokenAction', ...workflowStep, label: "use default anonymous\nuser for auth" },
     { id: 'checkTokenValidity', ...workflowDecision, label: 'is token valid?' },
-    { id: 'checkRateLimit', ...workflowDecision, label: "does request exceed\nrate limit?" },
-    { id: 'loadUserData', ...workflowStep, label: 'load user data' },
-    { id: 'error429', ...workflowEndError, label: 'return 429' },
+    { id: 'loadUserData', ...workflowStep, label: 'load token data' },
+    { id: 'error401', ...workflowEndError, label: 'return 401' },
+    { id: 'error403', ...workflowEndError, label: 'return 403' },
     { id: 'success200', ...workflowEndSuccess , label: "return 200"},
   ],
   edges: [
     { source: 'init', target: 'checkToken', label: '' },
     { source: 'checkToken', target: 'checkTokenValidity', label: 'yes' },
-    { source: 'checkToken', target: 'noTokenAction', label: 'no' },
-    { source: 'checkTokenValidity', target: 'checkRateLimit', label: 'yes' },
+    { source: 'checkToken', target: 'error403', label: 'no' },
+    { source: 'checkTokenValidity', target: 'loadUserData', label: 'yes' },
     { source: 'checkTokenValidity', target: 'error401', label: 'no' },
-    { source: 'checkRateLimit', target: 'loadUserData', label: 'no' },
-    { source: 'checkRateLimit', target: 'error429', label: 'yes' },
     { source: 'loadUserData', target: 'success200' },
-    { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
+    { source: 'noTokenAction', target: 'error403', label: '' }
   ],
 }, 'TB');
 </script>
