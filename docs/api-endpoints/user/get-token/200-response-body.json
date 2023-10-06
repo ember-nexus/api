@@ -1,0 +1,13 @@
+{
+  "type": "User",
+  "id": "2d376349-c5e2-42c8-8ce0-d6f525256cf7",
+  "data": {
+    "created": "2023-10-06T10:07:35+00:00",
+    "updated": "2023-10-06T10:07:35+00:00",
+    "name": "User",
+    "email": "anonymous-user@localhost.dev",
+    "note": "User contains password only due to testing purposes.",
+    "password": "1234",
+    "test": "general.anonymousUser"
+  }
+}
