@@ -12,6 +12,7 @@ imports:
   - {resource: ../src/EventSystem/NormalizedValueToRawValue/config.yaml}
   - {resource: ../src/EventSystem/RawValueToNormalizedValue/config.yaml}
   - {resource: ../src/EventSystem/ElementPropertyChange/config.yaml}
+  - {resource: ../src/EventSystem/ElementPropertyReset/config.yaml}
   - {resource: ../src/EventSystem/ElementPropertyReturn/config.yaml}
 
 services:

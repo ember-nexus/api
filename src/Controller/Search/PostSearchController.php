@@ -4,7 +4,6 @@ namespace App\Controller\Search;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
-use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
@@ -30,7 +29,6 @@ class PostSearchController extends AbstractController
         private CollectionService $collectionService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
-        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
     ) {
     }
@@ -45,9 +43,6 @@ class PostSearchController extends AbstractController
         $body = \Safe\json_decode($request->getContent(), true);
 
         $currentUserUuid = $this->authProvider->getUserUuid();
-        if (!$currentUserUuid) {
-            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
-        }
 
         $userGroups = $this->accessChecker->getUsersGroups($currentUserUuid);
         $stringUserGroups = [];

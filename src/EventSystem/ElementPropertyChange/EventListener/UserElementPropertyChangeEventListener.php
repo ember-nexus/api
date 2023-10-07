@@ -16,7 +16,7 @@ class UserElementPropertyChangeEventListener
 
     public function onElementPropertyChangeEvent(ElementPropertyChangeEvent $event): void
     {
-        if ('User' !== $event->getType()) {
+        if ('User' !== $event->getLabelOrType()) {
             return;
         }
         if (array_key_exists('_passwordHash', $event->getChangedProperties())) {

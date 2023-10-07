@@ -31,12 +31,6 @@ class DeleteTokenController extends AbstractController
     )]
     public function deleteToken(): Response
     {
-        $userUuid = $this->authProvider->getUserUuid();
-
-        if (!$userUuid) {
-            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
-        }
-
         if ($this->authProvider->isAnonymous()) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }

@@ -2,7 +2,6 @@
 
 namespace App\Controller\Element;
 
-use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
@@ -20,7 +19,6 @@ class GetElementController extends AbstractController
         private ElementResponseService $elementResponseService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
@@ -37,10 +35,6 @@ class GetElementController extends AbstractController
     {
         $elementUuid = UuidV4::fromString($uuid);
         $userUuid = $this->authProvider->getUserUuid();
-
-        if (!$userUuid) {
-            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
-        }
 
         if (!$this->accessChecker->hasAccessToElement($userUuid, $elementUuid, AccessType::READ)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();

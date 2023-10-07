@@ -2,7 +2,6 @@
 
 namespace App\Controller\Element;
 
-use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
@@ -21,7 +20,6 @@ class DeleteElementController extends AbstractController
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
@@ -38,10 +36,6 @@ class DeleteElementController extends AbstractController
     {
         $elementUuid = UuidV4::fromString($uuid);
         $userUuid = $this->authProvider->getUserUuid();
-
-        if (!$userUuid) {
-            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
-        }
 
         if (!$this->accessChecker->hasAccessToElement($userUuid, $elementUuid, AccessType::DELETE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();

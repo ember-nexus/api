@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Rfc4122\UuidV4;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class AuthProviderTest extends TestCase
@@ -68,10 +69,10 @@ class AuthProviderTest extends TestCase
             $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
-        $authProvider->setUserAndToken();
+        $authProvider->setUserAndToken(Uuid::fromString('d3e0ce1e-cdf1-4c80-beae-266008d5e520'));
 
         $this->assertFalse($authProvider->isAnonymous());
-        $this->assertNull($authProvider->getUserUuid());
+        $this->assertSame($authProvider->getUserUuid()->toString(), 'd3e0ce1e-cdf1-4c80-beae-266008d5e520');
         $this->assertNull($authProvider->getHashedToken());
         $this->assertNull($authProvider->getTokenUuid());
 
@@ -86,10 +87,10 @@ class AuthProviderTest extends TestCase
         $this->assertSame('some hashed token', $authProvider->getHashedToken());
         $this->assertSame('8a961321-fd60-475a-95b4-7f976ce44213', $authProvider->getTokenUuid()->toString());
 
-        $authProvider->setUserAndToken(null, null, null, true);
+        $authProvider->setUserAndToken(Uuid::fromString('c48aaf8e-4ab5-4e60-8f03-154b13e35724'), null, null, true);
 
         $this->assertTrue($authProvider->isAnonymous());
-        $this->assertNull($authProvider->getUserUuid());
+        $this->assertSame($authProvider->getUserUuid()->toString(), 'c48aaf8e-4ab5-4e60-8f03-154b13e35724');
         $this->assertNull($authProvider->getHashedToken());
         $this->assertNull($authProvider->getTokenUuid());
     }
