@@ -15,8 +15,8 @@ The request must contain the following attributes:
 - `id`: The elements UUID, optional. If not set, the API will generate one for you.
 - `start`: The start node's UUID, only required for relations.
 - `end`: The end node's UUID, only required for relations.
-- `data`: Data related to the element in the form of an JSON object. Restrictions might apply to internally used
-  properties. If no properties should be used, send an empty object, e.g. `"data": {}`;
+- `data`: Data related to the element in the form of an JSON object, optional. Restrictions might apply to internally
+  used properties.
 
 ```json
 {
@@ -29,11 +29,23 @@ The request must contain the following attributes:
 
 ## Request Example
 
+Nodes:
+
 ```bash
 curl \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"type": "Demo", "data": {"hello": "world :D"}}' \
+  https://api.localhost/
+```
+
+Relations:
+
+```bash
+curl \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"type": "SOME_RELATION", "start": "f9a619e1-f3f5-4fbf-a80e-fa8f7dd88103", "end": "ecfe46ff-d3c7-4ca7-9b41-9be5476d36e0"}' \
   https://api.localhost/
 ```
 

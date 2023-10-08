@@ -1,10 +1,10 @@
 <?php
 
-namespace App\tests\FeatureTests\Endpoint\Scenario01PostIndex;
+namespace App\tests\FeatureTests\Endpoint\Element;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class _E1_02_CreateRelationTest extends BaseRequestTestCase
+class PostIndexRelationTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:OZmOjZnLpek1ppUvog82KR';
     public const START = '2e709799-b84b-487f-837b-9ba92b991614';
@@ -21,6 +21,20 @@ class _E1_02_CreateRelationTest extends BaseRequestTestCase
                     'name' => 'some name',
                     'scenario' => 'e1-02',
                 ],
+                'start' => self::START,
+                'end' => self::END,
+            ]
+        );
+        $this->assertIsCreatedResponse($response);
+    }
+
+    public function testCreateRelationWithoutData(): void
+    {
+        $response = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'RELATION',
                 'start' => self::START,
                 'end' => self::END,
             ]

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\tests\FeatureTests\Endpoint\Scenario04PatchElement;
+namespace App\tests\FeatureTests\Endpoint\Element;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class _E4_02_PatchRelationTest extends BaseRequestTestCase
+class PatchElementRelationTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:S26Pn61Imv52pWOJ9GuXET';
     public const RELATION = 'd639767c-486c-4714-aa61-8d28ec6be338';

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\tests\FeatureTests\Endpoint\Scenario02DeleteElement;
+namespace App\tests\FeatureTests\Endpoint\Element;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class _E2_01_DeleteNodeTest extends BaseRequestTestCase
+class DeleteElementNodeTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:CevJS3ZkDtJcCdqEhFKqWF';
     public const DATA = '55cce573-1377-4781-be16-8b81587aca10';

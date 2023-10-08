@@ -1,10 +1,10 @@
 <?php
 
-namespace App\tests\FeatureTests\Endpoint\Scenario04PatchElement;
+namespace App\tests\FeatureTests\Endpoint\Element;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class _E4_01_PatchNodeTest extends BaseRequestTestCase
+class PatchElementNodeTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:PsN3SfXuql92IjEUkUYZFN';
     public const DATA = 'd77ca32c-8cf2-4ed9-868e-27ae122e9ea1';

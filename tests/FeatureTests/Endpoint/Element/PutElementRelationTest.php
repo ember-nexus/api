@@ -1,10 +1,10 @@
 <?php
 
-namespace App\tests\FeatureTests\Endpoint\Scenario03PutElement;
+namespace App\tests\FeatureTests\Endpoint\Element;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class _E3_02_PutRelationTest extends BaseRequestTestCase
+class PutElementRelationTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:7Sm1i6YAFHCW2FFf5KmG3j';
     public const RELATION = '0c3898d0-e0f4-4ad1-a754-347ea0865ac5';
