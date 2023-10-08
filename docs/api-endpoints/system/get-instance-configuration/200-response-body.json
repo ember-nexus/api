@@ -1,0 +1,13 @@
+{
+  "version": "dev",
+  "pageSize": {
+    "min": 5,
+    "default": 25,
+    "max": 100
+  },
+  "register": {
+    "enabled": true,
+    "uniqueIdentifier": "email",
+    "uniqueIdentifierRegex": false
+  }
+}
