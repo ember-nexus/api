@@ -5,7 +5,7 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\ElementPropertyReset\Event\ElementPropertyResetEvent;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class ResetElementPropertiesService
 {

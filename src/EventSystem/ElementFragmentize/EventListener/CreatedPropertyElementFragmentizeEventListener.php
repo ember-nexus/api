@@ -44,7 +44,12 @@ class CreatedPropertyElementFragmentizeEventListener
             $created = $created->toDateTime();
         }
         if (!($created instanceof DateTimeInterface)) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from created property of type '".get_class($created)."'.");
+            if (is_object($created)) {
+                $type = get_class($created);
+            } else {
+                $type = gettype($created);
+            }
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from created property of type '".$type."'.");
         }
         $cypherFragment->addProperty('created', $created);
         $mongoFragment->addProperty('created', new UTCDateTime($created));

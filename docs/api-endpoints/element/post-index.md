@@ -1,6 +1,5 @@
 # <span class="method-post">POST</span>` / -` Create Root Level Element
 
-
 <!-- panels:start -->
 <!-- div:left-panel -->
 

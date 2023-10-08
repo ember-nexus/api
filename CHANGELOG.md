@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Finalise documentation for the POST /token endpoint, closes #49.
 - Implement changes from #161, closes it.
 - Improve documentation, closes #162.
+### Fixed
+- Property normalization is now standardized across endpoints, and uses events. Closes #166.
 
 ## 0.0.32 - 2023-09-30
 ### Added

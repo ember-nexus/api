@@ -59,20 +59,6 @@ class PutElementController extends AbstractController
         $element = $this->resetElementPropertiesService->resetElementProperties($element);
         $element = $this->updateElementFromRawDataService->updateElementFromRawData($element, $rawData);
 
-        //        foreach (array_keys($element->getProperties()) as $name) {
-        //            if ('id' === $name) {
-        //                continue;
-        //            }
-        //            if ('created' === $name) {
-        //                continue;
-        //            }
-        //            if ('updated' === $name) {
-        //                continue;
-        //            }
-        //            $element->addProperty($name, null);
-        //        }
-        //
-        //        $element->addProperties($data);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
 
