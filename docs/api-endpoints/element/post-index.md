@@ -165,7 +165,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'checkId', ...workflowDecision, label: "is id provided?" },
     { id: 'generateId', ...workflowStep, label: "generate new id" },
     { id: 'useProvidedId', ...workflowStep, label: "use provided id" },
-    { id: 'checkType', ...workflowStep, label: "is type provided?" },
+    { id: 'checkType', ...workflowDecision, label: "is type provided?" },
     { id: 'checkStart', ...workflowDecision, label: "is start provided?" },
     { id: 'checkEnd', ...workflowDecision, label: "is end provided?" },
     { id: 'checkStartExistence', ...workflowDecision, label: "does start element exist?" },
