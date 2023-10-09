@@ -3,7 +3,9 @@
 namespace App\Controller\Element;
 
 use App\Contract\NodeElementInterface;
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
+use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\AccessChecker;
@@ -32,6 +34,8 @@ class PostIndexController extends AbstractController
         private UrlGeneratorInterface $router,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
+        private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService
     ) {
     }
@@ -66,16 +70,30 @@ class PostIndexController extends AbstractController
         $startId = null;
         if (array_key_exists('start', $body)) {
             $startId = UuidV4::fromString($body['start']);
+            $startElement = $this->elementManager->getElement($startId);
+            if ($startElement === null) {
+                throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+            }
             if (!$this->accessChecker->hasAccessToElement($userId, $startId, AccessType::CREATE)) {
                 throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+            }
+            if (!($startElement instanceof NodeElementInterface)) {
+                throw $this->client400BadContentExceptionFactory->createFromTemplate('start', 'id of a node', 'id of a relation');
             }
         }
 
         $endId = null;
         if (array_key_exists('end', $body)) {
             $endId = UuidV4::fromString($body['end']);
+            $endElement = $this->elementManager->getElement($endId);
+            if ($endElement === null) {
+                throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+            }
             if (!$this->accessChecker->hasAccessToElement($userId, $endId, AccessType::READ)) {
                 throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+            }
+            if (!($endElement instanceof NodeElementInterface)) {
+                throw $this->client400BadContentExceptionFactory->createFromTemplate('end', 'id of a node', 'id of a relation');
             }
         }
 
