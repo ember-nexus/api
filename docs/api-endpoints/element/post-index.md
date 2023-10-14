@@ -3,7 +3,7 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-Creates a new data element. If the data element is a node, it is directly owned by the current user.
+Creates a new element. If the element is a node, it is directly owned by the current user.
 
 ## Request Body
 
@@ -79,15 +79,15 @@ Success response does not have a response body. The UUID of the created element 
 
 [Response Body](./post-index/401-response-body.json ':include :type=code problem+json')
 
-### **🔴 Error 403**
+### **🔴 Error 404**
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-index/403-response-header.txt ':include :type=code')
+[Response Body](./post-index/404-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-index/403-response-body.json ':include :type=code problem+json')
+[Response Body](./post-index/404-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 429**
 

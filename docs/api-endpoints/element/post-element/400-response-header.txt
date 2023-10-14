@@ -3,9 +3,8 @@ Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROP
 Access-Control-Allow-Origin: *
 Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
 Cache-Control: no-cache, private
-Content-Type: text/html; charset=UTF-8
-Date: Mon, 09 Oct 2023 20:32:13 GMT
-Location: /455a89b9-4ec7-4b02-b023-bcfbcbba9a9f
+Content-Type: application/problem+json; charset=utf-8
+Date: Mon, 09 Oct 2023 21:22:17 GMT
 Server: Unit
 Transfer-Encoding: chunked
 X-Powered-By: Ember-Nexus-API

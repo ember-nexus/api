@@ -47,7 +47,7 @@ class PostElementController extends AbstractController
         $userId = $this->authProvider->getUserUuid();
 
         $parentType = $this->accessChecker->getElementType($parentElementId);
-        if (ElementType::RELATION === $parentType) {
+        if (ElementType::NODE !== $parentType) {
             // relations can not own nodes
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
@@ -78,10 +78,10 @@ class PostElementController extends AbstractController
         }
         $type = $body['type'];
 
-        if (!array_key_exists('data', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('data', 'an object');
+        $rawData = [];
+        if (array_key_exists('data', $body)) {
+            $rawData = $body['data'];
         }
-        $rawData = $body['data'];
 
         $element = $this->createElementFromRawDataService->createElementFromRawData(
             $elementId,

@@ -71,7 +71,7 @@ class PostIndexController extends AbstractController
         if (array_key_exists('start', $body)) {
             $startId = UuidV4::fromString($body['start']);
             $startElement = $this->elementManager->getElement($startId);
-            if ($startElement === null) {
+            if (null === $startElement) {
                 throw $this->client404NotFoundExceptionFactory->createFromTemplate();
             }
             if (!$this->accessChecker->hasAccessToElement($userId, $startId, AccessType::CREATE)) {
@@ -86,7 +86,7 @@ class PostIndexController extends AbstractController
         if (array_key_exists('end', $body)) {
             $endId = UuidV4::fromString($body['end']);
             $endElement = $this->elementManager->getElement($endId);
-            if ($endElement === null) {
+            if (null === $endElement) {
                 throw $this->client404NotFoundExceptionFactory->createFromTemplate();
             }
             if (!$this->accessChecker->hasAccessToElement($userId, $endId, AccessType::READ)) {
