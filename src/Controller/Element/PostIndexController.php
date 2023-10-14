@@ -5,7 +5,6 @@ namespace App\Controller\Element;
 use App\Contract\NodeElementInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
-use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\AccessChecker;
@@ -34,7 +33,6 @@ class PostIndexController extends AbstractController
         private UrlGeneratorInterface $router,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
-        private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService
     ) {

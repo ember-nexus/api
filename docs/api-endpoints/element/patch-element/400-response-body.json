@@ -1,0 +1,6 @@
+{
+  "type": "http://ember-nexus-api/error/400/missing-property",
+  "title": "Missing property",
+  "status": 400,
+  "detail": "Endpoint requires that the request contains property 'type' to be set to a valid type."
+}
