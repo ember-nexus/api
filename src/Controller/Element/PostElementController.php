@@ -2,6 +2,7 @@
 
 namespace App\Controller\Element;
 
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
@@ -28,6 +29,7 @@ class PostElementController extends AbstractController
         private ElementManager $elementManager,
         private UrlGeneratorInterface $router,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService
     ) {
@@ -60,11 +62,11 @@ class PostElementController extends AbstractController
 
         if (array_key_exists('start', $body)) {
             // owns-relation can only target nodes
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('start', 'non-existent', 'existent');
         }
         if (array_key_exists('end', $body)) {
             // owns-relation can only target nodes
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('start', 'non-existent', 'existent');
         }
 
         if (array_key_exists('id', $body)) {
