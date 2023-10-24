@@ -33,6 +33,7 @@ class GetIndexController extends AbstractController
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (user)-[:PART_OF_GROUP*0..]->()-[:OWNS]->(element)\n".
             "RETURN element.id\n".
+            "ORDER BY element.id\n".
             "SKIP \$skip\n".
             'LIMIT $limit',
             [
