@@ -14,15 +14,15 @@ class ElementPropertyChangeEvent implements EventInterface
      * @param array<string, mixed> $changedProperties
      */
     public function __construct(
-        private string $type,
+        private string $labelOrType,
         private ?ElementInterface $element,
         private array $changedProperties
     ) {
     }
 
-    public function getType(): string
+    public function getLabelOrType(): string
     {
-        return $this->type;
+        return $this->labelOrType;
     }
 
     public function getElement(): ?ElementInterface

@@ -276,6 +276,13 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertFalse($response->hasHeader('Location'));
     }
 
+    public function assertIsTextResponse(ResponseInterface $response, int $status): void
+    {
+        $this->assertSame($status, $response->getStatusCode());
+
+        $this->assertSame('text/plain; charset=utf-8', $response->getHeader('content-type')[0]);
+    }
+
     public function assertHasSingleOwner(string $token, string $childUuid, string $parentUuid): void
     {
         $parentsResponse = $this->runGetRequest(

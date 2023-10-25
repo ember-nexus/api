@@ -2,13 +2,13 @@
 
 namespace App\Controller\Element;
 
-use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\UpdateElementFromRawDataService;
 use App\Type\AccessType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,8 +22,8 @@ class PatchElementController extends AbstractController
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
+        private UpdateElementFromRawDataService $updateElementFromRawDataService
     ) {
     }
 
@@ -37,27 +37,24 @@ class PatchElementController extends AbstractController
     )]
     public function patchElement(string $uuid, Request $request): Response
     {
-        $elementUuid = UuidV4::fromString($uuid);
-        $userUuid = $this->authProvider->getUserUuid();
+        $elementId = UuidV4::fromString($uuid);
+        $userId = $this->authProvider->getUserUuid();
 
-        if (!$userUuid) {
-            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
-        }
-
-        if (!$this->accessChecker->hasAccessToElement($userUuid, $elementUuid, AccessType::UPDATE)) {
+        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElement($elementUuid);
+        $element = $this->elementManager->getElement($elementId);
         if (null === $element) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         /**
-         * @var array<string, mixed> $data
+         * @var array<string, mixed> $rawData
          */
-        $data = \Safe\json_decode($request->getContent(), true);
-        $element->addProperties($data);
+        $rawData = \Safe\json_decode($request->getContent(), true);
+
+        $element = $this->updateElementFromRawDataService->updateElementFromRawData($element, $rawData);
 
         $this->elementManager->merge($element);
         $this->elementManager->flush();

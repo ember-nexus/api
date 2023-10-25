@@ -2,7 +2,6 @@
 
 namespace App\Controller\Element;
 
-use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
@@ -24,7 +23,6 @@ class GetParentsController extends AbstractController
         private CollectionService $collectionService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
@@ -41,10 +39,6 @@ class GetParentsController extends AbstractController
     {
         $childUuid = UuidV4::fromString($uuid);
         $userUuid = $this->authProvider->getUserUuid();
-
-        if (!$userUuid) {
-            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
-        }
 
         $type = $this->accessChecker->getElementType($childUuid);
         if (ElementType::RELATION === $type) {
@@ -100,6 +94,7 @@ class GetParentsController extends AbstractController
             "    )\n".
             "  )\n".
             "WITH user, r, parent, path\n".
+            "ORDER BY parent.id, r.id\n".
             "WHERE\n".
             "  user.id = parent.id\n".
             "  OR\n".

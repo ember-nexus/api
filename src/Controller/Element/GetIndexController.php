@@ -2,7 +2,6 @@
 
 namespace App\Controller\Element;
 
-use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use Laudis\Neo4j\Databags\Statement;
@@ -18,7 +17,6 @@ class GetIndexController extends AbstractController
         private CypherEntityManager $cypherEntityManager,
         private AuthProvider $authProvider,
         private CollectionService $collectionService,
-        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory
     ) {
     }
 
@@ -30,14 +28,12 @@ class GetIndexController extends AbstractController
     public function getIndex(): Response
     {
         $userUuid = $this->authProvider->getUserUuid();
-        if (null === $userUuid) {
-            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
-        }
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (user)-[:PART_OF_GROUP*0..]->()-[:OWNS]->(element)\n".
             "RETURN element.id\n".
+            "ORDER BY element.id\n".
             "SKIP \$skip\n".
             'LIMIT $limit',
             [

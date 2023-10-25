@@ -1,10 +1,10 @@
 {
-  "type": "HAS_DATA",
-  "id": "904a5f37-785e-428d-96ba-4fa58cd2bea8",
-  "start": "ce0fde7f-851a-4933-bd1b-8d8a12f082f5",
-  "end": "1c7e0a52-b0dc-441a-9fbc-9e30bedbf812",
+  "type": "OWNS",
+  "id": "eb5d2879-c5e6-43a6-b8ce-2a1188ca7073",
+  "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+  "end": "ce8abdea-2e6c-41d4-b779-87b803f77836",
   "data": {
-    "name": "Some data relation",
-    "description": "demo"
+    "created": "2023-10-06T20:27:59+00:00",
+    "updated": "2023-10-06T20:27:59+00:00"
   }
 }

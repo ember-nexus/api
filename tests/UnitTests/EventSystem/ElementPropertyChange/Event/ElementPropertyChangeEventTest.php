@@ -11,7 +11,7 @@ class ElementPropertyChangeEventTest extends TestCase
     public function testEventReturnsCorrectWithoutElementData(): void
     {
         $event = new ElementPropertyChangeEvent('type', null, ['a' => 'A']);
-        $this->assertSame('type', $event->getType());
+        $this->assertSame('type', $event->getLabelOrType());
         $this->assertNull($event->getElement());
         $changedProperties = $event->getChangedProperties();
         $this->assertIsArray($changedProperties);
@@ -26,7 +26,7 @@ class ElementPropertyChangeEventTest extends TestCase
         $element = new NodeElement();
         $element->setLabel('Element');
         $event = new ElementPropertyChangeEvent('type', $element, ['b' => 'B']);
-        $this->assertSame('type', $event->getType());
+        $this->assertSame('type', $event->getLabelOrType());
         $this->assertSame($element, $event->getElement());
         $changedProperties = $event->getChangedProperties();
         $this->assertIsArray($changedProperties);

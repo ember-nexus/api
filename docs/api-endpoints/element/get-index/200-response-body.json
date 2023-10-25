@@ -13,17 +13,18 @@
       "type": "Sphere",
       "id": "7b80b203-2b82-40f5-accd-c7089fe6114e",
       "data": {
-        "created": "2023-08-09 21:17:16",
-        "name": "Comment",
-        "updated": "2023-08-09 21:17:16"
+        "created": "2023-10-06T20:04:04+00:00",
+        "updated": "2023-10-06T20:04:04+00:00",
+        "name": "Comment"
       }
     },
     {
       "type": "Token",
       "id": "e3b81351-fe0c-4f8f-ad22-78b6157edde8",
       "data": {
-        "created": "2023-08-09 21:17:16",
-        "updated": "2023-08-09 21:17:16"
+        "created": "2023-10-06T20:04:04+00:00",
+        "updated": "2023-10-06T20:04:04+00:00",
+        "note": "Token contains token only due to testing purposes."
       }
     }
   ],

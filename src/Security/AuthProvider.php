@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class AuthProvider
 {
     private bool $isAnonymous;
-    private ?UuidInterface $userUuid;
+    private UuidInterface $userUuid;
     private ?UuidInterface $tokenUuid = null;
     private ?string $hashedToken = null;
 
@@ -41,7 +41,7 @@ class AuthProvider
     }
 
     public function setUserAndToken(
-        UuidInterface $userUuid = null,
+        UuidInterface $userUuid,
         UuidInterface $tokenUuid = null,
         string $hashedToken = null,
         bool $isAnonymous = false
@@ -59,7 +59,7 @@ class AuthProvider
         return $this->isAnonymous;
     }
 
-    public function getUserUuid(): ?UuidInterface
+    public function getUserUuid(): UuidInterface
     {
         return $this->userUuid;
     }

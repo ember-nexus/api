@@ -14,7 +14,7 @@ class TokenElementPropertyChangeEventListener
 
     public function onElementPropertyChangeEvent(ElementPropertyChangeEvent $event): void
     {
-        if ('Token' !== $event->getType()) {
+        if ('Token' !== $event->getLabelOrType()) {
             return;
         }
         if (array_key_exists('token', $event->getChangedProperties())) {

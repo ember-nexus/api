@@ -5,7 +5,7 @@
 
 Returns instance specific configurations.
 
-Endpoint can be disabled, see
+Endpoint can be disabled and fields like `version` omitted, see
 [application configuration](/getting-started/configuration?id=application-configuration) for details.
 
 ## Request Example
@@ -16,34 +16,25 @@ curl https://api.localhost/instance-configuration
 
 <!-- tabs:start -->
 
-### **Success 200**
+### **🟢 Success 200**
 
-```json
-{
-  "version": "0.1.0",
-  "pageSize": {
-    "min": 5,
-    "default": 25,
-    "max": 100
-  },
-  "register": {
-    "enabled": true,
-    "uniqueIdentifier": "email",
-    "uniqueIdentifierRegex": false
-  }
-}
-```
+<div class="code-title auto-refresh">Response Headers</div>
 
-### **Error 403**
+[Response Body](./get-instance-configuration/200-response-header.txt ':include :type=code')
 
-```problem+json
-{
-  "type": "403-forbidden",
-  "title": "Forbidden",
-  "status": "403",
-  "detail": "Client does not have permissions to perform action."
-}
-```
+<div class="code-title auto-refresh">Response Body</div>
+
+[Response Body](./get-instance-configuration/200-response-body.json ':include :type=code')
+
+### **🔴 Error 403**
+
+<div class="code-title auto-refresh">Response Headers</div>
+
+[Response Body](./get-instance-configuration/403-response-header.txt ':include :type=code')
+
+<div class="code-title auto-refresh">Response Body</div>
+
+[Response Body](./get-instance-configuration/403-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 
