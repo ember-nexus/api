@@ -5,26 +5,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.33 - 2023-10-25
 ### Added
 - Add diverse unit tests.
 - Add timeout to some GitHub Action jobs.
 - Command examples are now automatically checked.
 - More commands are documented.
 - Add git and ssh to development Docker image.
-- Add GET /me endpoint and associated documentation, examples and tests. Closes #142.
-- Add GET /token endpoint (again), this time finished. Closes #72.
+- Add GET /me endpoint and associated documentation, examples and tests. Closes [#142].
+- Add GET /token endpoint (again), this time finished. Closes [#72].
+
 ### Changed
-- Rename term "session" to "token", closes #145.
-- Finalise documentation for the POST /token endpoint, closes #49.
-- Implement changes from #161, closes it.
-- Improve documentation, closes #162.
+- Rename term "session" to "token", closes [#145].
+- Finalise documentation for the POST /token endpoint, closes [#49].
+- Implement changes from [#161], closes it.
+- Improve documentation, closes [#162].
 - Elements in endpoint get index are now sorted via the element's id.
 - Relations in collection endpoints are sorted by their id as well.
 - Upgrade upstream dependency NGINX Unit to 1.31.1.
+
 ### Fixed
-- Property normalization is now standardized across endpoints, and uses events. Closes #166.
-- Implement changes from #161.
-- Fix id and link properties in parents, children and related endpoints are wrong, closes #164.
+- Property normalization is now standardized across endpoints, and uses events. Closes [#166].
+- Implement changes from [#161].
+- Fix id and link properties in parents, children and related endpoints are wrong, closes [#164].
 
 ## 0.0.32 - 2023-09-30
 ### Added
