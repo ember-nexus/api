@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More commands are documented.
 - Add git and ssh to development Docker image.
 - Add GET /me endpoint and associated documentation, examples and tests. Closes #142.
-- Add GET /token endpont (again), this time finished. Closes #72.
+- Add GET /token endpoint (again), this time finished. Closes #72.
 ### Changed
 - Rename term "session" to "token", closes #145.
 - Finalise documentation for the POST /token endpoint, closes #49.
@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve documentation, closes #162.
 - Elements in endpoint get index are now sorted via the element's id.
 - Relations in collection endpoints are sorted by their id as well.
+- Upgrade upstream dependency NGINX Unit to 1.31.1.
 ### Fixed
 - Property normalization is now standardized across endpoints, and uses events. Closes #166.
 - Implement changes from #161.
