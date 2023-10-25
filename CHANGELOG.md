@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement changes from #161, closes it.
 - Improve documentation, closes #162.
 - Elements in endpoint get index are now sorted via the element's id.
+- Relations in collection endpoints are sorted by their id as well.
 ### Fixed
 - Property normalization is now standardized across endpoints, and uses events. Closes #166.
 - Implement changes from #161.

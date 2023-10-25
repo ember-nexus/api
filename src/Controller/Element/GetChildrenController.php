@@ -94,6 +94,7 @@ class GetChildrenController extends AbstractController
             "    )\n".
             "  )\n".
             "WITH user, r, child, path\n".
+            "ORDER BY child.id, r.id\n".
             "WHERE\n".
             "  user.id = child.id\n".
             "  OR\n".

@@ -94,6 +94,7 @@ class GetRelatedController extends AbstractController
             "    )\n".
             "  )\n".
             "WITH user, r, outer, path\n".
+            "ORDER BY outer.id, r.id\n".
             "WHERE\n".
             "  user.id = outer.id\n".
             "  OR\n".

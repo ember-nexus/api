@@ -1,20 +1,20 @@
 {
   "type": "_PartialCollection",
-  "id": "/",
+  "id": "/45482998-274a-43d0-a466-f31d0b24cc0a/parents",
   "totalNodes": 1,
   "links": {
-    "first": "/",
+    "first": "/45482998-274a-43d0-a466-f31d0b24cc0a/parents",
     "previous": null,
     "next": null,
-    "last": "/"
+    "last": "/45482998-274a-43d0-a466-f31d0b24cc0a/parents"
   },
   "nodes": [
     {
       "type": "Sphere",
       "id": "56fda20c-b238-4034-b555-1df47c47e17a",
       "data": {
-        "created": "2023-10-06T20:40:29+00:00",
-        "updated": "2023-10-06T20:40:29+00:00",
+        "created": "2023-10-25T10:44:39+00:00",
+        "updated": "2023-10-25T10:44:39+00:00",
         "name": "Tag"
       }
     }
@@ -26,8 +26,8 @@
       "start": "56fda20c-b238-4034-b555-1df47c47e17a",
       "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
       "data": {
-        "created": "2023-10-06T20:40:31+00:00",
-        "updated": "2023-10-06T20:40:31+00:00"
+        "created": "2023-10-25T10:44:42+00:00",
+        "updated": "2023-10-25T10:44:42+00:00"
       }
     }
   ]

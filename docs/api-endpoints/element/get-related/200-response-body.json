@@ -1,20 +1,20 @@
 {
   "type": "_PartialCollection",
-  "id": "/",
+  "id": "/45482998-274a-43d0-a466-f31d0b24cc0a/related",
   "totalNodes": 3,
   "links": {
-    "first": "/",
+    "first": "/45482998-274a-43d0-a466-f31d0b24cc0a/related",
     "previous": null,
     "next": null,
-    "last": "/"
+    "last": "/45482998-274a-43d0-a466-f31d0b24cc0a/related"
   },
   "nodes": [
     {
       "type": "Comment",
       "id": "251654a1-588e-4dc4-836f-b1e334d91aae",
       "data": {
-        "created": "2023-10-06T20:55:32+00:00",
-        "updated": "2023-10-06T20:55:32+00:00",
+        "created": "2023-10-25T10:44:39+00:00",
+        "updated": "2023-10-25T10:44:39+00:00",
         "name": "Yellow",
         "content": "Yellow is the color between green and orange on the spectrum of light. It is evoked by light with a dominant wavelength of roughly 575–585 nm. It is a primary color in subtractive color systems, used in painting or color printing. In the RGB color model, used to create colors on television and computer screens, yellow is a secondary color made by combining red and green at equal intensity. Carotenoids give the characteristic yellow color to autumn leaves, corn, canaries, daffodils, and lemons, as well as egg yolks, buttercups, and bananas. They absorb light energy and protect plants from photo damage in some cases. Sunlight has a slight yellowish hue when the Sun is near the horizon, due to atmospheric scattering of shorter wavelengths (green, blue, and violet)."
       }
@@ -23,8 +23,8 @@
       "type": "Sphere",
       "id": "56fda20c-b238-4034-b555-1df47c47e17a",
       "data": {
-        "created": "2023-10-06T20:55:33+00:00",
-        "updated": "2023-10-06T20:55:33+00:00",
+        "created": "2023-10-25T10:44:39+00:00",
+        "updated": "2023-10-25T10:44:39+00:00",
         "name": "Tag"
       }
     },
@@ -32,8 +32,8 @@
       "type": "Comment",
       "id": "5bd2a18a-6d26-4fcd-99a7-9705794b63fc",
       "data": {
-        "created": "2023-10-06T20:55:32+00:00",
-        "updated": "2023-10-06T20:55:32+00:00",
+        "created": "2023-10-25T10:44:39+00:00",
+        "updated": "2023-10-25T10:44:39+00:00",
         "name": "Additive color model",
         "content": "Additive color or additive mixing is a property of a color model that predicts the appearance of colors made by coincident component lights, i.e. the perceived color can be predicted by summing the numeric representations of the component colors. Modern formulations of Grassmann's laws describe the additivity in the color perception of light mixtures in terms of algebraic equations. Additive color predicts perception and not any sort of change in the photons of light themselves. These predictions are only applicable in the limited scope of color matching experiments where viewers match small patches of uniform color isolated against a grey or black background."
       }
@@ -46,8 +46,8 @@
       "start": "251654a1-588e-4dc4-836f-b1e334d91aae",
       "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
       "data": {
-        "created": "2023-10-06T20:55:35+00:00",
-        "updated": "2023-10-06T20:55:35+00:00"
+        "created": "2023-10-25T10:44:42+00:00",
+        "updated": "2023-10-25T10:44:42+00:00"
       }
     },
     {
@@ -56,8 +56,8 @@
       "start": "56fda20c-b238-4034-b555-1df47c47e17a",
       "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
       "data": {
-        "created": "2023-10-06T20:55:35+00:00",
-        "updated": "2023-10-06T20:55:35+00:00"
+        "created": "2023-10-25T10:44:42+00:00",
+        "updated": "2023-10-25T10:44:42+00:00"
       }
     },
     {
@@ -66,8 +66,8 @@
       "start": "5bd2a18a-6d26-4fcd-99a7-9705794b63fc",
       "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
       "data": {
-        "created": "2023-10-06T20:55:35+00:00",
-        "updated": "2023-10-06T20:55:35+00:00"
+        "created": "2023-10-25T10:44:42+00:00",
+        "updated": "2023-10-25T10:44:42+00:00"
       }
     }
   ]

@@ -94,6 +94,7 @@ class GetParentsController extends AbstractController
             "    )\n".
             "  )\n".
             "WITH user, r, parent, path\n".
+            "ORDER BY parent.id, r.id\n".
             "WHERE\n".
             "  user.id = parent.id\n".
             "  OR\n".
