@@ -26,11 +26,18 @@ jobs:
           version=$(cat composer.json | jq -r .version)
           bumpType=${{ github.event.inputs.release-type }}
           newVersion="$(docker run usvc/semver:latest bump $bumpType $version | tr -d '\r')"
+          newVersionWithoutPatch=$(echo "$GITHUB_ENV" | cut -d'.' -f1,2)
+          newVersionWithoutMinor=$(echo "$GITHUB_ENV" | cut -d'.' -f1)
           jq --arg newVersion "$newVersion" '.version = $newVersion' composer.json | sponge composer.json
           echo "New version: $newVersion"
           mkdir -p /tmp/ci-env
           echo "NEW_VERSION=$newVersion" >> /tmp/ci-env/NEW_VERSION.txt
+          echo "NEW_VERSION_WITHOUT_PATCH=$newVersionWithoutPatch" >> /tmp/ci-env/NEW_VERSION.txt
+          echo "NEW_VERSION_WITHOUT_MINOR=$newVersionWithoutMinor" >> /tmp/ci-env/NEW_VERSION.txt
           echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
+          cat /tmp/ci-env/NEW_VERSION.txt
+          echo "Update version in command examples within documentation"
+          find ./docs/commands/assets -type f -exec sed -i "s/$version/$newVersion/g" {} \;
 
       - name: Update changelog unreleased section with new version
         uses: superfaceai/release-changelog-action@v2
@@ -238,7 +245,9 @@ jobs:
 
       - name: Debug version
         run: |
-          echo $NEW_VERSION
+          echo "${{ env.NEW_VERSION }}"
+          echo "${{ env.NEW_VERSION_WITHOUT_PATCH }}"
+          echo "${{ env.NEW_VERSION_WITHOUT_MINOR }}"
 
       # see also https://github.com/Nautilus-Cyberneering/pygithub
       - name: Import GPG key
@@ -289,6 +298,7 @@ jobs:
         shell: bash
         run: |
           ls -la /tmp/docker
+
           docker load < /tmp/docker/api-latest-amd.tar.gz
           docker load < /tmp/docker/api-latest-arm.tar.gz
           docker tag api:latest-amd embernexus/api:tmp-latest-amd
@@ -299,16 +309,35 @@ jobs:
           docker save embernexus/api:${{ env.NEW_VERSION }}-arm | gzip > /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
           docker push embernexus/api:tmp-latest-amd
           docker push embernexus/api:tmp-latest-arm
+
+          echo "Creating and pushing multi arch image embernexus/api:latest"
           docker manifest create \
             embernexus/api:latest \
             --amend embernexus/api:tmp-latest-amd \
             --amend embernexus/api:tmp-latest-arm
           docker manifest push embernexus/api:latest
+
+          echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION }}"
           docker manifest create \
             embernexus/api:${{ env.NEW_VERSION }} \
             --amend embernexus/api:tmp-latest-amd \
             --amend embernexus/api:tmp-latest-arm
           docker manifest push embernexus/api:${{ env.NEW_VERSION }}
+
+          echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }}"
+          docker manifest create \
+            embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }} \
+            --amend embernexus/api:tmp-latest-amd \
+            --amend embernexus/api:tmp-latest-arm
+          docker manifest push embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }}
+
+          echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }}"
+          docker manifest create \
+            embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }} \
+            --amend embernexus/api:tmp-latest-amd \
+            --amend embernexus/api:tmp-latest-arm
+          docker manifest push embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }}
+
           echo "Creating temporary JWT key for Docker Hub"
           export TMP_DOCKERHUB_JWT_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${{ secrets.DOCKERHUB_USERNAME}}'", "password": "'${{ secrets.DOCKERHUB_TOKEN }}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
           echo "Deleting Docker Hub tag embernexus/api:tmp-latest-amd"
