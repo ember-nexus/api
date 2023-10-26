@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- New releases include two new labels, 'major.minor' and 'major'. Closes #151.
 
 ## 0.0.33 - 2023-10-25
 ### Added
@@ -23,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve documentation, closes [#162].
 - Elements in endpoint get index are now sorted via the element's id.
 - Relations in collection endpoints are sorted by their id as well.
-- Upgrade upstream dependency NGINX Unit to 1.31.1.
+- Upgrade upstream dependency NGINX Unit to 1.31.1, closes [#171].
 
 ### Fixed
 - Property normalization is now standardized across endpoints, and uses events. Closes [#166].
