@@ -296,7 +296,7 @@ jobs:
         shell: bash
         run: |
           ls -la /tmp/docker
-          
+
           docker load < /tmp/docker/api-latest-amd.tar.gz
           docker load < /tmp/docker/api-latest-arm.tar.gz
           docker tag api:latest-amd embernexus/api:tmp-latest-amd
@@ -307,35 +307,35 @@ jobs:
           docker save embernexus/api:${{ env.NEW_VERSION }}-arm | gzip > /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
           docker push embernexus/api:tmp-latest-amd
           docker push embernexus/api:tmp-latest-arm
-          
+
           echo "Creating and pushing multi arch image embernexus/api:latest"
           docker manifest create \
             embernexus/api:latest \
             --amend embernexus/api:tmp-latest-amd \
             --amend embernexus/api:tmp-latest-arm
           docker manifest push embernexus/api:latest
-          
+
           echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION }}"
           docker manifest create \
             embernexus/api:${{ env.NEW_VERSION }} \
             --amend embernexus/api:tmp-latest-amd \
             --amend embernexus/api:tmp-latest-arm
           docker manifest push embernexus/api:${{ env.NEW_VERSION }}
-          
+
           echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }}"
           docker manifest create \
             embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }} \
             --amend embernexus/api:tmp-latest-amd \
             --amend embernexus/api:tmp-latest-arm
           docker manifest push embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }}
-          
+
           echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }}"
           docker manifest create \
             embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }} \
             --amend embernexus/api:tmp-latest-amd \
             --amend embernexus/api:tmp-latest-arm
           docker manifest push embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }}
-          
+
           echo "Creating temporary JWT key for Docker Hub"
           export TMP_DOCKERHUB_JWT_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${{ secrets.DOCKERHUB_USERNAME}}'", "password": "'${{ secrets.DOCKERHUB_TOKEN }}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
           echo "Deleting Docker Hub tag embernexus/api:tmp-latest-amd"
