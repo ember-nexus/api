@@ -2,11 +2,11 @@
 
 set -e
 
-#if [ -z "$BACKUP_FOLDER_CAN_BE_RESET" ]; then
-#  echo "This type of test requires that the backup folder is reset, i.e. all contained backups are deleted."
-#  echo "Set the ENV variable BACKUP_FOLDER_CAN_BE_RESET to an not empty value and run the test again if you are ok with that."
-#  exit 1
-#fi
+if [ -z "$BACKUP_FOLDER_CAN_BE_RESET" ]; then
+  echo "This type of test requires that the backup folder is reset, i.e. all contained backups are deleted."
+  echo "Set the ENV variable BACKUP_FOLDER_CAN_BE_RESET to an not empty value and run the test again if you are ok with that."
+  exit 1
+fi
 
 TERM_WIDTH=$(stty size | awk '{print $2}')
 if [ "$TERM_WIDTH" -ne 80 ]; then
