@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - New releases include two new labels, 'major.minor' and 'major'. Closes #151.
+- Release action will now update version string in documentation automatically.
 
 ## 0.0.33 - 2023-10-25
 ### Added
