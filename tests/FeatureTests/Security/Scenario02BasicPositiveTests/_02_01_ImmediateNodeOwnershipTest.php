@@ -108,15 +108,14 @@ class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
      */
     public function test2010306(): void
     {
-        $this->markTestSkipped();
         $response = $this->runPutRequest(
             sprintf('/%s', self::DATA),
             self::TOKEN,
             [
-                'name' => 'I shall not be updated.',
+                'name' => 'I shall be updated.',
             ]
         );
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertNoContentResponse($response);
     }
 
     /**
@@ -124,15 +123,14 @@ class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
      */
     public function test2010307(): void
     {
-        $this->markTestSkipped();
         $response = $this->runPatchRequest(
             sprintf('/%s', self::DATA),
             self::TOKEN,
             [
-                'name' => 'I shall not be updated.',
+                'name' => 'I shall be updated, again! :P',
             ]
         );
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertNoContentResponse($response);
     }
 
     /**
@@ -140,9 +138,8 @@ class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
      */
     public function test2010308(): void
     {
-        $this->markTestSkipped();
         $response = $this->runDeleteRequest(sprintf('/%s', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 404);
+        $this->assertIsDeletedResponse($response);
     }
 
     /**
@@ -202,6 +199,8 @@ class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
 
     /**
      * @description test 2-01-03-24
+     *
+     * @todo refactor in v0.2.0 with actual request required
      */
     public function test2010324(): void
     {

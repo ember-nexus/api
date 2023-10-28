@@ -12,7 +12,7 @@ class GetIndexTest extends BaseRequestTestCase
     public function testGetIndexSuccess(): void
     {
         $response = $this->runGetRequest('/', self::TOKEN);
-        $this->assertIsCollectionResponse($response, 2);
+        $this->assertIsCollectionResponse($response, 3);
         $documentationHeadersPath = 'docs/api-endpoints/element/get-index/200-response-header.txt';
         $documentationBodyPath = 'docs/api-endpoints/element/get-index/200-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(

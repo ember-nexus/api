@@ -31,7 +31,7 @@ class GetIndexController extends AbstractController
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (user)-[:PART_OF_GROUP*0..]->()-[:OWNS]->(element)\n".
+            "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(element)\n".
             "RETURN element.id\n".
             "ORDER BY element.id\n".
             "SKIP \$skip\n".
