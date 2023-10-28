@@ -270,8 +270,8 @@ LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
     org.opencontainers.image.licenses="GPL-3.0-only" \
     org.opencontainers.image.source="https://github.com/ember-nexus/api" \
-    org.opencontainers.image.title="Ember Nexus: API" \
-    org.opencontainers.image.description="Flexible graph based API for the modern web."
+    org.opencontainers.image.title="API" \
+    org.opencontainers.image.description="Knowledge Graph API."
 # The environment variable VERSION is set to dev by default, only release builds get their actual release version set.
 # Background: If the en user uses the dev mode, it is epected that he knows what he does.
 ARG VERSION=dev
@@ -338,8 +338,8 @@ LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
     org.opencontainers.image.licenses="GPL-3.0-only" \
     org.opencontainers.image.source="https://github.com/ember-nexus/api" \
-    org.opencontainers.image.title="Ember Nexus: API" \
-    org.opencontainers.image.description="Flexible graph based API for the modern web."
+    org.opencontainers.image.title="API" \
+    org.opencontainers.image.description="Knowledge Graph API."
 # The environment variable VERSION is set to dev by default, only release builds get their actual release version set.
 # Background: If the en user uses the dev mode, it is epected that he knows what he does.
 ARG VERSION=dev
