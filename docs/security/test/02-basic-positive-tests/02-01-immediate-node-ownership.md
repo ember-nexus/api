@@ -14,9 +14,9 @@ Users which immediately own a node, have full access to it.
 | `2-01-03-03` | `User` | `🔵 GET /<Data>/children` | -                   | ✔️ 200 | yes        | ✔️ implemented |
 | `2-01-03-04` | `User` | `🔵 GET /<Data>/related`  | -                   | ✔️ 200 | yes        | ✔️ implemented |
 | `2-01-03-05` | `User` | `🟢 POST /<Data>`         | Valid request body. | ✔️ 201 | no         | ✔️ implemented |
-| `2-01-03-06` | `User` | `🟠 PUT /<Data>`          | Valid request body. | ✔️ 204 | no         | ❌ todo         |
-| `2-01-03-07` | `User` | `🟠 PATCH /<Data>`        | Valid request body. | ✔️ 204 | no         | ❌ todo         |
-| `2-01-03-08` | `User` | `🔴 DELETE /<Data>`       | -                   | ✔️ ?   | no         | ❌ todo         |
+| `2-01-03-06` | `User` | `🟠 PUT /<Data>`          | Valid request body. | ✔️ 204 | no         | ✔️ implemented |
+| `2-01-03-07` | `User` | `🟠 PATCH /<Data>`        | Valid request body. | ✔️ 204 | no         | ✔️ implemented |
+| `2-01-03-08` | `User` | `🔴 DELETE /<Data>`       | -                   | ✔️ 204 | no         | ✔️ implemented |
 | `2-01-03-20` | `User` | `🔵 GET /<Data>/file`     | -                   | ✔️ 200 | yes        | ❌ todo v0.2.0  |
 | `2-01-03-21` | `User` | `🟢 POST /<Data>/file`    | Valid request body. | ✔️ 201 | no         | ❌ todo v0.2.0  |
 | `2-01-03-22` | `User` | `🟠 PUT /<Data>/file`     | Valid request body. | ✔️ 204 | no         | ❌ todo v0.2.0  |

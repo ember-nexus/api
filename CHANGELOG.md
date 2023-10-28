@@ -5,8 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add explicit feature tests for parents, children and related endpoints to (not) include non-OWNS-relations, related
+  to #163.
 ### Changed
 - Update readme and docker image labels.
+### Fixed
+- Fix index endpoint to include elements which are directly owned or are accessible. Fixes #163.
 
 ## 0.0.35 - 2023-10-26
 
