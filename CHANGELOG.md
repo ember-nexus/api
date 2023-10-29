@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Update readme and docker image labels.
 - Increase reference dataset version to 0.0.16, skipped 0.0.15 and 0.0.14 due to erroneous releases.
+- Upgrade PHP to 8.2.12, closes #176.
 ### Fixed
 - Fix index endpoint to include elements which are directly owned or are accessible. Fixes #163.
 
