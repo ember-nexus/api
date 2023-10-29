@@ -8,7 +8,6 @@ use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use LogicException;
-use Predis\Client;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,7 +17,6 @@ class DeleteTokenController extends AbstractController
     public function __construct(
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
-        private Client $redisClient,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
@@ -51,11 +49,6 @@ class DeleteTokenController extends AbstractController
         }
         $this->elementManager->delete($tokenElement);
         $this->elementManager->flush();
-
-        $this->redisClient->expire(
-            $this->authProvider->getRedisTokenKeyFromHashedToken(
-                $hashedToken
-            ), 0);
 
         return new NoContentResponse();
     }
