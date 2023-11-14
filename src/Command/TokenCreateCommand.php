@@ -22,8 +22,8 @@ use function Safe\preg_match;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'user:token:create', description: 'Creates a new token for an user.')]
-class UserTokenCreateCommand extends Command
+#[AsCommand(name: 'token:create', description: 'Creates a new token for an user.')]
+class TokenCreateCommand extends Command
 {
     private OutputStyle $io;
 

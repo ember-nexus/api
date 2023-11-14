@@ -71,6 +71,7 @@ class TokenGenerator
             ->addProperties([
                 'hash' => $hash,
                 'expirationDate' => (new DateTime())->add(new DateInterval(sprintf('PT%sS', $lifetimeInSeconds))),
+                'state' => ''
             ]);
         $this->elementManager->create($tokenNode);
         $this->elementManager->flush();
