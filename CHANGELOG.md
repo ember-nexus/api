@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Move code to expire deleted tokens from Redis into separate event listener, closes #111.
 - Upgrade PHP to 8.3.0, closes [#191].
 - Add parameter `--ignore-platform-req=php` to CI jobs.
+- Add env variable `PHP_CS_FIXER_IGNORE_ENV=1` in cs:list CI job.
 
 ## 0.0.36 - 2023-10-29
 ### Added

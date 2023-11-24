@@ -67,7 +67,7 @@ jobs:
       - name: CS Lint
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer cs:list"
+          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && PHP_CS_FIXER_IGNORE_ENV=1 composer cs:list"
 
   psalm:
     runs-on: ubuntu-latest
