@@ -1,7 +1,7 @@
 FROM alpine:3.18 as php_embed
-LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.2/alpine3.18/cli" \
-    org.opencontainers.image.title="Adapted php:8.2-cli-alpine3.18" \
-    org.opencontainers.image.description="Based on php:8.2-cli-alpine3.18, without sql, with embed."
+LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.18/cli" \
+    org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.18" \
+    org.opencontainers.image.description="Based on php:8.3-cli-alpine3.18, without sql, with embed."
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -29,11 +29,11 @@ ENV PHPIZE_DEPS="\
     PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64" \
     PHP_CPPFLAGS="$PHP_CFLAGS" \
     PHP_LDFLAGS="-Wl,-O1 -pie" \
-    GPG_KEYS="39B641343D8C104B2B146DC3F9C39DC0B9698544 E60913E4DF209907D8E30D96659A97C9CF2A795A 1198C0117593497A5EC5C199286AF1F9897469DC" \
-    PHP_VERSION="8.2.12" \
-    PHP_URL="https://www.php.net/distributions/php-8.2.12.tar.xz" \
-    PHP_ASC_URL="https://www.php.net/distributions/php-8.2.12.tar.xz.asc" \
-    PHP_SHA256="e1526e400bce9f9f9f774603cfac6b72b5e8f89fa66971ebc3cc4e5964083132"
+    GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA" \
+    PHP_VERSION="8.3.0" \
+    PHP_URL="https://www.php.net/distributions/php-8.3.0.tar.xz" \
+    PHP_ASC_URL="https://www.php.net/distributions/php-8.3.0.tar.xz.asc" \
+    PHP_SHA256="1db84fec57125aa93638b51bb2b15103e12ac196e2f960f0d124275b2687ea54"
 
 # persistent / runtime deps
 RUN apk add --no-cache \
@@ -218,7 +218,7 @@ RUN docker-php-ext-enable sodium \
 FROM php_embed as nginx_unit_builder
 LABEL org.opencontainers.image.source="https://github.com/nginx/unit/blob/master/pkg/docker/Dockerfile.php8.1" \
     org.opencontainers.image.title="Adapted nginx/unit:8.1" \
-    org.opencontainers.image.description="Based on nginx/unit:8.1, updated to PHP 8.2 and rewritten to work on Alpine."
+    org.opencontainers.image.description="Based on nginx/unit:8.1, updated to PHP 8.3 and rewritten to work on Alpine."
 
 RUN set -ex
 RUN apk update
@@ -360,7 +360,7 @@ WORKDIR /var/www/html
 FROM php as development
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers \
-    && pecl install xdebug-3.2.1 memprof \
+    && pecl install xdebug-3.3.0alpha3 memprof \
     && docker-php-ext-enable xdebug memprof \
     && apk del --no-network .build-deps \
     && apk add --no-cache judy aha git openssh
