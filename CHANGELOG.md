@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Move code to expire deleted tokens from Redis into separate event listener, closes #111.
+- Upgrade PHP to 8.3.0, closes [#191].
 
 ## 0.0.36 - 2023-10-29
 ### Added
