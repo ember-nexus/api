@@ -5,8 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.37 - 2023-11-24
 ### Changed
-- Move code to expire deleted tokens from Redis into separate event listener, closes #111.
+- Move code to expire deleted tokens from Redis into separate event listener, closes [#111].
 - Upgrade PHP to 8.3.0, closes [#191].
 - Add parameter `--ignore-platform-req=php` to CI jobs.
 - Add env variable `PHP_CS_FIXER_IGNORE_ENV=1` in cs:list CI job.
