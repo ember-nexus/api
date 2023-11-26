@@ -50,9 +50,9 @@ class EmberNexusStyle extends SymfonyStyle
     public function title(string $message): void
     {
         $versionString = 'development version';
-        $appMode = 'prod';
+        $appMode = 'production';
         if ('prod' !== getenv('APP_ENV')) {
-            $appMode = 'dev';
+            $appMode = 'development';
         }
         $envVersion = getenv('VERSION');
         if (is_string($envVersion)) {
