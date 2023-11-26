@@ -2,13 +2,21 @@
 
 namespace App\Tests\ExampleGenerationCommand;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 abstract class BaseCommandTestCase extends TestCase
 {
     public function runCommand(string $command): string
     {
-        return \Safe\shell_exec($command);
+        $output = [];
+        $resultCode = 0;
+        \Safe\exec($command, $output, $resultCode);
+        if (0 !== $resultCode) {
+            throw new Exception(sprintf('Result code of command should be 0, got %d.', $resultCode));
+        }
+
+        return implode("\n", $output);
     }
 
     /**

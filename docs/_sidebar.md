@@ -63,6 +63,8 @@
     - [<span class="method-get">GET</span>` /error/501/not-implemented`](/api-endpoints/error/get-501-not-implemented)
 
 - Commands
+  - **System Commands**
+    - [`healthcheck`](/commands/system/healthcheck)
   - **User Commands**
     - [`user:create`](/commands/user/user-create)
     - [`user:token:create`](/commands/user/user-token-create)

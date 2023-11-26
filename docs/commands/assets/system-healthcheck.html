@@ -43,11 +43,27 @@ body         {color: white; background-color: black;}
   <span class="highlighted dimgray ">▄</span><span class="highlighted dimgray bg-red ">▀ ▀</span><span class="highlighted dimgray ">▄</span>  <span class="bold ">Ember Nexus API</span>
    <span class="highlighted red ">▀</span><span class="highlighted white ">█</span><span class="highlighted red ">▀</span>   v0.0.37, production mode
 
-  <span class="bold ">User Token Create</span>
+  <span class="bold ">Healthcheck</span>
 
-  Found user with identifier '<span class="green ">command-test@localhost.dev</span>', user's UUID is <span class="green ">3ae8f319-f585-40bf-8bdf-3d3f990e62e6</span>.
+┌<span class="bold "> Check if databases are online </span>────────────────────────────────────────────────
+│ Neo4j version:         5.13.0 (enterprise)
+│ MongoDB version:       7.0.1
+│ Elasticsearch version: 8.8.1
+│ Redis version:         7.2.1
+│ RabbitMQ version:      3.12.6
+└ All databases are online.
 
-▶ Successfully created new token: <span class="green ">secret-token:DRiHEtg8a2O0bDInST35lU</span> .
+┌<span class="bold "> Check internal services </span>──────────────────────────────────────────────────────
+│ Alpine version:        3.18.4
+│ NGINX Unit version:    1.31.1
+│ PHP version:           8.3.0
+└ Internal services are ok.
+
+┌<span class="bold "> Check API </span>────────────────────────────────────────────────────────────────────
+│ Get index endpoint is online.
+└ API is ok.
+
+▶ Status is ok.
 
 </pre>
 </body>
