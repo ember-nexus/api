@@ -190,7 +190,7 @@ class CollectionService
     /**
      * @param UuidInterface[] $elementUuids
      */
-    public function buildUnifiedCollectionFromUuids(
+    public function buildElementCollectionFromUuids(
         array $elementUuids = [],
         int $totalElements = 0
     ): CollectionResponse {
@@ -218,7 +218,7 @@ class CollectionService
 
         return new CollectionResponse(
             [
-                'type' => '_PartialUnifiedCollection',
+                'type' => '_PartialElementCollection',
                 'id' => $this->getPageLink(),
                 'totalElements' => $totalElements,
                 'links' => [
