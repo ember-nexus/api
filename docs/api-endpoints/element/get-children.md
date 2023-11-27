@@ -6,6 +6,13 @@
 Returns all children of the specified node.  
 Returned data is paginated, and each page contains all relations between the parent and the returned children.
 
+## Request Parameters
+
+- `page`: Integer, number of the page to be returned. The first page is `1`, which is also the default if not explicitly
+  set.
+- `pageSize`: Integer, is the upper limit of nodes to be returned. Limited by the APIs instance configuration. By
+  default, 25 and can be set between 5 and 100.
+
 ## Request Example
 
 ```bash
