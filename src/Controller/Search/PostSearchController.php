@@ -137,6 +137,6 @@ class PostSearchController extends AbstractController
         }
         $totalElements = $res->asArray()['hits']['total']['value'];
 
-        return $this->collectionService->buildUnifiedCollectionFromUuids($elementIds, $totalElements);
+        return $this->collectionService->buildElementCollectionFromUuids($elementIds, $totalElements);
     }
 }

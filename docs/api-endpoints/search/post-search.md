@@ -86,7 +86,7 @@ curl \
 
 ```json
 {
-  "type": "_PartialUnifiedCollection",
+  "type": "_PartialElementCollection",
   "id": "/",
   "totalElements": 10,
   "links": {

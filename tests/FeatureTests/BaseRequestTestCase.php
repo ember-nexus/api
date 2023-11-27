@@ -163,7 +163,7 @@ abstract class BaseRequestTestCase extends TestCase
     /**
      * @param string[] $elementIds
      */
-    public function assertIsUnifiedCollectionResponse(ResponseInterface $response, int $countElements = null, array $elementIds = []): void
+    public function assertIsElementCollectionResponse(ResponseInterface $response, int $countElements = null, array $elementIds = []): void
     {
         $this->assertSame(200, $response->getStatusCode());
 
@@ -171,7 +171,7 @@ abstract class BaseRequestTestCase extends TestCase
 
         $body = \Safe\json_decode((string) $response->getBody(), true);
 
-        $this->assertSame('_PartialUnifiedCollection', $body['type']);
+        $this->assertSame('_PartialElementCollection', $body['type']);
         $this->assertArrayHasKey('id', $body);
         $this->assertIsNumeric($body['totalElements']);
         $this->assertIsArray($body['links']);

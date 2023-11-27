@@ -33,7 +33,7 @@ class _07_01_SearchAccessTest extends BaseRequestTestCase
             ]
         );
 
-        $this->assertIsUnifiedCollectionResponse(
+        $this->assertIsElementCollectionResponse(
             $response,
             3,
             [
