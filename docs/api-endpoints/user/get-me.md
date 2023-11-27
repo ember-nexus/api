@@ -27,6 +27,16 @@ curl \
 
 [Response Body](./get-me/200-response-body.json ':include :type=code')
 
+### **🔴 Error 401**
+
+<div class="code-title auto-refresh">Response Headers</div>
+
+[Response Body](./get-me/401-response-header.txt ':include :type=code')
+
+<div class="code-title auto-refresh">Response Body</div>
+
+[Response Body](./get-me/401-response-body.json ':include :type=code problem+json')
+
 ### **🔴 Error 429**
 
 <div class="code-title">Response Headers</div>
@@ -101,6 +111,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'checkTokenValidity', ...workflowDecision, label: 'is token valid?' },
     { id: 'checkRateLimit', ...workflowDecision, label: "does request exceed\nrate limit?" },
     { id: 'loadUserData', ...workflowStep, label: 'load user data' },
+    { id: 'error401', ...workflowEndError, label: 'return 401' },
     { id: 'error429', ...workflowEndError, label: 'return 429' },
     { id: 'success200', ...workflowEndSuccess , label: "return 200"},
   ],

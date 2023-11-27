@@ -7,6 +7,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 class GetMeTest extends BaseRequestTestCase
 {
     public const TOKEN = 'secret-token:S26Pn61Imv52pWOJ9GuXET';
+    public const INVALID_TOKEN = 'tokenDoesNotExist';
 
     public function testGetAnonymousMe(): void
     {
@@ -32,5 +33,11 @@ class GetMeTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($getAnonymousUserResponse, 'User');
 
         $this->assertSame((string) $getUserMeResponse->getBody(), (string) $getAnonymousUserResponse->getBody());
+    }
+
+    public function testGetUserMeWithInvalidTokenFails(): void
+    {
+        $response = $this->runGetRequest('/me', self::INVALID_TOKEN);
+        $this->assertIsProblemResponse($response, 401);
     }
 }
