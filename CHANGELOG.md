@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add documentation and automatic example generation for healthcheck command, closes [#184].
 - Add 401 error case for the GET /me endpoint, closes [#190].
+- Add parameters `page` and `pageSize` to documentation of collection endpoints, closes #189.
 ### Changed
 - Rename `_PartialUnifiedCollection` to `_PartialElementCollection`, closes #187.
 
