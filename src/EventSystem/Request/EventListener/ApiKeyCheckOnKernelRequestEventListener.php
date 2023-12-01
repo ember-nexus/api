@@ -5,6 +5,7 @@ namespace App\EventSystem\Request\EventListener;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
+use App\Type\TokenStateType;
 use App\Type\UserUuidAndTokenUuidObject;
 use Laudis\Neo4j\Databags\Statement;
 use Predis\Client;
@@ -57,9 +58,10 @@ class ApiKeyCheckOnKernelRequestEventListener
         $hashedToken = $this->tokenGenerator->hashToken($token);
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                'MATCH (user:User)-[:OWNS]->(token:Token {hash: $hash}) RETURN user.id, token.id',
+                'MATCH (user:User)-[:OWNS]->(token:Token {hash: $hash, state: $state}) RETURN user.id, token.id',
                 [
                     'hash' => $hashedToken,
+                    'state' => TokenStateType::ACTIVE->value,
                 ]
             )
         );

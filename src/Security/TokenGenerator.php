@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use App\Type\TokenStateType;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
@@ -71,7 +72,7 @@ class TokenGenerator
             ->addProperties([
                 'hash' => $hash,
                 'expirationDate' => (new DateTime())->add(new DateInterval(sprintf('PT%sS', $lifetimeInSeconds))),
-                'state' => ''
+                'state' => TokenStateType::ACTIVE->value,
             ]);
         $this->elementManager->create($tokenNode);
         $this->elementManager->flush();

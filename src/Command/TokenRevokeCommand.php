@@ -11,12 +11,10 @@ use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\DateTimeZoneId;
-use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -34,14 +32,14 @@ class TokenRevokeCommand extends Command
 {
     private OutputStyle $io;
 
-    const OPTION_FORCE = 'force';
-    const OPTION_DRY_RUN = 'dry-run';
-    const OPTION_USER = 'user';
-    const OPTION_GROUP = 'group';
-    const OPTION_ISSUED_BEFORE = 'issued-before';
-    const OPTION_ISSUED_AFTER = 'issued-after';
-    const OPTION_ISSUED_WITHOUT_EXPIRATION_DATE = 'issued-without-expiration-date';
-    const OPTION_ISSUED_WITH_EXPIRATION_DATE = 'issued-with-expiration-date';
+    public const OPTION_FORCE = 'force';
+    public const OPTION_DRY_RUN = 'dry-run';
+    public const OPTION_USER = 'user';
+    public const OPTION_GROUP = 'group';
+    public const OPTION_ISSUED_BEFORE = 'issued-before';
+    public const OPTION_ISSUED_AFTER = 'issued-after';
+    public const OPTION_ISSUED_WITHOUT_EXPIRATION_DATE = 'issued-without-expiration-date';
+    public const OPTION_ISSUED_WITH_EXPIRATION_DATE = 'issued-with-expiration-date';
 
     public function __construct(
         private ElementManager $elementManager,
@@ -125,32 +123,27 @@ class TokenRevokeCommand extends Command
         $arguments = [];
 
         if (
-            $input->getOption(self::OPTION_ISSUED_WITH_EXPIRATION_DATE) === true &&
-            $input->getOption(self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE) === true
+            true === $input->getOption(self::OPTION_ISSUED_WITH_EXPIRATION_DATE)
+            && true === $input->getOption(self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE)
         ) {
-            throw new Exception(sprintf(
-                "Using both %s and %s is not possible.",
-                self::OPTION_ISSUED_WITH_EXPIRATION_DATE,
-                self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE
-            ));
+            throw new Exception(sprintf('Using both %s and %s is not possible.', self::OPTION_ISSUED_WITH_EXPIRATION_DATE, self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE));
         }
-        if ($input->getOption(self::OPTION_ISSUED_WITH_EXPIRATION_DATE) === true) {
+        if (true === $input->getOption(self::OPTION_ISSUED_WITH_EXPIRATION_DATE)) {
             $filters[] = 't.expirationDate IS NOT NULL';
         }
-        if ($input->getOption(self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE) === true) {
+        if (true === $input->getOption(self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE)) {
             $filters[] = 't.expirationDate IS NULL';
         }
 
-
         $optionIssuedBefore = null;
-        if ($input->getOption(self::OPTION_ISSUED_BEFORE) !== null) {
+        if (null !== $input->getOption(self::OPTION_ISSUED_BEFORE)) {
             $optionIssuedBefore = DateTime::createFromFormat('Y-m-d H:i', $input->getOption(self::OPTION_ISSUED_BEFORE));
             $filters[] = 't.created < $issuedBefore';
             $arguments['issuedBefore'] = $optionIssuedBefore;
         }
 
         $optionIssuedAfter = null;
-        if ($input->getOption(self::OPTION_ISSUED_AFTER) !== null) {
+        if (null !== $input->getOption(self::OPTION_ISSUED_AFTER)) {
             $optionIssuedAfter = DateTime::createFromFormat('Y-m-d H:i', $input->getOption(self::OPTION_ISSUED_AFTER));
             $filters[] = 't.created > $issuedAfter';
             $arguments['issuedAfter'] = $optionIssuedAfter;
@@ -158,28 +151,24 @@ class TokenRevokeCommand extends Command
 
         if ($optionIssuedBefore && $optionIssuedAfter) {
             if ($optionIssuedBefore->getTimestamp() < $optionIssuedAfter->getTimestamp()) {
-                throw new Exception(sprintf(
-                    "%s can not be before %s.",
-                    self::OPTION_ISSUED_BEFORE,
-                    self::OPTION_ISSUED_AFTER
-                ));
+                throw new Exception(sprintf('%s can not be before %s.', self::OPTION_ISSUED_BEFORE, self::OPTION_ISSUED_AFTER));
             }
         }
 
-        if ($input->getOption(self::OPTION_USER) !== null) {
+        if (null !== $input->getOption(self::OPTION_USER)) {
             $userIdentifier = $input->getOption(self::OPTION_USER);
             if (preg_match(Regex::UUID_V4, $userIdentifier)) {
                 $filters[] = 'u.id = $userIdentifier';
             } else {
                 $filters[] = sprintf(
-                    "u.%s = \$userIdentifier",
+                    'u.%s = $userIdentifier',
                     $this->emberNexusConfiguration->getRegisterUniqueIdentifier()
                 );
             }
             $arguments['userIdentifier'] = $userIdentifier;
         }
 
-        if ($input->getOption(self::OPTION_GROUP) !== null) {
+        if (null !== $input->getOption(self::OPTION_GROUP)) {
             $filters[] = '(t)<-[:OWNS]-(:User)-[:IS_IN_GROUP*1..]->(:Group {id: $groupIdentifier})';
             $arguments['groupIdentifier'] = $input->getOption(self::OPTION_GROUP);
         }
@@ -187,36 +176,36 @@ class TokenRevokeCommand extends Command
         $joinedFilters = join("\nAND ", $filters);
         $finalQuery = sprintf(
             "MATCH (t:Token)<-[:OWNS]-(u:User)\n".
-            "%s%s%s".
+            '%s%s%s'.
             "RETURN t.id, t.created, t.expirationDate, u.id, u.%s as userUniqueIdentifier\n".
-            "ORDER BY t.created ASC, t.id ASC",
+            'ORDER BY t.created ASC, t.id ASC',
             count($filters) > 0 ? 'WHERE ' : '',
             $joinedFilters,
             count($filters) > 0 ? "\n" : '',
             $this->emberNexusConfiguration->getRegisterUniqueIdentifier()
         );
 
-//        $this->io->writeln("----------------------------");
-//
-//        foreach ($filters as $filter) {
-//            $this->io->writeln('  '.$filter);
-//        }
-//
-//        $this->io->writeln("----------------------------");
+        //        $this->io->writeln("----------------------------");
+        //
+        //        foreach ($filters as $filter) {
+        //            $this->io->writeln('  '.$filter);
+        //        }
+        //
+        //        $this->io->writeln("----------------------------");
 
         $res = $this->cypherEntityManager->getClient()->runStatement(
             new Statement($finalQuery, $arguments)
         );
 
-
         $countTokensToBeRevoked = count($res);
-        if ($countTokensToBeRevoked === 0) {
+        if (0 === $countTokensToBeRevoked) {
             $this->io->finalMessage('No tokens found.');
+
             return Command::SUCCESS;
         }
 
         $this->io->writeln(sprintf(
-            "  %d tokens are affected of revocation%s",
+            '  %d tokens are affected of revocation%s',
             $countTokensToBeRevoked,
             $countTokensToBeRevoked > 10 ? '. First 10 are shown:' : ':'
         ));
@@ -237,7 +226,7 @@ class TokenRevokeCommand extends Command
                 $tokenResult['u.id'],
                 $tokenResult['userUniqueIdentifier'],
                 $tokenCreated,
-                $tokenExpires ?? '-'
+                $tokenExpires ?? '-',
             ];
             if (count($rows) >= 10) {
                 break;
@@ -250,19 +239,18 @@ class TokenRevokeCommand extends Command
             'User UUID',
             'User identifier',
             'Created',
-            'Expires on'
+            'Expires on',
         ]);
         $table->setRows($rows);
         $table->render();
         $this->io->newLine();
-
 
         /**
          * @var QuestionHelper $helper
          */
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion(sprintf(
-            "  Are you sure you want to revoke all %d tokens? [y/N]: ",
+            '  Are you sure you want to revoke all %d tokens? [y/N]: ',
             $countTokensToBeRevoked
         ), false);
         if (!$helper->ask($input, $output, $question)) {
@@ -272,44 +260,36 @@ class TokenRevokeCommand extends Command
         }
         $this->io->newLine();
 
-//        foreach ($res as $tokenResult) {
-//            $this->io->writeln(sprintf(
-//                "Token: %s, owned by %s",
-//                $tokenResult['t.id'],
-//                $tokenResult['userUniqueIdentifier']
-//            ));
-//        }
+        //        foreach ($res as $tokenResult) {
+        //            $this->io->writeln(sprintf(
+        //                "Token: %s, owned by %s",
+        //                $tokenResult['t.id'],
+        //                $tokenResult['userUniqueIdentifier']
+        //            ));
+        //        }
 
-
-
-
-
-
-
-
-
-//        $normalizedArguments = [];
-//        foreach ($arguments as $i => $argument) {
-//            if ($argument instanceof \DateTimeInterface) {
-//                $argument = 'datetime("'.$argument->format('c').'")';
-//            } else {
-//                $argument = \Safe\json_encode($argument, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-//            }
-//            $normalizedArguments[] = sprintf(
-//                "    %s: %s,",
-//                $i,
-//                $argument
-//            );
-//        }
-//
-//        $finalArguments = sprintf(
-//            ":params\n{\n%s\n}",
-//            join("\n", $normalizedArguments)
-//        );
-//
-//        $this->io->writeln($finalArguments);
-//        $this->io->newLine();
-//        $this->io->writeln($finalQuery);
+        //        $normalizedArguments = [];
+        //        foreach ($arguments as $i => $argument) {
+        //            if ($argument instanceof \DateTimeInterface) {
+        //                $argument = 'datetime("'.$argument->format('c').'")';
+        //            } else {
+        //                $argument = \Safe\json_encode($argument, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        //            }
+        //            $normalizedArguments[] = sprintf(
+        //                "    %s: %s,",
+        //                $i,
+        //                $argument
+        //            );
+        //        }
+        //
+        //        $finalArguments = sprintf(
+        //            ":params\n{\n%s\n}",
+        //            join("\n", $normalizedArguments)
+        //        );
+        //
+        //        $this->io->writeln($finalArguments);
+        //        $this->io->newLine();
+        //        $this->io->writeln($finalQuery);
 
         $this->io->finalMessage('Successfully revoked tokens.');
 
