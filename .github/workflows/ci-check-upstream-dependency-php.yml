@@ -6,6 +6,8 @@ permissions:
   contents: write
 jobs:
   check-upstream-dependency-php:
+    name: 'Check upstream dependency PHP'
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
 

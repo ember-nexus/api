@@ -6,6 +6,8 @@ permissions:
   contents: write
 jobs:
   check-upstream-dependency-nginx-unit:
+    name: 'Check upstream dependency NGINX Unit'
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
 
