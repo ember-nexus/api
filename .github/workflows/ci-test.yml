@@ -10,6 +10,7 @@ jobs:
   yml-lint:
     runs-on: ubuntu-latest
     name: 'YML lint'
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v3
       - run: docker pull cytopia/yamllint
@@ -18,6 +19,7 @@ jobs:
   markdown-lint:
     runs-on: ubuntu-latest
     name: 'Markdown lint'
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v3
       - run: docker pull tmknom/markdownlint
@@ -55,6 +57,7 @@ jobs:
   cs-lint:
     runs-on: ubuntu-latest
     name: 'CS Lint'
+    timeout-minutes: 5
     needs:
       - build-docker-image
     steps:
@@ -72,6 +75,7 @@ jobs:
   psalm:
     runs-on: ubuntu-latest
     name: 'Psalm'
+    timeout-minutes: 5
     needs:
       - build-docker-image
     steps:
@@ -89,6 +93,7 @@ jobs:
   phpstan:
     runs-on: ubuntu-latest
     name: 'Phpstan'
+    timeout-minutes: 5
     needs:
       - build-docker-image
     steps:
@@ -106,6 +111,7 @@ jobs:
   test-unit:
     runs-on: ubuntu-latest
     name: 'Unit Test'
+    timeout-minutes: 5
     needs:
       - build-docker-image
     steps:
@@ -123,6 +129,7 @@ jobs:
   test-mutant:
     runs-on: ubuntu-latest
     name: 'Mutant Test'
+    timeout-minutes: 5
     needs:
       - build-docker-image
     continue-on-error: true
@@ -141,6 +148,7 @@ jobs:
   test-leak:
     runs-on: ubuntu-latest
     name: 'Leak Test'
+    timeout-minutes: 5
     needs:
       - build-docker-image
     continue-on-error: true
@@ -159,6 +167,7 @@ jobs:
   test-mess-detector:
     runs-on: ubuntu-latest
     name: 'Mess Detector'
+    timeout-minutes: 5
     needs:
       - build-docker-image
     continue-on-error: true

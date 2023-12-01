@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add parameters `page` and `pageSize` to documentation of collection endpoints, closes #189.
 ### Changed
 - Rename `_PartialUnifiedCollection` to `_PartialElementCollection`, closes #187.
+- All CI tasks are configured to have timeouts, closes #201.
 
 ## 0.0.37 - 2023-11-24
 ### Changed
