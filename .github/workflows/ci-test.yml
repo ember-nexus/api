@@ -171,6 +171,7 @@ jobs:
     needs:
       - build-docker-image
     continue-on-error: true
+    if: ${{ false }}  # deactivated due to https://github.com/ember-nexus/api/issues/203
     steps:
       - uses: actions/checkout@v3
       - run: mkdir -p /tmp/docker
@@ -194,7 +195,7 @@ jobs:
       - cs-lint
       - test-mutant
       - test-leak
-      - test-mess-detector
+#      - test-mess-detector
     strategy:
       matrix:
         dockerCompose:
@@ -234,7 +235,7 @@ jobs:
       - cs-lint
       - test-mutant
       - test-leak
-      - test-mess-detector
+#      - test-mess-detector
     steps:
       - uses: actions/checkout@v3
       - run: mkdir -p /tmp/docker
@@ -269,7 +270,7 @@ jobs:
       - cs-lint
       - test-mutant
       - test-leak
-      - test-mess-detector
+#      - test-mess-detector
     steps:
       - uses: actions/checkout@v3
       - run: mkdir -p /tmp/docker
