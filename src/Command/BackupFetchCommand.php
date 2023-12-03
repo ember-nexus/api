@@ -12,7 +12,6 @@ use League\Flysystem\ZipArchive\FilesystemZipArchiveProvider;
 use League\Flysystem\ZipArchive\ZipArchiveAdapter;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -175,8 +174,8 @@ class BackupFetchCommand extends Command
         ]);
         $manager->createDirectory(sprintf('dest://%s', $destinationPath));
         $listing = $manager->listContents('source://'.$sourcePath, true);
-        $progressBar = new ProgressBar($this->io);
-        $progressBar->start();
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal();
+        $progressBar?->start();
         /** @var \League\Flysystem\StorageAttributes $item */
         foreach ($listing as $item) {
             $itemPath = $item->path();
@@ -192,14 +191,14 @@ class BackupFetchCommand extends Command
                     ]
                 );
             }
-            $progressBar->advance();
+            $progressBar?->advance();
 
             if ($item->isDir()) {
                 $manager->createDirectory(sprintf('dest://%s/%s/%s', $destinationPath, $itemDir, $itemName));
             }
         }
-        $progressBar->finish();
-        $progressBar->clear();
+        $progressBar?->finish();
+        $progressBar?->clear();
     }
 
     public function copyFile(FilesystemOperator $source, string $sourcePath, FilesystemOperator $destination, string $destinationPath): void

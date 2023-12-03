@@ -122,8 +122,8 @@ class BackupCreateCommand extends Command
             'Found <info>%d</info> nodes.',
             $this->nodeCount
         ));
-        $progressBar = $this->io->createProgressBar($this->nodeCount);
-        $progressBar->display();
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->nodeCount);
+        $progressBar?->display();
         $nextPage = true;
         $currentPage = 0;
         while ($nextPage) {
@@ -156,10 +156,10 @@ class BackupCreateCommand extends Command
             }
 
             ++$currentPage;
-            $progressBar->advance(count($nodeIds));
-            $progressBar->display();
+            $progressBar?->advance(count($nodeIds));
+            $progressBar?->display();
         }
-        $progressBar->clear();
+        $progressBar?->clear();
         $this->io->stopSection(sprintf(
             'Successfully backed up <info>%d</info> nodes.',
             $this->nodeCount
@@ -173,8 +173,8 @@ class BackupCreateCommand extends Command
             'Found <info>%d</info> relations.',
             $this->relationCount
         ));
-        $progressBar = $this->io->createProgressBar($this->relationCount);
-        $progressBar->display();
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->relationCount);
+        $progressBar?->display();
         $nextPage = true;
         $currentPage = 0;
         while ($nextPage) {
@@ -207,10 +207,10 @@ class BackupCreateCommand extends Command
             }
 
             ++$currentPage;
-            $progressBar->advance(count($relationIds));
-            $progressBar->display();
+            $progressBar?->advance(count($relationIds));
+            $progressBar?->display();
         }
-        $progressBar->clear();
+        $progressBar?->clear();
         $this->io->stopSection(sprintf(
             'Successfully backed up <info>%d</info> relations.',
             $this->relationCount

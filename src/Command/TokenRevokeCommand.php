@@ -2,15 +2,16 @@
 
 namespace App\Command;
 
-use App\Factory\Exception\Client400IncompleteMutualDependencyExceptionFactory;
 use App\Helper\Regex;
-use App\Security\TokenGenerator;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
+use App\Type\TokenStateType;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\DateTimeZoneId;
+use Psr\Log\LoggerInterface;
+use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -34,19 +35,21 @@ class TokenRevokeCommand extends Command
 
     public const OPTION_FORCE = 'force';
     public const OPTION_DRY_RUN = 'dry-run';
+    public const OPTION_LIST_ALL_AFFECTED_TOKENS = 'list-all-affected-tokens';
     public const OPTION_USER = 'user';
     public const OPTION_GROUP = 'group';
     public const OPTION_ISSUED_BEFORE = 'issued-before';
     public const OPTION_ISSUED_AFTER = 'issued-after';
     public const OPTION_ISSUED_WITHOUT_EXPIRATION_DATE = 'issued-without-expiration-date';
     public const OPTION_ISSUED_WITH_EXPIRATION_DATE = 'issued-with-expiration-date';
+    public const NUMBER_OF_TOKENS_TO_DISPLAY = 10;
+    public const TOKEN_REVOKE_BATCH_SIZE = 10;
 
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
-        private TokenGenerator $tokenGenerator,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private Client400IncompleteMutualDependencyExceptionFactory $client400IncompleteMutualDependencyExceptionFactory
+        private LoggerInterface $logger
     ) {
         parent::__construct();
     }
@@ -65,7 +68,14 @@ class TokenRevokeCommand extends Command
             self::OPTION_DRY_RUN,
             null,
             InputOption::VALUE_NEGATABLE,
-            'Lists tokens which would be affected by revocation. Does not apply said revocation.',
+            'Does not apply revocation. Also lists all tokens which would be affected.',
+            false
+        );
+        $this->addOption(
+            self::OPTION_LIST_ALL_AFFECTED_TOKENS,
+            'l',
+            InputOption::VALUE_NEGATABLE,
+            'Lists all tokens.',
             false
         );
         // command filters
@@ -73,7 +83,7 @@ class TokenRevokeCommand extends Command
             self::OPTION_USER,
             'u',
             InputOption::VALUE_REQUIRED,
-            'Token revocation is only applied to given user. User can be specified by its UUID (takes precedent) or its identifier.',
+            'Token revocation is only applied to an given user. User can be specified by its UUID (takes precedent) or its identifier.',
             null
         );
         $this->addOption(
@@ -87,29 +97,27 @@ class TokenRevokeCommand extends Command
             self::OPTION_ISSUED_BEFORE,
             'b',
             InputOption::VALUE_REQUIRED,
-            'Token revocation is only applied to tokens issued before a given datetime. Datetime must be in the format "YYYY-MM-DD HH:MM" (UTC).',
+            'Token revocation is only applied to tokens issued before a given point in time. Datetime must be in the format "YYYY-MM-DD HH:MM" (UTC).',
             null
         );
         $this->addOption(
             self::OPTION_ISSUED_AFTER,
             'a',
             InputOption::VALUE_REQUIRED,
-            'Token revocation is only applied to tokens issued after a given datetime. Datetime must be in the format "YYYY-MM-DD HH:MM" (UTC).',
+            'Token revocation is only applied to tokens issued after a given point in time. Datetime must be in the format "YYYY-MM-DD HH:MM" (UTC).',
             null
         );
         $this->addOption(
             self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE,
             null,
-            InputOption::VALUE_NEGATABLE,
-            'Token revocation is only applied to tokens with no explicit expiration date.',
-            false
+            InputOption::VALUE_NONE,
+            'Token revocation is only applied to tokens with no explicit expiration date.'
         );
         $this->addOption(
             self::OPTION_ISSUED_WITH_EXPIRATION_DATE,
             null,
-            InputOption::VALUE_NEGATABLE,
-            'Token revocation is only applied to tokens with explicit expiration date set.',
-            false
+            InputOption::VALUE_NONE,
+            'Token revocation is only applied to tokens with explicit expiration date set.'
         );
     }
 
@@ -175,44 +183,57 @@ class TokenRevokeCommand extends Command
 
         $joinedFilters = join("\nAND ", $filters);
         $finalQuery = sprintf(
-            "MATCH (t:Token)<-[:OWNS]-(u:User)\n".
+            "MATCH (t:Token {state: '%s'})<-[:OWNS]-(u:User)\n".
             '%s%s%s'.
             "RETURN t.id, t.created, t.expirationDate, u.id, u.%s as userUniqueIdentifier\n".
             'ORDER BY t.created ASC, t.id ASC',
+            TokenStateType::ACTIVE->value,
             count($filters) > 0 ? 'WHERE ' : '',
             $joinedFilters,
             count($filters) > 0 ? "\n" : '',
             $this->emberNexusConfiguration->getRegisterUniqueIdentifier()
         );
 
-        //        $this->io->writeln("----------------------------");
-        //
-        //        foreach ($filters as $filter) {
-        //            $this->io->writeln('  '.$filter);
-        //        }
-        //
-        //        $this->io->writeln("----------------------------");
-
         $res = $this->cypherEntityManager->getClient()->runStatement(
             new Statement($finalQuery, $arguments)
         );
 
+        $this->io->isDecorated();
+
         $countTokensToBeRevoked = count($res);
         if (0 === $countTokensToBeRevoked) {
-            $this->io->finalMessage('No tokens found.');
+            $this->io->finalMessage('No active tokens found.');
 
             return Command::SUCCESS;
         }
 
-        $this->io->writeln(sprintf(
-            '  %d tokens are affected of revocation%s',
-            $countTokensToBeRevoked,
-            $countTokensToBeRevoked > 10 ? '. First 10 are shown:' : ':'
-        ));
+        $showOnlyFirstTokens = $countTokensToBeRevoked > self::NUMBER_OF_TOKENS_TO_DISPLAY
+            && false === $input->getOption(self::OPTION_LIST_ALL_AFFECTED_TOKENS)
+            && false === $input->getOption(self::OPTION_DRY_RUN);
+
+        if (true === $input->getOption(self::OPTION_DRY_RUN)) {
+            $this->io->writeln(sprintf(
+                '  %d tokens would be affected by revocation:',
+                $countTokensToBeRevoked
+            ));
+        } else {
+            if ($showOnlyFirstTokens) {
+                $this->io->writeln(sprintf(
+                    '  %d tokens are affected by revocation. First %s are shown:',
+                    $countTokensToBeRevoked,
+                    self::NUMBER_OF_TOKENS_TO_DISPLAY
+                ));
+            } else {
+                $this->io->writeln(sprintf(
+                    '  %d tokens are affected by revocation:',
+                    $countTokensToBeRevoked
+                ));
+            }
+        }
         $this->io->newLine();
 
         $rows = [];
-        foreach ($res as $i => $tokenResult) {
+        foreach ($res as $tokenResult) {
             $tokenCreated = $tokenResult['t.created'];
             if ($tokenCreated instanceof DateTimeZoneId) {
                 $tokenCreated = $tokenCreated->toDateTime()->format('Y-m-d H:i:s');
@@ -228,7 +249,7 @@ class TokenRevokeCommand extends Command
                 $tokenCreated,
                 $tokenExpires ?? '-',
             ];
-            if (count($rows) >= 10) {
+            if (count($rows) >= self::NUMBER_OF_TOKENS_TO_DISPLAY && $showOnlyFirstTokens) {
                 break;
             }
         }
@@ -245,51 +266,58 @@ class TokenRevokeCommand extends Command
         $table->render();
         $this->io->newLine();
 
-        /**
-         * @var QuestionHelper $helper
-         */
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion(sprintf(
-            '  Are you sure you want to revoke all %d tokens? [y/N]: ',
-            $countTokensToBeRevoked
-        ), false);
-        if (!$helper->ask($input, $output, $question)) {
-            $this->io->finalMessage('Aborted revoking tokens.');
+        if (true === $input->getOption(self::OPTION_DRY_RUN)) {
+            $this->io->finalMessage('Dry run finished.');
 
-            return self::FAILURE;
+            return self::SUCCESS;
         }
+
+        if (true !== $input->getOption(self::OPTION_FORCE)) {
+            /**
+             * @var QuestionHelper $helper
+             */
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(sprintf(
+                '  Are you sure you want to revoke all %d tokens? [y/N]: ',
+                $countTokensToBeRevoked
+            ), false);
+            if (!$helper->ask($input, $output, $question)) {
+                $this->io->finalMessage('Aborted revoking tokens.');
+
+                return self::FAILURE;
+            }
+            $this->io->newLine();
+        }
+
+        $this->io->writeln('  Revoking tokens...');
+
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal($countTokensToBeRevoked);
+        $progressBar?->display();
+
+        foreach ($res as $i => $tokenResult) {
+            $tokenUuid = Uuid::fromString($tokenResult['t.id']);
+            $tokenElement = $this->elementManager->getNode($tokenUuid);
+            if (!$tokenElement) {
+                $message = sprintf(
+                    'Unable to revoke token with UUID %s from user with UUID %s, as token could not be fetched from database.',
+                    $tokenResult['t.id'],
+                    $tokenResult['u.id']
+                );
+                $this->io->writeln($message);
+                $this->logger->notice($message);
+                continue;
+            }
+            $tokenElement->addProperty('state', TokenStateType::REVOKED->value);
+            $this->elementManager->merge($tokenElement);
+            if (0 === $i % self::TOKEN_REVOKE_BATCH_SIZE) {
+                $this->elementManager->flush();
+                $progressBar?->setProgress($i + 1);
+            }
+        }
+        $this->elementManager->flush();
+        $progressBar?->finish();
+        $progressBar?->clear();
         $this->io->newLine();
-
-        //        foreach ($res as $tokenResult) {
-        //            $this->io->writeln(sprintf(
-        //                "Token: %s, owned by %s",
-        //                $tokenResult['t.id'],
-        //                $tokenResult['userUniqueIdentifier']
-        //            ));
-        //        }
-
-        //        $normalizedArguments = [];
-        //        foreach ($arguments as $i => $argument) {
-        //            if ($argument instanceof \DateTimeInterface) {
-        //                $argument = 'datetime("'.$argument->format('c').'")';
-        //            } else {
-        //                $argument = \Safe\json_encode($argument, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        //            }
-        //            $normalizedArguments[] = sprintf(
-        //                "    %s: %s,",
-        //                $i,
-        //                $argument
-        //            );
-        //        }
-        //
-        //        $finalArguments = sprintf(
-        //            ":params\n{\n%s\n}",
-        //            join("\n", $normalizedArguments)
-        //        );
-        //
-        //        $this->io->writeln($finalArguments);
-        //        $this->io->newLine();
-        //        $this->io->writeln($finalQuery);
 
         $this->io->finalMessage('Successfully revoked tokens.');
 

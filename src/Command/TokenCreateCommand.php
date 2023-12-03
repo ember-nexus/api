@@ -53,7 +53,7 @@ class TokenCreateCommand extends Command
     {
         $this->io = new EmberNexusStyle($input, $output);
 
-        $this->io->title('User Token Create');
+        $this->io->title('Token Create');
 
         $identifier = $input->getArgument('identifier');
 

@@ -11,7 +11,7 @@ php bin/console token:revoke --help
 <div class="code-title auto-refresh">Example Command</div>
 
 ```bash
-php bin/console token:revoke
+php bin/console token:revoke -f
 ```
 
 [](../assets/token-revoke.html ':include :type=html')
