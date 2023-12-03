@@ -38,6 +38,7 @@
     "boesing/psalm-plugin-stringf": "^1.1",
     "friendsofphp/php-cs-fixer": "^3.8",
     "infection/infection": "^0.27",
+    "pdepend/pdepend": "~2.15",
     "phpbench/phpbench": "^1.2",
     "phpmd/phpmd": "^2.13",
     "phpspec/prophecy-phpunit": "^2.0",
