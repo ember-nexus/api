@@ -5,19 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.0.38 - 2023-12-08
 ### Added
 - Add documentation and automatic example generation for healthcheck command, closes [#184].
 - Add 401 error case for the GET /me endpoint, closes [#190].
-- Add parameters `page` and `pageSize` to documentation of collection endpoints, closes #189.
+- Add parameters `page` and `pageSize` to documentation of collection endpoints, closes [#189].
+
 ### Changed
-- Rename `_PartialUnifiedCollection` to `_PartialElementCollection`, closes #187.
-- All CI tasks are configured to have timeouts, closes #201.
+- Rename `_PartialUnifiedCollection` to `_PartialElementCollection`, closes [#187].
+- All CI tasks are configured to have timeouts, closes [#201].
 - Upgrade dependencies, e.g. Symfony to 7.0 and intermediate Neo4j PHP dependencies as far as possible.
-- Deactivate `composer mess` in CI due to upstream issue, tracked in #203.
-- Upgrade to Alpine 3.19, closes #205.
+- Deactivate `composer mess` in CI due to upstream issue, tracked in [#203].
+- Upgrade to Alpine 3.19, closes [#205].
+
 ### Fixed
-- Fix logic to detect readable relations between user and group elements, fixes #188.
-- Uncommented and fixed assertions in feature tests, related to #188.
+- Fix logic to detect readable relations between user and group elements, fixes [#188].
+- Uncommented and fixed assertions in feature tests, related to [#188].
 
 ## 0.0.37 - 2023-11-24
 ### Changed
