@@ -36,7 +36,10 @@ class DeleteTokenTest extends BaseRequestTestCase
         $indexResponse = $this->runGetRequest('/', self::TOKEN_2);
         $this->assertIsCollectionResponse($indexResponse);
 
-        $response = $this->runDeleteRequest(sprintf('/%s', self::TOKEN_2_UUID), self::TOKEN_2);
+        $indexResponse = $this->runGetRequest('/', self::TOKEN_3);
+        $this->assertIsCollectionResponse($indexResponse);
+
+        $response = $this->runDeleteRequest(sprintf('/%s', self::TOKEN_2_UUID), self::TOKEN_3);
         $this->assertNoContentResponse($response);
 
         $failingIndexResponse = $this->runGetRequest('/', self::TOKEN_2);

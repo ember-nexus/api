@@ -26,8 +26,10 @@ class ExpireTokenOnTokenDeleteEventListener
         if ('Token' !== $oldToken->getLabel()) {
             return;
         }
-        $hashedToken = $this->authProvider->getHashedToken();
-        if (null === $hashedToken) {
+
+        $oldTokenHash = $oldToken->getProperty('hash');
+
+        if (null === $oldTokenHash) {
             $this->logger->critical(
                 'Unable to expire deleted token from redis.',
                 [
@@ -39,9 +41,12 @@ class ExpireTokenOnTokenDeleteEventListener
 
             return;
         }
+
         $this->redisClient->expire(
             $this->authProvider->getRedisTokenKeyFromHashedToken(
-                $hashedToken
-            ), 0);
+                $oldTokenHash
+            ),
+            0
+        );
     }
 }
