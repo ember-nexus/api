@@ -11,3 +11,8 @@ Open tasks:
   - [ ] Update local Dockerfile.
   - [ ] Add changelog entry.
   - [ ] Release new patch release.
+- See also:
+  - [Alpine release branches](https://www.alpinelinux.org/releases/).
+  - [Alpine news archive](https://www.alpinelinux.org/posts/).
+  - [Alpine on Docker Hub](https://hub.docker.com/_/alpine).
+  - [Alpine branches on GitHub](https://github.com/alpinelinux/aports/branches).

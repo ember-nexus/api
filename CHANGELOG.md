@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All CI tasks are configured to have timeouts, closes #201.
 - Upgrade dependencies, e.g. Symfony to 7.0 and intermediate Neo4j PHP dependencies as far as possible.
 - Deactivate `composer mess` in CI due to upstream issue, tracked in #203.
+- Upgrade to Alpine 3.19, closes #205.
 
 ## 0.0.37 - 2023-11-24
 ### Changed

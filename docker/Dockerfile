@@ -1,7 +1,7 @@
-FROM alpine:3.18 as php_embed
-LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.18/cli" \
-    org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.18" \
-    org.opencontainers.image.description="Based on php:8.3-cli-alpine3.18, without sql, with embed."
+FROM alpine:3.19 as php_embed
+LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.19/cli" \
+    org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.19" \
+    org.opencontainers.image.description="Based on php:8.3-cli-alpine3.19, without sql, with embed."
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
