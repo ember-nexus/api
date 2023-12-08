@@ -23,12 +23,12 @@ class _05_02_MixedRelationOwnershipTest extends BaseRequestTestCase
         $this->assertIsCollectionResponse($response);
     }
 
-    public function testGetAllowedNode(): void
+    public function testGetAllowedNodes(): void
     {
-        //        $response = $this->runGetRequest(sprintf('/%s', self::GROUP_1), self::TOKEN);
-        //        $this->assertIsNodeResponse($response, 'Data');
-        //        $response = $this->runGetRequest(sprintf('/%s', self::GROUP_2), self::TOKEN);
-        //        $this->assertIsNodeResponse($response, 'Data');
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP_1), self::TOKEN);
+        $this->assertIsNodeResponse($response, 'Group');
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP_2), self::TOKEN);
+        $this->assertIsNodeResponse($response, 'Group');
         $response = $this->runGetRequest(sprintf('/%s', self::DATA_1), self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $response = $this->runGetRequest(sprintf('/%s', self::DATA_2), self::TOKEN);
