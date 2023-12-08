@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Fixed
+- Deleting tokens now deletes the correct token from Redis, fixes #186.
 
 ## 0.0.38 - 2023-12-08
 ### Added
