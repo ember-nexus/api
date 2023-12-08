@@ -18,7 +18,7 @@ class _02_03_PathNodeOwnershipTest extends BaseRequestTestCase
         $this->assertIsCollectionResponse($response);
     }
 
-    public function testGetAllowedNode(): void
+    public function testGetAllowedNodes(): void
     {
         $response = $this->runGetRequest(sprintf('/%s', self::DATA_1), self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');

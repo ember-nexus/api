@@ -20,7 +20,7 @@ class _02_02_ImmediateRelationOwnershipTest extends BaseRequestTestCase
         $this->assertIsCollectionResponse($response);
     }
 
-    public function testGetAllowedNode(): void
+    public function testGetAllowedNodes(): void
     {
         $response = $this->runGetRequest(sprintf('/%s', self::DATA_1), self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
@@ -28,7 +28,7 @@ class _02_02_ImmediateRelationOwnershipTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($response, 'Data');
     }
 
-    public function testGetAllowedRelation(): void
+    public function testGetAllowedRelations(): void
     {
         $response = $this->runGetRequest(sprintf('/%s', self::OWNS_1), self::TOKEN);
         $this->assertIsRelationResponse($response, 'OWNS');
