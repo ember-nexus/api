@@ -44,7 +44,6 @@ class UserCreateCommand extends Command
                 $this->emberNexusConfiguration->getRegisterUniqueIdentifier()
             )
         );
-        // TODO: Make plaintext password insert optional, direct insert from console would be better
         $this->addArgument('password', InputArgument::REQUIRED, 'Password of the user');
     }
 

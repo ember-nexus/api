@@ -15,5 +15,4 @@ services:
       - name: kernel.event_listener
         event: 'kernel.exception'
         method: 'onKernelException'
-        # todo: check if lower priority is ok
         priority: 2048

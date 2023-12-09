@@ -65,7 +65,6 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
      */
     public function test1030402(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/parents', self::RELATION_1), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -75,7 +74,6 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
      */
     public function test1030403(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/children', self::RELATION_1), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -85,7 +83,6 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
      */
     public function test1030404(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/related', self::RELATION_1), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -311,7 +308,6 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
      */
     public function test1030602(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/parents', self::RELATION_2), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -321,7 +317,6 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
      */
     public function test1030603(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/children', self::RELATION_2), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -331,7 +326,6 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
      */
     public function test1030604(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/related', self::RELATION_2), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }

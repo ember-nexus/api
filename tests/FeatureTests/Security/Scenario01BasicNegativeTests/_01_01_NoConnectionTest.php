@@ -42,7 +42,6 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010202(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/parents', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -52,7 +51,6 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010203(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/children', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
@@ -62,7 +60,6 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010204(): void
     {
-        //        $this->markTestIncomplete();
         $response = $this->runGetRequest(sprintf('/%s/related', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
