@@ -40,10 +40,6 @@ class EmberNexusStyle extends SymfonyStyle
             'ember-nexus-orange',
             new OutputFormatterStyle('#FA9640', '#D82739')
         );
-        //        $output->getFormatter()->setStyle(
-        //            'info',
-        //            new OutputFormatterStyle('#D82739')
-        //        );
         parent::__construct($input, $output);
     }
 
@@ -80,9 +76,6 @@ class EmberNexusStyle extends SymfonyStyle
     public function finalMessage(array|string $message): void
     {
         if ($this->isInSection) {
-            /*
-             * todo replace exception with new exception factory - requires ember nexus style factory itself
-             */
             throw new Exception('Function success() should only be called at end of command, not within sections.');
         }
         if (is_string($message)) {

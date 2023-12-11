@@ -28,7 +28,6 @@ class ExceptionEventListener
      */
     public function onKernelException(ExceptionEvent $event): void
     {
-        //        $this->logger->error($event->getThrowable());
         $originalException = $extendedException = $event->getThrowable();
         if (!($originalException instanceof ProblemJsonException)) {
             $extendedException = $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Other internal exception.');

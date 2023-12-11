@@ -10,11 +10,6 @@ services:
         event: 'kernel.request'
         method: 'onKernelRequest'
 
-#  App\EventSystem\Request\EventListener\RouterListener:
-#    arguments:
-#      $matcher: '@router.default'
-
-
   App\EventSystem\Request\EventListener\LogRequestListener:
     arguments:
       $matcher: '@router.default'

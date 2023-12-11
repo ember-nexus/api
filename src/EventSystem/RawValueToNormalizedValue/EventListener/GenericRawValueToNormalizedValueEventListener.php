@@ -11,7 +11,6 @@ class GenericRawValueToNormalizedValueEventListener
         $rawValue = $event->getRawValue();
         if (
             is_array($rawValue)
-//            is_object($rawValue) ||
             || is_numeric($rawValue)
             || is_bool($rawValue)
             || is_string($rawValue)
