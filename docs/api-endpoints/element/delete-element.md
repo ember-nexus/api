@@ -21,7 +21,7 @@ curl \
 
 ### **🟢 Success 204**
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./delete-element/204-response-header.txt ':include :type=code')
 
@@ -31,11 +31,11 @@ Success response does not have a return body.
 
 This error can only be thrown if the token is invalid or if there is no default anonymous user.
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./delete-element/401-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./delete-element/401-response-body.json ':include :type=code problem+json')
 
@@ -44,11 +44,11 @@ This error can only be thrown if the token is invalid or if there is no default 
 Error 404 is thrown if the element to be deleted does not exist or if the user does not have permission to delete the
 element.
 
-<div class="code-title">Response Headers</div>
+<div class="code-title auto-refresh">Response Headers</div>
 
 [Response Body](./delete-element/404-response-header.txt ':include :type=code')
 
-<div class="code-title">Response Body</div>
+<div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./delete-element/404-response-body.json ':include :type=code problem+json')
 

@@ -96,6 +96,7 @@
     "test:unit": "php vendor/phpunit/phpunit/phpunit",
     "test:feature": "php bin/console cache:clear && ./test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration phpunit.feature.xml.dist ./tests/FeatureTests",
     "test:example-generation-controller": "php bin/console cache:clear && ./test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration phpunit.feature.xml.dist ./tests/ExampleGenerationController && php bin/console cache:clear",
+    "test:example-generation-controller:test": "php bin/console cache:clear && ./test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration phpunit.feature.xml.dist ./tests/ExampleGenerationController --group test && php bin/console cache:clear",
     "test:example-generation-command": "php bin/console cache:clear && ./test-feature-command-prepare && php vendor/phpunit/phpunit/phpunit --configuration phpunit.feature.xml.dist ./tests/ExampleGenerationCommand && php bin/console cache:clear",
     "test:feature:test": "php bin/console cache:clear && ./test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration phpunit.feature.xml.dist ./tests/FeatureTests --group test",
     "test:coverage:xml": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --coverage-clover coverage.xml",
