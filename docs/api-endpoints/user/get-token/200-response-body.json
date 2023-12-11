@@ -2,9 +2,10 @@
   "type": "Token",
   "id": "2f8e245a-ff14-4f3c-b2c9-b8f7a61e55d6",
   "data": {
-    "created": "2023-10-06T21:16:27+00:00",
-    "updated": "2023-10-06T21:16:27+00:00",
+    "created": "2023-12-10T14:34:21+00:00",
+    "updated": "2023-12-10T14:34:21+00:00",
     "note": "Token contains token only due to testing purposes.",
-    "scenario": "endpoint.user.getToken"
+    "scenario": "endpoint.user.getToken",
+    "state": "ACTIVE"
   }
 }
