@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add documentation and automatic documentation tests for endpoint DELETE `/token`, closes #208.
 ### Changed
+- **Switch license to AGPL-3.0-only, closes #215.**
 - Remove commented and unused code, configuration etc., closes #168.
 - Remove test CI triggers "pull_request" and "fork", closes #216.
 ### Fixed
