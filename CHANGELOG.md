@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add documentation and automatic documentation tests for endpoint DELETE `/token`, closes #208.
 ### Changed
 - Remove commented and unused code, configuration etc., closes #168.
+- Remove test CI triggers "pull_request" and "fork", closes #216.
 ### Fixed
 - Deleting tokens now deletes the correct token from Redis, fixes #186.
 - Add missing feature tests, related to #168.
