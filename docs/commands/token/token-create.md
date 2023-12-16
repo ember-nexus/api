@@ -11,7 +11,7 @@ php bin/console token:create --help
 <div class="code-title auto-refresh">Example Command</div>
 
 ```bash
-php bin/console token:create command-test@localhost.dev 1234
+php bin/console token:create token-create-test@localhost.dev 1234
 ```
 
 [](../assets/token-create.html ':include :type=html')

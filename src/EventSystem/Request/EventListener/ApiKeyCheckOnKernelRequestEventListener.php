@@ -8,9 +8,11 @@ use App\Security\TokenGenerator;
 use App\Type\TokenStateType;
 use App\Type\UserUuidAndTokenUuidObject;
 use Laudis\Neo4j\Databags\Statement;
-use Predis\Client;
+use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
+use Predis\Client as RedisClient;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\Uuid;
+use Safe\DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -22,7 +24,7 @@ class ApiKeyCheckOnKernelRequestEventListener
     public function __construct(
         private TokenGenerator $tokenGenerator,
         private CypherEntityManager $cypherEntityManager,
-        private Client $redisClient,
+        private RedisClient $redisClient,
         private AuthProvider $authProvider,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory
     ) {
@@ -58,7 +60,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         $hashedToken = $this->tokenGenerator->hashToken($token);
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                'MATCH (user:User)-[:OWNS]->(token:Token {hash: $hash, state: $state}) RETURN user.id, token.id',
+                'MATCH (user:User)-[:OWNS]->(token:Token {hash: $hash, state: $state}) RETURN user.id, token.id, token.expirationDate',
                 [
                     'hash' => $hashedToken,
                     'state' => TokenStateType::ACTIVE->value,
@@ -77,10 +79,20 @@ class ApiKeyCheckOnKernelRequestEventListener
         $userUuid = Uuid::fromString($res->first()->get('user.id'));
         $tokenUuid = Uuid::fromString($res->first()->get('token.id'));
 
+        $tokenLifetimeInRedis = 60 * 30; // 30 minutes
+        if ($res->first()->get('token.expirationDate')) {
+            /**
+             * @var LaudisDateTime $tokenExpirationDate
+             */
+            $tokenExpirationDate = $res->first()->get('token.expirationDate');
+            $secondsUntilTokenExpires = $tokenExpirationDate->toDateTime()->getTimestamp() - (new DateTime())->getTimestamp();
+            $tokenLifetimeInRedis = min($tokenLifetimeInRedis, $secondsUntilTokenExpires);
+        }
+
         $redisKey = $this->authProvider->getRedisTokenKeyFromHashedToken($hashedToken);
         $this->redisClient->hset($redisKey, 'token', $tokenUuid->toString());
         $this->redisClient->hset($redisKey, 'user', $userUuid->toString());
-        $this->redisClient->expire($redisKey, 60 * 30); // 30 minutes
+        $this->redisClient->expire($redisKey, $tokenLifetimeInRedis);
 
         return new UserUuidAndTokenUuidObject(
             $userUuid,

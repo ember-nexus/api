@@ -78,7 +78,7 @@ class TokenCreateCommand extends Command
                     $identifier
                 ));
 
-                return self::FAILURE;
+                return Command::FAILURE;
             }
             if ($res->count() > 1) {
                 $this->io->finalMessage(sprintf(
@@ -87,7 +87,7 @@ class TokenCreateCommand extends Command
                     $identifier
                 ));
 
-                return self::FAILURE;
+                return Command::FAILURE;
             }
             $identifier = Uuid::fromString($res->first()->get('id'));
         }
@@ -100,7 +100,7 @@ class TokenCreateCommand extends Command
                 $identifier->toString()
             ));
 
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         $this->io->writeln(
@@ -119,7 +119,7 @@ class TokenCreateCommand extends Command
                 $identifier->toString()
             ));
 
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         if (!password_verify($input->getArgument('password'), $user->getProperty('_passwordHash'))) {
@@ -128,7 +128,7 @@ class TokenCreateCommand extends Command
                 $identifier->toString()
             ));
 
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         $token = $this->tokenGenerator->createNewToken($identifier);

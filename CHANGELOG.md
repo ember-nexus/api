@@ -13,9 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove commented and unused code, configuration etc., closes #168.
 - Remove test CI triggers "pull_request" and "fork", closes #216.
 - Rename command `user:token:create` to `token:create`, related to #59.
+- Tokens cached by Redis now automatically expire within 30 minutes or as their expiration date is reached, part of #59.
 ### Fixed
 - Deleting tokens now deletes the correct token from Redis, fixes #186.
 - Add missing feature tests, related to #168.
+- Fix bug where datetime-similar properties could not be correctly returned to the user, uncovered during #59.
 
 ## 0.0.38 - 2023-12-08
 ### Added

@@ -74,7 +74,7 @@ class UserCreateCommand extends Command
                 $this->emberNexusConfiguration->getRegisterUniqueIdentifier()
             ));
 
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         $userId = Uuid::uuid4();

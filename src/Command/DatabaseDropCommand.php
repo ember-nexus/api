@@ -62,7 +62,7 @@ class DatabaseDropCommand extends Command
             if (!$helper->ask($input, $output, $question)) {
                 $this->io->writeln('Aborted dropping databases.');
 
-                return self::FAILURE;
+                return Command::FAILURE;
             }
             $this->io->newLine();
         }

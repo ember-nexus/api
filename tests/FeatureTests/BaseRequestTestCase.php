@@ -317,6 +317,13 @@ abstract class BaseRequestTestCase extends TestCase
         ));
     }
 
+    public function assertIsTokenWithState(ResponseInterface $response, string $state): void
+    {
+        $this->assertIsNodeResponse($response, 'Token');
+        $tokenBody = $this->getBody($response);
+        $this->assertSame($state, $tokenBody['data']['state']);
+    }
+
     public function getUuidFromLocation(ResponseInterface $response): string
     {
         $location = $response->getHeader('Location')[0];

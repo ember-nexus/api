@@ -19,8 +19,11 @@ class TokenCreateTest extends BaseCommandTestCase
 
     public function testTokenCreate(): void
     {
+        $this->runCommand(
+            'APP_ENV=prod php bin/console user:create token-create-test@localhost.dev 1234'
+        );
         $commandOutput = $this->runCommand(sprintf(
-            'APP_ENV=prod VERSION=%s php bin/console token:create --ansi command-test@localhost.dev 1234 | aha -s --black --css "./cli-style.css"',
+            'APP_ENV=prod VERSION=%s php bin/console token:create --ansi token-create-test@localhost.dev 1234 | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
