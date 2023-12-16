@@ -32,6 +32,7 @@ class TokenRevokeTest extends BaseCommandTestCase
             [
                 'Found user with identifier',
                 'Successfully revoked new token:',
+                'localhost.dev'
             ]
         );
     }
