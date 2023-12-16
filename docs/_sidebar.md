@@ -67,7 +67,9 @@
     - [`healthcheck`](/commands/system/healthcheck)
   - **User Commands**
     - [`user:create`](/commands/user/user-create)
-    - [`user:token:create`](/commands/user/user-token-create)
+  - **Token Commands**
+    - [`token:create`](/commands/token/token-create)
+    - [`token:revoke`](/commands/token/token-revoke)
   - **Backup Commands**
     - [`backup:list`](/commands/backup/backup-list)
     - [`backup:fetch`](/commands/backup/backup-fetch)

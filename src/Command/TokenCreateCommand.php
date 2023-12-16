@@ -22,8 +22,8 @@ use function Safe\preg_match;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'user:token:create', description: 'Creates a new token for an user.')]
-class UserTokenCreateCommand extends Command
+#[AsCommand(name: 'token:create', description: 'Creates a new token for an user.')]
+class TokenCreateCommand extends Command
 {
     private OutputStyle $io;
 
@@ -53,7 +53,7 @@ class UserTokenCreateCommand extends Command
     {
         $this->io = new EmberNexusStyle($input, $output);
 
-        $this->io->title('User Token Create');
+        $this->io->title('Token Create');
 
         $identifier = $input->getArgument('identifier');
 
@@ -78,7 +78,7 @@ class UserTokenCreateCommand extends Command
                     $identifier
                 ));
 
-                return self::FAILURE;
+                return Command::FAILURE;
             }
             if ($res->count() > 1) {
                 $this->io->finalMessage(sprintf(
@@ -87,7 +87,7 @@ class UserTokenCreateCommand extends Command
                     $identifier
                 ));
 
-                return self::FAILURE;
+                return Command::FAILURE;
             }
             $identifier = Uuid::fromString($res->first()->get('id'));
         }
@@ -100,7 +100,7 @@ class UserTokenCreateCommand extends Command
                 $identifier->toString()
             ));
 
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         $this->io->writeln(
@@ -119,7 +119,7 @@ class UserTokenCreateCommand extends Command
                 $identifier->toString()
             ));
 
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         if (!password_verify($input->getArgument('password'), $user->getProperty('_passwordHash'))) {
@@ -128,7 +128,7 @@ class UserTokenCreateCommand extends Command
                 $identifier->toString()
             ));
 
-            return self::FAILURE;
+            return Command::FAILURE;
         }
 
         $token = $this->tokenGenerator->createNewToken($identifier);

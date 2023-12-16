@@ -5,6 +5,7 @@ namespace App\Style;
 use App\Console\EmberNexusOutputWrapper;
 use Exception;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -150,5 +151,14 @@ class EmberNexusStyle extends SymfonyStyle
     public function getLineLength(): int
     {
         return $this->lineLength;
+    }
+
+    public function createProgressBarInInteractiveTerminal(int $max = 0): ?ProgressBar
+    {
+        if (getenv('TERM')) {
+            return null;
+        }
+
+        return parent::createProgressBar($max);
     }
 }

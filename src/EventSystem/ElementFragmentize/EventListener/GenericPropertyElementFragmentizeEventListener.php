@@ -6,7 +6,11 @@ use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use DateTimeInterface;
-use Laudis\Neo4j\Types\DateTimeZoneId;
+use Laudis\Neo4j\Types\Date as LaudisDate;
+use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
+use Laudis\Neo4j\Types\DateTimeZoneId as LaudisDateTimeZoneId;
+use Laudis\Neo4j\Types\LocalDateTime as LaudisLocalDateTime;
+use Laudis\Neo4j\Types\LocalTime as LaudisLocalTime;
 
 /**
  * @SuppressWarnings(PHPMD.CyclomaticComplexity)
@@ -50,9 +54,29 @@ class GenericPropertyElementFragmentizeEventListener
                 $elasticFragment->addProperty($name, $value->format('Uu'));
                 continue;
             }
-            if ($value instanceof DateTimeZoneId) {
+            if ($value instanceof LaudisDateTimeZoneId) {
                 $cypherFragment->addProperty($name, $value);
                 $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
+                continue;
+            }
+            if ($value instanceof LaudisDateTime) {
+                $cypherFragment->addProperty($name, $value);
+                $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
+                continue;
+            }
+            if ($value instanceof LaudisDate) {
+                $cypherFragment->addProperty($name, $value);
+                $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
+                continue;
+            }
+            if ($value instanceof LaudisLocalDateTime) {
+                $cypherFragment->addProperty($name, $value);
+                $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
+                continue;
+            }
+            if ($value instanceof LaudisLocalTime) {
+                $cypherFragment->addProperty($name, $value);
+                $elasticFragment->addProperty($name, $value->toArray());
                 continue;
             }
             if (is_object($value)) {

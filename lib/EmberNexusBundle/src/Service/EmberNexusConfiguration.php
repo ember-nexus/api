@@ -241,6 +241,9 @@ class EmberNexusConfiguration
         if (0 === strlen($registerUniqueIdentifier)) {
             throw new Exception('Unique identifier can not be an empty string.');
         }
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $registerUniqueIdentifier)) {
+            throw new Exception("Unique identifier must only contain alphanumeric characters and '_'.");
+        }
         $this->registerUniqueIdentifier = $registerUniqueIdentifier;
 
         return $this;

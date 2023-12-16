@@ -86,8 +86,8 @@ class BackupLoadCommand extends Command
     private function loadNodes(): void
     {
         $this->io->startSection('Step 1 of 4: Loading Nodes');
-        $progressBar = $this->io->createProgressBar($this->nodeCount);
-        $progressBar->display();
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->nodeCount);
+        $progressBar?->display();
         $nodeFiles = $this->backupStorage->listContents($this->backupName.'/node/', true);
         $pageCount = 0;
         $totalCount = 0;
@@ -105,14 +105,14 @@ class BackupLoadCommand extends Command
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {
                 $this->elementManager->flush();
-                $progressBar->advance($pageCount);
+                $progressBar?->advance($pageCount);
                 $totalCount += $pageCount;
                 $pageCount = 0;
             }
         }
         $this->elementManager->flush();
-        $progressBar->advance($pageCount);
-        $progressBar->clear();
+        $progressBar?->advance($pageCount);
+        $progressBar?->clear();
         $totalCount += $pageCount;
         $this->io->stopSection(sprintf(
             'Loaded <info>%d</info> nodes.',
@@ -123,8 +123,8 @@ class BackupLoadCommand extends Command
     private function loadRelations(): void
     {
         $this->io->startSection('Step 2 of 4: Loading Relations');
-        $progressBar = $this->io->createProgressBar($this->relationCount);
-        $progressBar->display();
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->relationCount);
+        $progressBar?->display();
         $relationFiles = $this->backupStorage->listContents($this->backupName.'/relation/', true);
         $totalCount = 0;
         $pageCount = 0;
@@ -142,14 +142,14 @@ class BackupLoadCommand extends Command
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {
                 $this->elementManager->flush();
-                $progressBar->advance($pageCount);
+                $progressBar?->advance($pageCount);
                 $totalCount += $pageCount;
                 $pageCount = 0;
             }
         }
         $this->elementManager->flush();
-        $progressBar->advance($pageCount);
-        $progressBar->clear();
+        $progressBar?->advance($pageCount);
+        $progressBar?->clear();
         $totalCount += $pageCount;
         $this->io->stopSection(sprintf(
             'Loaded <info>%d</info> relations.',
