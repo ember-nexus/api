@@ -5,25 +5,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.0 - 2023-12-16
 ### Added
-- Add documentation and automatic documentation tests for endpoint DELETE `/token`, closes #208.
-- Add command `token:revoke`, closes #59.
+- Add documentation and automatic documentation tests for endpoint DELETE `/token`, closes [#208].
+- Add command `token:revoke`, closes [#59].
+
 ### Changed
-- **Switch license to AGPL-3.0-only, closes #215.**
-- Remove commented and unused code, configuration etc., closes #168.
-- Remove test CI triggers "pull_request" and "fork", closes #216.
-- Rename command `user:token:create` to `token:create`, related to #59.
-- Tokens cached by Redis now automatically expire within 30 minutes or as their expiration date is reached, part of #59.
+- **Switch license to AGPL-3.0-only, closes [#215].**
+- Remove commented and unused code, configuration etc., closes [#168].
+- Remove test CI triggers "pull_request" and "fork", closes [#216].
+- Rename command `user:token:create` to `token:create`, related to [#59].
+- Tokens cached by Redis now automatically expire within 30 minutes or as their expiration date is reached, part of [#59].
+
 ### Fixed
-- Deleting tokens now deletes the correct token from Redis, fixes #186.
-- Add missing feature tests, related to #168.
-- Fix bug where datetime-similar properties could not be correctly returned to the user, uncovered during #59.
+- Deleting tokens now deletes the correct token from Redis, fixes [#186].
+- Add missing feature tests, related to [#168].
+- Fix bug where datetime-similar properties could not be correctly returned to the user, uncovered during [#59].
 
 ## 0.0.38 - 2023-12-08
 ### Added
 - Add documentation and automatic example generation for healthcheck command, closes [#184].
 - Add 401 error case for the GET /me endpoint, closes [#190].
 - Add parameters `page` and `pageSize` to documentation of collection endpoints, closes [#189].
+
 ### Changed
 - Rename `_PartialUnifiedCollection` to `_PartialElementCollection`, closes [#187].
 - All CI tasks are configured to have timeouts, closes [#201].
