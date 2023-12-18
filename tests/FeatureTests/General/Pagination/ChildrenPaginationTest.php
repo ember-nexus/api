@@ -6,9 +6,9 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class ChildrenPaginationTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:FcXR4LsliYfWkYFKhTVovA';
-    public const PARENT_WITH_MANY_CHILDREN = '1ab54e88-a9cc-481a-b371-8873ca56c51b';
-    public const PARENT_WITH_ONE_CHILD = '12ac1946-0efd-43b2-8e8f-fc73a2413b03';
+    private const string TOKEN = 'secret-token:FcXR4LsliYfWkYFKhTVovA';
+    private const string PARENT_WITH_MANY_CHILDREN = '1ab54e88-a9cc-481a-b371-8873ca56c51b';
+    private const string PARENT_WITH_ONE_CHILD = '12ac1946-0efd-43b2-8e8f-fc73a2413b03';
 
     public function testParentWithManyChildrenPagination(): void
     {

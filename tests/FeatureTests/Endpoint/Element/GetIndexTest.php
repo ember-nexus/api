@@ -6,7 +6,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class GetIndexTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:55qfUCKq1JopVlrRCqF0Pr';
+    private const string TOKEN = 'secret-token:55qfUCKq1JopVlrRCqF0Pr';
 
     public function testGetIndex(): void
     {

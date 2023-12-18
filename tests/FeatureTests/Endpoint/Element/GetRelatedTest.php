@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class GetRelatedTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:8PTmlQm8B9QGM5Nen3U4f7';
-    public const CENTER = 'b4eee6fe-c177-4454-b809-ef2766658fd5';
+    private const string TOKEN = 'secret-token:8PTmlQm8B9QGM5Nen3U4f7';
+    private const string CENTER = 'b4eee6fe-c177-4454-b809-ef2766658fd5';
 
     public function testGetRelated(): void
     {

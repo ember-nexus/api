@@ -6,7 +6,7 @@ use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
 class PostChangePasswordTest extends BaseRequestTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
     public function testChangePasswordSuccess(): void
     {

@@ -6,7 +6,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class PostIndexNodeTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:NMASHc1jOGZdU7pEl3j68T';
+    private const string TOKEN = 'secret-token:NMASHc1jOGZdU7pEl3j68T';
 
     public function testCreateNode(): void
     {

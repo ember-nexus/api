@@ -4,7 +4,10 @@ namespace App\Helper;
 
 class ReservedPropertyNameHelper
 {
-    public const RESERVED_PROPERTY_NAMES = [
+    /**
+     * @var string[] RESERVED_PROPERTY_NAMES
+     */
+    public const array RESERVED_PROPERTY_NAMES = [
         'id',
         '_id',
         'type',

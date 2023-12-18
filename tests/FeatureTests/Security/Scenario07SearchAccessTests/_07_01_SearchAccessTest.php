@@ -6,17 +6,17 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class _07_01_SearchAccessTest extends BaseRequestTestCase
 {
-    public const TOKEN_1 = 'secret-token:Dp6FGPhJplengl8NSAI7vO';
-    public const TOKEN_2 = 'secret-token:RDiFmL57a2igibaW21ZFoC';
-    public const TOKEN_3 = 'secret-token:MJ04n655khrXMOraf9INcV';
-    public const TOKEN_4 = 'secret-token:PfVAPFK1qmE5pqel39Ime8';
-    public const TOKEN_5 = 'secret-token:Urhq1nO0p8jQnAZER721r5';
-    public const TOKEN_6 = 'secret-token:S8Y7FhkJIotvKnejEcSmdW';
-    public const TOKEN_7 = 'secret-token:OSeO4aXCZQorQ977P6XISP';
-    public const DATA_1 = '3a3c2f8b-d1bd-40fd-b381-82de60539c9f';
-    public const DATA_2 = 'c1bacef0-bdfc-4b13-b2fa-062bea9c0372';
-    public const DATA_3 = '2cacaa15-8920-43d4-b885-f53a90035aef';
-    public const DATA_4 = 'ef8a72b3-87d0-478c-a665-e134be8b8f7a';
+    private const string TOKEN_1 = 'secret-token:Dp6FGPhJplengl8NSAI7vO';
+    private const string TOKEN_2 = 'secret-token:RDiFmL57a2igibaW21ZFoC';
+    private const string TOKEN_3 = 'secret-token:MJ04n655khrXMOraf9INcV';
+    private const string TOKEN_4 = 'secret-token:PfVAPFK1qmE5pqel39Ime8';
+    private const string TOKEN_5 = 'secret-token:Urhq1nO0p8jQnAZER721r5';
+    private const string TOKEN_6 = 'secret-token:S8Y7FhkJIotvKnejEcSmdW';
+    private const string TOKEN_7 = 'secret-token:OSeO4aXCZQorQ977P6XISP';
+    private const string DATA_1 = '3a3c2f8b-d1bd-40fd-b381-82de60539c9f';
+    private const string DATA_2 = 'c1bacef0-bdfc-4b13-b2fa-062bea9c0372';
+    private const string DATA_3 = '2cacaa15-8920-43d4-b885-f53a90035aef';
+    private const string DATA_4 = 'ef8a72b3-87d0-478c-a665-e134be8b8f7a';
 
     private function baseSearchTest(string $token): void
     {

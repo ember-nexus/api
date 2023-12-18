@@ -6,14 +6,14 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class _02_04_PathRelationOwnershipTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:JbPPgmVodPsBPGOpbS2NdD';
+    private const string TOKEN = 'secret-token:JbPPgmVodPsBPGOpbS2NdD';
 
-    public const DATA_1 = '3d6e975b-3c1e-40ea-a50d-21dc3a1df97b';
-    public const DATA_2 = 'ec5ea3d7-d192-4e96-8933-d03a1e16f978';
-    public const DATA_3 = 'a9a5ed76-755d-43ed-9a5d-8a1de910132c';
-    public const DATA_4 = '0a27046a-4ed6-4937-aa5e-418296ab8612';
-    public const DATA_5 = '62b6f1bf-25e3-43b5-b9c9-1920d62d77f6';
-    public const DATA_6 = '1822cdab-a246-4887-99f7-e03a0f62ce45';
+    private const string DATA_1 = '3d6e975b-3c1e-40ea-a50d-21dc3a1df97b';
+    private const string DATA_2 = 'ec5ea3d7-d192-4e96-8933-d03a1e16f978';
+    private const string DATA_3 = 'a9a5ed76-755d-43ed-9a5d-8a1de910132c';
+    private const string DATA_4 = '0a27046a-4ed6-4937-aa5e-418296ab8612';
+    private const string DATA_5 = '62b6f1bf-25e3-43b5-b9c9-1920d62d77f6';
+    private const string DATA_6 = '1822cdab-a246-4887-99f7-e03a0f62ce45';
 
     public function testGetIndex(): void
     {

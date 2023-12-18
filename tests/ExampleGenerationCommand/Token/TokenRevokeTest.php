@@ -6,7 +6,7 @@ use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
 
 class TokenRevokeTest extends BaseCommandTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
     public function testTokenRevokeHelp(): void
     {
@@ -33,7 +33,7 @@ class TokenRevokeTest extends BaseCommandTestCase
                 'Found user with identifier',
                 'Successfully revoked new token:',
                 'localhost.dev',
-                'User identifier'
+                'User identifier',
             ]
         );
     }

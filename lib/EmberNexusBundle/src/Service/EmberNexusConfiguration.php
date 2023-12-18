@@ -10,25 +10,25 @@ use Exception;
  */
 class EmberNexusConfiguration
 {
-    public const PAGE_SIZE = 'pageSize';
-    public const PAGE_SIZE_MIN = 'min';
-    public const PAGE_SIZE_DEFAULT = 'default';
-    public const PAGE_SIZE_MAX = 'max';
+    public const string PAGE_SIZE = 'pageSize';
+    public const string PAGE_SIZE_MIN = 'min';
+    public const string PAGE_SIZE_DEFAULT = 'default';
+    public const string PAGE_SIZE_MAX = 'max';
 
-    public const REGISTER = 'register';
-    public const REGISTER_ENABLED = 'enabled';
-    public const REGISTER_UNIQUE_IDENTIFIER = 'uniqueIdentifier';
-    public const REGISTER_UNIQUE_IDENTIFIER_REGEX = 'uniqueIdentifierRegex';
+    public const string REGISTER = 'register';
+    public const string REGISTER_ENABLED = 'enabled';
+    public const string REGISTER_UNIQUE_IDENTIFIER = 'uniqueIdentifier';
+    public const string REGISTER_UNIQUE_IDENTIFIER_REGEX = 'uniqueIdentifierRegex';
 
-    public const INSTANCE_CONFIGURATION = 'instanceConfiguration';
-    public const INSTANCE_CONFIGURATION_ENABLED = 'enabled';
-    public const INSTANCE_CONFIGURATION_SHOW_VERSION = 'showVersion';
+    public const string INSTANCE_CONFIGURATION = 'instanceConfiguration';
+    public const string INSTANCE_CONFIGURATION_ENABLED = 'enabled';
+    public const string INSTANCE_CONFIGURATION_SHOW_VERSION = 'showVersion';
 
-    public const TOKEN = 'token';
-    public const TOKEN_MIN_LIFETIME_IN_SECONDS = 'minLifetimeInSeconds';
-    public const TOKEN_DEFAULT_LIFETIME_IN_SECONDS = 'defaultLifetimeInSeconds';
-    public const TOKEN_MAX_LIFETIME_IN_SECONDS = 'maxLifetimeInSeconds';
-    public const TOKEN_DELETE_EXPIRED_TOKENS_AUTOMATICALLY_IN_SECONDS = 'tokenDeleteExpiredTokensAutomaticallyInSeconds';
+    public const string TOKEN = 'token';
+    public const string TOKEN_MIN_LIFETIME_IN_SECONDS = 'minLifetimeInSeconds';
+    public const string TOKEN_DEFAULT_LIFETIME_IN_SECONDS = 'defaultLifetimeInSeconds';
+    public const string TOKEN_MAX_LIFETIME_IN_SECONDS = 'maxLifetimeInSeconds';
+    public const string TOKEN_DELETE_EXPIRED_TOKENS_AUTOMATICALLY_IN_SECONDS = 'tokenDeleteExpiredTokensAutomaticallyInSeconds';
 
     private int $pageSizeMin;
     private int $pageSizeDefault;

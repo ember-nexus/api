@@ -6,9 +6,9 @@ use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
 class DeleteTokenTest extends BaseRequestTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
-    private const TOKEN = 'secret-token:RIaBS3MoIoQRbu45ES4ZTP';
+    private const string TOKEN = 'secret-token:RIaBS3MoIoQRbu45ES4ZTP';
 
     public function testDeleteTokenSuccess(): void
     {

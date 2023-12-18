@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class DeleteElementNodeTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:CevJS3ZkDtJcCdqEhFKqWF';
-    public const DATA = '55cce573-1377-4781-be16-8b81587aca10';
+    private const string TOKEN = 'secret-token:CevJS3ZkDtJcCdqEhFKqWF';
+    private const string DATA = '55cce573-1377-4781-be16-8b81587aca10';
 
     public function testDeleteNode(): void
     {

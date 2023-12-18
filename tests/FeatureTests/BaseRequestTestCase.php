@@ -8,7 +8,10 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class BaseRequestTestCase extends TestCase
 {
-    private const IGNORED_HEAD_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link', 'Date'];
+    /**
+     * @var string[] IGNORED_HEAD_HEADERS
+     */
+    private const array IGNORED_HEAD_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link', 'Date'];
 
     public function runGetRequest(string $uri, ?string $token): ResponseInterface
     {

@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class DeleteElementRelationTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:DZnGleUhhBS5CY2T3JUkFY';
-    public const RELATION = '15491c7e-49b2-4c30-8762-2cb78b8503ea';
+    private const string TOKEN = 'secret-token:DZnGleUhhBS5CY2T3JUkFY';
+    private const string RELATION = '15491c7e-49b2-4c30-8762-2cb78b8503ea';
 
     public function testDeleteRelation(): void
     {

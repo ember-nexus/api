@@ -6,7 +6,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class NoRouteTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:FcXR4LsliYfWkYFKhTVovA';
+    private const string TOKEN = 'secret-token:FcXR4LsliYfWkYFKhTVovA';
 
     public function testUnknownRouteReturnsCustom404Problem(): void
     {

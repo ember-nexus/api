@@ -6,9 +6,9 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class _01_01_NoConnectionTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:451NiderFjTRW7TpoLoSWA';
-    public const USER = '33d44651-ba40-4e5e-b2c3-079b9509b068';
-    public const DATA = 'b1b253a6-d9a5-45b5-b7a9-1be29ced4df6';
+    private const string TOKEN = 'secret-token:451NiderFjTRW7TpoLoSWA';
+    private const string USER = '33d44651-ba40-4e5e-b2c3-079b9509b068';
+    private const string DATA = 'b1b253a6-d9a5-45b5-b7a9-1be29ced4df6';
 
     /**
      * @description test 1-01-01-01

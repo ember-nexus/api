@@ -6,9 +6,9 @@ use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
 class PutElementTest extends BaseRequestTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
-    private const TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const PARENT_ELEMENT = '7b80b203-2b82-40f5-accd-c7089fe6114e';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
+    private const string PARENT_ELEMENT = '7b80b203-2b82-40f5-accd-c7089fe6114e';
 
     public function testPostElementSuccess(): void
     {

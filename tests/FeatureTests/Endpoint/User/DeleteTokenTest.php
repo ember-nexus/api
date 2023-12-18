@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class DeleteTokenTest extends BaseRequestTestCase
 {
-    public const TOKEN_1 = 'secret-token:HWqEN8ai8eZtnfEIo4e1GI';
-    public const TOKEN_2 = 'secret-token:RIaBS3MoIoQRbu45ES4ZTP';
+    private const string TOKEN_1 = 'secret-token:HWqEN8ai8eZtnfEIo4e1GI';
+    private const string TOKEN_2 = 'secret-token:RIaBS3MoIoQRbu45ES4ZTP';
 
     public function testDeleteToken(): void
     {

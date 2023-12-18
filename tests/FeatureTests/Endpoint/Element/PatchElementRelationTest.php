@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class PatchElementRelationTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:S26Pn61Imv52pWOJ9GuXET';
-    public const RELATION = 'd639767c-486c-4714-aa61-8d28ec6be338';
+    private const string TOKEN = 'secret-token:S26Pn61Imv52pWOJ9GuXET';
+    private const string RELATION = 'd639767c-486c-4714-aa61-8d28ec6be338';
 
     public function testPutRelation(): void
     {

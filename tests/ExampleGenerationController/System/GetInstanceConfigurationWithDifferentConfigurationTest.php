@@ -6,8 +6,8 @@ use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
 class GetInstanceConfigurationWithDifferentConfigurationTest extends BaseRequestTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
-    private const PATH_TO_CONFIGURATION = __DIR__.'/../../../config/packages/ember_nexus.yaml';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string PATH_TO_CONFIGURATION = __DIR__.'/../../../config/packages/ember_nexus.yaml';
 
     private string $originalConfiguration = '';
 

@@ -6,9 +6,15 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTestCase
 {
-    private const IGNORED_HEADERS = ['Date', 'Location'];
+    /**
+     * @var string[] IGNORED_HEADERS
+     */
+    private const array IGNORED_HEADERS = ['Date', 'Location'];
 
-    private const REMOVED_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link'];
+    /**
+     * @var string[] REMOVED_HEADERS
+     */
+    private const array REMOVED_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link'];
 
     public function getHeadersFromRequest(ResponseInterface $response): string
     {
