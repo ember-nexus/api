@@ -6,10 +6,10 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class TokenStateTest extends BaseRequestTestCase
 {
-    public const TOKEN_ACTIVE = 'secret-token:VWPtCCQskD6uQnf0CHdNjY';
-    public const TOKEN_REVOKED = 'secret-token:63b9ULc3WYvEOaIaXEfCNc';
-    public const TOKEN_EXPIRED = 'secret-token:JHU2FrEe7jshvFtrD6BRb3';
-    public const DATA_UUID = '048ecc31-0807-463c-a8db-989721c73f26';
+    private const string TOKEN_ACTIVE = 'secret-token:VWPtCCQskD6uQnf0CHdNjY';
+    private const string TOKEN_REVOKED = 'secret-token:63b9ULc3WYvEOaIaXEfCNc';
+    private const string TOKEN_EXPIRED = 'secret-token:JHU2FrEe7jshvFtrD6BRb3';
+    private const string DATA_UUID = '048ecc31-0807-463c-a8db-989721c73f26';
 
     public function testAccessingApiWithActiveTokenWorks(): void
     {

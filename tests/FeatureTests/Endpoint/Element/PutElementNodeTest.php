@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class PutElementNodeTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:SuB0jXgi2sFAkC9su6ecr8';
-    public const DATA = 'b0f77cc4-5cd1-4de6-a172-ca49a662e0a7';
+    private const string TOKEN = 'secret-token:SuB0jXgi2sFAkC9su6ecr8';
+    private const string DATA = 'b0f77cc4-5cd1-4de6-a172-ca49a662e0a7';
 
     public function testPutNode(): void
     {

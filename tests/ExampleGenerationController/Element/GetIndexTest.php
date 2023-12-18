@@ -6,8 +6,8 @@ use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
 class GetIndexTest extends BaseRequestTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
-    private const TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
 
     public function testGetIndexSuccess(): void
     {

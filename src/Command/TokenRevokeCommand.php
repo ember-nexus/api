@@ -36,17 +36,17 @@ class TokenRevokeCommand extends Command
 {
     private EmberNexusStyle $io;
 
-    public const OPTION_FORCE = 'force';
-    public const OPTION_DRY_RUN = 'dry-run';
-    public const OPTION_LIST_ALL_AFFECTED_TOKENS = 'list-all-affected-tokens';
-    public const OPTION_USER = 'user';
-    public const OPTION_GROUP = 'group';
-    public const OPTION_ISSUED_BEFORE = 'issued-before';
-    public const OPTION_ISSUED_AFTER = 'issued-after';
-    public const OPTION_ISSUED_WITHOUT_EXPIRATION_DATE = 'issued-without-expiration-date';
-    public const OPTION_ISSUED_WITH_EXPIRATION_DATE = 'issued-with-expiration-date';
-    public const NUMBER_OF_TOKENS_TO_DISPLAY = 10;
-    public const TOKEN_REVOKE_BATCH_SIZE = 10;
+    public const string OPTION_FORCE = 'force';
+    public const string OPTION_DRY_RUN = 'dry-run';
+    public const string OPTION_LIST_ALL_AFFECTED_TOKENS = 'list-all-affected-tokens';
+    public const string OPTION_USER = 'user';
+    public const string OPTION_GROUP = 'group';
+    public const string OPTION_ISSUED_BEFORE = 'issued-before';
+    public const string OPTION_ISSUED_AFTER = 'issued-after';
+    public const string OPTION_ISSUED_WITHOUT_EXPIRATION_DATE = 'issued-without-expiration-date';
+    public const string OPTION_ISSUED_WITH_EXPIRATION_DATE = 'issued-with-expiration-date';
+    public const int NUMBER_OF_TOKENS_TO_DISPLAY = 10;
+    public const int TOKEN_REVOKE_BATCH_SIZE = 10;
 
     private bool $isForceActive = false;
     private bool $isDryRunActive = false;

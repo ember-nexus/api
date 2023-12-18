@@ -6,7 +6,7 @@ use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
 class Get400IncompleteMutualDependencyTest extends BaseRequestTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
     public function testRegisterSuccess(): void
     {

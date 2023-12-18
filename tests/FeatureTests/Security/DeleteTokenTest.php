@@ -6,10 +6,10 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class DeleteTokenTest extends BaseRequestTestCase
 {
-    public const TOKEN_1 = 'secret-token:MvsgHPbJY6LhtTbm9jnNXs';
-    public const TOKEN_2 = 'secret-token:5nm7j0FE6sPuHqRgjvK40U';
-    public const TOKEN_2_UUID = '2ddfc37a-f763-41a6-8826-084aec2a283f';
-    public const TOKEN_3 = 'secret-token:KhPjldUIB3YYMU44CUTJpC';
+    private const string TOKEN_1 = 'secret-token:MvsgHPbJY6LhtTbm9jnNXs';
+    private const string TOKEN_2 = 'secret-token:5nm7j0FE6sPuHqRgjvK40U';
+    private const string TOKEN_2_UUID = '2ddfc37a-f763-41a6-8826-084aec2a283f';
+    private const string TOKEN_3 = 'secret-token:KhPjldUIB3YYMU44CUTJpC';
 
     public function testDeleteTokenThroughDeleteTokenEndpoint(): void
     {

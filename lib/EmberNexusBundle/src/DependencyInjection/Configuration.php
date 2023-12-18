@@ -8,10 +8,10 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    public const HALF_AN_HOUR_IN_SECONDS = 1800;
-    public const THREE_HOURS_IN_SECONDS = 3600 * 3;
-    public const THIRTEEN_MONTHS_IN_SECONDS = 3600 * 24 * (365 + 31);
-    public const TWO_WEEKS_IN_SECONDS = 3600 * 24 * 14;
+    public const int HALF_AN_HOUR_IN_SECONDS = 1800;
+    public const int THREE_HOURS_IN_SECONDS = 3600 * 3;
+    public const int THIRTEEN_MONTHS_IN_SECONDS = 3600 * 24 * (365 + 31);
+    public const int TWO_WEEKS_IN_SECONDS = 3600 * 24 * 14;
 
     public function getConfigTreeBuilder(): TreeBuilder
     {

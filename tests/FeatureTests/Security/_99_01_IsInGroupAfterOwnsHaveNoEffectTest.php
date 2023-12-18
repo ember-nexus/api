@@ -6,17 +6,17 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class _99_01_IsInGroupAfterOwnsHaveNoEffectTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:AZuaUFmZ6YB2g14CO1qAlM';
+    private const string TOKEN = 'secret-token:AZuaUFmZ6YB2g14CO1qAlM';
 
-    public const GROUP_1 = 'a42beeb2-4c8f-4c31-ada8-fc1f127beb77';
-    public const GROUP_2 = '8a97b81c-56cb-4e09-a5e4-c80b7f6f2ee3';
-    public const DATA_1 = 'fbde7b0a-ed3b-4c19-bb95-2952a37feca1';
-    public const DATA_2 = '969e41af-a868-4026-b072-26791149f58b';
-    public const OWNS_TOKEN = '55a39b35-4f6d-4a98-b048-06352d201059';
-    public const IS_IN_GROUP_1 = '1b9c5238-335c-4023-af50-673178e7734f';
-    public const IS_IN_GROUP_2 = '0d105c9b-f801-44be-82dc-28559b0412b0';
-    public const OWNS_DATA_1 = 'bf3c3163-375f-41e6-b330-68fb2835a2b3';
-    public const OWNS_DATA_2 = 'ee0291eb-71c3-4402-b0f6-366254f57164';
+    private const string GROUP_1 = 'a42beeb2-4c8f-4c31-ada8-fc1f127beb77';
+    private const string GROUP_2 = '8a97b81c-56cb-4e09-a5e4-c80b7f6f2ee3';
+    private const string DATA_1 = 'fbde7b0a-ed3b-4c19-bb95-2952a37feca1';
+    private const string DATA_2 = '969e41af-a868-4026-b072-26791149f58b';
+    private const string OWNS_TOKEN = '55a39b35-4f6d-4a98-b048-06352d201059';
+    private const string IS_IN_GROUP_1 = '1b9c5238-335c-4023-af50-673178e7734f';
+    private const string IS_IN_GROUP_2 = '0d105c9b-f801-44be-82dc-28559b0412b0';
+    private const string OWNS_DATA_1 = 'bf3c3163-375f-41e6-b330-68fb2835a2b3';
+    private const string OWNS_DATA_2 = 'ee0291eb-71c3-4402-b0f6-366254f57164';
 
     public function testGetIndex(): void
     {

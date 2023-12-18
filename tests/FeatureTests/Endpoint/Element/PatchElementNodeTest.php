@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class PatchElementNodeTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:PsN3SfXuql92IjEUkUYZFN';
-    public const DATA = 'd77ca32c-8cf2-4ed9-868e-27ae122e9ea1';
+    private const string TOKEN = 'secret-token:PsN3SfXuql92IjEUkUYZFN';
+    private const string DATA = 'd77ca32c-8cf2-4ed9-868e-27ae122e9ea1';
 
     public function testPutNode(): void
     {

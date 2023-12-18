@@ -6,13 +6,13 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class _02_02_ImmediateRelationOwnershipTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:Au6srY6s3cW5THS6LeCl9Z';
+    private const string TOKEN = 'secret-token:Au6srY6s3cW5THS6LeCl9Z';
 
-    public const OWNS_1 = '5eff5f2e-7dfb-487a-ab81-9bcef466388d';
-    public const OWNS_2 = '5234732b-e1ab-4665-be47-10b9a903697f';
-    public const RELATION = 'fd9f4b9b-9831-4d8a-be98-a438f28e5038';
-    public const DATA_1 = 'b1e85bf9-6a79-4e50-ae5a-ed49beac8cb5';
-    public const DATA_2 = '76cc077f-580f-4a6f-ad33-170c545217d3';
+    private const string OWNS_1 = '5eff5f2e-7dfb-487a-ab81-9bcef466388d';
+    private const string OWNS_2 = '5234732b-e1ab-4665-be47-10b9a903697f';
+    private const string RELATION = 'fd9f4b9b-9831-4d8a-be98-a438f28e5038';
+    private const string DATA_1 = 'b1e85bf9-6a79-4e50-ae5a-ed49beac8cb5';
+    private const string DATA_2 = '76cc077f-580f-4a6f-ad33-170c545217d3';
 
     public function testGetIndex(): void
     {

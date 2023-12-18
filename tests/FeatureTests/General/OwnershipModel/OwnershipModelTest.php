@@ -6,13 +6,13 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class OwnershipModelTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:INirKZbnZETk6hLD86rfrL';
+    private const string TOKEN = 'secret-token:INirKZbnZETk6hLD86rfrL';
 
-    public const USER_UUID = 'e5d6c437-e13c-4fe8-85be-fc12e164eb17';
-    public const GROUP_1_UUID = '3d7bf35e-0188-467f-8cb4-6741a1741429';
-    public const GROUP_2_UUID = 'dbc96de1-0cb7-4f20-9cfe-d23740af32b0';
-    public const DATA_UUID = 'b66de74d-791a-4157-a632-4fdf066e80f2';
-    public const TOKEN_UUID = 'fdc9fc1f-1436-437b-a46d-358dbbb086d1';
+    private const string USER_UUID = 'e5d6c437-e13c-4fe8-85be-fc12e164eb17';
+    private const string GROUP_1_UUID = '3d7bf35e-0188-467f-8cb4-6741a1741429';
+    private const string GROUP_2_UUID = 'dbc96de1-0cb7-4f20-9cfe-d23740af32b0';
+    private const string DATA_UUID = 'b66de74d-791a-4157-a632-4fdf066e80f2';
+    private const string TOKEN_UUID = 'fdc9fc1f-1436-437b-a46d-358dbbb086d1';
 
     public function testIndex(): void
     {

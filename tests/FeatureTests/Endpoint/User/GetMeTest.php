@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class GetMeTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:S26Pn61Imv52pWOJ9GuXET';
-    public const INVALID_TOKEN = 'tokenDoesNotExist';
+    private const string TOKEN = 'secret-token:S26Pn61Imv52pWOJ9GuXET';
+    private const string INVALID_TOKEN = 'tokenDoesNotExist';
 
     public function testGetAnonymousMe(): void
     {

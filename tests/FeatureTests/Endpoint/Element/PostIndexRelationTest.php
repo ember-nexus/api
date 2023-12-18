@@ -6,9 +6,9 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class PostIndexRelationTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:OZmOjZnLpek1ppUvog82KR';
-    public const START = '2e709799-b84b-487f-837b-9ba92b991614';
-    public const END = '8bf94f2b-898e-4e50-9657-6a9a0736a1be';
+    private const string TOKEN = 'secret-token:OZmOjZnLpek1ppUvog82KR';
+    private const string START = '2e709799-b84b-487f-837b-9ba92b991614';
+    private const string END = '8bf94f2b-898e-4e50-9657-6a9a0736a1be';
 
     public function testCreateRelation(): void
     {

@@ -6,11 +6,11 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class _02_03_PathNodeOwnershipTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:6EorX1or81QkQDVp8uJMIV';
+    private const string TOKEN = 'secret-token:6EorX1or81QkQDVp8uJMIV';
 
-    public const DATA_1 = '237defce-d3be-44c5-b8a1-8288b76851e4';
-    public const DATA_2 = '512e0d66-68bd-4515-b969-fa0eb739ea50';
-    public const DATA_3 = '20ca0b80-9a92-4425-896d-bad6129f9c2e';
+    private const string DATA_1 = '237defce-d3be-44c5-b8a1-8288b76851e4';
+    private const string DATA_2 = '512e0d66-68bd-4515-b969-fa0eb739ea50';
+    private const string DATA_3 = '20ca0b80-9a92-4425-896d-bad6129f9c2e';
 
     public function testGetIndex(): void
     {

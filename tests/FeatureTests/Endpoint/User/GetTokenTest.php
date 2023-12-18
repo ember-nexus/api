@@ -6,7 +6,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class GetTokenTest extends BaseRequestTestCase
 {
-    private const TOKEN = 'secret-token:7s0vuDVJ1UDH0SErDeaLNe';
+    private const string TOKEN = 'secret-token:7s0vuDVJ1UDH0SErDeaLNe';
 
     public function testGetUserToken(): void
     {

@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class GetParentsTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:TVg2TMLeeK6AJMT4QhNsjA';
-    public const CHILD = '65ad4ffe-17b3-4258-894f-561d64abd2db';
+    private const string TOKEN = 'secret-token:TVg2TMLeeK6AJMT4QhNsjA';
+    private const string CHILD = '65ad4ffe-17b3-4258-894f-561d64abd2db';
 
     public function testGetParents(): void
     {

@@ -6,8 +6,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class TokenDoesNotReturnInternalFieldsTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:SaUQctGYKDHdRnm1jj7pG5';
-    public const TOKEN_ID = '674dae86-a2cc-4137-a275-a3aca2e1d64f';
+    private const string TOKEN = 'secret-token:SaUQctGYKDHdRnm1jj7pG5';
+    private const string TOKEN_ID = '674dae86-a2cc-4137-a275-a3aca2e1d64f';
 
     public function testTokenDoesNotReturnInternalFields(): void
     {

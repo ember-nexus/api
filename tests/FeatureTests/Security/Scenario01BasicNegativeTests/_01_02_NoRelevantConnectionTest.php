@@ -6,10 +6,10 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:1KLilQkUoSgY4BhbCQimec';
-    public const USER = 'c83935f7-bdd6-4eda-ad41-b85e22f5a68f';
-    public const DATA = '6a8a8afb-2a07-4fa2-b467-0afa359a4b7e';
-    public const RELATION = 'aac81a63-2d2e-40ab-b0bb-471f30a2b119';
+    private const string TOKEN = 'secret-token:1KLilQkUoSgY4BhbCQimec';
+    private const string USER = 'c83935f7-bdd6-4eda-ad41-b85e22f5a68f';
+    private const string DATA = '6a8a8afb-2a07-4fa2-b467-0afa359a4b7e';
+    private const string RELATION = 'aac81a63-2d2e-40ab-b0bb-471f30a2b119';
 
     /**
      * @description test 1-02-01-01

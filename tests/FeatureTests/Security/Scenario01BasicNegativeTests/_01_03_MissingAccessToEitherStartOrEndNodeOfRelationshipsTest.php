@@ -6,14 +6,14 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:TNh7DjhjbAicQOmu2GuCZZ';
-    public const USER = '4c40eb7d-7150-4e0d-983e-c4d57d5192f0';
-    public const OWNS = '6c935653-2003-487d-bc4c-ff2d4a96d515';
-    public const DATA_1 = '0400ece8-a5ec-4f2b-bf96-d110bc98e857';
-    public const DATA_2 = '3bc1669a-016a-4f10-8bfd-984d341af1bb';
-    public const DATA_3 = '15e4d734-dfd5-45a5-a941-59c26c0ca732';
-    public const RELATION_1 = '2a47ff59-0979-4452-b766-16ce68e08a7e';
-    public const RELATION_2 = '2a47ff59-0979-4452-b766-16ce68e08a7e';
+    private const string TOKEN = 'secret-token:TNh7DjhjbAicQOmu2GuCZZ';
+    private const string USER = '4c40eb7d-7150-4e0d-983e-c4d57d5192f0';
+    private const string OWNS = '6c935653-2003-487d-bc4c-ff2d4a96d515';
+    private const string DATA_1 = '0400ece8-a5ec-4f2b-bf96-d110bc98e857';
+    private const string DATA_2 = '3bc1669a-016a-4f10-8bfd-984d341af1bb';
+    private const string DATA_3 = '15e4d734-dfd5-45a5-a941-59c26c0ca732';
+    private const string RELATION_1 = '2a47ff59-0979-4452-b766-16ce68e08a7e';
+    private const string RELATION_2 = '2a47ff59-0979-4452-b766-16ce68e08a7e';
 
     /**
      * @description test 1-03-01-01

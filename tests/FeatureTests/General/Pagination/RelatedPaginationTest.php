@@ -6,9 +6,9 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 class RelatedPaginationTest extends BaseRequestTestCase
 {
-    public const TOKEN = 'secret-token:FcXR4LsliYfWkYFKhTVovA';
-    public const NODE_WITH_MANY_RELATED_ELEMENTS = '1ab54e88-a9cc-481a-b371-8873ca56c51b';
-    public const NODE_WITH_TWO_RELATED_ELEMENTS = 'f461a898-36d6-48a3-98a8-0df163d87104';
+    private const string TOKEN = 'secret-token:FcXR4LsliYfWkYFKhTVovA';
+    private const string NODE_WITH_MANY_RELATED_ELEMENTS = '1ab54e88-a9cc-481a-b371-8873ca56c51b';
+    private const string NODE_WITH_TWO_RELATED_ELEMENTS = 'f461a898-36d6-48a3-98a8-0df163d87104';
 
     public function testNodeWithManyRelatedElements(): void
     {

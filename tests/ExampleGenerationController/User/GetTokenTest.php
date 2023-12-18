@@ -6,9 +6,9 @@ use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
 class GetTokenTest extends BaseRequestTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
-    private const TOKEN = 'secret-token:7s0vuDVJ1UDH0SErDeaLNe';
+    private const string TOKEN = 'secret-token:7s0vuDVJ1UDH0SErDeaLNe';
 
     public function testGetTokenSuccess(): void
     {

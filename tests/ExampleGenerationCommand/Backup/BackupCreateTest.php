@@ -6,7 +6,7 @@ use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
 
 class BackupCreateTest extends BaseCommandTestCase
 {
-    private const PATH_TO_ROOT = __DIR__.'/../../../';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
     public function testBackupCreateHelp(): void
     {
