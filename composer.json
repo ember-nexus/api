@@ -60,7 +60,8 @@
       "infection/extension-installer": true,
       "php-http/discovery": true
     },
-    "sort-packages": true
+    "sort-packages": true,
+    "process-timeout": 0
   },
   "autoload": {
     "psr-4": {
