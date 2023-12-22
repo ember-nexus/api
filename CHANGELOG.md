@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add `/.well-known/security.txt` endpoint, documentation for it and (disabled) file check on container startup which
+  will crash the container intentionally if the file is missing. Check will be enabled with the release of version
+  0.2.0, see also #225. Closes issue #131.
 ### Changed
 - Constants are changed to contain type declarations, closes #211.
 - Remove timeout from PHP-tasks, closes #220. CI timeouts still apply.
