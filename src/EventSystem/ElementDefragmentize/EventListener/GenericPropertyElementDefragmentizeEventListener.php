@@ -27,6 +27,10 @@ class GenericPropertyElementDefragmentizeEventListener
         $this->handleEvent($event);
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     */
     private function handleEvent(NodeElementDefragmentizeEvent|RelationElementDefragmentizeEvent $event): void
     {
         $cypherFragment = $event->getCypherFragment();
