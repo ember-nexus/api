@@ -51,6 +51,7 @@
     - [<span class="method-post">POST</span>` /search -` Search](/api-endpoints/search/post-search)
   - **System Endpoints**
     - [<span class="method-get">GET</span>` /instance-configuration -` Get Instance Configuration](/api-endpoints/system/get-instance-configuration)
+    - [<span class="method-get">GET</span>` /.well-known/security.txt -` Get Well Known security.txt](/api-endpoints/system/get-well-known-security-txt)
   - **Error Endpoints**
     - [<span class="method-get">GET</span>` /error/400/bad-content`](/api-endpoints/error/get-400-bad-content)
     - [<span class="method-get">GET</span>` /error/400/forbidden-property`](/api-endpoints/error/get-400-forbidden-property)
