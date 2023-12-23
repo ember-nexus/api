@@ -30,6 +30,9 @@ use function Safe\preg_match;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
+ *
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
  */
 #[AsCommand(name: 'token:revoke', description: 'Revoke tokens.')]
 class TokenRevokeCommand extends Command
