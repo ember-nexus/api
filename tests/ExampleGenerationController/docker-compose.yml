@@ -7,6 +7,7 @@ services:
       - "80"
     volumes:
       - ../../:/var/www/html
+      - ./well-known-security.txt:/well-known-security.txt
 
   ember-nexus-neo4j:
     container_name: ember-nexus-neo4j
