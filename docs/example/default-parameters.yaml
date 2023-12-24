@@ -1,35 +1,56 @@
-parameters:
+# Default configuration for extension with alias: "ember_nexus"
+ember_nexus:
 
-  # Affects how many elements can be returned in collection responses.
-  pageSize:
+    # Affects how many elements can be returned in collection responses.
+    pageSize:
 
-    # Minimum number of elements which are always returned, if they exist.
-    min: 5
+        # Minimum number of elements which are always returned, if they exist.
+        min:                  5
 
-    # Default number of elements which are returned if they exist.
-    default: 25
+        # Default number of elements which are returned if they exist.
+        default:              25
 
-    # Maximum number of elements which are returned in a single response. Should not be way more than 100, as
-    # performance problems may arise.
-    max: 100
+        # Maximum number of elements which are returned in a single response. Should not be way more than 100, as performance problems may arise.
+        max:                  100
 
-  # Handles the /register endpoint.
-  register:
+    # Handles the /register endpoint.
+    register:
 
-    # If true, the /register endpoint is active and anonymous users can create accounts.
-    enabled: true
+        # If true, the /register endpoint is active and anonymous users can create accounts.
+        enabled:              true
 
-    # The property name of the identifier. Identifier must be unique across the API, usually the email.
-    uniqueIdentifier: email
+        # The property name of the identifier. Identifier must be unique across the API, usually the email.
+        uniqueIdentifier:     email
 
-    # Either false or a regex for checking the identifier content.
-    uniqueIdentifierRegex: false
+        # Either false or a regex for checking the identifier content.
+        uniqueIdentifierRegex: false
 
-  # Configures the /instance-configuration endpoint
-  instanceConfiguration:
+    # Configures the /instance-configuration endpoint.
+    instanceConfiguration:
 
-    # If true, enables the endpoint. If false, 403 error messages are returned.
-    enabled: true
+        # If true, enables the endpoint. If false, 403 error messages are returned.
+        enabled:              true
 
-    # If false, the version number is omitted.
-    showVersion: true
+        # If false, the version number is omitted.
+        showVersion:          true
+
+    # Configures token settings.
+    token:
+
+        # Minimum lifetime of created tokens.
+        minLifetimeInSeconds: 1800
+
+        # Default lifetime of created tokens.
+        defaultLifetimeInSeconds: 10800
+
+        # Maximum lifetime of created tokens. Can be set to false to disable maximum limit.
+        maxLifetimeInSeconds: 34214400
+
+        # Expired tokens will be deleted after defined time. Can be set to false to disable auto delete feature.
+        tokenDeleteExpiredTokensAutomaticallyInSeconds: 1209600
+
+    # Configures the cache.
+    cache:
+
+        # Seed used to generate Etag values. Changing it invalidates all data cached by clients.
+        etagSeed:             ''

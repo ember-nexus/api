@@ -12,6 +12,7 @@ class Configuration implements ConfigurationInterface
     public const int THREE_HOURS_IN_SECONDS = 3600 * 3;
     public const int THIRTEEN_MONTHS_IN_SECONDS = 3600 * 24 * (365 + 31);
     public const int TWO_WEEKS_IN_SECONDS = 3600 * 24 * 14;
+    public const int CACHE_ETAG_DEFAULT_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS = 100;
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -62,7 +63,7 @@ class Configuration implements ConfigurationInterface
             ->end()
 
             ->arrayNode(EmberNexusConfiguration::INSTANCE_CONFIGURATION)
-                ->info('Configures the /instance-configuration endpoint')
+                ->info('Configures the /instance-configuration endpoint.')
                 ->addDefaultsIfNotSet()
                 ->children()
                     ->booleanNode(EmberNexusConfiguration::INSTANCE_CONFIGURATION_ENABLED)
@@ -77,7 +78,7 @@ class Configuration implements ConfigurationInterface
             ->end()
 
             ->arrayNode(EmberNexusConfiguration::TOKEN)
-                ->info('Configures the /instance-configuration endpoint')
+                ->info('Configures token settings.')
                 ->addDefaultsIfNotSet()
                 ->children()
                     ->integerNode(EmberNexusConfiguration::TOKEN_MIN_LIFETIME_IN_SECONDS)
@@ -95,6 +96,21 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode(EmberNexusConfiguration::TOKEN_DELETE_EXPIRED_TOKENS_AUTOMATICALLY_IN_SECONDS)
                         ->info('Expired tokens will be deleted after defined time. Can be set to false to disable auto delete feature.')
                         ->defaultValue(self::TWO_WEEKS_IN_SECONDS)
+                    ->end()
+                ->end()
+            ->end()
+
+            ->arrayNode(EmberNexusConfiguration::CACHE)
+                ->info('Configures the cache.')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->scalarNode(EmberNexusConfiguration::CACHE_ETAG_SEED)
+                        ->info('Seed used to generate Etag values. Changing it invalidates all data cached by clients.')
+                        ->defaultValue('')
+                    ->end()
+                    ->scalarNode(EmberNexusConfiguration::CACHE_ETAG_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS)
+                        ->info('Maximum number of items in a collection for which to generate Etags. Bigger collection do not contain Etags due to performance problems.')
+                        ->defaultValue(self::CACHE_ETAG_DEFAULT_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS)
                     ->end()
                 ->end()
             ->end()

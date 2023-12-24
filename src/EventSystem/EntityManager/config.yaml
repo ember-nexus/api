@@ -43,6 +43,15 @@ services:
         event: 'App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent'
         method: 'onElementUpdateAfterBackupLoadEvent'
 
+  App\EventSystem\EntityManager\EventListener\ExpireEtagOnChangeEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\EntityManager\Event\ElementPostMergeEvent'
+        method: 'onElementPostMergeEvent'
+      - name: kernel.event_listener
+        event: 'App\EventSystem\EntityManager\Event\ElementPostDeleteEvent'
+        method: 'onElementPostDeleteEvent'
+
   App\EventSystem\EntityManager\EventListener\ExpireTokenOnTokenDeleteEventListener:
     tags:
       - name: kernel.event_listener
