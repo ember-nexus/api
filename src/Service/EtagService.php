@@ -2,30 +2,63 @@
 
 namespace App\Service;
 
+use App\Type\Etag;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
-use HashContext;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 use Predis\Client as RedisClient;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
-use Tuupola\Base58;
-
-use function Safe\pack;
-use function Safe\unpack;
 
 class EtagService
 {
-    private const string HASH_ALGORITHM = 'xxh3';
-    private Base58 $encoder;
-
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
         private RedisClient $redisClient,
         private EmberNexusConfiguration $emberNexusConfiguration
     ) {
-        $this->encoder = new Base58();
+    }
+
+    public function getEtagForChildrenCollection(UuidInterface $parentId): ?string
+    {
+        $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
+        $result = $this->cypherEntityManager->getClient()->runStatement(
+            Statement::create(
+                sprintf(
+                    "MATCH ({id: \$parentId})-[:OWNS]->(children)\n".
+                    "WITH children\n".
+                    "LIMIT %d\n".
+                    "WITH children ORDER BY children.id\n".
+                    "WITH [children.id, children.updated] AS childrenList\n".
+                    'RETURN collect(childrenList) AS childrenList',
+                    $limit + 1
+                ),
+                [
+                    'parentId' => $parentId->toString(),
+                ]
+            )
+        );
+        if (1 !== count($result)) {
+            throw new Exception('Unexpected result');
+        }
+        if (count($result[0]['childrenList']) > $limit) {
+            return null;
+        }
+
+        $etag = new Etag($this->emberNexusConfiguration->getCacheEtagSeed());
+        foreach ($result[0]['childrenList'] as $childIdUpdatedPair) {
+            $childId = Uuid::fromString($childIdUpdatedPair[0]);
+            $childUpdated = $childIdUpdatedPair[1];
+            if (!($childUpdated instanceof DateTimeZoneId)) {
+                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($childUpdated)));
+            }
+            $etag->addUuid($childId);
+            $etag->addDatetime($childUpdated->toDateTime());
+        }
+
+        return $etag->getEtag();
     }
 
     public function getEtagForElementId(UuidInterface $elementId): string
@@ -48,28 +81,10 @@ class EtagService
             throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($updated)));
         }
 
-        $hashContext = $this->startHashContext();
+        $etag = new Etag($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etag->addUuid($elementId);
+        $etag->addDatetime($updated->toDateTime());
 
-        hash_update($hashContext, $elementId->getBytes());
-        $timestamp = $updated->toDateTime()->getTimestamp();
-        $timestampAsBinaryString = pack('C*', ...array_reverse(unpack('C*', pack('L', $timestamp))));
-        hash_update($hashContext, $timestampAsBinaryString);
-
-        return $this->getEtagFromHashContext($hashContext);
-    }
-
-    private function getEtagFromHashContext(HashContext $hashContext): string
-    {
-        $rawHash = hash_final($hashContext, true);
-
-        return $this->encoder->encode($rawHash);
-    }
-
-    private function startHashContext(): HashContext
-    {
-        $hashContext = hash_init(self::HASH_ALGORITHM);
-        hash_update($hashContext, $this->emberNexusConfiguration->getCacheEtagSeed());
-
-        return $hashContext;
+        return $etag->getEtag();
     }
 }
