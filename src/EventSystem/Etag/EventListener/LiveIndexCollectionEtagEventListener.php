@@ -61,6 +61,7 @@ class LiveIndexCollectionEtagEventListener
     {
         // todo: implement
         $this->logger->debug($userUuid->toString());
+
         return null;
     }
 }
