@@ -46,7 +46,10 @@ class GetElementController extends AbstractController
 
         $etag = $this->etagService->getElementEtag($elementUuid);
         if ($etag) {
-            $response->headers->set('Etag', $etag);
+            $response->headers->set('Etag', sprintf(
+                '"%s"',
+                $etag
+            ));
         }
 
         return $response;

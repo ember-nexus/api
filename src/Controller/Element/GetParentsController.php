@@ -133,7 +133,10 @@ class GetParentsController extends AbstractController
 
         $etag = $this->etagService->getParentsCollectionEtag($childUuid);
         if ($etag) {
-            $response->headers->set('Etag', $etag);
+            $response->headers->set('Etag', sprintf(
+                '"%s"',
+                $etag
+            ));
         }
 
         return $response;

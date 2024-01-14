@@ -53,7 +53,10 @@ class GetIndexController extends AbstractController
 
         $etag = $this->etagService->getIndexCollectionEtag($userUuid);
         if ($etag) {
-            $response->headers->set('Etag', $etag);
+            $response->headers->set('Etag', sprintf(
+                '"%s"',
+                $etag
+            ));
         }
 
         return $response;

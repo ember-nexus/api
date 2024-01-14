@@ -133,7 +133,10 @@ class GetRelatedController extends AbstractController
 
         $etag = $this->etagService->getRelatedCollectionEtag($centerUuid);
         if ($etag) {
-            $response->headers->set('Etag', $etag);
+            $response->headers->set('Etag', sprintf(
+                '"%s"',
+                $etag
+            ));
         }
 
         return $response;

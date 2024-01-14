@@ -13,6 +13,19 @@ class ConfigDumpReferenceEmberNexusTest extends BaseCommandTestCase
         $commandOutput = $this->runCommand(
             'APP_ENV=dev php bin/console config:dump-reference ember_nexus'
         );
+
+        $commandOutput = $this->replaceStartingSpaces($commandOutput);
+        $commandOutput = \Safe\preg_replace('/: +/', ': ', $commandOutput);
+
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/example/default-parameters.yaml', $commandOutput);
+    }
+
+    public function replaceStartingSpaces(string $inputString): string
+    {
+        return preg_replace_callback(
+            '/^( +)/m',
+            fn ($matches) => str_repeat(' ', floor(strlen($matches[0]) / 2)),
+            $inputString
+        );
     }
 }
