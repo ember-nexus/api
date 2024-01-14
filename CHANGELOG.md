@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `/.well-known/security.txt` endpoint, documentation for it and (disabled) file check on container startup which
   will crash the container intentionally if the file is missing. Check will be enabled with the release of version
   0.2.0, see also #225. Closes issue #131.
+- Add HTTP header `Etag` to GET responses of element and collection endpoints, closes #88.
 ### Changed
 - Constants are changed to contain type declarations, closes #211.
 - Remove timeout from PHP-tasks, closes #220. CI timeouts still apply.
 - Upgrade PHP to 8.3.1, closes #223.
 - Enable `composer mess` in CI due to fixed upstream issue, closes #203.
+- Enable PHP CS Fixer rule `self_accessor`, which prefers `self` over the element's class name.
+- Change value of HTTP header `X-Powered-By` to `Ember Nexus API`.
 
 ## 0.1.0 - 2023-12-16
 ### Added

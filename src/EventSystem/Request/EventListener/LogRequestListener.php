@@ -46,8 +46,8 @@ class LogRequestListener
             'Handled request.',
             [
                 'client' => [
-                    'user' => $this->authProvider->isAnonymous() ? 'anonymous' : $this->authProvider->getUserUuid(),
-                    'token' => $this->authProvider->getTokenUuid(),
+                    'user' => $this->authProvider->isAnonymous() ? 'anonymous' : $this->authProvider->getUserUuid()->toString(),
+                    'token' => $this->authProvider->getTokenUuid()?->toString(),
                     'ip' => $this->request->getClientIp(),
                 ],
                 'request' => [

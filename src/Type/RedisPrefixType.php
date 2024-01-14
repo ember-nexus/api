@@ -6,9 +6,11 @@ namespace App\Type;
 
 enum RedisPrefixType: string
 {
-    // token:<tokenHash>
     case TOKEN = 'token:';
 
-    // etag:<elementUuid>[/optionalSubresource]
-    case ETAG = 'etag:';
+    case ETAG_ELEMENT = 'etag:element:';
+    case ETAG_CHILDREN_COLLECTION = 'etag:children:';
+    case ETAG_PARENTS_COLLECTION = 'etag:parents:';
+    case ETAG_RELATED_COLLECTION = 'etag:related:';
+    case ETAG_INDEX_COLLECTION = 'etag:index:';
 }

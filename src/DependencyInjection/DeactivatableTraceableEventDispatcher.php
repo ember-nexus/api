@@ -30,7 +30,7 @@ class DeactivatableTraceableEventDispatcher extends TraceableEventDispatcher
         return $this->isDeactivated;
     }
 
-    public function deactivate(): DeactivatableTraceableEventDispatcher
+    public function deactivate(): self
     {
         $this->logger?->notice('Activated TraceableEventDispatcher');
         $this->isDeactivated = true;
@@ -38,7 +38,7 @@ class DeactivatableTraceableEventDispatcher extends TraceableEventDispatcher
         return $this;
     }
 
-    public function activate(): DeactivatableTraceableEventDispatcher
+    public function activate(): self
     {
         $this->isDeactivated = false;
 

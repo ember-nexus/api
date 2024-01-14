@@ -21,7 +21,7 @@ class FragmentGroup
         return $this->cypherFragment;
     }
 
-    public function setCypherFragment(RelationInterface|NodeInterface $cypherFragment): FragmentGroup
+    public function setCypherFragment(RelationInterface|NodeInterface $cypherFragment): self
     {
         $this->cypherFragment = $cypherFragment;
 
@@ -33,7 +33,7 @@ class FragmentGroup
         return $this->mongoFragment;
     }
 
-    public function setMongoFragment(MongoDocumentInterface $mongoFragment): FragmentGroup
+    public function setMongoFragment(MongoDocumentInterface $mongoFragment): self
     {
         $this->mongoFragment = $mongoFragment;
 
@@ -45,7 +45,7 @@ class FragmentGroup
         return $this->elasticFragment;
     }
 
-    public function setElasticFragment(ElasticDocumentInterface $elasticFragment): FragmentGroup
+    public function setElasticFragment(ElasticDocumentInterface $elasticFragment): self
     {
         $this->elasticFragment = $elasticFragment;
 
