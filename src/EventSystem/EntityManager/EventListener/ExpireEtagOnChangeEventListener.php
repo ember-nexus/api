@@ -29,6 +29,10 @@ class ExpireEtagOnChangeEventListener
         $this->handleEvent($event);
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     */
     private function handleEvent(ElementPostMergeEvent|ElementPostDeleteEvent $event): void
     {
         $elementUuid = $event->getElement()->getIdentifier();

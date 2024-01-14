@@ -60,6 +60,7 @@ class LiveIndexCollectionEtagEventListener
     private function getIndexCollectionEtag(UuidInterface $userUuid): null
     {
         // todo: implement
+        $this->logger->debug($userUuid->toString());
         return null;
     }
 }
