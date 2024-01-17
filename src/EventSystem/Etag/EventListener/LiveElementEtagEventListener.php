@@ -4,7 +4,7 @@ namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ElementEtagEvent;
 use App\Helper\RedisKeyHelper;
-use App\Type\Etag;
+use App\Type\EtagCalculator;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
@@ -81,10 +81,10 @@ class LiveElementEtagEventListener
             throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($updated)));
         }
 
-        $etag = new Etag($this->emberNexusConfiguration->getCacheEtagSeed());
-        $etag->addUuid($elementUuid);
-        $etag->addDatetime($updated->toDateTime());
+        $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etagCalculator->addUuid($elementUuid);
+        $etagCalculator->addDateTime($updated->toDateTime());
 
-        return $etag->getEtag();
+        return $etagCalculator->getEtag();
     }
 }

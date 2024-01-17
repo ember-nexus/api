@@ -4,18 +4,20 @@ namespace App\Type;
 
 use DateTimeInterface;
 use HashContext;
+use LogicException;
 use Ramsey\Uuid\UuidInterface;
 use Tuupola\Base58;
 
 use function Safe\pack;
 use function Safe\unpack;
 
-class Etag
+class EtagCalculator
 {
     private const string HASH_ALGORITHM = 'xxh3';
 
     private HashContext $hashContext;
     private Base58 $encoder;
+    private ?string $finalEtag = null;
 
     public function __construct(
         string $seed,
@@ -26,8 +28,11 @@ class Etag
         $this->encoder = new Base58();
     }
 
-    public function addDatetime(DateTimeInterface $dateTime): self
+    public function addDateTime(DateTimeInterface $dateTime): self
     {
+        if ($this->finalEtag) {
+            throw new LogicException('Etag is already finalized, no new data can be added.');
+        }
         $timestamp = $dateTime->getTimestamp();
         $timestampAsBinaryString = pack('C*', ...array_reverse(unpack('C*', pack('L', $timestamp))));
         hash_update($this->hashContext, $timestampAsBinaryString);
@@ -37,6 +42,9 @@ class Etag
 
     public function addUuid(UuidInterface $uuid): self
     {
+        if ($this->finalEtag) {
+            throw new LogicException('Etag is already finalized, no new data can be added.');
+        }
         hash_update($this->hashContext, $uuid->getBytes());
 
         return $this;
@@ -44,8 +52,12 @@ class Etag
 
     public function getEtag(): string
     {
+        if ($this->finalEtag) {
+            return $this->finalEtag;
+        }
         $rawHash = hash_final($this->hashContext, true);
+        $this->finalEtag = $this->encoder->encode($rawHash);
 
-        return $this->encoder->encode($rawHash);
+        return $this->finalEtag;
     }
 }

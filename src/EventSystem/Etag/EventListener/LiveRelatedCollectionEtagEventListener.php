@@ -4,7 +4,7 @@ namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
 use App\Helper\RedisKeyHelper;
-use App\Type\Etag;
+use App\Type\EtagCalculator;
 use App\Type\RedisValueType;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
@@ -93,17 +93,17 @@ class LiveRelatedCollectionEtagEventListener
             return null;
         }
 
-        $etag = new Etag($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         foreach ($result[0]['relatedList'] as $relatedIdUpdatedPair) {
             $relatedId = Uuid::fromString($relatedIdUpdatedPair[0]);
             $relatedUpdated = $relatedIdUpdatedPair[1];
             if (!($relatedUpdated instanceof DateTimeZoneId)) {
                 throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($relatedUpdated)));
             }
-            $etag->addUuid($relatedId);
-            $etag->addDatetime($relatedUpdated->toDateTime());
+            $etagCalculator->addUuid($relatedId);
+            $etagCalculator->addDateTime($relatedUpdated->toDateTime());
         }
 
-        return $etag->getEtag();
+        return $etagCalculator->getEtag();
     }
 }
