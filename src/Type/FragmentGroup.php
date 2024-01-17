@@ -13,6 +13,7 @@ class FragmentGroup
         private NodeInterface|RelationInterface $cypherFragment,
         private MongoDocumentInterface $mongoFragment,
         private ElasticDocumentInterface $elasticFragment,
+        private mixed $fileFragment
     ) {
     }
 
@@ -48,6 +49,18 @@ class FragmentGroup
     public function setElasticFragment(ElasticDocumentInterface $elasticFragment): self
     {
         $this->elasticFragment = $elasticFragment;
+
+        return $this;
+    }
+
+    public function getFileFragment(): mixed
+    {
+        return $this->fileFragment;
+    }
+
+    public function setFileFragment(mixed $fileFragment): self
+    {
+        $this->fileFragment = $fileFragment;
 
         return $this;
     }
