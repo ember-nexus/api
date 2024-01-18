@@ -3,7 +3,7 @@
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent;
-use App\Helper\RedisKeyHelper;
+use App\Factory\Type\RedisKeyTypeFactory;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
@@ -12,13 +12,14 @@ class RedisChildrenCollectionEtagEventListener
 {
     public function __construct(
         private RedisClient $redisClient,
+        private RedisKeyTypeFactory $redisKeyTypeFactory,
         private LoggerInterface $logger
     ) {
     }
 
     public function onChildrenCollectionEtagEvent(ChildrenCollectionEtagEvent $event): void
     {
-        $redisKey = RedisKeyHelper::getEtagChildrenCollectionRedisKey($event->getParentUuid());
+        $redisKey = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey($event->getParentUuid());
         $this->logger->debug(
             'Trying to find Etag for children collection in Redis.',
             [

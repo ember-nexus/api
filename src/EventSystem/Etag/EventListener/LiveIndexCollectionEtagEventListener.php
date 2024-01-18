@@ -3,7 +3,7 @@
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
-use App\Helper\RedisKeyHelper;
+use App\Factory\Type\RedisKeyTypeFactory;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
@@ -15,6 +15,7 @@ class LiveIndexCollectionEtagEventListener
 
     public function __construct(
         private RedisClient $redisClient,
+        private RedisKeyTypeFactory $redisKeyTypeFactory,
         private LoggerInterface $logger
     ) {
     }
@@ -36,7 +37,7 @@ class LiveIndexCollectionEtagEventListener
             ]
         );
 
-        $redisKey = RedisKeyHelper::getEtagIndexCollectionRedisKey($event->getUserUuid());
+        $redisKey = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey($event->getUserUuid());
 
         $this->logger->debug(
             'Trying to persist Etag for index collection in Redis.',

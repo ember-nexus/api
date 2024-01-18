@@ -3,7 +3,7 @@
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ElementEtagEvent;
-use App\Helper\RedisKeyHelper;
+use App\Factory\Type\RedisKeyTypeFactory;
 use App\Type\EtagCalculator;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
@@ -22,6 +22,7 @@ class LiveElementEtagEventListener
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private RedisClient $redisClient,
+        private RedisKeyTypeFactory $redisKeyTypeFactory,
         private LoggerInterface $logger
     ) {
     }
@@ -43,7 +44,7 @@ class LiveElementEtagEventListener
             ]
         );
 
-        $redisKey = RedisKeyHelper::getEtagElementRedisKey($event->getElementUuid());
+        $redisKey = $this->redisKeyTypeFactory->getEtagElementRedisKey($event->getElementUuid());
 
         $this->logger->debug(
             'Trying to persist Etag for element in Redis.',

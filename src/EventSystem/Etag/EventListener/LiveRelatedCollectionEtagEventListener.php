@@ -3,7 +3,7 @@
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
-use App\Helper\RedisKeyHelper;
+use App\Factory\Type\RedisKeyTypeFactory;
 use App\Type\EtagCalculator;
 use App\Type\RedisValueType;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -24,6 +24,7 @@ class LiveRelatedCollectionEtagEventListener
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private RedisClient $redisClient,
+        private RedisKeyTypeFactory $redisKeyTypeFactory,
         private LoggerInterface $logger
     ) {
     }
@@ -45,7 +46,7 @@ class LiveRelatedCollectionEtagEventListener
             ]
         );
 
-        $redisKey = RedisKeyHelper::getEtagRelatedCollectionRedisKey($event->getCenterUuid());
+        $redisKey = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey($event->getCenterUuid());
 
         $this->logger->debug(
             'Trying to persist Etag for related collection in Redis.',

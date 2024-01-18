@@ -3,7 +3,7 @@
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ElementEtagEvent;
-use App\Helper\RedisKeyHelper;
+use App\Factory\Type\RedisKeyTypeFactory;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
@@ -12,13 +12,14 @@ class RedisElementEtagEventListener
 {
     public function __construct(
         private RedisClient $redisClient,
+        private RedisKeyTypeFactory $redisKeyTypeFactory,
         private LoggerInterface $logger
     ) {
     }
 
     public function onElementEtagEvent(ElementEtagEvent $event): void
     {
-        $redisKey = RedisKeyHelper::getEtagElementRedisKey($event->getElementUuid());
+        $redisKey = $this->redisKeyTypeFactory->getEtagElementRedisKey($event->getElementUuid());
         $this->logger->debug(
             'Trying to find Etag for element in Redis.',
             [
