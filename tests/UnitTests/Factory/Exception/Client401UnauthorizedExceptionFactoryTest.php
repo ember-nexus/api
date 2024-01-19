@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\UnitTests\Factory\Exception;
+namespace App\tests\UnitTests\Factory\Exception;
 
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use PHPUnit\Framework\TestCase;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\ExampleGenerationController;
+namespace App\tests\ExampleGenerationController;
 
 use Psr\Http\Message\ResponseInterface;
 

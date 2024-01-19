@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\UnitTests\EventSystem\ElementPropertyReturn\Event;
+namespace App\tests\UnitTests\EventSystem\ElementPropertyReturn\Event;
 
 use App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent;
 use App\Type\NodeElement;

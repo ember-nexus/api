@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\ExampleGenerationController\User;
+namespace App\tests\ExampleGenerationController\User;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 

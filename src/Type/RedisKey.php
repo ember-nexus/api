@@ -4,7 +4,7 @@ namespace App\Type;
 
 use Stringable;
 
-class RedisKeyType implements Stringable
+class RedisKey implements Stringable
 {
     private string $redisKey;
 

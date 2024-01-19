@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\UnitTests\EventSystem\RawValueToNormalizedValue\EventListener;
+namespace App\tests\UnitTests\EventSystem\RawValueToNormalizedValue\EventListener;
 
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
 use App\EventSystem\RawValueToNormalizedValue\EventListener\DateTimeRawValueToNormalizedValueEventListener;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\UnitTests\EventSystem\Kernel\EventListener;
+namespace App\tests\UnitTests\EventSystem\Kernel\EventListener;
 
 use App\EventSystem\Kernel\EventListener\RabbitMqConnectionListener;
 use PhpAmqpLib\Connection\AMQPStreamConnection;

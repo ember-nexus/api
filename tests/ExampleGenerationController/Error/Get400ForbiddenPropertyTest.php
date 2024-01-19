@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\ExampleGenerationController\Error;
+namespace App\tests\ExampleGenerationController\Error;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 

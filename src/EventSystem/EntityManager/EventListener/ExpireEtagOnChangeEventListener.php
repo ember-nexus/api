@@ -4,7 +4,7 @@ namespace App\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
-use App\Factory\Type\RedisKeyTypeFactory;
+use App\Factory\Type\RedisKeyFactory;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use Predis\Client;
@@ -16,7 +16,7 @@ class ExpireEtagOnChangeEventListener
     public function __construct(
         private Client $redisClient,
         private CypherEntityManager $cypherEntityManager,
-        private RedisKeyTypeFactory $redisKeyTypeFactory
+        private RedisKeyFactory $redisKeyTypeFactory
     ) {
     }
 

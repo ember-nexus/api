@@ -3,7 +3,7 @@
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ElementEtagEvent;
-use App\Factory\Type\RedisKeyTypeFactory;
+use App\Factory\Type\RedisKeyFactory;
 use App\Type\EtagCalculator;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
@@ -22,7 +22,7 @@ class LiveElementEtagEventListener
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private RedisClient $redisClient,
-        private RedisKeyTypeFactory $redisKeyTypeFactory,
+        private RedisKeyFactory $redisKeyTypeFactory,
         private LoggerInterface $logger
     ) {
     }

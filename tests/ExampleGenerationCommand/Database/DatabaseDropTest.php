@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\ExampleGenerationCommand\Database;
+namespace App\tests\ExampleGenerationCommand\Database;
 
 use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
 

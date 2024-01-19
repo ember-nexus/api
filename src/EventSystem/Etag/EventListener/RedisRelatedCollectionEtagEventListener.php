@@ -3,7 +3,7 @@
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
-use App\Factory\Type\RedisKeyTypeFactory;
+use App\Factory\Type\RedisKeyFactory;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
@@ -12,7 +12,7 @@ class RedisRelatedCollectionEtagEventListener
 {
     public function __construct(
         private RedisClient $redisClient,
-        private RedisKeyTypeFactory $redisKeyTypeFactory,
+        private RedisKeyFactory $redisKeyTypeFactory,
         private LoggerInterface $logger
     ) {
     }
