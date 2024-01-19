@@ -13,6 +13,12 @@
   - [Predefined Data Types](/security/predefined-data-types)
   - [Passwords, Tokens and Hashing](/security/passwords-tokens-and-hashing)
   - [Security Tests](/security/test/general)
+
+- Concepts
+  - [Authentication](/concepts/authentication)
+  - [Caching](/concepts/caching)
+  - [Pagination](/concepts/pagination)
+
 - API Endpoints
 
   - **User Endpoints**

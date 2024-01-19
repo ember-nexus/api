@@ -5,6 +5,30 @@
 
 Creates a new element. If the element is a node, it is directly owned by the current user.
 
+### Request Parameters
+
+This endpoint does not require parameters.
+
+### Request Headers
+
+<div class="table-request-headers">
+
+| Header          | Description                                                                                         | Required | Default |
+|-----------------|-----------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details. | no       | -       |
+
+</div>
+
+### Response Headers
+
+<div class="table-response-headers">
+
+| Header     | Description                                              | Default |
+|------------|----------------------------------------------------------| ------- |
+| `Location` | Contains the absolute path to the newly created element. | -       |
+
+</div>
+
 ## Request Body
 
 The posted request must be a valid JSON document.
@@ -57,7 +81,8 @@ curl \
 
 [Response Body](./post-index/204-response-header.txt ':include :type=code')
 
-Success response does not have a response body. The UUID of the created element is written in the `Location`-header.
+Success response does not have a response body.  
+Note that the UUID of the created element is written in the `Location`-header.
 
 ### **🔴 Error 400**
 

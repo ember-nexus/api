@@ -5,8 +5,33 @@
 
 Creates a new node. It is owned by the referenced node.
 
-!> **Note**: This endpoint can not create relations, as the behaviour of "owning a relation", i.e.
-`(user)-[:OWNS]->[relation]`, is undefined.
+> [!NOTE]
+> This endpoint can not create relations, as the behaviour of "owning a relation", i.e.
+> `(user)-[:OWNS]->[relation]`, is undefined.
+
+### Request Parameters
+
+This endpoint does not require parameters.
+
+### Request Headers
+
+<div class="table-request-headers">
+
+| Header          | Description                                                                                         | Required | Default |
+|-----------------|-----------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details. | no       | -       |
+
+</div>
+
+### Response Headers
+
+<div class="table-response-headers">
+
+| Header     | Description                                              | Default |
+|------------|----------------------------------------------------------| ------- |
+| `Location` | Contains the absolute path to the newly created element. | -       |
+
+</div>
 
 ## Request Body
 
@@ -48,7 +73,8 @@ curl \
 
 [Response Body](./post-element/204-response-header.txt ':include :type=code')
 
-Success response does not have a response body. The UUID of the created element is written in the `Location`-header.
+Success response does not have a response body.  
+Note that the UUID of the created element is written in the `Location`-header.
 
 ### **🔴 Error 400**
 

@@ -71,6 +71,10 @@ table {
   width: 100%;
 }
 
+table th {
+  text-align: left;
+}
+
 .app-sub-sidebar li::before {
   display: none;
 }
@@ -171,4 +175,72 @@ pre + .code-title {
 
 pre + iframe {
   margin-top: -1.2em !important;
+}
+
+.table-request-parameters,
+.table-request-headers,
+.table-response-headers {
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.table-request-parameters table,
+.table-request-headers table,
+.table-response-headers table {
+  margin-bottom: 0;
+}
+
+.table-request-parameters th:first-of-type {
+  width: 15%;
+  min-width: 5em;
+}
+
+.table-request-parameters th:nth-of-type(2) {
+  width: 65%;
+  min-width: 25em;
+}
+
+.table-request-parameters th:nth-of-type(3) {
+  width: 10%;
+  min-width: 5em;
+}
+
+.table-request-parameters th:nth-of-type(4) {
+  width: 10%;
+  min-width: 5em;
+}
+
+.table-request-headers th:first-of-type {
+  width: 15%;
+  min-width: 5em;
+}
+
+.table-request-headers th:nth-of-type(2) {
+  width: 65%;
+  min-width: 25em;
+}
+
+.table-request-headers th:nth-of-type(3) {
+  width: 10%;
+  min-width: 5em;
+}
+
+.table-request-headers th:nth-of-type(4) {
+  width: 10%;
+  min-width: 5em;
+}
+
+.table-response-headers th:first-of-type {
+  width: 15%;
+  min-width: 5em;
+}
+
+.table-response-headers th:nth-of-type(2) {
+  width: 75%;
+  min-width: 25em;
+}
+
+.table-response-headers th:nth-of-type(3) {
+  width: 10%;
+  min-width: 5em;
 }
