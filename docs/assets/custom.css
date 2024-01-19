@@ -1,8 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400&display=swap')
-
-/* required in order to load Fira Code instantly */
-{}
-
 :root {
   --ember-nexus-background-lightest: #ffffff;
   --ember-nexus-background-lighter: #f6f5f4;
