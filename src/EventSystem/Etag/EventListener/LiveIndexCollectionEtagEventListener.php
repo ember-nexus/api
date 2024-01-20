@@ -4,10 +4,10 @@ namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
 use App\Factory\Type\RedisKeyFactory;
+use App\Service\EtagCalculatorService;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\UuidInterface;
 
 class LiveIndexCollectionEtagEventListener
 {
@@ -16,6 +16,7 @@ class LiveIndexCollectionEtagEventListener
     public function __construct(
         private RedisClient $redisClient,
         private RedisKeyFactory $redisKeyTypeFactory,
+        private EtagCalculatorService $etagCalculatorService,
         private LoggerInterface $logger
     ) {
     }
@@ -28,7 +29,7 @@ class LiveIndexCollectionEtagEventListener
                 'userUuid' => $event->getUserUuid()->toString(),
             ]
         );
-        $etag = $this->getIndexCollectionEtag($event->getUserUuid());
+        $etag = $this->etagCalculatorService->calculateIndexCollectionEtag($event->getUserUuid());
         $this->logger->debug(
             'Calculated Etag for index collection.',
             [
@@ -56,13 +57,5 @@ class LiveIndexCollectionEtagEventListener
 
         $event->setEtag($etag);
         $event->stopPropagation();
-    }
-
-    private function getIndexCollectionEtag(UuidInterface $userUuid): null
-    {
-        // todo: implement
-        $this->logger->debug($userUuid->toString());
-
-        return null;
     }
 }
