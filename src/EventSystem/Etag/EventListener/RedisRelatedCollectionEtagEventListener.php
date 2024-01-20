@@ -4,6 +4,7 @@ namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
 use App\Factory\Type\RedisKeyFactory;
+use App\Type\Etag;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
@@ -27,8 +28,8 @@ class RedisRelatedCollectionEtagEventListener
                 'redisKey' => $redisKey,
             ]
         );
-        $etag = $this->redisClient->get($redisKey);
-        if (null === $etag) {
+        $rawEtag = $this->redisClient->get($redisKey);
+        if (null === $rawEtag) {
             $this->logger->debug(
                 'Unable to find Etag for related collection in Redis.',
                 [
@@ -39,7 +40,8 @@ class RedisRelatedCollectionEtagEventListener
 
             return;
         }
-        if ($etag === RedisValueType::NULL->value) {
+        $etag = new Etag($rawEtag);
+        if ((string) $etag === RedisValueType::NULL->value) {
             $etag = null;
         }
         $this->logger->debug(

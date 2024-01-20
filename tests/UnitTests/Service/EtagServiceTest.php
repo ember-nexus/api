@@ -8,6 +8,7 @@ use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
 use App\EventSystem\Etag\Event\ParentsCollectionEtagEvent;
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
 use App\Service\EtagService;
+use App\Type\Etag;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -26,7 +27,7 @@ class EtagServiceTest extends TestCase
              * @var $event ChildrenCollectionEtagEvent
              */
             $event = $args[0];
-            $event->setEtag('syntheticEtag');
+            $event->setEtag(new Etag('syntheticEtag'));
 
             return $event;
         });
@@ -34,7 +35,7 @@ class EtagServiceTest extends TestCase
         $etagService = new EtagService($eventDispatcher->reveal());
 
         $etag = $etagService->getChildrenCollectionEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', $etag);
+        $this->assertSame('syntheticEtag', (string) $etag);
     }
 
     public function testGetParentsCollectionEtag(): void
@@ -45,7 +46,7 @@ class EtagServiceTest extends TestCase
              * @var $event ParentsCollectionEtagEvent
              */
             $event = $args[0];
-            $event->setEtag('syntheticEtag');
+            $event->setEtag(new Etag('syntheticEtag'));
 
             return $event;
         });
@@ -53,7 +54,7 @@ class EtagServiceTest extends TestCase
         $etagService = new EtagService($eventDispatcher->reveal());
 
         $etag = $etagService->getParentsCollectionEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', $etag);
+        $this->assertSame('syntheticEtag', (string) $etag);
     }
 
     public function testGetRelatedCollectionEtag(): void
@@ -64,7 +65,7 @@ class EtagServiceTest extends TestCase
              * @var $event RelatedCollectionEtagEvent
              */
             $event = $args[0];
-            $event->setEtag('syntheticEtag');
+            $event->setEtag(new Etag('syntheticEtag'));
 
             return $event;
         });
@@ -72,7 +73,7 @@ class EtagServiceTest extends TestCase
         $etagService = new EtagService($eventDispatcher->reveal());
 
         $etag = $etagService->getRelatedCollectionEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', $etag);
+        $this->assertSame('syntheticEtag', (string) $etag);
     }
 
     public function testGetIndexCollectionEtag(): void
@@ -83,7 +84,7 @@ class EtagServiceTest extends TestCase
              * @var $event IndexCollectionEtagEvent
              */
             $event = $args[0];
-            $event->setEtag('syntheticEtag');
+            $event->setEtag(new Etag('syntheticEtag'));
 
             return $event;
         });
@@ -91,7 +92,7 @@ class EtagServiceTest extends TestCase
         $etagService = new EtagService($eventDispatcher->reveal());
 
         $etag = $etagService->getIndexCollectionEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', $etag);
+        $this->assertSame('syntheticEtag', (string) $etag);
     }
 
     public function testGetElementEtag(): void
@@ -102,7 +103,7 @@ class EtagServiceTest extends TestCase
              * @var $event ElementEtagEvent
              */
             $event = $args[0];
-            $event->setEtag('syntheticEtag');
+            $event->setEtag(new Etag('syntheticEtag'));
 
             return $event;
         });
@@ -110,6 +111,6 @@ class EtagServiceTest extends TestCase
         $etagService = new EtagService($eventDispatcher->reveal());
 
         $etag = $etagService->getElementEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', $etag);
+        $this->assertSame('syntheticEtag', (string) $etag);
     }
 }

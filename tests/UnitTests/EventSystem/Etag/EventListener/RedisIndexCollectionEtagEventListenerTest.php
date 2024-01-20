@@ -5,6 +5,7 @@ namespace App\tests\UnitTests\EventSystem\Etag\EventListener;
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
 use App\EventSystem\Etag\EventListener\RedisIndexCollectionEtagEventListener;
 use App\Factory\Type\RedisKeyFactory;
+use App\Type\Etag;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
 use App\Type\RedisValueType;
@@ -99,10 +100,11 @@ class RedisIndexCollectionEtagEventListenerTest extends TestCase
         $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_INDEX_COLLECTION, $uuid->toString());
         $elementIndexCollectionEvent = new IndexCollectionEtagEvent($uuid);
+        $etag = new Etag('someEtag');
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
-        $redisClient->get(Argument::is($redisKey))->shouldBeCalledOnce()->willReturn('someEtag');
+        $redisClient->get(Argument::is($redisKey))->shouldBeCalledOnce()->willReturn($etag);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
         $redisKeyFactory->getEtagIndexCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
@@ -123,7 +125,7 @@ class RedisIndexCollectionEtagEventListenerTest extends TestCase
 
         // assert event
         $this->assertTrue($elementIndexCollectionEvent->isPropagationStopped());
-        $this->assertSame('someEtag', $elementIndexCollectionEvent->getEtag());
+        $this->assertSame('someEtag', (string) $elementIndexCollectionEvent->getEtag());
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Trying to find Etag for index collection in Redis.'));

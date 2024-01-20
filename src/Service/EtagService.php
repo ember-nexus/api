@@ -7,6 +7,7 @@ use App\EventSystem\Etag\Event\ElementEtagEvent;
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
 use App\EventSystem\Etag\Event\ParentsCollectionEtagEvent;
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
+use App\Type\Etag;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\UuidInterface;
 
@@ -17,7 +18,7 @@ class EtagService
     ) {
     }
 
-    public function getChildrenCollectionEtag(UuidInterface $parentUuid): ?string
+    public function getChildrenCollectionEtag(UuidInterface $parentUuid): ?Etag
     {
         $childrenCollectionEtagEvent = new ChildrenCollectionEtagEvent($parentUuid);
         $this->eventDispatcher->dispatch($childrenCollectionEtagEvent);
@@ -25,7 +26,7 @@ class EtagService
         return $childrenCollectionEtagEvent->getEtag();
     }
 
-    public function getParentsCollectionEtag(UuidInterface $childUuid): ?string
+    public function getParentsCollectionEtag(UuidInterface $childUuid): ?Etag
     {
         $parentsCollectionEtagEvent = new ParentsCollectionEtagEvent($childUuid);
         $this->eventDispatcher->dispatch($parentsCollectionEtagEvent);
@@ -33,7 +34,7 @@ class EtagService
         return $parentsCollectionEtagEvent->getEtag();
     }
 
-    public function getRelatedCollectionEtag(UuidInterface $centerUuid): ?string
+    public function getRelatedCollectionEtag(UuidInterface $centerUuid): ?Etag
     {
         $relatedCollectionEtagEvent = new RelatedCollectionEtagEvent($centerUuid);
         $this->eventDispatcher->dispatch($relatedCollectionEtagEvent);
@@ -41,7 +42,7 @@ class EtagService
         return $relatedCollectionEtagEvent->getEtag();
     }
 
-    public function getIndexCollectionEtag(UuidInterface $userUuid): ?string
+    public function getIndexCollectionEtag(UuidInterface $userUuid): ?Etag
     {
         $indexCollectionEtagEvent = new IndexCollectionEtagEvent($userUuid);
         $this->eventDispatcher->dispatch($indexCollectionEtagEvent);
@@ -49,7 +50,7 @@ class EtagService
         return $indexCollectionEtagEvent->getEtag();
     }
 
-    public function getElementEtag(UuidInterface $elementUuid): ?string
+    public function getElementEtag(UuidInterface $elementUuid): ?Etag
     {
         $elementEtagEvent = new ElementEtagEvent($elementUuid);
         $this->eventDispatcher->dispatch($elementEtagEvent);

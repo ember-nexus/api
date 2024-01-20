@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Type\Etag;
 use App\Type\EtagCalculator;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
@@ -21,7 +22,7 @@ class EtagCalculatorService
     ) {
     }
 
-    public function calculateElementEtag(UuidInterface $elementUuid): string
+    public function calculateElementEtag(UuidInterface $elementUuid): Etag
     {
         $this->logger->debug(
             'Calculating Etag for element.',
@@ -64,7 +65,7 @@ class EtagCalculatorService
         return $etag;
     }
 
-    public function calculateChildrenCollectionEtag(UuidInterface $parentUuid): ?string
+    public function calculateChildrenCollectionEtag(UuidInterface $parentUuid): ?Etag
     {
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
         // todo: add relation id + updated to calculation
@@ -105,13 +106,13 @@ class EtagCalculatorService
         return $etagCalculator->getEtag();
     }
 
-    public function calculateIndexCollectionEtag(UuidInterface $userUuid): ?string
+    public function calculateIndexCollectionEtag(UuidInterface $userUuid): ?Etag
     {
         // todo: implement
         return null;
     }
 
-    public function calculateParentsCollectionEtag(UuidInterface $childUuid): ?string
+    public function calculateParentsCollectionEtag(UuidInterface $childUuid): ?Etag
     {
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
         // todo: add relation id + updated to calculation
@@ -152,7 +153,7 @@ class EtagCalculatorService
         return $etagCalculator->getEtag();
     }
 
-    public function calculateRelatedCollectionEtag(UuidInterface $centerUuid): ?string
+    public function calculateRelatedCollectionEtag(UuidInterface $centerUuid): ?Etag
     {
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
         // todo: add relation id + updated to calculation

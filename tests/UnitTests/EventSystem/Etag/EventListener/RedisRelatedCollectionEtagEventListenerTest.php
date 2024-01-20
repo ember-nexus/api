@@ -5,6 +5,7 @@ namespace App\tests\UnitTests\EventSystem\Etag\EventListener;
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
 use App\EventSystem\Etag\EventListener\RedisRelatedCollectionEtagEventListener;
 use App\Factory\Type\RedisKeyFactory;
+use App\Type\Etag;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
 use App\Type\RedisValueType;
@@ -99,10 +100,11 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
         $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $uuid->toString());
         $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($uuid);
+        $etag = new Etag('someEtag');
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
-        $redisClient->get(Argument::is($redisKey))->shouldBeCalledOnce()->willReturn('someEtag');
+        $redisClient->get(Argument::is($redisKey))->shouldBeCalledOnce()->willReturn($etag);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
         $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
@@ -123,7 +125,7 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
 
         // assert event
         $this->assertTrue($elementRelatedCollectionEvent->isPropagationStopped());
-        $this->assertSame('someEtag', $elementRelatedCollectionEvent->getEtag());
+        $this->assertSame('someEtag', (string) $elementRelatedCollectionEvent->getEtag());
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Trying to find Etag for related collection in Redis.'));

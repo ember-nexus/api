@@ -17,7 +17,7 @@ class EtagCalculator
 
     private HashContext $hashContext;
     private Base58 $encoder;
-    private ?string $finalEtag = null;
+    private ?Etag $finalEtag = null;
 
     public function __construct(
         string $seed,
@@ -50,13 +50,13 @@ class EtagCalculator
         return $this;
     }
 
-    public function getEtag(): string
+    public function getEtag(): Etag
     {
         if ($this->finalEtag) {
             return $this->finalEtag;
         }
         $rawHash = hash_final($this->hashContext, true);
-        $this->finalEtag = $this->encoder->encode($rawHash);
+        $this->finalEtag = new Etag($this->encoder->encode($rawHash));
 
         return $this->finalEtag;
     }

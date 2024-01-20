@@ -6,6 +6,7 @@ use App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent;
 use App\EventSystem\Etag\EventListener\LiveChildrenCollectionEtagEventListener;
 use App\Factory\Type\RedisKeyFactory;
 use App\Service\EtagCalculatorService;
+use App\Type\Etag;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
 use App\Type\RedisValueType;
@@ -26,12 +27,13 @@ class LiveChildrenCollectionEtagEventListenerTest extends TestCase
         $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_CHILDREN_COLLECTION, $uuid->toString());
         $elementEtagEvent = new ChildrenCollectionEtagEvent($uuid);
+        $etag = new Etag('someEtag');
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
         $redisClient->set(
             Argument::is($redisKey),
-            Argument::is('someEtag'),
+            Argument::is($etag),
             Argument::is('EX'),
             Argument::is(3600)
         )->shouldBeCalledOnce()->willReturn(null);
@@ -42,7 +44,7 @@ class LiveChildrenCollectionEtagEventListenerTest extends TestCase
         );
 
         $etagCalculatorService = $this->prophesize(EtagCalculatorService::class);
-        $etagCalculatorService->calculateChildrenCollectionEtag(Argument::is($uuid))->shouldBeCalledOnce()->willReturn('someEtag');
+        $etagCalculatorService->calculateChildrenCollectionEtag(Argument::is($uuid))->shouldBeCalledOnce()->willReturn($etag);
 
         $logger = TestLogger::create();
 
@@ -59,7 +61,7 @@ class LiveChildrenCollectionEtagEventListenerTest extends TestCase
 
         // assert event
         $this->assertTrue($elementEtagEvent->isPropagationStopped());
-        $this->assertSame('someEtag', $elementEtagEvent->getEtag());
+        $this->assertSame('someEtag', (string) $elementEtagEvent->getEtag());
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Trying to persist Etag for children collection in Redis.'));
