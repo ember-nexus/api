@@ -67,17 +67,28 @@ class EtagCalculatorService
 
     public function calculateChildrenCollectionEtag(UuidInterface $parentUuid): ?Etag
     {
+        $this->logger->debug(
+            'Calculating Etag for children collection.',
+            [
+                'parentUuid' => $parentUuid->toString(),
+            ]
+        );
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
-        // todo: add relation id + updated to calculation
         $result = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 sprintf(
-                    "MATCH ({id: \$parentUuid})-[:OWNS]->(children)\n".
-                    "WITH children\n".
+                    "MATCH (parent {id: \$parentUuid})\n".
+                    "MATCH (parent)-[:OWNS]->(children)\n".
+                    "MATCH (parent)-[relations]->(children)\n".
+                    "WITH children, relations\n".
                     "LIMIT %d\n".
-                    "WITH children ORDER BY children.id\n".
-                    "WITH [children.id, children.updated] AS childrenList\n".
-                    'RETURN collect(childrenList) AS childrenList',
+                    "WITH children, relations\n".
+                    "ORDER BY children.id, relations.id\n".
+                    "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
+                    "WITH allTuples\n".
+                    "UNWIND allTuples AS tuple\n".
+                    "WITH tuple ORDER BY tuple[0]\n".
+                    'RETURN COLLECT(tuple) AS sortedTuples',
                     $limit + 1
                 ),
                 [
@@ -86,34 +97,75 @@ class EtagCalculatorService
             )
         );
         if (1 !== count($result)) {
-            throw new Exception('Unexpected result');
+            throw new Exception('Unexpected result.');
         }
-        if (count($result[0]['childrenList']) > $limit) {
+        if (count($result[0]['sortedTuples']) > $limit) {
+            $this->logger->debug(
+                'Calculation of Etag for children collection stopped due to too many children.',
+                [
+                    'parentUuid' => $parentUuid->toString(),
+                ]
+            );
+
             return null;
         }
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
-        foreach ($result[0]['childrenList'] as $childIdUpdatedPair) {
-            $childId = Uuid::fromString($childIdUpdatedPair[0]);
-            $childUpdated = $childIdUpdatedPair[1];
-            if (!($childUpdated instanceof DateTimeZoneId)) {
-                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($childUpdated)));
+        $etagCalculator->addUuid($parentUuid);
+        foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
+            $elementId = Uuid::fromString($idUpdatedPair[0]);
+            $elementUpdated = $idUpdatedPair[1];
+            if (!($elementUpdated instanceof DateTimeZoneId)) {
+                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($elementUpdated)));
             }
-            $etagCalculator->addUuid($childId);
-            $etagCalculator->addDateTime($childUpdated->toDateTime());
+            $etagCalculator->addUuid($elementId);
+            $etagCalculator->addDateTime($elementUpdated->toDateTime());
         }
 
-        return $etagCalculator->getEtag();
+        $etag = $etagCalculator->getEtag();
+
+        $this->logger->debug(
+            'Calculated Etag for children collection.',
+            [
+                'parentUuid' => $parentUuid->toString(),
+                'etag' => $etag,
+            ]
+        );
+
+        return $etag;
     }
 
     public function calculateIndexCollectionEtag(UuidInterface $userUuid): ?Etag
     {
+        $this->logger->debug(
+            'Calculating Etag for index collection.',
+            [
+                'userUuid' => $userUuid->toString(),
+            ]
+        );
         // todo: implement
+        //        $etagCalculator->addUuid($userUuid);
+        $etag = '';
+
+        $this->logger->debug(
+            'Calculated Etag for index collection.',
+            [
+                'userUuid' => $userUuid->toString(),
+                'etag' => $etag,
+            ]
+        );
+
         return null;
     }
 
     public function calculateParentsCollectionEtag(UuidInterface $childUuid): ?Etag
     {
+        $this->logger->debug(
+            'Calculating Etag for parents collection.',
+            [
+                'childUuid' => $childUuid->toString(),
+            ]
+        );
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
         // todo: add relation id + updated to calculation
         $result = $this->cypherEntityManager->getClient()->runStatement(
@@ -140,6 +192,7 @@ class EtagCalculatorService
         }
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etagCalculator->addUuid($childUuid);
         foreach ($result[0]['parentsList'] as $parentsIdUpdatedPair) {
             $parentId = Uuid::fromString($parentsIdUpdatedPair[0]);
             $parentUpdated = $parentsIdUpdatedPair[1];
@@ -150,11 +203,27 @@ class EtagCalculatorService
             $etagCalculator->addDateTime($parentUpdated->toDateTime());
         }
 
-        return $etagCalculator->getEtag();
+        $etag = $etagCalculator->getEtag();
+
+        $this->logger->debug(
+            'Calculated Etag for parents collection.',
+            [
+                'childUuid' => $childUuid->toString(),
+                'etag' => $etag,
+            ]
+        );
+
+        return $etag;
     }
 
     public function calculateRelatedCollectionEtag(UuidInterface $centerUuid): ?Etag
     {
+        $this->logger->debug(
+            'Calculating Etag for related collection.',
+            [
+                'centerUuid' => $centerUuid->toString(),
+            ]
+        );
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
         // todo: add relation id + updated to calculation
         $result = $this->cypherEntityManager->getClient()->runStatement(
@@ -181,6 +250,7 @@ class EtagCalculatorService
         }
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etagCalculator->addUuid($centerUuid);
         foreach ($result[0]['relatedList'] as $relatedIdUpdatedPair) {
             $relatedId = Uuid::fromString($relatedIdUpdatedPair[0]);
             $relatedUpdated = $relatedIdUpdatedPair[1];
@@ -191,6 +261,16 @@ class EtagCalculatorService
             $etagCalculator->addDateTime($relatedUpdated->toDateTime());
         }
 
-        return $etagCalculator->getEtag();
+        $etag = $etagCalculator->getEtag();
+
+        $this->logger->debug(
+            'Calculated Etag for related collection.',
+            [
+                'centerUuid' => $centerUuid->toString(),
+                'etag' => $etag,
+            ]
+        );
+
+        return $etag;
     }
 }

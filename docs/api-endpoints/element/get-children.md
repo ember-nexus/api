@@ -6,7 +6,7 @@
 Returns all children of the specified node.  
 Returned data is paginated, and each page contains all relations between the parent and the returned children.
 
-### Request Parameters
+## Request Parameters
 
 <div class="table-request-parameters">
 
@@ -17,7 +17,7 @@ Returned data is paginated, and each page contains all relations between the par
 
 </div>
 
-### Request Headers
+## Request Headers
 
 <div class="table-request-headers">
 
@@ -27,7 +27,7 @@ Returned data is paginated, and each page contains all relations between the par
 
 </div>
 
-### Response Headers
+## Response Headers
 
 <div class="table-response-headers">
 

@@ -6,11 +6,11 @@
 The get element endpoint at `GET /<uuid>` is used to retrieve the data of a single element, which can be either
 a node or a relationship.
 
-### Request Parameters
+## Request Parameters
 
 This endpoint does not require parameters.
 
-### Request Headers
+## Request Headers
 
 <div class="table-request-headers">
 
@@ -20,7 +20,7 @@ This endpoint does not require parameters.
 
 </div>
 
-### Response Headers
+## Response Headers
 
 <div class="table-response-headers">
 

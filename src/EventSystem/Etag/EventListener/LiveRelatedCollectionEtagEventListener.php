@@ -23,21 +23,7 @@ class LiveRelatedCollectionEtagEventListener
 
     public function onRelatedCollectionEtagEvent(RelatedCollectionEtagEvent $event): void
     {
-        $this->logger->debug(
-            'Calculating Etag for related collection.',
-            [
-                'centerUuid' => $event->getCenterUuid()->toString(),
-            ]
-        );
         $etag = $this->etagCalculatorService->calculateRelatedCollectionEtag($event->getCenterUuid());
-        $this->logger->debug(
-            'Calculated Etag for related collection.',
-            [
-                'centerUuid' => $event->getCenterUuid()->toString(),
-                'etag' => $etag,
-            ]
-        );
-
         $redisKey = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey($event->getCenterUuid());
 
         $this->logger->debug(

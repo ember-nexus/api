@@ -23,21 +23,7 @@ class LiveChildrenCollectionEtagEventListener
 
     public function onChildrenCollectionEtagEvent(ChildrenCollectionEtagEvent $event): void
     {
-        $this->logger->debug(
-            'Calculating Etag for children collection.',
-            [
-                'parentUuid' => $event->getParentUuid()->toString(),
-            ]
-        );
         $etag = $this->etagCalculatorService->calculateChildrenCollectionEtag($event->getParentUuid());
-        $this->logger->debug(
-            'Calculated Etag for children collection.',
-            [
-                'parentUuid' => $event->getParentUuid()->toString(),
-                'etag' => $etag,
-            ]
-        );
-
         $redisKey = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey($event->getParentUuid());
 
         $this->logger->debug(

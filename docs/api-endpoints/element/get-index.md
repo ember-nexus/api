@@ -6,7 +6,7 @@
 Returns all top-level elements to which the current user has direct access.  
 Returned data is paginated.
 
-### Request Parameters
+## Request Parameters
 
 <div class="table-request-parameters">
 
@@ -17,7 +17,7 @@ Returned data is paginated.
 
 </div>
 
-### Request Headers
+## Request Headers
 
 <div class="table-request-headers">
 
@@ -27,7 +27,7 @@ Returned data is paginated.
 
 </div>
 
-### Response Headers
+## Response Headers
 
 <div class="table-response-headers">
 

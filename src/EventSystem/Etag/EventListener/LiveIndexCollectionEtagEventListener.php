@@ -23,21 +23,7 @@ class LiveIndexCollectionEtagEventListener
 
     public function onIndexCollectionEtagEvent(IndexCollectionEtagEvent $event): void
     {
-        $this->logger->debug(
-            'Calculating Etag for index collection.',
-            [
-                'userUuid' => $event->getUserUuid()->toString(),
-            ]
-        );
         $etag = $this->etagCalculatorService->calculateIndexCollectionEtag($event->getUserUuid());
-        $this->logger->debug(
-            'Calculated Etag for index collection.',
-            [
-                'userUuid' => $event->getUserUuid()->toString(),
-                'etag' => $etag,
-            ]
-        );
-
         $redisKey = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey($event->getUserUuid());
 
         $this->logger->debug(

@@ -9,11 +9,11 @@ Deletes a single element. If the deleted element is a node, all connected relati
 > To avoid orphaned nodes, children need to be deleted first or get other parents added.  
 > This behavior might be changed; see issue [#64: HTTP DELETE /&lt;uuid&gt; - DeleteElementController](https://github.com/ember-nexus/api/issues/64).
 
-### Request Parameters
+## Request Parameters
 
 This endpoint does not require parameters.
 
-### Request Headers
+## Request Headers
 
 <div class="table-request-headers">
 
@@ -23,7 +23,7 @@ This endpoint does not require parameters.
 
 </div>
 
-### Response Headers
+## Response Headers
 
 This endpoint does not return special headers.
 

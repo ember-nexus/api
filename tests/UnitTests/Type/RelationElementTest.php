@@ -43,6 +43,9 @@ class RelationElementTest extends TestCase
 
     public function testPropertiesTraitGetPropertyWhichDoesNotExist(): void
     {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
         $relationElement = new RelationElement();
 
         try {

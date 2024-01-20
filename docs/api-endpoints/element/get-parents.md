@@ -9,7 +9,7 @@ Returned data is paginated; each page contains all relations between the node an
 > [!NOTE]
 > Usually, a node only has one parent, although the security system allows multiple ones.
 
-### Request Parameters
+## Request Parameters
 
 <div class="table-request-parameters">
 
@@ -20,7 +20,7 @@ Returned data is paginated; each page contains all relations between the node an
 
 </div>
 
-### Request Headers
+## Request Headers
 
 <div class="table-request-headers">
 
@@ -30,7 +30,7 @@ Returned data is paginated; each page contains all relations between the node an
 
 </div>
 
-### Response Headers
+## Response Headers
 
 <div class="table-response-headers">
 

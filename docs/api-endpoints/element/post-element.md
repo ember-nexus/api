@@ -9,11 +9,11 @@ Creates a new node. It is owned by the referenced node.
 > This endpoint can not create relations, as the behaviour of "owning a relation", i.e.
 > `(user)-[:OWNS]->[relation]`, is undefined.
 
-### Request Parameters
+## Request Parameters
 
 This endpoint does not require parameters.
 
-### Request Headers
+## Request Headers
 
 <div class="table-request-headers">
 
@@ -23,7 +23,7 @@ This endpoint does not require parameters.
 
 </div>
 
-### Response Headers
+## Response Headers
 
 <div class="table-response-headers">
 

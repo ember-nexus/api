@@ -12,11 +12,11 @@ Replaces the data of an individual data element.
 > [!NOTE]
 > Some properties of internally used nodes and relations can not be changed directly, doing so will throw errors.
 
-### Request Parameters
+## Request Parameters
 
 This endpoint does not require parameters.
 
-### Request Headers
+## Request Headers
 
 <div class="table-request-headers">
 
@@ -27,7 +27,7 @@ This endpoint does not require parameters.
 
 </div>
 
-### Response Headers
+## Response Headers
 
 <div class="table-response-headers">
 

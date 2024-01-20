@@ -5,11 +5,11 @@
 
 Creates a new element. If the element is a node, it is directly owned by the current user.
 
-### Request Parameters
+## Request Parameters
 
 This endpoint does not require parameters.
 
-### Request Headers
+## Request Headers
 
 <div class="table-request-headers">
 
@@ -19,7 +19,7 @@ This endpoint does not require parameters.
 
 </div>
 
-### Response Headers
+## Response Headers
 
 <div class="table-response-headers">
 
