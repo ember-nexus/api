@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   will crash the container intentionally if the file is missing. Check will be enabled with the release of version
   0.2.0, see also #225. Closes issue #131.
 - Add HTTP header `Etag` to GET responses of element and collection endpoints, closes #88.
+- Add `beste/psr-testlogger` for creating easier unit tests, related to #88.
 ### Changed
 - Constants are changed to contain type declarations, closes #211.
 - Remove timeout from PHP-tasks, closes #220. CI timeouts still apply.

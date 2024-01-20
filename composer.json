@@ -35,6 +35,7 @@
     "tuupola/base58": "^2.1"
   },
   "require-dev": {
+    "beste/psr-testlogger": "^1.0",
     "boesing/psalm-plugin-stringf": "^1.4",
     "friendsofphp/php-cs-fixer": "^3.41",
     "infection/infection": "^0.27.9",
