@@ -530,4 +530,888 @@ class EtagCalculatorServiceTest extends TestCase
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for children collection.'));
     }
+
+    public function testCalculateParentsCollectionEtagWithExistingElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([
+                        new CypherList([
+                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                        ]),
+                        new CypherList([
+                            '2c42deee-ad24-4f04-bb37-7c31fd5b3345',
+                            new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                        ]),
+                    ]),
+                ]),
+            ]
+        );
+        /**
+         * @var ?Statement $statement
+         */
+        $statement = null;
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::that(
+            function ($internalStatement) use (&$statement) {
+                $statement = $internalStatement;
+
+                return true;
+            }
+        ))->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+
+        // assert result
+        $this->assertSame('526poCqn6vm', (string) $etag);
+
+        $this->assertInstanceOf(Statement::class, $statement);
+        $this->assertSame(
+            "MATCH (child {id: \$childUuid})\n".
+            "MATCH (child)<-[:OWNS]-(parents)\n".
+            "MATCH (child)<-[relations]-(parents)\n".
+            "WITH parents, relations\n".
+            "LIMIT 101\n".
+            "WITH parents, relations\n".
+            "ORDER BY parents.id, relations.id\n".
+            "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
+            "WITH allTuples\n".
+            "UNWIND allTuples AS tuple\n".
+            "WITH tuple ORDER BY tuple[0]\n".
+            'RETURN COLLECT(tuple) AS sortedTuples',
+            $statement->getText()
+        );
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for parents collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for parents collection.'));
+    }
+
+    public function testCalculateParentsCollectionEtagWithNoElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([]),
+                ]),
+            ]
+        );
+        /**
+         * @var ?Statement $statement
+         */
+        $statement = null;
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::that(
+            function ($internalStatement) use (&$statement) {
+                $statement = $internalStatement;
+
+                return true;
+            }
+        ))->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+
+        // assert result
+        $this->assertSame('3F8H5eXjtu0', (string) $etag);
+
+        $this->assertInstanceOf(Statement::class, $statement);
+        $this->assertSame(
+            "MATCH (child {id: \$childUuid})\n".
+            "MATCH (child)<-[:OWNS]-(parents)\n".
+            "MATCH (child)<-[relations]-(parents)\n".
+            "WITH parents, relations\n".
+            "LIMIT 101\n".
+            "WITH parents, relations\n".
+            "ORDER BY parents.id, relations.id\n".
+            "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
+            "WITH allTuples\n".
+            "UNWIND allTuples AS tuple\n".
+            "WITH tuple ORDER BY tuple[0]\n".
+            'RETURN COLLECT(tuple) AS sortedTuples',
+            $statement->getText()
+        );
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for parents collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for parents collection.'));
+    }
+
+    public function testCalculateParentsCollectionEtagWithTooManyElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $resultList = [];
+        for ($i = 0; $i < 101; ++$i) {
+            $resultList[] = new CypherList([
+                '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+            ]);
+        }
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => $resultList,
+                ]),
+            ]
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+
+        // assert result
+        $this->assertNull($etag);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for parents collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculation of Etag for parents collection stopped due to too many parents.'));
+    }
+
+    public function testCalculateParentsCollectionEtagDifferentObjectIsReturned(): void
+    {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([
+                        new CypherList([
+                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            new stdClass(),
+                        ]),
+                    ]),
+                ]),
+            ]
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        $this->expectExceptionMessage('Expected variable element.updated to be of type Laudis\Neo4j\Types\DateTimeZoneId, got stdClass.');
+
+        // run service method
+        $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for parents collection.'));
+    }
+
+    public function testCalculateParentsCollectionEtagWhereNoDataIsReturned(): void
+    {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            []
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        $this->expectExceptionMessage('Unexpected result.');
+
+        // run service method
+        $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for parents collection.'));
+    }
+
+    public function testCalculateRelatedCollectionEtagWithExistingElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([
+                        new CypherList([
+                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                        ]),
+                        new CypherList([
+                            '2c42deee-ad24-4f04-bb37-7c31fd5b3345',
+                            new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                        ]),
+                    ]),
+                ]),
+            ]
+        );
+        /**
+         * @var ?Statement $statement
+         */
+        $statement = null;
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::that(
+            function ($internalStatement) use (&$statement) {
+                $statement = $internalStatement;
+
+                return true;
+            }
+        ))->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+
+        // assert result
+        $this->assertSame('526poCqn6vm', (string) $etag);
+
+        $this->assertInstanceOf(Statement::class, $statement);
+        $this->assertSame(
+            "MATCH (center {id: \$centerUuid})\n".
+            "MATCH (center)-[relations]-(related)\n".
+            "WITH related, relations\n".
+            "LIMIT 101\n".
+            "WITH related, relations\n".
+            "ORDER BY related.id, relations.id\n".
+            "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
+            "WITH allTuples\n".
+            "UNWIND allTuples AS tuple\n".
+            "WITH tuple ORDER BY tuple[0]\n".
+            'RETURN COLLECT(tuple) AS sortedTuples',
+            $statement->getText()
+        );
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for related collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for related collection.'));
+    }
+
+    public function testCalculateRelatedCollectionEtagWithNoElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([]),
+                ]),
+            ]
+        );
+        /**
+         * @var ?Statement $statement
+         */
+        $statement = null;
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::that(
+            function ($internalStatement) use (&$statement) {
+                $statement = $internalStatement;
+
+                return true;
+            }
+        ))->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+
+        // assert result
+        $this->assertSame('3F8H5eXjtu0', (string) $etag);
+
+        $this->assertInstanceOf(Statement::class, $statement);
+        $this->assertSame(
+            "MATCH (center {id: \$centerUuid})\n".
+            "MATCH (center)-[relations]-(related)\n".
+            "WITH related, relations\n".
+            "LIMIT 101\n".
+            "WITH related, relations\n".
+            "ORDER BY related.id, relations.id\n".
+            "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
+            "WITH allTuples\n".
+            "UNWIND allTuples AS tuple\n".
+            "WITH tuple ORDER BY tuple[0]\n".
+            'RETURN COLLECT(tuple) AS sortedTuples',
+            $statement->getText()
+        );
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for related collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for related collection.'));
+    }
+
+    public function testCalculateRelatedCollectionEtagWithTooManyElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $resultList = [];
+        for ($i = 0; $i < 101; ++$i) {
+            $resultList[] = new CypherList([
+                '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+            ]);
+        }
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => $resultList,
+                ]),
+            ]
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+
+        // assert result
+        $this->assertNull($etag);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for related collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculation of Etag for related collection stopped due to too many related elements.'));
+    }
+
+    public function testCalculateRelatedCollectionEtagDifferentObjectIsReturned(): void
+    {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([
+                        new CypherList([
+                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            new stdClass(),
+                        ]),
+                    ]),
+                ]),
+            ]
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        $this->expectExceptionMessage('Expected variable element.updated to be of type Laudis\Neo4j\Types\DateTimeZoneId, got stdClass.');
+
+        // run service method
+        $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for related collection.'));
+    }
+
+    public function testCalculateRelatedCollectionEtagWhereNoDataIsReturned(): void
+    {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            []
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        $this->expectExceptionMessage('Unexpected result.');
+
+        // run service method
+        $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for related collection.'));
+    }
+
+    public function testCalculateIndexCollectionEtagWithExistingElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([
+                        new CypherList([
+                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                        ]),
+                        new CypherList([
+                            '2c42deee-ad24-4f04-bb37-7c31fd5b3345',
+                            new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                        ]),
+                    ]),
+                ]),
+            ]
+        );
+        /**
+         * @var ?Statement $statement
+         */
+        $statement = null;
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::that(
+            function ($internalStatement) use (&$statement) {
+                $statement = $internalStatement;
+
+                return true;
+            }
+        ))->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+
+        // assert result
+        $this->assertSame('526poCqn6vm', (string) $etag);
+
+        $this->assertInstanceOf(Statement::class, $statement);
+        $this->assertSame(
+            "MATCH (user:User {id: \$userUuid})\n".
+            "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+            "WITH elements\n".
+            "LIMIT 101\n".
+            "WITH elements\n".
+            "ORDER BY elements.id\n".
+            "WITH COLLECT([elements.id, elements.updated]) AS allTuples\n".
+            "WITH allTuples\n".
+            "UNWIND allTuples AS tuple\n".
+            "WITH tuple ORDER BY tuple[0]\n".
+            'RETURN COLLECT(tuple) AS sortedTuples',
+            $statement->getText()
+        );
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for index collection.'));
+    }
+
+    public function testCalculateIndexCollectionEtagWithNoElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([]),
+                ]),
+            ]
+        );
+        /**
+         * @var ?Statement $statement
+         */
+        $statement = null;
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::that(
+            function ($internalStatement) use (&$statement) {
+                $statement = $internalStatement;
+
+                return true;
+            }
+        ))->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+
+        // assert result
+        $this->assertSame('3F8H5eXjtu0', (string) $etag);
+
+        $this->assertInstanceOf(Statement::class, $statement);
+        $this->assertSame(
+            "MATCH (user:User {id: \$userUuid})\n".
+            "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+            "WITH elements\n".
+            "LIMIT 101\n".
+            "WITH elements\n".
+            "ORDER BY elements.id\n".
+            "WITH COLLECT([elements.id, elements.updated]) AS allTuples\n".
+            "WITH allTuples\n".
+            "UNWIND allTuples AS tuple\n".
+            "WITH tuple ORDER BY tuple[0]\n".
+            'RETURN COLLECT(tuple) AS sortedTuples',
+            $statement->getText()
+        );
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for index collection.'));
+    }
+
+    public function testCalculateIndexCollectionEtagWithTooManyElements(): void
+    {
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $resultList = [];
+        for ($i = 0; $i < 101; ++$i) {
+            $resultList[] = new CypherList([
+                '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+            ]);
+        }
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => $resultList,
+                ]),
+            ]
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+
+        // assert result
+        $this->assertNull($etag);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculation of Etag for index collection stopped due to too many index elements.'));
+    }
+
+    public function testCalculateIndexCollectionEtagDifferentObjectIsReturned(): void
+    {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'sortedTuples' => new CypherList([
+                        new CypherList([
+                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            new stdClass(),
+                        ]),
+                    ]),
+                ]),
+            ]
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        $this->expectExceptionMessage('Expected variable element.updated to be of type Laudis\Neo4j\Types\DateTimeZoneId, got stdClass.');
+
+        // run service method
+        $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));
+    }
+
+    public function testCalculateIndexCollectionEtagWhereNoDataIsReturned(): void
+    {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+        // setup variables
+        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            []
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints()->shouldBeCalledOnce()->willReturn(100);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $logger
+        );
+
+        $this->expectExceptionMessage('Unexpected result.');
+
+        // run service method
+        $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));
+    }
 }

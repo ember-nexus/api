@@ -135,29 +135,6 @@ class EtagCalculatorService
         return $etag;
     }
 
-    public function calculateIndexCollectionEtag(UuidInterface $userUuid): ?Etag
-    {
-        $this->logger->debug(
-            'Calculating Etag for index collection.',
-            [
-                'userUuid' => $userUuid->toString(),
-            ]
-        );
-        // todo: implement
-        //        $etagCalculator->addUuid($userUuid);
-        $etag = '';
-
-        $this->logger->debug(
-            'Calculated Etag for index collection.',
-            [
-                'userUuid' => $userUuid->toString(),
-                'etag' => $etag,
-            ]
-        );
-
-        return null;
-    }
-
     public function calculateParentsCollectionEtag(UuidInterface $childUuid): ?Etag
     {
         $this->logger->debug(
@@ -167,16 +144,21 @@ class EtagCalculatorService
             ]
         );
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
-        // todo: add relation id + updated to calculation
         $result = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 sprintf(
-                    "MATCH ({id: \$childUuid})<-[:OWNS]-(parents)\n".
-                    "WITH parents\n".
+                    "MATCH (child {id: \$childUuid})\n".
+                    "MATCH (child)<-[:OWNS]-(parents)\n".
+                    "MATCH (child)<-[relations]-(parents)\n".
+                    "WITH parents, relations\n".
                     "LIMIT %d\n".
-                    "WITH parents ORDER BY parents.id\n".
-                    "WITH [parents.id, parents.updated] AS parentsList\n".
-                    'RETURN collect(parentsList) AS parentsList',
+                    "WITH parents, relations\n".
+                    "ORDER BY parents.id, relations.id\n".
+                    "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
+                    "WITH allTuples\n".
+                    "UNWIND allTuples AS tuple\n".
+                    "WITH tuple ORDER BY tuple[0]\n".
+                    'RETURN COLLECT(tuple) AS sortedTuples',
                     $limit + 1
                 ),
                 [
@@ -185,22 +167,29 @@ class EtagCalculatorService
             )
         );
         if (1 !== count($result)) {
-            throw new Exception('Unexpected result');
+            throw new Exception('Unexpected result.');
         }
-        if (count($result[0]['parentsList']) > $limit) {
+        if (count($result[0]['sortedTuples']) > $limit) {
+            $this->logger->debug(
+                'Calculation of Etag for parents collection stopped due to too many parents.',
+                [
+                    'childUuid' => $childUuid->toString(),
+                ]
+            );
+
             return null;
         }
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($childUuid);
-        foreach ($result[0]['parentsList'] as $parentsIdUpdatedPair) {
-            $parentId = Uuid::fromString($parentsIdUpdatedPair[0]);
-            $parentUpdated = $parentsIdUpdatedPair[1];
-            if (!($parentUpdated instanceof DateTimeZoneId)) {
-                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($parentUpdated)));
+        foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
+            $elementId = Uuid::fromString($idUpdatedPair[0]);
+            $elementUpdated = $idUpdatedPair[1];
+            if (!($elementUpdated instanceof DateTimeZoneId)) {
+                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($elementUpdated)));
             }
-            $etagCalculator->addUuid($parentId);
-            $etagCalculator->addDateTime($parentUpdated->toDateTime());
+            $etagCalculator->addUuid($elementId);
+            $etagCalculator->addDateTime($elementUpdated->toDateTime());
         }
 
         $etag = $etagCalculator->getEtag();
@@ -225,16 +214,20 @@ class EtagCalculatorService
             ]
         );
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
-        // todo: add relation id + updated to calculation
         $result = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 sprintf(
-                    "MATCH ({id: \$centerUuid})-[]-(related)\n".
-                    "WITH related\n".
+                    "MATCH (center {id: \$centerUuid})\n".
+                    "MATCH (center)-[relations]-(related)\n".
+                    "WITH related, relations\n".
                     "LIMIT %d\n".
-                    "WITH related ORDER BY related.id\n".
-                    "WITH [related.id, related.updated] AS relatedList\n".
-                    'RETURN collect(relatedList) AS relatedList',
+                    "WITH related, relations\n".
+                    "ORDER BY related.id, relations.id\n".
+                    "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
+                    "WITH allTuples\n".
+                    "UNWIND allTuples AS tuple\n".
+                    "WITH tuple ORDER BY tuple[0]\n".
+                    'RETURN COLLECT(tuple) AS sortedTuples',
                     $limit + 1
                 ),
                 [
@@ -243,22 +236,29 @@ class EtagCalculatorService
             )
         );
         if (1 !== count($result)) {
-            throw new Exception('Unexpected result');
+            throw new Exception('Unexpected result.');
         }
-        if (count($result[0]['relatedList']) > $limit) {
+        if (count($result[0]['sortedTuples']) > $limit) {
+            $this->logger->debug(
+                'Calculation of Etag for related collection stopped due to too many related elements.',
+                [
+                    'centerUuid' => $centerUuid->toString(),
+                ]
+            );
+
             return null;
         }
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($centerUuid);
-        foreach ($result[0]['relatedList'] as $relatedIdUpdatedPair) {
-            $relatedId = Uuid::fromString($relatedIdUpdatedPair[0]);
-            $relatedUpdated = $relatedIdUpdatedPair[1];
-            if (!($relatedUpdated instanceof DateTimeZoneId)) {
-                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($relatedUpdated)));
+        foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
+            $elementId = Uuid::fromString($idUpdatedPair[0]);
+            $elementUpdated = $idUpdatedPair[1];
+            if (!($elementUpdated instanceof DateTimeZoneId)) {
+                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($elementUpdated)));
             }
-            $etagCalculator->addUuid($relatedId);
-            $etagCalculator->addDateTime($relatedUpdated->toDateTime());
+            $etagCalculator->addUuid($elementId);
+            $etagCalculator->addDateTime($elementUpdated->toDateTime());
         }
 
         $etag = $etagCalculator->getEtag();
@@ -267,6 +267,75 @@ class EtagCalculatorService
             'Calculated Etag for related collection.',
             [
                 'centerUuid' => $centerUuid->toString(),
+                'etag' => $etag,
+            ]
+        );
+
+        return $etag;
+    }
+
+    public function calculateIndexCollectionEtag(UuidInterface $userUuid): ?Etag
+    {
+        $this->logger->debug(
+            'Calculating Etag for index collection.',
+            [
+                'userUuid' => $userUuid->toString(),
+            ]
+        );
+        $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
+        $result = $this->cypherEntityManager->getClient()->runStatement(
+            Statement::create(
+                sprintf(
+                    "MATCH (user:User {id: \$userUuid})\n".
+                    "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+                    "WITH elements\n".
+                    "LIMIT %d\n".
+                    "WITH elements\n".
+                    "ORDER BY elements.id\n".
+                    "WITH COLLECT([elements.id, elements.updated]) AS allTuples\n".
+                    "WITH allTuples\n".
+                    "UNWIND allTuples AS tuple\n".
+                    "WITH tuple ORDER BY tuple[0]\n".
+                    'RETURN COLLECT(tuple) AS sortedTuples',
+                    $limit + 1
+                ),
+                [
+                    'userUuid' => $userUuid->toString(),
+                ]
+            )
+        );
+        if (1 !== count($result)) {
+            throw new Exception('Unexpected result.');
+        }
+        if (count($result[0]['sortedTuples']) > $limit) {
+            $this->logger->debug(
+                'Calculation of Etag for index collection stopped due to too many index elements.',
+                [
+                    'userUuid' => $userUuid->toString(),
+                ]
+            );
+
+            return null;
+        }
+
+        $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etagCalculator->addUuid($userUuid);
+        foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
+            $elementId = Uuid::fromString($idUpdatedPair[0]);
+            $elementUpdated = $idUpdatedPair[1];
+            if (!($elementUpdated instanceof DateTimeZoneId)) {
+                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($elementUpdated)));
+            }
+            $etagCalculator->addUuid($elementId);
+            $etagCalculator->addDateTime($elementUpdated->toDateTime());
+        }
+
+        $etag = $etagCalculator->getEtag();
+
+        $this->logger->debug(
+            'Calculated Etag for index collection.',
+            [
+                'userUuid' => $userUuid->toString(),
                 'etag' => $etag,
             ]
         );
