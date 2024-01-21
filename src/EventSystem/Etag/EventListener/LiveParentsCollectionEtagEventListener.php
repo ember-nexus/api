@@ -30,7 +30,7 @@ class LiveParentsCollectionEtagEventListener
             'Trying to persist Etag for parents collection in Redis.',
             [
                 'childUuid' => $event->getChildUuid()->toString(),
-                'redisKey' => $redisKey,
+                'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]
         );

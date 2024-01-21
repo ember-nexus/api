@@ -30,7 +30,7 @@ class LiveIndexCollectionEtagEventListener
             'Trying to persist Etag for index collection in Redis.',
             [
                 'userUuid' => $event->getUserUuid()->toString(),
-                'redisKey' => $redisKey,
+                'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]
         );

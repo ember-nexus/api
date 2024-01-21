@@ -25,7 +25,7 @@ class RedisElementEtagEventListener
             'Trying to find Etag for element in Redis.',
             [
                 'elementUuid' => $event->getElementUuid()->toString(),
-                'redisKey' => $redisKey,
+                'redisKey' => (string) $redisKey,
             ]
         );
         $rawEtag = $this->redisClient->get($redisKey);
@@ -34,7 +34,7 @@ class RedisElementEtagEventListener
                 'Unable to find Etag for element in Redis.',
                 [
                     'elementUuid' => $event->getElementUuid()->toString(),
-                    'redisKey' => $redisKey,
+                    'redisKey' => (string) $redisKey,
                 ]
             );
 
@@ -48,7 +48,7 @@ class RedisElementEtagEventListener
             'Found Etag for element in Redis.',
             [
                 'elementUuid' => $event->getElementUuid()->toString(),
-                'redisKey' => $redisKey,
+                'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]
         );

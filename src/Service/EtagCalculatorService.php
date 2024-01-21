@@ -2,12 +2,12 @@
 
 namespace App\Service;
 
+use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
-use Laudis\Neo4j\Types\DateTimeZoneId;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -45,13 +45,10 @@ class EtagCalculatorService
         if (null === $updated) {
             throw new Exception(sprintf('Unable to find node or relation with id %s.', $elementUuid->toString()));
         }
-        if (!($updated instanceof DateTimeZoneId)) {
-            throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($updated)));
-        }
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($elementUuid);
-        $etagCalculator->addDateTime($updated->toDateTime());
+        $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($updated));
         $etag = $etagCalculator->getEtag();
 
         $this->logger->debug(
@@ -84,11 +81,14 @@ class EtagCalculatorService
                     "LIMIT %d\n".
                     "WITH children, relations\n".
                     "ORDER BY children.id, relations.id\n".
-                    "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-                    "WITH allTuples\n".
-                    "UNWIND allTuples AS tuple\n".
-                    "WITH tuple ORDER BY tuple[0]\n".
-                    'RETURN COLLECT(tuple) AS sortedTuples',
+                    "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(children) as childrenCount\n".
+                    "CALL {\n".
+                    "  WITH rawTuples\n".
+                    "  UNWIND rawTuples as tuple\n".
+                    "  WITH tuple ORDER BY tuple[0]\n".
+                    "  RETURN COLLECT(tuple) AS sortedTuples\n".
+                    "}\n".
+                    'RETURN sortedTuples, childrenCount',
                     $limit + 1
                 ),
                 [
@@ -99,7 +99,7 @@ class EtagCalculatorService
         if (1 !== count($result)) {
             throw new Exception('Unexpected result.');
         }
-        if (count($result[0]['sortedTuples']) > $limit) {
+        if ($result[0]['childrenCount'] > $limit) {
             $this->logger->debug(
                 'Calculation of Etag for children collection stopped due to too many children.',
                 [
@@ -113,13 +113,8 @@ class EtagCalculatorService
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($parentUuid);
         foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
-            $elementId = Uuid::fromString($idUpdatedPair[0]);
-            $elementUpdated = $idUpdatedPair[1];
-            if (!($elementUpdated instanceof DateTimeZoneId)) {
-                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($elementUpdated)));
-            }
-            $etagCalculator->addUuid($elementId);
-            $etagCalculator->addDateTime($elementUpdated->toDateTime());
+            $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
+            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
         }
 
         $etag = $etagCalculator->getEtag();
@@ -154,11 +149,14 @@ class EtagCalculatorService
                     "LIMIT %d\n".
                     "WITH parents, relations\n".
                     "ORDER BY parents.id, relations.id\n".
-                    "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-                    "WITH allTuples\n".
-                    "UNWIND allTuples AS tuple\n".
-                    "WITH tuple ORDER BY tuple[0]\n".
-                    'RETURN COLLECT(tuple) AS sortedTuples',
+                    "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(parents) as parentsCount\n".
+                    "CALL {\n".
+                    "  WITH rawTuples\n".
+                    "  UNWIND rawTuples as tuple\n".
+                    "  WITH tuple ORDER BY tuple[0]\n".
+                    "  RETURN COLLECT(tuple) AS sortedTuples\n".
+                    "}\n".
+                    'RETURN sortedTuples, parentsCount',
                     $limit + 1
                 ),
                 [
@@ -169,7 +167,7 @@ class EtagCalculatorService
         if (1 !== count($result)) {
             throw new Exception('Unexpected result.');
         }
-        if (count($result[0]['sortedTuples']) > $limit) {
+        if ($result[0]['parentsCount'] > $limit) {
             $this->logger->debug(
                 'Calculation of Etag for parents collection stopped due to too many parents.',
                 [
@@ -183,13 +181,8 @@ class EtagCalculatorService
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($childUuid);
         foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
-            $elementId = Uuid::fromString($idUpdatedPair[0]);
-            $elementUpdated = $idUpdatedPair[1];
-            if (!($elementUpdated instanceof DateTimeZoneId)) {
-                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($elementUpdated)));
-            }
-            $etagCalculator->addUuid($elementId);
-            $etagCalculator->addDateTime($elementUpdated->toDateTime());
+            $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
+            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
         }
 
         $etag = $etagCalculator->getEtag();
@@ -223,11 +216,14 @@ class EtagCalculatorService
                     "LIMIT %d\n".
                     "WITH related, relations\n".
                     "ORDER BY related.id, relations.id\n".
-                    "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-                    "WITH allTuples\n".
-                    "UNWIND allTuples AS tuple\n".
-                    "WITH tuple ORDER BY tuple[0]\n".
-                    'RETURN COLLECT(tuple) AS sortedTuples',
+                    "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(related) as relatedCount\n".
+                    "CALL {\n".
+                    "  WITH rawTuples\n".
+                    "  UNWIND rawTuples as tuple\n".
+                    "  WITH tuple ORDER BY tuple[0]\n".
+                    "  RETURN COLLECT(tuple) AS sortedTuples\n".
+                    "}\n".
+                    'RETURN sortedTuples, relatedCount',
                     $limit + 1
                 ),
                 [
@@ -238,7 +234,7 @@ class EtagCalculatorService
         if (1 !== count($result)) {
             throw new Exception('Unexpected result.');
         }
-        if (count($result[0]['sortedTuples']) > $limit) {
+        if ($result[0]['relatedCount'] > $limit) {
             $this->logger->debug(
                 'Calculation of Etag for related collection stopped due to too many related elements.',
                 [
@@ -252,13 +248,8 @@ class EtagCalculatorService
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($centerUuid);
         foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
-            $elementId = Uuid::fromString($idUpdatedPair[0]);
-            $elementUpdated = $idUpdatedPair[1];
-            if (!($elementUpdated instanceof DateTimeZoneId)) {
-                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($elementUpdated)));
-            }
-            $etagCalculator->addUuid($elementId);
-            $etagCalculator->addDateTime($elementUpdated->toDateTime());
+            $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
+            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
         }
 
         $etag = $etagCalculator->getEtag();
@@ -292,11 +283,14 @@ class EtagCalculatorService
                     "LIMIT %d\n".
                     "WITH elements\n".
                     "ORDER BY elements.id\n".
-                    "WITH COLLECT([elements.id, elements.updated]) AS allTuples\n".
-                    "WITH allTuples\n".
-                    "UNWIND allTuples AS tuple\n".
-                    "WITH tuple ORDER BY tuple[0]\n".
-                    'RETURN COLLECT(tuple) AS sortedTuples',
+                    "WITH COLLECT([elements.id, elements.updated]) AS rawTuples, count(elements) as elementsCount\n".
+                    "CALL {\n".
+                    "  WITH rawTuples\n".
+                    "  UNWIND rawTuples as tuple\n".
+                    "  WITH tuple ORDER BY tuple[0]\n".
+                    "  RETURN COLLECT(tuple) AS sortedTuples\n".
+                    "}\n".
+                    'RETURN sortedTuples, elementsCount',
                     $limit + 1
                 ),
                 [
@@ -307,7 +301,7 @@ class EtagCalculatorService
         if (1 !== count($result)) {
             throw new Exception('Unexpected result.');
         }
-        if (count($result[0]['sortedTuples']) > $limit) {
+        if ($result[0]['elementsCount'] > $limit) {
             $this->logger->debug(
                 'Calculation of Etag for index collection stopped due to too many index elements.',
                 [
@@ -321,13 +315,8 @@ class EtagCalculatorService
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($userUuid);
         foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
-            $elementId = Uuid::fromString($idUpdatedPair[0]);
-            $elementUpdated = $idUpdatedPair[1];
-            if (!($elementUpdated instanceof DateTimeZoneId)) {
-                throw new Exception(sprintf('Expected variable element.updated to be of type %s, got %s.', DateTimeZoneId::class, get_class($elementUpdated)));
-            }
-            $etagCalculator->addUuid($elementId);
-            $etagCalculator->addDateTime($elementUpdated->toDateTime());
+            $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
+            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
         }
 
         $etag = $etagCalculator->getEtag();

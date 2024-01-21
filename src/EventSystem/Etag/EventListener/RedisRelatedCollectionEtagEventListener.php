@@ -25,7 +25,7 @@ class RedisRelatedCollectionEtagEventListener
             'Trying to find Etag for related collection in Redis.',
             [
                 'centerUuid' => $event->getCenterUuid()->toString(),
-                'redisKey' => $redisKey,
+                'redisKey' => (string) $redisKey,
             ]
         );
         $rawEtag = $this->redisClient->get($redisKey);
@@ -34,7 +34,7 @@ class RedisRelatedCollectionEtagEventListener
                 'Unable to find Etag for related collection in Redis.',
                 [
                     'centerUuid' => $event->getCenterUuid()->toString(),
-                    'redisKey' => $redisKey,
+                    'redisKey' => (string) $redisKey,
                 ]
             );
 
@@ -48,7 +48,7 @@ class RedisRelatedCollectionEtagEventListener
             'Found Etag for related collection in Redis.',
             [
                 'centerUuid' => $event->getCenterUuid()->toString(),
-                'redisKey' => $redisKey,
+                'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]
         );

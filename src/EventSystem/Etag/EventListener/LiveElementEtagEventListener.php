@@ -29,7 +29,7 @@ class LiveElementEtagEventListener
             'Trying to persist Etag for element in Redis.',
             [
                 'elementUuid' => $event->getElementUuid()->toString(),
-                'redisKey' => $redisKey,
+                'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]
         );

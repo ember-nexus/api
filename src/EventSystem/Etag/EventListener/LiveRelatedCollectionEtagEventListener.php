@@ -30,7 +30,7 @@ class LiveRelatedCollectionEtagEventListener
             'Trying to persist Etag for related collection in Redis.',
             [
                 'centerUuid' => $event->getCenterUuid()->toString(),
-                'redisKey' => $redisKey,
+                'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]
         );

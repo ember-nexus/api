@@ -213,6 +213,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         // setup service dependencies
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
 
         $clientInterface = $this->prophesize(ClientInterface::class);
         $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
@@ -229,7 +230,7 @@ class EtagCalculatorServiceTest extends TestCase
             $logger
         );
 
-        $this->expectExceptionMessage('Expected variable element.updated to be of type Laudis\Neo4j\Types\DateTimeZoneId, got stdClass.');
+        $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
         $etagCalculatorService->calculateElementEtag($uuid);
@@ -257,6 +258,7 @@ class EtagCalculatorServiceTest extends TestCase
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                     ]),
+                    'childrenCount' => 1,
                 ]),
             ]
         );
@@ -306,11 +308,14 @@ class EtagCalculatorServiceTest extends TestCase
             "LIMIT 101\n".
             "WITH children, relations\n".
             "ORDER BY children.id, relations.id\n".
-            "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-            "WITH allTuples\n".
-            "UNWIND allTuples AS tuple\n".
-            "WITH tuple ORDER BY tuple[0]\n".
-            'RETURN COLLECT(tuple) AS sortedTuples',
+            "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(children) as childrenCount\n".
+            "CALL {\n".
+            "  WITH rawTuples\n".
+            "  UNWIND rawTuples as tuple\n".
+            "  WITH tuple ORDER BY tuple[0]\n".
+            "  RETURN COLLECT(tuple) AS sortedTuples\n".
+            "}\n".
+            'RETURN sortedTuples, childrenCount',
             $statement->getText()
         );
 
@@ -329,6 +334,7 @@ class EtagCalculatorServiceTest extends TestCase
             [
                 new CypherMap([
                     'sortedTuples' => new CypherList([]),
+                    'childrenCount' => 0,
                 ]),
             ]
         );
@@ -378,11 +384,14 @@ class EtagCalculatorServiceTest extends TestCase
             "LIMIT 101\n".
             "WITH children, relations\n".
             "ORDER BY children.id, relations.id\n".
-            "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-            "WITH allTuples\n".
-            "UNWIND allTuples AS tuple\n".
-            "WITH tuple ORDER BY tuple[0]\n".
-            'RETURN COLLECT(tuple) AS sortedTuples',
+            "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(children) as childrenCount\n".
+            "CALL {\n".
+            "  WITH rawTuples\n".
+            "  UNWIND rawTuples as tuple\n".
+            "  WITH tuple ORDER BY tuple[0]\n".
+            "  RETURN COLLECT(tuple) AS sortedTuples\n".
+            "}\n".
+            'RETURN sortedTuples, childrenCount',
             $statement->getText()
         );
 
@@ -408,6 +417,7 @@ class EtagCalculatorServiceTest extends TestCase
             [
                 new CypherMap([
                     'sortedTuples' => $resultList,
+                    'childrenCount' => 101,
                 ]),
             ]
         );
@@ -460,6 +470,7 @@ class EtagCalculatorServiceTest extends TestCase
                             new stdClass(),
                         ]),
                     ]),
+                    'childrenCount' => 1,
                 ]),
             ]
         );
@@ -484,7 +495,7 @@ class EtagCalculatorServiceTest extends TestCase
             $logger
         );
 
-        $this->expectExceptionMessage('Expected variable element.updated to be of type Laudis\Neo4j\Types\DateTimeZoneId, got stdClass.');
+        $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
         $etagCalculatorService->calculateChildrenCollectionEtag($uuid);
@@ -553,6 +564,7 @@ class EtagCalculatorServiceTest extends TestCase
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                     ]),
+                    'parentsCount' => 1,
                 ]),
             ]
         );
@@ -602,11 +614,14 @@ class EtagCalculatorServiceTest extends TestCase
             "LIMIT 101\n".
             "WITH parents, relations\n".
             "ORDER BY parents.id, relations.id\n".
-            "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-            "WITH allTuples\n".
-            "UNWIND allTuples AS tuple\n".
-            "WITH tuple ORDER BY tuple[0]\n".
-            'RETURN COLLECT(tuple) AS sortedTuples',
+            "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(parents) as parentsCount\n".
+            "CALL {\n".
+            "  WITH rawTuples\n".
+            "  UNWIND rawTuples as tuple\n".
+            "  WITH tuple ORDER BY tuple[0]\n".
+            "  RETURN COLLECT(tuple) AS sortedTuples\n".
+            "}\n".
+            'RETURN sortedTuples, parentsCount',
             $statement->getText()
         );
 
@@ -625,6 +640,7 @@ class EtagCalculatorServiceTest extends TestCase
             [
                 new CypherMap([
                     'sortedTuples' => new CypherList([]),
+                    'parentsCount' => 0,
                 ]),
             ]
         );
@@ -674,11 +690,14 @@ class EtagCalculatorServiceTest extends TestCase
             "LIMIT 101\n".
             "WITH parents, relations\n".
             "ORDER BY parents.id, relations.id\n".
-            "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-            "WITH allTuples\n".
-            "UNWIND allTuples AS tuple\n".
-            "WITH tuple ORDER BY tuple[0]\n".
-            'RETURN COLLECT(tuple) AS sortedTuples',
+            "WITH COLLECT([parents.id, parents.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(parents) as parentsCount\n".
+            "CALL {\n".
+            "  WITH rawTuples\n".
+            "  UNWIND rawTuples as tuple\n".
+            "  WITH tuple ORDER BY tuple[0]\n".
+            "  RETURN COLLECT(tuple) AS sortedTuples\n".
+            "}\n".
+            'RETURN sortedTuples, parentsCount',
             $statement->getText()
         );
 
@@ -704,6 +723,7 @@ class EtagCalculatorServiceTest extends TestCase
             [
                 new CypherMap([
                     'sortedTuples' => $resultList,
+                    'parentsCount' => 101,
                 ]),
             ]
         );
@@ -756,6 +776,7 @@ class EtagCalculatorServiceTest extends TestCase
                             new stdClass(),
                         ]),
                     ]),
+                    'parentsCount' => 1,
                 ]),
             ]
         );
@@ -780,7 +801,7 @@ class EtagCalculatorServiceTest extends TestCase
             $logger
         );
 
-        $this->expectExceptionMessage('Expected variable element.updated to be of type Laudis\Neo4j\Types\DateTimeZoneId, got stdClass.');
+        $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
         $etagCalculatorService->calculateParentsCollectionEtag($uuid);
@@ -849,6 +870,7 @@ class EtagCalculatorServiceTest extends TestCase
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                     ]),
+                    'relatedCount' => 1,
                 ]),
             ]
         );
@@ -897,11 +919,14 @@ class EtagCalculatorServiceTest extends TestCase
             "LIMIT 101\n".
             "WITH related, relations\n".
             "ORDER BY related.id, relations.id\n".
-            "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-            "WITH allTuples\n".
-            "UNWIND allTuples AS tuple\n".
-            "WITH tuple ORDER BY tuple[0]\n".
-            'RETURN COLLECT(tuple) AS sortedTuples',
+            "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(related) as relatedCount\n".
+            "CALL {\n".
+            "  WITH rawTuples\n".
+            "  UNWIND rawTuples as tuple\n".
+            "  WITH tuple ORDER BY tuple[0]\n".
+            "  RETURN COLLECT(tuple) AS sortedTuples\n".
+            "}\n".
+            'RETURN sortedTuples, relatedCount',
             $statement->getText()
         );
 
@@ -920,6 +945,7 @@ class EtagCalculatorServiceTest extends TestCase
             [
                 new CypherMap([
                     'sortedTuples' => new CypherList([]),
+                    'relatedCount' => 0,
                 ]),
             ]
         );
@@ -968,11 +994,14 @@ class EtagCalculatorServiceTest extends TestCase
             "LIMIT 101\n".
             "WITH related, relations\n".
             "ORDER BY related.id, relations.id\n".
-            "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-            "WITH allTuples\n".
-            "UNWIND allTuples AS tuple\n".
-            "WITH tuple ORDER BY tuple[0]\n".
-            'RETURN COLLECT(tuple) AS sortedTuples',
+            "WITH COLLECT([related.id, related.updated]) + COLLECT([relations.id, relations.updated]) AS rawTuples, count(related) as relatedCount\n".
+            "CALL {\n".
+            "  WITH rawTuples\n".
+            "  UNWIND rawTuples as tuple\n".
+            "  WITH tuple ORDER BY tuple[0]\n".
+            "  RETURN COLLECT(tuple) AS sortedTuples\n".
+            "}\n".
+            'RETURN sortedTuples, relatedCount',
             $statement->getText()
         );
 
@@ -998,6 +1027,7 @@ class EtagCalculatorServiceTest extends TestCase
             [
                 new CypherMap([
                     'sortedTuples' => $resultList,
+                    'relatedCount' => 101,
                 ]),
             ]
         );
@@ -1050,6 +1080,7 @@ class EtagCalculatorServiceTest extends TestCase
                             new stdClass(),
                         ]),
                     ]),
+                    'relatedCount' => 1,
                 ]),
             ]
         );
@@ -1074,7 +1105,7 @@ class EtagCalculatorServiceTest extends TestCase
             $logger
         );
 
-        $this->expectExceptionMessage('Expected variable element.updated to be of type Laudis\Neo4j\Types\DateTimeZoneId, got stdClass.');
+        $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
         $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
@@ -1143,6 +1174,7 @@ class EtagCalculatorServiceTest extends TestCase
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                     ]),
+                    'elementsCount' => 2,
                 ]),
             ]
         );
@@ -1191,11 +1223,14 @@ class EtagCalculatorServiceTest extends TestCase
             "LIMIT 101\n".
             "WITH elements\n".
             "ORDER BY elements.id\n".
-            "WITH COLLECT([elements.id, elements.updated]) AS allTuples\n".
-            "WITH allTuples\n".
-            "UNWIND allTuples AS tuple\n".
-            "WITH tuple ORDER BY tuple[0]\n".
-            'RETURN COLLECT(tuple) AS sortedTuples',
+            "WITH COLLECT([elements.id, elements.updated]) AS rawTuples, count(elements) as elementsCount\n".
+            "CALL {\n".
+            "  WITH rawTuples\n".
+            "  UNWIND rawTuples as tuple\n".
+            "  WITH tuple ORDER BY tuple[0]\n".
+            "  RETURN COLLECT(tuple) AS sortedTuples\n".
+            "}\n".
+            'RETURN sortedTuples, elementsCount',
             $statement->getText()
         );
 
@@ -1214,6 +1249,7 @@ class EtagCalculatorServiceTest extends TestCase
             [
                 new CypherMap([
                     'sortedTuples' => new CypherList([]),
+                    'elementsCount' => 0,
                 ]),
             ]
         );
@@ -1262,11 +1298,14 @@ class EtagCalculatorServiceTest extends TestCase
             "LIMIT 101\n".
             "WITH elements\n".
             "ORDER BY elements.id\n".
-            "WITH COLLECT([elements.id, elements.updated]) AS allTuples\n".
-            "WITH allTuples\n".
-            "UNWIND allTuples AS tuple\n".
-            "WITH tuple ORDER BY tuple[0]\n".
-            'RETURN COLLECT(tuple) AS sortedTuples',
+            "WITH COLLECT([elements.id, elements.updated]) AS rawTuples, count(elements) as elementsCount\n".
+            "CALL {\n".
+            "  WITH rawTuples\n".
+            "  UNWIND rawTuples as tuple\n".
+            "  WITH tuple ORDER BY tuple[0]\n".
+            "  RETURN COLLECT(tuple) AS sortedTuples\n".
+            "}\n".
+            'RETURN sortedTuples, elementsCount',
             $statement->getText()
         );
 
@@ -1292,6 +1331,7 @@ class EtagCalculatorServiceTest extends TestCase
             [
                 new CypherMap([
                     'sortedTuples' => $resultList,
+                    'elementsCount' => 101,
                 ]),
             ]
         );
@@ -1344,6 +1384,7 @@ class EtagCalculatorServiceTest extends TestCase
                             new stdClass(),
                         ]),
                     ]),
+                    'elementsCount' => 1,
                 ]),
             ]
         );
@@ -1368,7 +1409,7 @@ class EtagCalculatorServiceTest extends TestCase
             $logger
         );
 
-        $this->expectExceptionMessage('Expected variable element.updated to be of type Laudis\Neo4j\Types\DateTimeZoneId, got stdClass.');
+        $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
         $etagCalculatorService->calculateIndexCollectionEtag($uuid);
