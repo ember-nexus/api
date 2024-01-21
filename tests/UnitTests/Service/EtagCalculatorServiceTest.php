@@ -18,6 +18,9 @@ use Ramsey\Uuid\Uuid;
 use stdClass;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassLength)
+ */
 class EtagCalculatorServiceTest extends TestCase
 {
     use ProphecyTrait;
