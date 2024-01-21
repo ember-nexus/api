@@ -77,6 +77,8 @@
   - **Token Commands**
     - [`token:create`](/commands/token/token-create)
     - [`token:revoke`](/commands/token/token-revoke)
+  - **Cache Commands**
+    - [`cache:clear:etag`](/commands/cache/clear-etag)
   - **Backup Commands**
     - [`backup:list`](/commands/backup/backup-list)
     - [`backup:fetch`](/commands/backup/backup-fetch)
