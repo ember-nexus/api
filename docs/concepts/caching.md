@@ -1,6 +1,7 @@
 # Caching
 
-Most endpoints do support the `Etag`-header.
+Most endpoints do support the `Etag`-header. The `Etag`-header-property is calculated from all involved elements UUIDs
+and timestamps (microsecond precision).
 
 The headers `If-Match` and `If-None-Match` are expected to be implemented soon, see their GitHub issues
 ([#232](https://github.com/ember-nexus/api/issues/232) and [#233](https://github.com/ember-nexus/api/issues/233))

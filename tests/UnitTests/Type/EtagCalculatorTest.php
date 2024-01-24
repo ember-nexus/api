@@ -36,8 +36,11 @@ class EtagCalculatorTest extends TestCase
         $etagCalculator->addDateTime(DateTime::createFromFormat('Y-m-d H:i:s', '2024-01-17 00:00:00'));
         $etag = $etagCalculator->getEtag();
 
-        $this->assertNotSame('9Ie0RnaeBuE', (string) $etag); // this is the etag without datetime
-        $this->assertSame('8qVAho7SmVW', (string) $etag);
+        $emptyEtagCalculator = new EtagCalculator('seed');
+        $emptyEtag = $emptyEtagCalculator->getEtag();
+
+        $this->assertNotSame((string) $emptyEtag, (string) $etag);
+        $this->assertSame('dFOo1A9s0Pd', (string) $etag);
     }
 
     public function testAddUuidChangesEtag(): void
@@ -46,7 +49,10 @@ class EtagCalculatorTest extends TestCase
         $etagCalculator->addUuid(Uuid::fromString('67b1689e-e6c7-4463-a48a-74236fd5f08a'));
         $etag = $etagCalculator->getEtag();
 
-        $this->assertNotSame('9Ie0RnaeBuE', (string) $etag); // this is the etag without datetime
+        $emptyEtagCalculator = new EtagCalculator('seed');
+        $emptyEtag = $emptyEtagCalculator->getEtag();
+
+        $this->assertNotSame((string) $emptyEtag, (string) $etag);
         $this->assertSame('D7h1i75muKb', (string) $etag);
     }
 

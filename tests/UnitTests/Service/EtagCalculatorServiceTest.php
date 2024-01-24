@@ -73,7 +73,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateElementEtag($uuid);
 
         // assert result
-        $this->assertSame('a85A8IhnHI6', (string) $etag);
+        $this->assertSame('Rh8DXSRXuja', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -136,7 +136,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateElementEtag($uuid);
 
         // assert result
-        $this->assertSame('a85A8IhnHI6', (string) $etag);
+        $this->assertSame('Rh8DXSRXuja', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -297,7 +297,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateChildrenCollectionEtag($uuid);
 
         // assert result
-        $this->assertSame('526poCqn6vm', (string) $etag);
+        $this->assertSame('EKHX4b5HhHX', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -603,7 +603,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateParentsCollectionEtag($uuid);
 
         // assert result
-        $this->assertSame('526poCqn6vm', (string) $etag);
+        $this->assertSame('EKHX4b5HhHX', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -909,7 +909,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
 
         // assert result
-        $this->assertSame('526poCqn6vm', (string) $etag);
+        $this->assertSame('EKHX4b5HhHX', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -1213,7 +1213,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateIndexCollectionEtag($uuid);
 
         // assert result
-        $this->assertSame('526poCqn6vm', (string) $etag);
+        $this->assertSame('EKHX4b5HhHX', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
