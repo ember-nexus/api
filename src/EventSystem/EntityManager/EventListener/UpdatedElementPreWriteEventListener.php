@@ -4,10 +4,17 @@ namespace App\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPreCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
+use App\Service\AppStateService;
+use App\Type\AppStateType;
 use Safe\DateTime;
 
 class UpdatedElementPreWriteEventListener
 {
+    public function __construct(
+        private AppStateService $appStateService
+    ) {
+    }
+
     public function onElementPreCreateEvent(ElementPreCreateEvent $event): void
     {
         $this->handleEvent($event);
@@ -21,7 +28,7 @@ class UpdatedElementPreWriteEventListener
     private function handleEvent(ElementPreCreateEvent|ElementPreMergeEvent $event): void
     {
         $element = $event->getElement();
-        if ($element->hasProperty('updated')) {
+        if (AppStateType::LOADING_BACKUP === $this->appStateService->getAppState() && $element->hasProperty('updated')) {
             return;
         }
         $element->addProperty('updated', new DateTime());

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change value of HTTP header `X-Powered-By` to `Ember Nexus API`.
 ### Fixed
 - Fix monospace font in documentation (graph renderings), closes #152.
+- Fix bug where updated timestamps where not updated when they already where set to a value.
 
 ## 0.1.0 - 2023-12-16
 ### Added
