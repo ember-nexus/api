@@ -49,8 +49,8 @@ services:
         event: 'App\EventSystem\EntityManager\Event\ElementPostMergeEvent'
         method: 'onElementPostMergeEvent'
       - name: kernel.event_listener
-        event: 'App\EventSystem\EntityManager\Event\ElementPostDeleteEvent'
-        method: 'onElementPostDeleteEvent'
+        event: 'App\EventSystem\EntityManager\Event\ElementPreDeleteEvent'
+        method: 'onElementPreDeleteEvent'
 
   App\EventSystem\EntityManager\EventListener\ExpireTokenOnTokenDeleteEventListener:
     tags:

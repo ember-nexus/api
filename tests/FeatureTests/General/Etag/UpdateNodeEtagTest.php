@@ -4,7 +4,7 @@ namespace App\tests\FeatureTests\General\Etag;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class NodeEtagTest extends BaseRequestTestCase
+class UpdateNodeEtagTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:G7dRuaI5PU7rCgYmu8gKhu';
     private const string UUID_DATA_1 = '8dd5a24c-36fa-4b91-88aa-13bde35f55f0';

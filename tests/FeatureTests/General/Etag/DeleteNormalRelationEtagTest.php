@@ -4,12 +4,12 @@ namespace App\tests\FeatureTests\General\Etag;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class NormalRelationEtagTest extends BaseRequestTestCase
+class DeleteNormalRelationEtagTest extends BaseRequestTestCase
 {
-    private const string TOKEN = 'secret-token:L7mQpPOOdY2ESN6GsJIGkU';
-    private const string UUID_DATA_1 = '81826403-6513-40ce-a2b7-6ce1ec259df4';
-    private const string UUID_DATA_2 = 'eeccb6bf-91da-4da1-8bef-b797a32eb8a6';
-    private const string UUID_RELATED = '7f3afac6-013e-4b28-acc7-f4fe1c418c99';
+    private const string TOKEN = 'secret-token:61GotFGNgBa3YmB8UXU1l2';
+    private const string UUID_DATA_1 = '572826c4-f041-4265-be18-4de5b6f4a6bc';
+    private const string UUID_DATA_2 = '119cdc2a-e169-4cc5-a20a-7d6b67e05c25';
+    private const string UUID_RELATED = '41e07860-c278-4d3a-b96a-47465e832b5e';
 
     private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
     {
@@ -27,27 +27,24 @@ class NormalRelationEtagTest extends BaseRequestTestCase
 
     public function testEtagBeforeAndAfterChangingCentralNormalRelation(): void
     {
-        $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '', '"YoB0OOEREXk"');
-        $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/parents', '"3j6Nn1Zg7Vh"');
-        $initialEtagNode1Children = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/children', '"CXBnJAUbSJp"');
-        $initialEtagNode1Related = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/related', '"KLXJORKMBo2"');
+        $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '', '"TAtItfs3idO"');
+        $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/parents', '"FbiZIdWq12P"');
+        $initialEtagNode1Children = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/children', '"YSITtXY7GMb"');
+        $initialEtagNode1Related = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/related', '"Z6W1WX1iL6K"');
 
-        $initialEtagNode2Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '', '"7VR6m1Ibrsd"');
-        $initialEtagNode2Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '/parents', '"Ii50AcImQIP"');
-        $initialEtagNode2Children = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '/children', '"qgOpKWhgph"');
-        $initialEtagNode2Related = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '/related', '"4MjlN2a6NE5"');
+        $initialEtagNode2Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '', '"DMa9WhPTKXt"');
+        $initialEtagNode2Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '/parents', '"AqEB7dVQdPC"');
+        $initialEtagNode2Children = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '/children', '"EQP6CSWfYKi"');
+        $initialEtagNode2Related = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '/related', '"E5sTUk3DppO"');
 
-        $initialEtagRelatedSelf = $this->testEtagOfElement(self::TOKEN, self::UUID_RELATED, '', '"UoDabdDMmbq"');
+        $this->testEtagOfElement(self::TOKEN, self::UUID_RELATED, '', '"KQmZRZRdpic"');
 
-        $response = $this->runPatchRequest(
+        $response = $this->runDeleteRequest(
             sprintf(
                 '%s',
                 self::UUID_RELATED
             ),
-            self::TOKEN,
-            [
-                'some' => 'changed data',
-            ]
+            self::TOKEN
         );
         $this->assertNoContentResponse($response);
 
@@ -64,9 +61,5 @@ class NormalRelationEtagTest extends BaseRequestTestCase
         $finalEtagNode2Related = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_2, '/related');
 
         $this->assertNotSame($initialEtagNode2Related, $finalEtagNode2Related);
-
-        $finalEtagRelatedSelf = $this->testEtagOfElement(self::TOKEN, self::UUID_RELATED, '');
-
-        $this->assertNotSame($initialEtagRelatedSelf, $finalEtagRelatedSelf);
     }
 }
