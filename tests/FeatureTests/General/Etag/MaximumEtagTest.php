@@ -3,11 +3,7 @@
 namespace App\tests\FeatureTests\General\Etag;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use Psr\Http\Message\ResponseInterface;
 
-/**
- * @group test2
- */
 class MaximumEtagTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:IoRXsjFDSZ658iTsGCcJlt';
@@ -18,88 +14,144 @@ class MaximumEtagTest extends BaseRequestTestCase
     private const string GROUP_UUID = '42c7a0f3-fc9b-478b-b658-52ecb44238b8';
     private const string SOME_NODE_UUID = '81f811e2-c19f-4339-94e2-c0376fec097e';
 
-    private function getEtagFromResponse(ResponseInterface $response): string
+    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
     {
-        return $response->getHeader('Etag')[0];
+        $response = $this->runGetRequest(
+            sprintf('/%s%s', $uuid, $additionalPath),
+            $token
+        );
+        $etag = $response->getHeader('Etag')[0];
+        if ($shouldEtag) {
+            $this->assertSame($shouldEtag, $etag);
+        }
+
+        return $etag;
+    }
+
+    private function testEtagOfElementDoesNotExist(string $token, string $uuid, string $additionalPath): void
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s%s', $uuid, $additionalPath),
+            $token
+        );
+        $this->assertCount(0, $response->getHeader('Etag'));
     }
 
     public function testEtagBeforeAndAfterGoingOverEtagLimit(): void
     {
-        $this->markTestSkipped();
-        // assert initial etag values
-        $response = $this->runGetRequest(
-            sprintf('/%s/children', self::PARENT_UUID),
-            self::TOKEN
-        );
-        $initialParentEtag = $this->getEtagFromResponse($response);
-        $this->assertSame('"72kOJ5B1f1p"', $initialParentEtag);
+        $initialEtagNodeParentSelf = $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '', '"XIoWpD03PDi"');
+        $initialEtagNodeParentParents = $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '/parents', '"CH5uJMBOiL5"');
+        $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '/children', '"72kOJ5B1f1p"');
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::PARENT_UUID, '/related');
 
-        $response = $this->runGetRequest(
-            sprintf('/%s/parents', self::CHILD_UUID),
-            self::TOKEN
-        );
-        $initialChildEtag = $this->getEtagFromResponse($response);
-        $this->assertSame('"TA9dR0e3QFg"', $initialChildEtag);
+        $initialEtagNodeChildSelf = $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '', '"MF9LXcsbS9W"');
+        $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '/parents', '"TA9dR0e3QFg"');
+        $initialEtagNodeChildChildren = $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '/children', '"YumWkClVdjC"');
+        $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '/related', '"TA9dR0e3QFg"');
 
-        //        $response = $this->runGetRequest(
-        //            sprintf("/%s/related", self::RELATED_UUID),
-        //            self::TOKEN
-        //        );
-        //        $initialRelatedEtag = $this->getEtagFromResponse($response);
-        //        $this->assertSame('"ITsmYNHWAVL"', $initialRelatedEtag);
+        $initialEtagNodeRelatedSelf = $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '', '"ITsmYNHWAVL"');
+        $initialEtagNodeRelatedParents = $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '/parents', '"A14DEvTRqFm"');
+        $initialEtagNodeRelatedChildren = $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '/children', '"elPrb0N3odH"');
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::RELATED_UUID, '/related');
 
-        $response = $this->runGetRequest(
-            sprintf('/%s/children', self::GROUP_UUID),
-            self::TOKEN
-        );
-        $initialGroupEtag = $this->getEtagFromResponse($response);
-        $this->assertSame('"6CStc81LfoX"', $initialGroupEtag);
+        $initialEtagNodeGroupSelf = $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '', '"ghh3kF8BXvi"');
+        $initialEtagNodeGroupParents = $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '/parents', '"gfRnoZmYUIs"');
+        $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '/children', '"6CStc81LfoX"');
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/related');
 
-        // change one element -> all related element's etags will change as well
+        $initialEtagNodeSomeNodeSelf = $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '', '"X3ETsa7nPQg"');
+        $initialEtagNodeSomeNodeParents = $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/parents', '"PNXGItBje4l"');
+        $initialEtagNodeSomeNodeChildren = $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/children', '"EfU099ffuDv"');
+        $initialEtagNodeSomeNodeRelated = $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/related', '"QpKhKWN0FsH"');
 
-        $response = $this->runPatchRequest(
-            sprintf('/%s', self::SOME_NODE_UUID),
+        // add one more central node with relations to bring all etags over their limit
+
+        $response = $this->runPostRequest(
+            sprintf(
+                '%s',
+                self::PARENT_UUID
+            ),
             self::TOKEN,
             [
-                'change' => '1',
+                'type' => 'Data',
+                'data' => [
+                    'name' => 'Data 101',
+                    'scenario' => 'general.etag.maximum',
+                ],
             ]
         );
-        $this->assertNoContentResponse($response);
+        $this->assertIsCreatedResponse($response);
+        $dataNewCentralNode = $this->getUuidFromLocation($response);
 
-        sleep(2);
-
-        // compare that etags have changed
-
-        $response = $this->runGetRequest(
-            sprintf('/%s/children', self::PARENT_UUID),
-            self::TOKEN
+        $response = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'OWNS',
+                'start' => $dataNewCentralNode,
+                'end' => self::CHILD_UUID,
+                'data' => [
+                    'scenario' => 'general.etag.maximum',
+                ],
+            ]
         );
-        $changed1ParentEtag = $this->getEtagFromResponse($response);
-        $this->assertSame('"aaaa"', $changed1ParentEtag);
-        $this->assertNotSame($initialParentEtag, $changed1ParentEtag);
+        $this->assertIsCreatedResponse($response);
 
-        $response = $this->runGetRequest(
-            sprintf('/%s/parents', self::CHILD_UUID),
-            self::TOKEN
+        // todo: enable test once https://github.com/ember-nexus/api/issues/238 is fixed
+        // $response = $this->runPostRequest(
+        //     '/',
+        //     self::TOKEN,
+        //     [
+        //         'type' => 'OWNS',
+        //         'start' => self::GROUP_UUID,
+        //         'end' => $dataNewCentralNode,
+        //         'data' => [
+        //             'scenario' => 'general.etag.maximum',
+        //         ],
+        //     ]
+        // );
+        // $this->assertIsCreatedResponse($response);
+
+        $response = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'RELATED',
+                'start' => $dataNewCentralNode,
+                'end' => self::RELATED_UUID,
+                'data' => [
+                    'scenario' => 'general.etag.maximum',
+                ],
+            ]
         );
-        $changed1ChildEtag = $this->getEtagFromResponse($response);
-        $this->assertSame('"bbbb"', $changed1ChildEtag);
-        $this->assertNotSame($initialChildEtag, $changed1ChildEtag);
+        $this->assertIsCreatedResponse($response);
 
-        //        $response = $this->runGetRequest(
-        //            sprintf("/%s/related", self::RELATED_UUID),
-        //            self::TOKEN
-        //        );
-        //        $changed1RelatedEtag = $this->getEtagFromResponse($response);
-        //        $this->assertSame('"cccc"', $changed1RelatedEtag);
-        //        $this->assertNotSame($initialRelatedEtag, $changed1RelatedEtag);
+        // verify that the etags are no longer generated
 
-        $response = $this->runGetRequest(
-            sprintf('/%s/children', self::GROUP_UUID),
-            self::TOKEN
-        );
-        $changed1GroupEtag = $this->getEtagFromResponse($response);
-        $this->assertSame('"dddd"', $changed1GroupEtag);
-        $this->assertNotSame($initialGroupEtag, $changed1GroupEtag);
+        $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '', $initialEtagNodeParentSelf);
+        $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '/parents', $initialEtagNodeParentParents);
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::PARENT_UUID, '/children');
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::PARENT_UUID, '/related');
+
+        $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '', $initialEtagNodeChildSelf);
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::CHILD_UUID, '/parents');
+        $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '/children', $initialEtagNodeChildChildren);
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::CHILD_UUID, '/related');
+
+        $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '', $initialEtagNodeRelatedSelf);
+        $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '/parents', $initialEtagNodeRelatedParents);
+        $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '/children', $initialEtagNodeRelatedChildren);
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::RELATED_UUID, '/related');
+
+        $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '', $initialEtagNodeGroupSelf);
+        $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '/parents', $initialEtagNodeGroupParents);
+        // todo: enable test once https://github.com/ember-nexus/api/issues/238 is fixed
+        // $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/children');
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/related');
+
+        $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '', $initialEtagNodeSomeNodeSelf);
+        $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/parents', $initialEtagNodeSomeNodeParents);
+        $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/children', $initialEtagNodeSomeNodeChildren);
+        $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/related', $initialEtagNodeSomeNodeRelated);
     }
 }
