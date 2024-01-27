@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: docker pull cytopia/yamllint
-      - run: docker run --rm -t -v $(pwd):/data cytopia/yamllint .
+      - run: docker run --rm -t -v $(pwd):/data cytopia/yamllint --config-file=tests/.yamllint .
 
   markdown-lint:
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: docker pull tmknom/markdownlint
-      - run: docker run --rm -v $(pwd):/work tmknom/markdownlint '**/*.md' --ignore vendor --ignore CHANGELOG.md
+      - run: docker run --rm -v $(pwd):/work tmknom/markdownlint '**/*.md' --config tests/.markdownlintrc --ignore vendor --ignore CHANGELOG.md --ignore var --ignore tmp
 
   build-docker-image:
     runs-on: buildjet-4vcpu-ubuntu-2204

@@ -1,7 +1,7 @@
 parameters:
   level: 8
   paths:
-    - src
+    - ../src
   checkGenericClassInNonGenericObjectType: false
 includes:
-  - vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
+  - ../vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
