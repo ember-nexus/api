@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\UnitTests\Response;
+namespace App\tests\UnitTests\Response;
 
 use App\Response\CollectionResponse;
 use PHPUnit\Framework\TestCase;

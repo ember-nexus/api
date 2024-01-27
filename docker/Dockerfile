@@ -360,7 +360,7 @@ WORKDIR /var/www/html
 FROM php as development
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers \
-    && pecl install xdebug-3.3.0alpha3 memprof \
+    && pecl install xdebug-3.3.1 memprof-3.0.2 \
     && docker-php-ext-enable xdebug memprof \
     && apk del --no-network .build-deps \
     && apk add --no-cache judy aha git openssh

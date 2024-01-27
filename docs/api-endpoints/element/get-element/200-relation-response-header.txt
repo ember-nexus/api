@@ -5,6 +5,7 @@ Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL,
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
 Date: Fri, 06 Oct 2023 20:24:11 GMT
+Etag: "9FX6hrAKraU"
 Server: Unit
 Transfer-Encoding: chunked
-X-Powered-By: Ember-Nexus-API
+X-Powered-By: Ember Nexus API

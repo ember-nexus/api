@@ -7,6 +7,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
+use App\Service\EtagService;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use Laudis\Neo4j\Databags\Statement;
@@ -23,6 +24,7 @@ class GetRelatedController extends AbstractController
         private CollectionService $collectionService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private EtagService $etagService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
@@ -127,6 +129,16 @@ class GetRelatedController extends AbstractController
             }
         }
 
-        return $this->collectionService->buildCollectionFromUuids($nodeUuids, $relationUuids, $totalCount);
+        $response = $this->collectionService->buildCollectionFromUuids($nodeUuids, $relationUuids, $totalCount);
+
+        $etag = $this->etagService->getRelatedCollectionEtag($centerUuid);
+        if ($etag) {
+            $response->headers->set('Etag', sprintf(
+                '"%s"',
+                $etag
+            ));
+        }
+
+        return $response;
     }
 }

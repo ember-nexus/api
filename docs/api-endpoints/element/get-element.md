@@ -6,6 +6,30 @@
 The get element endpoint at `GET /<uuid>` is used to retrieve the data of a single element, which can be either
 a node or a relationship.
 
+## Request Parameters
+
+This endpoint does not require parameters.
+
+## Request Headers
+
+<div class="table-request-headers">
+
+| Header          | Description                                                                                         | Required | Default |
+|-----------------|-----------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details. | no       | -       |
+
+</div>
+
+## Response Headers
+
+<div class="table-response-headers">
+
+| Header | Description                                                                                                                                                          | Default |
+| ------ |----------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------- |
+| `Etag` | The `Etag`, short for "entity tag", is used to identify a particular version of the element for caching purposes.<br />See [caching](/concepts/caching) for details. | -       |
+
+</div>
+
 ## Request Example
 
 ```bash

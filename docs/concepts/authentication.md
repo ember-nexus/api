@@ -1,0 +1,3 @@
+# Authentication
+
+All endpoints support the `Authentication` header...

@@ -14,7 +14,7 @@ class EmberNexusExtension extends Extension
         return 'ember_nexus';
     }
 
-    public function load(array $rawConfigurations, ContainerBuilder $container)
+    public function load(array $rawConfigurations, ContainerBuilder $container): void
     {
         $configuration = $this->getConfiguration($rawConfigurations, $container);
         $processedConfiguration = $this->processConfiguration($configuration, $rawConfigurations);

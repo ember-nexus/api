@@ -5,8 +5,27 @@
 
 Deletes a single element. If the deleted element is a node, all connected relationships are deleted.
 
-!> **Note**: To avoid orphaned nodes, children need to be deleted first or get other parents added.  
-This behavior might be changed; see issue [#64: HTTP DELETE /&lt;uuid&gt; - DeleteElementController](https://github.com/ember-nexus/api/issues/64).
+> [!NOTE]
+> To avoid orphaned nodes, children need to be deleted first or get other parents added.  
+> This behavior might be changed; see issue [#64: HTTP DELETE /&lt;uuid&gt; - DeleteElementController](https://github.com/ember-nexus/api/issues/64).
+
+## Request Parameters
+
+This endpoint does not require parameters.
+
+## Request Headers
+
+<div class="table-request-headers">
+
+| Header          | Description                                                                                                       | Required | Default |
+|-----------------|-------------------------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details.               | no       | -       |
+
+</div>
+
+## Response Headers
+
+This endpoint does not return special headers.
 
 ## Request Example
 

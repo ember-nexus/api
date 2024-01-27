@@ -6,14 +6,39 @@
 Returns all parents of the specified node which the current user can access.  
 Returned data is paginated; each page contains all relations between the node and the returned parents.
 
-!> **Note**: Usually, a node only has one parent, although the security system allows multiple owners.
+> [!NOTE]
+> Usually, a node only has one parent, although the security system allows multiple ones.
 
 ## Request Parameters
 
-- `page`: Integer, number of the page to be returned. The first page is `1`, which is also the default if not explicitly
-  set.
-- `pageSize`: Integer, is the upper limit of nodes to be returned. Limited by the APIs instance configuration. By
-  default, 25 and can be set between 5 and 100.
+<div class="table-request-parameters">
+
+| Parameter  | Description                                                                                                           | Required | Default |
+| ---------- |-----------------------------------------------------------------------------------------------------------------------|----------| ------- |
+| `page`     | Specifies the page number to retrieve, starting with page 1.<br />See [pagination](/concepts/pagination) for details. | no       | 1       |
+| `pageSize` | Defines the number of nodes returned in a single page.<br />See [pagination](/concepts/pagination) for details.       | no       | 25      |
+
+</div>
+
+## Request Headers
+
+<div class="table-request-headers">
+
+| Header          | Description                                                                                         | Required | Default |
+|-----------------|-----------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details. | no       | -       |
+
+</div>
+
+## Response Headers
+
+<div class="table-response-headers">
+
+| Header | Description                                                                                                                                                          | Default |
+| ------ |----------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------- |
+| `Etag` | The `Etag`, short for "entity tag", is used to identify a particular version of the element for caching purposes.<br />See [caching](/concepts/caching) for details. | -       |
+
+</div>
 
 ## Request Example
 

@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Type\RedisPrefixType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -30,7 +31,8 @@ class AuthProvider
     public function getRedisTokenKeyFromHashedToken(string $hashedToken): string
     {
         return sprintf(
-            'token:%s',
+            '%s%s',
+            RedisPrefixType::TOKEN->value,
             $hashedToken
         );
     }

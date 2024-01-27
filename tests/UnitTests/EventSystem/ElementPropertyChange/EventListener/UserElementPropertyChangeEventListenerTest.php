@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
+namespace App\tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\ElementPropertyChange\EventListener\UserElementPropertyChangeEventListener;

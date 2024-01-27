@@ -29,6 +29,9 @@ class EmberNexusConfiguration
     public const string TOKEN_DEFAULT_LIFETIME_IN_SECONDS = 'defaultLifetimeInSeconds';
     public const string TOKEN_MAX_LIFETIME_IN_SECONDS = 'maxLifetimeInSeconds';
     public const string TOKEN_DELETE_EXPIRED_TOKENS_AUTOMATICALLY_IN_SECONDS = 'tokenDeleteExpiredTokensAutomaticallyInSeconds';
+    public const string CACHE = 'cache';
+    public const string CACHE_ETAG_SEED = 'etagSeed';
+    public const string CACHE_ETAG_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS = 'etagUpperLimitInCollectionEndpoints';
 
     private int $pageSizeMin;
     private int $pageSizeDefault;
@@ -42,6 +45,8 @@ class EmberNexusConfiguration
     private int $tokenDefaultLifetimeInSeconds;
     private int|false $tokenMaxLifetimeInSeconds;
     private int|false $tokenDeleteExpiredTokensAutomaticallyInSeconds;
+    private string $cacheEtagSeed;
+    private int $cacheEtagUpperLimitInCollectionEndpoints;
 
     private static function getValueFromConfig(array $configuration, array $keyParts): mixed
     {
@@ -59,7 +64,7 @@ class EmberNexusConfiguration
 
     public static function createFromConfiguration(array $configuration): self
     {
-        $emberNexusConfiguration = new EmberNexusConfiguration();
+        $emberNexusConfiguration = new self();
 
         $emberNexusConfiguration->setPageSizeMin((int) self::getValueFromConfig(
             $configuration,
@@ -180,6 +185,24 @@ class EmberNexusConfiguration
             throw new Exception('token default lifetime must be equal or longer to min lifetime.');
         }
 
+        $value = self::getValueFromConfig(
+            $configuration,
+            [
+                self::CACHE,
+                self::CACHE_ETAG_SEED,
+            ]
+        );
+        $emberNexusConfiguration->setCacheEtagSeed($value);
+
+        $value = self::getValueFromConfig(
+            $configuration,
+            [
+                self::CACHE,
+                self::CACHE_ETAG_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS,
+            ]
+        );
+        $emberNexusConfiguration->setCacheEtagUpperLimitInCollectionEndpoints($value);
+
         return $emberNexusConfiguration;
     }
 
@@ -188,7 +211,7 @@ class EmberNexusConfiguration
         return $this->pageSizeMin;
     }
 
-    public function setPageSizeMin(int $pageSizeMin): EmberNexusConfiguration
+    public function setPageSizeMin(int $pageSizeMin): self
     {
         $this->pageSizeMin = $pageSizeMin;
 
@@ -200,7 +223,7 @@ class EmberNexusConfiguration
         return $this->pageSizeDefault;
     }
 
-    public function setPageSizeDefault(int $pageSizeDefault): EmberNexusConfiguration
+    public function setPageSizeDefault(int $pageSizeDefault): self
     {
         $this->pageSizeDefault = $pageSizeDefault;
 
@@ -212,7 +235,7 @@ class EmberNexusConfiguration
         return $this->pageSizeMax;
     }
 
-    public function setPageSizeMax(int $pageSizeMax): EmberNexusConfiguration
+    public function setPageSizeMax(int $pageSizeMax): self
     {
         $this->pageSizeMax = $pageSizeMax;
 
@@ -224,7 +247,7 @@ class EmberNexusConfiguration
         return $this->registerEnabled;
     }
 
-    public function setRegisterEnabled(bool $registerEnabled): EmberNexusConfiguration
+    public function setRegisterEnabled(bool $registerEnabled): self
     {
         $this->registerEnabled = $registerEnabled;
 
@@ -236,7 +259,7 @@ class EmberNexusConfiguration
         return $this->registerUniqueIdentifier;
     }
 
-    public function setRegisterUniqueIdentifier(string $registerUniqueIdentifier): EmberNexusConfiguration
+    public function setRegisterUniqueIdentifier(string $registerUniqueIdentifier): self
     {
         if (0 === strlen($registerUniqueIdentifier)) {
             throw new Exception('Unique identifier can not be an empty string.');
@@ -254,7 +277,7 @@ class EmberNexusConfiguration
         return $this->registerUniqueIdentifierRegex;
     }
 
-    public function setRegisterUniqueIdentifierRegex(string|false $registerUniqueIdentifierRegex): EmberNexusConfiguration
+    public function setRegisterUniqueIdentifierRegex(string|false $registerUniqueIdentifierRegex): self
     {
         $this->registerUniqueIdentifierRegex = $registerUniqueIdentifierRegex;
 
@@ -266,7 +289,7 @@ class EmberNexusConfiguration
         return $this->instanceConfigurationEnabled;
     }
 
-    public function setInstanceConfigurationEnabled(bool $instanceConfigurationEnabled): EmberNexusConfiguration
+    public function setInstanceConfigurationEnabled(bool $instanceConfigurationEnabled): self
     {
         $this->instanceConfigurationEnabled = $instanceConfigurationEnabled;
 
@@ -278,7 +301,7 @@ class EmberNexusConfiguration
         return $this->instanceConfigurationShowVersion;
     }
 
-    public function setInstanceConfigurationShowVersion(bool $instanceConfigurationShowVersion): EmberNexusConfiguration
+    public function setInstanceConfigurationShowVersion(bool $instanceConfigurationShowVersion): self
     {
         $this->instanceConfigurationShowVersion = $instanceConfigurationShowVersion;
 
@@ -290,7 +313,7 @@ class EmberNexusConfiguration
         return $this->tokenMinLifetimeInSeconds;
     }
 
-    public function setTokenMinLifetimeInSeconds(int $tokenMinLifetimeInSeconds): EmberNexusConfiguration
+    public function setTokenMinLifetimeInSeconds(int $tokenMinLifetimeInSeconds): self
     {
         $this->tokenMinLifetimeInSeconds = $tokenMinLifetimeInSeconds;
 
@@ -302,7 +325,7 @@ class EmberNexusConfiguration
         return $this->tokenDefaultLifetimeInSeconds;
     }
 
-    public function setTokenDefaultLifetimeInSeconds(int $tokenDefaultLifetimeInSeconds): EmberNexusConfiguration
+    public function setTokenDefaultLifetimeInSeconds(int $tokenDefaultLifetimeInSeconds): self
     {
         $this->tokenDefaultLifetimeInSeconds = $tokenDefaultLifetimeInSeconds;
 
@@ -314,7 +337,7 @@ class EmberNexusConfiguration
         return $this->tokenMaxLifetimeInSeconds;
     }
 
-    public function setTokenMaxLifetimeInSeconds(bool|int $tokenMaxLifetimeInSeconds): EmberNexusConfiguration
+    public function setTokenMaxLifetimeInSeconds(bool|int $tokenMaxLifetimeInSeconds): self
     {
         $this->tokenMaxLifetimeInSeconds = $tokenMaxLifetimeInSeconds;
 
@@ -326,10 +349,30 @@ class EmberNexusConfiguration
         return $this->tokenDeleteExpiredTokensAutomaticallyInSeconds;
     }
 
-    public function setTokenDeleteExpiredTokensAutomaticallyInSeconds(bool|int $tokenDeleteExpiredTokensAutomaticallyInSeconds): EmberNexusConfiguration
+    public function setTokenDeleteExpiredTokensAutomaticallyInSeconds(bool|int $tokenDeleteExpiredTokensAutomaticallyInSeconds): self
     {
         $this->tokenDeleteExpiredTokensAutomaticallyInSeconds = $tokenDeleteExpiredTokensAutomaticallyInSeconds;
 
         return $this;
+    }
+
+    public function getCacheEtagSeed(): string
+    {
+        return $this->cacheEtagSeed;
+    }
+
+    public function setCacheEtagSeed(string $cacheEtagSeed): void
+    {
+        $this->cacheEtagSeed = $cacheEtagSeed;
+    }
+
+    public function getCacheEtagUpperLimitInCollectionEndpoints(): int
+    {
+        return $this->cacheEtagUpperLimitInCollectionEndpoints;
+    }
+
+    public function setCacheEtagUpperLimitInCollectionEndpoints(int $cacheEtagUpperLimitInCollectionEndpoints): void
+    {
+        $this->cacheEtagUpperLimitInCollectionEndpoints = $cacheEtagUpperLimitInCollectionEndpoints;
     }
 }

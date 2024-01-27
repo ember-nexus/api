@@ -10,6 +10,9 @@
       rel="stylesheet"
       href="//cdn.jsdelivr.net/npm/docsify@4/themes/vue.css"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code" rel="stylesheet">
     <link rel="stylesheet" href="./assets/custom.css" />
     <link
       rel="apple-touch-icon"
@@ -60,12 +63,16 @@
           theme      : 'material',
           tabComments: true,
           tabHeadings: true
+        },
+        'flexible-alerts': {
+          style: 'flat'
         }
       };
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/docsify-example-panels"></script>
     <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
+    <script src="https://unpkg.com/docsify-plugin-flexible-alerts"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-cypher.min.js"></script>
@@ -80,121 +87,125 @@
       const emberNexusTextPurple = '#7E57C2';
       const emberNexusTextBlue = '#0074E4';
       function renderWorkflow(container, data, direction = "LR"){
-        const graph = new G6.Graph({
-          container: container,
-          width: container.offsetWidth,
-          height: container.offsetHeight,
-          modes: {
-            default: ['drag-canvas', 'zoom-canvas']
-          },
-          layout: {
-            type: 'dagre',
-            controlPoints: true,
-            rankdir: direction,
-            align: 'UL',
-            nodesep: 60,
-            ranksep: 30,
-          },
-          fitView: true,
-          maxZoom: 1.5,
-          minZoom: 0.5,
-          fitViewPadding: [20, 40, 50, 20],
-          animate: true,
-          defaultNode: {
-            type: 'node',
-            style: {
-              fill: emberNexusTextRed
+        document.fonts.ready.then(function () {
+          const graph = new G6.Graph({
+            container: container,
+            width: container.offsetWidth,
+            height: container.offsetHeight,
+            modes: {
+              default: ['drag-canvas', 'zoom-canvas']
             },
-            labelCfg: {
+            layout: {
+              type: 'dagre',
+              controlPoints: true,
+              rankdir: direction,
+              align: 'UL',
+              nodesep: 60,
+              ranksep: 30,
+            },
+            fitView: true,
+            maxZoom: 1.5,
+            minZoom: 0.5,
+            fitViewPadding: [20, 40, 50, 20],
+            animate: true,
+            defaultNode: {
+              type: 'node',
               style: {
-                fill: '#fff',
-                fontSize: 14,
-                fontFamily: 'Fira Code'
+                fill: emberNexusTextRed
+              },
+              labelCfg: {
+                style: {
+                  fill: '#fff',
+                  fontSize: 14,
+                  fontFamily: 'Fira Code'
+                },
               },
             },
-          },
-          defaultEdge: {
-            type: 'polyline',
-            style: {
-              radius: 20,
-              offset: 45,
-              endArrow: true,
-              lineWidth: 2,
-              stroke: '#000',
-            },
-            labelCfg: {
+            defaultEdge: {
+              type: 'polyline',
               style: {
-                fill: '#000',
-                fontSize: 14,
-                textAlign: 'center',
-                textBaseline: 'middle',
-                fontFamily: 'Fira Code'
+                radius: 20,
+                offset: 45,
+                endArrow: true,
+                lineWidth: 2,
+                stroke: '#000',
               },
-              backgroundStyle: {
-                fill: 'yellow'
-              }
+              labelCfg: {
+                style: {
+                  fill: '#000',
+                  fontSize: 14,
+                  textAlign: 'center',
+                  textBaseline: 'middle',
+                  fontFamily: 'Fira Code'
+                },
+                backgroundStyle: {
+                  fill: 'yellow'
+                }
+              },
             },
-          },
-          data
+            data
+          });
+          graph.render();
         });
-        graph.render();
       }
       function renderGraph(container, data, direction = "LR"){
-        const graph = new G6.Graph({
-          container: container,
-          width: container.offsetWidth,
-          height: container.offsetHeight,
-          modes: {
-            default: ['drag-canvas', 'zoom-canvas']
-          },
-          layout: {
-            type: 'dagre',
-            controlPoints: true,
-            rankdir: direction,
-            align: 'UL',
-            nodesep: 60,
-            ranksep: 60,
-          },
-          fitView: true,
-          maxZoom: 1.5,
-          minZoom: 0.25,
-          fitViewPadding: 20,
-          animate: true,
-          defaultNode: {
-            type: 'node',
-            style: {
-              fill: emberNexusTextRed
+        document.fonts.ready.then(function () {
+          const graph = new G6.Graph({
+            container: container,
+            width: container.offsetWidth,
+            height: container.offsetHeight,
+            modes: {
+              default: ['drag-canvas', 'zoom-canvas']
             },
-            labelCfg: {
+            layout: {
+              type: 'dagre',
+              controlPoints: true,
+              rankdir: direction,
+              align: 'UL',
+              nodesep: 60,
+              ranksep: 60,
+            },
+            fitView: true,
+            maxZoom: 1.5,
+            minZoom: 0.25,
+            fitViewPadding: 20,
+            animate: true,
+            defaultNode: {
+              type: 'node',
               style: {
-                fill: '#fff',
-                fontSize: 14,
-                fontFamily: 'Fira Code'
+                fill: emberNexusTextRed
+              },
+              labelCfg: {
+                style: {
+                  fill: '#fff',
+                  fontSize: 14,
+                  fontFamily: 'Fira Code'
+                },
               },
             },
-          },
-          defaultEdge: {
-            type: 'polyline',
-            style: {
-              radius: 20,
-              offset: 45,
-              endArrow: true,
-              lineWidth: 2,
-              stroke: '#C2C8D5',
-            },
-            labelCfg: {
+            defaultEdge: {
+              type: 'polyline',
               style: {
-                fill: '#000',
-                fontSize: 14,
-                textAlign: 'center',
-                textBaseline: 'middle',
-                fontFamily: 'Fira Code'
-              }
+                radius: 20,
+                offset: 45,
+                endArrow: true,
+                lineWidth: 2,
+                stroke: '#C2C8D5',
+              },
+              labelCfg: {
+                style: {
+                  fill: '#000',
+                  fontSize: 14,
+                  textAlign: 'center',
+                  textBaseline: 'middle',
+                  fontFamily: 'Fira Code'
+                }
+              },
             },
-          },
-          data
+            data
+          });
+          graph.render();
         });
-        graph.render();
       }
       let userNode = {label: 'User', icon: 'user', style: {fill: emberNexusTextBlue}};
       let tokenNode = {label: 'Token', icon: 'token', style: {fill: emberNexusTextPurple}};

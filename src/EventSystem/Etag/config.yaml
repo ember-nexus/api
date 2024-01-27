@@ -1,0 +1,65 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\Etag\EventListener\RedisChildrenCollectionEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent'
+        method: 'onChildrenCollectionEtagEvent'
+
+  App\EventSystem\Etag\EventListener\LiveChildrenCollectionEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent'
+        method: 'onChildrenCollectionEtagEvent'
+
+  App\EventSystem\Etag\EventListener\RedisParentsCollectionEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\ParentsCollectionEtagEvent'
+        method: 'onParentsCollectionEtagEvent'
+
+  App\EventSystem\Etag\EventListener\LiveParentsCollectionEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\ParentsCollectionEtagEvent'
+        method: 'onParentsCollectionEtagEvent'
+
+  App\EventSystem\Etag\EventListener\RedisRelatedCollectionEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\RelatedCollectionEtagEvent'
+        method: 'onRelatedCollectionEtagEvent'
+
+  App\EventSystem\Etag\EventListener\LiveRelatedCollectionEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\RelatedCollectionEtagEvent'
+        method: 'onRelatedCollectionEtagEvent'
+
+  App\EventSystem\Etag\EventListener\RedisIndexCollectionEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\IndexCollectionEtagEvent'
+        method: 'onIndexCollectionEtagEvent'
+
+  App\EventSystem\Etag\EventListener\LiveIndexCollectionEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\IndexCollectionEtagEvent'
+        method: 'onIndexCollectionEtagEvent'
+
+  App\EventSystem\Etag\EventListener\RedisElementEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\ElementEtagEvent'
+        method: 'onElementEtagEvent'
+
+  App\EventSystem\Etag\EventListener\LiveElementEtagEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\Etag\Event\ElementEtagEvent'
+        method: 'onElementEtagEvent'

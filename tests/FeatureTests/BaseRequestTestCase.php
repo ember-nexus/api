@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\FeatureTests;
+namespace App\tests\FeatureTests;
 
 use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;

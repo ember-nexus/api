@@ -31,4 +31,6 @@ one containing your values.
 
 Possible parameters are:
 
+<div class="code-title code-title-path auto-refresh">/var/www/html/config/packages/ember_nexus.yaml</div>
+
 [](../example/default-parameters.yaml ':include :type=code')

@@ -7,4 +7,4 @@ Content-Type: application/problem+json; charset=utf-8
 Date: Mon, 11 Dec 2023 12:12:52 GMT
 Server: Unit
 Transfer-Encoding: chunked
-X-Powered-By: Ember-Nexus-API
+X-Powered-By: Ember Nexus API

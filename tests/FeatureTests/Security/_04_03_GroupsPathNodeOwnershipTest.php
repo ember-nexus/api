@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\FeatureTests\Security;
+namespace App\tests\FeatureTests\Security;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 

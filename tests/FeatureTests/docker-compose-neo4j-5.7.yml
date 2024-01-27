@@ -11,7 +11,7 @@ services:
 
   ember-nexus-neo4j:
     container_name: ember-nexus-neo4j
-    image: neo4j:5.12
+    image: neo4j:5.7
     expose:
       - "7474"
       - "7687"

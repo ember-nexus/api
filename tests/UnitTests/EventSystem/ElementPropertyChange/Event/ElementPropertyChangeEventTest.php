@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\Event;
+namespace App\tests\UnitTests\EventSystem\ElementPropertyChange\Event;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\Type\NodeElement;

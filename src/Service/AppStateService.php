@@ -13,7 +13,7 @@ class AppStateService
         return $this->appState;
     }
 
-    public function setAppState(AppStateType $appState): AppStateService
+    public function setAppState(AppStateType $appState): self
     {
         $this->appState = $appState;
 

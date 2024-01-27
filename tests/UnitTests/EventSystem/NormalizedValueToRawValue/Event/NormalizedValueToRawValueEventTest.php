@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\UnitTests\EventSystem\NormalizedValueToRawValue\Event;
+namespace App\tests\UnitTests\EventSystem\NormalizedValueToRawValue\Event;
 
 use App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent;
 use PHPUnit\Framework\TestCase;

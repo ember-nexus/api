@@ -4,6 +4,7 @@ namespace App\Controller\Element;
 
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
+use App\Service\EtagService;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,6 +18,7 @@ class GetIndexController extends AbstractController
         private CypherEntityManager $cypherEntityManager,
         private AuthProvider $authProvider,
         private CollectionService $collectionService,
+        private EtagService $etagService,
     ) {
     }
 
@@ -47,6 +49,16 @@ class GetIndexController extends AbstractController
             $nodeUuids[] = UuidV4::fromString($resultSet->get('element.id'));
         }
 
-        return $this->collectionService->buildCollectionFromUuids($nodeUuids, [], count($nodeUuids));
+        $response = $this->collectionService->buildCollectionFromUuids($nodeUuids, [], count($nodeUuids));
+
+        $etag = $this->etagService->getIndexCollectionEtag($userUuid);
+        if ($etag) {
+            $response->headers->set('Etag', sprintf(
+                '"%s"',
+                $etag
+            ));
+        }
+
+        return $response;
     }
 }

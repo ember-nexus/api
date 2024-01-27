@@ -5,8 +5,37 @@
 
 Updates an individual data element.
 
-!> **Note**: Some properties of internally used nodes and relations can not be changed directly, doing so will throw
-errors.
+> [!ATTENTION]
+> The schema of the request body will be changed with the release of version 0.3.0, which is a **breaking change**.  
+> See [issue #113](https://github.com/ember-nexus/api/issues/113) for details.
+
+> [!NOTE]
+> Some properties of internally used nodes and relations can not be changed directly, doing so will throw errors.
+
+## Request Parameters
+
+This endpoint does not require parameters.
+
+## Request Headers
+
+<div class="table-request-headers">
+
+| Header          | Description                                                                                                       | Required | Default |
+|-----------------|-------------------------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details.               | no       | -       |
+| `Content-Type`  | Can be used to explicitly define the content type of the uploaded data. If specified, must be `application/json`. | no       | -       |
+
+</div>
+
+## Response Headers
+
+<div class="table-response-headers">
+
+| Header     | Description                                        | Default |
+|------------|----------------------------------------------------| ------- |
+| `Location` | Contains the absolute path of the updated element. | -       |
+
+</div>
 
 ## Request Body
 
@@ -41,7 +70,8 @@ curl \
 
 [Response Body](./patch-element/204-response-header.txt ':include :type=code')
 
-Success response does not have a response body. The UUID of the created element is written in the `Location`-header.
+Success response does not have a response body.  
+Note that the UUID of the updated element is written in the `Location`-header.
 
 ### **🔴 Error 400**
 

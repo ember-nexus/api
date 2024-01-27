@@ -4,27 +4,30 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
-use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
+use App\Factory\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEventFactory;
+use App\Factory\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEventFactory;
+use App\Helper\FragmentHelper;
 use App\Type\FragmentGroup;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 class ElementFragmentizeService
 {
     public function __construct(
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
+        private NodeElementFragmentizeEventFactory $nodeElementFragmentizeEventFactory,
+        private RelationElementFragmentizeEventFactory $relationElementFragmentizeEventFactory
     ) {
     }
 
     public function fragmentize(NodeElementInterface|RelationElementInterface $element): FragmentGroup
     {
         if ($element instanceof NodeElementInterface) {
-            $event = new NodeElementFragmentizeEvent($element);
+            $event = $this->nodeElementFragmentizeEventFactory->createNodeElementFragmentizeEvent($element);
         } else {
-            $event = new RelationElementFragmentizeEvent($element);
+            $event = $this->relationElementFragmentizeEventFactory->createRelationElementFragmentizeEvent($element);
         }
         $this->eventDispatcher->dispatch($event);
 
-        return $event->getAsFragmentGroup();
+        return FragmentHelper::getFragmentGroupFromFragmentizeEvent($event);
     }
 }

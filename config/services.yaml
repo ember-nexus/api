@@ -6,6 +6,7 @@ imports:
   - {resource: ../src/EventSystem/ElementDefragmentize/config.yaml}
   - {resource: ../src/EventSystem/ElementFragmentize/config.yaml}
   - {resource: ../src/EventSystem/EntityManager/config.yaml}
+  - {resource: ../src/EventSystem/Etag/config.yaml}
   - {resource: ../src/EventSystem/Exception/config.yaml}
   - {resource: ../src/EventSystem/Kernel/config.yaml}
   - {resource: ../src/EventSystem/Request/config.yaml}

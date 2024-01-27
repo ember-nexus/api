@@ -13,7 +13,8 @@ return (new PhpCsFixer\Config())
             'import_classes' => true,
             'import_constants' => true,
             'import_functions' => true
-        ]
+        ],
+        'self_accessor' => true
     ])
     ->setFinder($finder)
 ;

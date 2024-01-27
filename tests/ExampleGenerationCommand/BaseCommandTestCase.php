@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\ExampleGenerationCommand;
+namespace App\tests\ExampleGenerationCommand;
 
 use Exception;
 use PHPUnit\Framework\TestCase;

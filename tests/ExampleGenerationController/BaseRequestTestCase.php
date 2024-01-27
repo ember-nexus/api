@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\ExampleGenerationController;
+namespace App\tests\ExampleGenerationController;
 
 use Psr\Http\Message\ResponseInterface;
 
@@ -9,7 +9,7 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
     /**
      * @var string[] IGNORED_HEADERS
      */
-    private const array IGNORED_HEADERS = ['Date', 'Location'];
+    private const array IGNORED_HEADERS = ['Date', 'Etag', 'Location'];
 
     /**
      * @var string[] REMOVED_HEADERS

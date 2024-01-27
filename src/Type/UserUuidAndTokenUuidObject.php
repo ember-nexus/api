@@ -17,7 +17,7 @@ class UserUuidAndTokenUuidObject
         return $this->userUuid;
     }
 
-    public function setUserUuid(UuidInterface $userUuid): UserUuidAndTokenUuidObject
+    public function setUserUuid(UuidInterface $userUuid): self
     {
         $this->userUuid = $userUuid;
 
@@ -29,7 +29,7 @@ class UserUuidAndTokenUuidObject
         return $this->tokenUuid;
     }
 
-    public function setTokenUuid(UuidInterface $tokenUuid): UserUuidAndTokenUuidObject
+    public function setTokenUuid(UuidInterface $tokenUuid): self
     {
         $this->tokenUuid = $tokenUuid;
 

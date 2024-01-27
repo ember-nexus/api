@@ -7,6 +7,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementResponseService;
+use App\Service\EtagService;
 use App\Type\AccessType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +20,7 @@ class GetElementController extends AbstractController
         private ElementResponseService $elementResponseService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private EtagService $etagService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
@@ -40,6 +42,16 @@ class GetElementController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        return $this->elementResponseService->buildElementResponseFromUuid($elementUuid);
+        $response = $this->elementResponseService->buildElementResponseFromUuid($elementUuid);
+
+        $etag = $this->etagService->getElementEtag($elementUuid);
+        if ($etag) {
+            $response->headers->set('Etag', sprintf(
+                '"%s"',
+                $etag
+            ));
+        }
+
+        return $response;
     }
 }
