@@ -25,7 +25,7 @@ class DeleteOwnsRelationEtagTest extends BaseRequestTestCase
         return $etag;
     }
 
-    public function testEtagBeforeAndAfterChangingCentralOwnsRelation(): void
+    public function testEtagBeforeAndAfterDeletingCentralOwnsRelation(): void
     {
         $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '', '"3fKNknCFOBH"');
         $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/parents', '"9F1JTjQKoVJ"');

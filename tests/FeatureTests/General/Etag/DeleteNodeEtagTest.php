@@ -27,7 +27,7 @@ class DeleteNodeEtagTest extends BaseRequestTestCase
         return $etag;
     }
 
-    public function testEtagBeforeAndAfterChangingCentralNode(): void
+    public function testEtagBeforeAndAfterDeletingCentralNode(): void
     {
         $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '', '"SPPl9HgNJoQ"');
         $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/parents', '"9egU8GlmZhd"');

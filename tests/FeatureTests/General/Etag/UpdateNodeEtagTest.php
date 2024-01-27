@@ -31,7 +31,7 @@ class UpdateNodeEtagTest extends BaseRequestTestCase
         return $etag;
     }
 
-    public function testEtagBeforeAndAfterChangingCentralNode(): void
+    public function testEtagBeforeAndAfterUpdatingCentralNode(): void
     {
         $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '', '"32Y4YaICHSp"');
         $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/parents', '"YPDrndSAaRk"');

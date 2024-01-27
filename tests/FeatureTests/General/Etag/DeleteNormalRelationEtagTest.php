@@ -25,7 +25,7 @@ class DeleteNormalRelationEtagTest extends BaseRequestTestCase
         return $etag;
     }
 
-    public function testEtagBeforeAndAfterChangingCentralNormalRelation(): void
+    public function testEtagBeforeAndAfterDeletingCentralNormalRelation(): void
     {
         $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '', '"TAtItfs3idO"');
         $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/parents', '"FbiZIdWq12P"');

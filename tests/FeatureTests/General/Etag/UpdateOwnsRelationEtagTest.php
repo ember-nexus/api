@@ -25,7 +25,7 @@ class UpdateOwnsRelationEtagTest extends BaseRequestTestCase
         return $etag;
     }
 
-    public function testEtagBeforeAndAfterChangingCentralOwnsRelation(): void
+    public function testEtagBeforeAndAfterUpdatingCentralOwnsRelation(): void
     {
         $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '', '"fkFkIGpTl6c"');
         $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/parents', '"YJGQbkhuZfp"');

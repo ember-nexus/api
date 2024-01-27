@@ -2,6 +2,7 @@
 
 namespace App\EventSystem\EntityManager\EventListener;
 
+use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\Factory\Type\RedisKeyFactory;
@@ -20,6 +21,11 @@ class ExpireEtagOnChangeEventListener
     ) {
     }
 
+    public function onElementPostCreateEvent(ElementPostCreateEvent $event): void
+    {
+        $this->handleEvent($event);
+    }
+
     public function onElementPostMergeEvent(ElementPostMergeEvent $event): void
     {
         $this->handleEvent($event);
@@ -34,7 +40,7 @@ class ExpireEtagOnChangeEventListener
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    private function handleEvent(ElementPostMergeEvent|ElementPreDeleteEvent $event): void
+    private function handleEvent(ElementPostCreateEvent|ElementPostMergeEvent|ElementPreDeleteEvent $event): void
     {
         $elementUuid = $event->getElement()->getIdentifier();
         if (null === $elementUuid) {

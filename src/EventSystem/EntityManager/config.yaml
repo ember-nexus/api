@@ -46,6 +46,9 @@ services:
   App\EventSystem\EntityManager\EventListener\ExpireEtagOnChangeEventListener:
     tags:
       - name: kernel.event_listener
+        event: 'App\EventSystem\EntityManager\Event\ElementPostCreateEvent'
+        method: 'onElementPostCreateEvent'
+      - name: kernel.event_listener
         event: 'App\EventSystem\EntityManager\Event\ElementPostMergeEvent'
         method: 'onElementPostMergeEvent'
       - name: kernel.event_listener

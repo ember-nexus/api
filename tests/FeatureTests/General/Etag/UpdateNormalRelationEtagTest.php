@@ -25,7 +25,7 @@ class UpdateNormalRelationEtagTest extends BaseRequestTestCase
         return $etag;
     }
 
-    public function testEtagBeforeAndAfterChangingCentralNormalRelation(): void
+    public function testEtagBeforeAndAfterUpdatingCentralNormalRelation(): void
     {
         $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '', '"YoB0OOEREXk"');
         $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::UUID_DATA_1, '/parents', '"3j6Nn1Zg7Vh"');
