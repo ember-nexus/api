@@ -30,10 +30,10 @@ ENV PHPIZE_DEPS="\
     PHP_CPPFLAGS="$PHP_CFLAGS" \
     PHP_LDFLAGS="-Wl,-O1 -pie" \
     GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA" \
-    PHP_VERSION="8.3.1" \
-    PHP_URL="https://www.php.net/distributions/php-8.3.1.tar.xz" \
-    PHP_ASC_URL="https://www.php.net/distributions/php-8.3.1.tar.xz.asc" \
-    PHP_SHA256="56445b1771b2ba5b7573453f9e8a9451e2d810b1741a352fa05259733b1e9758"
+    PHP_VERSION="8.3.2" \
+    PHP_URL="https://www.php.net/distributions/php-8.3.2.tar.xz" \
+    PHP_ASC_URL="https://www.php.net/distributions/php-8.3.2.tar.xz.asc" \
+    PHP_SHA256="4ffa3e44afc9c590e28dc0d2d31fc61f0139f8b335f11880a121b9f9b9f0634e"
 
 # persistent / runtime deps
 RUN apk add --no-cache \

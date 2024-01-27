@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Constants are changed to contain type declarations, closes #211.
 - Remove timeout from PHP-tasks, closes #220. CI timeouts still apply.
-- Upgrade PHP to 8.3.1, closes #223.
+- Upgrade PHP to 8.3.2, closes #236. Skips interim PHP version 8.3.1, which was tracked in #223.
 - Enable `composer mess` in CI due to fixed upstream issue, closes #203.
 - Enable PHP CS Fixer rule `self_accessor`, which prefers `self` over the element's class name.
 - Change value of HTTP header `X-Powered-By` to `Ember Nexus API`.
