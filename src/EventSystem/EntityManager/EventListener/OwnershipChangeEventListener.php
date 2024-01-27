@@ -54,7 +54,7 @@ class OwnershipChangeEventListener
             return;
         }
         $type = $element->getType();
-        if (!$type) {
+        if (null === $type) {
             return;
         }
         if (array_key_exists($type, $this->relationshipTypesWhichCanTriggerOwnershipChange)) {
