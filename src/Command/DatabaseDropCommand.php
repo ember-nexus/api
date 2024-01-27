@@ -99,7 +99,7 @@ class DatabaseDropCommand extends Command
         $this->io->startSection('Task 2 of 6: MongoDB');
         $this->io->writeln('Deleting Mongo data...');
         $mongoDatabase = $this->mongoEntityManager->getDatabase();
-        if ($mongoDatabase) {
+        if (null !== $mongoDatabase) {
             $this->mongoEntityManager->getClient()->dropDatabase($mongoDatabase);
         }
         $this->io->stopSection('Successfully deleted Mongo data.');

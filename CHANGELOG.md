@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enable PHP CS Fixer rule `self_accessor`, which prefers `self` over the element's class name.
 - Change value of HTTP header `X-Powered-By` to `Ember Nexus API`.
 - Move configuration files and scripts out of root folder, closes #237.
+- Replace flysystem AWS with `async-aws/s3`, closes #235.
+- Upgrade dependencies.
 ### Fixed
 - Fix monospace font in documentation (graph renderings), closes #152.
 - Fix bug where updated timestamps where not updated when they already where set to a value.

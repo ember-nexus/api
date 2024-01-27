@@ -8,11 +8,11 @@
     "php": ">=8.3",
     "ext-ctype": "*",
     "ext-iconv": "*",
+    "async-aws/s3": "^2.2",
     "guzzlehttp/guzzle": "^7.8",
     "league/flysystem": "^3.23",
-    "league/flysystem-aws-s3-v3": "^3.22",
     "league/flysystem-bundle": "^3.3",
-    "league/flysystem-ziparchive": "^3.21",
+    "league/flysystem-ziparchive": "^3.23",
     "mongodb/mongodb": "^1.17",
     "php-amqplib/php-amqplib": "^3.6",
     "predis/predis": "^2.2",
@@ -37,11 +37,11 @@
   "require-dev": {
     "beste/psr-testlogger": "^1.0",
     "boesing/psalm-plugin-stringf": "^1.4",
-    "friendsofphp/php-cs-fixer": "^3.41",
+    "friendsofphp/php-cs-fixer": "^3.48",
     "infection/infection": "^0.27.9",
     "phpbench/phpbench": "^1.2",
-    "phpmd/phpmd": "^2.14",
-    "phpspec/prophecy-phpunit": "^2.0",
+    "phpmd/phpmd": "^2.15",
+    "phpspec/prophecy-phpunit": "^2.1",
     "phpstan/phpstan": "^1.10",
     "phpunit/php-code-coverage": "^9.2",
     "phpunit/phpunit": "^9.6",
@@ -51,7 +51,7 @@
     "symfony/stopwatch": "7.0.*",
     "symfony/web-profiler-bundle": "7.0.*",
     "thecodingmachine/phpstan-safe-rule": "^1.2",
-    "vimeo/psalm": "^5.18"
+    "vimeo/psalm": "^5.20"
   },
   "config": {
     "allow-plugins": {

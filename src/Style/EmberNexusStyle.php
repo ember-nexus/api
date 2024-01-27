@@ -155,6 +155,9 @@ class EmberNexusStyle extends SymfonyStyle
 
     public function createProgressBarInInteractiveTerminal(int $max = 0): ?ProgressBar
     {
+        /**
+         * @psalm-suppress RiskyTruthyFalsyComparison
+         */
         if (getenv('TERM')) {
             return null;
         }
