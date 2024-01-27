@@ -213,7 +213,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Feature Test
         run: |
-          chmod 777 test-feature-prepare
+          chmod 777 ./bin/test-feature-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml up --quiet-pull -d
           echo "waiting for containers to star tup (10s)"
@@ -247,7 +247,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Controller Example Generation Test
         run: |
-          chmod 777 test-feature-prepare
+          chmod 777 ./bin/test-feature-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker compose -f ./tests/ExampleGenerationController/docker-compose.yml up --quiet-pull -d
           echo "waiting for containers to star tup (10s)"
@@ -282,7 +282,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Command Example Generation Test
         run: |
-          chmod 777 test-feature-command-prepare
+          chmod 777 ./bin/test-feature-command-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker compose -f ./tests/ExampleGenerationCommand/docker-compose.yml up --quiet-pull -d
           echo "waiting for containers to star tup (10s)"
