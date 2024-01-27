@@ -5,24 +5,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.1 - 2024-01-27
 ### Added
 - Add `/.well-known/security.txt` endpoint, documentation for it and (disabled) file check on container startup which
   will crash the container intentionally if the file is missing. Check will be enabled with the release of version
-  0.2.0, see also #225. Closes issue #131.
-- Add HTTP header `Etag` to GET responses of element and collection endpoints, closes #88.
-- Add `beste/psr-testlogger` for creating easier unit tests, related to #88.
+  0.2.0, see also [#225]. Closes issue [#131].
+- Add HTTP header `Etag` to GET responses of element and collection endpoints, closes [#88].
+- Add `beste/psr-testlogger` for creating easier unit tests, related to [#88].
+
 ### Changed
-- Constants are changed to contain type declarations, closes #211.
-- Remove timeout from PHP-tasks, closes #220. CI timeouts still apply.
-- Upgrade PHP to 8.3.2, closes #236. Skips interim PHP version 8.3.1, which was tracked in #223.
-- Enable `composer mess` in CI due to fixed upstream issue, closes #203.
+- Constants are changed to contain type declarations, closes [#211].
+- Remove timeout from PHP-tasks, closes [#220]. CI timeouts still apply.
+- Upgrade PHP to 8.3.2, closes [#236]. Skips interim PHP version 8.3.1, which was tracked in [#223].
+- Enable `composer mess` in CI due to fixed upstream issue, closes [#203].
 - Enable PHP CS Fixer rule `self_accessor`, which prefers `self` over the element's class name.
 - Change value of HTTP header `X-Powered-By` to `Ember Nexus API`.
-- Move configuration files and scripts out of root folder, closes #237.
-- Replace flysystem AWS with `async-aws/s3`, closes #235.
+- Move configuration files and scripts out of root folder, closes [#237].
+- Replace flysystem AWS with `async-aws/s3`, closes [#235].
 - Upgrade dependencies.
+
 ### Fixed
-- Fix monospace font in documentation (graph renderings), closes #152.
+- Fix monospace font in documentation (graph renderings), closes [#152].
 - Fix bug where updated timestamps where not updated when they already where set to a value.
 
 ## 0.1.0 - 2023-12-16
