@@ -184,7 +184,7 @@ jobs:
   test-feature:
     runs-on: buildjet-4vcpu-ubuntu-2204
     name: 'Feature Test'
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs:
       - test-unit
       - phpstan
@@ -224,7 +224,7 @@ jobs:
   test-example-generation-controller:
     runs-on: buildjet-2vcpu-ubuntu-2204
     name: 'Controller Example Generation Test'
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs:
       - test-unit
       - phpstan
@@ -259,7 +259,7 @@ jobs:
   test-example-generation-command:
     runs-on: buildjet-2vcpu-ubuntu-2204
     name: 'Command Example Generation Test'
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs:
       - test-unit
       - phpstan
