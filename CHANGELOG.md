@@ -5,9 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add `brianium/paratest` as a parallel PHP Unit runtime, related to #63.
 ### Changed
 - Upgrade most GitHub actions, required due to deprecation of Node 16, closes #240.
 - Increase feature test timeout from 10 to 15 minutes.
+- Upgrade PHP Unit to major version 10, related to #63.
+### Removed
+- Remove leak test due to incompatibility with PHP Unit 10+, related to #63.
 
 ## 0.1.1 - 2024-01-27
 ### Added
