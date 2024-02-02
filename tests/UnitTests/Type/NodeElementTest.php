@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\tests\UnitTests\Type;
 
 use App\Type\NodeElement;
-use Exception;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
@@ -50,13 +49,8 @@ class NodeElementTest extends TestCase
         }
         $nodeElement = new NodeElement();
 
-        try {
-            $nodeElement->getProperty('propertyWhichDoesNotExist');
-        } catch (Exception $exception) {
-            $this->assertSame('Undefined array key "propertyWhichDoesNotExist"', $exception->getMessage());
-        }
-
-        $this->assertTrue(true);
+        $this->expectExceptionMessage('Undefined array key "propertyWhichDoesNotExist".');
+        $nodeElement->getProperty('propertyWhichDoesNotExist');
     }
 
     public function testPropertiesTraitRemovePropertyWhichDoesNotExist(): void

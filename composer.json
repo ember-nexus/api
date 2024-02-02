@@ -1,6 +1,6 @@
 {
   "type": "project",
-  "version": "0.1.5",
+  "version": "0.1.1",
   "license": "AGPL-3.0-only",
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -37,21 +37,21 @@
   "require-dev": {
     "beste/psr-testlogger": "^1.0",
     "boesing/psalm-plugin-stringf": "^1.4",
+    "brianium/paratest": "^7.3",
     "friendsofphp/php-cs-fixer": "^3.48",
     "infection/infection": "^0.27.9",
     "phpbench/phpbench": "^1.2",
     "phpmd/phpmd": "^2.15",
     "phpspec/prophecy-phpunit": "^2.1",
     "phpstan/phpstan": "^1.10",
-    "phpunit/php-code-coverage": "^9.2",
-    "phpunit/phpunit": "^9.6",
-    "roave/no-leaks": "^1.5",
-    "symfony/maker-bundle": "^1.52",
+    "phpunit/php-code-coverage": "^10",
+    "phpunit/phpunit": "^10",
+    "symfony/maker-bundle": "^1.53",
     "symfony/phpunit-bridge": "^7.0",
     "symfony/stopwatch": "7.0.*",
     "symfony/web-profiler-bundle": "7.0.*",
     "thecodingmachine/phpstan-safe-rule": "^1.2",
-    "vimeo/psalm": "^5.20"
+    "vimeo/psalm": "^5.21"
   },
   "config": {
     "allow-plugins": {
@@ -95,7 +95,8 @@
       "@auto-scripts"
     ],
     "test:unit": "php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist",
-    "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude deprecated",
+    "test:unit:test": "php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --group test",
+    "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/bin/paratest -p 6 --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude deprecated",
     "test:feature:deprecated": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group deprecated",
     "test:feature:test": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group test",
     "test:example-generation-controller": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationController --exclude deprecated && php bin/console cache:clear",
