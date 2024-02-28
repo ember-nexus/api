@@ -13,7 +13,7 @@ class Client404NotFoundExceptionFactory
     ) {
     }
 
-    public function createFromTemplate(Throwable $previous = null): Client404NotFoundException
+    public function createFromTemplate(?Throwable $previous = null): Client404NotFoundException
     {
         return new Client404NotFoundException(
             $this->urlGenerator->generate(

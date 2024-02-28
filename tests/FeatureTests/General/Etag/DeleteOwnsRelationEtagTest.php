@@ -11,7 +11,7 @@ class DeleteOwnsRelationEtagTest extends BaseRequestTestCase
     private const string UUID_DATA_2 = '8b0e08f1-beda-4753-91ba-26f2c2546cdb';
     private const string UUID_OWNS = '8adecb8f-01ca-41c9-907c-dca9ee8f4bc9';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
             sprintf('/%s%s', $uuid, $additionalPath),

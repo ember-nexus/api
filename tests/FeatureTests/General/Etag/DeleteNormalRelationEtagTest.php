@@ -11,7 +11,7 @@ class DeleteNormalRelationEtagTest extends BaseRequestTestCase
     private const string UUID_DATA_2 = '119cdc2a-e169-4cc5-a20a-7d6b67e05c25';
     private const string UUID_RELATED = '41e07860-c278-4d3a-b96a-47465e832b5e';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
             sprintf('/%s%s', $uuid, $additionalPath),

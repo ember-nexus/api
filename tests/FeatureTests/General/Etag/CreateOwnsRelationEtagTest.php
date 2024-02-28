@@ -10,7 +10,7 @@ class CreateOwnsRelationEtagTest extends BaseRequestTestCase
     private const string UUID_DATA_1 = 'd62f5169-1e12-42eb-ac91-8a6cfa9b3244';
     private const string UUID_DATA_2 = 'a0691ac0-b75b-4c4f-9fe0-a95b30263e10';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
             sprintf('/%s%s', $uuid, $additionalPath),

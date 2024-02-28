@@ -30,7 +30,7 @@ class TokenGenerator
     /**
      * @param array<string, mixed> $data
      */
-    public function createNewToken(UuidInterface $userUuid, array $data = [], int $lifetimeInSeconds = null): string
+    public function createNewToken(UuidInterface $userUuid, array $data = [], ?int $lifetimeInSeconds = null): string
     {
         for ($i = 0; $i < 3; ++$i) {
             $token = $this->createToken();

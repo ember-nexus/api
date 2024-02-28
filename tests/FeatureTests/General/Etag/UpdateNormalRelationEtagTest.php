@@ -11,7 +11,7 @@ class UpdateNormalRelationEtagTest extends BaseRequestTestCase
     private const string UUID_DATA_2 = 'eeccb6bf-91da-4da1-8bef-b797a32eb8a6';
     private const string UUID_RELATED = '7f3afac6-013e-4b28-acc7-f4fe1c418c99';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
             sprintf('/%s%s', $uuid, $additionalPath),

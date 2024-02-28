@@ -16,8 +16,8 @@ class DeactivatableTraceableEventDispatcher extends TraceableEventDispatcher
     public function __construct(
         EventDispatcherInterface $dispatcher,
         Stopwatch $stopwatch,
-        LoggerInterface $logger = null,
-        RequestStack $requestStack = null
+        ?LoggerInterface $logger = null,
+        ?RequestStack $requestStack = null
     ) {
         $this->eventDispatcher = $dispatcher;
         parent::__construct($dispatcher, $stopwatch, $logger, $requestStack);
@@ -45,7 +45,7 @@ class DeactivatableTraceableEventDispatcher extends TraceableEventDispatcher
         return $this;
     }
 
-    public function dispatch(object $event, string $eventName = null): object
+    public function dispatch(object $event, ?string $eventName = null): object
     {
         if ($this->isDeactivated) {
             return $this->eventDispatcher->dispatch($event, $eventName);

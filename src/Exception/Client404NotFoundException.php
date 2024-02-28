@@ -11,8 +11,8 @@ class Client404NotFoundException extends ProblemJsonException
         string $title = 'Not found',
         int $status = 404,
         string $detail = 'Requested element was not found.',
-        string $instance = null,
-        Throwable $previous = null
+        ?string $instance = null,
+        ?Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }
