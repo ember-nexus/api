@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Upgrade most GitHub actions, required due to deprecation of Node 16, closes #240.
 - Increase feature test timeout from 10 to 15 minutes.
+- Upgrade PHP to 8.3.3, closes #253.
 
 ## 0.1.1 - 2024-01-27
 ### Added
