@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\EventSystem\Request\EventListener;
 
 use App\Security\AuthProvider;
-use App\Service\RequestTimeService;
 use Psr\Log\LoggerInterface;
-use Safe\DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -24,8 +22,7 @@ class LogRequestListener
     public function __construct(
         private UrlMatcherInterface|RequestMatcherInterface $matcher,
         private AuthProvider $authProvider,
-        private LoggerInterface $logger,
-        private RequestTimeService $requestTimeService
+        private LoggerInterface $logger
     ) {
     }
 
@@ -47,9 +44,6 @@ class LogRequestListener
             $parameters = $this->matcher->match($this->request->getPathInfo());
         }
 
-        $delta = (new DateTime())->diff($this->requestTimeService->getRequestStart());
-        $duration = $delta->s * 1000000 + $delta->f * 1000;
-
         $this->logger->info(
             'Handled request.',
             [
@@ -68,7 +62,6 @@ class LogRequestListener
                     'status' => $response->getStatusCode(),
                     'type' => $response->headers->get('content-type'),
                 ],
-                'duration' => $duration
             ]
         );
     }

@@ -6,6 +6,9 @@ namespace App\tests\FeatureTests\Command;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
+/**
+ * @group command
+ */
 class RevokeTokenIssuedWithExpirationDateTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:S1aCcsPd5nPfI16SGcoTY0';
@@ -17,10 +20,21 @@ class RevokeTokenIssuedWithExpirationDateTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::TOKEN_WITH_EXPIRATION_DATE_UUID), self::TOKEN);
         $this->assertIsTokenWithState($response, 'ACTIVE');
 
-        \Safe\exec(sprintf(
+        $result = 0;
+        $command = sprintf(
             'php bin/console token:revoke -f --user %s --issued-with-expiration-date',
             self::USER_UUID
-        ));
+        );
+        \Safe\exec(
+            $command,
+            result_code: $result
+        );
+        if ($result !== 0) {
+            $this->fail(sprintf(
+                "The following command is unsuccessful: %s",
+                $command
+            ));
+        }
 
         $response = $this->runGetRequest(sprintf('/%s', self::TOKEN_WITH_EXPIRATION_DATE_UUID), self::TOKEN);
         $this->assertIsTokenWithState($response, 'REVOKED');
