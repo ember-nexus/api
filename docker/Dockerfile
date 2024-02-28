@@ -328,7 +328,7 @@ COPY docker/.env.docker /var/www/html/.env
 COPY composer.json /var/www/html/composer.json
 COPY composer.lock /var/www/html/composer.lock
 COPY LICENSE /var/www/html/LICENSE
-RUN APP_ENV=prod composer install --no-dev --optimize-autoloader
+RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
 
 
 
