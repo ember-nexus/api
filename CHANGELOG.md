@@ -5,13 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.2 - 2024-02-28
 ### Changed
-- Upgrade most GitHub actions, required due to deprecation of Node 16, closes #240.
+- Upgrade most GitHub actions, required due to deprecation of Node 16, closes [#240].
 - Increase feature test timeout from 10 to 15 minutes.
-- Upgrade PHP to 8.3.3, closes #253.
-- Upgrade upstream dependency NGINX Unit to 1.32.0, closes #254.
-- Upgrade dependencies, closes #257.
-- Add environment variable `COMPOSER_ALLOW_SUPERUSER=1` in release action to fix image build, fixes #259.
+- Upgrade PHP to 8.3.3, closes [#253].
+- Upgrade upstream dependency NGINX Unit to 1.32.0, closes [#254].
+- Upgrade dependencies, closes [#257].
+- Add environment variable `COMPOSER_ALLOW_SUPERUSER=1` in release action to fix image build, fixes [#259].
 
 ## 0.1.1 - 2024-01-27
 ### Added
