@@ -31,8 +31,8 @@ class Neo4jClientHelper
 
     public function getRelationFromLaudisRelation(
         LaudisRelationship $relation,
-        LaudisNode $startNode = null,
-        LaudisNode $endNode = null
+        ?LaudisNode $startNode = null,
+        ?LaudisNode $endNode = null
     ): Relation {
         $newRelation = (new Relation())
             ->setType($relation->getType())

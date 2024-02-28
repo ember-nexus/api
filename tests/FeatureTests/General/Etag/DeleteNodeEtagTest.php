@@ -13,7 +13,7 @@ class DeleteNodeEtagTest extends BaseRequestTestCase
     private const string UUID_DATA_4 = '4b04fac0-a2db-454c-9d1d-1880a82ecd0f';
     private const string UUID_DATA_5 = '02a52492-ee1d-43fe-ad1a-bde040552fd0';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
             sprintf('/%s%s', $uuid, $additionalPath),

@@ -29,8 +29,8 @@ class CreateElementFromRawDataService
     public function createElementFromRawData(
         UuidInterface $elementId,
         string $type,
-        UuidInterface $startNodeId = null,
-        UuidInterface $endNodeId = null,
+        ?UuidInterface $startNodeId = null,
+        ?UuidInterface $endNodeId = null,
         array $rawData = []
     ): NodeElementInterface|RelationElementInterface {
         if (null !== $startNodeId && null === $endNodeId) {

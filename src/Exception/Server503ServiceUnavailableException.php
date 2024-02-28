@@ -11,8 +11,8 @@ class Server503ServiceUnavailableException extends ProblemJsonException
         string $title = 'Service unavailable',
         int $status = 503,
         string $detail = '',
-        string $instance = null,
-        Throwable $previous = null
+        ?string $instance = null,
+        ?Throwable $previous = null
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

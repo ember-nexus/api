@@ -17,7 +17,7 @@ class UpdateNodeEtagTest extends BaseRequestTestCase
     private const string UUID_RELATED_1 = '3d793ff1-5587-45e3-aa17-1677dec2854a';
     private const string UUID_RELATED_2 = '5f7dfb9c-9b76-43dc-aa75-6b5a023a10e8';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
             sprintf('/%s%s', $uuid, $additionalPath),

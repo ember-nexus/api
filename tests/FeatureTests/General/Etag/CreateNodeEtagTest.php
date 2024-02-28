@@ -12,7 +12,7 @@ class CreateNodeEtagTest extends BaseRequestTestCase
     private const string UUID_DATA_4 = '1ef20009-1db9-4e74-a3d4-2de7ec475dde';
     private const string UUID_DATA_5 = '47016bbb-405a-49a1-9531-8d1efa4d5e0a';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
             sprintf('/%s%s', $uuid, $additionalPath),

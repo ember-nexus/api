@@ -121,7 +121,7 @@ class ElementManager
         return $this;
     }
 
-    public function getElement(UuidInterface $uuid): null|NodeElementInterface|RelationElementInterface
+    public function getElement(UuidInterface $uuid): NodeElementInterface|RelationElementInterface|null
     {
         $node = $this->getNode($uuid);
         if ($node) {
