@@ -224,7 +224,7 @@ RUN set -ex
 RUN apk update
 RUN apk add mercurial gcc g++ make pcre-dev openssl-dev
 RUN mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules
-RUN hg clone -u 1.31.1-1 https://hg.nginx.org/unit
+RUN hg clone -u 1.32.0-1 https://hg.nginx.org/unit
 RUN  cd unit \
     && NCPU="$(getconf _NPROCESSORS_ONLN)" \
     && CC_OPT="-fPIC" \
