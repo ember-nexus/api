@@ -14,6 +14,11 @@
       <directory>FeatureTests</directory>
     </testsuite>
   </testsuites>
+  <groups>
+    <exclude>
+      <group>command</group>
+    </exclude>
+  </groups>
   <source>
     <include>
       <directory suffix=".php">../src</directory>

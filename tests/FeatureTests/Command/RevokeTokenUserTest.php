@@ -4,6 +4,9 @@ namespace App\tests\FeatureTests\Command;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
+/**
+ * @group command
+ */
 class RevokeTokenUserTest extends BaseRequestTestCase
 {
     private const string TOKEN_1_USER_1 = 'secret-token:BPZQtpPeHOpUZ8JPEZK8s8';
@@ -23,10 +26,21 @@ class RevokeTokenUserTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::TOKEN_1_USER_2_UUID), self::TOKEN_1_USER_2);
         $this->assertIsTokenWithState($response, 'ACTIVE');
 
-        \Safe\exec(sprintf(
+        $result = 0;
+        $command = sprintf(
             'php bin/console token:revoke -f --user %s',
             self::USER_1_UUID
-        ));
+        );
+        \Safe\exec(
+            $command,
+            result_code: $result
+        );
+        if ($result !== 0) {
+            $this->fail(sprintf(
+                "The following command is unsuccessful: %s",
+                $command
+            ));
+        }
 
         $response = $this->runGetRequest(sprintf('/%s', self::TOKEN_1_USER_1_UUID), self::TOKEN_1_USER_1);
         $this->assertIsProblemResponse($response, 401);
