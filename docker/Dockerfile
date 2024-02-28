@@ -291,8 +291,7 @@ COPY --from=nginx_unit_builder /usr/lib/unit/ /usr/lib/unit/
 COPY --from=nginx_unit_builder /requirements.apt /requirements.apt
 COPY ./docker/nginx-unit/unit-entrypoint.sh /usr/local/bin/
 COPY ./docker/nginx-unit/unit.json /docker-entrypoint.d/unit.json
-COPY ./docker/supervisord/supervisord.conf /etc/supervisord.conf
-COPY ./docker/supervisord/docker-entrypoint.sh /usr/local/bin/
+COPY ./docker/docker-entrypoint.sh /usr/local/bin/
 #RUN ldconfig # this command seems to not work on alpine & image works without it?
 RUN set -x \
     && chmod +x /usr/local/bin/unit-entrypoint.sh \
@@ -305,7 +304,7 @@ RUN set -x \
     && addgroup --system unit \
     && adduser -D -S -G unit unit \
     && apk update \
-    && apk add curl supervisor $(cat /requirements.apt) \
+    && apk add curl $(cat /requirements.apt) \
     && rm -f /requirements.apt \
     && ln -sf /dev/stdout /var/log/unit.log
 
