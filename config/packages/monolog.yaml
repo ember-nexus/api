@@ -7,7 +7,7 @@ when@dev:
     handlers:
       main:
         type: stream
-        path: "%kernel.logs_dir%/log.log"
+        path: "%kernel.logs_dir%/dev.log"
         level: debug
         channels: ["!event", "!request"]
         formatter: monolog_json_formatter
@@ -27,7 +27,7 @@ when@test:
         channels: ["!event"]
       nested:
         type: stream
-        path: "%kernel.logs_dir%/log.log"
+        path: "%kernel.logs_dir%/test.log"
         level: debug
 
 when@prod:
@@ -41,7 +41,7 @@ when@prod:
         buffer_size: 50  # How many messages should be saved? Prevent memory leaks
       nested:
         type: stream
-        path: php://stderr
+        path: "php://stderr"
         level: debug
         formatter: monolog.formatter.json
       console:
@@ -50,5 +50,5 @@ when@prod:
         channels: ["!event", "!doctrine", "!deprecation"]
       deprecation:
         type: stream
-        path: php://stderr
+        path: "php://stderr"
         level: error

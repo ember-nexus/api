@@ -9,11 +9,8 @@ set -e
 #  exit 1
 #fi
 
-mkdir -p /var/www/html/var/logs
-touch /var/www/html/var/logs/log.log
-
 if [ -z "$@" ]; then
-  supervisord --nodaemon --configuration /etc/supervisord.conf
+  /usr/local/bin/unit-entrypoint.sh unitd --no-daemon --control unix:/var/run/control.unit.sock
 else
   exec "$@"
 fi
