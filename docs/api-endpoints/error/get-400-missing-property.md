@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /error/400/missing-property`
+# <span class="title-url"><span class="method-get">GET</span>` /error/400/missing-property`</span><span class="title-human">Get Details for Error 400 Missing Property Endpoint</span>
 
 ## Request Example
 

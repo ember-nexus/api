@@ -1,4 +1,4 @@
-# <span class="method-post">POST</span>` /search -` Search
+# <span class="title-url"><span class="method-post">POST</span>` /search`</span><span class="title-human">Search Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

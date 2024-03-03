@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /<uuid>/related -` Get Related
+# <span class="title-url"><span class="method-get">GET</span>` /<uuid>/related`</span><span class="title-human">Get Related Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /error/403/forbidden`
+# <span class="title-url"><span class="method-get">GET</span>` /error/403/forbidden`</span><span class="title-human">Get Details for Error 403 Forbidden Endpoint</span>
 
 ## Request Example
 

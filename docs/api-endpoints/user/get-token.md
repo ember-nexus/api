@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /token -` Get Token
+# <span class="title-url"><span class="method-get">GET</span>` /token`</span><span class="title-human">Get Token Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

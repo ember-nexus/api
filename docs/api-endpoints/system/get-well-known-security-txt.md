@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /.well-known/security.txt -` Get Well Known security.txt
+# <span class="title-url"><span class="method-get">GET</span>` /.well-known/security.txt`</span><span class="title-human">Get Well Known security.txt Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

@@ -1,4 +1,4 @@
-# <span class="method-post">POST</span>` /change-password -` Change Password
+# <span class="title-url"><span class="method-post">POST</span>` /change-password`</span><span class="title-human">Change Password Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

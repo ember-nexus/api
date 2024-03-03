@@ -1,4 +1,4 @@
-# <span class="method-post">POST</span>` /register -` Register New Account
+# <span class="title-url"><span class="method-post">POST</span>` /register`</span><span class="title-human">Register New Account Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

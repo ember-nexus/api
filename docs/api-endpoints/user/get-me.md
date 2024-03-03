@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /me -` Get Me
+# <span class="title-url"><span class="method-get">GET</span>` /me`</span><span class="title-human">Get Me Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

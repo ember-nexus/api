@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /error/404/not-found`
+# <span class="title-url"><span class="method-get">GET</span>` /error/404/not-found`</span><span class="title-human">Get Details for Error 404 Not Found Endpoint</span>
 
 ## Request Example
 

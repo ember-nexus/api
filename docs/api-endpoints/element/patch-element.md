@@ -1,4 +1,4 @@
-# <span class="method-patch">PATCH</span>` /<uuid> -` Update Element
+# <span class="title-url"><span class="method-patch">PATCH</span>` /<uuid>`</span><span class="title-human">Update Element Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

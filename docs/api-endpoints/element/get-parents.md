@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /<uuid>/parents -` Get Parents
+# <span class="title-url"><span class="method-get">GET</span>` /<uuid>/parents`</span><span class="title-human">Get Parents Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

@@ -1,4 +1,4 @@
-# <span class="method-delete">DELETE</span>` /<uuid> -` Delete Element
+# <span class="title-url"><span class="method-delete">DELETE</span>` /<uuid>`</span><span class="title-human">Delete Element Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->
