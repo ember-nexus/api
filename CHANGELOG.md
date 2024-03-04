@@ -5,11 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.3 - 2024-03-04
 ### Changed
-- Update NGINX Unit build steps in Dockerfile, replace Mercurial repo with new GitHub repo. Closes #261.
-- Streamline documentation, closes #263.
+- Update NGINX Unit build steps in Dockerfile, replace Mercurial repo with new GitHub repo. Closes [#261].
+- Streamline documentation, closes [#263].
+
 ### Removed
-- Remove supervisord and its dependencies like Python. Logs are directly sent to stderr. Closes #244.
+- Remove supervisord and its dependencies like Python. Logs are directly sent to stderr. Closes [#244].
 
 ## 0.1.2 - 2024-02-28
 ### Changed
