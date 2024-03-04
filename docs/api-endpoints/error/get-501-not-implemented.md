@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /error/501/not-implemented`
+# <span class="title-url"><span class="method-get">GET</span>` /error/501/not-implemented`</span><span class="title-human">Get Details for Error 501 Not Implemented Endpoint</span>
 
 ## Request Example
 

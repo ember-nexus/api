@@ -1,4 +1,4 @@
-# <span class="method-post">POST</span>` /token -` Create Token
+# <span class="title-url"><span class="method-post">POST</span>` /token`</span><span class="title-human">Create Token Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

@@ -66,6 +66,33 @@ td code {
   padding: 0 !important;
 }
 
+h1 {
+  line-height: 1.5;
+}
+
+.title-url {
+  display: inline-block;
+  margin-right: 0.3em;
+}
+
+.title-human {
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.title-human::before {
+  content: '-';
+  margin-right: 0.3em;
+  font-weight: 700 !important;
+  font-family: 'Fira Code', 'Roboto Mono', Monaco, courier, monospace !important;
+}
+
+a:hover .title-url,
+a:hover .title-human {
+  text-decoration: underline;
+  text-decoration-color: var(--ember-nexus-text-red);
+}
+
 table {
   display: table !important;
   width: 100%;

@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /error/400/incomplete-mutual-dependency`
+# <span class="title-url"><span class="method-get">GET</span>` /error/400/incomplete-mutual-dependency`</span><span class="title-human">Get Details for Error 400 Incomplete Mutual Dependency Endpoint</span>
 
 ## Request Example
 

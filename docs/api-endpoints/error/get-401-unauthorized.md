@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /error/401/unauthorized`
+# <span class="title-url"><span class="method-get">GET</span>` /error/401/unauthorized`</span><span class="title-human">Get Details for Error 401 Unauthorized Endpoint</span>
 
 ## Request Example
 

@@ -1,4 +1,4 @@
-# <span class="method-get">GET</span>` /<uuid> -` Get Element
+# <span class="title-url"><span class="method-get">GET</span>` /<uuid>`</span><span class="title-human">Get Element Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

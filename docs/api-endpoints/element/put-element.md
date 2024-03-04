@@ -1,4 +1,4 @@
-# <span class="method-put">PUT</span>` /<uuid> -` Replace Element
+# <span class="title-url"><span class="method-put">PUT</span>` /<uuid>`</span><span class="title-human">Replace Element Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->

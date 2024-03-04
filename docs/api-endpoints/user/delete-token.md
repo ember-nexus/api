@@ -1,4 +1,4 @@
-# <span class="method-delete">DELETE</span>` /token -` Delete Token
+# <span class="title-url"><span class="method-delete">DELETE</span>` /token`</span><span class="title-human">Delete Token Endpoint</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->
