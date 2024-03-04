@@ -2,6 +2,7 @@
 
 namespace App\Response;
 
+use App\Type\Etag;
 use Symfony\Component\HttpFoundation\JsonResponse as SymfonyJsonResponse;
 
 class JsonResponse extends SymfonyJsonResponse
@@ -22,5 +23,10 @@ class JsonResponse extends SymfonyJsonResponse
             ],
             $json
         );
+    }
+
+    public function setEtagFromEtagInstance(Etag $etag): static
+    {
+        return parent::setEtag((string) $etag);
     }
 }

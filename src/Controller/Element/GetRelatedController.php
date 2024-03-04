@@ -2,14 +2,15 @@
 
 namespace App\Controller\Element;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
-use App\Service\EtagService;
 use App\Type\AccessType;
 use App\Type\ElementType;
+use App\Type\EtagType;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,7 +25,6 @@ class GetRelatedController extends AbstractController
         private CollectionService $collectionService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private EtagService $etagService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
@@ -37,6 +37,7 @@ class GetRelatedController extends AbstractController
         ],
         methods: ['GET']
     )]
+    #[EndpointSupportsEtag(EtagType::RELATED_COLLECTION)]
     public function getRelated(string $uuid): Response
     {
         $centerUuid = UuidV4::fromString($uuid);
@@ -129,16 +130,6 @@ class GetRelatedController extends AbstractController
             }
         }
 
-        $response = $this->collectionService->buildCollectionFromUuids($nodeUuids, $relationUuids, $totalCount);
-
-        $etag = $this->etagService->getRelatedCollectionEtag($centerUuid);
-        if ($etag) {
-            $response->headers->set('Etag', sprintf(
-                '"%s"',
-                $etag
-            ));
-        }
-
-        return $response;
+        return $this->collectionService->buildCollectionFromUuids($nodeUuids, $relationUuids, $totalCount);
     }
 }

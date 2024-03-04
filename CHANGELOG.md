@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Refactor parts of the Etag generation in order to make implementation of #232 and #233 easier.
 
 ## 0.1.3 - 2024-03-04
 ### Changed

@@ -1,0 +1,11 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\Controller\EventListener\EtagControllerListener:
+    tags:
+      - name: kernel.event_listener
+        event: kernel.controller
+        method: 'onKernelController'

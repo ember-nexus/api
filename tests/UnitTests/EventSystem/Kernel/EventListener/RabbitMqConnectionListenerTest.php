@@ -2,7 +2,7 @@
 
 namespace App\tests\UnitTests\EventSystem\Kernel\EventListener;
 
-use App\EventSystem\Kernel\EventListener\RabbitMqConnectionListener;
+use App\EventSystem\Kernel\EventListener\EtagConnectionListener;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -15,7 +15,7 @@ class RabbitMqConnectionListenerTest extends TestCase
     {
         $amqpStreamConnection = $this->prophesize(AMQPStreamConnection::class);
         $amqpStreamConnection->close()->shouldBeCalledOnce()->willReturn();
-        $eventListener = new RabbitMqConnectionListener($amqpStreamConnection->reveal());
+        $eventListener = new EtagConnectionListener($amqpStreamConnection->reveal());
         $eventListener->onKernelTerminate();
     }
 }

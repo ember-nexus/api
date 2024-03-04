@@ -2,13 +2,14 @@
 
 namespace App\Controller\Element;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementResponseService;
-use App\Service\EtagService;
 use App\Type\AccessType;
+use App\Type\EtagType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +21,6 @@ class GetElementController extends AbstractController
         private ElementResponseService $elementResponseService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private EtagService $etagService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
     ) {
     }
@@ -33,6 +33,7 @@ class GetElementController extends AbstractController
         ],
         methods: ['GET']
     )]
+    #[EndpointSupportsEtag(EtagType::ELEMENT)]
     public function getElement(string $uuid): Response
     {
         $elementUuid = UuidV4::fromString($uuid);
@@ -42,16 +43,6 @@ class GetElementController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $response = $this->elementResponseService->buildElementResponseFromUuid($elementUuid);
-
-        $etag = $this->etagService->getElementEtag($elementUuid);
-        if ($etag) {
-            $response->headers->set('Etag', sprintf(
-                '"%s"',
-                $etag
-            ));
-        }
-
-        return $response;
+        return $this->elementResponseService->buildElementResponseFromUuid($elementUuid);
     }
 }

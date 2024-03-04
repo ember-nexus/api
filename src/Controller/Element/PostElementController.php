@@ -2,6 +2,7 @@
 
 namespace App\Controller\Element;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
@@ -13,6 +14,7 @@ use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
 use App\Type\AccessType;
 use App\Type\ElementType;
+use App\Type\EtagType;
 use App\Type\RelationElement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -43,6 +45,7 @@ class PostElementController extends AbstractController
         ],
         methods: ['POST']
     )]
+    #[EndpointSupportsEtag(EtagType::ELEMENT)]
     public function postElement(string $uuid, Request $request): Response
     {
         $parentElementId = UuidV4::fromString($uuid);

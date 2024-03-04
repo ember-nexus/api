@@ -2,6 +2,7 @@
 
 namespace App\Controller\Element;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
@@ -11,6 +12,7 @@ use App\Service\ElementManager;
 use App\Service\ResetElementPropertiesService;
 use App\Service\UpdateElementFromRawDataService;
 use App\Type\AccessType;
+use App\Type\EtagType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,6 +39,7 @@ class PutElementController extends AbstractController
         ],
         methods: ['PUT']
     )]
+    #[EndpointSupportsEtag(EtagType::ELEMENT)]
     public function putElement(string $uuid, Request $request): Response
     {
         $elementId = UuidV4::fromString($uuid);

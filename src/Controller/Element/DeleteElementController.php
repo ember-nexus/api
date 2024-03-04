@@ -2,6 +2,7 @@
 
 namespace App\Controller\Element;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
@@ -9,6 +10,7 @@ use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Type\AccessType;
+use App\Type\EtagType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,6 +34,7 @@ class DeleteElementController extends AbstractController
         ],
         methods: ['DELETE']
     )]
+    #[EndpointSupportsEtag(EtagType::ELEMENT)]
     public function deleteElement(string $uuid): Response
     {
         $elementUuid = UuidV4::fromString($uuid);
