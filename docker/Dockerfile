@@ -220,19 +220,23 @@ LABEL org.opencontainers.image.source="https://github.com/nginx/unit/blob/master
     org.opencontainers.image.title="Adapted nginx/unit:8.1" \
     org.opencontainers.image.description="Based on nginx/unit:8.1, updated to PHP 8.3 and rewritten to work on Alpine."
 
-RUN set -ex
-RUN apk update
-RUN apk add mercurial gcc g++ make pcre-dev openssl-dev
-RUN mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules
-RUN hg clone -u 1.32.0-1 https://hg.nginx.org/unit
-RUN  cd unit \
+RUN set -eux \
+    && apk update \
+    && apk add git gcc g++ make pcre-dev openssl-dev \
+    && mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules /usr/src/unit \
+    && cd /usr/src/unit \
+    && git clone --depth 1 -b 1.32.0-1 https://github.com/nginx/unit
+RUN set -eux \
+    && cd /usr/src/unit/unit \
     && NCPU="$(getconf _NPROCESSORS_ONLN)" \
     && CC_OPT="-fPIC" \
     && LD_OPT="-Wl,--as-needed" \
     && CONFIGURE_ARGS_MODULES="--prefix=/usr \
         --statedir=/var/lib/unit \
         --control=unix:/var/run/control.unit.sock \
+        --runstatedir=/var/run \
         --pid=/var/run/unit.pid \
+        --logdir=/var/log \
         --log=/var/log/unit.log \
         --tmpdir=/var/tmp \
         --user=unit \
@@ -250,6 +254,7 @@ RUN  cd unit \
     && ./configure $CONFIGURE_ARGS --cc-opt="$CC_OPT" --ld-opt="$LD_OPT" --modulesdir=/usr/lib/unit/modules \
     && make -j $NCPU unitd \
     && install -pm755 build/sbin/unitd /usr/sbin/unitd \
+    && /bin/true \
     && make clean \
     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/debug-modules --debug \
     && ./configure php \
@@ -257,10 +262,10 @@ RUN  cd unit \
     && make clean \
     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/modules \
     && ./configure php \
-    && make -j $NCPU php-install \
-    && cd ../ \
-    && rm -rf ./unit \
-    && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do dpkg-query -S $n; done | sed 's/^\([^:]\+\):.*$/\1/' | sort | uniq > /requirements.apt
+    && make -j $NCPU php-install
+RUN set -eux \
+    && cd \
+    && rm -rf /usr/src/unit
 
 
 
@@ -288,7 +293,6 @@ RUN apk add pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev \
 COPY --from=nginx_unit_builder /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=nginx_unit_builder /usr/sbin/unitd-debug /usr/sbin/unitd-debug
 COPY --from=nginx_unit_builder /usr/lib/unit/ /usr/lib/unit/
-COPY --from=nginx_unit_builder /requirements.apt /requirements.apt
 COPY ./docker/nginx-unit/unit-entrypoint.sh /usr/local/bin/
 COPY ./docker/nginx-unit/unit.json /docker-entrypoint.d/unit.json
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/
@@ -304,9 +308,8 @@ RUN set -x \
     && addgroup --system unit \
     && adduser -D -S -G unit unit \
     && apk update \
-    && apk add curl $(cat /requirements.apt) \
-    && rm -f /requirements.apt \
-    && ln -sf /dev/stdout /var/log/unit.log
+    && apk add curl \
+    && ln -sf /dev/stderr /var/log/unit.log
 
 STOPSIGNAL SIGTERM
 
