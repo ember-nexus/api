@@ -34,8 +34,10 @@ class LiveElementEtagEventListener
             ]
         );
 
-        $redisValue = $etag;
-        $this->redisClient->set($redisKey, $redisValue, 'EX', self::REDIS_ELEMENT_TTL_IN_SECONDS);
+        if ($etag) {
+            $redisValue = $etag;
+            $this->redisClient->set($redisKey, $redisValue, 'EX', self::REDIS_ELEMENT_TTL_IN_SECONDS);
+        }
 
         $event->setEtag($etag);
         $event->stopPropagation();

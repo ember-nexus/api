@@ -27,7 +27,6 @@ class EtagService
 
     public function setCurrentRequestEtagFromRequestAndEtagType(Request $request, EtagType $etagType): self
     {
-        $event = null;
         if (EtagType::INDEX_COLLECTION == $etagType) {
             $event = new IndexCollectionEtagEvent($this->authProvider->getUserUuid());
         } else {
@@ -48,8 +47,6 @@ class EtagService
                 case EtagType::RELATED_COLLECTION:
                     $event = new RelatedCollectionEtagEvent($requestUuid);
                     break;
-                default:
-                    throw new Exception('Reached unreachable statement');
             }
         }
 

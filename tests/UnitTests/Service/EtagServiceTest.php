@@ -7,110 +7,164 @@ use App\EventSystem\Etag\Event\ElementEtagEvent;
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
 use App\EventSystem\Etag\Event\ParentsCollectionEtagEvent;
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
+use App\Security\AuthProvider;
 use App\Service\EtagService;
 use App\Type\Etag;
+use App\Type\EtagType;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\HttpFoundation\Request;
 
 class EtagServiceTest extends TestCase
 {
     use ProphecyTrait;
 
-    public function testGetChildrenCollectionEtag(): void
+    public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeElement(): void
     {
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
-        $eventDispatcher->dispatch(Argument::type(ChildrenCollectionEtagEvent::class))->shouldBeCalledOnce()->will(function ($args) {
-            /**
-             * @var $event ChildrenCollectionEtagEvent
-             */
+        $self = $this;
+        $eventDispatcher->dispatch(Argument::type(ElementEtagEvent::class))->will(function ($args) use ($self) {
             $event = $args[0];
-            $event->setEtag(new Etag('syntheticEtag'));
+            /**
+             * @var ElementEtagEvent $event
+             */
+            $self->assertSame('224b322a-c2a1-4971-8b05-28af080d67f1', $event->getElementUuid()->toString());
+            $event->setEtag(new Etag('someEtag'));
+        })->shouldBeCalledTimes(1);
+        $authProvider = $this->prophesize(AuthProvider::class);
 
-            return $event;
-        });
+        $request = new Request(attributes: ['uuid' => '224b322a-c2a1-4971-8b05-28af080d67f1']);
 
-        $etagService = new EtagService($eventDispatcher->reveal());
+        $etagService = new EtagService(
+            $eventDispatcher->reveal(),
+            $authProvider->reveal()
+        );
 
-        $etag = $etagService->getChildrenCollectionEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', (string) $etag);
+        $returnedEtag = $etagService->setCurrentRequestEtagFromRequestAndEtagType($request, EtagType::ELEMENT);
+        $this->assertSame('someEtag', $returnedEtag->getCurrentRequestEtag()->getEtag());
     }
 
-    public function testGetParentsCollectionEtag(): void
+    public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeChildrenCollection(): void
     {
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
-        $eventDispatcher->dispatch(Argument::type(ParentsCollectionEtagEvent::class))->shouldBeCalledOnce()->will(function ($args) {
-            /**
-             * @var $event ParentsCollectionEtagEvent
-             */
+        $self = $this;
+        $eventDispatcher->dispatch(Argument::type(ChildrenCollectionEtagEvent::class))->will(function ($args) use ($self) {
             $event = $args[0];
-            $event->setEtag(new Etag('syntheticEtag'));
+            /**
+             * @var ChildrenCollectionEtagEvent $event
+             */
+            $self->assertSame('47d86985-68e0-4747-8921-33f3a9090549', $event->getParentUuid()->toString());
+            $event->setEtag(new Etag('someEtag'));
+        })->shouldBeCalledTimes(1);
+        $authProvider = $this->prophesize(AuthProvider::class);
 
-            return $event;
-        });
+        $request = new Request(attributes: ['uuid' => '47d86985-68e0-4747-8921-33f3a9090549']);
 
-        $etagService = new EtagService($eventDispatcher->reveal());
+        $etagService = new EtagService(
+            $eventDispatcher->reveal(),
+            $authProvider->reveal()
+        );
 
-        $etag = $etagService->getParentsCollectionEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', (string) $etag);
+        $returnedEtag = $etagService->setCurrentRequestEtagFromRequestAndEtagType($request, EtagType::CHILDREN_COLLECTION);
+        $this->assertSame('someEtag', $returnedEtag->getCurrentRequestEtag()->getEtag());
     }
 
-    public function testGetRelatedCollectionEtag(): void
+    public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeParentsCollection(): void
     {
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
-        $eventDispatcher->dispatch(Argument::type(RelatedCollectionEtagEvent::class))->shouldBeCalledOnce()->will(function ($args) {
-            /**
-             * @var $event RelatedCollectionEtagEvent
-             */
+        $self = $this;
+        $eventDispatcher->dispatch(Argument::type(ParentsCollectionEtagEvent::class))->will(function ($args) use ($self) {
             $event = $args[0];
-            $event->setEtag(new Etag('syntheticEtag'));
+            /**
+             * @var ParentsCollectionEtagEvent $event
+             */
+            $self->assertSame('685b5a01-f2d2-4764-9c69-3fd87c45d5b0', $event->getChildUuid()->toString());
+            $event->setEtag(new Etag('someEtag'));
+        })->shouldBeCalledTimes(1);
+        $authProvider = $this->prophesize(AuthProvider::class);
 
-            return $event;
-        });
+        $request = new Request(attributes: ['uuid' => '685b5a01-f2d2-4764-9c69-3fd87c45d5b0']);
 
-        $etagService = new EtagService($eventDispatcher->reveal());
+        $etagService = new EtagService(
+            $eventDispatcher->reveal(),
+            $authProvider->reveal()
+        );
 
-        $etag = $etagService->getRelatedCollectionEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', (string) $etag);
+        $returnedEtag = $etagService->setCurrentRequestEtagFromRequestAndEtagType($request, EtagType::PARENTS_COLLECTION);
+        $this->assertSame('someEtag', $returnedEtag->getCurrentRequestEtag()->getEtag());
     }
 
-    public function testGetIndexCollectionEtag(): void
+    public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeRelatedCollection(): void
     {
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
-        $eventDispatcher->dispatch(Argument::type(IndexCollectionEtagEvent::class))->shouldBeCalledOnce()->will(function ($args) {
-            /**
-             * @var $event IndexCollectionEtagEvent
-             */
+        $self = $this;
+        $eventDispatcher->dispatch(Argument::type(RelatedCollectionEtagEvent::class))->will(function ($args) use ($self) {
             $event = $args[0];
-            $event->setEtag(new Etag('syntheticEtag'));
+            /**
+             * @var RelatedCollectionEtagEvent $event
+             */
+            $self->assertSame('adfd47a3-7d25-4bdb-b546-f5744382d488', $event->getCenterUuid()->toString());
+            $event->setEtag(new Etag('someEtag'));
+        })->shouldBeCalledTimes(1);
+        $authProvider = $this->prophesize(AuthProvider::class);
 
-            return $event;
-        });
+        $request = new Request(attributes: ['uuid' => 'adfd47a3-7d25-4bdb-b546-f5744382d488']);
 
-        $etagService = new EtagService($eventDispatcher->reveal());
+        $etagService = new EtagService(
+            $eventDispatcher->reveal(),
+            $authProvider->reveal()
+        );
 
-        $etag = $etagService->getIndexCollectionEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', (string) $etag);
+        $returnedEtag = $etagService->setCurrentRequestEtagFromRequestAndEtagType($request, EtagType::RELATED_COLLECTION);
+        $this->assertSame('someEtag', $returnedEtag->getCurrentRequestEtag()->getEtag());
     }
 
-    public function testGetElementEtag(): void
+    public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeIndexCollection(): void
     {
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
-        $eventDispatcher->dispatch(Argument::type(ElementEtagEvent::class))->shouldBeCalledOnce()->will(function ($args) {
-            /**
-             * @var $event ElementEtagEvent
-             */
+        $self = $this;
+        $eventDispatcher->dispatch(Argument::type(IndexCollectionEtagEvent::class))->will(function ($args) use ($self) {
             $event = $args[0];
-            $event->setEtag(new Etag('syntheticEtag'));
+            /**
+             * @var IndexCollectionEtagEvent $event
+             */
+            $self->assertSame('405599eb-f72b-4505-9ad6-fabe458e9607', $event->getUserUuid()->toString());
+            $event->setEtag(new Etag('someEtag'));
+        })->shouldBeCalledTimes(1);
+        $authProvider = $this->prophesize(AuthProvider::class);
+        $authProvider->getUserUuid()->shouldBeCalledOnce()->willReturn(Uuid::fromString('405599eb-f72b-4505-9ad6-fabe458e9607'));
 
-            return $event;
-        });
+        $request = new Request(attributes: ['uuid' => '405599eb-f72b-4505-9ad6-fabe458e9607']);
 
-        $etagService = new EtagService($eventDispatcher->reveal());
+        $etagService = new EtagService(
+            $eventDispatcher->reveal(),
+            $authProvider->reveal()
+        );
 
-        $etag = $etagService->getElementEtag(Uuid::fromString('85f27fba-0152-4087-a88a-cb7c601d1f37'));
-        $this->assertSame('syntheticEtag', (string) $etag);
+        $returnedEtag = $etagService->setCurrentRequestEtagFromRequestAndEtagType($request, EtagType::INDEX_COLLECTION);
+        $this->assertSame('someEtag', $returnedEtag->getCurrentRequestEtag()->getEtag());
+    }
+
+    public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeElementAndRequestWithoutAttribute(): void
+    {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+        $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
+        $authProvider = $this->prophesize(AuthProvider::class);
+
+        $request = new Request();
+
+        $etagService = new EtagService(
+            $eventDispatcher->reveal(),
+            $authProvider->reveal()
+        );
+
+        $this->expectExceptionMessage('Route should have attribute uuid.');
+
+        $etagService->setCurrentRequestEtagFromRequestAndEtagType($request, EtagType::ELEMENT);
     }
 }

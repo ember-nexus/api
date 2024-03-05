@@ -184,10 +184,9 @@ class EtagCalculatorServiceTest extends TestCase
             $logger
         );
 
-        $this->expectExceptionMessage('Unable to find node or relation with id 224a787e-3b32-4822-8697-61047175505d.');
-
         // run service method
-        $etagCalculatorService->calculateElementEtag($uuid);
+        $etag = $etagCalculatorService->calculateElementEtag($uuid);
+        $this->assertNull($etag);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for element.'));
