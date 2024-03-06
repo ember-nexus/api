@@ -13,10 +13,10 @@ abstract class BaseRequestTestCase extends TestCase
      */
     private const array IGNORED_HEAD_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link', 'Date'];
 
-    public function runGetRequest(string $uri, ?string $token): ResponseInterface
+    public function runGetRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        $headRequest = $this->runRequest('HEAD', $uri, $token);
-        $getRequest = $this->runRequest('GET', $uri, $token);
+        $headRequest = $this->runRequest('HEAD', $uri, $token, headers: $headers);
+        $getRequest = $this->runRequest('GET', $uri, $token, headers: $headers);
 
         $headHeaders = $headRequest->getHeaders();
         $getHeaders = $getRequest->getHeaders();
@@ -96,7 +96,7 @@ abstract class BaseRequestTestCase extends TestCase
         return $this->runRequest('UNLOCK', $uri, $token);
     }
 
-    public function runRequest(string $method, string $uri, ?string $token = null, ?array $data = null): ResponseInterface
+    public function runRequest(string $method, string $uri, ?string $token = null, ?array $data = null, ?array $headers = []): ResponseInterface
     {
         $client = new Client([
             'base_uri' => $_ENV['API_DOMAIN'],
@@ -104,7 +104,7 @@ abstract class BaseRequestTestCase extends TestCase
         ]);
 
         $options = [
-            'headers' => [],
+            'headers' => $headers,
         ];
         if (null !== $token) {
             $options['headers']['Authorization'] = sprintf(
