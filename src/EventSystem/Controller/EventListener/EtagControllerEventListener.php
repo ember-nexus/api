@@ -6,7 +6,7 @@ use App\Attribute\EndpointSupportsEtag;
 use App\Service\EtagService;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
-class EtagControllerListener
+class EtagControllerEventListener
 {
     public function __construct(
         private EtagService $etagService

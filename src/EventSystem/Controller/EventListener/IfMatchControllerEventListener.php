@@ -8,7 +8,7 @@ use App\Service\EtagService;
 use App\Type\Etag;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
-class IfMatchControllerListener
+class IfMatchControllerEventListener
 {
     public function __construct(
         private EtagService $etagService,

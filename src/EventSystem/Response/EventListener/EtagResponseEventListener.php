@@ -7,7 +7,7 @@ use App\Response\ElementResponse;
 use App\Service\EtagService;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
-class EtagResponseListener
+class EtagResponseEventListener
 {
     public function __construct(
         private EtagService $etagService

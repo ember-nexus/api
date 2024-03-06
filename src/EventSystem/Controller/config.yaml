@@ -4,14 +4,14 @@ services:
     autowire: true
     autoconfigure: true
 
-  App\EventSystem\Controller\EventListener\EtagControllerListener:
+  App\EventSystem\Controller\EventListener\EtagControllerEventListener:
     tags:
       - name: kernel.event_listener
         event: kernel.controller
         method: 'onKernelController'
         priority: 256
 
-  App\EventSystem\Controller\EventListener\IfMatchControllerListener:
+  App\EventSystem\Controller\EventListener\IfMatchControllerEventListener:
     tags:
       - name: kernel.event_listener
         event: kernel.controller
