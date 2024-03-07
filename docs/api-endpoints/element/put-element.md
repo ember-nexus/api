@@ -20,10 +20,11 @@ This endpoint does not require parameters.
 
 <div class="table-request-headers">
 
-| Header          | Description                                                                                                       | Required | Default |
-|-----------------|-------------------------------------------------------------------------------------------------------------------|----------|---------|
-| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details.               | no       | -       |
-| `Content-Type`  | Can be used to explicitly define the content type of the uploaded data. If specified, must be `application/json`. | no       | -       |
+| Header          | Description                                                                                                                 | Required | Default |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details.                         | no       | -       |
+| `Content-Type`  | Can be used to explicitly define the content type of the uploaded data. If specified, must be `application/json`.           | no       | -       |
+| `If-Match`      | The `If-Match`-header can be used to make the `PUT` request conditional.<br />See [caching](/concepts/caching) for details. | no       | -       |
 
 </div>
 
@@ -111,7 +112,7 @@ Note that the UUID of the replaced element is written in the `Location`-header.
 
 Once the server receives such a request, it checks several things internally:
 
-<div id="graph-container-1" class="graph-container" style="height:1400px"></div>
+<div id="graph-container-1" class="graph-container" style="height:1600px"></div>
 
 <!-- panels:end -->
 
@@ -166,14 +167,17 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'noTokenAction', ...workflowStep, label: "use default anonymous\nuser for auth" },
     { id: 'checkTokenValidity', ...workflowDecision, label: 'is token valid?' },
     { id: 'checkRateLimit', ...workflowDecision, label: "does request exceed\nrate limit?" },
+    { id: 'checkIfMatchHeaderExists', ...workflowDecision, label: "does request contain\nIf-Match header?" },
+    { id: 'checkIfMatchHeaderMatches', ...workflowDecision, label: "does If-Match\nmatch ETag?" },
     { id: 'checkAccess', ...workflowDecision, label: "has user UPDATE access?" },
     { id: 'checkExistence', ...workflowDecision, label: "does element exist?" },
     { id: 'resetProperties', ...workflowStep, label: "reset properties" },
     { id: 'setNewProperties', ...workflowStep, label: "set new properties" },
     { id: 'flush', ...workflowStep, label: "flush" },
-    { id: 'error404', ...workflowEndError, label: "return 404" },
-    { id: 'error401', ...workflowEndError, label: "return 401" },
     { id: 'success204', ...workflowEndSuccess , label: "return 204"},
+    { id: 'error401', ...workflowEndError, label: "return 401" },
+    { id: 'error404', ...workflowEndError, label: "return 404" },
+    { id: 'error412', ...workflowEndError, label: 'return 412' },
     { id: 'error429', ...workflowEndError, label: 'return 429' },
   ],
   edges: [
@@ -182,8 +186,12 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkToken', target: 'checkTokenValidity', label: 'yes' },
     { source: 'checkTokenValidity', target: 'checkRateLimit', label: 'yes' },
     { source: 'checkTokenValidity', target: 'error401', label: 'no' },
-    { source: 'checkRateLimit', target: 'checkAccess', label: 'no' },
+    { source: 'checkRateLimit', target: 'checkIfMatchHeaderExists', label: 'no' },
     { source: 'checkRateLimit', target: 'error429', label: 'yes' },
+    { source: 'checkIfMatchHeaderExists', target: 'checkAccess', label: 'no' },
+    { source: 'checkIfMatchHeaderExists', target: 'checkIfMatchHeaderMatches', label: 'yes' },
+    { source: 'checkIfMatchHeaderMatches', target: 'checkAccess', label: 'yes' },
+    { source: 'checkIfMatchHeaderMatches', target: 'error412', label: 'no' },
     { source: 'noTokenAction', target: 'checkRateLimit', label: '' },
     { source: 'checkAccess', target: 'checkExistence', label: 'yes' },
     { source: 'checkAccess', target: 'error404', label: 'no' },

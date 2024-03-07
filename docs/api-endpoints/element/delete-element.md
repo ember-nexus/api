@@ -17,9 +17,10 @@ This endpoint does not require parameters.
 
 <div class="table-request-headers">
 
-| Header          | Description                                                                                                       | Required | Default |
-|-----------------|-------------------------------------------------------------------------------------------------------------------|----------|---------|
-| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details.               | no       | -       |
+| Header          | Description                                                                                                                    | Required | Default |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details.                            | no       | -       |
+| `If-Match`      | The `If-Match`-header can be used to make the `DELETE` request conditional.<br />See [caching](/concepts/caching) for details. | no       | -       |
 
 </div>
 
@@ -89,7 +90,7 @@ element.
 
 Once the server receives such a request, it checks several things internally:
 
-<div id="graph-container-1" class="graph-container" style="height:1200px"></div>
+<div id="graph-container-1" class="graph-container" style="height:1400px"></div>
 
 <!-- panels:end -->
 
@@ -144,22 +145,29 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'noTokenAction', ...workflowStep, label: "use default anonymous\nuser for auth" },
     { id: 'checkTokenValidity', ...workflowDecision, label: 'is token valid?' },
     { id: 'checkRateLimit', ...workflowDecision, label: "does request exceed\nrate limit?" },
+    { id: 'checkIfMatchHeaderExists', ...workflowDecision, label: "does request contain\nIf-Match header?" },
+    { id: 'checkIfMatchHeaderMatches', ...workflowDecision, label: "does If-Match\nmatch ETag?" },
     { id: 'checkExistence', ...workflowDecision, label: 'does element exist?' },
     { id: 'checkAccess', ...workflowDecision, label: 'has user permission\nto delete element?' },
     { id: 'deleteElement', ...workflowStep, label: 'delete element' },
     { id: 'error401', ...workflowEndError, label: "return 401" },
     { id: 'error404', ...workflowEndError, label: "return 404" },
+    { id: 'error412', ...workflowEndError, label: 'return 412' },
     { id: 'error429', ...workflowEndError, label: 'return 429' },
     { id: 'success204', ...workflowEndSuccess , label: "return 204"},
   ],
   edges: [
     { source: 'init', target: 'checkToken', label: '' },
-    { source: 'checkToken', target: 'checkTokenValidity', label: 'yes' },
     { source: 'checkToken', target: 'noTokenAction', label: 'no' },
+    { source: 'checkToken', target: 'checkTokenValidity', label: 'yes' },
     { source: 'checkTokenValidity', target: 'checkRateLimit', label: 'yes' },
     { source: 'checkTokenValidity', target: 'error401', label: 'no' },
-    { source: 'checkRateLimit', target: 'checkExistence', label: 'no' },
+    { source: 'checkRateLimit', target: 'checkIfMatchHeaderExists', label: 'no' },
     { source: 'checkRateLimit', target: 'error429', label: 'yes' },
+    { source: 'checkIfMatchHeaderExists', target: 'checkExistence', label: 'no' },
+    { source: 'checkIfMatchHeaderExists', target: 'checkIfMatchHeaderMatches', label: 'yes' },
+    { source: 'checkIfMatchHeaderMatches', target: 'checkExistence', label: 'yes' },
+    { source: 'checkIfMatchHeaderMatches', target: 'error412', label: 'no' },
     { source: 'checkExistence', target: 'checkAccess', label: 'yes' },
     { source: 'checkExistence', target: 'error404', label: 'no' },
     { source: 'checkAccess', target: 'deleteElement', label: 'yes' },

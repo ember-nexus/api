@@ -2,7 +2,6 @@
 
 namespace App\Controller\Element;
 
-use App\Attribute\EndpointSupportsEtag;
 use App\Contract\NodeElementInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
@@ -13,7 +12,6 @@ use App\Security\AuthProvider;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
 use App\Type\AccessType;
-use App\Type\EtagType;
 use App\Type\RelationElement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,7 +43,6 @@ class PostIndexController extends AbstractController
         name: 'post-index',
         methods: ['POST']
     )]
-    #[EndpointSupportsEtag(EtagType::INDEX_COLLECTION)]
     public function postIndex(Request $request): Response
     {
         $userId = $this->authProvider->getUserUuid();
