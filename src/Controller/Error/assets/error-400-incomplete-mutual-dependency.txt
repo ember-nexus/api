@@ -5,3 +5,5 @@
 
  Link to the documentation: https://ember-nexus.github.io/api
 
+ Link to http.dev's explanation of the 400 error code: https://http.dev/400
+
