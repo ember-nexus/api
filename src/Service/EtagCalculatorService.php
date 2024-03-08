@@ -22,7 +22,7 @@ class EtagCalculatorService
     ) {
     }
 
-    public function calculateElementEtag(UuidInterface $elementUuid): Etag
+    public function calculateElementEtag(UuidInterface $elementUuid): ?Etag
     {
         $this->logger->debug(
             'Calculating Etag for element.',
@@ -43,7 +43,7 @@ class EtagCalculatorService
         );
         $updated = $result[0]['node.updated'] ?? $result[0]['relation.updated'] ?? null;
         if (null === $updated) {
-            throw new Exception(sprintf('Unable to find node or relation with id %s.', $elementUuid->toString()));
+            return null;
         }
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());

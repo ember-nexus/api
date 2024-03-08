@@ -1,0 +1,6 @@
+ Error 412 - Precondition Failed
+
+ Precondition does not match.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+

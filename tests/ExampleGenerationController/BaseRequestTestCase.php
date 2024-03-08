@@ -9,7 +9,7 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
     /**
      * @var string[] IGNORED_HEADERS
      */
-    private const array IGNORED_HEADERS = ['Date', 'Etag', 'Location'];
+    private const array IGNORED_HEADERS = ['Date', 'ETag', 'Location'];
 
     /**
      * @var string[] REMOVED_HEADERS

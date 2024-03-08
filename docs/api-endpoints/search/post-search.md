@@ -318,7 +318,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'combineSearchQueries', target: 'loadElementData', label: '' },
     { source: 'loadElementData', target: 'success200' },
     { source: 'checkElementAccess', target: 'error404', label: 'no' },
-    { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
+    { source: 'noTokenAction', target: 'checkRateLimit', label: '' }
   ],
 }, 'TB');
 </script>

@@ -1,0 +1,29 @@
+<?php
+
+namespace App\EventSystem\Response\EventListener;
+
+use App\Response\CollectionResponse;
+use App\Response\ElementResponse;
+use App\Service\EtagService;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+
+class EtagResponseEventListener
+{
+    public function __construct(
+        private EtagService $etagService
+    ) {
+    }
+
+    public function onKernelResponse(ResponseEvent $event): void
+    {
+        $response = $event->getResponse();
+        if (!($response instanceof CollectionResponse || $response instanceof ElementResponse)) {
+            return;
+        }
+        $etag = $this->etagService->getCurrentRequestEtag();
+        if (null === $etag) {
+            return;
+        }
+        $response->setEtagFromEtagInstance($etag);
+    }
+}

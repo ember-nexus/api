@@ -254,7 +254,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'createOwns', target: 'createCreated' },
     { source: 'createCreated', target: 'createAndFlush' },
     { source: 'createAndFlush', target: 'success204' },
-    { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
+    { source: 'noTokenAction', target: 'checkRateLimit', label: '' }
   ],
 }, 'TB');
 </script>

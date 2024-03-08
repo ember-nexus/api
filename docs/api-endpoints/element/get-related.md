@@ -22,9 +22,10 @@ parents and children.
 
 <div class="table-request-headers">
 
-| Header          | Description                                                                                         | Required | Default |
-|-----------------|-----------------------------------------------------------------------------------------------------|----------|---------|
-| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details. | no       | -       |
+| Header          | Description                                                                                                                | Required | Default |
+|-----------------|----------------------------------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details.                        | no       | -       |
+| `If-Match`      | The `If-Match`-header can be used to make the `GET` request conditional.<br />See [caching](/concepts/caching) for details. | no       | -       |
 
 </div>
 
@@ -34,7 +35,7 @@ parents and children.
 
 | Header | Description                                                                                                                                                          | Default |
 | ------ |----------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------- |
-| `Etag` | The `Etag`, short for "entity tag", is used to identify a particular version of the element for caching purposes.<br />See [caching](/concepts/caching) for details. | -       |
+| `ETag` | The `ETag`, short for "entity tag", is used to identify a particular version of the element for caching purposes.<br />See [caching](/concepts/caching) for details. | -       |
 
 </div>
 
@@ -98,7 +99,7 @@ This error can only be thrown if the token is invalid or if there is no default 
 
 Once the server receives such a request, it checks several things internally:
 
-<div id="graph-container-1" class="graph-container" style="height:1200px"></div>
+<div id="graph-container-1" class="graph-container" style="height:1400px"></div>
 
 <!-- panels:end -->
 
@@ -153,31 +154,38 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'noTokenAction', ...workflowStep, label: "use default anonymous\nuser for auth" },
     { id: 'checkTokenValidity', ...workflowDecision, label: 'is token valid?' },
     { id: 'checkRateLimit', ...workflowDecision, label: "does request exceed\nrate limit?" },
+    { id: 'checkIfMatchHeaderExists', ...workflowDecision, label: "does request contain\nIf-Match header?" },
+    { id: 'checkIfMatchHeaderMatches', ...workflowDecision, label: "does If-Match\nmatch ETag?" },
     { id: 'checkElementExistence', ...workflowDecision, label: "does element exist?" },
     { id: 'checkRelation', ...workflowDecision, label: "is element relation?" },
     { id: 'checkAccess', ...workflowDecision, label: "has user access?" },
     { id: 'loadElementsData', ...workflowStep, label: 'load related' },
+    { id: 'success200', ...workflowEndSuccess , label: "return 200"},
     { id: 'error401', ...workflowEndError, label: "return 401" },
     { id: 'error404', ...workflowEndError, label: "return 404" },
+    { id: 'error412', ...workflowEndError, label: 'return 412' },
     { id: 'error429', ...workflowEndError, label: 'return 429' },
-    { id: 'success200', ...workflowEndSuccess , label: "return 200"},
   ],
   edges: [
     { source: 'init', target: 'checkToken', label: '' },
-    { source: 'checkToken', target: 'checkTokenValidity', label: 'yes' },
     { source: 'checkToken', target: 'noTokenAction', label: 'no' },
+    { source: 'checkToken', target: 'checkTokenValidity', label: 'yes' },
     { source: 'checkTokenValidity', target: 'checkRateLimit', label: 'yes' },
     { source: 'checkTokenValidity', target: 'error401', label: 'no' },
-    { source: 'checkRateLimit', target: 'checkElementExistence', label: 'no' },
+    { source: 'checkRateLimit', target: 'checkIfMatchHeaderExists', label: 'no' },
     { source: 'checkRateLimit', target: 'error429', label: 'yes' },
+    { source: 'checkIfMatchHeaderExists', target: 'checkElementExistence', label: 'no' },
+    { source: 'checkIfMatchHeaderExists', target: 'checkIfMatchHeaderMatches', label: 'yes' },
+    { source: 'checkIfMatchHeaderMatches', target: 'checkElementExistence', label: 'yes' },
+    { source: 'checkIfMatchHeaderMatches', target: 'error412', label: 'no' },
     { source: 'checkElementExistence', target: 'checkRelation', label: 'yes' },
     { source: 'checkElementExistence', target: 'error404', label: 'no' },
-    { source: 'checkRelation', target: 'error404', label: 'yes' },
     { source: 'checkRelation', target: 'checkAccess', label: 'no' },
+    { source: 'checkRelation', target: 'error404', label: 'yes' },
     { source: 'checkAccess', target: 'loadElementsData', label: 'yes' },
     { source: 'checkAccess', target: 'error404', label: 'no' },
     { source: 'loadElementsData', target: 'success200' },
-    { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
+    { source: 'noTokenAction', target: 'checkRateLimit', label: '' }
   ],
 }, 'TB');
 </script>
