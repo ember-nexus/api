@@ -79,4 +79,27 @@ class GetRelatedTest extends BaseRequestTestCase
             ]
         );
     }
+
+    public function testGetRelatedFailure412(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
+        $this->assertIsProblemResponse($response, 412);
+        $documentationHeadersPath = 'docs/api-endpoints/element/get-related/412-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/get-related/412-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response,
+            true,
+            [
+                'created',
+                'updated',
+            ]
+        );
+    }
 }

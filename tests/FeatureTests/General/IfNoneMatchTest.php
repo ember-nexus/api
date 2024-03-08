@@ -4,13 +4,16 @@ namespace App\tests\FeatureTests\General;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class IfMatchTest extends BaseRequestTestCase
+/**
+ * @group test
+ */
+class IfNoneMatchTest extends BaseRequestTestCase
 {
-    private const string TOKEN = 'secret-token:M3WHIDj4q62EY0XiZFMLnv';
-    private const string UUID_DATA = '35cd3b18-0d0c-4e98-876e-898b930797f2';
-    private const string UUID_PARENT = 'e94ebb96-8cca-49eb-a214-ba73a72abba0';
-    private const string UUID_CHILD = 'ad966733-6cfb-427b-8661-8207a58bdc7f';
-    private const string UUID_RELATED = '1647af8f-2f6a-46de-ab8a-3f1a740761f3';
+    private const string TOKEN = 'secret-token:RRq4WsomBeTH0AAa7Jmi4k';
+    private const string UUID_DATA = '88d75ef3-8b27-4519-af9a-baa5dc2907db';
+    private const string UUID_PARENT = '17370748-35e2-41f7-ae9b-66be353b5a90';
+    private const string UUID_CHILD = 'f621c1b9-1d3f-4a9c-999c-99d1edcc9c6f';
+    private const string UUID_RELATED = 'b576e116-f5f1-4106-92e6-1547b8131108';
 
     private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
     {
@@ -28,7 +31,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchElementNode(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_DATA, '', '"6JM8JahrCeu"');
+        $this->testEtagOfElement(self::TOKEN, self::UUID_DATA, '', '"ROiR1100cKu"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -46,7 +49,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"6JM8JahrCeu"',
+                'If-None-Match' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsNodeResponse($response, 'Data');
@@ -58,7 +61,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"etagDoesNotExist"',
+                'If-None-Match' => '"ROiR1100cKu"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -73,7 +76,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'if-match' => '"6JM8JahrCeu"',
+                'if-none-match' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsNodeResponse($response, 'Data');
@@ -85,7 +88,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'if-match' => '"etagDoesNotExist"',
+                'if-none-match' => '"ROiR1100cKu"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -96,7 +99,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'IF-MATCH' => '"6JM8JahrCeu"',
+                'IF-NONE-MATCH' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsNodeResponse($response, 'Data');
@@ -108,7 +111,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'IF-MATCH' => '"etagDoesNotExist"',
+                'IF-NONE-MATCH' => '"ROiR1100cKu"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -116,7 +119,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchElementRelation(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_RELATED, '', '"fMmIm5Rb9kp"');
+        $this->testEtagOfElement(self::TOKEN, self::UUID_RELATED, '', '"IZK4tgD1OhG"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -134,7 +137,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"fMmIm5Rb9kp"',
+                'If-None-Match' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsNodeResponse($response, 'RELATED');
@@ -146,7 +149,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"etagDoesNotExist"',
+                'If-None-Match' => '"IZK4tgD1OhG"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -154,7 +157,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchIndex(): void
     {
-        $this->testEtagOfElement(self::TOKEN, '', '', '"ZWkfjHF1QO1"');
+        $this->testEtagOfElement(self::TOKEN, '', '', '"VFHTCT94KoT"');
 
         $response = $this->runGetRequest('/', self::TOKEN);
         $this->assertIsCollectionResponse($response, 2, 0);
@@ -163,7 +166,7 @@ class IfMatchTest extends BaseRequestTestCase
             '/',
             self::TOKEN,
             [
-                'If-Match' => '"ZWkfjHF1QO1"',
+                'If-None-Match' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsCollectionResponse($response, 2, 0);
@@ -172,7 +175,7 @@ class IfMatchTest extends BaseRequestTestCase
             '/',
             self::TOKEN,
             [
-                'If-Match' => '"etagDoesNotExist"',
+                'If-None-Match' => '"VFHTCT94KoT"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -180,7 +183,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchChildren(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_PARENT, '/children', '"V3s5O8medDn"');
+        $this->testEtagOfElement(self::TOKEN, self::UUID_PARENT, '/children', '"d344gmYJeeQ"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -198,7 +201,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"V3s5O8medDn"',
+                'If-None-Match' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsCollectionResponse($response, 1, 1);
@@ -210,7 +213,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"etagDoesNotExist"',
+                'If-None-Match' => '"d344gmYJeeQ"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -218,7 +221,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchParents(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_CHILD, '/parents', '"If6HLZuIreW"');
+        $this->testEtagOfElement(self::TOKEN, self::UUID_CHILD, '/parents', '"ZGUcWBYHppR"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -236,7 +239,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"If6HLZuIreW"',
+                'If-None-Match' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsCollectionResponse($response, 1, 1);
@@ -248,7 +251,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"etagDoesNotExist"',
+                'If-None-Match' => '"ZGUcWBYHppR"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -256,7 +259,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchRelated(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_PARENT, '/related', '"5DkIZtvdg3q"');
+        $this->testEtagOfElement(self::TOKEN, self::UUID_PARENT, '/related', '"TVPsbpcCAeU"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -274,7 +277,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"5DkIZtvdg3q"',
+                'If-None-Match' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsCollectionResponse($response, 3, 3);
@@ -286,7 +289,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"etagDoesNotExist"',
+                'If-None-Match' => '"TVPsbpcCAeU"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -303,7 +306,7 @@ class IfMatchTest extends BaseRequestTestCase
         );
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
-        $this->assertSame('"6JM8JahrCeu"', $etag);
+        $this->assertSame('"ROiR1100cKu"', $etag);
 
         $response = $this->runPatchRequest(
             sprintf(
@@ -315,7 +318,7 @@ class IfMatchTest extends BaseRequestTestCase
                 'new' => 'data',
             ],
             [
-                'If-Match' => '"wrongEtag"',
+                'If-None-Match' => '"ROiR1100cKu"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -330,7 +333,7 @@ class IfMatchTest extends BaseRequestTestCase
                 'new' => 'data',
             ],
             [
-                'If-Match' => '"6JM8JahrCeu"',
+                'If-None-Match' => '"wrongEtag"',
             ]
         );
         $this->assertNoContentResponse($response);
@@ -359,7 +362,7 @@ class IfMatchTest extends BaseRequestTestCase
         );
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
-        $this->assertSame('"aKq8GOPALf"', $etag);
+        $this->assertSame('"QIDRBlpmjG4"', $etag);
 
         $response = $this->runPutRequest(
             sprintf(
@@ -369,11 +372,11 @@ class IfMatchTest extends BaseRequestTestCase
             self::TOKEN,
             [
                 'new' => 'data',
-                'scenario' => 'general.if-match',
+                'scenario' => 'general.if-None-match',
                 'name' => 'Child',
             ],
             [
-                'If-Match' => '"wrongEtag"',
+                'If-None-Match' => '"QIDRBlpmjG4"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -386,11 +389,11 @@ class IfMatchTest extends BaseRequestTestCase
             self::TOKEN,
             [
                 'new' => 'data',
-                'scenario' => 'general.if-match',
+                'scenario' => 'general.if-none-match',
                 'name' => 'Child',
             ],
             [
-                'If-Match' => '"aKq8GOPALf"',
+                'If-None-Match' => '"wrongEtag"',
             ]
         );
         $this->assertNoContentResponse($response);
@@ -403,7 +406,7 @@ class IfMatchTest extends BaseRequestTestCase
             self::TOKEN,
             [
                 'new' => 'data',
-                'scenario' => 'general.if-match',
+                'scenario' => 'general.if-none-match',
                 'name' => 'Child',
             ],
         );
@@ -421,7 +424,7 @@ class IfMatchTest extends BaseRequestTestCase
         );
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
-        $this->assertSame('"VaJ7FG60f3R"', $etag);
+        $this->assertSame('"EGZLT62PpEk"', $etag);
 
         $response = $this->runDeleteRequest(
             sprintf(
@@ -430,7 +433,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"wrongEtag"',
+                'If-None-Match' => '"EGZLT62PpEk"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -442,7 +445,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"VaJ7FG60f3R"',
+                'If-None-Match' => '"wrongEtag"',
             ]
         );
         $this->assertNoContentResponse($response);

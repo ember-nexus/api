@@ -94,6 +94,18 @@ Note that the UUID of the replaced element is written in the `Location`-header.
 
 [Response Body](./put-element/401-response-body.json ':include :type=code problem+json')
 
+### **🔴 Error 412**
+
+Error 412 is thrown if the request header `If-Match` or `If-None-Match` is present and their precondition fails.
+
+<div class="code-title auto-refresh">Response Headers</div>
+
+[Response Body](./delete-element/412-response-header.txt ':include :type=code')
+
+<div class="code-title auto-refresh">Response Body</div>
+
+[Response Body](./delete-element/412-response-body.json ':include :type=code problem+json')
+
 ### **🔴 Error 429**
 
 <div class="code-title">Response Headers</div>
