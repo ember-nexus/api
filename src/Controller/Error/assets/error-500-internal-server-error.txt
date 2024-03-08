@@ -1,0 +1,11 @@
+ Error 500 - Internal Server Error
+
+ The server has some internal problem. You can try to repeat your request at a later time.
+ Should the problem persist, contact this site's administrator.
+
+ As an administrator, you should be able to find the cause in the server's logs.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+
+ Link to http.dev's explanation of the 500 error code: https://http.dev/500
+
