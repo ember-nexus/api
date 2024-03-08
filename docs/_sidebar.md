@@ -68,6 +68,7 @@
     - [<span class="method-get">GET</span>` /error/403/forbidden -` Get Details for Error 403 Forbidden Endpoint](/api-endpoints/error/get-403-forbidden)
     - [<span class="method-get">GET</span>` /error/404/not-found -` Get Details for Error 404 Not Found Endpoint](/api-endpoints/error/get-404-not-found)
     - [<span class="method-get">GET</span>` /error/412/precondition-failed -` Get Details for Error 412 Precondition Failed Endpoint](/api-endpoints/error/get-412-precondition-failed)
+    - [<span class="method-get">GET</span>` /error/500/internal-server-error -` Get Details for Error 500 Internal Server Error Endpoint](/api-endpoints/error/get-500-internal-server-error)
     - [<span class="method-get">GET</span>` /error/501/not-implemented -` Get Details for Error 501 Not Implemented Endpoint](/api-endpoints/error/get-501-not-implemented)
 
 - Commands
