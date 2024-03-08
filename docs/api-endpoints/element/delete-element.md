@@ -173,7 +173,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkAccess', target: 'deleteElement', label: 'yes' },
     { source: 'checkAccess', target: 'error404', label: 'no' },
     { source: 'deleteElement', target: 'success204' },
-    { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
+    { source: 'noTokenAction', target: 'checkRateLimit', label: '' }
   ],
 }, 'TB');
 </script>

@@ -45,7 +45,7 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_DATA
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"6JM8JahrCeu"',
             ]
         );
@@ -57,8 +57,58 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_DATA
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"etagDoesNotExist"',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 412);
+    }
+
+    public function testIfMatchDifferentHeaderKeyCasing(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf(
+                '%s',
+                self::UUID_DATA
+            ),
+            self::TOKEN,
+            [
+                'if-match' => '"6JM8JahrCeu"',
+            ]
+        );
+        $this->assertIsNodeResponse($response, 'Data');
+
+        $response = $this->runGetRequest(
+            sprintf(
+                '%s',
+                self::UUID_DATA
+            ),
+            self::TOKEN,
+            [
+                'if-match' => '"etagDoesNotExist"',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 412);
+        $response = $this->runGetRequest(
+            sprintf(
+                '%s',
+                self::UUID_DATA
+            ),
+            self::TOKEN,
+            [
+                'IF-MATCH' => '"6JM8JahrCeu"',
+            ]
+        );
+        $this->assertIsNodeResponse($response, 'Data');
+
+        $response = $this->runGetRequest(
+            sprintf(
+                '%s',
+                self::UUID_DATA
+            ),
+            self::TOKEN,
+            [
+                'IF-MATCH' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
@@ -83,7 +133,7 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_RELATED
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"fMmIm5Rb9kp"',
             ]
         );
@@ -95,7 +145,7 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_RELATED
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"etagDoesNotExist"',
             ]
         );
@@ -112,7 +162,7 @@ class IfMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             '/',
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"ZWkfjHF1QO1"',
             ]
         );
@@ -121,7 +171,7 @@ class IfMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             '/',
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"etagDoesNotExist"',
             ]
         );
@@ -147,7 +197,7 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_PARENT
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"V3s5O8medDn"',
             ]
         );
@@ -159,7 +209,7 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_PARENT
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"etagDoesNotExist"',
             ]
         );
@@ -185,7 +235,7 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_CHILD
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"If6HLZuIreW"',
             ]
         );
@@ -197,7 +247,7 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_CHILD
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"etagDoesNotExist"',
             ]
         );
@@ -223,7 +273,7 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_PARENT
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"5DkIZtvdg3q"',
             ]
         );
@@ -235,10 +285,166 @@ class IfMatchTest extends BaseRequestTestCase
                 self::UUID_CHILD
             ),
             self::TOKEN,
-            headers: [
+            [
                 'If-Match' => '"etagDoesNotExist"',
             ]
         );
         $this->assertIsProblemResponse($response, 412);
+    }
+
+    public function testEtagIfMatchWithPatchElement(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf(
+                '%s',
+                self::UUID_DATA
+            ),
+            self::TOKEN
+        );
+        $this->assertIsNodeResponse($response, 'Data');
+        $etag = $response->getHeader('ETag')[0];
+        $this->assertSame('"6JM8JahrCeu"', $etag);
+
+        $response = $this->runPatchRequest(
+            sprintf(
+                '%s',
+                self::UUID_DATA
+            ),
+            self::TOKEN,
+            [
+                'new' => 'data',
+            ],
+            [
+                'If-Match' => '"wrongEtag"',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 412);
+
+        $response = $this->runPatchRequest(
+            sprintf(
+                '%s',
+                self::UUID_DATA
+            ),
+            self::TOKEN,
+            [
+                'new' => 'data',
+            ],
+            [
+                'If-Match' => '"6JM8JahrCeu"',
+            ]
+        );
+        $this->assertNoContentResponse($response);
+
+        $response = $this->runPatchRequest(
+            sprintf(
+                '%s',
+                self::UUID_DATA
+            ),
+            self::TOKEN,
+            [
+                'new' => 'data 2',
+            ],
+        );
+        $this->assertNoContentResponse($response);
+    }
+
+    public function testEtagIfMatchWithPutElement(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf(
+                '%s',
+                self::UUID_CHILD
+            ),
+            self::TOKEN
+        );
+        $this->assertIsNodeResponse($response, 'Data');
+        $etag = $response->getHeader('ETag')[0];
+        $this->assertSame('"aKq8GOPALf"', $etag);
+
+        $response = $this->runPutRequest(
+            sprintf(
+                '%s',
+                self::UUID_CHILD
+            ),
+            self::TOKEN,
+            [
+                'new' => 'data',
+                'scenario' => 'general.if-match',
+                'name' => 'Child',
+            ],
+            [
+                'If-Match' => '"wrongEtag"',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 412);
+
+        $response = $this->runPutRequest(
+            sprintf(
+                '%s',
+                self::UUID_CHILD
+            ),
+            self::TOKEN,
+            [
+                'new' => 'data',
+                'scenario' => 'general.if-match',
+                'name' => 'Child',
+            ],
+            [
+                'If-Match' => '"aKq8GOPALf"',
+            ]
+        );
+        $this->assertNoContentResponse($response);
+
+        $response = $this->runPutRequest(
+            sprintf(
+                '%s',
+                self::UUID_CHILD
+            ),
+            self::TOKEN,
+            [
+                'new' => 'data',
+                'scenario' => 'general.if-match',
+                'name' => 'Child',
+            ],
+        );
+        $this->assertNoContentResponse($response);
+    }
+
+    public function testEtagIfMatchWithDeleteElement(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf(
+                '%s',
+                self::UUID_PARENT
+            ),
+            self::TOKEN
+        );
+        $this->assertIsNodeResponse($response, 'Data');
+        $etag = $response->getHeader('ETag')[0];
+        $this->assertSame('"VaJ7FG60f3R"', $etag);
+
+        $response = $this->runDeleteRequest(
+            sprintf(
+                '%s',
+                self::UUID_PARENT
+            ),
+            self::TOKEN,
+            [
+                'If-Match' => '"wrongEtag"',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 412);
+
+        $response = $this->runDeleteRequest(
+            sprintf(
+                '%s',
+                self::UUID_PARENT
+            ),
+            self::TOKEN,
+            [
+                'If-Match' => '"VaJ7FG60f3R"',
+            ]
+        );
+        $this->assertNoContentResponse($response);
     }
 }

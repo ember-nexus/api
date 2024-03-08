@@ -185,7 +185,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkAccess', target: 'loadElementsData', label: 'yes' },
     { source: 'checkAccess', target: 'error404', label: 'no' },
     { source: 'loadElementsData', target: 'success200' },
-    { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
+    { source: 'noTokenAction', target: 'checkRateLimit', label: '' }
   ],
 }, 'TB');
 </script>

@@ -164,7 +164,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkIfMatchHeaderMatches', target: 'loadElementsData', label: 'yes' },
     { source: 'checkIfMatchHeaderMatches', target: 'error412', label: 'no' },
     { source: 'loadElementsData', target: 'success200' },
-    { source: 'noTokenAction', target: 'checkRateLimit', label: '', type2: 'polyline-edge' }
+    { source: 'noTokenAction', target: 'checkRateLimit', label: '' }
   ],
 }, 'TB');
 </script>

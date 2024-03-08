@@ -31,69 +31,69 @@ abstract class BaseRequestTestCase extends TestCase
         return $getRequest;
     }
 
-    public function runPostRequest(string $uri, ?string $token, array $data): ResponseInterface
+    public function runPostRequest(string $uri, ?string $token, array $data, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('POST', $uri, $token, $data);
+        return $this->runRequest('POST', $uri, $token, $data, $headers);
     }
 
-    public function runPutRequest(string $uri, ?string $token, array $data): ResponseInterface
+    public function runPutRequest(string $uri, ?string $token, array $data, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('PUT', $uri, $token, $data);
+        return $this->runRequest('PUT', $uri, $token, $data, $headers);
     }
 
-    public function runPatchRequest(string $uri, ?string $token, array $data): ResponseInterface
+    public function runPatchRequest(string $uri, ?string $token, array $data, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('PATCH', $uri, $token, $data);
+        return $this->runRequest('PATCH', $uri, $token, $data, $headers);
     }
 
-    public function runDeleteRequest(string $uri, ?string $token): ResponseInterface
+    public function runDeleteRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('DELETE', $uri, $token);
+        return $this->runRequest('DELETE', $uri, $token, headers: $headers);
     }
 
-    public function runOptionsRequest(string $uri, ?string $token): ResponseInterface
+    public function runOptionsRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('OPTIONS', $uri, $token);
+        return $this->runRequest('OPTIONS', $uri, $token, headers: $headers);
     }
 
-    public function runHeadRequest(string $uri, ?string $token): ResponseInterface
+    public function runHeadRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('HEAD', $uri, $token);
+        return $this->runRequest('HEAD', $uri, $token, headers: $headers);
     }
 
-    public function runCopyRequest(string $uri, ?string $token): ResponseInterface
+    public function runCopyRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('COPY', $uri, $token);
+        return $this->runRequest('COPY', $uri, $token, headers: $headers);
     }
 
-    public function runLockRequest(string $uri, ?string $token): ResponseInterface
+    public function runLockRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('LOCK', $uri, $token);
+        return $this->runRequest('LOCK', $uri, $token, headers: $headers);
     }
 
-    public function runMkcolRequest(string $uri, ?string $token): ResponseInterface
+    public function runMkcolRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('MKCOL', $uri, $token);
+        return $this->runRequest('MKCOL', $uri, $token, headers: $headers);
     }
 
-    public function runMoveRequest(string $uri, ?string $token): ResponseInterface
+    public function runMoveRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('MOVE', $uri, $token);
+        return $this->runRequest('MOVE', $uri, $token, headers: $headers);
     }
 
-    public function runPropfindRequest(string $uri, ?string $token): ResponseInterface
+    public function runPropfindRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('PROPFIND', $uri, $token);
+        return $this->runRequest('PROPFIND', $uri, $token, headers: $headers);
     }
 
-    public function runProppatchRequest(string $uri, ?string $token): ResponseInterface
+    public function runProppatchRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('PROPPATCH', $uri, $token);
+        return $this->runRequest('PROPPATCH', $uri, $token, headers: $headers);
     }
 
-    public function runUnlockRequest(string $uri, ?string $token): ResponseInterface
+    public function runUnlockRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
     {
-        return $this->runRequest('UNLOCK', $uri, $token);
+        return $this->runRequest('UNLOCK', $uri, $token, headers: $headers);
     }
 
     public function runRequest(string $method, string $uri, ?string $token = null, ?array $data = null, ?array $headers = []): ResponseInterface
