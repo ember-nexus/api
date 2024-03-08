@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add support for the `If-Match`-header, closes #232.
+- Add links in error endpoints to http.dev explaining the current error status code, closes #267.
 ### Changed
 - Increase reference dataset version to 0.0.24.
 - Refactor parts of the Etag generation in order to make implementation of #232 and #233 easier.

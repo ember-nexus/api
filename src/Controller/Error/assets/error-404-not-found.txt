@@ -2,5 +2,15 @@
 
  The requested element was not found.
 
+ This can happen due to multiple reasons:
+
+ - The requested route does not exist.
+ - The requested element did never exist.
+ - There is a typo within the element's UUID.
+ - You do not have access to the element.
+ - You do not have the correct type of access to the element.
+
  Link to the documentation: https://ember-nexus.github.io/api
+
+ Link to http.dev's explanation of the 404 error code: https://http.dev/404
 
