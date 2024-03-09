@@ -4,6 +4,7 @@ namespace App\EventSystem\Controller\EventListener;
 
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client412PreconditionFailedExceptionFactory;
+use App\Response\NotModifiedResponse;
 use App\Service\EtagService;
 use App\Type\Etag;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -48,6 +49,13 @@ class IfNoneMatchControllerEventListener
             $etags[] = $rawEtag;
         }
         if (in_array($currentRequestEtag->getEtag(), $etags)) {
+            if (in_array($event->getRequest()->getMethod(), ['GET', 'HEAD'])) {
+                $event->setController(function () {
+                    return new NotModifiedResponse();
+                });
+
+                return;
+            }
             throw $this->client412PreconditionFailedExceptionFactory->createFromTemplate();
         }
     }
