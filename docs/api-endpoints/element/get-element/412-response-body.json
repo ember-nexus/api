@@ -1,0 +1,6 @@
+{
+  "type": "http://ember-nexus-api/error/412/precondition-failed",
+  "title": "Precondition Failed",
+  "status": 412,
+  "detail": "Precondition does not match."
+}

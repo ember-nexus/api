@@ -11,6 +11,13 @@ services:
         method: 'onKernelController'
         priority: 256
 
+  App\EventSystem\Controller\EventListener\IfNoneMatchControllerEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: kernel.controller
+        method: 'onKernelController'
+        priority: 192
+
   App\EventSystem\Controller\EventListener\IfMatchControllerEventListener:
     tags:
       - name: kernel.event_listener

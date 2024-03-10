@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add support for the `If-Match`-header, closes #232.
+- Add support for the `If-None-Match`-header, closes #233.
 - Add links in error endpoints to http.dev explaining the current error status code, closes #267.
 - Add documentation for the GET `error/500/internal-server-error` endpoint, closes #251.
 ### Changed
 - Increase reference dataset version to 0.0.24.
 - Refactor parts of the Etag generation in order to make implementation of #232 and #233 easier.
+### Fixed
+- Fix controller example tests for put element and patch element endpoints, uncovered in #233.
 
 ## 0.1.3 - 2024-03-04
 ### Changed

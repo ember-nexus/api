@@ -4,16 +4,16 @@ namespace App\tests\ExampleGenerationController\Element;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
-class PutElementTest extends BaseRequestTestCase
+class PatchElementTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string ELEMENT = '251654a1-588e-4dc4-836f-b1e334d91aae';
+    private const string ELEMENT = '84e67836-6455-489c-85d2-b57c70885b3b';
     private const string ELEMENT_WHICH_DOES_NOT_EXIST = '00000000-0000-4000-8000-000000000000';
 
-    public function testPutElementSuccess(): void
+    public function testPatchElementSuccess(): void
     {
-        $response = $this->runPutRequest(
+        $response = $this->runPatchRequest(
             sprintf('/%s', self::ELEMENT),
             self::TOKEN,
             [
@@ -21,7 +21,7 @@ class PutElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertNoContentResponse($response);
-        $documentationHeadersPath = 'docs/api-endpoints/element/put-element/204-response-header.txt';
+        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/204-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -29,9 +29,9 @@ class PutElementTest extends BaseRequestTestCase
         );
     }
 
-    public function testPutElementError401(): void
+    public function testPatchElementError401(): void
     {
-        $response = $this->runPutRequest(
+        $response = $this->runPatchRequest(
             sprintf('/%s', self::ELEMENT),
             'badToken',
             [
@@ -39,8 +39,8 @@ class PutElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/element/put-element/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/put-element/401-response-body.json';
+        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/401-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -53,9 +53,9 @@ class PutElementTest extends BaseRequestTestCase
         );
     }
 
-    public function testPutElementError404(): void
+    public function testPatchElementError404(): void
     {
-        $response = $this->runPutRequest(
+        $response = $this->runPatchRequest(
             sprintf('/%s', self::ELEMENT_WHICH_DOES_NOT_EXIST),
             self::TOKEN,
             [
@@ -63,8 +63,8 @@ class PutElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 404);
-        $documentationHeadersPath = 'docs/api-endpoints/element/put-element/404-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/put-element/404-response-body.json';
+        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/404-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/404-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -77,9 +77,9 @@ class PutElementTest extends BaseRequestTestCase
         );
     }
 
-    public function testPutElementError412(): void
+    public function testPatchElementError412(): void
     {
-        $response = $this->runPutRequest(
+        $response = $this->runPatchRequest(
             sprintf('/%s', self::ELEMENT),
             self::TOKEN,
             [
@@ -90,8 +90,8 @@ class PutElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 412);
-        $documentationHeadersPath = 'docs/api-endpoints/element/put-element/412-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/put-element/412-response-body.json';
+        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/412-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/412-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

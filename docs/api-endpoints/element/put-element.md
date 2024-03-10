@@ -74,16 +74,6 @@ curl \
 Success response does not have a response body.  
 Note that the UUID of the replaced element is written in the `Location`-header.
 
-### **🔴 Error 400**
-
-<div class="code-title auto-refresh">Response Headers</div>
-
-[Response Body](./put-element/400-response-header.txt ':include :type=code')
-
-<div class="code-title auto-refresh">Response Body</div>
-
-[Response Body](./put-element/400-response-body.json ':include :type=code problem+json')
-
 ### **🔴 Error 401**
 
 <div class="code-title auto-refresh">Response Headers</div>
@@ -93,6 +83,28 @@ Note that the UUID of the replaced element is written in the `Location`-header.
 <div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./put-element/401-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 404**
+
+<div class="code-title auto-refresh">Response Headers</div>
+
+[Response Body](./put-element/404-response-header.txt ':include :type=code')
+
+<div class="code-title auto-refresh">Response Body</div>
+
+[Response Body](./put-element/404-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 412**
+
+Error 412 is thrown if the request header `If-Match` or `If-None-Match` is present and their precondition fails.
+
+<div class="code-title auto-refresh">Response Headers</div>
+
+[Response Body](./delete-element/412-response-header.txt ':include :type=code')
+
+<div class="code-title auto-refresh">Response Body</div>
+
+[Response Body](./delete-element/412-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 429**
 

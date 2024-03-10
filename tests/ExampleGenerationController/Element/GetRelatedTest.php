@@ -34,6 +34,20 @@ class GetRelatedTest extends BaseRequestTestCase
         );
     }
 
+    public function testGetRelatedRedirect304(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_UUID), self::TOKEN);
+        $etag = $response->getHeader('ETag');
+        $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_UUID), self::TOKEN, ['If-None-Match' => $etag]);
+        $this->assertNotModifiedResponse($response);
+        $documentationHeadersPath = 'docs/api-endpoints/element/get-related/304-response-header.txt';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+    }
+
     public function testGetRelatedFailure401(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_WHICH_DOES_NOT_EXIST), 'thisTokenDoesNotExist');
@@ -63,6 +77,29 @@ class GetRelatedTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 404);
         $documentationHeadersPath = 'docs/api-endpoints/element/get-related/404-response-header.txt';
         $documentationBodyPath = 'docs/api-endpoints/element/get-related/404-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response,
+            true,
+            [
+                'created',
+                'updated',
+            ]
+        );
+    }
+
+    public function testGetRelatedFailure412(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
+        $this->assertIsProblemResponse($response, 412);
+        $documentationHeadersPath = 'docs/api-endpoints/element/get-related/412-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/get-related/412-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

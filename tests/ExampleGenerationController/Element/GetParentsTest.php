@@ -34,6 +34,20 @@ class GetParentsTest extends BaseRequestTestCase
         );
     }
 
+    public function testGetParentsRedirect304(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/parents', self::CHILD_UUID), self::TOKEN);
+        $etag = $response->getHeader('ETag');
+        $response = $this->runGetRequest(sprintf('/%s/parents', self::CHILD_UUID), self::TOKEN, ['If-None-Match' => $etag]);
+        $this->assertNotModifiedResponse($response);
+        $documentationHeadersPath = 'docs/api-endpoints/element/get-parents/304-response-header.txt';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+    }
+
     public function testGetParentsFailure401(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/parents', self::CHILD_UUID), 'thisTokenDoesNotExist');
@@ -63,6 +77,29 @@ class GetParentsTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 404);
         $documentationHeadersPath = 'docs/api-endpoints/element/get-parents/404-response-header.txt';
         $documentationBodyPath = 'docs/api-endpoints/element/get-parents/404-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response,
+            true,
+            [
+                'created',
+                'updated',
+            ]
+        );
+    }
+
+    public function testGetParentsFailure412(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/parents', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
+        $this->assertIsProblemResponse($response, 412);
+        $documentationHeadersPath = 'docs/api-endpoints/element/get-parents/412-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/get-parents/412-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
