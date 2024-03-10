@@ -74,16 +74,6 @@ curl \
 Success response does not have a response body.  
 Note that the UUID of the updated element is written in the `Location`-header.
 
-### **🔴 Error 400**
-
-<div class="code-title auto-refresh">Response Headers</div>
-
-[Response Body](./patch-element/400-response-header.txt ':include :type=code')
-
-<div class="code-title auto-refresh">Response Body</div>
-
-[Response Body](./patch-element/400-response-body.json ':include :type=code problem+json')
-
 ### **🔴 Error 401**
 
 <div class="code-title auto-refresh">Response Headers</div>
@@ -93,6 +83,16 @@ Note that the UUID of the updated element is written in the `Location`-header.
 <div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./patch-element/401-response-body.json ':include :type=code problem+json')
+
+### **🔴 Error 404**
+
+<div class="code-title auto-refresh">Response Headers</div>
+
+[Response Body](./patch-element/404-response-header.txt ':include :type=code')
+
+<div class="code-title auto-refresh">Response Body</div>
+
+[Response Body](./patch-element/404-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 412**
 

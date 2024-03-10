@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Increase reference dataset version to 0.0.24.
 - Refactor parts of the Etag generation in order to make implementation of #232 and #233 easier.
+### Fixed
+- Fix controller example tests for put element and patch element endpoints, uncovered in #233.
 
 ## 0.1.3 - 2024-03-04
 ### Changed

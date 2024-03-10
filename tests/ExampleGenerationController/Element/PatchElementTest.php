@@ -8,22 +8,20 @@ class PatchElementTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string PARENT_ELEMENT = '7b80b203-2b82-40f5-accd-c7089fe6114e';
+    private const string ELEMENT = '84e67836-6455-489c-85d2-b57c70885b3b';
+    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '00000000-0000-4000-8000-000000000000';
 
-    public function testPostElementSuccess(): void
+    public function testPatchElementSuccess(): void
     {
-        $response = $this->runPostRequest(
-            sprintf('/%s', self::PARENT_ELEMENT),
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::ELEMENT),
             self::TOKEN,
             [
-                'type' => 'Data',
-                'data' => [
-                    'hello' => 'world',
-                ],
+                'hello' => 'world',
             ]
         );
-        $this->assertIsCreatedResponse($response);
-        $documentationHeadersPath = 'docs/api-endpoints/element/post-element/204-response-header.txt';
+        $this->assertNoContentResponse($response);
+        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/204-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -31,20 +29,18 @@ class PatchElementTest extends BaseRequestTestCase
         );
     }
 
-    public function testPostElementError400(): void
+    public function testPatchElementError401(): void
     {
-        $response = $this->runPostRequest(
-            sprintf('/%s', self::PARENT_ELEMENT),
-            self::TOKEN,
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::ELEMENT),
+            'badToken',
             [
-                'data' => [
-                    'hello' => 'world',
-                ],
+                'hello' => 'world',
             ]
         );
-        $this->assertIsProblemResponse($response, 400);
-        $documentationHeadersPath = 'docs/api-endpoints/element/post-element/400-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/post-element/400-response-body.json';
+        $this->assertIsProblemResponse($response, 401);
+        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/401-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -57,21 +53,45 @@ class PatchElementTest extends BaseRequestTestCase
         );
     }
 
-    public function testPostElementError401(): void
+    public function testPatchElementError404(): void
     {
-        $response = $this->runPostRequest(
-            sprintf('/%s', self::PARENT_ELEMENT),
-            'badToken',
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::ELEMENT_WHICH_DOES_NOT_EXIST),
+            self::TOKEN,
             [
-                'type' => 'Data',
-                'data' => [
-                    'hello' => 'world',
-                ],
+                'hello' => 'world',
             ]
         );
-        $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/element/post-element/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/post-element/401-response-body.json';
+        $this->assertIsProblemResponse($response, 404);
+        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/404-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/404-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response
+        );
+    }
+
+    public function testPatchElementError412(): void
+    {
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::ELEMENT),
+            self::TOKEN,
+            [
+                'hello' => 'world',
+            ],
+            [
+                'If-Match' => '"etagDoesNotExist"',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 412);
+        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/412-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/412-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
