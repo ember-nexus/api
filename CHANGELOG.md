@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add support for the `If-Match`-header, closes #232.
+- Add support for the `If-None-Match`-header, closes #233.
 - Add links in error endpoints to http.dev explaining the current error status code, closes #267.
 - Add documentation for the GET `error/500/internal-server-error` endpoint, closes #251.
 ### Changed

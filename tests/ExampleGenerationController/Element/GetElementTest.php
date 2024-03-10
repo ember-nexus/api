@@ -58,6 +58,20 @@ class GetElementTest extends BaseRequestTestCase
         );
     }
 
+    public function testGetElementRedirect304(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s', self::NODE_UUID), self::TOKEN);
+        $etag = $response->getHeader('ETag');
+        $response = $this->runGetRequest(sprintf('/%s', self::NODE_UUID), self::TOKEN, ['If-None-Match' => $etag]);
+        $this->assertNotModifiedResponse($response);
+        $documentationHeadersPath = 'docs/api-endpoints/element/get-element/304-response-header.txt';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+    }
+
     public function testGetElementFailure401(): void
     {
         $response = $this->runGetRequest(sprintf('/%s', self::NODE_UUID), 'thisTokenDoesNotExist');

@@ -58,6 +58,14 @@ curl \
 
 [Response Body](./get-index/200-response-body.json ':include :type=code')
 
+### **🟢 Redirect 304**
+
+<div class="code-title auto-refresh">Response Headers</div>
+
+[Response Body](./get-index/304-response-header.txt ':include :type=code')
+
+Redirect response does not have a response body.
+
 ### **🔴 Error 401**
 
 This error can only be thrown if the token is invalid or if there is no default anonymous user.
@@ -100,7 +108,7 @@ Error 412 is thrown if the request header `If-Match` or `If-None-Match` is prese
 
 Once the server receives such a request, it checks several things internally:
 
-<div id="graph-container-1" class="graph-container" style="height:1200px"></div>
+<div id="graph-container-1" class="graph-container" style="height:1500px"></div>
 
 <!-- panels:end -->
 
@@ -155,10 +163,13 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'noTokenAction', ...workflowStep, label: "use default anonymous\nuser for auth" },
     { id: 'checkTokenValidity', ...workflowDecision, label: 'is token valid?' },
     { id: 'checkRateLimit', ...workflowDecision, label: "does request exceed\nrate limit?" },
+    { id: 'checkIfNoneMatchHeaderExists', ...workflowDecision, label: "does request contain\nIf-None-Match header?" },
+    { id: 'checkIfNoneMatchHeaderMatches', ...workflowDecision, label: "does If-None-Match\nmatch ETag?" },
     { id: 'checkIfMatchHeaderExists', ...workflowDecision, label: "does request contain\nIf-Match header?" },
     { id: 'checkIfMatchHeaderMatches', ...workflowDecision, label: "does If-Match\nmatch ETag?" },
     { id: 'loadElementsData', ...workflowStep, label: 'Load root level elements' },
     { id: 'success200', ...workflowEndSuccess , label: "return 200"},
+    { id: 'redirect304', ...workflowEndSuccess , label: "return 304"},
     { id: 'error401', ...workflowEndError, label: "return 401" },
     { id: 'error412', ...workflowEndError, label: 'return 412' },
     { id: 'error429', ...workflowEndError, label: 'return 429' },
@@ -169,8 +180,12 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkToken', target: 'checkTokenValidity', label: 'yes' },
     { source: 'checkTokenValidity', target: 'checkRateLimit', label: 'yes' },
     { source: 'checkTokenValidity', target: 'error401', label: 'no' },
-    { source: 'checkRateLimit', target: 'checkIfMatchHeaderExists', label: 'no' },
+    { source: 'checkRateLimit', target: 'checkIfNoneMatchHeaderExists', label: 'no' },
     { source: 'checkRateLimit', target: 'error429', label: 'yes' },
+    { source: 'checkIfNoneMatchHeaderExists', target: 'checkIfMatchHeaderExists', label: 'no' },
+    { source: 'checkIfNoneMatchHeaderExists', target: 'checkIfNoneMatchHeaderMatches', label: 'yes' },
+    { source: 'checkIfNoneMatchHeaderMatches', target: 'checkIfMatchHeaderExists', label: 'no' },
+    { source: 'checkIfNoneMatchHeaderMatches', target: 'redirect304', label: 'yes' },
     { source: 'checkIfMatchHeaderExists', target: 'loadElementsData', label: 'no' },
     { source: 'checkIfMatchHeaderExists', target: 'checkIfMatchHeaderMatches', label: 'yes' },
     { source: 'checkIfMatchHeaderMatches', target: 'loadElementsData', label: 'yes' },

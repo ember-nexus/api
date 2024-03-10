@@ -4,9 +4,6 @@ namespace App\tests\FeatureTests\General;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-/**
- * @group test
- */
 class IfNoneMatchTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:RRq4WsomBeTH0AAa7Jmi4k';
@@ -64,7 +61,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
                 'If-None-Match' => '"ROiR1100cKu"',
             ]
         );
-        $this->assertIsProblemResponse($response, 412);
+        $this->assertNotModifiedResponse($response);
     }
 
     public function testIfMatchDifferentHeaderKeyCasing(): void
@@ -91,7 +88,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
                 'if-none-match' => '"ROiR1100cKu"',
             ]
         );
-        $this->assertIsProblemResponse($response, 412);
+        $this->assertNotModifiedResponse($response);
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
@@ -114,7 +111,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
                 'IF-NONE-MATCH' => '"ROiR1100cKu"',
             ]
         );
-        $this->assertIsProblemResponse($response, 412);
+        $this->assertNotModifiedResponse($response);
     }
 
     public function testIfMatchElementRelation(): void
@@ -152,7 +149,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
                 'If-None-Match' => '"IZK4tgD1OhG"',
             ]
         );
-        $this->assertIsProblemResponse($response, 412);
+        $this->assertNotModifiedResponse($response);
     }
 
     public function testIfMatchIndex(): void
@@ -178,7 +175,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
                 'If-None-Match' => '"VFHTCT94KoT"',
             ]
         );
-        $this->assertIsProblemResponse($response, 412);
+        $this->assertNotModifiedResponse($response);
     }
 
     public function testIfMatchChildren(): void
@@ -216,7 +213,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
                 'If-None-Match' => '"d344gmYJeeQ"',
             ]
         );
-        $this->assertIsProblemResponse($response, 412);
+        $this->assertNotModifiedResponse($response);
     }
 
     public function testIfMatchParents(): void
@@ -254,7 +251,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
                 'If-None-Match' => '"ZGUcWBYHppR"',
             ]
         );
-        $this->assertIsProblemResponse($response, 412);
+        $this->assertNotModifiedResponse($response);
     }
 
     public function testIfMatchRelated(): void
@@ -292,7 +289,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
                 'If-None-Match' => '"TVPsbpcCAeU"',
             ]
         );
-        $this->assertIsProblemResponse($response, 412);
+        $this->assertNotModifiedResponse($response);
     }
 
     public function testEtagIfMatchWithPatchElement(): void

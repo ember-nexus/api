@@ -34,6 +34,20 @@ class GetParentsTest extends BaseRequestTestCase
         );
     }
 
+    public function testGetParentsRedirect304(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/parents', self::CHILD_UUID), self::TOKEN);
+        $etag = $response->getHeader('ETag');
+        $response = $this->runGetRequest(sprintf('/%s/parents', self::CHILD_UUID), self::TOKEN, ['If-None-Match' => $etag]);
+        $this->assertNotModifiedResponse($response);
+        $documentationHeadersPath = 'docs/api-endpoints/element/get-parents/304-response-header.txt';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+    }
+
     public function testGetParentsFailure401(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/parents', self::CHILD_UUID), 'thisTokenDoesNotExist');
