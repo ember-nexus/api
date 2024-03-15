@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+- Upgrade PHP to 8.3.4, closes #272.
+
 ## 0.1.4 - 2024-03-10
 ### Added
 - Add support for the `If-Match`-header, closes [#232].
