@@ -225,7 +225,7 @@ RUN set -eux \
     && apk add git gcc g++ make pcre-dev openssl-dev \
     && mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules /usr/src/unit \
     && cd /usr/src/unit \
-    && git clone --depth 1 -b 1.32.0-1 https://github.com/nginx/unit
+    && git clone --depth 1 -b 1.32.1-1 https://github.com/nginx/unit
 RUN set -eux \
     && cd /usr/src/unit/unit \
     && NCPU="$(getconf _NPROCESSORS_ONLN)" \
