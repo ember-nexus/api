@@ -221,6 +221,40 @@ jobs:
           echo "finished waiting"
           docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet && composer test:feature"
 
+  test-feature-replaced:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    name: 'Feature Test Replaced'
+    timeout-minutes: 15
+    needs:
+      - test-unit
+      - phpstan
+      - psalm
+      - cs-lint
+      - test-mutant
+      - test-leak
+      - test-mess-detector
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v4
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Feature Test
+        run: |
+          chmod 777 ./bin/test-feature-prepare
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker compose -f ./tests/FeatureTests/docker-compose-neo4j-5.15.yml up --quiet-pull -d
+          echo "waiting for containers to star tup (10s)"
+          sleep 10
+          echo "finished waiting"
+          docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet && composer test:feature:replaced"
+
   test-example-generation-controller:
     runs-on: buildjet-2vcpu-ubuntu-2204
     name: 'Controller Example Generation Test'

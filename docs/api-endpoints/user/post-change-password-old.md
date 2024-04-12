@@ -1,12 +1,16 @@
-# <span class="title-url"><span class="method-post">POST</span>` /change-password`</span><span class="title-human">Change Password Endpoint</span>
+# <span class="title-url"><span class="method-post">POST</span>` /change-password`</span><span class="title-human">Change Password Endpoint (Old)</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-!> This endpoint's request body changed with version 0.1.6. The old variant is deprecated and will be removed in version
-0.2.0. Link to the old documentation: [POST /change-password (old)](/api-endpoints/user/post-change-password-old.md).
+!> This is the original variant of the `POST /change-password` endpoint, which is deprecated since version 0.1.6. It
+will be removed in version 0.2.0.
 
-Endpoint allows changing the user's current password. Knowledge of the currently used (old) password is required.
+Endpoint allows changing the user's current password.
+
+!> This endpoint requires knowing the currently used password.
+
+!> Using auth tokens for this endpoint is optional; they are just used for rate limiting here.
 
 ## Request Body
 
@@ -17,7 +21,10 @@ The request must contain the following attributes:
 - `type`: Contains the value `ActionChangePassword`. No other types are currently allowed.
 - `currentPassword`: The user's currently used password in plain text.
 - `newPassword`: The user's new password in plain text.
-- `uniqueUserIdentifier`: Some attribute uniquely identifying a user, normally an email address. Can be configured.
+- `data.<identifier>`: By default, `data.email` must contain a new unique string. While not required, keeping the
+  content within 256 bytes is encouraged. Optional limits might be added at a later time.  
+  The required identifier name is returned by the
+  [instance configuration endpoint](/api-endpoints/get-instance-configuration) and in error messages.
 
 !> **Notice regarding passwords**: They can contain any string and will be hashed internally. Whitespace at the start or
 end of the password will **not** be removed, though it is discouraged. No password complexity checks are performed.
@@ -27,7 +34,9 @@ end of the password will **not** be removed, though it is discouraged. No passwo
   "type": "ActionChangePassword",
   "currentPassword": "1234",
   "newPassword": "9876",
-  "uniqueUserIdentifier": "test@example.com"
+  "data": {
+    "<identifier>": "test@example.com"
+  }
 }
 ```
 
@@ -37,7 +46,7 @@ end of the password will **not** be removed, though it is discouraged. No passwo
 curl \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"type": "ActionChangePassword", "currentPassword": "1234", "newPassword": "9876", "uniqueUserIdentifier": "test@example.com"}' \
+  -d '{"type": "ActionChangePassword", "currentPassword": "1234", "newPassword": "9876", "data": {"email": "test@example.com"}}' \
   https://api.localhost/change-password
 ```
 
@@ -47,7 +56,7 @@ curl \
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-change-password/204-response-header.txt ':include :type=code')
+[Response Body](./post-change-password-old/204-response-header.txt ':include :type=code')
 
 Success response does not have a return body. The password is successfully changed, and creating new tokens require the
 new password.
@@ -56,41 +65,41 @@ new password.
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-change-password/400-response-header.txt ':include :type=code')
+[Response Body](./post-change-password-old/400-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-change-password/400-response-body.json ':include :type=code problem+json')
+[Response Body](./post-change-password-old/400-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 401**
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-change-password/401-response-header.txt ':include :type=code')
+[Response Body](./post-change-password-old/401-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-change-password/401-response-body.json ':include :type=code problem+json')
+[Response Body](./post-change-password-old/401-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 403**
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-change-password/403-response-header.txt ':include :type=code')
+[Response Body](./post-change-password-old/403-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-change-password/403-response-body.json ':include :type=code problem+json')
+[Response Body](./post-change-password-old/403-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 429**
 
 <div class="code-title">Response Headers</div>
 
-[Response Body](./post-change-password/429-response-header.txt ':include :type=code')
+[Response Body](./post-change-password-old/429-response-header.txt ':include :type=code')
 
 <div class="code-title">Response Body</div>
 
-[Response Body](./post-change-password/429-response-body.json ':include :type=code problem+json')
+[Response Body](./post-change-password-old/429-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 

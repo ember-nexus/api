@@ -1,10 +1,10 @@
-# <span class="title-url"><span class="method-post">POST</span>` /token`</span><span class="title-human">Create Token Endpoint</span>
+# <span class="title-url"><span class="method-post">POST</span>` /token`</span><span class="title-human">Create Token Endpoint (Old)</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-!> This endpoint's request body changed with version 0.1.6. The old variant is deprecated and will be removed in version
-0.2.0. Link to the old documentation: [POST /token (old)](/api-endpoints/user/post-token-old.md).
+!> This is the original variant of the `POST /token` endpoint, which is deprecated since version 0.1.6. It will be
+removed in version 0.2.0.
 
 Endpoint for creating new tokens.
 
@@ -18,14 +18,14 @@ The posted request must be a valid JSON document.
 The request must contain the following attributes:
 
 - `type`: Containing the content "Token". No other values are currently possible.
-- `uniqueUserIdentifier`: Some attribute uniquely identifying a user, normally an email address. Can be configured.
+- `user`: The value for the user's identifying property, by default the user's email address.
 - `password`: The plain text password of the user.
 - `data`: Object of properties, optional.
 
 ```json
 {
   "type": "Token",
-  "uniqueUserIdentifier": "test@localhost.dev",
+  "user": "test@localhost.dev",
   "password": "1234",
   "data": {
     "key": "value"
@@ -39,7 +39,7 @@ The request must contain the following attributes:
 curl \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"type": "Token", "uniqueUserIdentifier": "test@localhost.dev", "password": "1234"}' \
+  -d '{"type": "Token", "user": "test@localhost.dev", "password": "1234"}' \
   https://api.localhost/token
 ```
 
@@ -49,31 +49,31 @@ curl \
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-token/200-response-header.txt ':include :type=code')
+[Response Body](./post-token-old/200-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-token/200-response-body.json ':include :type=code')
+[Response Body](./post-token-old/200-response-body.json ':include :type=code')
 
 ### **🔴 Error 400**
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-token/400-response-header.txt ':include :type=code')
+[Response Body](./post-token-old/400-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-token/400-response-body.json ':include :type=code problem+json')
+[Response Body](./post-token-old/400-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 401**
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-token/401-response-header.txt ':include :type=code')
+[Response Body](./post-token-old/401-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-token/401-response-body.json ':include :type=code problem+json')
+[Response Body](./post-token-old/401-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 
@@ -136,7 +136,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'init', ...workflowStart, label: 'server receives POST-request' },
     { id: 'checkType', ...workflowDecision, label: 'is type given?' },
     { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal\nto "Token"?' },
-    { id: 'checkUniqueUserIdentifierProperty', ...workflowDecision, label: 'is uniqueUserIdentifier\ngiven?' },
+    { id: 'checkUserProperty', ...workflowDecision, label: 'is user given?' },
     { id: 'checkPasswordProperty', ...workflowDecision, label: "is password given?" },
     { id: 'checkCredentials', ...workflowDecision, label: 'are credentials ok?' },
     { id: 'createToken', ...workflowStep, label: "create token" },
@@ -148,10 +148,10 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'init', target: 'checkType', label: '' },
     { source: 'checkType', target: 'checkTypeContent', label: 'yes' },
     { source: 'checkType', target: 'error400', label: 'no' },
-    { source: 'checkTypeContent', target: 'checkUniqueUserIdentifierProperty', label: 'yes' },
+    { source: 'checkTypeContent', target: 'checkUserProperty', label: 'yes' },
     { source: 'checkTypeContent', target: 'error400', label: 'no' },
-    { source: 'checkUniqueUserIdentifierProperty', target: 'checkPasswordProperty', label: 'yes' },
-    { source: 'checkUniqueUserIdentifierProperty', target: 'error400', label: 'no' },
+    { source: 'checkUserProperty', target: 'checkPasswordProperty', label: 'yes' },
+    { source: 'checkUserProperty', target: 'error400', label: 'no' },
     { source: 'checkPasswordProperty', target: 'checkCredentials', label: 'yes' },
     { source: 'checkPasswordProperty', target: 'error400', label: 'no' },
     { source: 'checkCredentials', target: 'createToken', label: 'yes' },

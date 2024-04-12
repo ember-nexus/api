@@ -4,7 +4,10 @@ namespace App\tests\FeatureTests\Endpoint\User;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class PostRegisterTest extends BaseRequestTestCase
+/**
+ * @group replaced
+ */
+class PostRegisterOldTest extends BaseRequestTestCase
 {
     public function testPostRegister(): void
     {
@@ -14,7 +17,9 @@ class PostRegisterTest extends BaseRequestTestCase
             [
                 'type' => 'User',
                 'password' => '1234',
-                'uniqueUserIdentifier' => 'user1@register.user.endpoint.localhost.dev',
+                'data' => [
+                    'email' => 'user1@register.user.endpoint.localhost.dev',
+                ],
             ]
         );
 
@@ -28,7 +33,9 @@ class PostRegisterTest extends BaseRequestTestCase
             null,
             [
                 'password' => '1234',
-                'uniqueUserIdentifier' => 'user2@register.user.endpoint.localhost.dev',
+                'data' => [
+                    'email' => 'user2@register.user.endpoint.localhost.dev',
+                ],
             ]
         );
 
@@ -43,7 +50,9 @@ class PostRegisterTest extends BaseRequestTestCase
             [
                 'type' => 'NotAUser',
                 'password' => '1234',
-                'uniqueUserIdentifier' => 'user3@register.user.endpoint.localhost.dev',
+                'data' => [
+                    'email' => 'user3@register.user.endpoint.localhost.dev',
+                ],
             ]
         );
 
@@ -57,7 +66,9 @@ class PostRegisterTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'User',
-                'uniqueUserIdentifier' => 'user4@register.user.endpoint.localhost.dev',
+                'data' => [
+                    'email' => 'user4@register.user.endpoint.localhost.dev',
+                ],
             ]
         );
 
@@ -72,6 +83,8 @@ class PostRegisterTest extends BaseRequestTestCase
             [
                 'type' => 'User',
                 'password' => '1234',
+                'data' => [
+                ],
             ]
         );
 
@@ -86,7 +99,9 @@ class PostRegisterTest extends BaseRequestTestCase
             [
                 'type' => 'User',
                 'password' => '1234',
-                'uniqueUserIdentifier' => 'user5@register.user.endpoint.localhost.dev',
+                'data' => [
+                    'email' => 'user5@register.user.endpoint.localhost.dev',
+                ],
             ]
         );
 
@@ -98,7 +113,9 @@ class PostRegisterTest extends BaseRequestTestCase
             [
                 'type' => 'User',
                 'password' => '1234',
-                'uniqueUserIdentifier' => 'user5@register.user.endpoint.localhost.dev',
+                'data' => [
+                    'email' => 'user5@register.user.endpoint.localhost.dev',
+                ],
             ]
         );
 

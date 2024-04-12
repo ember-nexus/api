@@ -43,13 +43,6 @@ class PostRegisterController extends AbstractController
     public function postRegister(Request $request): Response
     {
         $body = \Safe\json_decode($request->getContent(), true);
-
-        if (!$this->emberNexusConfiguration->isRegisterEnabled()) {
-            throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
-        }
-
-        $userId = UuidV4::uuid4();
-
         $data = [];
         if (array_key_exists('data', $body)) {
             $data = $body['data'];
@@ -57,6 +50,12 @@ class PostRegisterController extends AbstractController
         /**
          * @var array<string, mixed> $data
          */
+        if (!$this->emberNexusConfiguration->isRegisterEnabled()) {
+            throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
+        }
+
+        $userId = UuidV4::uuid4();
+
         if (!array_key_exists('password', $body)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('password', 'string');
         }
@@ -69,23 +68,32 @@ class PostRegisterController extends AbstractController
             throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'User', $body['type']);
         }
 
-        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        if (!array_key_exists($uniqueIdentifier, $data)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate($uniqueIdentifier, 'string');
+        // @todo 0.2.0: remove old logic, see also #280
+        $uniqueUserIdentifier = null;
+        if (!$this->emberNexusConfiguration->isFeatureFlag280OldUniqueUserIdentifierDisabled()) {
+            $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
+            if (array_key_exists($uniqueIdentifier, $data)) {
+                $uniqueUserIdentifier = $data[$uniqueIdentifier];
+            }
         }
-        $uniqueIdentifierValue = $data[$uniqueIdentifier];
+        if (null === $uniqueUserIdentifier) {
+            if (!array_key_exists('uniqueUserIdentifier', $body)) {
+                throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('uniqueUserIdentifier', 'string');
+            }
+            $uniqueUserIdentifier = $body['uniqueUserIdentifier'];
+        }
 
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             sprintf(
-                'MATCH (u:User {%s: $identifier}) RETURN count(u) AS count',
+                'MATCH (u:User {%s: $uniqueUserIdentifier}) RETURN count(u) AS count',
                 $uniqueIdentifier
             ),
             [
-                'identifier' => $uniqueIdentifierValue,
+                'uniqueUserIdentifier' => $uniqueUserIdentifier,
             ]
         ));
         if ($res->first()->get('count') > 0) {
-            throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($uniqueIdentifierValue);
+            throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($uniqueUserIdentifier);
         }
 
         $userNode = (new NodeElement())
@@ -93,6 +101,7 @@ class PostRegisterController extends AbstractController
             ->setLabel('User')
             ->addProperties([
                 ...$data,
+                $uniqueIdentifier => $uniqueUserIdentifier,
                 '_passwordHash' => $this->userPasswordHasher->hashPassword($password),
             ]);
 

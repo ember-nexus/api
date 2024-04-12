@@ -33,6 +33,9 @@ class EmberNexusConfiguration
     public const string CACHE_ETAG_SEED = 'etagSeed';
     public const string CACHE_ETAG_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS = 'etagUpperLimitInCollectionEndpoints';
 
+    public const string FEATURE_FLAG = 'featureFlag';
+    public const string FEATURE_FLAG_280_OLD_UNIQUE_USER_IDENTIFIER_DISABLED = '280_OldUniqueUserIdentifierDisabled';
+
     private int $pageSizeMin;
     private int $pageSizeDefault;
     private int $pageSizeMax;
@@ -47,6 +50,7 @@ class EmberNexusConfiguration
     private int|false $tokenDeleteExpiredTokensAutomaticallyInSeconds;
     private string $cacheEtagSeed;
     private int $cacheEtagUpperLimitInCollectionEndpoints;
+    private bool $featureFlag280OldUniqueUserIdentifierDisabled;
 
     private static function getValueFromConfig(array $configuration, array $keyParts): mixed
     {
@@ -202,6 +206,15 @@ class EmberNexusConfiguration
             ]
         );
         $emberNexusConfiguration->setCacheEtagUpperLimitInCollectionEndpoints($value);
+
+        $value = self::getValueFromConfig(
+            $configuration,
+            [
+                self::FEATURE_FLAG,
+                self::FEATURE_FLAG_280_OLD_UNIQUE_USER_IDENTIFIER_DISABLED,
+            ]
+        );
+        $emberNexusConfiguration->setFeatureFlag280OldUniqueUserIdentifierDisabled($value);
 
         return $emberNexusConfiguration;
     }
@@ -361,9 +374,11 @@ class EmberNexusConfiguration
         return $this->cacheEtagSeed;
     }
 
-    public function setCacheEtagSeed(string $cacheEtagSeed): void
+    public function setCacheEtagSeed(string $cacheEtagSeed): self
     {
         $this->cacheEtagSeed = $cacheEtagSeed;
+
+        return $this;
     }
 
     public function getCacheEtagUpperLimitInCollectionEndpoints(): int
@@ -371,8 +386,22 @@ class EmberNexusConfiguration
         return $this->cacheEtagUpperLimitInCollectionEndpoints;
     }
 
-    public function setCacheEtagUpperLimitInCollectionEndpoints(int $cacheEtagUpperLimitInCollectionEndpoints): void
+    public function setCacheEtagUpperLimitInCollectionEndpoints(int $cacheEtagUpperLimitInCollectionEndpoints): self
     {
         $this->cacheEtagUpperLimitInCollectionEndpoints = $cacheEtagUpperLimitInCollectionEndpoints;
+
+        return $this;
+    }
+
+    public function isFeatureFlag280OldUniqueUserIdentifierDisabled(): bool
+    {
+        return $this->featureFlag280OldUniqueUserIdentifierDisabled;
+    }
+
+    public function setFeatureFlag280OldUniqueUserIdentifierDisabled(bool $featureFlag280OldUniqueUserIdentifierDisabled): self
+    {
+        $this->featureFlag280OldUniqueUserIdentifierDisabled = $featureFlag280OldUniqueUserIdentifierDisabled;
+
+        return $this;
     }
 }

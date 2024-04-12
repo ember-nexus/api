@@ -1,10 +1,10 @@
-# <span class="title-url"><span class="method-post">POST</span>` /register`</span><span class="title-human">Register New Account Endpoint</span>
+# <span class="title-url"><span class="method-post">POST</span>` /register`</span><span class="title-human">Register New Account Endpoint (Old)</span>
 
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-!> This endpoint's request body changed with version 0.1.6. The old variant is deprecated and will be removed in version
-0.2.0. Link to the old documentation: [POST /register (old)](/api-endpoints/user/post-register-old.md).
+!> This is the original variant of the `POST /register` endpoint, which is deprecated since version 0.1.6. It will be
+removed in version 0.2.0.
 
 Endpoint for registering / creating new accounts.
 
@@ -21,16 +21,17 @@ The request must contain the following attributes:
 - `password`: The plain text password of the new user. It can contain any string and will be hashed internally.
   Whitespace at the start or end of the string will **not** be removed, though it is discouraged.  
   No password complexity check is performed.
-- `uniqueUserIdentifier`: Some attribute uniquely identifying a user, normally an email address. Can be configured.
-- `data`: Optional properties stored in the user element.
+- `data.<identifier>`: By default, `data.email` must contain a new unique string. While not required, keeping the
+  content within 256 bytes is encouraged. Optional limits might be added at a later time.  
+  The required identifier name is returned by the
+  [instance configuration endpoint](/api-endpoints/get-instance-configuration) and in error messages.
 
 ```json
 {
   "type": "User",
   "password": "1234",
-  "uniqueUserIdentifier": "test@example.com",
   "data": {
-    "key": "value"
+    "<identifier>": "test@example.com"
   }
 }
 ```
@@ -41,7 +42,7 @@ The request must contain the following attributes:
 curl \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"type": "User", "password": "1234", "uniqueUserIdentifier": "test@example.com"}' \
+  -d '{"type": "User", "password": "1234", "data": {"email": "test@example.com"}}' \
   https://api.localhost/register
 ```
 
@@ -51,7 +52,7 @@ curl \
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-register/201-response-header.txt ':include :type=code')
+[Response Body](./post-register-old/201-response-header.txt ':include :type=code')
 
 Success response does not have a return body. The location of the new user, containing the user's UUID, is written in
 the `Location` header.
@@ -60,21 +61,21 @@ the `Location` header.
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-register/400-response-header.txt ':include :type=code')
+[Response Body](./post-register-old/400-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-register/400-response-body.json ':include :type=code problem+json')
+[Response Body](./post-register-old/400-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 403**
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-register/403-response-header.txt ':include :type=code')
+[Response Body](./post-register-old/403-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-register/403-response-body.json ':include :type=code problem+json')
+[Response Body](./post-register-old/403-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 
@@ -139,7 +140,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'checkPassword', ...workflowDecision, label: 'is password given?' },
     { id: 'checkType', ...workflowDecision, label: 'is type given?' },
     { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal to "User"?' },
-    { id: 'checkIdentifier', ...workflowDecision, label: "is uniqueUserIdentifier given?" },
+    { id: 'checkIdentifier', ...workflowDecision, label: "is identifier given?" },
     { id: 'checkIdentifierUnique', ...workflowDecision, label: 'is identifier unique?' },
     { id: 'createUser', ...workflowStep, label: "create user" },
     { id: 'error400', ...workflowEndError, label: "return 400" },

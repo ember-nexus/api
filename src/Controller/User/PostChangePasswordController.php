@@ -39,7 +39,7 @@ class PostChangePasswordController extends AbstractController
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
-        private ParameterBagInterface $bag
+        private ParameterBagInterface $bag,
     ) {
     }
 
@@ -51,11 +51,6 @@ class PostChangePasswordController extends AbstractController
     public function postChangePassword(Request $request): Response
     {
         $body = \Safe\json_decode($request->getContent(), true);
-
-        $data = [];
-        if (array_key_exists('data', $body)) {
-            $data = $body['data'];
-        }
 
         if (!array_key_exists('type', $body)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
@@ -74,11 +69,24 @@ class PostChangePasswordController extends AbstractController
         }
         $newPassword = $body['newPassword'];
 
-        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        if (!array_key_exists($uniqueIdentifier, $data)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate($uniqueIdentifier, 'string');
+        // @todo 0.2.0: remove old logic, see also #280
+        $uniqueIdentifierValue = null;
+        if (!$this->emberNexusConfiguration->isFeatureFlag280OldUniqueUserIdentifierDisabled()) {
+            $data = [];
+            if (array_key_exists('data', $body)) {
+                $data = $body['data'];
+            }
+            $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
+            if (array_key_exists($uniqueIdentifier, $data)) {
+                $uniqueIdentifierValue = $data[$uniqueIdentifier];
+            }
         }
-        $uniqueIdentifierValue = $data[$uniqueIdentifier];
+        if (null === $uniqueIdentifierValue) {
+            if (!array_key_exists('uniqueUserIdentifier', $body)) {
+                throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('uniqueUserIdentifier', 'string');
+            }
+            $uniqueIdentifierValue = $body['uniqueUserIdentifier'];
+        }
 
         if ($currentPassword === $newPassword) {
             throw $this->client400BadContentExceptionFactory->createFromTemplate('newPassword', 'password which is not identical to the old password', '<redacted>');

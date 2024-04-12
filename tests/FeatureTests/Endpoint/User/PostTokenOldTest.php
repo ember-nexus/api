@@ -4,7 +4,10 @@ namespace App\tests\FeatureTests\Endpoint\User;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class PostTokenTest extends BaseRequestTestCase
+/**
+ * @group replaced
+ */
+class PostTokenOldTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:3tgEP9MhD81rkp3qiJcm1U';
     private const string EMAIL = 'user@postToken.user.endpoint.localhost.dev';
@@ -20,7 +23,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'uniqueUserIdentifier' => self::EMAIL,
+                'user' => self::EMAIL,
                 'password' => self::PASSWORD,
             ]
         );
@@ -49,7 +52,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'uniqueUserIdentifier' => self::EMAIL,
+                'user' => self::EMAIL,
                 'password' => self::PASSWORD,
                 'lifetime' => 3600,
             ]
@@ -79,7 +82,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'uniqueUserIdentifier' => self::EMAIL,
+                'user' => self::EMAIL,
                 'password' => self::PASSWORD,
                 'lifetime' => 0,
             ]
@@ -109,7 +112,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'uniqueUserIdentifier' => self::EMAIL,
+                'user' => self::EMAIL,
                 'password' => self::PASSWORD,
                 'lifetime' => 100 * 365 * 24 * 3600, // 100 years
             ]

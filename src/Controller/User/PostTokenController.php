@@ -46,7 +46,9 @@ class PostTokenController extends AbstractController
     public function postToken(Request $request): Response
     {
         $body = \Safe\json_decode($request->getContent(), true);
-
+        /**
+         * @var array<string, mixed> $body
+         */
         if (!array_key_exists('type', $body)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
         }
@@ -54,22 +56,28 @@ class PostTokenController extends AbstractController
             throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'Token', $body['type']);
         }
 
-        /**
-         * @var array<string, mixed> $body
-         */
-        if (!array_key_exists('user', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('user', 'string');
+        // @todo 0.2.0: remove old logic, see also #280
+        $uniqueUserIdentifier = null;
+        if (!$this->emberNexusConfiguration->isFeatureFlag280OldUniqueUserIdentifierDisabled()) {
+            if (array_key_exists('user', $body)) {
+                $uniqueUserIdentifier = $body['user'];
+            }
         }
-        $uniqueIdentifierValue = $body['user'];
+        if (null === $uniqueUserIdentifier) {
+            if (!array_key_exists('uniqueUserIdentifier', $body)) {
+                throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('uniqueUserIdentifier', 'string');
+            }
+            $uniqueUserIdentifier = $body['uniqueUserIdentifier'];
+        }
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             sprintf(
-                'MATCH (u:User {%s: $identifier}) RETURN u.id AS id',
+                'MATCH (u:User {%s: $uniqueUserIdentifier}) RETURN u.id AS id',
                 $uniqueIdentifier,
             ),
             [
-                'identifier' => $uniqueIdentifierValue,
+                'uniqueUserIdentifier' => $uniqueUserIdentifier,
             ]
         ));
         if (0 === count($res)) {

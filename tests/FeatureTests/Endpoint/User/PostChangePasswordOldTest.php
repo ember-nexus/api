@@ -4,7 +4,10 @@ namespace App\tests\FeatureTests\Endpoint\User;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
-class PostChangePasswordTest extends BaseRequestTestCase
+/**
+ * @group replaced
+ */
+class PostChangePasswordOldTest extends BaseRequestTestCase
 {
     private const string EMAIL = 'user@changePassword.user.endpoint.localhost.dev';
     private const string PASSWORD = '1234';
@@ -19,7 +22,9 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'ActionChangePassword',
                 'currentPassword' => self::PASSWORD,
                 'newPassword' => self::NEW_PASSWORD,
-                'uniqueUserIdentifier' => self::EMAIL,
+                'data' => [
+                    'email' => self::EMAIL,
+                ],
             ]
         );
         $this->assertNoContentResponse($changePasswordResponse);
@@ -53,7 +58,9 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'ActionChangePassword',
                 'currentPassword' => self::PASSWORD,
                 'newPassword' => self::NEW_PASSWORD,
-                'uniqueUserIdentifier' => self::EMAIL,
+                'data' => [
+                    'email' => self::EMAIL,
+                ],
             ]
         );
         $this->assertIsProblemResponse($changePasswordWithOldCredentialsFails, 401);
@@ -68,7 +75,9 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'ActionChangePassword',
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
-                'uniqueUserIdentifier' => 'this-email-does-not-exist@localhost.dev',
+                'data' => [
+                    'email' => 'this-email-does-not-exist@localhost.dev',
+                ],
             ]
         );
         $this->assertIsProblemResponse($changePasswordWithOldCredentialsFails, 401);
@@ -82,7 +91,9 @@ class PostChangePasswordTest extends BaseRequestTestCase
             [
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
-                'uniqueUserIdentifier' => 'this-email-does-not-exist@localhost.dev',
+                'data' => [
+                    'email' => 'this-email-does-not-exist@localhost.dev',
+                ],
             ]
         );
         $this->assertIsProblemResponse($changePasswordWithOldCredentialsFails, 400);
@@ -97,7 +108,9 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'NotActionChangePassword',
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
-                'uniqueUserIdentifier' => 'this-email-does-not-exist@localhost.dev',
+                'data' => [
+                    'email' => 'this-email-does-not-exist@localhost.dev',
+                ],
             ]
         );
         $this->assertIsProblemResponse($changePasswordWithOldCredentialsFails, 400);
@@ -111,7 +124,9 @@ class PostChangePasswordTest extends BaseRequestTestCase
             [
                 'type' => 'ActionChangePassword',
                 'newPassword' => 'abcd',
-                'uniqueUserIdentifier' => 'this-email-does-not-exist@localhost.dev',
+                'data' => [
+                    'email' => 'this-email-does-not-exist@localhost.dev',
+                ],
             ]
         );
         $this->assertIsProblemResponse($changePasswordWithOldCredentialsFails, 400);
@@ -125,13 +140,15 @@ class PostChangePasswordTest extends BaseRequestTestCase
             [
                 'type' => 'ActionChangePassword',
                 'currentPassword' => '1234',
-                'uniqueUserIdentifier' => 'this-email-does-not-exist@localhost.dev',
+                'data' => [
+                    'email' => 'this-email-does-not-exist@localhost.dev',
+                ],
             ]
         );
         $this->assertIsProblemResponse($changePasswordWithOldCredentialsFails, 400);
     }
 
-    public function testChangePasswordFailsIfUniqueUserIdentifierIsMissing(): void
+    public function testChangePasswordFailsIfUniqueIdentifyingPropertyIsMissing(): void
     {
         $changePasswordWithOldCredentialsFails = $this->runPostRequest(
             '/change-password',
@@ -140,6 +157,8 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'ActionChangePassword',
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
+                'data' => [
+                ],
             ]
         );
         $this->assertIsProblemResponse($changePasswordWithOldCredentialsFails, 400);
@@ -154,7 +173,9 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'ActionChangePassword',
                 'currentPassword' => '1234',
                 'newPassword' => '1234',
-                'uniqueUserIdentifier' => 'this-email-does-not-exist@localhost.dev',
+                'data' => [
+                    'email' => 'this-email-does-not-exist@localhost.dev',
+                ],
             ]
         );
         $this->assertIsProblemResponse($changePasswordWithOldCredentialsFails, 400);

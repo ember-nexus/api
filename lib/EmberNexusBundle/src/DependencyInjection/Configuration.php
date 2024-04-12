@@ -115,6 +115,17 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
 
+            ->arrayNode(EmberNexusConfiguration::FEATURE_FLAG)
+                ->info('Configures feature flags.')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->booleanNode(EmberNexusConfiguration::FEATURE_FLAG_280_OLD_UNIQUE_USER_IDENTIFIER_DISABLED)
+                        ->info('If true, the original behavior of some user endpoints in versions before 0.1.5 will no longer be supported. Old behavior will be dropped with version 0.2.0. See GitHub issue #280.')
+                        ->defaultFalse()
+                    ->end()
+                ->end()
+            ->end()
+
             ->end()
         ;
 
