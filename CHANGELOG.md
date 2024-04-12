@@ -5,11 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
-### Changed
-- Upgrade upstream dependency NGINX Unit to 1.32.1, closes #274.
 
+## 0.1.5 - 2024-04-12
 ### Changed
-- Upgrade PHP to 8.3.6, closes #278 and #272.
+- Upgrade upstream dependency NGINX Unit to 1.32.1, closes [#274].
+- Upgrade PHP to 8.3.6, closes [#278] and [#272].
 
 ## 0.1.4 - 2024-03-10
 ### Added
