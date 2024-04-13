@@ -71,12 +71,12 @@ class PostChangePasswordController extends AbstractController
 
         // @todo 0.2.0: remove old logic, see also #280
         $uniqueIdentifierValue = null;
+        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         if (!$this->emberNexusConfiguration->isFeatureFlag280OldUniqueUserIdentifierDisabled()) {
             $data = [];
             if (array_key_exists('data', $body)) {
                 $data = $body['data'];
             }
-            $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
             if (array_key_exists($uniqueIdentifier, $data)) {
                 $uniqueIdentifierValue = $data[$uniqueIdentifier];
             }
