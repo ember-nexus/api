@@ -6,6 +6,7 @@ use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -19,7 +20,9 @@ class Server500InternalServerErrorExceptionFactoryTest extends TestCase
         $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $bag = $this->prophesize(ParameterBagInterface::class);
         $bag->get(Argument::is('kernel.environment'))->shouldBeCalledOnce()->willReturn('prod');
-        $factory = new Server500InternalServerErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal());
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->error(Argument::is('a'))->shouldBeCalledOnce();
+        $factory = new Server500InternalServerErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger->reveal());
 
         $exception = $factory->createFromTemplate('a');
 
@@ -37,7 +40,8 @@ class Server500InternalServerErrorExceptionFactoryTest extends TestCase
         $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $bag = $this->prophesize(ParameterBagInterface::class);
         $bag->get(Argument::is('kernel.environment'))->shouldBeCalledOnce()->willReturn('dev');
-        $factory = new Server500InternalServerErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal());
+        $logger = $this->prophesize(LoggerInterface::class)->reveal();
+        $factory = new Server500InternalServerErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger);
 
         $exception = $factory->createFromTemplate('a');
 

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Introduce simpler request bodies for endpoints `POST /change-password`, `POST /token` and `POST /register`. Old
   behavior can be disabled with the feature flag `featureFlag.280_OldUniqueUserIdentifierDisabled`. Closes #280.
 - Add first unit tests for controller, related to #280.
+### Changed
+- In the case of server errors during requests in production environments, i.e. HTTP status code 500, the error message
+  will be printed to the log.
 ### Deprecated
 - Original request body scheme of endpoints `POST /change-password`, `POST /token` and `POST /register` is deprecated,
   will be removed in version 0.2.0, part of #280.

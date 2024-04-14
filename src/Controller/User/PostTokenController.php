@@ -2,14 +2,19 @@
 
 namespace App\Controller\User;
 
+use App\Contract\NodeElementInterface;
+use App\Contract\RelationElementInterface;
+use App\Exception\Client400BadContentException;
+use App\Exception\Client400MissingPropertyException;
+use App\Exception\Client401UnauthorizedException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\JsonResponse;
 use App\Security\TokenGenerator;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
+use App\Service\RequestUtilService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
@@ -28,13 +33,13 @@ class PostTokenController extends AbstractController
     public function __construct(
         private TokenGenerator $tokenGenerator,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private ElementManager $elementManager,
-        private UserPasswordHasher $userPasswordHasher
+        private UserPasswordHasher $userPasswordHasher,
+        private RequestUtilService $requestUtilService
     ) {
     }
 
@@ -46,30 +51,72 @@ class PostTokenController extends AbstractController
     public function postToken(Request $request): Response
     {
         $body = \Safe\json_decode($request->getContent(), true);
-        /**
-         * @var array<string, mixed> $body
-         */
-        if (!array_key_exists('type', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
+        $data = $this->requestUtilService->getDataFromBody($body);
+
+        $this->requestUtilService->validateTypeFromBody('Token', $body);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
+
+        $userElement = $this->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
+        $userId = $userElement->getIdentifier();
+        if (null === $userId) {
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
-        if ('Token' !== $body['type']) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'Token', $body['type']);
+        $this->verifyPasswordMatches($body, $userElement);
+
+        $lifetimeInSeconds = $this->getLifetimeInSecondsFromBody($body);
+        $data = $this->requestUtilService->getDataFromBody($body);
+        $token = $this->tokenGenerator->createNewToken($userId, $data, $lifetimeInSeconds);
+
+        return $this->createTokenResponse($token);
+    }
+
+    private function createTokenResponse(string $token): JsonResponse
+    {
+        return new JsonResponse([
+            'type' => '_TokenResponse',
+            'token' => $token,
+        ]);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     *
+     * @throws Client400BadContentException
+     * @throws Client400MissingPropertyException
+     * @throws Client401UnauthorizedException
+     */
+    private function verifyPasswordMatches(array $body, NodeElementInterface $userElement): void
+    {
+        $password = $this->requestUtilService->getPasswordFromBody($body);
+        if (!$userElement->hasProperty('_passwordHash')) {
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
+        }
+        $hashedPassword = $userElement->getProperty('_passwordHash');
+        if (true !== $this->userPasswordHasher->verifyPassword($password, $hashedPassword)) {
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     *
+     * @throws Client400BadContentException
+     */
+    private function getLifetimeInSecondsFromBody(array $body): ?int
+    {
+        if (!array_key_exists('lifetimeInSeconds', $body)) {
+            return null;
+        }
+        $lifetimeInSeconds = $body['lifetimeInSeconds'];
+        if (!is_int($lifetimeInSeconds)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('lifetimeInSeconds', 'int', gettype($lifetimeInSeconds));
         }
 
-        // @todo 0.2.0: remove old logic, see also #280
-        $uniqueUserIdentifier = null;
-        if (!$this->emberNexusConfiguration->isFeatureFlag280OldUniqueUserIdentifierDisabled()) {
-            if (array_key_exists('user', $body)) {
-                $uniqueUserIdentifier = $body['user'];
-            }
-        }
-        if (null === $uniqueUserIdentifier) {
-            if (!array_key_exists('uniqueUserIdentifier', $body)) {
-                throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('uniqueUserIdentifier', 'string');
-            }
-            $uniqueUserIdentifier = $body['uniqueUserIdentifier'];
-        }
+        return $lifetimeInSeconds;
+    }
 
+    private function findUserByUniqueUserIdentifier(string $uniqueUserIdentifier): NodeElementInterface
+    {
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             sprintf(
@@ -80,40 +127,18 @@ class PostTokenController extends AbstractController
                 'uniqueUserIdentifier' => $uniqueUserIdentifier,
             ]
         ));
-        if (0 === count($res)) {
+        if (1 !== count($res)) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
         $userUuid = Uuid::fromString($res->first()->get('id'));
-
-        $userElement = $this->elementManager->getElement($userUuid);
-        if (null === $userElement) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to load user element from id which was just returned.');
-        }
-
-        if (!array_key_exists('password', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('password', 'string');
-        }
-        $password = $body['password'];
-
-        if (true !== $this->userPasswordHasher->verifyPassword($password, $userElement->getProperty('_passwordHash'))) {
+        $element = $this->elementManager->getElement($userUuid);
+        if (null === $element) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
-
-        $lifetimeInSeconds = null;
-        if (array_key_exists('lifetimeInSeconds', $body)) {
-            $lifetimeInSeconds = (int) $body['lifetimeInSeconds'];
+        if ($element instanceof RelationElementInterface) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Impossible situation, found relation by looking for user node.');
         }
 
-        $data = [];
-        if (array_key_exists('data', $body)) {
-            $data = $body['data'];
-        }
-
-        $token = $this->tokenGenerator->createNewToken($userUuid, $data, $lifetimeInSeconds);
-
-        return new JsonResponse([
-            'type' => '_TokenResponse',
-            'token' => $token,
-        ]);
+        return $element;
     }
 }
