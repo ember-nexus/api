@@ -34,7 +34,7 @@ class RequestUtilService
             throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'string', gettype($type));
         }
         if ($expectedType !== $type) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'User', $body['type']);
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', $expectedType, $body['type']);
         }
     }
 

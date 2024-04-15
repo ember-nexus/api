@@ -29,7 +29,7 @@ class PostChangePasswordTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
                 'password' => self::PASSWORD,
             ]
         );
@@ -40,7 +40,7 @@ class PostChangePasswordTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
                 'password' => self::NEW_PASSWORD,
             ]
         );

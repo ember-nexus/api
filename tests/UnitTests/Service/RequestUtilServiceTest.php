@@ -226,14 +226,12 @@ class RequestUtilServiceTest extends TestCase
         $requestUtilService = $this->getRequestUtilService(
             emberNexusConfiguration: $emberNexusConfiguration
         );
-        $method = new ReflectionMethod(RequestUtilService::class, 'getUniqueUserIdentifierFromBodyAndData');
-        $method->setAccessible(true);
 
         $body = [
             'data' => [],
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$body, $body['data']]);
+            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
@@ -247,7 +245,7 @@ class RequestUtilServiceTest extends TestCase
             'data' => [],
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$body, $body['data']]);
+            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -263,7 +261,7 @@ class RequestUtilServiceTest extends TestCase
             'data' => [],
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$body, $body['data']]);
+            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -276,7 +274,7 @@ class RequestUtilServiceTest extends TestCase
             'uniqueUserIdentifier' => 'test@localhost.dev',
             'data' => [],
         ];
-        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$body, $body['data']]);
+        $uniqueUserIdentifier = $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
         $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
 
         $body = [
@@ -285,7 +283,7 @@ class RequestUtilServiceTest extends TestCase
                 'email' => 'testOld@localhost.dev',
             ],
         ];
-        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$body, $body['data']]);
+        $uniqueUserIdentifier = $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
         $this->assertSame('testOld@localhost.dev', $uniqueUserIdentifier);
 
         $body = [
@@ -293,30 +291,28 @@ class RequestUtilServiceTest extends TestCase
                 'email' => 'test@localhost.dev',
             ],
         ];
-        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$body, $body['data']]);
+        $uniqueUserIdentifier = $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
         $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
     }
 
     public function testGetDataFromBody(): void
     {
         $requestUtilService = $this->getRequestUtilService();
-        $method = new ReflectionMethod(RequestUtilService::class, 'getDataFromBody');
-        $method->setAccessible(true);
 
         $body = [];
-        $data = $method->invokeArgs($requestUtilService, [$body]);
+        $data = $requestUtilService->getDataFromBody($body);
         $this->assertEmpty($data);
 
         $body = [
             'someOtherKey' => 'test',
         ];
-        $data = $method->invokeArgs($requestUtilService, [$body]);
+        $data = $requestUtilService->getDataFromBody($body);
         $this->assertEmpty($data);
 
         $body = [
             'data' => [],
         ];
-        $data = $method->invokeArgs($requestUtilService, [$body]);
+        $data = $requestUtilService->getDataFromBody($body);
         $this->assertEmpty($data);
 
         $body = [
@@ -324,7 +320,7 @@ class RequestUtilServiceTest extends TestCase
                 'key' => 'value',
             ],
         ];
-        $data = $method->invokeArgs($requestUtilService, [$body]);
+        $data = $requestUtilService->getDataFromBody($body);
         $this->assertArrayHasKey('key', $data);
     }
 
@@ -335,12 +331,10 @@ class RequestUtilServiceTest extends TestCase
         }
 
         $requestUtilService = $this->getRequestUtilService();
-        $method = new ReflectionMethod(RequestUtilService::class, 'getPasswordFromBody');
-        $method->setAccessible(true);
 
         $body = [];
         try {
-            $method->invokeArgs($requestUtilService, [$body]);
+            $requestUtilService->getPasswordFromBody($body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
@@ -353,7 +347,7 @@ class RequestUtilServiceTest extends TestCase
             'password' => 1234,
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$body]);
+            $requestUtilService->getPasswordFromBody($body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -368,7 +362,7 @@ class RequestUtilServiceTest extends TestCase
             ],
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$body]);
+            $requestUtilService->getPasswordFromBody($body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -380,7 +374,7 @@ class RequestUtilServiceTest extends TestCase
         $body = [
             'password' => '1234',
         ];
-        $password = $method->invokeArgs($requestUtilService, [$body]);
+        $password = $requestUtilService->getPasswordFromBody($body);
         $this->assertSame('1234', $password);
     }
 }

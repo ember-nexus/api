@@ -5,13 +5,12 @@ namespace App\tests\UnitTests\Controller\User;
 use App\Controller\User\PostRegisterController;
 use App\Exception\Client400ReservedIdentifierException;
 use App\Exception\Client403ForbiddenException;
-use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
+use App\Service\RequestUtilService;
 use App\Type\NodeElement;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
@@ -37,10 +36,9 @@ class PostRegisterControllerTest extends TestCase
         ?UrlGeneratorInterface $router = null,
         ?UserPasswordHasher $userPasswordHasher = null,
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
-        ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
-        ?Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory = null,
         ?Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory = null,
         ?Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory = null,
+        ?RequestUtilService $requestUtilService = null
     ): PostRegisterController {
         return new PostRegisterController(
             $elementManager ?? $this->createMock(ElementManager::class),
@@ -48,10 +46,9 @@ class PostRegisterControllerTest extends TestCase
             $router ?? $this->createMock(UrlGeneratorInterface::class),
             $userPasswordHasher ?? $this->createMock(UserPasswordHasher::class),
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
-            $client400BadContentExceptionFactory ?? $this->createMock(Client400BadContentExceptionFactory::class),
-            $client400MissingPropertyExceptionFactory ?? $this->createMock(Client400MissingPropertyExceptionFactory::class),
             $client400ReservedIdentifierExceptionFactory ?? $this->createMock(Client400ReservedIdentifierExceptionFactory::class),
-            $client403ForbiddenExceptionFactory ?? $this->createMock(Client403ForbiddenExceptionFactory::class)
+            $client403ForbiddenExceptionFactory ?? $this->createMock(Client403ForbiddenExceptionFactory::class),
+            $requestUtilService ?? $this->createMock(RequestUtilService::class)
         );
     }
 
@@ -94,7 +91,6 @@ class PostRegisterControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $request->method('getContent')->willReturn('{"type": "User", "password": "1234", "uniqueUserIdentifier": "test@example.com"}');
 
-        //        $response = $method->invokeArgs($postRegisterController, [$request]);
         $response = $postRegisterController->postRegister($request);
         $this->assertInstanceOf(CreatedResponse::class, $response);
         $this->assertSame(201, $response->getStatusCode());
@@ -255,6 +251,10 @@ class PostRegisterControllerTest extends TestCase
 
     public function testCreateCreatedResponse(): void
     {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');
         $postRegisterController = $this->getPostRegisterController(
