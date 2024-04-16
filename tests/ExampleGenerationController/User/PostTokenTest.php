@@ -17,7 +17,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
                 'password' => self::PASSWORD,
             ]
         );
@@ -46,7 +46,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
             ]
         );
         $documentationHeadersPath = 'docs/api-endpoints/user/post-token/400-response-header.txt';
@@ -70,7 +70,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
                 'password' => 'wrongPassword',
             ]
         );

@@ -3,8 +3,10 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-!> This is the original variant of the `POST /register` endpoint, which is deprecated since version 0.1.6. It will be
-removed in version 0.2.0.
+> [!WARNING]
+> You are looking at deprecated documentation.
+> The behavior described on this page will be removed in version 0.2.0.
+> For the up-to-date version of the `POST /register` endpoint, see [POST /register](/api-endpoints/user/post-register.md).
 
 Endpoint for registering / creating new accounts.
 
@@ -59,21 +61,21 @@ the `Location` header.
 
 ### **🔴 Error 400**
 
-<div class="code-title auto-refresh">Response Headers</div>
+<div class="code-title">Response Headers</div>
 
 [Response Body](./post-register-old/400-response-header.txt ':include :type=code')
 
-<div class="code-title auto-refresh">Response Body</div>
+<div class="code-title">Response Body</div>
 
 [Response Body](./post-register-old/400-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 403**
 
-<div class="code-title auto-refresh">Response Headers</div>
+<div class="code-title">Response Headers</div>
 
 [Response Body](./post-register-old/403-response-header.txt ':include :type=code')
 
-<div class="code-title auto-refresh">Response Body</div>
+<div class="code-title">Response Body</div>
 
 [Response Body](./post-register-old/403-response-body.json ':include :type=code problem+json')
 

@@ -42,13 +42,20 @@ class RequestUtilService
      * @deprecated will be removed in version 0.2.0
      * @see GitHub issue #280
      *
+     * @param array<string, mixed> $body
      * @param array<string, mixed> $data
      *
      * @throws Client400BadContentException
      * @throws Client400MissingPropertyException
      */
-    protected function getUniqueUserIdentifierFromDataOld(array $data): string
+    protected function getUniqueUserIdentifierFromBodyAndDataOld(array $body, array $data): string
     {
+        if (!array_key_exists('user', $body)) {
+            $uniqueUserIdentifier = $body['user'];
+            if (is_string($uniqueUserIdentifier)) {
+                return $uniqueUserIdentifier;
+            }
+        }
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         if (!array_key_exists($uniqueIdentifier, $data)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate(sprintf('data.%s', $uniqueIdentifier), 'string');
@@ -100,7 +107,7 @@ class RequestUtilService
                 /**
                  * @psalm-suppress DeprecatedMethod
                  */
-                $uniqueUserIdentifier = $this->getUniqueUserIdentifierFromDataOld($data);
+                $uniqueUserIdentifier = $this->getUniqueUserIdentifierFromBodyAndDataOld($body, $data);
             } catch (Exception $e) {
             }
         }

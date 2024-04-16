@@ -5,7 +5,7 @@ namespace App\tests\FeatureTests\Endpoint\User;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * @group replaced
+ * @group deprecated
  */
 class PostChangePasswordOldTest extends BaseRequestTestCase
 {

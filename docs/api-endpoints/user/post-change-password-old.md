@@ -3,14 +3,16 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-!> This is the original variant of the `POST /change-password` endpoint, which is deprecated since version 0.1.6. It
-will be removed in version 0.2.0.
+> [!WARNING]
+> You are looking at deprecated documentation.
+> The behavior described on this page will be removed in version 0.2.0.
+> For the up-to-date version of the `POST /change-password` endpoint, see [POST /change-password](/api-endpoints/user/post-change-password.md).
 
 Endpoint allows changing the user's current password.
 
-!> This endpoint requires knowing the currently used password.
+This endpoint requires knowing the currently used password.
 
-!> Using auth tokens for this endpoint is optional; they are just used for rate limiting here.
+Using auth tokens for this endpoint is optional; they are just used for rate limiting here.
 
 ## Request Body
 
@@ -26,8 +28,9 @@ The request must contain the following attributes:
   The required identifier name is returned by the
   [instance configuration endpoint](/api-endpoints/get-instance-configuration) and in error messages.
 
-!> **Notice regarding passwords**: They can contain any string and will be hashed internally. Whitespace at the start or
-end of the password will **not** be removed, though it is discouraged. No password complexity checks are performed.
+> [!SECURITY]
+> **Notice regarding passwords**: They can contain any string and will be hashed internally. Whitespace at the start or
+> end of the password will **not** be removed, though it is discouraged. No password complexity checks are performed.
 
 ```json
 {
@@ -63,31 +66,31 @@ new password.
 
 ### **🔴 Error 400**
 
-<div class="code-title auto-refresh">Response Headers</div>
+<div class="code-title">Response Headers</div>
 
 [Response Body](./post-change-password-old/400-response-header.txt ':include :type=code')
 
-<div class="code-title auto-refresh">Response Body</div>
+<div class="code-title">Response Body</div>
 
 [Response Body](./post-change-password-old/400-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 401**
 
-<div class="code-title auto-refresh">Response Headers</div>
+<div class="code-title">Response Headers</div>
 
 [Response Body](./post-change-password-old/401-response-header.txt ':include :type=code')
 
-<div class="code-title auto-refresh">Response Body</div>
+<div class="code-title">Response Body</div>
 
 [Response Body](./post-change-password-old/401-response-body.json ':include :type=code problem+json')
 
 ### **🔴 Error 403**
 
-<div class="code-title auto-refresh">Response Headers</div>
+<div class="code-title">Response Headers</div>
 
 [Response Body](./post-change-password-old/403-response-header.txt ':include :type=code')
 
-<div class="code-title auto-refresh">Response Body</div>
+<div class="code-title">Response Body</div>
 
 [Response Body](./post-change-password-old/403-response-body.json ':include :type=code problem+json')
 

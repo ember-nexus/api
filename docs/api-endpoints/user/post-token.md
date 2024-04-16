@@ -3,8 +3,10 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-!> This endpoint's request body changed with version 0.1.6. The old variant is deprecated and will be removed in version
-0.2.0. Link to the old documentation: [POST /token (old)](/api-endpoints/user/post-token-old.md).
+> [!NOTE]
+> This endpoint's request body received a breaking change with version [0.1.6](https://github.com/ember-nexus/api/releases/tag/0.1.6).
+> The previous variant is deprecated and will be removed in version 0.2.0.
+> Link to the old documentation: [POST /token (old)](/api-endpoints/user/post-token-old.md).
 
 Endpoint for creating new tokens.
 
@@ -17,7 +19,7 @@ The posted request must be a valid JSON document.
 
 The request must contain the following attributes:
 
-- `type`: Containing the content "Token". No other values are currently possible.
+- `type`: Containing the content `Token`. No other values are currently possible.
 - `uniqueUserIdentifier`: Some attribute uniquely identifying a user, normally an email address. Can be configured.
 - `password`: The plain text password of the user.
 - `data`: Object of properties, optional.
