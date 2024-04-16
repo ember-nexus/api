@@ -5,8 +5,6 @@ namespace App\Controller\User;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Response\NoContentResponse;
-use App\Security\UserPasswordHasher;
-use App\Service\ElementManager;
 use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,12 +15,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class PostChangePasswordController extends AbstractController
 {
     public function __construct(
-        private ElementManager $elementManager,
-        private UserPasswordHasher $userPasswordHasher,
+        private RequestUtilService $requestUtilService,
+        private SecurityUtilService $securityUtilService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
-        private RequestUtilService $requestUtilService,
-        private SecurityUtilService $securityUtilService
     ) {
     }
 
@@ -51,14 +47,8 @@ class PostChangePasswordController extends AbstractController
         }
 
         $this->securityUtilService->validateUserIsNotAnonymousUser($userId);
-
         $this->securityUtilService->validatePasswordMatches($userNode, $currentPassword);
-
-        $newPasswordHash = $this->userPasswordHasher->hashPassword($newPassword);
-
-        $userNode->addProperty('_passwordHash', $newPasswordHash);
-        $this->elementManager->merge($userNode);
-        $this->elementManager->flush();
+        $this->securityUtilService->changeUserPassword($userNode, $newPassword);
 
         return new NoContentResponse();
     }

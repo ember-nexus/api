@@ -48,6 +48,17 @@ class SecurityUtilService
     }
 
     /**
+     * **Note:** This function calls the element manager's flush method.
+     */
+    public function changeUserPassword(NodeElementInterface $userNode, string $newPassword): void
+    {
+        $newPasswordHash = $this->userPasswordHasher->hashPassword($newPassword);
+        $userNode->addProperty('_passwordHash', $newPasswordHash);
+        $this->elementManager->merge($userNode);
+        $this->elementManager->flush();
+    }
+
+    /**
      * @throws Server500LogicErrorException
      * @throws Client403ForbiddenException
      */

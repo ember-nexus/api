@@ -2,6 +2,7 @@
 
 namespace App\tests\UnitTests\Service;
 
+use App\Contract\NodeElementInterface;
 use App\Exception\Client401UnauthorizedException;
 use App\Exception\Client403ForbiddenException;
 use App\Exception\Server500LogicErrorException;
@@ -28,9 +29,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
-/**
- * @group test
- */
 class SecurityUtilServiceTest extends TestCase
 {
     private function getSecurityUtilService(
@@ -210,6 +208,36 @@ class SecurityUtilServiceTest extends TestCase
 
         $userId = Uuid::fromString('a530420d-d426-4028-9377-9f8486ae7a4a');
         $securityUtilService->validateUserIsNotAnonymousUser($userId);
+        $this->expectNotToPerformAssertions();
+    }
+
+    public function testChangeUserPassword(): void
+    {
+        if (array_key_exists('LEAK', $_ENV)) {
+            $this->markTestSkipped();
+        }
+
+        $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
+        $userPasswordHasher->method('hashPassword')->willReturn('someHash');
+
+        $elementManager = $this->createMock(ElementManager::class);
+        $elementManager->method('merge')
+            ->with(
+                $this->callback(function (NodeElementInterface $userNode) {
+                    return $userNode->hasProperty('_passwordHash')
+                        && 'someHash' === $userNode->getProperty('_passwordHash');
+                })
+            );
+
+        $userNode = new NodeElement();
+
+        $securityUtilService = $this->getSecurityUtilService(
+            elementManager: $elementManager,
+            userPasswordHasher: $userPasswordHasher
+        );
+
+        $securityUtilService->changeUserPassword($userNode, '1234');
+
         $this->expectNotToPerformAssertions();
     }
 
