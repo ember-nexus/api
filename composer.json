@@ -95,6 +95,7 @@
       "@auto-scripts"
     ],
     "test:unit": "php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist",
+    "test:unit:test": "php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --group test",
     "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude replaced",
     "test:feature:replaced": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group replaced",
     "test:feature:test": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group test",

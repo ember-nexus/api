@@ -132,16 +132,16 @@ class RequestUtilService
      * @throws Client400BadContentException
      * @throws Client400MissingPropertyException
      */
-    public function getPasswordFromBody(array $body): string
+    public function getStringFromBody(string $key, array $body): string
     {
-        if (!array_key_exists('password', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('password', 'string');
+        if (!array_key_exists($key, $body)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate($key, 'string');
         }
-        $password = $body['password'];
-        if (!is_string($password)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('password', 'string', gettype($password));
+        $value = $body[$key];
+        if (!is_string($value)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate($key, 'string', gettype($value));
         }
 
-        return $body['password'];
+        return $value;
     }
 }

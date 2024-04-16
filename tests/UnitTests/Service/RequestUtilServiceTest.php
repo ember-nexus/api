@@ -324,7 +324,7 @@ class RequestUtilServiceTest extends TestCase
         $this->assertArrayHasKey('key', $data);
     }
 
-    public function testGetPasswordFromBody(): void
+    public function testGetStringFromBody(): void
     {
         if (array_key_exists('LEAK', $_ENV)) {
             $this->markTestSkipped();
@@ -334,7 +334,7 @@ class RequestUtilServiceTest extends TestCase
 
         $body = [];
         try {
-            $requestUtilService->getPasswordFromBody($body);
+            $requestUtilService->getStringFromBody('password', $body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
@@ -347,7 +347,7 @@ class RequestUtilServiceTest extends TestCase
             'password' => 1234,
         ];
         try {
-            $requestUtilService->getPasswordFromBody($body);
+            $requestUtilService->getStringFromBody('password', $body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -362,7 +362,7 @@ class RequestUtilServiceTest extends TestCase
             ],
         ];
         try {
-            $requestUtilService->getPasswordFromBody($body);
+            $requestUtilService->getStringFromBody('password', $body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -374,7 +374,7 @@ class RequestUtilServiceTest extends TestCase
         $body = [
             'password' => '1234',
         ];
-        $password = $requestUtilService->getPasswordFromBody($body);
+        $password = $requestUtilService->getStringFromBody('password', $body);
         $this->assertSame('1234', $password);
     }
 }

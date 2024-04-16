@@ -50,7 +50,7 @@ class PostRegisterController extends AbstractController
 
         $this->requestUtilService->validateTypeFromBody('User', $body);
         $userId = UuidV4::uuid4();
-        $password = $this->requestUtilService->getPasswordFromBody($body);
+        $password = $this->requestUtilService->getStringFromBody('password', $body);
         $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
         $this->checkForDuplicateUniqueUserIdentifier($uniqueUserIdentifier);
 
