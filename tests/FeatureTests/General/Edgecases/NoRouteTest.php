@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\FeatureTests\General\Edgecases;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;

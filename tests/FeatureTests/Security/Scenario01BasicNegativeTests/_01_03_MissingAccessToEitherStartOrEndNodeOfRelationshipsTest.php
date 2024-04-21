@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\FeatureTests\Security\Scenario01BasicNegativeTests;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;

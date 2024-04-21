@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\FeatureTests\Security\Scenario07SearchAccessTests;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;

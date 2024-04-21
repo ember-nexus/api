@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ElementEtagEvent;
@@ -36,7 +38,7 @@ class LiveElementEtagEventListener
 
         if ($etag) {
             $redisValue = $etag;
-            $this->redisClient->set($redisKey, $redisValue, 'EX', self::REDIS_ELEMENT_TTL_IN_SECONDS);
+            $this->redisClient->set((string) $redisKey, $redisValue, 'EX', self::REDIS_ELEMENT_TTL_IN_SECONDS);
         }
 
         $event->setEtag($etag);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\EntityManager\EventListener;
 
 use App\Contract\NodeElementInterface;

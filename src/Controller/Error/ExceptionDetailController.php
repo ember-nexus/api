@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller\Error;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;

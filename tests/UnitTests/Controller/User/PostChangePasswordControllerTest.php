@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\UnitTests\Controller\User;
 
 use App\Controller\User\PostChangePasswordController;

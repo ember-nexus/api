@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Factory\Exception;
 
 use App\Exception\Client400ReservedIdentifierException;

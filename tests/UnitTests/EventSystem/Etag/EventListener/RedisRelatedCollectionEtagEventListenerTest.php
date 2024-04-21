@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\UnitTests\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
@@ -29,7 +31,7 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
-        $redisClient->get(Argument::is($redisKey))->shouldBeCalledOnce()->willReturn(null);
+        $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn(null);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
         $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
@@ -66,7 +68,7 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
-        $redisClient->get(Argument::is($redisKey))->shouldBeCalledOnce()->willReturn(RedisValueType::NULL->value);
+        $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn(RedisValueType::NULL->value);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
         $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
@@ -104,7 +106,7 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
-        $redisClient->get(Argument::is($redisKey))->shouldBeCalledOnce()->willReturn($etag);
+        $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn((string) $etag);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
         $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(

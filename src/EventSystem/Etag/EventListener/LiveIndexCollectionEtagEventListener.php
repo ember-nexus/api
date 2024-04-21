@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
@@ -39,7 +41,7 @@ class LiveIndexCollectionEtagEventListener
         if (null === $redisValue) {
             $redisValue = RedisValueType::NULL->value;
         }
-        $this->redisClient->set($redisKey, $redisValue, 'EX', self::REDIS_INDEX_COLLECTION_TTL_IN_SECONDS);
+        $this->redisClient->set((string) $redisKey, $redisValue, 'EX', self::REDIS_INDEX_COLLECTION_TTL_IN_SECONDS);
 
         $event->setEtag($etag);
         $event->stopPropagation();

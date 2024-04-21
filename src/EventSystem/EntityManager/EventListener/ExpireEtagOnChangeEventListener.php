@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\Factory\Type\RedisKeyFactory;
+use App\Type\RedisKey;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use Predis\Client;
@@ -48,7 +51,9 @@ class ExpireEtagOnChangeEventListener
         }
 
         $redisEtagKeysToExpire = [];
-
+        /**
+         * @var RedisKey[] $redisEtagKeysToExpire
+         */
         $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagElementRedisKey($elementUuid);
 
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
@@ -104,7 +109,7 @@ class ExpireEtagOnChangeEventListener
         }
 
         foreach ($redisEtagKeysToExpire as $redisEtagKeyToExpire) {
-            $this->redisClient->expire($redisEtagKeyToExpire, 0);
+            $this->redisClient->expire((string) $redisEtagKeyToExpire, 0);
         }
     }
 }

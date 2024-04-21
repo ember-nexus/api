@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\UnitTests\Service;
 
 use App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\UnitTests\EventSystem\Kernel\EventListener;
 
 use App\EventSystem\Kernel\EventListener\RabbitMqConnectionListener;

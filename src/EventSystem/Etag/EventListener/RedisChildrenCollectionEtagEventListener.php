@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent;
@@ -28,7 +30,7 @@ class RedisChildrenCollectionEtagEventListener
                 'redisKey' => (string) $redisKey,
             ]
         );
-        $rawEtag = $this->redisClient->get($redisKey);
+        $rawEtag = $this->redisClient->get((string) $redisKey);
         if (null === $rawEtag) {
             $this->logger->debug(
                 'Unable to find Etag for children collection in Redis.',

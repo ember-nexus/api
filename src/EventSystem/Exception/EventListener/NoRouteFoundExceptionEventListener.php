@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\Exception\EventListener;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;

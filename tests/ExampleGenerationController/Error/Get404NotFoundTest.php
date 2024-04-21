@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\ExampleGenerationController\Error;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
