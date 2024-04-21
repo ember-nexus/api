@@ -3,6 +3,11 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
+> [!NOTE]
+> This endpoint's request body received a breaking change with version [0.1.6](https://github.com/ember-nexus/api/releases/tag/0.1.6).
+> The previous variant is deprecated and will be removed in version 0.2.0.
+> Link to the old documentation: [POST /token (old)](/api-endpoints/user/post-token-old.md).
+
 Endpoint for creating new tokens.
 
 The endpoint can be configured; see
@@ -14,15 +19,15 @@ The posted request must be a valid JSON document.
 
 The request must contain the following attributes:
 
-- `type`: Containing the content "Token". No other values are currently possible.
-- `user`: The value for the user's identifying property, by default the user's email address.
+- `type`: Containing the content `Token`. No other values are currently possible.
+- `uniqueUserIdentifier`: Some attribute uniquely identifying a user, normally an email address. Can be configured.
 - `password`: The plain text password of the user.
 - `data`: Object of properties, optional.
 
 ```json
 {
   "type": "Token",
-  "user": "test@localhost.dev",
+  "uniqueUserIdentifier": "test@localhost.dev",
   "password": "1234",
   "data": {
     "key": "value"
@@ -36,7 +41,7 @@ The request must contain the following attributes:
 curl \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"type": "Token", "user": "test@localhost.dev", "password": "1234"}' \
+  -d '{"type": "Token", "uniqueUserIdentifier": "test@localhost.dev", "password": "1234"}' \
   https://api.localhost/token
 ```
 
@@ -133,7 +138,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'init', ...workflowStart, label: 'server receives POST-request' },
     { id: 'checkType', ...workflowDecision, label: 'is type given?' },
     { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal\nto "Token"?' },
-    { id: 'checkUserProperty', ...workflowDecision, label: 'is user given?' },
+    { id: 'checkUniqueUserIdentifierProperty', ...workflowDecision, label: 'is uniqueUserIdentifier\ngiven?' },
     { id: 'checkPasswordProperty', ...workflowDecision, label: "is password given?" },
     { id: 'checkCredentials', ...workflowDecision, label: 'are credentials ok?' },
     { id: 'createToken', ...workflowStep, label: "create token" },
@@ -145,10 +150,10 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'init', target: 'checkType', label: '' },
     { source: 'checkType', target: 'checkTypeContent', label: 'yes' },
     { source: 'checkType', target: 'error400', label: 'no' },
-    { source: 'checkTypeContent', target: 'checkUserProperty', label: 'yes' },
+    { source: 'checkTypeContent', target: 'checkUniqueUserIdentifierProperty', label: 'yes' },
     { source: 'checkTypeContent', target: 'error400', label: 'no' },
-    { source: 'checkUserProperty', target: 'checkPasswordProperty', label: 'yes' },
-    { source: 'checkUserProperty', target: 'error400', label: 'no' },
+    { source: 'checkUniqueUserIdentifierProperty', target: 'checkPasswordProperty', label: 'yes' },
+    { source: 'checkUniqueUserIdentifierProperty', target: 'error400', label: 'no' },
     { source: 'checkPasswordProperty', target: 'checkCredentials', label: 'yes' },
     { source: 'checkPasswordProperty', target: 'error400', label: 'no' },
     { source: 'checkCredentials', target: 'createToken', label: 'yes' },

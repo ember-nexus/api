@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
@@ -22,7 +23,8 @@ class TokenGenerator
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory
     ) {
         $this->encoder = new Base58();
     }
@@ -46,6 +48,9 @@ class TokenGenerator
             );
             if (0 === $res->count()) {
                 break;
+            }
+            if ($res->count() > 0 && 2 == $i) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to generate new token hash without collision. Please repeat your last call at a later time.');
             }
         }
 

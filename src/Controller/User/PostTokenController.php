@@ -2,39 +2,26 @@
 
 namespace App\Controller\User;
 
+use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\JsonResponse;
 use App\Security\TokenGenerator;
-use App\Security\UserPasswordHasher;
-use App\Service\ElementManager;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
-use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Uuid;
+use App\Service\RequestUtilService;
+use App\Service\SecurityUtilService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
-/**
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
- */
 class PostTokenController extends AbstractController
 {
     public function __construct(
         private TokenGenerator $tokenGenerator,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
-        private EmberNexusConfiguration $emberNexusConfiguration,
-        private CypherEntityManager $cypherEntityManager,
-        private ElementManager $elementManager,
-        private UserPasswordHasher $userPasswordHasher
+        private RequestUtilService $requestUtilService,
+        private SecurityUtilService $securityUtilService
     ) {
     }
 
@@ -46,66 +33,50 @@ class PostTokenController extends AbstractController
     public function postToken(Request $request): Response
     {
         $body = \Safe\json_decode($request->getContent(), true);
+        $data = $this->requestUtilService->getDataFromBody($body);
 
-        if (!array_key_exists('type', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
-        }
-        if ('Token' !== $body['type']) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'Token', $body['type']);
-        }
+        $this->requestUtilService->validateTypeFromBody('Token', $body);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
 
-        /**
-         * @var array<string, mixed> $body
-         */
-        if (!array_key_exists('user', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('user', 'string');
-        }
-        $uniqueIdentifierValue = $body['user'];
-
-        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            sprintf(
-                'MATCH (u:User {%s: $identifier}) RETURN u.id AS id',
-                $uniqueIdentifier,
-            ),
-            [
-                'identifier' => $uniqueIdentifierValue,
-            ]
-        ));
-        if (0 === count($res)) {
-            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
-        }
-        $userUuid = Uuid::fromString($res->first()->get('id'));
-
-        $userElement = $this->elementManager->getElement($userUuid);
-        if (null === $userElement) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to load user element from id which was just returned.');
-        }
-
-        if (!array_key_exists('password', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('password', 'string');
-        }
-        $password = $body['password'];
-
-        if (true !== $this->userPasswordHasher->verifyPassword($password, $userElement->getProperty('_passwordHash'))) {
+        $userElement = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
+        $userId = $userElement->getIdentifier();
+        if (null === $userId) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
-        $lifetimeInSeconds = null;
-        if (array_key_exists('lifetimeInSeconds', $body)) {
-            $lifetimeInSeconds = (int) $body['lifetimeInSeconds'];
-        }
+        $currentPassword = $this->requestUtilService->getStringFromBody('password', $body);
+        $this->securityUtilService->validatePasswordMatches($userElement, $currentPassword);
 
-        $data = [];
-        if (array_key_exists('data', $body)) {
-            $data = $body['data'];
-        }
+        $lifetimeInSeconds = $this->getLifetimeInSecondsFromBody($body);
+        $data = $this->requestUtilService->getDataFromBody($body);
+        $token = $this->tokenGenerator->createNewToken($userId, $data, $lifetimeInSeconds);
 
-        $token = $this->tokenGenerator->createNewToken($userUuid, $data, $lifetimeInSeconds);
+        return $this->createTokenResponse($token);
+    }
 
+    private function createTokenResponse(string $token): JsonResponse
+    {
         return new JsonResponse([
             'type' => '_TokenResponse',
             'token' => $token,
         ]);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     *
+     * @throws Client400BadContentException
+     */
+    private function getLifetimeInSecondsFromBody(array $body): ?int
+    {
+        if (!array_key_exists('lifetimeInSeconds', $body)) {
+            return null;
+        }
+        $lifetimeInSeconds = $body['lifetimeInSeconds'];
+        if (!is_int($lifetimeInSeconds)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('lifetimeInSeconds', 'int', gettype($lifetimeInSeconds));
+        }
+
+        return $lifetimeInSeconds;
     }
 }

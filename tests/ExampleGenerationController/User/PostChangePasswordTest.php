@@ -17,9 +17,7 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'ActionChangePassword',
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
-                'data' => [
-                    'email' => 'user@changePassword.user.endpoint.localhost.dev',
-                ],
+                'uniqueUserIdentifier' => 'user@changePassword.user.endpoint.localhost.dev',
             ]
         );
         $this->assertNoContentResponse($response);
@@ -40,9 +38,7 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'NotActionChangePassword',
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
-                'data' => [
-                    'email' => 'user@changePassword.user.endpoint.localhost.dev',
-                ],
+                'uniqueUserIdentifier' => 'user@changePassword.user.endpoint.localhost.dev',
             ]
         );
         $this->assertIsProblemResponse($response, 400);
@@ -69,9 +65,7 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'ActionChangePassword',
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
-                'data' => [
-                    'email' => 'this-user-does-not-exist@localhost.dev',
-                ],
+                'uniqueUserIdentifier' => 'this-user-does-not-exist@localhost.dev',
             ]
         );
         $this->assertIsProblemResponse($response, 401);
@@ -98,9 +92,7 @@ class PostChangePasswordTest extends BaseRequestTestCase
                 'type' => 'ActionChangePassword',
                 'currentPassword' => '1234',
                 'newPassword' => 'abcd',
-                'data' => [
-                    'email' => 'anonymous-user@localhost.dev',
-                ],
+                'uniqueUserIdentifier' => 'anonymous-user@localhost.dev',
             ]
         );
         $this->assertIsProblemResponse($response, 403);

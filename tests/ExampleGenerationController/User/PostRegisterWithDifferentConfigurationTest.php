@@ -39,9 +39,7 @@ class PostRegisterWithDifferentConfigurationTest extends BaseRequestTestCase
             [
                 'type' => 'User',
                 'password' => '1234',
-                'data' => [
-                    'email' => 'test2@localhost.dev',
-                ],
+                'uniqueUserIdentifier' => 'test2@localhost.dev',
             ]
         );
         $this->assertIsProblemResponse($response, 403);

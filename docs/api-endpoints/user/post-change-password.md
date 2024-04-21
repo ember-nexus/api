@@ -3,11 +3,12 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-Endpoint allows changing the user's current password.
+> [!NOTE]
+> This endpoint's request body received a breaking change with version [0.1.6](https://github.com/ember-nexus/api/releases/tag/0.1.6).
+> The previous variant is deprecated and will be removed in version 0.2.0.
+> Link to the old documentation: [POST /change-password (old)](/api-endpoints/user/post-change-password-old.md).
 
-!> This endpoint requires knowing the currently used password.
-
-!> Using auth tokens for this endpoint is optional; they are just used for rate limiting here.
+Endpoint allows changing the user's current password. Knowledge of the currently used (old) password is required.
 
 ## Request Body
 
@@ -18,22 +19,18 @@ The request must contain the following attributes:
 - `type`: Contains the value `ActionChangePassword`. No other types are currently allowed.
 - `currentPassword`: The user's currently used password in plain text.
 - `newPassword`: The user's new password in plain text.
-- `data.<identifier>`: By default, `data.email` must contain a new unique string. While not required, keeping the
-  content within 256 bytes is encouraged. Optional limits might be added at a later time.  
-  The required identifier name is returned by the
-  [instance configuration endpoint](/api-endpoints/get-instance-configuration) and in error messages.
+- `uniqueUserIdentifier`: Some attribute uniquely identifying a user, normally an email address. Can be configured.
 
-!> **Notice regarding passwords**: They can contain any string and will be hashed internally. Whitespace at the start or
-end of the password will **not** be removed, though it is discouraged. No password complexity checks are performed.
+> [!SECURITY]
+> **Notice regarding passwords**: They can contain any string and will be hashed internally. Whitespace at the start or
+> end of the password will **not** be removed, though it is discouraged. No password complexity checks are performed.
 
 ```json
 {
   "type": "ActionChangePassword",
   "currentPassword": "1234",
   "newPassword": "9876",
-  "data": {
-    "<identifier>": "test@example.com"
-  }
+  "uniqueUserIdentifier": "test@example.com"
 }
 ```
 
@@ -43,7 +40,7 @@ end of the password will **not** be removed, though it is discouraged. No passwo
 curl \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"type": "ActionChangePassword", "currentPassword": "1234", "newPassword": "9876", "data": {"email": "test@example.com"}}' \
+  -d '{"type": "ActionChangePassword", "currentPassword": "1234", "newPassword": "9876", "uniqueUserIdentifier": "test@example.com"}' \
   https://api.localhost/change-password
 ```
 

@@ -20,7 +20,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
                 'password' => self::PASSWORD,
             ]
         );
@@ -49,7 +49,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
                 'password' => self::PASSWORD,
                 'lifetime' => 3600,
             ]
@@ -79,7 +79,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
                 'password' => self::PASSWORD,
                 'lifetime' => 0,
             ]
@@ -109,7 +109,7 @@ class PostTokenTest extends BaseRequestTestCase
             null,
             [
                 'type' => 'Token',
-                'user' => self::EMAIL,
+                'uniqueUserIdentifier' => self::EMAIL,
                 'password' => self::PASSWORD,
                 'lifetime' => 100 * 365 * 24 * 3600, // 100 years
             ]

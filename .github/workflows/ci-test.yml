@@ -219,7 +219,7 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet && composer test:feature"
+          docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet && composer test:feature && composer test:feature:deprecated"
 
   test-example-generation-controller:
     runs-on: buildjet-2vcpu-ubuntu-2204
@@ -253,7 +253,7 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet && composer test:example-generation-controller"
+          docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet && composer test:example-generation-controller && composer test:example-generation-controller:deprecated"
 
 
   test-example-generation-command:

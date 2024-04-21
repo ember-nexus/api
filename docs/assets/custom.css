@@ -271,3 +271,80 @@ pre + iframe {
   width: 10%;
   min-width: 5em;
 }
+
+.alert.ember-nexus {
+  position: relative;
+  padding: .75rem 1.25rem !important;
+  color: black;
+  border-left: 3px solid black;
+}
+
+.alert.ember-nexus.warning {
+  border-left-color: var(--ember-nexus-text-red);
+}
+
+.alert.ember-nexus.security {
+  border-left-color: var(--ember-nexus-text-purple);
+}
+
+.alert.ember-nexus .btn {
+  display: flex;
+  width: auto;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 1rem;
+  text-decoration: none;
+  padding: 0.5rem;
+  border: 1px solid black;
+  color: black;
+}
+
+.alert.ember-nexus .btn > img {
+  height: 2rem;
+  width: auto;
+  display: block;
+  margin-left: 0.5rem;
+}
+
+.blob-container {
+  position: relative;
+}
+
+.blob-container > * {
+  position: relative;
+}
+
+.blob-container > svg {
+  pointer-events: none;
+}
+
+.blob-container > svg .blob {
+  pointer-events: auto;
+}
+
+.blob {
+  fill: #34e58b;
+  pointer-events: auto;
+  transition: fill 0.2s ease-in-out;
+}
+.blob-container:hover .blob {
+  fill: #366dfe;
+}
+
+.icon {
+  height: 24px !important;
+  width: 24px !important;
+}
+
+.icon.icon-note {
+  background-image: url(./information-outline.svg);
+}
+
+.icon.icon-warning {
+  background-image: url(./alert-outline.svg);
+}
+
+.icon.icon-security {
+  background-image: url(./shield-alert-outline.svg);
+}

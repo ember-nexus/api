@@ -16,9 +16,7 @@ class PostRegisterTest extends BaseRequestTestCase
             [
                 'type' => 'User',
                 'password' => '1234',
-                'data' => [
-                    'email' => 'test@localhost.dev',
-                ],
+                'uniqueUserIdentifier' => 'test@localhost.dev',
             ]
         );
         $this->assertIsCreatedResponse($response);
@@ -38,9 +36,7 @@ class PostRegisterTest extends BaseRequestTestCase
             [
                 'type' => 'NotAUser',
                 'password' => '1234',
-                'data' => [
-                    'email' => 'test2@localhost.dev',
-                ],
+                'uniqueUserIdentifier' => 'test2@localhost.dev',
             ]
         );
         $this->assertIsProblemResponse($response, 400);

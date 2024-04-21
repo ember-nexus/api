@@ -2,17 +2,17 @@
 
 namespace App\Controller\User;
 
-use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
+use App\Service\RequestUtilService;
 use App\Type\NodeElement;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
+use Ramsey\Uuid\UuidInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,10 +28,9 @@ class PostRegisterController extends AbstractController
         private UrlGeneratorInterface $router,
         private UserPasswordHasher $userPasswordHasher,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
+        private RequestUtilService $requestUtilService
     ) {
     }
 
@@ -42,63 +41,67 @@ class PostRegisterController extends AbstractController
     )]
     public function postRegister(Request $request): Response
     {
-        $body = \Safe\json_decode($request->getContent(), true);
-
         if (!$this->emberNexusConfiguration->isRegisterEnabled()) {
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
 
+        $body = \Safe\json_decode($request->getContent(), true);
+        $data = $this->requestUtilService->getDataFromBody($body);
+
+        $this->requestUtilService->validateTypeFromBody('User', $body);
         $userId = UuidV4::uuid4();
+        $password = $this->requestUtilService->getStringFromBody('password', $body);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
+        $this->checkForDuplicateUniqueUserIdentifier($uniqueUserIdentifier);
 
-        $data = [];
-        if (array_key_exists('data', $body)) {
-            $data = $body['data'];
-        }
-        /**
-         * @var array<string, mixed> $data
-         */
-        if (!array_key_exists('password', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('password', 'string');
-        }
-        $password = $body['password'];
+        $userNode = $this->createUserNode($userId, $data, $uniqueUserIdentifier, $password);
 
-        if (!array_key_exists('type', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'string');
-        }
-        if ('User' !== $body['type']) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'User', $body['type']);
-        }
+        $this->elementManager->create($userNode);
+        $this->elementManager->flush();
 
+        return $this->createCreatedResponse($userId);
+    }
+
+    /**
+     * @throws \App\Exception\Client400ReservedIdentifierException
+     */
+    private function checkForDuplicateUniqueUserIdentifier(string $uniqueUserIdentifier): void
+    {
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        if (!array_key_exists($uniqueIdentifier, $data)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate($uniqueIdentifier, 'string');
-        }
-        $uniqueIdentifierValue = $data[$uniqueIdentifier];
-
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             sprintf(
-                'MATCH (u:User {%s: $identifier}) RETURN count(u) AS count',
+                'MATCH (u:User {%s: $uniqueUserIdentifier}) RETURN count(u) AS count',
                 $uniqueIdentifier
             ),
             [
-                'identifier' => $uniqueIdentifierValue,
+                'uniqueUserIdentifier' => $uniqueUserIdentifier,
             ]
         ));
         if ($res->first()->get('count') > 0) {
-            throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($uniqueIdentifierValue);
+            throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($uniqueUserIdentifier);
         }
+    }
 
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function createUserNode(UuidInterface $userId, array $data, string $uniqueUserIdentifier, string $password): NodeElement
+    {
+        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         $userNode = (new NodeElement())
             ->setIdentifier($userId)
             ->setLabel('User')
             ->addProperties([
                 ...$data,
+                $uniqueIdentifier => $uniqueUserIdentifier,
                 '_passwordHash' => $this->userPasswordHasher->hashPassword($password),
             ]);
 
-        $this->elementManager->create($userNode);
-        $this->elementManager->flush();
+        return $userNode;
+    }
 
+    private function createCreatedResponse(UuidInterface $userId): CreatedResponse
+    {
         return new CreatedResponse(
             $this->router->generate(
                 'get-element',

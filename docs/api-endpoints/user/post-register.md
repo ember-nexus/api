@@ -3,6 +3,11 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
+> [!NOTE]
+> This endpoint's request body received a breaking change with version [0.1.6](https://github.com/ember-nexus/api/releases/tag/0.1.6).
+> The previous variant is deprecated and will be removed in version 0.2.0.
+> Link to the old documentation: [POST /register (old)](/api-endpoints/user/post-register-old.md).
+
 Endpoint for registering / creating new accounts.
 
 The endpoint can be disabled; see
@@ -14,21 +19,20 @@ The posted request must be a valid JSON document.
 
 The request must contain the following attributes:
 
-- `type`: Containing the content "User". No other values are currently possible.
+- `type`: Containing the content `User`. No other values are currently possible.
 - `password`: The plain text password of the new user. It can contain any string and will be hashed internally.
   Whitespace at the start or end of the string will **not** be removed, though it is discouraged.  
   No password complexity check is performed.
-- `data.<identifier>`: By default, `data.email` must contain a new unique string. While not required, keeping the
-  content within 256 bytes is encouraged. Optional limits might be added at a later time.  
-  The required identifier name is returned by the
-  [instance configuration endpoint](/api-endpoints/get-instance-configuration) and in error messages.
+- `uniqueUserIdentifier`: Some attribute uniquely identifying a user, normally an email address. Can be configured.
+- `data`: Optional properties stored in the user element.
 
 ```json
 {
   "type": "User",
   "password": "1234",
+  "uniqueUserIdentifier": "test@example.com",
   "data": {
-    "<identifier>": "test@example.com"
+    "key": "value"
   }
 }
 ```
@@ -39,7 +43,7 @@ The request must contain the following attributes:
 curl \
   -X POST \
   -H "Content-Type: application/json" \
-  -d '{"type": "User", "password": "1234", "data": {"email": "test@example.com"}}' \
+  -d '{"type": "User", "password": "1234", "uniqueUserIdentifier": "test@example.com"}' \
   https://api.localhost/register
 ```
 
@@ -137,7 +141,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'checkPassword', ...workflowDecision, label: 'is password given?' },
     { id: 'checkType', ...workflowDecision, label: 'is type given?' },
     { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal to "User"?' },
-    { id: 'checkIdentifier', ...workflowDecision, label: "is identifier given?" },
+    { id: 'checkIdentifier', ...workflowDecision, label: "is uniqueUserIdentifier given?" },
     { id: 'checkIdentifierUnique', ...workflowDecision, label: 'is identifier unique?' },
     { id: 'createUser', ...workflowStep, label: "create user" },
     { id: 'error400', ...workflowEndError, label: "return 400" },
