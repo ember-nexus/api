@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\ElementDefragmentize\EventListener;
 
 use App\EventSystem\ElementDefragmentize\Event\NodeElementDefragmentizeEvent;

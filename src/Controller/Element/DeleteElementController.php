@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller\Element;
 
 use App\Attribute\EndpointSupportsEtag;

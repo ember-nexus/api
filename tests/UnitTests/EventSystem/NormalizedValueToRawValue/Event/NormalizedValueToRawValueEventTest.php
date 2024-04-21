@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\UnitTests\EventSystem\NormalizedValueToRawValue\Event;
 
 use App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent;

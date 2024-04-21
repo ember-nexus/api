@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\ExampleGenerationCommand\Cache;
 
 use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;

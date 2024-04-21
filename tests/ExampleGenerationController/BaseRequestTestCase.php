@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\ExampleGenerationController;
 
 use Psr\Http\Message\ResponseInterface;
@@ -119,7 +121,7 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
 
     public function getFormattedResponseBodyAsJsonString(ResponseInterface $response): string
     {
-        $data = json_decode($response->getBody(), true);
+        $data = json_decode((string) $response->getBody(), true);
         if (array_key_exists('exception', $data)) {
             unset($data['exception']);
         }

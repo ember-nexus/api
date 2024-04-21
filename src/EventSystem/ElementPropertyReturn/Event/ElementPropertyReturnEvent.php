@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\ElementPropertyReturn\Event;
 
 use App\Contract\ElementInterface;

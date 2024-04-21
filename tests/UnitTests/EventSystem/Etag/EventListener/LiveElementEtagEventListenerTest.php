@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\UnitTests\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ElementEtagEvent;
@@ -31,7 +33,7 @@ class LiveElementEtagEventListenerTest extends TestCase
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
         $redisClient->set(
-            Argument::is($redisKey),
+            Argument::is((string) $redisKey),
             Argument::is($etag),
             Argument::is('EX'),
             Argument::is(3600)

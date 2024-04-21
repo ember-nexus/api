@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller\File;
 
 use App\Factory\Exception\Server501NotImplementedExceptionFactory;

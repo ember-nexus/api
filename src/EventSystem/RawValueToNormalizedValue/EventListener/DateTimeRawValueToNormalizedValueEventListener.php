@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSystem\RawValueToNormalizedValue\EventListener;
 
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;

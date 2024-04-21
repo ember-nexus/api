@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\ExampleGenerationCommand\Other;
 
 use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
@@ -24,7 +26,7 @@ class ConfigDumpReferenceEmberNexusTest extends BaseCommandTestCase
     {
         return preg_replace_callback(
             '/^( +)/m',
-            fn ($matches) => str_repeat(' ', floor(strlen($matches[0]) / 2)),
+            fn ($matches) => str_repeat(' ', (int) floor(strlen($matches[0]) / 2)),
             $inputString
         );
     }

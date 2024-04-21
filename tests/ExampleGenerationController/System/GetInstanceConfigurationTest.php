@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\tests\ExampleGenerationController\System;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
