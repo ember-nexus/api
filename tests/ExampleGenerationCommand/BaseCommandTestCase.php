@@ -52,10 +52,10 @@ abstract class BaseCommandTestCase extends TestCase
         }
 
         if (array_key_exists('FIX_COMMAND_OUTPUT', $_ENV)) {
-            echo(sprintf(
+            echo sprintf(
                 "\nAutomatically updated file %s.\n",
                 $pathToDocumentationFile
-            ));
+            );
             \Safe\file_put_contents(
                 $pathToProjectRoot.$pathToDocumentationFile,
                 $commandOutput
