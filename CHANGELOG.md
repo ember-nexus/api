@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - In the case of server errors during requests in production environments, i.e. HTTP status code 500, the error message
   will be printed to the log.
+- Update PHP dependencies.
 ### Deprecated
 - Original request body scheme of endpoints `POST /change-password`, `POST /token` and `POST /register` is deprecated,
   will be removed in version 0.2.0, part of #280.

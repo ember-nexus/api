@@ -3,9 +3,11 @@
 namespace App\tests\UnitTests\Service;
 
 use App\Contract\NodeElementInterface;
+use App\Exception\Client400MissingPropertyException;
 use App\Exception\Client401UnauthorizedException;
 use App\Exception\Client403ForbiddenException;
 use App\Exception\Server500LogicErrorException;
+use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
@@ -47,6 +49,7 @@ class SecurityUtilServiceTest extends TestCase
             $server500Bag,
             $this->createMock(LoggerInterface::class)
         );
+        $client400MissingPropertyExceptionFactory = new Client400MissingPropertyExceptionFactory($urlGenerator);
         $client401UnauthorizedExceptionFactory = new Client401UnauthorizedExceptionFactory($urlGenerator);
         $client403ForbiddenExceptionFactory = new Client403ForbiddenExceptionFactory($urlGenerator);
 
@@ -56,6 +59,7 @@ class SecurityUtilServiceTest extends TestCase
             $elementManager ?? $this->createMock(ElementManager::class),
             $userPasswordHasher ?? $this->createMock(UserPasswordHasher::class),
             $bag ?? $this->createMock(ParameterBagInterface::class),
+            $client400MissingPropertyExceptionFactory,
             $client401UnauthorizedExceptionFactory,
             $client403ForbiddenExceptionFactory,
             $server500LogicExceptionFactory,
@@ -80,11 +84,11 @@ class SecurityUtilServiceTest extends TestCase
         try {
             $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
         } catch (Exception $e) {
-            $this->assertInstanceOf(Server500LogicErrorException::class, $e);
+            $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
-             * @var $e Server500LogicErrorException
+             * @var $e Client400MissingPropertyException
              */
-            $this->assertSame('Unable to find property "_passwordHash" on user with id "3207d629-7199-4c2d-9b2a-b0fba10fe309".', $e->getDetail());
+            $this->assertSame("Endpoint requires that the request contains property '_passwordHash' to be set to string.", $e->getDetail());
         }
     }
 
@@ -111,11 +115,11 @@ class SecurityUtilServiceTest extends TestCase
         try {
             $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
         } catch (Exception $e) {
-            $this->assertInstanceOf(Server500LogicErrorException::class, $e);
+            $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Server500LogicErrorException
+             * @var $e Client401UnauthorizedException
              */
-            $this->assertSame('Unable to verify password on user with id "2c6c7f9a-10c9-434c-b770-9733b749b82c".', $e->getDetail());
+            $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
     }
 

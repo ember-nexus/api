@@ -98,7 +98,7 @@ class RequestUtilServiceTest extends TestCase
         $requestUtilService->validateTypeFromBody('Test', $body);
     }
 
-    public function testGetUniqueUserIdentifierFromDataOld(): void
+    public function testGetUniqueUserIdentifierFromBodyAndDataOld(): void
     {
         if (array_key_exists('LEAK', $_ENV)) {
             $this->markTestSkipped();
@@ -109,12 +109,13 @@ class RequestUtilServiceTest extends TestCase
         $requestUtilService = $this->getRequestUtilService(
             emberNexusConfiguration: $emberNexusConfiguration
         );
-        $method = new ReflectionMethod(RequestUtilService::class, 'getUniqueUserIdentifierFromDataOld');
+        $method = new ReflectionMethod(RequestUtilService::class, 'getUniqueUserIdentifierFromBodyAndDataOld');
         $method->setAccessible(true);
 
+        $body = [];
         $data = [];
         try {
-            $method->invokeArgs($requestUtilService, [$data]);
+            $method->invokeArgs($requestUtilService, [$body, $data]);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
@@ -123,11 +124,12 @@ class RequestUtilServiceTest extends TestCase
             $this->assertSame("Endpoint requires that the request contains property 'data.email' to be set to string.", $e->getDetail());
         }
 
+        $body = [];
         $data = [
             'email' => 1234,
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$data]);
+            $method->invokeArgs($requestUtilService, [$body, $data]);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -136,13 +138,14 @@ class RequestUtilServiceTest extends TestCase
             $this->assertSame("Endpoint expects property 'data.email' to be string, got 'integer'.", $e->getDetail());
         }
 
+        $body = [];
         $data = [
             'email' => [
                 'some' => 'object',
             ],
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$data]);
+            $method->invokeArgs($requestUtilService, [$body, $data]);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -151,10 +154,18 @@ class RequestUtilServiceTest extends TestCase
             $this->assertSame("Endpoint expects property 'data.email' to be string, got 'array'.", $e->getDetail());
         }
 
+        $body = [];
         $data = [
             'email' => 'test@localhost.dev',
         ];
-        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$data]);
+        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$body, $data]);
+        $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
+
+        $body = [
+            'user' => 'test@localhost.dev',
+        ];
+        $data = [];
+        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$body, $data]);
         $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
     }
 

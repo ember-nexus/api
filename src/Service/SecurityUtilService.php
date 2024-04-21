@@ -7,6 +7,7 @@ use App\Contract\RelationElementInterface;
 use App\Exception\Client401UnauthorizedException;
 use App\Exception\Client403ForbiddenException;
 use App\Exception\Server500LogicErrorException;
+use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
@@ -27,6 +28,7 @@ class SecurityUtilService
         private ElementManager $elementManager,
         private UserPasswordHasher $userPasswordHasher,
         private ParameterBagInterface $bag,
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
@@ -39,11 +41,11 @@ class SecurityUtilService
     public function validatePasswordMatches(NodeElementInterface $userNode, string $currentPassword): void
     {
         if (!$userNode->hasProperty('_passwordHash')) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Unable to find property "_passwordHash" on user with id "%s".', $userNode->getIdentifier()?->toString() ?? 'no identifier'));
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('_passwordHash', 'string');
         }
         $hashedPassword = $userNode->getProperty('_passwordHash');
         if (true !== $this->userPasswordHasher->verifyPassword($currentPassword, $hashedPassword)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Unable to verify password on user with id "%s".', $userNode->getIdentifier()?->toString() ?? 'no identifier'));
+            throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
     }
 

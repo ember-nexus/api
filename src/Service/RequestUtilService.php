@@ -48,9 +48,9 @@ class RequestUtilService
      * @throws Client400BadContentException
      * @throws Client400MissingPropertyException
      */
-    protected function getUniqueUserIdentifierFromBodyAndDataOld(array $body, array $data): string
+    protected function getUniqueUserIdentifierFromBodyAndDataOld(array $body, array $data): ?string
     {
-        if (!array_key_exists('user', $body)) {
+        if (array_key_exists('user', $body)) {
             $uniqueUserIdentifier = $body['user'];
             if (is_string($uniqueUserIdentifier)) {
                 return $uniqueUserIdentifier;
