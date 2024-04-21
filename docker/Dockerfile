@@ -134,6 +134,8 @@ RUN set -eux; \
 		\
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
+# XXX included due to https://github.com/ember-nexus/api/issues/294 \
+        --enable-opcache \
 # https://wiki.php.net/rfc/argon2_password_hash
 		--with-password-argon2 \
 # https://wiki.php.net/rfc/libsodium
@@ -207,7 +209,7 @@ RUN set -eux; \
 	php --version
 
 COPY ./docker/php-embed/docker-php-ext-* /usr/local/bin/
-COPY ./docker/php-embed/php.ini "$PHP_INI_DIR/php.ini"
+COPY ./docker/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium \
@@ -360,6 +362,8 @@ WORKDIR /var/www/html
 
 
 FROM php as development
+
+COPY ./docker/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers \
     && pecl install xdebug-3.3.1 memprof-3.0.2 \
