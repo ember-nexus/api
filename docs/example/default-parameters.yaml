@@ -57,3 +57,9 @@ ember_nexus:
 
     # Maximum number of items in a collection for which to generate Etags. Bigger collection do not contain Etags due to performance problems.
     etagUpperLimitInCollectionEndpoints: 100
+
+  # Configures feature flags.
+  featureFlag:
+
+    # If true, the original behavior of some user endpoints in versions before 0.1.6 will no longer be supported. Old behavior will be dropped with version 0.2.0. See GitHub issue #280.
+    280_OldUniqueUserIdentifierDisabled: false
