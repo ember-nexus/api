@@ -163,7 +163,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
   test-feature:
-    runs-on: buildjet-8vcpu-ubuntu-2204
+    runs-on: buildjet-4vcpu-ubuntu-2204
     name: 'Feature Test'
     timeout-minutes: 15
     needs:
