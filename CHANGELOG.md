@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - In the case of server errors during requests in production environments, i.e. HTTP status code 500, the error message
   will be printed to the log.
 - Update PHP dependencies.
+- Upgrade remaining GitHub actions, required due to deprecation of Node 16, closes #240.
 ### Deprecated
 - Original request body scheme of endpoints `POST /change-password`, `POST /token` and `POST /register` is deprecated,
   will be removed in version 0.2.0, part of #280.
@@ -48,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.1.2 - 2024-02-28
 ### Changed
-- Upgrade most GitHub actions, required due to deprecation of Node 16, closes [#240].
+- Upgrade most GitHub actions, required due to deprecation of Node 16, relates to [#240].
 - Increase feature test timeout from 10 to 15 minutes.
 - Upgrade PHP to 8.3.3, closes [#253].
 - Upgrade upstream dependency NGINX Unit to 1.32.0, closes [#254].
