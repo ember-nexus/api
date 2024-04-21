@@ -196,9 +196,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateElementEtagWithEdgecaseWhereDifferentObjectIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
@@ -455,9 +452,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateChildrenCollectionEtagDifferentObjectIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
@@ -507,9 +501,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateChildrenCollectionEtagWhereNoDataIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
@@ -761,9 +752,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateParentsCollectionEtagDifferentObjectIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
@@ -813,9 +801,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateParentsCollectionEtagWhereNoDataIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
@@ -1065,9 +1050,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateRelatedCollectionEtagDifferentObjectIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
@@ -1117,9 +1099,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateRelatedCollectionEtagWhereNoDataIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
@@ -1369,9 +1348,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateIndexCollectionEtagDifferentObjectIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
@@ -1421,9 +1397,6 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateIndexCollectionEtagWhereNoDataIsReturned(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         // setup variables
         $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;

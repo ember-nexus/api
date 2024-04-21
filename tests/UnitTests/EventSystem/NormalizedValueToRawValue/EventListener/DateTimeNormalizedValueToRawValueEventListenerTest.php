@@ -13,9 +13,6 @@ class DateTimeNormalizedValueToRawValueEventListenerTest extends TestCase
 {
     public function testNonDatetimeValuesAreIgnored(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $eventListener = new DateTimeNormalizedValueToRawValueEventListener();
         $event = new NormalizedValueToRawValueEvent('not a datetime');
         $eventListener->onNormalizedValueToRawValueEvent($event);

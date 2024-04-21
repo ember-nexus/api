@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add first unit tests for controller, related to #280.
 - Enable PHP's strict type, closes #284.
 - Enable PHP Opcache extension, closes #294.
-- Add `brianium/paratest` as a parallel PHP Unit runtime, related to #63.
+- Add `brianium/paratest` as a parallel PHP Unit runtime, closes #63.
 ### Changed
 - In the case of server errors during requests in production environments, i.e. HTTP status code 500, the error message
   will be printed to the log.

@@ -112,9 +112,6 @@ class IfMatchControllerEventListenerTest extends TestCase
 
     public function testControllerWithEtagAndWeakIfMatchHeaderIsSkipped(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 
@@ -146,9 +143,6 @@ class IfMatchControllerEventListenerTest extends TestCase
 
     public function testControllerWithEtagAndWrongIfMatchHeaderIsSkipped(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 

@@ -45,10 +45,6 @@ class PostTokenControllerTest extends TestCase
 
     public function testPostTokenWithWorkingUser(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $requestUtilService = $this->createMock(RequestUtilService::class);
         $requestUtilService->method('getUniqueUserIdentifierFromBodyAndData')->willReturn('test@example.com');
         $requestUtilService->method('getStringFromBody')->willReturn('1234');
@@ -82,10 +78,6 @@ class PostTokenControllerTest extends TestCase
 
     public function testPostTokenWithBadUser(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $requestUtilService = $this->createMock(RequestUtilService::class);
         $requestUtilService->method('getUniqueUserIdentifierFromBodyAndData')->willReturn('test@example.com');
 
@@ -113,10 +105,6 @@ class PostTokenControllerTest extends TestCase
 
     public function testCreateTokenResponse(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $postTokenController = $this->getPostTokenController();
         $method = new ReflectionMethod(PostTokenController::class, 'createTokenResponse');
         $method->setAccessible(true);
@@ -131,10 +119,6 @@ class PostTokenControllerTest extends TestCase
 
     public function testGetLifetimeInSecondsFromBody(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $postTokenController = $this->getPostTokenController();
         $method = new ReflectionMethod(PostTokenController::class, 'getLifetimeInSecondsFromBody');
         $method->setAccessible(true);

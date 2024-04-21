@@ -94,9 +94,8 @@
     "post-update-cmd": [
       "@auto-scripts"
     ],
-    "test:unit": "php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist",
-    "test:unit:test": "php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --group test",
-    "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/bin/paratest -p 6 --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude deprecated",
+    "test:unit": "php vendor/bin/paratest -p 6 --configuration tests/phpunit.xml.dist",
+    "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/bin/paratest -p 6 --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude-group command,deprecated && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group command",
     "test:feature:deprecated": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group deprecated",
     "test:feature:test": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group test",
     "test:example-generation-controller": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationController --exclude deprecated && php bin/console cache:clear",
@@ -106,7 +105,6 @@
     "test:coverage:xml": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --coverage-clover coverage.xml",
     "test:coverage:html": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --coverage-html ./tmp",
     "test:mutant": "export XDEBUG_MODE=coverage && php vendor/infection/infection/bin/infection --configuration=tests/infection.json5 --threads=4",
-    "test:leak": "export LEAK=true && php vendor/bin/roave-no-leaks --configuration tests/phpunit.xml.dist",
     "cs:list": "PHP_CS_FIXER_IGNORE_ENV=1 php vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix --config=tests/.php-cs-fixer.dist.php --allow-risky=yes --dry-run",
     "cs:fix": "PHP_CS_FIXER_IGNORE_ENV=1 php vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix --config=tests/.php-cs-fixer.dist.php --allow-risky=yes",
     "psalm": "php vendor/bin/psalm --config=tests/psalm.xml --show-info=true --no-cache",

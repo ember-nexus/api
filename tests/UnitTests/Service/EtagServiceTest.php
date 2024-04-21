@@ -152,9 +152,6 @@ class EtagServiceTest extends TestCase
 
     public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeElementAndRequestWithoutAttribute(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
         $authProvider = $this->prophesize(AuthProvider::class);
 

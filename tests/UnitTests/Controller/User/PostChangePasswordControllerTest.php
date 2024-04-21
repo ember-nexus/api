@@ -42,10 +42,6 @@ class PostChangePasswordControllerTest extends TestCase
 
     public function testPostChangePassword(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $requestUtilService = $this->createMock(RequestUtilService::class);
         $requestUtilService
             ->method('getStringFromBody')
@@ -76,10 +72,6 @@ class PostChangePasswordControllerTest extends TestCase
 
     public function testPostChangePasswordWithBadUser(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $requestUtilService = $this->createMock(RequestUtilService::class);
         $requestUtilService
             ->method('getStringFromBody')
@@ -115,10 +107,6 @@ class PostChangePasswordControllerTest extends TestCase
 
     public function testValidateNewPasswordIsDifferentFromCurrentPassword(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $postChangePasswordController = $this->getPostChangePasswordController();
 
         $method = new ReflectionMethod(PostChangePasswordController::class, 'validateNewPasswordIsDifferentFromCurrentPassword');

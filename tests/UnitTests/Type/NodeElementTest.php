@@ -44,9 +44,6 @@ class NodeElementTest extends TestCase
 
     public function testPropertiesTraitGetPropertyWhichDoesNotExist(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $nodeElement = new NodeElement();
 
         $this->expectExceptionMessage('Undefined array key "propertyWhichDoesNotExist".');

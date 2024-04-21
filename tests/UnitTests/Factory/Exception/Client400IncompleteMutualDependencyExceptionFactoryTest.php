@@ -18,9 +18,6 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
 
     public function testFailWithLessThanTwoProperties(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $expectedException = new Server500LogicErrorException('');
         $serverExceptionFactory = $this->prophesize(Server500LogicExceptionFactory::class);
         $serverExceptionFactory
@@ -37,9 +34,6 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
 
     public function testFailWithNoMissingProperty(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $expectedException = new Server500LogicErrorException('');
         $serverExceptionFactory = $this->prophesize(Server500LogicExceptionFactory::class);
         $serverExceptionFactory

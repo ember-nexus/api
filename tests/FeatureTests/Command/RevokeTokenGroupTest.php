@@ -46,9 +46,9 @@ class RevokeTokenGroupTest extends BaseRequestTestCase
             $command,
             result_code: $result
         );
-        if ($result !== 0) {
+        if (0 !== $result) {
             $this->fail(sprintf(
-                "The following command is unsuccessful: %s",
+                'The following command is unsuccessful: %s',
                 $command
             ));
         }
