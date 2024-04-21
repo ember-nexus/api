@@ -139,9 +139,6 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
 
     public function testControllerWithEtagAndWrongIfNoneMatchHeaderReturns412ForPost(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 
@@ -174,9 +171,6 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
 
     public function testControllerWithEtagAndWrongIfNoneMatchHeaderReturns412ForPut(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 
@@ -209,9 +203,6 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
 
     public function testControllerWithEtagAndWrongIfNoneMatchHeaderReturns412ForPatch(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 
@@ -244,9 +235,6 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
 
     public function testControllerWithEtagAndWrongIfNoneMatchHeaderReturns412ForDelete(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 
@@ -279,9 +267,6 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
 
     public function testControllerWithEtagAndWrongIfNoneMatchHeaderReturns304ForGet(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 
@@ -312,9 +297,6 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
 
     public function testControllerWithEtagAndWrongIfNoneMatchHeaderReturns304ForHead(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 

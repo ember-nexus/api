@@ -49,9 +49,6 @@ class UserElementPropertyChangeEventListenerTest extends TestCase
 
     public function testUserWithPasswordHashPropertyTriggersException(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getRegisterUniqueIdentifier()->willReturn('email');
         $event = new ElementPropertyChangeEvent('User', null, ['_passwordHash' => true]);
@@ -70,9 +67,6 @@ class UserElementPropertyChangeEventListenerTest extends TestCase
 
     public function testUserWithUniqueIdentifyingPropertyTriggersException(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getRegisterUniqueIdentifier()->willReturn('email');
         $event = new ElementPropertyChangeEvent('User', null, ['email' => true]);

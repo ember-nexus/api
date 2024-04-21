@@ -56,10 +56,6 @@ class PostRegisterControllerTest extends TestCase
 
     public function testPostRegisterWithEnabledRegister(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
         $emberNexusConfiguration->method('isRegisterEnabled')->willReturn(true);
@@ -101,10 +97,6 @@ class PostRegisterControllerTest extends TestCase
 
     public function testPostRegisterWithDisabledRegister(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('isRegisterEnabled')->willReturn(false);
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
@@ -133,10 +125,6 @@ class PostRegisterControllerTest extends TestCase
 
     public function testCheckForDuplicateUniqueUserIdentifierWithDuplicate(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
 
@@ -215,10 +203,6 @@ class PostRegisterControllerTest extends TestCase
 
     public function testCreateUserNode(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
         $postRegisterController = $this->getPostRegisterController(
@@ -253,10 +237,6 @@ class PostRegisterControllerTest extends TestCase
 
     public function testCreateCreatedResponse(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');
         $postRegisterController = $this->getPostRegisterController(

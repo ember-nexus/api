@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\tests\UnitTests\Type;
 
 use App\Type\RelationElement;
-use Exception;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
@@ -45,18 +44,10 @@ class RelationElementTest extends TestCase
 
     public function testPropertiesTraitGetPropertyWhichDoesNotExist(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $relationElement = new RelationElement();
 
-        try {
-            $relationElement->getProperty('propertyWhichDoesNotExist');
-        } catch (Exception $exception) {
-            $this->assertSame('Undefined array key "propertyWhichDoesNotExist"', $exception->getMessage());
-        }
-
-        $this->assertTrue(true);
+        $this->expectExceptionMessage('Undefined array key "propertyWhichDoesNotExist".');
+        $relationElement->getProperty('propertyWhichDoesNotExist');
     }
 
     public function testPropertiesTraitRemovePropertyWhichDoesNotExist(): void

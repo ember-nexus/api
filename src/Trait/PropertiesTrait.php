@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Trait;
 
+use Exception;
+
 trait PropertiesTrait
 {
     /**
@@ -34,6 +36,10 @@ trait PropertiesTrait
 
     public function getProperty(string $name): mixed
     {
+        if (!$this->hasProperty($name)) {
+            throw new Exception(sprintf('Undefined array key "%s".', $name));
+        }
+
         return $this->properties[$name];
     }
 

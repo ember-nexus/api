@@ -70,10 +70,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testValidatePasswordMatchesWithMissingProperty(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $bag = $this->createMock(ParameterBagInterface::class);
         $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
 
@@ -96,10 +92,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testValidatePasswordMatchesWithBadPassword(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $bag = $this->createMock(ParameterBagInterface::class);
         $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
 
@@ -127,10 +119,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testValidatePasswordMatchesWithCorrectPassword(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $bag = $this->createMock(ParameterBagInterface::class);
         $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
 
@@ -151,10 +139,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testValidateUserIsNotAnonymousUserWithBadConfig(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $bag = $this->createMock(ParameterBagInterface::class);
         $bag->method('get')->willReturn(null);
 
@@ -176,10 +160,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testValidateUserIsNotAnonymousUserWithAnonymousUser(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $bag = $this->createMock(ParameterBagInterface::class);
         $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
 
@@ -201,10 +181,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testValidateUserIsNotAnonymousUserWithNormalUser(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $bag = $this->createMock(ParameterBagInterface::class);
         $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
 
@@ -219,10 +195,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testChangeUserPassword(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
         $userPasswordHasher->method('hashPassword')->willReturn('someHash');
 
@@ -249,10 +221,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testFindUserByUniqueUserIdentifierWithNoResults(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
 
@@ -292,10 +260,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testFindUserByUniqueUserIdentifierWithTooManyResults(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
 
@@ -342,10 +306,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testFindUserByUniqueUserIdentifierWithMissingNode(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
 
@@ -399,10 +359,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testFindUserByUniqueUserIdentifierWithRelation(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
 
@@ -447,10 +403,6 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testFindUserByUniqueUserIdentifierWithNode(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
 

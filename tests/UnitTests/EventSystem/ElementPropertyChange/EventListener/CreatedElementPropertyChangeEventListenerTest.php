@@ -29,9 +29,6 @@ class CreatedElementPropertyChangeEventListenerTest extends TestCase
 
     public function testElementWithCreatedPropertyTriggersException(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $event = new ElementPropertyChangeEvent('Test', null, ['created' => true]);
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator->generate(Argument::cetera())

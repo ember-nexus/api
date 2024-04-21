@@ -14,9 +14,6 @@ class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
 {
     public function testNonStringValuesAreIgnored(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $eventListener = new DateTimeRawValueToNormalizedValueEventListener();
         $event = new RawValueToNormalizedValueEvent(1234);
         $eventListener->onRawValueToNormalizedValueEvent($event);
@@ -27,9 +24,6 @@ class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
 
     public function testShortStringValuesAreIgnored(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $eventListener = new DateTimeRawValueToNormalizedValueEventListener();
         $event = new RawValueToNormalizedValueEvent('short');
         $eventListener->onRawValueToNormalizedValueEvent($event);
@@ -40,9 +34,6 @@ class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
 
     public function testLongStringValuesAreIgnored(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $eventListener = new DateTimeRawValueToNormalizedValueEventListener();
         $event = new RawValueToNormalizedValueEvent('long-----x---------x---------x');
         $eventListener->onRawValueToNormalizedValueEvent($event);
@@ -53,9 +44,6 @@ class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
 
     public function testNonDateStringValuesAreIgnored(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $eventListener = new DateTimeRawValueToNormalizedValueEventListener();
         $event = new RawValueToNormalizedValueEvent('2005-08-15Z15:52:01+00:00');
         $eventListener->onRawValueToNormalizedValueEvent($event);

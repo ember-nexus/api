@@ -21,10 +21,6 @@ class AuthProviderTest extends TestCase
 
     public function testFailWhenAnonymousUserIsNotConfigured(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $bag = $this->prophesize(ParameterBagInterface::class);
         $bag->get(Argument::is('anonymousUserUUID'))->shouldBeCalledOnce()->willReturn(null);
 

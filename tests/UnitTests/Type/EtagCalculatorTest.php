@@ -68,10 +68,6 @@ class EtagCalculatorTest extends TestCase
 
     public function testAddDateTimeAfterGettingEtagResultsInException(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $etagCalculator = new EtagCalculator('seed');
         $etagCalculator->getEtag();
 
@@ -81,10 +77,6 @@ class EtagCalculatorTest extends TestCase
 
     public function testAddUuidAfterGettingEtagResultsInException(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $etagCalculator = new EtagCalculator('seed');
         $etagCalculator->getEtag();
 

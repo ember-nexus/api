@@ -44,9 +44,6 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
 
     public function testTokenWithTokenPropertyTriggersException(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $event = new ElementPropertyChangeEvent('Token', null, ['token' => true]);
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator->generate(Argument::cetera())
@@ -62,9 +59,6 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
 
     public function testTokenWithTokenHashPropertyTriggersException(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
         $event = new ElementPropertyChangeEvent('Token', null, ['_tokenHash' => true]);
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator->generate(Argument::cetera())

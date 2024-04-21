@@ -36,10 +36,6 @@ class RequestUtilServiceTest extends TestCase
 
     public function testValidateTypeFromBody(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $requestUtilService = $this->getRequestUtilService();
 
         $body = [];
@@ -102,10 +98,6 @@ class RequestUtilServiceTest extends TestCase
 
     public function testGetUniqueUserIdentifierFromBodyAndDataOld(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
         $requestUtilService = $this->getRequestUtilService(
@@ -173,10 +165,6 @@ class RequestUtilServiceTest extends TestCase
 
     public function testGetUniqueUserIdentifierFromDataNew(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $requestUtilService = $this->getRequestUtilService();
         $method = new ReflectionMethod(RequestUtilService::class, 'getUniqueUserIdentifierFromBodyNew');
         $method->setAccessible(true);
@@ -229,10 +217,6 @@ class RequestUtilServiceTest extends TestCase
 
     public function testGetUniqueUserIdentifierFromBodyAndDataWithOldWayEnabled(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
         $emberNexusConfiguration->method('isFeatureFlag280OldUniqueUserIdentifierDisabled')->willReturn(false);
@@ -339,10 +323,6 @@ class RequestUtilServiceTest extends TestCase
 
     public function testGetStringFromBody(): void
     {
-        if (array_key_exists('LEAK', $_ENV)) {
-            $this->markTestSkipped();
-        }
-
         $requestUtilService = $this->getRequestUtilService();
 
         $body = [];
