@@ -123,13 +123,13 @@ class ElementManager
         return $this;
     }
 
-    public function getElement(UuidInterface $uuid): NodeElementInterface|RelationElementInterface|null
+    public function getElement(UuidInterface $id): NodeElementInterface|RelationElementInterface|null
     {
-        $node = $this->getNode($uuid);
+        $node = $this->getNode($id);
         if ($node) {
             return $node;
         }
-        $relation = $this->getRelation($uuid);
+        $relation = $this->getRelation($id);
         if ($relation) {
             return $relation;
         }
@@ -137,13 +137,13 @@ class ElementManager
         return null;
     }
 
-    public function getNode(UuidInterface $uuid): ?NodeElementInterface
+    public function getNode(UuidInterface $id): ?NodeElementInterface
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 'MATCH (node {id: $id}) RETURN node',
                 [
-                    'id' => $uuid->toString(),
+                    'id' => $id->toString(),
                 ]
             )
         );
@@ -152,7 +152,7 @@ class ElementManager
         } catch (OutOfBoundsException $e) {
             return null;
         }
-        $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $uuid->toString());
+        $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $id->toString());
         $fileFragment = null;
 
         $node = $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment, $fileFragment);
@@ -163,13 +163,13 @@ class ElementManager
         return $node;
     }
 
-    public function getRelation(UuidInterface $uuid): ?RelationElementInterface
+    public function getRelation(UuidInterface $id): ?RelationElementInterface
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 'MATCH (startNode)-[relation {id: $id}]->(endNode) RETURN startNode, relation, endNode',
                 [
-                    'id' => $uuid->toString(),
+                    'id' => $id->toString(),
                 ]
             )
         );
@@ -186,7 +186,7 @@ class ElementManager
         if (null === $type) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to get relationship type.');
         }
-        $documentFragment = $this->mongoEntityManager->getOneByIdentifier($type, $uuid->toString());
+        $documentFragment = $this->mongoEntityManager->getOneByIdentifier($type, $id->toString());
         $fileFragment = null;
 
         $relation = $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment, $fileFragment);

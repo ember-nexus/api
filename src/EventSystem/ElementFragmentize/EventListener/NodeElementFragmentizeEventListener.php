@@ -18,7 +18,7 @@ class NodeElementFragmentizeEventListener
     {
         $nodeElement = $event->getNodeElement();
 
-        $nodeElementIdentifier = $nodeElement->getIdentifier();
+        $nodeElementIdentifier = $nodeElement->getId();
         if (null === $nodeElementIdentifier) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Node element fragmentize event listener requires node to contain valid UUID.');
         }

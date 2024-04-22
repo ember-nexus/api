@@ -44,9 +44,9 @@ class PostSearchController extends AbstractController
     {
         $body = \Safe\json_decode($request->getContent(), true);
 
-        $currentUserUuid = $this->authProvider->getUserUuid();
+        $currentUserId = $this->authProvider->getUserId();
 
-        $userGroups = $this->accessChecker->getUsersGroups($currentUserUuid);
+        $userGroups = $this->accessChecker->getUsersGroups($currentUserId);
         $stringUserGroups = [];
         foreach ($userGroups as $userGroup) {
             $stringUserGroups[] = $userGroup->toString();
@@ -115,7 +115,7 @@ class PostSearchController extends AbstractController
                                         [
                                             'term' => [
                                                 '_usersWithSearchAccess.keyword' => [
-                                                    'value' => $currentUserUuid->toString(),
+                                                    'value' => $currentUserId->toString(),
                                                 ],
                                             ],
                                         ],
@@ -139,6 +139,6 @@ class PostSearchController extends AbstractController
         }
         $totalElements = $res->asArray()['hits']['total']['value'];
 
-        return $this->collectionService->buildElementCollectionFromUuids($elementIds, $totalElements);
+        return $this->collectionService->buildElementCollectionFromIds($elementIds, $totalElements);
     }
 }

@@ -16,7 +16,7 @@ class ChildrenCollectionEtagEvent implements EventInterface
     private ?Etag $etag = null;
 
     public function __construct(
-        private UuidInterface $parentUuid
+        private UuidInterface $parentId
     ) {
     }
 
@@ -32,8 +32,8 @@ class ChildrenCollectionEtagEvent implements EventInterface
         return $this;
     }
 
-    public function getParentUuid(): UuidInterface
+    public function getParentId(): UuidInterface
     {
-        return $this->parentUuid;
+        return $this->parentId;
     }
 }

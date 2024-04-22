@@ -9,15 +9,15 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 class IfNoneMatchTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:RRq4WsomBeTH0AAa7Jmi4k';
-    private const string UUID_DATA = '88d75ef3-8b27-4519-af9a-baa5dc2907db';
-    private const string UUID_PARENT = '17370748-35e2-41f7-ae9b-66be353b5a90';
-    private const string UUID_CHILD = 'f621c1b9-1d3f-4a9c-999c-99d1edcc9c6f';
-    private const string UUID_RELATED = 'b576e116-f5f1-4106-92e6-1547b8131108';
+    private const string ID_DATA = '88d75ef3-8b27-4519-af9a-baa5dc2907db';
+    private const string ID_PARENT = '17370748-35e2-41f7-ae9b-66be353b5a90';
+    private const string ID_CHILD = 'f621c1b9-1d3f-4a9c-999c-99d1edcc9c6f';
+    private const string ID_RELATED = 'b576e116-f5f1-4106-92e6-1547b8131108';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $id, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
-            sprintf('/%s%s', $uuid, $additionalPath),
+            sprintf('/%s%s', $id, $additionalPath),
             $token
         );
         $etag = $response->getHeader('Etag')[0];
@@ -30,12 +30,12 @@ class IfNoneMatchTest extends BaseRequestTestCase
 
     public function testIfMatchElementNode(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_DATA, '', '"ROiR1100cKu"');
+        $this->testEtagOfElement(self::TOKEN, self::ID_DATA, '', '"ROiR1100cKu"');
 
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN
         );
@@ -44,7 +44,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -56,7 +56,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -71,7 +71,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -83,7 +83,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -94,7 +94,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -106,7 +106,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -118,12 +118,12 @@ class IfNoneMatchTest extends BaseRequestTestCase
 
     public function testIfMatchElementRelation(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_RELATED, '', '"IZK4tgD1OhG"');
+        $this->testEtagOfElement(self::TOKEN, self::ID_RELATED, '', '"IZK4tgD1OhG"');
 
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_RELATED
+                self::ID_RELATED
             ),
             self::TOKEN
         );
@@ -132,7 +132,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_RELATED
+                self::ID_RELATED
             ),
             self::TOKEN,
             [
@@ -144,7 +144,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_RELATED
+                self::ID_RELATED
             ),
             self::TOKEN,
             [
@@ -182,12 +182,12 @@ class IfNoneMatchTest extends BaseRequestTestCase
 
     public function testIfMatchChildren(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_PARENT, '/children', '"d344gmYJeeQ"');
+        $this->testEtagOfElement(self::TOKEN, self::ID_PARENT, '/children', '"d344gmYJeeQ"');
 
         $response = $this->runGetRequest(
             sprintf(
                 '%s/children',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN
         );
@@ -196,7 +196,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s/children',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN,
             [
@@ -208,7 +208,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s/children',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN,
             [
@@ -220,12 +220,12 @@ class IfNoneMatchTest extends BaseRequestTestCase
 
     public function testIfMatchParents(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_CHILD, '/parents', '"ZGUcWBYHppR"');
+        $this->testEtagOfElement(self::TOKEN, self::ID_CHILD, '/parents', '"ZGUcWBYHppR"');
 
         $response = $this->runGetRequest(
             sprintf(
                 '%s/parents',
-                self::UUID_CHILD
+                self::ID_CHILD
             ),
             self::TOKEN
         );
@@ -234,7 +234,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s/parents',
-                self::UUID_CHILD
+                self::ID_CHILD
             ),
             self::TOKEN,
             [
@@ -246,7 +246,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s/parents',
-                self::UUID_CHILD
+                self::ID_CHILD
             ),
             self::TOKEN,
             [
@@ -258,12 +258,12 @@ class IfNoneMatchTest extends BaseRequestTestCase
 
     public function testIfMatchRelated(): void
     {
-        $this->testEtagOfElement(self::TOKEN, self::UUID_PARENT, '/related', '"TVPsbpcCAeU"');
+        $this->testEtagOfElement(self::TOKEN, self::ID_PARENT, '/related', '"TVPsbpcCAeU"');
 
         $response = $this->runGetRequest(
             sprintf(
                 '%s/related',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN
         );
@@ -272,7 +272,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s/related',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN,
             [
@@ -284,7 +284,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s/related',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN,
             [
@@ -299,7 +299,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN
         );
@@ -310,7 +310,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runPatchRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -325,7 +325,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runPatchRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -340,7 +340,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runPatchRequest(
             sprintf(
                 '%s',
-                self::UUID_DATA
+                self::ID_DATA
             ),
             self::TOKEN,
             [
@@ -355,7 +355,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_CHILD
+                self::ID_CHILD
             ),
             self::TOKEN
         );
@@ -366,7 +366,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runPutRequest(
             sprintf(
                 '%s',
-                self::UUID_CHILD
+                self::ID_CHILD
             ),
             self::TOKEN,
             [
@@ -383,7 +383,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runPutRequest(
             sprintf(
                 '%s',
-                self::UUID_CHILD
+                self::ID_CHILD
             ),
             self::TOKEN,
             [
@@ -400,7 +400,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runPutRequest(
             sprintf(
                 '%s',
-                self::UUID_CHILD
+                self::ID_CHILD
             ),
             self::TOKEN,
             [
@@ -417,7 +417,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runGetRequest(
             sprintf(
                 '%s',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN
         );
@@ -428,7 +428,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runDeleteRequest(
             sprintf(
                 '%s',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN,
             [
@@ -440,7 +440,7 @@ class IfNoneMatchTest extends BaseRequestTestCase
         $response = $this->runDeleteRequest(
             sprintf(
                 '%s',
-                self::UUID_PARENT
+                self::ID_PARENT
             ),
             self::TOKEN,
             [

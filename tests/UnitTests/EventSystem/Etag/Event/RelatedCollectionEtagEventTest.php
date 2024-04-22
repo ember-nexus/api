@@ -13,22 +13,22 @@ class RelatedCollectionEtagEventTest extends TestCase
 {
     public function testEventWithEtag(): void
     {
-        $uuid = Uuid::fromString('87877759-2856-4b4a-80f6-df53296d12a4');
+        $id = Uuid::fromString('87877759-2856-4b4a-80f6-df53296d12a4');
         $etag = new Etag('someEtag');
-        $event = new RelatedCollectionEtagEvent($uuid);
+        $event = new RelatedCollectionEtagEvent($id);
         $event->setEtag($etag);
 
         $this->assertSame($etag, $event->getEtag());
-        $this->assertSame($uuid, $event->getCenterUuid());
+        $this->assertSame($id, $event->getCenterId());
     }
 
     public function testEventWithNull(): void
     {
-        $uuid = Uuid::fromString('87877759-2856-4b4a-80f6-df53296d12a4');
-        $event = new RelatedCollectionEtagEvent($uuid);
+        $id = Uuid::fromString('87877759-2856-4b4a-80f6-df53296d12a4');
+        $event = new RelatedCollectionEtagEvent($id);
         $event->setEtag(null);
 
         $this->assertNull($event->getEtag());
-        $this->assertSame($uuid, $event->getCenterUuid());
+        $this->assertSame($id, $event->getCenterId());
     }
 }

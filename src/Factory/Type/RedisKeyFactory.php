@@ -19,43 +19,43 @@ class RedisKeyFactory
         );
     }
 
-    public function getEtagElementRedisKey(UuidInterface $elementUuid): RedisKey
+    public function getEtagElementRedisKey(UuidInterface $elementId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_ELEMENT,
-            $elementUuid->toString()
+            $elementId->toString()
         );
     }
 
-    public function getEtagChildrenCollectionRedisKey(UuidInterface $parentUuid): RedisKey
+    public function getEtagChildrenCollectionRedisKey(UuidInterface $parentId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_CHILDREN_COLLECTION,
-            $parentUuid->toString()
+            $parentId->toString()
         );
     }
 
-    public function getEtagParentsCollectionRedisKey(UuidInterface $childUuid): RedisKey
+    public function getEtagParentsCollectionRedisKey(UuidInterface $childId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_PARENTS_COLLECTION,
-            $childUuid->toString()
+            $childId->toString()
         );
     }
 
-    public function getEtagRelatedCollectionRedisKey(UuidInterface $centerUuid): RedisKey
+    public function getEtagRelatedCollectionRedisKey(UuidInterface $centerId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_RELATED_COLLECTION,
-            $centerUuid->toString()
+            $centerId->toString()
         );
     }
 
-    public function getEtagIndexCollectionRedisKey(UuidInterface $userUuid): RedisKey
+    public function getEtagIndexCollectionRedisKey(UuidInterface $userId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_INDEX_COLLECTION,
-            $userUuid->toString()
+            $userId->toString()
         );
     }
 }

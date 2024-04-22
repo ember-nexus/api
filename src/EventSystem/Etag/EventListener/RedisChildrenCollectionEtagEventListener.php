@@ -22,11 +22,11 @@ class RedisChildrenCollectionEtagEventListener
 
     public function onChildrenCollectionEtagEvent(ChildrenCollectionEtagEvent $event): void
     {
-        $redisKey = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey($event->getParentUuid());
+        $redisKey = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey($event->getParentId());
         $this->logger->debug(
             'Trying to find Etag for children collection in Redis.',
             [
-                'parentUuid' => $event->getParentUuid()->toString(),
+                'parentId' => $event->getParentId()->toString(),
                 'redisKey' => (string) $redisKey,
             ]
         );
@@ -35,7 +35,7 @@ class RedisChildrenCollectionEtagEventListener
             $this->logger->debug(
                 'Unable to find Etag for children collection in Redis.',
                 [
-                    'parentUuid' => $event->getParentUuid()->toString(),
+                    'parentId' => $event->getParentId()->toString(),
                     'redisKey' => (string) $redisKey,
                 ]
             );
@@ -49,7 +49,7 @@ class RedisChildrenCollectionEtagEventListener
         $this->logger->debug(
             'Found Etag for children collection in Redis.',
             [
-                'parentUuid' => $event->getParentUuid()->toString(),
+                'parentId' => $event->getParentId()->toString(),
                 'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]

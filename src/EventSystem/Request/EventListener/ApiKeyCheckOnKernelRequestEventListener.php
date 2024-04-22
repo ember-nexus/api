@@ -8,7 +8,7 @@ use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use App\Type\TokenStateType;
-use App\Type\UserUuidAndTokenUuidObject;
+use App\Type\UserIdAndTokenIdObject;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
 use Predis\Client as RedisClient;
@@ -44,20 +44,20 @@ class ApiKeyCheckOnKernelRequestEventListener
 
         $token = $this->extractTokenFromRequest($event->getRequest());
 
-        $userUuidAndTokenUuidObject = $this->getUserUuidAndTokenUuidFromTokenObjectFromRedis($token);
+        $userIdAndTokenIdObject = $this->getUserIdAndTokenIdFromTokenObjectFromRedis($token);
 
-        if (!$userUuidAndTokenUuidObject) {
-            $userUuidAndTokenUuidObject = $this->getUserUuidAndTokenUuidObjectFromTokenFromCypher($token);
+        if (!$userIdAndTokenIdObject) {
+            $userIdAndTokenIdObject = $this->getUserIdAndTokenIdObjectFromTokenFromCypher($token);
         }
 
         $this->authProvider->setUserAndToken(
-            $userUuidAndTokenUuidObject->getUserUuid(),
-            $userUuidAndTokenUuidObject->getTokenUuid(),
+            $userIdAndTokenIdObject->getUserId(),
+            $userIdAndTokenIdObject->getTokenId(),
             $this->tokenGenerator->hashToken($token)
         );
     }
 
-    private function getUserUuidAndTokenUuidObjectFromTokenFromCypher(string $token): UserUuidAndTokenUuidObject
+    private function getUserIdAndTokenIdObjectFromTokenFromCypher(string $token): UserIdAndTokenIdObject
     {
         $hashedToken = $this->tokenGenerator->hashToken($token);
         $res = $this->cypherEntityManager->getClient()->runStatement(
@@ -78,8 +78,8 @@ class ApiKeyCheckOnKernelRequestEventListener
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
-        $userUuid = Uuid::fromString($res->first()->get('user.id'));
-        $tokenUuid = Uuid::fromString($res->first()->get('token.id'));
+        $userId = Uuid::fromString($res->first()->get('user.id'));
+        $tokenId = Uuid::fromString($res->first()->get('token.id'));
 
         $tokenLifetimeInRedis = 60 * 30; // 30 minutes
         if ($res->first()->get('token.expirationDate')) {
@@ -92,17 +92,17 @@ class ApiKeyCheckOnKernelRequestEventListener
         }
 
         $redisKey = $this->authProvider->getRedisTokenKeyFromHashedToken($hashedToken);
-        $this->redisClient->hset($redisKey, 'token', $tokenUuid->toString());
-        $this->redisClient->hset($redisKey, 'user', $userUuid->toString());
+        $this->redisClient->hset($redisKey, 'token', $tokenId->toString());
+        $this->redisClient->hset($redisKey, 'user', $userId->toString());
         $this->redisClient->expire($redisKey, $tokenLifetimeInRedis);
 
-        return new UserUuidAndTokenUuidObject(
-            $userUuid,
-            $tokenUuid
+        return new UserIdAndTokenIdObject(
+            $userId,
+            $tokenId
         );
     }
 
-    private function getUserUuidAndTokenUuidFromTokenObjectFromRedis(string $rawToken): ?UserUuidAndTokenUuidObject
+    private function getUserIdAndTokenIdFromTokenObjectFromRedis(string $rawToken): ?UserIdAndTokenIdObject
     {
         $data = $this->redisClient->hgetall($this->authProvider->getRedisTokenKeyFromRawToken($rawToken));
 
@@ -119,7 +119,7 @@ class ApiKeyCheckOnKernelRequestEventListener
             return null;
         }
 
-        return new UserUuidAndTokenUuidObject(
+        return new UserIdAndTokenIdObject(
             UuidV4::fromString($data['user']),
             UuidV4::fromString($data['token'])
         );

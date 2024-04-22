@@ -22,11 +22,11 @@ class RedisIndexCollectionEtagEventListener
 
     public function onIndexCollectionEtagEvent(IndexCollectionEtagEvent $event): void
     {
-        $redisKey = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey($event->getUserUuid());
+        $redisKey = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey($event->getUserId());
         $this->logger->debug(
             'Trying to find Etag for index collection in Redis.',
             [
-                'userUuid' => $event->getUserUuid()->toString(),
+                'userId' => $event->getUserId()->toString(),
                 'redisKey' => (string) $redisKey,
             ]
         );
@@ -35,7 +35,7 @@ class RedisIndexCollectionEtagEventListener
             $this->logger->debug(
                 'Unable to find Etag for index collection in Redis.',
                 [
-                    'userUuid' => $event->getUserUuid()->toString(),
+                    'userId' => $event->getUserId()->toString(),
                     'redisKey' => (string) $redisKey,
                 ]
             );
@@ -49,7 +49,7 @@ class RedisIndexCollectionEtagEventListener
         $this->logger->debug(
             'Found Etag for index collection in Redis.',
             [
-                'userUuid' => $event->getUserUuid()->toString(),
+                'userId' => $event->getUserId()->toString(),
                 'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]

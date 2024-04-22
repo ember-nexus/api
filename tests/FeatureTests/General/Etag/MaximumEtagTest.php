@@ -16,10 +16,10 @@ class MaximumEtagTest extends BaseRequestTestCase
     private const string GROUP_UUID = '42c7a0f3-fc9b-478b-b658-52ecb44238b8';
     private const string SOME_NODE_UUID = '81f811e2-c19f-4339-94e2-c0376fec097e';
 
-    private function testEtagOfElement(string $token, string $uuid, string $additionalPath, ?string $shouldEtag = null): string
+    private function testEtagOfElement(string $token, string $id, string $additionalPath, ?string $shouldEtag = null): string
     {
         $response = $this->runGetRequest(
-            sprintf('/%s%s', $uuid, $additionalPath),
+            sprintf('/%s%s', $id, $additionalPath),
             $token
         );
         $etag = $response->getHeader('Etag')[0];
@@ -30,10 +30,10 @@ class MaximumEtagTest extends BaseRequestTestCase
         return $etag;
     }
 
-    private function testEtagOfElementDoesNotExist(string $token, string $uuid, string $additionalPath): void
+    private function testEtagOfElementDoesNotExist(string $token, string $id, string $additionalPath): void
     {
         $response = $this->runGetRequest(
-            sprintf('/%s%s', $uuid, $additionalPath),
+            sprintf('/%s%s', $id, $additionalPath),
             $token
         );
         $this->assertCount(0, $response->getHeader('Etag'));

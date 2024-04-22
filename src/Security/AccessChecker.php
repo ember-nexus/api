@@ -21,40 +21,40 @@ class AccessChecker
     /**
      * @return UuidInterface[]
      */
-    public function getUsersGroups(UuidInterface $userUuid): array
+    public function getUsersGroups(UuidInterface $userId): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (user:User {id: $userId})-[:IS_IN_GROUP*1..]->(group:Group) RETURN group.id',
             [
-                'userId' => $userUuid->toString(),
+                'userId' => $userId->toString(),
             ]
         ));
-        $groupUuids = [];
+        $groupIds = [];
         foreach ($res as $row) {
-            $groupUuids[] = UuidV4::fromString($row['group.id']);
+            $groupIds[] = UuidV4::fromString($row['group.id']);
         }
 
-        return $groupUuids;
+        return $groupIds;
     }
 
-    public function hasAccessToElement(UuidInterface $userUuid, UuidInterface $elementUuid, AccessType $accessType): bool
+    public function hasAccessToElement(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
     {
-        if (ElementType::NODE === $this->getElementType($elementUuid)) {
+        if (ElementType::NODE === $this->getElementType($elementId)) {
             if (AccessType::READ === $accessType) {
-                return $this->hasReadAccessToNode($userUuid, $elementUuid);
+                return $this->hasReadAccessToNode($userId, $elementId);
             } else {
-                return $this->hasGeneralAccessToNode($userUuid, $elementUuid, $accessType);
+                return $this->hasGeneralAccessToNode($userId, $elementId, $accessType);
             }
         } else {
             if (AccessType::READ === $accessType) {
-                return $this->hasReadAccessToRelation($userUuid, $elementUuid);
+                return $this->hasReadAccessToRelation($userId, $elementId);
             } else {
-                return $this->hasGeneralAccessToRelation($userUuid, $elementUuid, $accessType);
+                return $this->hasGeneralAccessToRelation($userId, $elementId, $accessType);
             }
         }
     }
 
-    public function hasReadAccessToNode(UuidInterface $userUuid, UuidInterface $elementUuid): bool
+    public function hasReadAccessToNode(UuidInterface $userId, UuidInterface $elementId): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
@@ -103,8 +103,8 @@ class AccessChecker
             "  path IS NOT NULL\n".
             'RETURN count(*) as count;',
             [
-                'userId' => $userUuid->toString(),
-                'elementId' => $elementUuid->toString(),
+                'userId' => $userId->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         if (1 !== $res->count()) {
@@ -117,7 +117,7 @@ class AccessChecker
         return true;
     }
 
-    public function hasGeneralAccessToNode(UuidInterface $userUuid, UuidInterface $elementUuid, AccessType $accessType): bool
+    public function hasGeneralAccessToNode(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
@@ -164,8 +164,8 @@ class AccessChecker
             "  relations IS NOT NULL\n".
             'RETURN count(*) as count;',
             [
-                'userId' => $userUuid->toString(),
-                'elementId' => $elementUuid->toString(),
+                'userId' => $userId->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         if (1 !== $res->count()) {
@@ -178,7 +178,7 @@ class AccessChecker
         return true;
     }
 
-    public function hasReadAccessToRelation(UuidInterface $userUuid, UuidInterface $elementUuid): bool
+    public function hasReadAccessToRelation(UuidInterface $userId, UuidInterface $elementId): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
@@ -276,8 +276,8 @@ class AccessChecker
             "  )\n".
             'RETURN count(*) as count;',
             [
-                'userId' => $userUuid->toString(),
-                'elementId' => $elementUuid->toString(),
+                'userId' => $userId->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         if (1 !== $res->count()) {
@@ -290,7 +290,7 @@ class AccessChecker
         return true;
     }
 
-    public function hasGeneralAccessToRelation(UuidInterface $userUuid, UuidInterface $elementUuid, AccessType $accessType): bool
+    public function hasGeneralAccessToRelation(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
@@ -388,8 +388,8 @@ class AccessChecker
             "  )\n".
             'RETURN count(*) as count;',
             [
-                'userId' => $userUuid->toString(),
-                'elementId' => $elementUuid->toString(),
+                'userId' => $userId->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         if (1 !== $res->count()) {
@@ -402,7 +402,7 @@ class AccessChecker
         return true;
     }
 
-    public function getElementType(UuidInterface $elementUuid): ?ElementType
+    public function getElementType(UuidInterface $elementId): ?ElementType
     {
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
@@ -410,7 +410,7 @@ class AccessChecker
             "OPTIONAL MATCH ()-[relation {id: \$elementId}]-()\n".
             'RETURN node.id, relation.id',
             [
-                'elementId' => $elementUuid->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         if (0 === $res->count()) {
@@ -429,16 +429,16 @@ class AccessChecker
     /**
      * @return array<UuidInterface>
      */
-    public function getDirectGroupsWithAccessToElement(UuidInterface $elementUuid, AccessType $accessType): array
+    public function getDirectGroupsWithAccessToElement(UuidInterface $elementId, AccessType $accessType): array
     {
-        $type = $this->getElementType($elementUuid);
+        $type = $this->getElementType($elementId);
         if (!$type) {
             return [];
         }
         if (ElementType::NODE === $type) {
-            return $this->getDirectGroupsWithAccessToNode($elementUuid, $accessType);
+            return $this->getDirectGroupsWithAccessToNode($elementId, $accessType);
         } else {
-            return $this->getDirectGroupsWithAccessToRelation($elementUuid, $accessType);
+            return $this->getDirectGroupsWithAccessToRelation($elementId, $accessType);
         }
     }
 
@@ -450,7 +450,7 @@ class AccessChecker
      *
      * @return array<UuidInterface>
      */
-    public function getDirectGroupsWithAccessToNode(UuidInterface $elementUuid, AccessType $accessType): array
+    public function getDirectGroupsWithAccessToNode(UuidInterface $elementId, AccessType $accessType): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (group:Group)-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
@@ -484,7 +484,7 @@ class AccessChecker
             "  )\n".
             'RETURN group.id;',
             [
-                'elementId' => $elementUuid->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         $groups = [];
@@ -501,7 +501,7 @@ class AccessChecker
      *
      * @return array<UuidInterface>
      */
-    public function getDirectGroupsWithAccessToRelation(UuidInterface $elementUuid, AccessType $accessType): array
+    public function getDirectGroupsWithAccessToRelation(UuidInterface $elementId, AccessType $accessType): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (start)-[element {id: \$elementId}]->(end)\n".
@@ -592,7 +592,7 @@ class AccessChecker
             "  )\n".
             'RETURN DISTINCT startGroup.id AS group;',
             [
-                'elementId' => $elementUuid->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         $groups = [];
@@ -606,16 +606,16 @@ class AccessChecker
     /**
      * @return array<UuidInterface>
      */
-    public function getDirectUsersWithAccessToElement(UuidInterface $elementUuid, AccessType $accessType): array
+    public function getDirectUsersWithAccessToElement(UuidInterface $elementId, AccessType $accessType): array
     {
-        $type = $this->getElementType($elementUuid);
+        $type = $this->getElementType($elementId);
         if (!$type) {
             return [];
         }
         if (ElementType::NODE === $type) {
-            return $this->getDirectUsersWithAccessToNode($elementUuid, $accessType);
+            return $this->getDirectUsersWithAccessToNode($elementId, $accessType);
         } else {
-            return $this->getDirectUsersWithAccessToRelation($elementUuid, $accessType);
+            return $this->getDirectUsersWithAccessToRelation($elementId, $accessType);
         }
     }
 
@@ -625,7 +625,7 @@ class AccessChecker
      *
      * @return array<UuidInterface>
      */
-    public function getDirectUsersWithAccessToNode(UuidInterface $elementUuid, AccessType $accessType): array
+    public function getDirectUsersWithAccessToNode(UuidInterface $elementId, AccessType $accessType): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (user:User)-[groups:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
@@ -682,7 +682,7 @@ class AccessChecker
             "  relations IS NOT NULL\n".
             'RETURN user.id;',
             [
-                'elementId' => $elementUuid->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         $users = [];
@@ -699,7 +699,7 @@ class AccessChecker
      *
      * @return array<UuidInterface>
      */
-    public function getDirectUsersWithAccessToRelation(UuidInterface $elementUuid, AccessType $accessType): array
+    public function getDirectUsersWithAccessToRelation(UuidInterface $elementId, AccessType $accessType): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (start)-[element {id: \$elementId}]->(end)\n".
@@ -826,7 +826,7 @@ class AccessChecker
             "  )\n".
             'RETURN DISTINCT startUser.id AS user;',
             [
-                'elementId' => $elementUuid->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
         $users = [];

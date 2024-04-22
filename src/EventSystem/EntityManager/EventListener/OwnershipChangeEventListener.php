@@ -66,7 +66,7 @@ class OwnershipChangeEventListener
 
     public function handleOwnershipChange(RelationElementInterface $element): void
     {
-        $elementId = $element->getIdentifier();
+        $elementId = $element->getId();
         if (!$elementId) {
             return;
         }

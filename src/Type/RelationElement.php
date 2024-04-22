@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Type;
 
 use App\Contract\RelationElementInterface;
-use App\Trait\IdentifierTrait;
+use App\Trait\IdTrait;
 use App\Trait\PropertiesTrait;
 use Ramsey\Uuid\UuidInterface;
 
 class RelationElement implements RelationElementInterface
 {
     use PropertiesTrait;
-    use IdentifierTrait;
+    use IdTrait;
 
     private ?string $type = null;
     private ?UuidInterface $start = null;
@@ -39,9 +39,9 @@ class RelationElement implements RelationElementInterface
         return $this->start;
     }
 
-    public function setStart(?UuidInterface $uuid): self
+    public function setStart(?UuidInterface $start): self
     {
-        $this->start = $uuid;
+        $this->start = $start;
 
         return $this;
     }
@@ -51,9 +51,9 @@ class RelationElement implements RelationElementInterface
         return $this->end;
     }
 
-    public function setEnd(?UuidInterface $uuid): self
+    public function setEnd(?UuidInterface $end): self
     {
-        $this->end = $uuid;
+        $this->end = $end;
 
         return $this;
     }

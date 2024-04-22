@@ -25,13 +25,13 @@ class LiveRelatedCollectionEtagEventListener
 
     public function onRelatedCollectionEtagEvent(RelatedCollectionEtagEvent $event): void
     {
-        $etag = $this->etagCalculatorService->calculateRelatedCollectionEtag($event->getCenterUuid());
-        $redisKey = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey($event->getCenterUuid());
+        $etag = $this->etagCalculatorService->calculateRelatedCollectionEtag($event->getCenterId());
+        $redisKey = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey($event->getCenterId());
 
         $this->logger->debug(
             'Trying to persist Etag for related collection in Redis.',
             [
-                'centerUuid' => $event->getCenterUuid()->toString(),
+                'centerId' => $event->getCenterId()->toString(),
                 'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]

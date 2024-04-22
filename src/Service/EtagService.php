@@ -30,24 +30,24 @@ class EtagService
     public function setCurrentRequestEtagFromRequestAndEtagType(Request $request, EtagType $etagType): self
     {
         if (EtagType::INDEX_COLLECTION == $etagType) {
-            $event = new IndexCollectionEtagEvent($this->authProvider->getUserUuid());
+            $event = new IndexCollectionEtagEvent($this->authProvider->getUserId());
         } else {
-            if (!$request->attributes->has('uuid')) {
-                throw new Exception('Route should have attribute uuid.');
+            if (!$request->attributes->has('id')) {
+                throw new Exception('Route should have attribute id.');
             }
-            $requestUuid = Uuid::fromString($request->attributes->get('uuid'));
+            $requestId = Uuid::fromString($request->attributes->get('id'));
             switch ($etagType) {
                 case EtagType::ELEMENT:
-                    $event = new ElementEtagEvent($requestUuid);
+                    $event = new ElementEtagEvent($requestId);
                     break;
                 case EtagType::CHILDREN_COLLECTION:
-                    $event = new ChildrenCollectionEtagEvent($requestUuid);
+                    $event = new ChildrenCollectionEtagEvent($requestId);
                     break;
                 case EtagType::PARENTS_COLLECTION:
-                    $event = new ParentsCollectionEtagEvent($requestUuid);
+                    $event = new ParentsCollectionEtagEvent($requestId);
                     break;
                 case EtagType::RELATED_COLLECTION:
-                    $event = new RelatedCollectionEtagEvent($requestUuid);
+                    $event = new RelatedCollectionEtagEvent($requestId);
                     break;
             }
         }

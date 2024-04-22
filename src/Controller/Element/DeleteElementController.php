@@ -29,24 +29,24 @@ class DeleteElementController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}',
+        '/{id}',
         name: 'delete-element',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['DELETE']
     )]
     #[EndpointSupportsEtag(EtagType::ELEMENT)]
-    public function deleteElement(string $uuid): Response
+    public function deleteElement(string $id): Response
     {
-        $elementUuid = UuidV4::fromString($uuid);
-        $userUuid = $this->authProvider->getUserUuid();
+        $elementId = UuidV4::fromString($id);
+        $userId = $this->authProvider->getUserId();
 
-        if (!$this->accessChecker->hasAccessToElement($userUuid, $elementUuid, AccessType::DELETE)) {
+        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::DELETE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElement($elementUuid);
+        $element = $this->elementManager->getElement($elementId);
         if (null === $element) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }

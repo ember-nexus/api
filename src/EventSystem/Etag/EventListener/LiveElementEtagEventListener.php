@@ -24,13 +24,13 @@ class LiveElementEtagEventListener
 
     public function onElementEtagEvent(ElementEtagEvent $event): void
     {
-        $etag = $this->etagCalculatorService->calculateElementEtag($event->getElementUuid());
-        $redisKey = $this->redisKeyTypeFactory->getEtagElementRedisKey($event->getElementUuid());
+        $etag = $this->etagCalculatorService->calculateElementEtag($event->getElementId());
+        $redisKey = $this->redisKeyTypeFactory->getEtagElementRedisKey($event->getElementId());
 
         $this->logger->debug(
             'Trying to persist Etag for element in Redis.',
             [
-                'elementUuid' => $event->getElementUuid()->toString(),
+                'elementId' => $event->getElementId()->toString(),
                 'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]

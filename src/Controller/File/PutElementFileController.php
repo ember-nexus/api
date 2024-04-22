@@ -22,14 +22,14 @@ class PutElementFileController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}/file',
+        '/{id}/file',
         name: 'put-element-file',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['PUT']
     )]
-    public function putElementFile(string $uuid, Request $request): Response
+    public function putElementFile(string $id, Request $request): Response
     {
         throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }

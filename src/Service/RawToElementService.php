@@ -70,7 +70,7 @@ class RawToElementService
             $element->setLabel($type);
         }
         $element->addProperties($normalizedProperties);
-        $element->setIdentifier($id);
+        $element->setId($id);
 
         return $element;
     }

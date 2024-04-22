@@ -87,7 +87,7 @@ class UserCreateCommand extends Command
                 $this->emberNexusConfiguration->getRegisterUniqueIdentifier() => $identifier,
                 '_passwordHash' => $this->userPasswordHasher->hashPassword($input->getArgument('password')),
             ])
-            ->setIdentifier($userId);
+            ->setId($userId);
 
         $this->elementManager
             ->create($userNode)

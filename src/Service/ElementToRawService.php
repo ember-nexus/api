@@ -24,7 +24,7 @@ class ElementToRawService
     {
         $rawData = [
             'type' => null,
-            'id' => $element->getIdentifier()?->toString(),
+            'id' => $element->getId()?->toString(),
             'start' => null,
             'end' => null,
             'data' => [],

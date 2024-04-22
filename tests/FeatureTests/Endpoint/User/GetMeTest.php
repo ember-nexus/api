@@ -16,9 +16,9 @@ class GetMeTest extends BaseRequestTestCase
         $getAnonymousMeResponse = $this->runGetRequest('/me', null);
         $this->assertIsNodeResponse($getAnonymousMeResponse, 'User');
 
-        $anonymousUserUuid = $this->getBody($getAnonymousMeResponse)['id'];
+        $anonymousUserId = $this->getBody($getAnonymousMeResponse)['id'];
 
-        $getAnonymousUserResponse = $this->runGetRequest(sprintf('/%s', $anonymousUserUuid), null);
+        $getAnonymousUserResponse = $this->runGetRequest(sprintf('/%s', $anonymousUserId), null);
         $this->assertIsNodeResponse($getAnonymousUserResponse, 'User');
 
         $this->assertSame((string) $getAnonymousMeResponse->getBody(), (string) $getAnonymousUserResponse->getBody());
@@ -29,9 +29,9 @@ class GetMeTest extends BaseRequestTestCase
         $getUserMeResponse = $this->runGetRequest('/me', self::TOKEN);
         $this->assertIsNodeResponse($getUserMeResponse, 'User');
 
-        $userUuid = $this->getBody($getUserMeResponse)['id'];
+        $userId = $this->getBody($getUserMeResponse)['id'];
 
-        $getAnonymousUserResponse = $this->runGetRequest(sprintf('/%s', $userUuid), self::TOKEN);
+        $getAnonymousUserResponse = $this->runGetRequest(sprintf('/%s', $userId), self::TOKEN);
         $this->assertIsNodeResponse($getAnonymousUserResponse, 'User');
 
         $this->assertSame((string) $getUserMeResponse->getBody(), (string) $getAnonymousUserResponse->getBody());

@@ -59,18 +59,18 @@ class RelationElementTest extends TestCase
         $relationElement->removeProperty('propertyWhichDoesNotExist');
     }
 
-    public function testIdentifierTrait(): void
+    public function testIdTrait(): void
     {
         $relationElement = new RelationElement();
 
-        $this->assertNull($relationElement->getIdentifier());
+        $this->assertNull($relationElement->getId());
 
-        $uuid = Uuid::fromString('e6f6ef39-60b4-47aa-8a7f-091502943815');
-        $relationElement->setIdentifier($uuid);
-        $this->assertSame($uuid, $relationElement->getIdentifier());
+        $id = Uuid::fromString('e6f6ef39-60b4-47aa-8a7f-091502943815');
+        $relationElement->setId($id);
+        $this->assertSame($id, $relationElement->getId());
 
-        $relationElement->setIdentifier(null);
-        $this->assertNull($relationElement->getIdentifier());
+        $relationElement->setId(null);
+        $this->assertNull($relationElement->getId());
     }
 
     public function testType(): void
@@ -94,11 +94,11 @@ class RelationElementTest extends TestCase
 
         $this->assertNull($relationElement->getStart());
 
-        $uuid = Uuid::fromString('8790d9de-453c-44af-9bd4-ce2515c5f164');
+        $id = Uuid::fromString('8790d9de-453c-44af-9bd4-ce2515c5f164');
 
-        $relationElement->setStart($uuid);
+        $relationElement->setStart($id);
 
-        $this->assertSame($uuid, $relationElement->getStart());
+        $this->assertSame($id, $relationElement->getStart());
 
         $relationElement->setStart(null);
 
@@ -111,11 +111,11 @@ class RelationElementTest extends TestCase
 
         $this->assertNull($relationElement->getEnd());
 
-        $uuid = Uuid::fromString('8790d9de-453c-44af-9bd4-ce2515c5f164');
+        $id = Uuid::fromString('8790d9de-453c-44af-9bd4-ce2515c5f164');
 
-        $relationElement->setEnd($uuid);
+        $relationElement->setEnd($id);
 
-        $this->assertSame($uuid, $relationElement->getEnd());
+        $this->assertSame($id, $relationElement->getEnd());
 
         $relationElement->setEnd(null);
 

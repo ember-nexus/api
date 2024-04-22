@@ -22,14 +22,14 @@ class PatchElementFileController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}/file',
+        '/{id}/file',
         name: 'patch-element-file',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['PATCH']
     )]
-    public function patchElementFile(string $uuid, Request $request): Response
+    public function patchElementFile(string $id, Request $request): Response
     {
         throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }

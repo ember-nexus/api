@@ -45,8 +45,8 @@ class ExpireEtagOnChangeEventListener
      */
     private function handleEvent(ElementPostCreateEvent|ElementPostMergeEvent|ElementPreDeleteEvent $event): void
     {
-        $elementUuid = $event->getElement()->getIdentifier();
-        if (null === $elementUuid) {
+        $elementId = $event->getElement()->getId();
+        if (null === $elementId) {
             throw new Exception('Unable to expire etag for element with no identifier.');
         }
 
@@ -54,7 +54,7 @@ class ExpireEtagOnChangeEventListener
         /**
          * @var RedisKey[] $redisEtagKeysToExpire
          */
-        $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagElementRedisKey($elementUuid);
+        $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagElementRedisKey($elementId);
 
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (node {id: \$elementId})\n".
@@ -72,22 +72,22 @@ class ExpireEtagOnChangeEventListener
                 "    RETURN user.id\n".
                 '} as indexList',
             [
-                'elementId' => $elementUuid->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
 
         if (1 === count($result)) {
-            foreach ($result[0]['childrenList'] as $childUuid) {
-                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey(Uuid::fromString($childUuid));
+            foreach ($result[0]['childrenList'] as $childId) {
+                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey(Uuid::fromString($childId));
             }
-            foreach ($result[0]['parentsList'] as $parentUuid) {
-                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey(Uuid::fromString($parentUuid));
+            foreach ($result[0]['parentsList'] as $parentId) {
+                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey(Uuid::fromString($parentId));
             }
-            foreach ($result[0]['relatedList'] as $centerUuid) {
-                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey(Uuid::fromString($centerUuid));
+            foreach ($result[0]['relatedList'] as $centerId) {
+                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey(Uuid::fromString($centerId));
             }
-            foreach ($result[0]['indexList'] as $userUuid) {
-                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey(Uuid::fromString($userUuid));
+            foreach ($result[0]['indexList'] as $userId) {
+                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey(Uuid::fromString($userId));
             }
         }
 
@@ -95,7 +95,7 @@ class ExpireEtagOnChangeEventListener
             "MATCH (start)-[relation {id: \$elementId}]->(end)\n".
                 'RETURN start.id, type(relation) as type, end.id',
             [
-                'elementId' => $elementUuid->toString(),
+                'elementId' => $elementId->toString(),
             ]
         ));
 

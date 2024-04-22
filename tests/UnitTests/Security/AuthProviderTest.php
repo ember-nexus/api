@@ -52,9 +52,9 @@ class AuthProviderTest extends TestCase
         );
 
         $this->assertTrue($authProvider->isAnonymous());
-        $this->assertSame('100ee3de-3846-4bd4-be4a-b17886dfc50c', $authProvider->getUserUuid()->toString());
+        $this->assertSame('100ee3de-3846-4bd4-be4a-b17886dfc50c', $authProvider->getUserId()->toString());
         $this->assertNull($authProvider->getHashedToken());
-        $this->assertNull($authProvider->getTokenUuid());
+        $this->assertNull($authProvider->getTokenId());
     }
 
     public function testSetUserAndToken(): void
@@ -70,9 +70,9 @@ class AuthProviderTest extends TestCase
         $authProvider->setUserAndToken(Uuid::fromString('d3e0ce1e-cdf1-4c80-beae-266008d5e520'));
 
         $this->assertFalse($authProvider->isAnonymous());
-        $this->assertSame($authProvider->getUserUuid()->toString(), 'd3e0ce1e-cdf1-4c80-beae-266008d5e520');
+        $this->assertSame($authProvider->getUserId()->toString(), 'd3e0ce1e-cdf1-4c80-beae-266008d5e520');
         $this->assertNull($authProvider->getHashedToken());
-        $this->assertNull($authProvider->getTokenUuid());
+        $this->assertNull($authProvider->getTokenId());
 
         $authProvider->setUserAndToken(
             UuidV4::fromString('84e2dca1-3d54-4eda-81af-203c5cb4cec7'),
@@ -81,16 +81,16 @@ class AuthProviderTest extends TestCase
         );
 
         $this->assertFalse($authProvider->isAnonymous());
-        $this->assertSame('84e2dca1-3d54-4eda-81af-203c5cb4cec7', $authProvider->getUserUuid()->toString());
+        $this->assertSame('84e2dca1-3d54-4eda-81af-203c5cb4cec7', $authProvider->getUserId()->toString());
         $this->assertSame('some hashed token', $authProvider->getHashedToken());
-        $this->assertSame('8a961321-fd60-475a-95b4-7f976ce44213', $authProvider->getTokenUuid()->toString());
+        $this->assertSame('8a961321-fd60-475a-95b4-7f976ce44213', $authProvider->getTokenId()->toString());
 
         $authProvider->setUserAndToken(Uuid::fromString('c48aaf8e-4ab5-4e60-8f03-154b13e35724'), null, null, true);
 
         $this->assertTrue($authProvider->isAnonymous());
-        $this->assertSame($authProvider->getUserUuid()->toString(), 'c48aaf8e-4ab5-4e60-8f03-154b13e35724');
+        $this->assertSame($authProvider->getUserId()->toString(), 'c48aaf8e-4ab5-4e60-8f03-154b13e35724');
         $this->assertNull($authProvider->getHashedToken());
-        $this->assertNull($authProvider->getTokenUuid());
+        $this->assertNull($authProvider->getTokenId());
     }
 
     public function testRedisToken(): void

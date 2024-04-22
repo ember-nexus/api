@@ -133,27 +133,27 @@ class CollectionService
     }
 
     /**
-     * @param UuidInterface[] $nodeUuids
-     * @param UuidInterface[] $relationUuids
+     * @param UuidInterface[] $nodeIds
+     * @param UuidInterface[] $relationIds
      */
-    public function buildCollectionFromUuids(
-        array $nodeUuids = [],
-        array $relationUuids = [],
+    public function buildCollectionFromIds(
+        array $nodeIds = [],
+        array $relationIds = [],
         int $totalNodes = 0
     ): CollectionResponse {
         $nodeData = [];
         $relationData = [];
 
-        foreach ($nodeUuids as $nodeUuid) {
-            $nodeElement = $this->elementManager->getNode($nodeUuid);
+        foreach ($nodeIds as $nodeId) {
+            $nodeElement = $this->elementManager->getNode($nodeId);
             if ($nodeElement) {
                 $nodeData[] = $this->elementToRawService->elementToRaw(
                     $nodeElement
                 );
             }
         }
-        foreach ($relationUuids as $relationUuid) {
-            $relationElement = $this->elementManager->getRelation($relationUuid);
+        foreach ($relationIds as $relationId) {
+            $relationElement = $this->elementManager->getRelation($relationId);
             if ($relationElement) {
                 $relationData[] = $this->elementToRawService->elementToRaw(
                     $relationElement
@@ -190,16 +190,16 @@ class CollectionService
     }
 
     /**
-     * @param UuidInterface[] $elementUuids
+     * @param UuidInterface[] $elementIds
      */
-    public function buildElementCollectionFromUuids(
-        array $elementUuids = [],
+    public function buildElementCollectionFromIds(
+        array $elementIds = [],
         int $totalElements = 0
     ): CollectionResponse {
         $elementData = [];
 
-        foreach ($elementUuids as $elementUuid) {
-            $element = $this->elementManager->getElement($elementUuid);
+        foreach ($elementIds as $elementId) {
+            $element = $this->elementManager->getElement($elementId);
             if ($element) {
                 $elementData[] = $this->elementToRawService->elementToRaw(
                     $element

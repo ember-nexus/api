@@ -22,14 +22,14 @@ class DeleteElementFileController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}/file',
+        '/{id}/file',
         name: 'delete-element-file',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['DELETE']
     )]
-    public function deleteElementFile(string $uuid, Request $request): Response
+    public function deleteElementFile(string $id, Request $request): Response
     {
         throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }

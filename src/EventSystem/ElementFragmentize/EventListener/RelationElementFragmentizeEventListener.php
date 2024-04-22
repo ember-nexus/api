@@ -19,28 +19,28 @@ class RelationElementFragmentizeEventListener
     {
         $relationElement = $event->getRelationElement();
 
-        $relationUuid = $relationElement->getIdentifier();
-        if (null === $relationUuid) {
+        $relationId = $relationElement->getId();
+        if (null === $relationId) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element fragmentize event listener requires relation to contain valid UUID.');
         }
-        $relationUuid = $relationUuid->toString();
+        $relationId = $relationId->toString();
 
         $relationType = $relationElement->getType();
         if (null === $relationType) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element fragmentize event listener requires relation to contain valid type.');
         }
 
-        $startUuid = $relationElement->getStart();
-        if (null === $startUuid) {
+        $startId = $relationElement->getStart();
+        if (null === $startId) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element fragmentize event listener requires relation to have valid start UUID.');
         }
-        $startUuid = $startUuid->toString();
+        $startId = $startId->toString();
 
-        $endUuid = $relationElement->getEnd();
-        if (null === $endUuid) {
+        $endId = $relationElement->getEnd();
+        if (null === $endId) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element fragmentize event listener requires relation to have valid end UUID.');
         }
-        $endUuid = $endUuid->toString();
+        $endId = $endId->toString();
 
         /**
          * @psalm-suppress UndefinedInterfaceMethod
@@ -51,24 +51,24 @@ class RelationElementFragmentizeEventListener
             ->setType($relationElement->getType())
             ->setStartNode(
                 (new Node())
-                    ->addProperty('id', $startUuid)
+                    ->addProperty('id', $startId)
                     ->addIdentifier('id')
             )
             ->setEndNode(
                 (new Node())
-                    ->addProperty('id', $endUuid)
+                    ->addProperty('id', $endId)
                     ->addIdentifier('id')
             )
-            ->addProperty('id', $relationUuid)
+            ->addProperty('id', $relationId)
             ->addIdentifier('id');
         $event->getMongoFragment()
             ->setCollection($relationType)
-            ->setIdentifier($relationUuid);
+            ->setIdentifier($relationId);
         $event->getElasticFragment()
             ->setIndex(sprintf(
                 'relation_%s',
                 strtolower($relationType)
             ))
-            ->setIdentifier($relationUuid);
+            ->setIdentifier($relationId);
     }
 }

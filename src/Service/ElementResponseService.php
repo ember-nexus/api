@@ -17,12 +17,12 @@ class ElementResponseService
     ) {
     }
 
-    public function buildElementResponseFromUuid(
-        UuidInterface $uuid
+    public function buildElementResponseFromId(
+        UuidInterface $id
     ): ElementResponse {
-        $element = $this->elementManager->getElement($uuid);
+        $element = $this->elementManager->getElement($id);
         if (null === $element) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Unable to find element with the id '%s'.", $uuid->toString()));
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Unable to find element with the id '%s'.", $id->toString()));
         }
         $rawData = $this->elementToRawService->elementToRaw($element);
 

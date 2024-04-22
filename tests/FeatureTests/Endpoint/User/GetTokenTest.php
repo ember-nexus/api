@@ -15,9 +15,9 @@ class GetTokenTest extends BaseRequestTestCase
         $tokenResponse = $this->runGetRequest('/token', self::TOKEN);
         $this->assertIsNodeResponse($tokenResponse, 'Token');
 
-        $tokenUuid = $this->getBody($tokenResponse)['id'];
+        $tokenId = $this->getBody($tokenResponse)['id'];
 
-        $directTokenResponse = $this->runGetRequest(sprintf('/%s', $tokenUuid), self::TOKEN);
+        $directTokenResponse = $this->runGetRequest(sprintf('/%s', $tokenId), self::TOKEN);
         $this->assertIsNodeResponse($directTokenResponse, 'Token');
 
         $this->assertSame((string) $tokenResponse->getBody(), (string) $directTokenResponse->getBody());

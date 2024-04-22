@@ -52,7 +52,7 @@ class PostChangePasswordControllerTest extends TestCase
         $requestUtilService->method('getUniqueUserIdentifierFromBodyAndData')->willReturn('test@example.com');
 
         $userNode = new NodeElement();
-        $userNode->setIdentifier(Uuid::fromString('6d3d983e-8cc0-43b7-88f9-5595d5ca0ad1'));
+        $userNode->setId(Uuid::fromString('6d3d983e-8cc0-43b7-88f9-5595d5ca0ad1'));
 
         $securityUtilService = $this->createMock(SecurityUtilService::class);
         $securityUtilService->method('findUserByUniqueUserIdentifier')->willReturn($userNode);

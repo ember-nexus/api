@@ -40,12 +40,12 @@ class DeleteTokenController extends AbstractController
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
-        $tokenUuid = $this->authProvider->getTokenUuid();
-        if (null === $tokenUuid) {
+        $tokenId = $this->authProvider->getTokenId();
+        if (null === $tokenId) {
             throw new LogicException('Token must be provided.');
         }
 
-        $tokenElement = $this->elementManager->getElement($tokenUuid);
+        $tokenElement = $this->elementManager->getElement($tokenId);
         if (null === $tokenElement) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }

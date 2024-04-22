@@ -25,8 +25,8 @@ class GetMeController extends AbstractController
     )]
     public function getMe(): Response
     {
-        $userUuid = $this->authProvider->getUserUuid();
+        $userId = $this->authProvider->getUserId();
 
-        return $this->elementResponseService->buildElementResponseFromUuid($userUuid);
+        return $this->elementResponseService->buildElementResponseFromId($userId);
     }
 }

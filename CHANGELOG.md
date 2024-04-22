@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Fixed
 - Fix wrong license identifier in Dockerfile, closes #302.
+### Changed
+- Change naming of internal variables to replace `Uuid` with `Id`, because the variables are already type hinted and
+  `Id` emerged as a better convention in the ecosystem. Closes #292.
 
 ## 0.1.6 - 2024-04-22
 ### Added

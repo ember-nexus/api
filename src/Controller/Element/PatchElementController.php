@@ -32,18 +32,18 @@ class PatchElementController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}',
+        '/{id}',
         name: 'patch-element',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['PATCH']
     )]
     #[EndpointSupportsEtag(EtagType::ELEMENT)]
-    public function patchElement(string $uuid, Request $request): Response
+    public function patchElement(string $id, Request $request): Response
     {
-        $elementId = UuidV4::fromString($uuid);
-        $userId = $this->authProvider->getUserUuid();
+        $elementId = UuidV4::fromString($id);
+        $userId = $this->authProvider->getUserId();
 
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();

@@ -51,7 +51,7 @@ class CalculateSearchAccessEventListener
 
     private function handleNode(NodeElementInterface $element): void
     {
-        $elementId = $element->getIdentifier();
+        $elementId = $element->getId();
         if (!$elementId) {
             return;
         }
@@ -62,7 +62,7 @@ class CalculateSearchAccessEventListener
 
         $document = new Document();
         $document
-            ->setIdentifier($element->getIdentifier()?->toString())
+            ->setIdentifier($element->getId()?->toString())
             ->setIndex(sprintf(
                 'node_%s',
                 strtolower($element->getLabel() ?? '')
@@ -77,7 +77,7 @@ class CalculateSearchAccessEventListener
 
     private function handleRelation(RelationElementInterface $element): void
     {
-        $elementId = $element->getIdentifier();
+        $elementId = $element->getId();
         if (!$elementId) {
             return;
         }
@@ -88,7 +88,7 @@ class CalculateSearchAccessEventListener
 
         $document = new Document();
         $document
-            ->setIdentifier($element->getIdentifier()?->toString())
+            ->setIdentifier($element->getId()?->toString())
             ->setIndex(sprintf(
                 'relation_%s',
                 strtolower($element->getType() ?? '')
@@ -102,15 +102,15 @@ class CalculateSearchAccessEventListener
     }
 
     /**
-     * @param UuidInterface[] $uuids
+     * @param UuidInterface[] $ids
      *
      * @return string[]
      */
-    private function convertArrayOfUuidsToArrayOfStrings(array $uuids): array
+    private function convertArrayOfUuidsToArrayOfStrings(array $ids): array
     {
         $output = [];
-        foreach ($uuids as $uuid) {
-            $output[] = $uuid->toString();
+        foreach ($ids as $id) {
+            $output[] = $id->toString();
         }
 
         return $output;

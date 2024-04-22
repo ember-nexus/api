@@ -78,7 +78,7 @@ class SecurityUtilServiceTest extends TestCase
         );
 
         $userNode = new NodeElement();
-        $userNode->setIdentifier(Uuid::fromString('3207d629-7199-4c2d-9b2a-b0fba10fe309'));
+        $userNode->setId(Uuid::fromString('3207d629-7199-4c2d-9b2a-b0fba10fe309'));
         try {
             $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
         } catch (Exception $e) {
@@ -104,7 +104,7 @@ class SecurityUtilServiceTest extends TestCase
         );
 
         $userNode = new NodeElement();
-        $userNode->setIdentifier(Uuid::fromString('2c6c7f9a-10c9-434c-b770-9733b749b82c'));
+        $userNode->setId(Uuid::fromString('2c6c7f9a-10c9-434c-b770-9733b749b82c'));
         $userNode->addProperty('_passwordHash', 'someHash');
         try {
             $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
@@ -131,7 +131,7 @@ class SecurityUtilServiceTest extends TestCase
         );
 
         $userNode = new NodeElement();
-        $userNode->setIdentifier(Uuid::fromString('4b08d9bd-4dfa-42f9-b433-0902d71f421e'));
+        $userNode->setId(Uuid::fromString('4b08d9bd-4dfa-42f9-b433-0902d71f421e'));
         $userNode->addProperty('_passwordHash', 'someHash');
         $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
         $this->expectNotToPerformAssertions();
