@@ -5,24 +5,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.6 - 2024-04-22
 ### Added
 - Introduce simpler request bodies for endpoints `POST /change-password`, `POST /token` and `POST /register`. Old
-  behavior can be disabled with the feature flag `featureFlag.280_OldUniqueUserIdentifierDisabled`. Closes #280.
-- Add first unit tests for controller, related to #280.
-- Enable PHP's strict type, closes #284.
-- Enable PHP Opcache extension, closes #294.
-- Add `brianium/paratest` as a parallel PHP Unit runtime, closes #63.
+  behavior can be disabled with the feature flag `featureFlag.280_OldUniqueUserIdentifierDisabled`. Closes [#280].
+- Add first unit tests for controller, related to [#280].
+- Enable PHP's strict type, closes [#284].
+- Enable PHP Opcache extension, closes [#294].
+- Add `brianium/paratest` as a parallel PHP Unit runtime, closes [#63].
+
 ### Changed
 - In the case of server errors during requests in production environments, i.e. HTTP status code 500, the error message
   will be printed to the log.
 - Update PHP dependencies.
-- Upgrade remaining GitHub actions, required due to deprecation of Node 16, closes #240.
-- Upgrade PHP Unit to major version 10, related to #63.
+- Upgrade remaining GitHub actions, required due to deprecation of Node 16, closes [#240].
+- Upgrade PHP Unit to major version 10, related to [#63].
+
 ### Deprecated
 - Original request body scheme of endpoints `POST /change-password`, `POST /token` and `POST /register` is deprecated,
-  will be removed in version 0.2.0, part of #280.
+  will be removed in version 0.2.0, part of [#280].
+
 ### Removed
-- Remove leak test due to incompatibility with PHP Unit 10+, related to #63.
+- Remove leak test due to incompatibility with PHP Unit 10+, related to [#63].
 
 ## 0.1.5 - 2024-04-12
 ### Changed
