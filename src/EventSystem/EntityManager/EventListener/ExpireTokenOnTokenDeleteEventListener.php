@@ -35,9 +35,9 @@ class ExpireTokenOnTokenDeleteEventListener
             $this->logger->critical(
                 'Unable to expire deleted token from redis.',
                 [
-                    'tokenUuid' => $oldToken->getIdentifier()?->toString(),
+                    'tokenId' => $oldToken->getId()?->toString(),
                     'tokenProperties' => $oldToken->getProperties(),
-                    'userUuid' => $this->authProvider->getUserUuid()->toString(),
+                    'userId' => $this->authProvider->getUserId()->toString(),
                 ]
             );
 

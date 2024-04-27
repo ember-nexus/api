@@ -22,11 +22,11 @@ class RedisElementEtagEventListener
 
     public function onElementEtagEvent(ElementEtagEvent $event): void
     {
-        $redisKey = $this->redisKeyTypeFactory->getEtagElementRedisKey($event->getElementUuid());
+        $redisKey = $this->redisKeyTypeFactory->getEtagElementRedisKey($event->getElementId());
         $this->logger->debug(
             'Trying to find Etag for element in Redis.',
             [
-                'elementUuid' => $event->getElementUuid()->toString(),
+                'elementId' => $event->getElementId()->toString(),
                 'redisKey' => (string) $redisKey,
             ]
         );
@@ -35,7 +35,7 @@ class RedisElementEtagEventListener
             $this->logger->debug(
                 'Unable to find Etag for element in Redis.',
                 [
-                    'elementUuid' => $event->getElementUuid()->toString(),
+                    'elementId' => $event->getElementId()->toString(),
                     'redisKey' => (string) $redisKey,
                 ]
             );
@@ -49,7 +49,7 @@ class RedisElementEtagEventListener
         $this->logger->debug(
             'Found Etag for element in Redis.',
             [
-                'elementUuid' => $event->getElementUuid()->toString(),
+                'elementId' => $event->getElementId()->toString(),
                 'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]

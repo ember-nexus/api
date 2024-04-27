@@ -28,23 +28,23 @@ class GetElementController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}',
+        '/{id}',
         name: 'get-element',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['GET']
     )]
     #[EndpointSupportsEtag(EtagType::ELEMENT)]
-    public function getElement(string $uuid): Response
+    public function getElement(string $id): Response
     {
-        $elementUuid = UuidV4::fromString($uuid);
-        $userUuid = $this->authProvider->getUserUuid();
+        $elementId = UuidV4::fromString($id);
+        $userId = $this->authProvider->getUserId();
 
-        if (!$this->accessChecker->hasAccessToElement($userUuid, $elementUuid, AccessType::READ)) {
+        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::READ)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        return $this->elementResponseService->buildElementResponseFromUuid($elementUuid);
+        return $this->elementResponseService->buildElementResponseFromId($elementId);
     }
 }

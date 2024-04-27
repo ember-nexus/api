@@ -25,16 +25,16 @@ class RedisElementEtagEventListenerTest extends TestCase
     public function testRedisElementEtagEventListenerWithElementNotInRedis(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_ELEMENT, $uuid->toString());
-        $elementEtagEvent = new ElementEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_ELEMENT, $id->toString());
+        $elementEtagEvent = new ElementEtagEvent($id);
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
         $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn(null);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagElementRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagElementRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
@@ -62,16 +62,16 @@ class RedisElementEtagEventListenerTest extends TestCase
     public function testRedisElementEtagEventListenerWithElementInRedisWithNullValue(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_ELEMENT, $uuid->toString());
-        $elementEtagEvent = new ElementEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_ELEMENT, $id->toString());
+        $elementEtagEvent = new ElementEtagEvent($id);
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
         $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn(RedisValueType::NULL->value);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagElementRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagElementRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
@@ -99,9 +99,9 @@ class RedisElementEtagEventListenerTest extends TestCase
     public function testRedisElementEtagEventListenerWithElementInRedisWithValue(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_ELEMENT, $uuid->toString());
-        $elementEtagEvent = new ElementEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_ELEMENT, $id->toString());
+        $elementEtagEvent = new ElementEtagEvent($id);
         $etag = new Etag('someEtag');
 
         // setup event listener dependencies
@@ -109,7 +109,7 @@ class RedisElementEtagEventListenerTest extends TestCase
         $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn((string) $etag);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagElementRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagElementRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 

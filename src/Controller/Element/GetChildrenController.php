@@ -32,26 +32,26 @@ class GetChildrenController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}/children',
+        '/{id}/children',
         name: 'get-children',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['GET']
     )]
     #[EndpointSupportsEtag(EtagType::CHILDREN_COLLECTION)]
-    public function getChildren(string $uuid): Response
+    public function getChildren(string $id): Response
     {
-        $parentUuid = UuidV4::fromString($uuid);
-        $userUuid = $this->authProvider->getUserUuid();
+        $parentId = UuidV4::fromString($id);
+        $userId = $this->authProvider->getUserId();
 
-        $type = $this->accessChecker->getElementType($parentUuid);
+        $type = $this->accessChecker->getElementType($parentId);
         if (ElementType::RELATION === $type) {
             // relations can not be parent nodes
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if (!$this->accessChecker->hasAccessToElement($userUuid, $parentUuid, AccessType::READ)) {
+        if (!$this->accessChecker->hasAccessToElement($userId, $parentId, AccessType::READ)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
@@ -113,25 +113,25 @@ class GetChildrenController extends AbstractController
             "SKIP \$skip\n".
             'LIMIT $limit',
             [
-                'userId' => $userUuid->toString(),
-                'parentId' => $parentUuid->toString(),
+                'userId' => $userId->toString(),
+                'parentId' => $parentId->toString(),
                 'skip' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
                 'limit' => $this->collectionService->getPageSize(),
             ]
         ));
         $totalCount = 0;
-        $nodeUuids = [];
-        $relationUuids = [];
+        $nodeIds = [];
+        $relationIds = [];
         if (count($res) > 0) {
             $totalCount = $res->first()->get('totalCount');
             foreach ($res as $resultSet) {
-                $nodeUuids[] = UuidV4::fromString($resultSet->get('child'));
+                $nodeIds[] = UuidV4::fromString($resultSet->get('child'));
                 foreach ($resultSet->get('r') as $relationId) {
-                    $relationUuids[] = UuidV4::fromString($relationId);
+                    $relationIds[] = UuidV4::fromString($relationId);
                 }
             }
         }
 
-        return $this->collectionService->buildCollectionFromUuids($nodeUuids, $relationUuids, $totalCount);
+        return $this->collectionService->buildCollectionFromIds($nodeIds, $relationIds, $totalCount);
     }
 }

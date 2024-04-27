@@ -68,12 +68,12 @@ class SecurityUtilService
      */
     public function validateUserIsNotAnonymousUser(UuidInterface $userId): void
     {
-        $anonymousUserUuid = $this->bag->get('anonymousUserUUID');
-        if (!is_string($anonymousUserUuid)) {
+        $anonymousUserId = $this->bag->get('anonymousUserUUID');
+        if (!is_string($anonymousUserId)) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Environment variable "ANONYMOUS_USER_UUID" must be set to a valid UUID.');
         }
-        $anonymousUserUuid = UuidV4::fromString($anonymousUserUuid);
-        if ($userId->equals($anonymousUserUuid)) {
+        $anonymousUserId = UuidV4::fromString($anonymousUserId);
+        if ($userId->equals($anonymousUserId)) {
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
     }
@@ -97,8 +97,8 @@ class SecurityUtilService
         if (1 !== count($res)) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
-        $userUuid = Uuid::fromString($res->first()->get('id'));
-        $element = $this->elementManager->getElement($userUuid);
+        $userId = Uuid::fromString($res->first()->get('id'));
+        $element = $this->elementManager->getElement($userId);
         if (null === $element) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }

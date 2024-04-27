@@ -38,17 +38,17 @@ class PostElementController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}',
+        '/{id}',
         name: 'post-element',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['POST']
     )]
-    public function postElement(string $uuid, Request $request): Response
+    public function postElement(string $id, Request $request): Response
     {
-        $parentElementId = UuidV4::fromString($uuid);
-        $userId = $this->authProvider->getUserUuid();
+        $parentElementId = UuidV4::fromString($id);
+        $userId = $this->authProvider->getUserId();
 
         $parentType = $this->accessChecker->getElementType($parentElementId);
         if (ElementType::NODE !== $parentType) {
@@ -95,17 +95,17 @@ class PostElementController extends AbstractController
         $this->elementManager->create($element);
 
         $newNodeOwnsRelation = (new RelationElement())
-            ->setIdentifier(UuidV4::uuid4())
+            ->setId(UuidV4::uuid4())
             ->setType('OWNS')
             ->setStart($parentElementId)
-            ->setEnd($element->getIdentifier());
+            ->setEnd($element->getId());
         $this->elementManager->create($newNodeOwnsRelation);
 
         $newNodeCreatedRelation = (new RelationElement())
-            ->setIdentifier(UuidV4::uuid4())
+            ->setId(UuidV4::uuid4())
             ->setType('CREATED')
             ->setStart($userId)
-            ->setEnd($element->getIdentifier());
+            ->setEnd($element->getId());
         $this->elementManager->create($newNodeCreatedRelation);
 
         $this->elementManager->flush();
@@ -114,7 +114,7 @@ class PostElementController extends AbstractController
             $this->router->generate(
                 'get-element',
                 [
-                    'uuid' => $element->getIdentifier(),
+                    'id' => $element->getId(),
                 ]
             )
         );

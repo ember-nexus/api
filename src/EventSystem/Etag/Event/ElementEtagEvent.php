@@ -16,7 +16,7 @@ class ElementEtagEvent implements EventInterface
     private ?Etag $etag = null;
 
     public function __construct(
-        private UuidInterface $elementUuid
+        private UuidInterface $elementId
     ) {
     }
 
@@ -32,8 +32,8 @@ class ElementEtagEvent implements EventInterface
         return $this;
     }
 
-    public function getElementUuid(): UuidInterface
+    public function getElementId(): UuidInterface
     {
-        return $this->elementUuid;
+        return $this->elementId;
     }
 }

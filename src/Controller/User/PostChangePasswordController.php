@@ -43,7 +43,7 @@ class PostChangePasswordController extends AbstractController
         $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
 
         $userNode = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
-        $userId = $userNode->getIdentifier();
+        $userId = $userNode->getId();
         if (null === $userId) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }

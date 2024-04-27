@@ -56,8 +56,8 @@ class TokenRevokeCommand extends Command
     private bool $isForceActive = false;
     private bool $isDryRunActive = false;
     private bool $isListAllAffectedTokensActive = false;
-    private ?UuidInterface $userUuid = null;
-    private ?UuidInterface $groupUuid = null;
+    private ?UuidInterface $userId = null;
+    private ?UuidInterface $groupId = null;
     private ?DateTime $issuedBefore = null;
     private ?DateTime $issuedAfter = null;
     private bool $isFilterIssuedWithoutExpirationDateActive = false;
@@ -220,7 +220,7 @@ class TokenRevokeCommand extends Command
         if (null !== $input->getOption(self::OPTION_USER)) {
             $userIdentifier = $input->getOption(self::OPTION_USER);
             if (preg_match(Regex::UUID_V4, $userIdentifier)) {
-                $this->userUuid = Uuid::fromString($userIdentifier);
+                $this->userId = Uuid::fromString($userIdentifier);
             } else {
                 $res = $this->cypherEntityManager->getClient()->runStatement(new Statement(
                     sprintf(
@@ -236,12 +236,12 @@ class TokenRevokeCommand extends Command
                     throw new Exception(sprintf('Unable to find user identified by %s.', $userIdentifier));
                 }
 
-                $this->userUuid = Uuid::fromString($res[0]['u.id']);
+                $this->userId = Uuid::fromString($res[0]['u.id']);
             }
         }
 
         if (null !== $input->getOption(self::OPTION_GROUP)) {
-            $this->groupUuid = Uuid::fromString($input->getOption(self::OPTION_GROUP));
+            $this->groupId = Uuid::fromString($input->getOption(self::OPTION_GROUP));
         }
     }
 
@@ -267,14 +267,14 @@ class TokenRevokeCommand extends Command
             $arguments['issuedAfter'] = $this->issuedAfter;
         }
 
-        if ($this->userUuid) {
+        if ($this->userId) {
             $filters[] = 'u.id = $userIdentifier';
-            $arguments['userIdentifier'] = $this->userUuid->toString();
+            $arguments['userIdentifier'] = $this->userId->toString();
         }
 
-        if ($this->groupUuid) {
+        if ($this->groupId) {
             $filters[] = '(t)<-[:OWNS]-(:User)-[:IS_IN_GROUP*1..]->(:Group {id: $groupIdentifier})';
-            $arguments['groupIdentifier'] = $this->groupUuid->toString();
+            $arguments['groupIdentifier'] = $this->groupId->toString();
         }
 
         $joinedFilters = join("\nAND ", $filters);

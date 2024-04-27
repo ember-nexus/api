@@ -22,14 +22,14 @@ class GetElementFileController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}/file',
+        '/{id}/file',
         name: 'get-element-file',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['GET']
     )]
-    public function getElementFile(string $uuid, Request $request): Response
+    public function getElementFile(string $id, Request $request): Response
     {
         throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }

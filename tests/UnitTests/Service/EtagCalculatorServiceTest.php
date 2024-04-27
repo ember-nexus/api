@@ -30,7 +30,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateElementEtagForNodeWhichExists(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -72,15 +72,15 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateElementEtag($uuid);
+        $etag = $etagCalculatorService->calculateElementEtag($id);
 
         // assert result
         $this->assertSame('Rh8DXSRXuja', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "OPTIONAL MATCH (node {id: \$elementUuid})\n".
-            "OPTIONAL MATCH ()-[relation {id: \$elementUuid}]->()\n".
+            "OPTIONAL MATCH (node {id: \$elementId})\n".
+            "OPTIONAL MATCH ()-[relation {id: \$elementId}]->()\n".
             'RETURN node.updated, relation.updated',
             $statement->getText()
         );
@@ -93,7 +93,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateElementEtagForRelationWhichExists(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -135,15 +135,15 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateElementEtag($uuid);
+        $etag = $etagCalculatorService->calculateElementEtag($id);
 
         // assert result
         $this->assertSame('Rh8DXSRXuja', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "OPTIONAL MATCH (node {id: \$elementUuid})\n".
-            "OPTIONAL MATCH ()-[relation {id: \$elementUuid}]->()\n".
+            "OPTIONAL MATCH (node {id: \$elementId})\n".
+            "OPTIONAL MATCH ()-[relation {id: \$elementId}]->()\n".
             'RETURN node.updated, relation.updated',
             $statement->getText()
         );
@@ -156,7 +156,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateElementEtagForElementWhichDoesNotExist(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -187,7 +187,7 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateElementEtag($uuid);
+        $etag = $etagCalculatorService->calculateElementEtag($id);
         $this->assertNull($etag);
 
         // assert logs
@@ -197,7 +197,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateElementEtagWithEdgecaseWhereDifferentObjectIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -231,7 +231,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
-        $etagCalculatorService->calculateElementEtag($uuid);
+        $etagCalculatorService->calculateElementEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for element.'));
@@ -240,7 +240,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagWithExistingElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -292,14 +292,14 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateChildrenCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateChildrenCollectionEtag($id);
 
         // assert result
         $this->assertSame('EKHX4b5HhHX', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (parent {id: \$parentUuid})\n".
+            "MATCH (parent {id: \$parentId})\n".
             "MATCH (parent)-[:OWNS]->(children)\n".
             "MATCH (parent)-[relations]->(children)\n".
             "WITH children, relations\n".
@@ -325,7 +325,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagWithNoElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -368,14 +368,14 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateChildrenCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateChildrenCollectionEtag($id);
 
         // assert result
         $this->assertSame('3F8H5eXjtu0', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (parent {id: \$parentUuid})\n".
+            "MATCH (parent {id: \$parentId})\n".
             "MATCH (parent)-[:OWNS]->(children)\n".
             "MATCH (parent)-[relations]->(children)\n".
             "WITH children, relations\n".
@@ -401,7 +401,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagWithTooManyElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $resultList = [];
         for ($i = 0; $i < 101; ++$i) {
@@ -440,7 +440,7 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateChildrenCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateChildrenCollectionEtag($id);
 
         // assert result
         $this->assertNull($etag);
@@ -453,7 +453,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagDifferentObjectIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -493,7 +493,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
-        $etagCalculatorService->calculateChildrenCollectionEtag($uuid);
+        $etagCalculatorService->calculateChildrenCollectionEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for children collection.'));
@@ -502,7 +502,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagWhereNoDataIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -531,7 +531,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unexpected result.');
 
         // run service method
-        $etagCalculatorService->calculateChildrenCollectionEtag($uuid);
+        $etagCalculatorService->calculateChildrenCollectionEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for children collection.'));
@@ -540,7 +540,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagWithExistingElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -592,14 +592,14 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateParentsCollectionEtag($id);
 
         // assert result
         $this->assertSame('EKHX4b5HhHX', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (child {id: \$childUuid})\n".
+            "MATCH (child {id: \$childId})\n".
             "MATCH (child)<-[:OWNS]-(parents)\n".
             "MATCH (child)<-[relations]-(parents)\n".
             "WITH parents, relations\n".
@@ -625,7 +625,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagWithNoElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -668,14 +668,14 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateParentsCollectionEtag($id);
 
         // assert result
         $this->assertSame('3F8H5eXjtu0', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (child {id: \$childUuid})\n".
+            "MATCH (child {id: \$childId})\n".
             "MATCH (child)<-[:OWNS]-(parents)\n".
             "MATCH (child)<-[relations]-(parents)\n".
             "WITH parents, relations\n".
@@ -701,7 +701,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagWithTooManyElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $resultList = [];
         for ($i = 0; $i < 101; ++$i) {
@@ -740,7 +740,7 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateParentsCollectionEtag($id);
 
         // assert result
         $this->assertNull($etag);
@@ -753,7 +753,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagDifferentObjectIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -793,7 +793,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
-        $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+        $etagCalculatorService->calculateParentsCollectionEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for parents collection.'));
@@ -802,7 +802,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagWhereNoDataIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -831,7 +831,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unexpected result.');
 
         // run service method
-        $etagCalculatorService->calculateParentsCollectionEtag($uuid);
+        $etagCalculatorService->calculateParentsCollectionEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for parents collection.'));
@@ -840,7 +840,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagWithExistingElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -892,14 +892,14 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($id);
 
         // assert result
         $this->assertSame('EKHX4b5HhHX', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (center {id: \$centerUuid})\n".
+            "MATCH (center {id: \$centerId})\n".
             "MATCH (center)-[relations]-(related)\n".
             "WITH related, relations\n".
             "LIMIT 101\n".
@@ -924,7 +924,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagWithNoElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -967,14 +967,14 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($id);
 
         // assert result
         $this->assertSame('3F8H5eXjtu0', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (center {id: \$centerUuid})\n".
+            "MATCH (center {id: \$centerId})\n".
             "MATCH (center)-[relations]-(related)\n".
             "WITH related, relations\n".
             "LIMIT 101\n".
@@ -999,7 +999,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagWithTooManyElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $resultList = [];
         for ($i = 0; $i < 101; ++$i) {
@@ -1038,7 +1038,7 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateRelatedCollectionEtag($id);
 
         // assert result
         $this->assertNull($etag);
@@ -1051,7 +1051,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagDifferentObjectIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1091,7 +1091,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
-        $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+        $etagCalculatorService->calculateRelatedCollectionEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for related collection.'));
@@ -1100,7 +1100,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagWhereNoDataIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1129,7 +1129,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unexpected result.');
 
         // run service method
-        $etagCalculatorService->calculateRelatedCollectionEtag($uuid);
+        $etagCalculatorService->calculateRelatedCollectionEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for related collection.'));
@@ -1138,7 +1138,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagWithExistingElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1190,14 +1190,14 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateIndexCollectionEtag($id);
 
         // assert result
         $this->assertSame('EKHX4b5HhHX', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (user:User {id: \$userUuid})\n".
+            "MATCH (user:User {id: \$userId})\n".
             "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
             "WITH elements\n".
             "LIMIT 101\n".
@@ -1222,7 +1222,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagWithNoElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1265,14 +1265,14 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateIndexCollectionEtag($id);
 
         // assert result
         $this->assertSame('3F8H5eXjtu0', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (user:User {id: \$userUuid})\n".
+            "MATCH (user:User {id: \$userId})\n".
             "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
             "WITH elements\n".
             "LIMIT 101\n".
@@ -1297,7 +1297,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagWithTooManyElements(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $resultList = [];
         for ($i = 0; $i < 101; ++$i) {
@@ -1336,7 +1336,7 @@ class EtagCalculatorServiceTest extends TestCase
         );
 
         // run service method
-        $etag = $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+        $etag = $etagCalculatorService->calculateIndexCollectionEtag($id);
 
         // assert result
         $this->assertNull($etag);
@@ -1349,7 +1349,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagDifferentObjectIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1389,7 +1389,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
 
         // run service method
-        $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+        $etagCalculatorService->calculateIndexCollectionEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));
@@ -1398,7 +1398,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagWhereNoDataIsReturned(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1427,7 +1427,7 @@ class EtagCalculatorServiceTest extends TestCase
         $this->expectExceptionMessage('Unexpected result.');
 
         // run service method
-        $etagCalculatorService->calculateIndexCollectionEtag($uuid);
+        $etagCalculatorService->calculateIndexCollectionEtag($id);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));

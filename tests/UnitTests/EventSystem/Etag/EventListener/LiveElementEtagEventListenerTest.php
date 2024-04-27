@@ -25,9 +25,9 @@ class LiveElementEtagEventListenerTest extends TestCase
     public function testLiveElementEtagEventListener(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_ELEMENT, $uuid->toString());
-        $elementEtagEvent = new ElementEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_ELEMENT, $id->toString());
+        $elementEtagEvent = new ElementEtagEvent($id);
         $etag = new Etag('someEtag');
 
         // setup event listener dependencies
@@ -40,12 +40,12 @@ class LiveElementEtagEventListenerTest extends TestCase
         )->shouldBeCalledOnce()->willReturn(null);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagElementRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagElementRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
         $etagCalculatorService = $this->prophesize(EtagCalculatorService::class);
-        $etagCalculatorService->calculateElementEtag(Argument::is($uuid))->shouldBeCalledOnce()->willReturn($etag);
+        $etagCalculatorService->calculateElementEtag(Argument::is($id))->shouldBeCalledOnce()->willReturn($etag);
 
         $logger = TestLogger::create();
 

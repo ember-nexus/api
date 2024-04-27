@@ -39,14 +39,14 @@ class UpdatedPropertyElementFragmentizeEventListener
             $element = $event->getRelationElement();
         }
         if (!$element->hasProperty('updated')) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Server must set updated property before persisting element');
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Server must set updated property before persisting element.');
         }
         $updated = $element->getProperty('updated');
         if ($updated instanceof DateTimeZoneId) {
             $updated = $updated->toDateTime();
         }
         if (!($updated instanceof DateTimeInterface)) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from updated property of type '".get_class($updated)."'.");
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from updated property of type '".get_class($updated)."'.", ['updated' => $updated]);
         }
         $cypherFragment->addProperty('updated', $updated);
         $mongoFragment->addProperty('updated', new UTCDateTime($updated));

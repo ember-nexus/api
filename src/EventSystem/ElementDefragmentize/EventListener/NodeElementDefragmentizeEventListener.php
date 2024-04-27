@@ -18,6 +18,6 @@ class NodeElementDefragmentizeEventListener
         $cypherFragment = $event->getCypherFragment();
         $event->getNodeElement()
             ->setLabel($cypherFragment->getLabels()[0])
-            ->setIdentifier(UuidV4::fromString($cypherFragment->getProperty('id')));
+            ->setId(UuidV4::fromString($cypherFragment->getProperty('id')));
     }
 }

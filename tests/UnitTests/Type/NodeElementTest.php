@@ -59,18 +59,18 @@ class NodeElementTest extends TestCase
         $nodeElement->removeProperty('propertyWhichDoesNotExist');
     }
 
-    public function testIdentifierTrait(): void
+    public function testIdTrait(): void
     {
         $nodeElement = new NodeElement();
 
-        $this->assertNull($nodeElement->getIdentifier());
+        $this->assertNull($nodeElement->getId());
 
-        $uuid = Uuid::fromString('e6f6ef39-60b4-47aa-8a7f-091502943815');
-        $nodeElement->setIdentifier($uuid);
-        $this->assertSame($uuid, $nodeElement->getIdentifier());
+        $id = Uuid::fromString('e6f6ef39-60b4-47aa-8a7f-091502943815');
+        $nodeElement->setId($id);
+        $this->assertSame($id, $nodeElement->getId());
 
-        $nodeElement->setIdentifier(null);
-        $this->assertNull($nodeElement->getIdentifier());
+        $nodeElement->setId(null);
+        $this->assertNull($nodeElement->getId());
     }
 
     public function testLabel(): void

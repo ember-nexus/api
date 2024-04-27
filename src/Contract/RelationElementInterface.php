@@ -14,9 +14,9 @@ interface RelationElementInterface extends ElementInterface
 
     public function getStart(): ?UuidInterface;
 
-    public function setStart(?UuidInterface $uuid): self;
+    public function setStart(?UuidInterface $start): self;
 
     public function getEnd(): ?UuidInterface;
 
-    public function setEnd(?UuidInterface $uuid): self;
+    public function setEnd(?UuidInterface $end): self;
 }

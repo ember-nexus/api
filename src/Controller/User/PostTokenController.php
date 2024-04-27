@@ -41,7 +41,7 @@ class PostTokenController extends AbstractController
         $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
 
         $userElement = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
-        $userId = $userElement->getIdentifier();
+        $userId = $userElement->getId();
         if (null === $userId) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }

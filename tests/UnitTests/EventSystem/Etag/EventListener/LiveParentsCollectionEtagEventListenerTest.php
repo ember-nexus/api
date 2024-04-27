@@ -26,9 +26,9 @@ class LiveParentsCollectionEtagEventListenerTest extends TestCase
     public function testLiveParentsCollectionEtagEventListenerWithFewEnoughParents(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_PARENTS_COLLECTION, $uuid->toString());
-        $elementEtagEvent = new ParentsCollectionEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_PARENTS_COLLECTION, $id->toString());
+        $elementEtagEvent = new ParentsCollectionEtagEvent($id);
         $etag = new Etag('someEtag');
 
         // setup event listener dependencies
@@ -41,12 +41,12 @@ class LiveParentsCollectionEtagEventListenerTest extends TestCase
         )->shouldBeCalledOnce()->willReturn(null);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagParentsCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagParentsCollectionRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
         $etagCalculatorService = $this->prophesize(EtagCalculatorService::class);
-        $etagCalculatorService->calculateParentsCollectionEtag(Argument::is($uuid))->shouldBeCalledOnce()->willReturn($etag);
+        $etagCalculatorService->calculateParentsCollectionEtag(Argument::is($id))->shouldBeCalledOnce()->willReturn($etag);
 
         $logger = TestLogger::create();
 
@@ -72,9 +72,9 @@ class LiveParentsCollectionEtagEventListenerTest extends TestCase
     public function testLiveParentsCollectionEtagEventListenerWithTooManyParents(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_PARENTS_COLLECTION, $uuid->toString());
-        $elementEtagEvent = new ParentsCollectionEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_PARENTS_COLLECTION, $id->toString());
+        $elementEtagEvent = new ParentsCollectionEtagEvent($id);
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
@@ -86,12 +86,12 @@ class LiveParentsCollectionEtagEventListenerTest extends TestCase
         )->shouldBeCalledOnce()->willReturn(null);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagParentsCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagParentsCollectionRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
         $etagCalculatorService = $this->prophesize(EtagCalculatorService::class);
-        $etagCalculatorService->calculateParentsCollectionEtag(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(null);
+        $etagCalculatorService->calculateParentsCollectionEtag(Argument::is($id))->shouldBeCalledOnce()->willReturn(null);
 
         $logger = TestLogger::create();
 

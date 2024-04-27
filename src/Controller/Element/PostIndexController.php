@@ -47,7 +47,7 @@ class PostIndexController extends AbstractController
     )]
     public function postIndex(Request $request): Response
     {
-        $userId = $this->authProvider->getUserUuid();
+        $userId = $this->authProvider->getUserId();
 
         $body = \Safe\json_decode($request->getContent(), true);
 
@@ -108,17 +108,17 @@ class PostIndexController extends AbstractController
 
         if ($element instanceof NodeElementInterface) {
             $newNodeOwnsRelation = (new RelationElement())
-                ->setIdentifier(UuidV4::uuid4())
+                ->setId(UuidV4::uuid4())
                 ->setType('OWNS')
                 ->setStart($userId)
-                ->setEnd($element->getIdentifier());
+                ->setEnd($element->getId());
             $this->elementManager->create($newNodeOwnsRelation);
 
             $newNodeCreatedRelation = (new RelationElement())
-                ->setIdentifier(UuidV4::uuid4())
+                ->setId(UuidV4::uuid4())
                 ->setType('CREATED')
                 ->setStart($userId)
-                ->setEnd($element->getIdentifier());
+                ->setEnd($element->getId());
             $this->elementManager->create($newNodeCreatedRelation);
         }
 
@@ -128,7 +128,7 @@ class PostIndexController extends AbstractController
             $this->router->generate(
                 'get-element',
                 [
-                    'uuid' => $element->getIdentifier(),
+                    'id' => $element->getId(),
                 ]
             )
         );

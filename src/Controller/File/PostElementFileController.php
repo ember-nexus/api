@@ -22,14 +22,14 @@ class PostElementFileController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}/file',
+        '/{id}/file',
         name: 'post-element-file',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['POST']
     )]
-    public function postElementFile(string $uuid, Request $request): Response
+    public function postElementFile(string $id, Request $request): Response
     {
         throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }

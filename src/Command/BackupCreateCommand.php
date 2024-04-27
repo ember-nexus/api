@@ -229,37 +229,37 @@ class BackupCreateCommand extends Command
         ));
     }
 
-    private function getNodePath(UuidInterface $nodeUuid): string
+    private function getNodePath(UuidInterface $nodeId): string
     {
-        $nodeUuidAsHex = $nodeUuid->getHex()->toString();
+        $nodeIdAsHex = $nodeId->getHex()->toString();
         $folders = ceil(log($this->nodeCount, 256));
         $folderParts = [];
         for ($i = 0; $i < $folders; ++$i) {
-            $folderParts[] = substr($nodeUuidAsHex, 2 * $i, 2);
+            $folderParts[] = substr($nodeIdAsHex, 2 * $i, 2);
         }
 
         return sprintf(
             '%s/node/%s/%s.json',
             $this->backupName,
             implode('/', $folderParts),
-            $nodeUuid->toString()
+            $nodeId->toString()
         );
     }
 
-    private function getRelationPath(UuidInterface $relationUuid): string
+    private function getRelationPath(UuidInterface $relationId): string
     {
-        $relationUuidAsHex = $relationUuid->getHex()->toString();
+        $relationIdAsHex = $relationId->getHex()->toString();
         $folders = ceil(log($this->relationCount, 256));
         $folderParts = [];
         for ($i = 0; $i < $folders; ++$i) {
-            $folderParts[] = substr($relationUuidAsHex, 2 * $i, 2);
+            $folderParts[] = substr($relationIdAsHex, 2 * $i, 2);
         }
 
         return sprintf(
             '%s/relation/%s/%s.json',
             $this->backupName,
             implode('/', $folderParts),
-            $relationUuid->toString()
+            $relationId->toString()
         );
     }
 

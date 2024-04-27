@@ -25,13 +25,13 @@ class LiveIndexCollectionEtagEventListener
 
     public function onIndexCollectionEtagEvent(IndexCollectionEtagEvent $event): void
     {
-        $etag = $this->etagCalculatorService->calculateIndexCollectionEtag($event->getUserUuid());
-        $redisKey = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey($event->getUserUuid());
+        $etag = $this->etagCalculatorService->calculateIndexCollectionEtag($event->getUserId());
+        $redisKey = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey($event->getUserId());
 
         $this->logger->debug(
             'Trying to persist Etag for index collection in Redis.',
             [
-                'userUuid' => $event->getUserUuid()->toString(),
+                'userId' => $event->getUserId()->toString(),
                 'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]

@@ -22,14 +22,14 @@ class MoveElementController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}',
+        '/{id}',
         name: 'move-element',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['MOVE']
     )]
-    public function moveElement(string $uuid, Request $request): Response
+    public function moveElement(string $id, Request $request): Response
     {
         throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }

@@ -25,13 +25,13 @@ class LiveParentsCollectionEtagEventListener
 
     public function onParentsCollectionEtagEvent(ParentsCollectionEtagEvent $event): void
     {
-        $etag = $this->etagCalculatorService->calculateParentsCollectionEtag($event->getChildUuid());
-        $redisKey = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey($event->getChildUuid());
+        $etag = $this->etagCalculatorService->calculateParentsCollectionEtag($event->getChildId());
+        $redisKey = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey($event->getChildId());
 
         $this->logger->debug(
             'Trying to persist Etag for parents collection in Redis.',
             [
-                'childUuid' => $event->getChildUuid()->toString(),
+                'childId' => $event->getChildId()->toString(),
                 'redisKey' => (string) $redisKey,
                 'etag' => $etag,
             ]

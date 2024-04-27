@@ -69,7 +69,7 @@ class CreateElementFromRawDataService
             $element->setLabel($type);
         }
         $element->addProperties($verifiedData);
-        $element->setIdentifier($elementId);
+        $element->setId($elementId);
 
         return $element;
     }

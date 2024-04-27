@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace App\Contract;
 
-interface ElementInterface extends HasIdentifierInterface, HasPropertiesInterface
+interface ElementInterface extends HasIdInterface, HasPropertiesInterface
 {
 }

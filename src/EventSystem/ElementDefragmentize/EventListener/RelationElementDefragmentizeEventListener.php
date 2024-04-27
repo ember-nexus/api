@@ -52,7 +52,7 @@ class RelationElementDefragmentizeEventListener
          */
         $event->getRelationElement()
             ->setType($cypherFragment->getType())
-            ->setIdentifier($identifier)
+            ->setId($identifier)
             ->setStart($start)
             ->setEnd($end);
     }

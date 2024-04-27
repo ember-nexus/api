@@ -33,12 +33,12 @@ class GetTokenController extends AbstractController
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
 
-        $tokenUuid = $this->authProvider->getTokenUuid();
+        $tokenId = $this->authProvider->getTokenId();
 
-        if (!$tokenUuid) {
+        if (!$tokenId) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Token uuid should not be null.');
         }
 
-        return $this->elementResponseService->buildElementResponseFromUuid($tokenUuid);
+        return $this->elementResponseService->buildElementResponseFromId($tokenId);
     }
 }

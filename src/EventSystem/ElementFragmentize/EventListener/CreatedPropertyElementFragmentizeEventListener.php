@@ -51,7 +51,7 @@ class CreatedPropertyElementFragmentizeEventListener
             } else {
                 $type = gettype($created);
             }
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from created property of type '".$type."'.");
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from created property of type '".$type."'.", ['created' => $created]);
         }
         $cypherFragment->addProperty('created', $created);
         $mongoFragment->addProperty('created', new UTCDateTime($created));

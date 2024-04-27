@@ -188,8 +188,8 @@ class BackupLoadCommand extends Command
                 $endReached = true;
             }
             foreach ($res as $row) {
-                $uuid = UuidV4::fromString($row->get('n.id'));
-                $element = $this->elementManager->getNode($uuid);
+                $id = UuidV4::fromString($row->get('n.id'));
+                $element = $this->elementManager->getNode($id);
                 if ($element) {
                     $event = new ElementUpdateAfterBackupLoadEvent($element);
                     $this->eventDispatcher->dispatch($event);
@@ -212,8 +212,8 @@ class BackupLoadCommand extends Command
                 $endReached = true;
             }
             foreach ($res as $row) {
-                $uuid = UuidV4::fromString($row->get('r.id'));
-                $element = $this->elementManager->getRelation($uuid);
+                $id = UuidV4::fromString($row->get('r.id'));
+                $element = $this->elementManager->getRelation($id);
                 if ($element) {
                     $event = new ElementUpdateAfterBackupLoadEvent($element);
                     $this->eventDispatcher->dispatch($event);

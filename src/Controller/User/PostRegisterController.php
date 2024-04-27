@@ -91,7 +91,7 @@ class PostRegisterController extends AbstractController
     {
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         $userNode = (new NodeElement())
-            ->setIdentifier($userId)
+            ->setId($userId)
             ->setLabel('User')
             ->addProperties([
                 ...$data,
@@ -108,7 +108,7 @@ class PostRegisterController extends AbstractController
             $this->router->generate(
                 'get-element',
                 [
-                    'uuid' => $userId,
+                    'id' => $userId,
                 ]
             )
         );

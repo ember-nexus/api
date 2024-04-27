@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Factory\Exception;
 
 use App\Exception\Server500InternalServerErrorException;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -20,14 +21,15 @@ class Server500InternalServerErrorExceptionFactory
 
     /**
      * Returns an exception in the format of: "%s".
+     *
+     * @param mixed[] $context
      */
-    public function createFromTemplate(string $developmentDetail): Server500InternalServerErrorException
+    public function createFromTemplate(string $developmentDetail, array $context = []): Server500InternalServerErrorException
     {
+        $this->logger->error($developmentDetail, $context);
         $message = 'Internal server error, see log.';
         if ('prod' !== $this->bag->get('kernel.environment')) {
             $message = $developmentDetail;
-        } else {
-            $this->logger->error($developmentDetail);
         }
 
         return new Server500InternalServerErrorException(

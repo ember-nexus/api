@@ -295,37 +295,37 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertSame('text/plain; charset=utf-8', $response->getHeader('content-type')[0]);
     }
 
-    public function assertHasSingleOwner(string $token, string $childUuid, string $parentUuid): void
+    public function assertHasSingleOwner(string $token, string $childId, string $parentId): void
     {
         $parentsResponse = $this->runGetRequest(
-            sprintf('/%s/parents', $childUuid),
+            sprintf('/%s/parents', $childId),
             $token
         );
         $this->assertIsCollectionResponse($parentsResponse);
         $parentsResponseData = json_decode((string) $parentsResponse->getBody(), true);
         $this->assertSame(1, $parentsResponseData['totalNodes']);
-        $this->assertSame($parentUuid, $parentsResponseData['nodes'][0]['id']);
+        $this->assertSame($parentId, $parentsResponseData['nodes'][0]['id']);
         $this->assertSame('OWNS', $parentsResponseData['relations'][0]['type']);
     }
 
-    public function assertIsCreatedBy(string $token, string $nodeUuid, string $userUuid): void
+    public function assertIsCreatedBy(string $token, string $nodeId, string $userId): void
     {
         $relatedResponse = $this->runGetRequest(
-            sprintf('/%s/related', $nodeUuid),
+            sprintf('/%s/related', $nodeId),
             $token
         );
         $this->assertIsCollectionResponse($relatedResponse);
         $relatedResponseData = json_decode((string) $relatedResponse->getBody(), true);
         foreach ($relatedResponseData['relations'] as $relation) {
             if ('CREATED' === $relation['type']) {
-                $this->assertSame($userUuid, $relation['start']);
+                $this->assertSame($userId, $relation['start']);
 
                 return;
             }
         }
         $this->fail(sprintf(
             'Unable to find CREATED relation for node with UUID %s.',
-            $nodeUuid
+            $nodeId
         ));
     }
 

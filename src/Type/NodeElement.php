@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Type;
 
 use App\Contract\NodeElementInterface;
-use App\Trait\IdentifierTrait;
+use App\Trait\IdTrait;
 use App\Trait\PropertiesTrait;
 
 class NodeElement implements NodeElementInterface
 {
     use PropertiesTrait;
-    use IdentifierTrait;
+    use IdTrait;
 
     private ?string $label = null;
 

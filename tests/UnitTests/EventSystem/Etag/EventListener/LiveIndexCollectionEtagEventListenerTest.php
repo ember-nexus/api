@@ -26,9 +26,9 @@ class LiveIndexCollectionEtagEventListenerTest extends TestCase
     public function testLiveIndexCollectionEtagEventListenerWithFewEnoughIndex(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_INDEX_COLLECTION, $uuid->toString());
-        $elementEtagEvent = new IndexCollectionEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_INDEX_COLLECTION, $id->toString());
+        $elementEtagEvent = new IndexCollectionEtagEvent($id);
         $etag = new Etag('someEtag');
 
         // setup event listener dependencies
@@ -41,12 +41,12 @@ class LiveIndexCollectionEtagEventListenerTest extends TestCase
         )->shouldBeCalledOnce()->willReturn(null);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagIndexCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagIndexCollectionRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
         $etagCalculatorService = $this->prophesize(EtagCalculatorService::class);
-        $etagCalculatorService->calculateIndexCollectionEtag(Argument::is($uuid))->shouldBeCalledOnce()->willReturn($etag);
+        $etagCalculatorService->calculateIndexCollectionEtag(Argument::is($id))->shouldBeCalledOnce()->willReturn($etag);
 
         $logger = TestLogger::create();
 
@@ -72,9 +72,9 @@ class LiveIndexCollectionEtagEventListenerTest extends TestCase
     public function testLiveIndexCollectionEtagEventListenerWithTooManyIndex(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_INDEX_COLLECTION, $uuid->toString());
-        $elementEtagEvent = new IndexCollectionEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_INDEX_COLLECTION, $id->toString());
+        $elementEtagEvent = new IndexCollectionEtagEvent($id);
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
@@ -86,12 +86,12 @@ class LiveIndexCollectionEtagEventListenerTest extends TestCase
         )->shouldBeCalledOnce()->willReturn(null);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagIndexCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagIndexCollectionRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
         $etagCalculatorService = $this->prophesize(EtagCalculatorService::class);
-        $etagCalculatorService->calculateIndexCollectionEtag(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(null);
+        $etagCalculatorService->calculateIndexCollectionEtag(Argument::is($id))->shouldBeCalledOnce()->willReturn(null);
 
         $logger = TestLogger::create();
 

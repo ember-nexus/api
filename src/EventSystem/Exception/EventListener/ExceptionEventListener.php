@@ -32,7 +32,9 @@ class ExceptionEventListener
     {
         $originalException = $extendedException = $event->getThrowable();
         if (!($originalException instanceof ProblemJsonException)) {
-            $extendedException = $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Other internal exception.');
+            $extendedException = $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Other internal exception.', [
+                'originalException' => $originalException,
+            ]);
         }
         /**
          * @var ProblemJsonException $extendedException

@@ -32,7 +32,7 @@ class GetIndexController extends AbstractController
     #[EndpointSupportsEtag(EtagType::INDEX_COLLECTION)]
     public function getIndex(): Response
     {
-        $userUuid = $this->authProvider->getUserUuid();
+        $userId = $this->authProvider->getUserId();
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
@@ -42,16 +42,16 @@ class GetIndexController extends AbstractController
             "SKIP \$skip\n".
             'LIMIT $limit',
             [
-                'userId' => $userUuid->toString(),
+                'userId' => $userId->toString(),
                 'skip' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
                 'limit' => $this->collectionService->getPageSize(),
             ]
         ));
-        $nodeUuids = [];
+        $nodeIds = [];
         foreach ($res as $resultSet) {
-            $nodeUuids[] = UuidV4::fromString($resultSet->get('element.id'));
+            $nodeIds[] = UuidV4::fromString($resultSet->get('element.id'));
         }
 
-        return $this->collectionService->buildCollectionFromUuids($nodeUuids, [], count($nodeUuids));
+        return $this->collectionService->buildCollectionFromIds($nodeIds, [], count($nodeIds));
     }
 }

@@ -42,12 +42,12 @@ class EtagCalculator
         return $this;
     }
 
-    public function addUuid(UuidInterface $uuid): self
+    public function addUuid(UuidInterface $id): self
     {
         if ($this->finalEtag) {
             throw new LogicException('Etag is already finalized, no new data can be added.');
         }
-        hash_update($this->hashContext, $uuid->getBytes());
+        hash_update($this->hashContext, $id->getBytes());
 
         return $this;
     }

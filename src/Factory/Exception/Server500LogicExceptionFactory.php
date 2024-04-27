@@ -20,14 +20,15 @@ class Server500LogicExceptionFactory
 
     /**
      * Returns an exception in the format of: "%s".
+     *
+     * @param mixed[] $context
      */
-    public function createFromTemplate(string $developmentDetail): Server500LogicErrorException
+    public function createFromTemplate(string $developmentDetail, array $context = []): Server500LogicErrorException
     {
+        $this->logger->error($developmentDetail, $context);
         $message = 'Internal server error, see log.';
         if ('prod' !== $this->bag->get('kernel.environment')) {
             $message = $developmentDetail;
-        } else {
-            $this->logger->error($developmentDetail);
         }
 
         return new Server500LogicErrorException(

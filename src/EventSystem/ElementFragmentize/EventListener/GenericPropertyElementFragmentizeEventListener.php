@@ -107,7 +107,7 @@ class GenericPropertyElementFragmentizeEventListener
                 $elasticFragment->addProperty($name, $value);
                 continue;
             }
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate(sprintf("Unknown data type with value '%s'.", $value));
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate(sprintf("Unknown data type with value '%s'.", $value), ['value' => $value]);
         }
     }
 }

@@ -34,7 +34,7 @@ class TokenGenerator
     /**
      * @param array<string, mixed> $data
      */
-    public function createNewToken(UuidInterface $userUuid, array $data = [], ?int $lifetimeInSeconds = null): string
+    public function createNewToken(UuidInterface $userId, array $data = [], ?int $lifetimeInSeconds = null): string
     {
         for ($i = 0; $i < 3; ++$i) {
             $token = $this->createToken();
@@ -70,10 +70,10 @@ class TokenGenerator
             }
         }
 
-        $tokenUuid = Uuid::uuid4();
+        $tokenId = Uuid::uuid4();
         $tokenNode = (new NodeElement())
             ->setLabel('Token')
-            ->setIdentifier($tokenUuid)
+            ->setId($tokenId)
             ->addProperty('name', (new DateTime())->format('Y-m-d H:i:s'))
             ->addProperties($data)
             ->addProperties([
@@ -86,9 +86,9 @@ class TokenGenerator
 
         $tokenOwnedByUserRelation = (new RelationElement())
             ->setType('OWNS')
-            ->setIdentifier(Uuid::uuid4())
-            ->setStart($userUuid)
-            ->setEnd($tokenUuid);
+            ->setId(Uuid::uuid4())
+            ->setStart($userId)
+            ->setEnd($tokenId);
         $this->elementManager->create($tokenOwnedByUserRelation);
         $this->elementManager->flush();
 

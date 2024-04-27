@@ -13,8 +13,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class AuthProvider
 {
     private bool $isAnonymous;
-    private UuidInterface $userUuid;
-    private ?UuidInterface $tokenUuid = null;
+    private UuidInterface $userId;
+    private ?UuidInterface $tokenId = null;
     private ?string $hashedToken = null;
 
     public function __construct(
@@ -22,11 +22,11 @@ class AuthProvider
         private TokenGenerator $tokenGenerator,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory
     ) {
-        $anonymousUserUuid = $this->bag->get('anonymousUserUUID');
-        if (!is_string($anonymousUserUuid)) {
+        $anonymousUserId = $this->bag->get('anonymousUserUUID');
+        if (!is_string($anonymousUserId)) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('anonymousUserUUID must be set to a valid UUID');
         }
-        $this->userUuid = UuidV4::fromString($anonymousUserUuid);
+        $this->userId = UuidV4::fromString($anonymousUserId);
         $this->isAnonymous = true;
     }
 
@@ -45,13 +45,13 @@ class AuthProvider
     }
 
     public function setUserAndToken(
-        UuidInterface $userUuid,
-        ?UuidInterface $tokenUuid = null,
+        UuidInterface $userId,
+        ?UuidInterface $tokenId = null,
         ?string $hashedToken = null,
         bool $isAnonymous = false
     ): self {
-        $this->userUuid = $userUuid;
-        $this->tokenUuid = $tokenUuid;
+        $this->userId = $userId;
+        $this->tokenId = $tokenId;
         $this->hashedToken = $hashedToken;
         $this->isAnonymous = $isAnonymous;
 
@@ -63,9 +63,9 @@ class AuthProvider
         return $this->isAnonymous;
     }
 
-    public function getUserUuid(): UuidInterface
+    public function getUserId(): UuidInterface
     {
-        return $this->userUuid;
+        return $this->userId;
     }
 
     public function getHashedToken(): ?string
@@ -73,8 +73,8 @@ class AuthProvider
         return $this->hashedToken;
     }
 
-    public function getTokenUuid(): ?UuidInterface
+    public function getTokenId(): ?UuidInterface
     {
-        return $this->tokenUuid;
+        return $this->tokenId;
     }
 }

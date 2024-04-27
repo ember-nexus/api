@@ -25,16 +25,16 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
     public function testRedisRelatedCollectionEtagEventListenerWithElementNotInRedis(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $uuid->toString());
-        $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $id->toString());
+        $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($id);
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
         $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn(null);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
@@ -62,16 +62,16 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
     public function testRedisRelatedCollectionEtagEventListenerWithElementInRedisWithNullValue(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $uuid->toString());
-        $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $id->toString());
+        $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($id);
 
         // setup event listener dependencies
         $redisClient = $this->prophesize(RedisClient::class);
         $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn(RedisValueType::NULL->value);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 
@@ -99,9 +99,9 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
     public function testRedisRelatedCollectionEtagEventListenerWithElementInRedisWithValue(): void
     {
         // setup variables
-        $uuid = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
-        $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $uuid->toString());
-        $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($uuid);
+        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $id->toString());
+        $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($id);
         $etag = new Etag('someEtag');
 
         // setup event listener dependencies
@@ -109,7 +109,7 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
         $redisClient->get(Argument::is((string) $redisKey))->shouldBeCalledOnce()->willReturn((string) $etag);
 
         $redisKeyFactory = $this->prophesize(RedisKeyFactory::class);
-        $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($uuid))->shouldBeCalledOnce()->willReturn(
+        $redisKeyFactory->getEtagRelatedCollectionRedisKey(Argument::is($id))->shouldBeCalledOnce()->willReturn(
             $redisKey
         );
 

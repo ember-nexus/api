@@ -218,7 +218,7 @@ class PostRegisterControllerTest extends TestCase
         $password = '1234';
         $userNode = $method->invokeArgs($postRegisterController, [$userId, $data, $uniqueUserIdentifier, $password]);
         $this->assertInstanceOf(NodeElement::class, $userNode);
-        $this->assertSame($userId, $userNode->getIdentifier());
+        $this->assertSame($userId, $userNode->getId());
         $this->assertSame($uniqueUserIdentifier, $userNode->getProperty('email'));
         $this->assertTrue($userNode->hasProperty('_passwordHash'));
 
@@ -230,7 +230,7 @@ class PostRegisterControllerTest extends TestCase
         $password = '1234';
         $userNode = $method->invokeArgs($postRegisterController, [$userId, $data, $uniqueUserIdentifier, $password]);
         $this->assertInstanceOf(NodeElement::class, $userNode);
-        $this->assertSame($userId, $userNode->getIdentifier());
+        $this->assertSame($userId, $userNode->getId());
         $this->assertSame($uniqueUserIdentifier, $userNode->getProperty('email'));
         $this->assertTrue($userNode->hasProperty('_passwordHash'));
     }

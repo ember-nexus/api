@@ -51,7 +51,7 @@ class PostTokenControllerTest extends TestCase
         $requestUtilService->method('getDataFromBody')->willReturn([]);
 
         $userNode = new NodeElement();
-        $userNode->setIdentifier(Uuid::fromString('018ed248-d1de-4e20-9e61-30d1a479215c'));
+        $userNode->setId(Uuid::fromString('018ed248-d1de-4e20-9e61-30d1a479215c'));
 
         $securityUtilService = $this->createMock(SecurityUtilService::class);
         $securityUtilService->method('findUserByUniqueUserIdentifier')->willReturn($userNode);

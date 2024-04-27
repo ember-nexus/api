@@ -22,14 +22,14 @@ class LockElementController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}',
+        '/{id}',
         name: 'lock-element',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['LOCK']
     )]
-    public function lockElement(string $uuid, Request $request): Response
+    public function lockElement(string $id, Request $request): Response
     {
         throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }

@@ -22,14 +22,14 @@ class MkcolElementController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}',
+        '/{id}',
         name: 'mkcol-element',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['MKCOL']
     )]
-    public function mkcolElement(string $uuid, Request $request): Response
+    public function mkcolElement(string $id, Request $request): Response
     {
         throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
     }

@@ -36,7 +36,7 @@ class TestCommand extends Command
         $result = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 sprintf(
-                    "MATCH (parent {id: \$parentUuid})\n".
+                    "MATCH (parent {id: \$parentId})\n".
                     "MATCH (parent)-[:OWNS]->(children)\n".
                     "MATCH (parent)-[relations]->(children)\n".
                     "WITH children, relations\n".
@@ -51,7 +51,7 @@ class TestCommand extends Command
                     100
                 ),
                 [
-                    'parentUuid' => '7b80b203-2b82-40f5-accd-c7089fe6114e',
+                    'parentId' => '7b80b203-2b82-40f5-accd-c7089fe6114e',
                 ]
             )
         );

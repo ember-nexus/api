@@ -34,18 +34,18 @@ class PutElementController extends AbstractController
     }
 
     #[Route(
-        '/{uuid}',
+        '/{id}',
         name: 'put-element',
         requirements: [
-            'uuid' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_V4_CONTROLLER,
         ],
         methods: ['PUT']
     )]
     #[EndpointSupportsEtag(EtagType::ELEMENT)]
-    public function putElement(string $uuid, Request $request): Response
+    public function putElement(string $id, Request $request): Response
     {
-        $elementId = UuidV4::fromString($uuid);
-        $userId = $this->authProvider->getUserUuid();
+        $elementId = UuidV4::fromString($id);
+        $userId = $this->authProvider->getUserId();
 
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
