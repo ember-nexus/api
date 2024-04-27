@@ -108,7 +108,7 @@ class PostRegisterController extends AbstractController
             $this->router->generate(
                 'get-element',
                 [
-                    'uuid' => $userId,
+                    'id' => $userId,
                 ]
             )
         );

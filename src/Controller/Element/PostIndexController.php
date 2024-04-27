@@ -128,7 +128,7 @@ class PostIndexController extends AbstractController
             $this->router->generate(
                 'get-element',
                 [
-                    'uuid' => $element->getId(),
+                    'id' => $element->getId(),
                 ]
             )
         );

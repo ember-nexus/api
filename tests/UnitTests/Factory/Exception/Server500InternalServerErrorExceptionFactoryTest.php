@@ -23,7 +23,7 @@ class Server500InternalServerErrorExceptionFactoryTest extends TestCase
         $bag = $this->prophesize(ParameterBagInterface::class);
         $bag->get(Argument::is('kernel.environment'))->shouldBeCalledOnce()->willReturn('prod');
         $logger = $this->prophesize(LoggerInterface::class);
-        $logger->error(Argument::is('a'))->shouldBeCalledOnce();
+        $logger->error(Argument::is('a'), Argument::is([]))->shouldBeCalledOnce();
         $factory = new Server500InternalServerErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger->reveal());
 
         $exception = $factory->createFromTemplate('a');
@@ -42,8 +42,9 @@ class Server500InternalServerErrorExceptionFactoryTest extends TestCase
         $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $bag = $this->prophesize(ParameterBagInterface::class);
         $bag->get(Argument::is('kernel.environment'))->shouldBeCalledOnce()->willReturn('dev');
-        $logger = $this->prophesize(LoggerInterface::class)->reveal();
-        $factory = new Server500InternalServerErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger);
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->error(Argument::is('a'), Argument::is([]))->shouldBeCalledOnce();
+        $factory = new Server500InternalServerErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger->reveal());
 
         $exception = $factory->createFromTemplate('a');
 

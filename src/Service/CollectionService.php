@@ -33,7 +33,7 @@ class CollectionService
         $firstPage = 1;
         $query = $this->requestStack->getCurrentRequest()?->query;
         if (!($query instanceof InputBag)) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Query must be an instance of InputBag.');
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Query must be an instance of InputBag.', ['query' => $query]);
         }
         if (!$query->has('page')) {
             return $firstPage;
@@ -50,7 +50,7 @@ class CollectionService
     {
         $query = $this->requestStack->getCurrentRequest()?->query;
         if (!($query instanceof InputBag)) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Query must be an instance of InputBag.');
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Query must be an instance of InputBag.', ['query' => $query]);
         }
         if (!$query->has('pageSize')) {
             return $this->emberNexusConfiguration->getPageSizeDefault();

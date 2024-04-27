@@ -130,7 +130,7 @@ class PostSearchController extends AbstractController
         ]);
 
         if (!($res instanceof Elasticsearch)) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Unknown response type for elastic search query.');
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Unknown response type for elastic search query.', ['response' => $res]);
         }
 
         $elementIds = [];
