@@ -5,8 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add S3 status check to healthcheck command, closes #200.
 ### Changed
 - Upgrade PHP to 8.5.2, closes #448.
+- Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.
 
 ## 0.1.30 - 2026-02-03
 ### Changed
