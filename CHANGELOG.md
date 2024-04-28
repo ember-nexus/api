@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add taskfile.dev development environment into the API repository itself, closes #461.
+- Add S3 status check to healthcheck command, closes #200.
 
 ### Changed
 - Upgrade FrankenPHP to 1.12.1, related to #457 and #461.
 - Upgrade PHP dependencies, related to #457 and #461.
 - Upgrade GitHub Actions in CI/CD.
+- Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.
 
 ## 0.1.31 - 2026-02-10
 ### Changed
