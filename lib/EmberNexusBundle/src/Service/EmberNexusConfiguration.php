@@ -45,6 +45,18 @@ class EmberNexusConfiguration
     public const string FEATURE_FLAG = 'featureFlag';
     public const string FEATURE_FLAG_280_OLD_UNIQUE_USER_IDENTIFIER_DISABLED = '280_OldUniqueUserIdentifierDisabled';
 
+    public const string FILE = 'file';
+    public const string FILE_MAX_FILE_SIZE_IN_BYTES = 'maxFileSizeInBytes';
+    public const string FILE_UPLOAD_EXPIRES_IN_SECONDS_AFTER_FIRST_REQUEST = 'uploadExpiresInSecondsAfterFirstRequest';
+    public const string FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES = 'uploadMinChunkSizeInBytes';
+    public const string FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES = 'uploadMaxChunkSizeInBytes';
+    public const string FILE_S3_STORAGE_BUCKET = 'S3StorageBucket';
+    public const string FILE_S3_UPLOAD_BUCKET = 'S3UploadBucket';
+    public const string FILE_S3_STORAGE_BUCKET_LEVELS = 'S3StorageBucketLevels';
+    public const string FILE_S3_STORAGE_BUCKET_LEVEL_LENGTH = 'S3StorageBucketLevelLength';
+    public const string FILE_S3_UPLOAD_BUCKET_LEVELS = 'S3UploadBucketLevels';
+    public const string FILE_S3_UPLOAD_BUCKET_LEVEL_LENGTH = 'S3UploadBucketLevelLength';
+
     private int $pageSizeMin;
     private int $pageSizeDefault;
     private int $pageSizeMax;
@@ -63,6 +75,17 @@ class EmberNexusConfiguration
     private string $cacheEtagSeed;
     private int $cacheEtagUpperLimitInCollectionEndpoints;
     private bool $featureFlag280OldUniqueUserIdentifierDisabled;
+
+    private int $fileMaxFileSizeInBytes;
+    private int $fileUploadExpiresInSecondsAfterFirstRequest;
+    private int $fileUploadMinChunkSizeInBytes;
+    private int $fileUploadMaxChunkSizeInBytes;
+    private string $fileS3StorageBucket;
+    private string $fileS3UploadBucket;
+    private int $fileS3StorageBucketLevels;
+    private int $fileS3StorageBucketLevelLength;
+    private int $fileS3UploadBucketLevels;
+    private int $fileS3UploadBucketLevelLength;
 
     private static function getValueFromConfig(array $configuration, array $keyParts): mixed
     {
@@ -249,6 +272,100 @@ class EmberNexusConfiguration
             ]
         );
         $emberNexusConfiguration->setFeatureFlag280OldUniqueUserIdentifierDisabled($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_MAX_FILE_SIZE_IN_BYTES,
+            ]
+        );
+        $emberNexusConfiguration->setFileMaxFileSizeInBytes($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_UPLOAD_EXPIRES_IN_SECONDS_AFTER_FIRST_REQUEST,
+            ]
+        );
+        $emberNexusConfiguration->setFileUploadExpiresInSecondsAfterFirstRequest($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES,
+            ]
+        );
+        $emberNexusConfiguration->setFileUploadMinChunkSizeInBytes($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES,
+            ]
+        );
+        $emberNexusConfiguration->setFileUploadMaxChunkSizeInBytes($value);
+
+        if ($emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes() < $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
+            throw new Exception(sprintf('%s.%s can not be smaller than %s.%s.', self::FILE, self::FILE_MAX_FILE_SIZE_IN_BYTES, self::FILE, self::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES));
+        }
+
+        $value = (string) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_S3_STORAGE_BUCKET,
+            ]
+        );
+        $emberNexusConfiguration->setFileS3StorageBucket($value);
+
+        $value = (string) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_S3_UPLOAD_BUCKET,
+            ]
+        );
+        $emberNexusConfiguration->setFileS3UploadBucket($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_S3_STORAGE_BUCKET_LEVELS,
+            ]
+        );
+        $emberNexusConfiguration->setFileS3StorageBucketLevels($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_S3_STORAGE_BUCKET_LEVEL_LENGTH,
+            ]
+        );
+        $emberNexusConfiguration->setFileS3StorageBucketLevelLength($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_S3_UPLOAD_BUCKET_LEVELS,
+            ]
+        );
+        $emberNexusConfiguration->setFileS3UploadBucketLevels($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_S3_UPLOAD_BUCKET_LEVEL_LENGTH,
+            ]
+        );
+        $emberNexusConfiguration->setFileS3UploadBucketLevelLength($value);
 
         return $emberNexusConfiguration;
     }
@@ -471,6 +588,126 @@ class EmberNexusConfiguration
     public function setFeatureFlag280OldUniqueUserIdentifierDisabled(bool $featureFlag280OldUniqueUserIdentifierDisabled): self
     {
         $this->featureFlag280OldUniqueUserIdentifierDisabled = $featureFlag280OldUniqueUserIdentifierDisabled;
+
+        return $this;
+    }
+
+    public function getFileMaxFileSizeInBytes(): int
+    {
+        return $this->fileMaxFileSizeInBytes;
+    }
+
+    public function setFileMaxFileSizeInBytes(int $fileMaxFileSizeInBytes): self
+    {
+        $this->fileMaxFileSizeInBytes = $fileMaxFileSizeInBytes;
+
+        return $this;
+    }
+
+    public function getFileUploadExpiresInSecondsAfterFirstRequest(): int
+    {
+        return $this->fileUploadExpiresInSecondsAfterFirstRequest;
+    }
+
+    public function setFileUploadExpiresInSecondsAfterFirstRequest(int $fileUploadExpiresInSecondsAfterFirstRequest): self
+    {
+        $this->fileUploadExpiresInSecondsAfterFirstRequest = $fileUploadExpiresInSecondsAfterFirstRequest;
+
+        return $this;
+    }
+
+    public function getFileUploadMinChunkSizeInBytes(): int
+    {
+        return $this->fileUploadMinChunkSizeInBytes;
+    }
+
+    public function setFileUploadMinChunkSizeInBytes(int $fileUploadMinChunkSizeInBytes): self
+    {
+        $this->fileUploadMinChunkSizeInBytes = $fileUploadMinChunkSizeInBytes;
+
+        return $this;
+    }
+
+    public function getFileUploadMaxChunkSizeInBytes(): int
+    {
+        return $this->fileUploadMaxChunkSizeInBytes;
+    }
+
+    public function setFileUploadMaxChunkSizeInBytes(int $fileUploadMaxChunkSizeInBytes): self
+    {
+        $this->fileUploadMaxChunkSizeInBytes = $fileUploadMaxChunkSizeInBytes;
+
+        return $this;
+    }
+
+    public function getFileS3StorageBucket(): string
+    {
+        return $this->fileS3StorageBucket;
+    }
+
+    public function setFileS3StorageBucket(string $fileS3StorageBucket): self
+    {
+        $this->fileS3StorageBucket = $fileS3StorageBucket;
+
+        return $this;
+    }
+
+    public function getFileS3UploadBucket(): string
+    {
+        return $this->fileS3UploadBucket;
+    }
+
+    public function setFileS3UploadBucket(string $fileS3UploadBucket): self
+    {
+        $this->fileS3UploadBucket = $fileS3UploadBucket;
+
+        return $this;
+    }
+
+    public function getFileS3StorageBucketLevels(): int
+    {
+        return $this->fileS3StorageBucketLevels;
+    }
+
+    public function setFileS3StorageBucketLevels(int $fileS3StorageBucketLevels): self
+    {
+        $this->fileS3StorageBucketLevels = $fileS3StorageBucketLevels;
+
+        return $this;
+    }
+
+    public function getFileS3StorageBucketLevelLength(): int
+    {
+        return $this->fileS3StorageBucketLevelLength;
+    }
+
+    public function setFileS3StorageBucketLevelLength(int $fileS3StorageBucketLevelLength): self
+    {
+        $this->fileS3StorageBucketLevelLength = $fileS3StorageBucketLevelLength;
+
+        return $this;
+    }
+
+    public function getFileS3UploadBucketLevels(): int
+    {
+        return $this->fileS3UploadBucketLevels;
+    }
+
+    public function setFileS3UploadBucketLevels(int $fileS3UploadBucketLevels): self
+    {
+        $this->fileS3UploadBucketLevels = $fileS3UploadBucketLevels;
+
+        return $this;
+    }
+
+    public function getFileS3UploadBucketLevelLength(): int
+    {
+        return $this->fileS3UploadBucketLevelLength;
+    }
+
+    public function setFileS3UploadBucketLevelLength(int $fileS3UploadBucketLevelLength): self
+    {
+        $this->fileS3UploadBucketLevelLength = $fileS3UploadBucketLevelLength;
 
         return $this;
     }
