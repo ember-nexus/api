@@ -7,6 +7,7 @@ namespace App\Command;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
+use App\Service\StorageUtilService;
 use App\Style\EmberNexusStyle;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
@@ -49,6 +50,7 @@ class BackupCreateCommand extends Command
         private ElementToRawService $elementToRawService,
         private ParameterBagInterface $bag,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private StorageUtilService $storageUtilService
     ) {
         parent::__construct();
     }
@@ -241,35 +243,23 @@ class BackupCreateCommand extends Command
 
     private function getNodePath(UuidInterface $nodeId): string
     {
-        $nodeIdAsHex = $nodeId->getHex()->toString();
-        $folders = ceil(log($this->nodeCount, 256));
-        $folderParts = [];
-        for ($i = 0; $i < $folders; ++$i) {
-            $folderParts[] = substr($nodeIdAsHex, 2 * $i, 2);
-        }
+        $levels = (int) ceil(log($this->nodeCount, 256));
 
         return sprintf(
-            '%s/node/%s/%s.json',
+            '%s/node/%s.json',
             $this->backupName,
-            implode('/', $folderParts),
-            $nodeId->toString()
+            $this->storageUtilService->uuidToNestedFolderStructure($nodeId, $levels)
         );
     }
 
     private function getRelationPath(UuidInterface $relationId): string
     {
-        $relationIdAsHex = $relationId->getHex()->toString();
-        $folders = ceil(log($this->relationCount, 256));
-        $folderParts = [];
-        for ($i = 0; $i < $folders; ++$i) {
-            $folderParts[] = substr($relationIdAsHex, 2 * $i, 2);
-        }
+        $levels = (int) ceil(log($this->relationCount, 256));
 
         return sprintf(
-            '%s/relation/%s/%s.json',
+            '%s/relation/%s.json',
             $this->backupName,
-            implode('/', $folderParts),
-            $relationId->toString()
+            $this->storageUtilService->uuidToNestedFolderStructure($relationId, $levels)
         );
     }
 
