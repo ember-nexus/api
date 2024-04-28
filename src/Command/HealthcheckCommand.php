@@ -6,6 +6,8 @@ namespace App\Command;
 
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Style\EmberNexusStyle;
+use AsyncAws\S3\S3Client;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
@@ -36,6 +38,8 @@ class HealthcheckCommand extends Command
         private RedisClient $redisClient,
         private AMQPStreamConnection $AMQPStreamConnection,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private S3Client $s3Client,
+        private EmberNexusConfiguration $emberNexusConfiguration
     ) {
         parent::__construct();
     }
@@ -115,6 +119,16 @@ class HealthcheckCommand extends Command
             'RabbitMQ version:      %s',
             $rabbitMqVersion
         ));
+
+        $isStorageBucketOnline = $this->s3Client->bucketExists(['Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket()])->isSuccess();
+        if (!$isStorageBucketOnline) {
+            throw new Exception(sprintf('Unable to connect to bucket %s.', $this->emberNexusConfiguration->getFileS3StorageBucket()));
+        }
+        $isUploadBucketOnline = $this->s3Client->bucketExists(['Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket()])->isSuccess();
+        if (!$isUploadBucketOnline) {
+            throw new Exception(sprintf('Unable to connect to bucket %s.', $this->emberNexusConfiguration->getFileS3UploadBucket()));
+        }
+        $this->io->writeln('S3 buckets:            online');
 
         $this->io->stopSection('All databases are online.');
 
