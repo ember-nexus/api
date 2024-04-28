@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Style\EmberNexusStyle;
-use Laudis\Neo4j\Databags\Statement;
+use AsyncAws\S3\S3Client;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,7 +22,8 @@ class TestCommand extends Command
     private OutputStyle $io;
 
     public function __construct(
-        private CypherEntityManager $cypherEntityManager
+        private CypherEntityManager $cypherEntityManager,
+        private S3Client $s3Client
     ) {
         parent::__construct();
     }
@@ -33,30 +34,12 @@ class TestCommand extends Command
 
         $this->io->title('Test');
 
-        $result = $this->cypherEntityManager->getClient()->runStatement(
-            Statement::create(
-                sprintf(
-                    "MATCH (parent {id: \$parentId})\n".
-                    "MATCH (parent)-[:OWNS]->(children)\n".
-                    "MATCH (parent)-[relations]->(children)\n".
-                    "WITH children, relations\n".
-                    "LIMIT %d\n".
-                    "WITH children, relations\n".
-                    "ORDER BY children.id, relations.id\n".
-                    "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-                    "WITH allTuples\n".
-                    "UNWIND allTuples AS tuple\n".
-                    "WITH tuple ORDER BY tuple[0]\n".
-                    'RETURN COLLECT(tuple) AS sortedTuples;',
-                    100
-                ),
-                [
-                    'parentId' => '7b80b203-2b82-40f5-accd-c7089fe6114e',
-                ]
-            )
-        );
+        $buckets = $this->s3Client->listBuckets();
+        print_r($buckets->getBuckets());
 
-        print_r($result->toArray());
+        $res = $this->s3Client->bucketExists(['Bucket' => 'api-upload2']);
+        print_r($res->getState());
+        print_r($res->isSuccess() ? 'true' : 'false');
 
         return Command::SUCCESS;
     }

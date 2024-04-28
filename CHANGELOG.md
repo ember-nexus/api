@@ -5,8 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add S3 status check to healthcheck command, closes #200.
 ### Changed
 - Update versions of Neo4j used inside the CI, closes #326.
+- Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.
 
 ## 0.1.11 - 2024-07-08
 ### Changed
