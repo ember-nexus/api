@@ -10,10 +10,37 @@ use Ramsey\Uuid\UuidInterface;
 
 class StorageUtilService
 {
+    public const int STREAM_CHUNK_SIZE = 8192;
+    //    public const int STREAM_CHUNK_SIZE = 1024 * 1024;
+
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
+    }
+
+    public function getStorageBucketKey(UuidInterface $id): string
+    {
+        return sprintf(
+            '%s.bin',
+            $this->uuidToNestedFolderStructure(
+                $id,
+                $this->emberNexusConfiguration->getFileS3StorageBucketLevels(),
+                $this->emberNexusConfiguration->getFileS3StorageBucketLevelLength(),
+            )
+        );
+    }
+
+    public function getUploadBucketKey(UuidInterface $id): string
+    {
+        return sprintf(
+            '%s.bin',
+            $this->uuidToNestedFolderStructure(
+                $id,
+                $this->emberNexusConfiguration->getFileS3UploadBucketLevels(),
+                $this->emberNexusConfiguration->getFileS3UploadBucketLevelLength(),
+            )
+        );
     }
 
     public function uuidToNestedFolderStructure(UuidInterface $uuid, int $levels = 0, int $levelLength = 2): string
