@@ -202,8 +202,6 @@ services:
       $s3Endpoint: '%env(S3_ENDPOINT)%'
       $s3AccessKeyId: '%env(S3_ACCESS_KEY_ID)%'
       $s3SecretAccessKey: '%env(S3_SECRET_ACCESS_KEY)%'
-#      $s3BucketStorage: '%env(S3_BUCKET_STORAGE)%'
-#      $s3BucketUpload: '%env(S3_BUCKET_UPLOAD)%'
 
   AsyncAws\S3\S3Client:
     factory: ['@App\Factory\S3ClientFactory', 'createS3Client']
