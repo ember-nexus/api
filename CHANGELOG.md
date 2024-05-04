@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add S3 status check to healthcheck command, closes #200.
+- Add support to delete files in S3 / object storage through the `php bin/console database:drop` command, closes #309.
 ### Changed
 - Upgrade PHP to 8.5.2, closes #448.
 - Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.

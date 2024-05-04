@@ -6,6 +6,8 @@ namespace App\Command;
 
 use App\Style\EmberNexusStyle;
 use App\Type\RabbitMQQueueType;
+use AsyncAws\S3\S3Client;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use Predis\Client;
@@ -35,6 +37,8 @@ class DatabaseDropCommand extends Command
         private ElasticEntityManager $elasticEntityManager,
         private Client $redisClient,
         private AMQPStreamConnection $AMQPStreamConnection,
+        private S3Client $s3Client,
+        private EmberNexusConfiguration $emberNexusConfiguration
     ) {
         parent::__construct();
     }
@@ -111,8 +115,28 @@ class DatabaseDropCommand extends Command
     private function deleteObjectStorage(): void
     {
         $this->io->startSection('Task 3 of 6: Object Storage');
-        $this->io->writeln('Deleting object storage data...');
-        $this->io->stopSection('Object storage is currently not implemented, nothing to delete.');
+        $this->io->writeln('Deleting Object data...');
+        do {
+            $objects = $this->s3Client->listObjectsV2([
+                'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
+            ]);
+            $keyCount = $objects->getKeyCount();
+            if ($keyCount > 0) {
+                $objectsToBeDeleted = [];
+                foreach ($objects->getContents() as $object) {
+                    $objectsToBeDeleted[] = [
+                        'Key' => $object->getKey(),
+                    ];
+                }
+                $this->s3Client->deleteObjects([
+                    'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
+                    'Delete' => [
+                        'Objects' => $objectsToBeDeleted,
+                    ],
+                ]);
+            }
+        } while ($keyCount > 0);
+        $this->io->stopSection('Successfully deleted object storage.');
     }
 
     private function deleteElastic(): void
