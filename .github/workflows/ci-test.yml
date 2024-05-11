@@ -218,7 +218,7 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"ember-nexus-api-prod\" && echo \$API_DOMAIN && composer install --ignore-platform-req=php --quiet && composer test:feature && composer test:feature:deprecated"
+          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api-prod\" && echo \$API_DOMAIN && composer install --ignore-platform-req=php --quiet && composer test:feature && composer test:feature:deprecated"
 
   test-example-generation-controller:
     runs-on: buildjet-2vcpu-ubuntu-2204
@@ -256,7 +256,7 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"ember-nexus-api-prod\" && echo \$API_DOMAIN && composer install --ignore-platform-req=php --quiet && composer test:example-generation-controller && composer test:example-generation-controller:deprecated"
+          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api-prod\" && echo \$API_DOMAIN && composer install --ignore-platform-req=php --quiet && composer test:example-generation-controller && composer test:example-generation-controller:deprecated"
 
 
   test-example-generation-command:
