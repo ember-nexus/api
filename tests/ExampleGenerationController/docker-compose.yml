@@ -1,8 +1,17 @@
 services:
 
+  ember-nexus-api-dev:
+    container_name: ember-nexus-api-dev
+    image: api:dev-amd
+    expose:
+      - "80"
+    volumes:
+      - ../../:/var/www/html
+      - ./well-known-security.txt:/well-known-security.txt
+
   ember-nexus-api:
     container_name: ember-nexus-api
-    image: api:dev-amd
+    image: api:prod-amd
     expose:
       - "80"
     volumes:
