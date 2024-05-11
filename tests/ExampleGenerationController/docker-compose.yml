@@ -9,8 +9,8 @@ services:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt
 
-  ember-nexus-api-prod:
-    container_name: ember-nexus-api-prod
+  ember-nexus-api:
+    container_name: ember-nexus-api
     image: api:prod-amd
     expose:
       - "80"
