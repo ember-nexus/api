@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change naming of internal variables to replace `Uuid` with `Id`, because the variables are already type hinted and
   `Id` emerged as a better convention in the ecosystem. Closes #292.
 - Server exceptions with the HTTP status code 500 will now always log their message.
+- Upgrade PHP to 8.3.7, closes #310.
+- Update PHP dependencies, related to #310.
 
 ## 0.1.6 - 2024-04-22
 ### Added
