@@ -47,13 +47,10 @@ jobs:
             .
           docker save api:dev-amd | gzip > api-dev-amd.tar.gz
       - name: Build Docker image - AMD prod
-        shell: bash
         run: |
-          version=$(cat composer.json | jq -r .version)
-          echo $version
           docker build \
             --target production \
-            --build-arg="VERSION=${{ version }}" \
+            --build-arg="VERSION=$( cat composer.json | jq -r .version )" \
             -t api:prod-amd \
             -f ./docker/Dockerfile \
             .
