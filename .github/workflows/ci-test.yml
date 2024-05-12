@@ -37,6 +37,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Create Docker builder
+        run: |
+          docker buildx create \
+            --name container \
+            --driver=docker-container \
+            container
       - name: Build Docker image - AMD dev
         run: |
           docker buildx build \
@@ -44,6 +50,7 @@ jobs:
             --no-cache \
             --sbom=true \
             --provenance=true \
+            --builder=container \
             -t api:dev-amd \
             -f ./docker/Dockerfile \
             .
@@ -55,6 +62,7 @@ jobs:
             --build-arg="VERSION=$( cat composer.json | jq -r .version )" \
             --sbom=true \
             --provenance=true \
+            --builder=container \
             -t api:prod-amd \
             -f ./docker/Dockerfile \
             .
