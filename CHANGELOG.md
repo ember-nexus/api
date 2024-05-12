@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix wrong license identifier in Dockerfile, closes #302.
 ### Added
 - Add `requestId` property to all logs to enable finding all logs made during a single request, closes #306.
+- Add support for Docker buildx provenance and sbom generation, closes #135.
 ### Changed
 - Change naming of internal variables to replace `Uuid` with `Id`, because the variables are already type hinted and
   `Id` emerged as a better convention in the ecosystem. Closes #292.

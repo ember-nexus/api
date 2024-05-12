@@ -39,18 +39,22 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build Docker image - AMD dev
         run: |
-          docker build \
+          docker buildx build \
             --target development \
             --no-cache \
+            --sbom=true \
+            --provenance=true \
             -t api:dev-amd \
             -f ./docker/Dockerfile \
             .
           docker save api:dev-amd | gzip > api-dev-amd.tar.gz
       - name: Build Docker image - AMD prod
         run: |
-          docker build \
+          docker buildx build \
             --target production \
             --build-arg="VERSION=$( cat composer.json | jq -r .version )" \
+            --sbom=true \
+            --provenance=true \
             -t api:prod-amd \
             -f ./docker/Dockerfile \
             .

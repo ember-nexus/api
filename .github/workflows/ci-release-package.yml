@@ -112,10 +112,12 @@ jobs:
 
       - name: Build Docker image - AMD
         run: |
-          docker build \
+          docker buildx build \
             --target production \
             --build-arg="VERSION=${{ env.NEW_VERSION }}" \
             --no-cache \
+            --sbom=true \
+            --provenance=true \
             -t api:latest-amd \
             -f ./docker/Dockerfile \
             .
@@ -174,10 +176,12 @@ jobs:
 
       - name: Build Docker image - ARM
         run: |
-          docker build \
+          docker buildx build \
             --target production \
             --build-arg="VERSION=${{ env.NEW_VERSION }}" \
             --no-cache \
+            --sbom=true \
+            --provenance=true \
             -t api:latest-arm \
             -f ./docker/Dockerfile \
             .
