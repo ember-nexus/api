@@ -5,17 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
-### Fixed
-- Fix wrong license identifier in Dockerfile, closes #302.
+
+## 0.1.7 - 2024-05-17
 ### Added
-- Add `requestId` property to all logs to enable finding all logs made during a single request, closes #306.
+- Add `requestId` property to all logs to enable finding all logs made during a single request, closes [#306].
+
 ### Changed
 - Change naming of internal variables to replace `Uuid` with `Id`, because the variables are already type hinted and
-  `Id` emerged as a better convention in the ecosystem. Closes #292.
+  `Id` emerged as a better convention in the ecosystem. Closes [#292].
 - Server exceptions with the HTTP status code 500 will now always log their message.
-- Upgrade PHP to 8.3.7, closes #310.
-- Update PHP dependencies, related to #310.
-- Feature tests use production docker build in CI, closes #297.
+- Upgrade PHP to 8.3.7, closes [#310].
+- Update PHP dependencies, related to [#310].
+- Feature tests use production docker build in CI, closes [#297].
+
+### Fixed
+- Fix wrong license identifier in Dockerfile, closes [#302].
 
 ## 0.1.6 - 2024-04-22
 ### Added
