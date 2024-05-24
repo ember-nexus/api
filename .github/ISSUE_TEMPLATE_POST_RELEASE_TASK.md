@@ -1,7 +1,7 @@
 ---
 title: Post release task for {{ env.NEW_VERSION }}
 assignees: Syndesi
-labels: post release task
+labels: Post Release
 ---
 
 Open tasks:
