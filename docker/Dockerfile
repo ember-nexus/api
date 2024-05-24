@@ -295,6 +295,7 @@ RUN apk add pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev \
 COPY --from=nginx_unit_builder /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=nginx_unit_builder /usr/sbin/unitd-debug /usr/sbin/unitd-debug
 COPY --from=nginx_unit_builder /usr/lib/unit/ /usr/lib/unit/
+COPY ./docker/nginx-unit/nginx-unit.spdx.json /usr/local/share/sbom/nginx-unit.spdx.json
 COPY ./docker/nginx-unit/unit-entrypoint.sh /usr/local/bin/
 COPY ./docker/nginx-unit/unit.json /docker-entrypoint.d/unit.json
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/

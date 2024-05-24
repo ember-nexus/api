@@ -1,0 +1,31 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "nginx-unit",
+  "packages": [
+    {
+      "name": "Nginx Unit",
+      "SPDXID": "SPDXRef-Package-dotnet-Hidden-Input-2792eeef8e8d29c9",
+      "versionInfo": "1, 0, 0, 0",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "sourceInfo": "acquired package info from dotnet project assets file: /var/www/html/vendor/symfony/console/Resources/bin/hiddeninput.exe",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:Hidden_Input:Hidden_Input:1\\,_0\\,_0\\,_0:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:nuget/Hidden%20Input@1,%200,%200,%200"
+        }
+      ]
+    }
+  ]
+}
