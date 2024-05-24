@@ -26,7 +26,7 @@ class GetInstanceConfigurationTest extends BaseRequestTestCase
             $response,
             true,
             [
-                "version"
+                'version',
             ]
         );
     }
