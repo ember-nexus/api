@@ -1,7 +1,7 @@
 ---
 title: Upstream dependency got updated - Alpine with tag {{ env.TAG }}
 assignees: Syndesi
-labels: update dependency
+labels: Dependency Update
 ---
 
 Open tasks:

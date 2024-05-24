@@ -1,7 +1,7 @@
 ---
 title: Upstream dependency got updated - PHP with version {{ env.VERSION }}
 assignees: Syndesi
-labels: update dependency
+labels: Dependency Update
 ---
 
 Open tasks:
