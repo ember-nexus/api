@@ -24,7 +24,10 @@ class GetInstanceConfigurationTest extends BaseRequestTestCase
             self::PATH_TO_ROOT,
             $documentationBodyPath,
             $response,
-            true
+            true,
+            [
+                'version',
+            ]
         );
     }
 }
