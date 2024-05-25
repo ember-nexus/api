@@ -5,11 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.8 - 2024-05-25
 ### Changed
-- Upgrade to Alpine 3.20, closes #315.
+- Upgrade to Alpine 3.20, closes [#315].
 - Fix GetInstanceConfigurationTest and documentation for GetInstanceConfigurationController.
-- Fix labels used in automatic GitHub issues, closes #314.
-- Fix CI version replace command, closes #318.
+- Fix labels used in automatic GitHub issues, closes [#314].
+- Fix CI version replace command, closes [#318].
 
 ## 0.1.7 - 2024-05-17
 ### Added
