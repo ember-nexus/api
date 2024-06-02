@@ -18,9 +18,6 @@ currently support AMD and ARM architectures.
 - [Check out the documentation](https://ember-nexus.github.io/api)
 - [Find us on Docker Hub](https://hub.docker.com/r/embernexus/api)
 
-Find us on [GitHub](https://github.com/ember-nexus/api), [our website ember-nexus.dev](https://ember-nexus.dev), and
-[Discord](https://discord.gg/3UhupSvMAa).
-
 ## Features
 
 Ember Nexus offers a range of cutting-edge features to meet your data storage needs, including:
