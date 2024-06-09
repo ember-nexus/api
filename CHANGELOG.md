@@ -5,10 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.9 - 2024-06-09
 ### Changed
 - Rework README.md, add shield labels.
 - Fix LICENSE file.
-- Upgrade PHP to 8.3.8, closes #321.
+- Upgrade PHP to 8.3.8, closes [#321].
 
 ## 0.1.8 - 2024-05-25
 ### Changed
