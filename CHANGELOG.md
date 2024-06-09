@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Rework README.md, add shield labels.
 - Fix LICENSE file.
+- Upgrade PHP to 8.3.8, closes #321.
 
 ## 0.1.8 - 2024-05-25
 ### Changed
