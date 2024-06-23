@@ -17,17 +17,17 @@
     "php-amqplib/php-amqplib": "^3.6",
     "predis/predis": "^2.2",
     "ramsey/uuid": "^4.7",
-    "symfony/asset": "7.0.*",
-    "symfony/console": "7.0.*",
-    "symfony/dotenv": "7.0.*",
-    "symfony/event-dispatcher": "7.0.*",
-    "symfony/filesystem": "7.0.*",
+    "symfony/asset": "7.1.*",
+    "symfony/console": "7.1.*",
+    "symfony/dotenv": "7.1.*",
+    "symfony/event-dispatcher": "7.1.*",
+    "symfony/filesystem": "7.1.*",
     "symfony/flex": "^2.4",
-    "symfony/framework-bundle": "7.0.*",
+    "symfony/framework-bundle": "7.1.*",
     "symfony/monolog-bundle": "^3.10",
-    "symfony/runtime": "7.0.*",
-    "symfony/string": "7.0.*",
-    "symfony/yaml": "7.0.*",
+    "symfony/runtime": "7.1.*",
+    "symfony/string": "7.1.*",
+    "symfony/yaml": "7.1.*",
     "syndesi/cypher-entity-manager": "^0.1.0",
     "syndesi/elastic-entity-manager": "^0.0.3",
     "syndesi/mongo-entity-manager": "^0.0.6",
@@ -37,9 +37,9 @@
   "require-dev": {
     "beste/psr-testlogger": "^1.0",
     "boesing/psalm-plugin-stringf": "^1.4",
-    "brianium/paratest": "^7.3",
+    "brianium/paratest": "^7.4",
     "friendsofphp/php-cs-fixer": "^3.48",
-    "infection/infection": "^0.27.9",
+    "infection/infection": "^0.27",
     "phpbench/phpbench": "^1.2",
     "phpmd/phpmd": "^2.15",
     "phpspec/prophecy-phpunit": "^2.1",
@@ -47,9 +47,9 @@
     "phpunit/php-code-coverage": "^10",
     "phpunit/phpunit": "^10",
     "symfony/maker-bundle": "^1.53",
-    "symfony/phpunit-bridge": "^7.0",
-    "symfony/stopwatch": "7.0.*",
-    "symfony/web-profiler-bundle": "7.0.*",
+    "symfony/phpunit-bridge": "^7.1",
+    "symfony/stopwatch": "7.1.*",
+    "symfony/web-profiler-bundle": "7.1.*",
     "thecodingmachine/phpstan-safe-rule": "^1.2",
     "vimeo/psalm": "^5.21"
   },
@@ -122,7 +122,7 @@
   "extra": {
     "symfony": {
       "allow-contrib": false,
-      "require": "7.0.*"
+      "require": "7.1.*"
     }
   }
 }
