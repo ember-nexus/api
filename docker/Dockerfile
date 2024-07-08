@@ -30,10 +30,10 @@ ENV PHPIZE_DEPS="\
     PHP_CPPFLAGS="$PHP_CFLAGS" \
     PHP_LDFLAGS="-Wl,-O1 -pie" \
     GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA" \
-    PHP_VERSION="8.3.8" \
-    PHP_URL="https://www.php.net/distributions/php-8.3.8.tar.xz" \
-    PHP_ASC_URL="https://www.php.net/distributions/php-8.3.8.tar.xz.asc" \
-    PHP_SHA256="aea358b56186f943c2bbd350c9005b9359133d47e954cfc561385319ae5bb8d7"
+    PHP_VERSION="8.3.9" \
+    PHP_URL="https://www.php.net/distributions/php-8.3.9.tar.xz" \
+    PHP_ASC_URL="https://www.php.net/distributions/php-8.3.9.tar.xz.asc" \
+    PHP_SHA256="bf4d7b8ea60a356064f88485278bd6f941a230ec16f0fc401574ce1445ad6c77"
 
 # persistent / runtime deps
 RUN apk add --no-cache \
@@ -366,7 +366,7 @@ FROM php as development
 COPY ./docker/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers \
-    && pecl install xdebug-3.3.1 memprof-3.0.2 \
+    && pecl install xdebug-3.3.2 memprof-3.0.2 \
     && docker-php-ext-enable xdebug memprof \
     && apk del --no-network .build-deps \
     && apk add --no-cache judy aha git openssh
