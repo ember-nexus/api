@@ -1,4 +1,4 @@
-FROM alpine:3.20 as php_embed
+FROM alpine:3.20 AS php_embed
 LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.20/cli" \
     org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.20" \
     org.opencontainers.image.description="Based on php:8.3-cli-alpine3.20, without sql, with embed."
@@ -217,7 +217,7 @@ RUN docker-php-ext-enable sodium \
 
 
 
-FROM php_embed as nginx_unit_builder
+FROM php_embed AS nginx_unit_builder
 LABEL org.opencontainers.image.source="https://github.com/nginx/unit/blob/master/pkg/docker/Dockerfile.php8.1" \
     org.opencontainers.image.title="Adapted nginx/unit:8.1" \
     org.opencontainers.image.description="Based on nginx/unit:8.1, updated to PHP 8.3 and rewritten to work on Alpine."
@@ -271,7 +271,7 @@ RUN set -eux \
 
 
 
-FROM php_embed as php
+FROM php_embed AS php
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
@@ -321,7 +321,7 @@ WORKDIR /var/www/html
 
 
 
-FROM php as production-build
+FROM php AS production-build
 
 COPY bin/console /var/www/html/bin/console
 COPY config /var/www/html/config
@@ -336,7 +336,7 @@ RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize
 
 
 
-FROM scratch as production
+FROM scratch AS production
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
@@ -361,7 +361,7 @@ ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 WORKDIR /var/www/html
 
 
-FROM php as development
+FROM php AS development
 
 COPY ./docker/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
