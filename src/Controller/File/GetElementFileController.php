@@ -6,6 +6,7 @@ namespace App\Controller\File;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
+use App\Response\BinaryStreamResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\StorageUtilService;
@@ -39,18 +40,18 @@ class GetElementFileController extends AbstractController
         ],
         methods: ['GET']
     )]
-    public function getElementFile(string $id, Request $request): Response
+    public function getElementFile(string $id): Response
     {
-        $id = UuidV4::fromString($id);
+        $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();
 
-        if (!$this->accessChecker->hasAccessToElement($userId, $id, AccessType::READ)) {
+        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::READ)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         $objectConfig = [
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->storageUtilService->getStorageBucketKey($id),
+            'Key' => $this->storageUtilService->getStorageBucketKey($elementId),
         ];
         $status = $this->s3Client->objectExists($objectConfig);
 
@@ -60,25 +61,27 @@ class GetElementFileController extends AbstractController
 
         $object = $this->s3Client->getObject($objectConfig);
 
-        $stream = $object->getBody()->getContentAsResource();
+        return new BinaryStreamResponse($object);
 
-        $response = new StreamedResponse();
-        $response->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
-        $response->headers->set('Content-Type', 'application/octet-stream');
-
-        $response->setCallback(function () use ($stream): void {
-            while (!feof($stream)) {
-                $buffer = fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
-                if (false === $buffer || 0 === strlen($buffer)) {
-                    break;
-                }
-                echo $buffer;
-                //                ob_flush();
-                flush();
-            }
-            fclose($stream);
-        });
-
-        return $response;
+//        $stream = $object->getBody()->getContentAsResource();
+//
+//        $response = new StreamedResponse();
+//        $response->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
+//        $response->headers->set('Content-Type', 'application/octet-stream');
+//
+//        $response->setCallback(function () use ($stream): void {
+//            while (!feof($stream)) {
+//                $buffer = fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
+//                if (false === $buffer || 0 === strlen($buffer)) {
+//                    break;
+//                }
+//                echo $buffer;
+//                //                ob_flush();
+//                flush();
+//            }
+//            fclose($stream);
+//        });
+//
+//        return $response;
     }
 }
