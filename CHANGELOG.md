@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add taskfile.dev development environment into the API repository itself, closes #461.
 - Add S3 status check to healthcheck command, closes #200.
 - Add support to delete files in S3 / object storage through the `php bin/console database:drop` command, closes #309.
+- Add support for locks, related to #119.
 
 ### Changed
 - Upgrade FrankenPHP to 1.12.1, related to #457 and #461.

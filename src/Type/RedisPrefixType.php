@@ -14,4 +14,5 @@ enum RedisPrefixType: string
     case ETAG_PARENTS_COLLECTION = 'etag:parents:';
     case ETAG_RELATED_COLLECTION = 'etag:related:';
     case ETAG_INDEX_COLLECTION = 'etag:index:';
+    case LOCK_FILE_UPLOAD_CHECK = 'lock:file-upload-check:';
 }
