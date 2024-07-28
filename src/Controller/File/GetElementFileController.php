@@ -15,7 +15,6 @@ use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -63,25 +62,25 @@ class GetElementFileController extends AbstractController
 
         return new BinaryStreamResponse($object);
 
-//        $stream = $object->getBody()->getContentAsResource();
-//
-//        $response = new StreamedResponse();
-//        $response->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
-//        $response->headers->set('Content-Type', 'application/octet-stream');
-//
-//        $response->setCallback(function () use ($stream): void {
-//            while (!feof($stream)) {
-//                $buffer = fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
-//                if (false === $buffer || 0 === strlen($buffer)) {
-//                    break;
-//                }
-//                echo $buffer;
-//                //                ob_flush();
-//                flush();
-//            }
-//            fclose($stream);
-//        });
-//
-//        return $response;
+        //        $stream = $object->getBody()->getContentAsResource();
+        //
+        //        $response = new StreamedResponse();
+        //        $response->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
+        //        $response->headers->set('Content-Type', 'application/octet-stream');
+        //
+        //        $response->setCallback(function () use ($stream): void {
+        //            while (!feof($stream)) {
+        //                $buffer = fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
+        //                if (false === $buffer || 0 === strlen($buffer)) {
+        //                    break;
+        //                }
+        //                echo $buffer;
+        //                //                ob_flush();
+        //                flush();
+        //            }
+        //            fclose($stream);
+        //        });
+        //
+        //        return $response;
     }
 }

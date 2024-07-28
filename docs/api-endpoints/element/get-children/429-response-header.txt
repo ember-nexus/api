@@ -1,6 +1,6 @@
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
+Access-Control-Allow-Headers: *
 Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE
 Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE
 Content-Type: application/json; charset=utf-8

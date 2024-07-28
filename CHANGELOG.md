@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade PHP dependencies, related to #457 and #461.
 - Upgrade GitHub Actions in CI/CD.
 - Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.
+- Change header `Access-Control-Allow-Headers` to `*`, due to growing number of supported headers.
+### Fixed
+- Fix deprecation "The "Symfony\Component\HttpKernel\DependencyInjection\Extension" class is considered internal since
+  Symfony 7.1, to be deprecated in 8.1; use Symfony\Component\DependencyInjection\Extension\Extension instead. It may
+  change without further notice.".
 
 ## 0.1.31 - 2026-02-10
 ### Changed
