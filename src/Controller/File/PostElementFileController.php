@@ -10,7 +10,9 @@ use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\LockService;
 use App\Type\AccessType;
+use App\Type\Lock\FileUploadCheckLock;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +24,7 @@ class PostElementFileController extends AbstractController
     public function __construct(
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private LockService $lockService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory)
     {
     }
@@ -37,13 +40,16 @@ class PostElementFileController extends AbstractController
     #[EndpointImplementsTusIo]
     public function postElementFile(string $id, Request $request): Response
     {
-        $id = UuidV4::fromString($id);
+        $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();
 
         // note: update is used because files are optional parts of already existing elements
-        if (!$this->accessChecker->hasAccessToElement($userId, $id, AccessType::UPDATE)) {
+        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
+
+        $lock = new FileUploadCheckLock($elementId, $userId);
+        $this->lockService->acquireLock($lock);
 
         return new NoContentResponse();
     }

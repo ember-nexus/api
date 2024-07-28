@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add S3 status check to healthcheck command, closes #200.
 - Add support to delete files in S3 / object storage through the `php bin/console database:drop` command, closes #309.
+- Add support for locks, related to #119.
 ### Changed
 - Update versions of Neo4j used inside the CI, closes #326.
 - Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.
