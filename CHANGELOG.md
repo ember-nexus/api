@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Update versions of Neo4j used inside the CI, closes #326.
 - Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.
+- Change header `Access-Control-Allow-Headers` to `*`, due to growing number of supported headers.
+### Fixed
+- Fix deprecation "The "Symfony\Component\HttpKernel\DependencyInjection\Extension" class is considered internal since
+  Symfony 7.1, to be deprecated in 8.1; use Symfony\Component\DependencyInjection\Extension\Extension instead. It may
+  change without further notice.".
 
 ## 0.1.11 - 2024-07-08
 ### Changed

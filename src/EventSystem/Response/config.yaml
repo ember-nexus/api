@@ -9,3 +9,9 @@ services:
       - name: kernel.event_listener
         event: 'kernel.response'
         method: 'onKernelResponse'
+
+  App\EventSystem\Response\EventListener\TusIoResponseEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'kernel.response'
+        method: 'onKernelResponse'

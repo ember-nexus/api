@@ -24,3 +24,10 @@ services:
         event: kernel.controller
         method: 'onKernelController'
         priority: 128
+
+  App\EventSystem\Controller\EventListener\TusIoControllerEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: kernel.controller
+        method: 'onKernelController'
+        priority: 256
