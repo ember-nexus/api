@@ -130,7 +130,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010220(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runGetRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -142,7 +142,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010221(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runPostRequest(
             sprintf('/%s/file', self::DATA),
             self::TOKEN,
@@ -163,7 +163,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010222(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runPutRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -175,7 +175,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010223(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runPatchRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -187,7 +187,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010224(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runDeleteRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -199,7 +199,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010230(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runCopyRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -211,7 +211,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010231(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runLockRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -223,7 +223,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010232(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runUnlockRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -235,7 +235,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010233(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runMkcolRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -247,7 +247,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010234(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runMoveRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -259,7 +259,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010235(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runPropfindRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -271,7 +271,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
      */
     public function test1010236(): void
     {
-        $this->markTestSkipped("WIP");
+        $this->markTestSkipped('WIP');
         $response = $this->runProppatchRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
