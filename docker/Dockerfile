@@ -1,4 +1,4 @@
-FROM alpine:3.20 as php_embed
+FROM alpine:3.20 AS php_embed
 LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.20/cli" \
     org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.20" \
     org.opencontainers.image.description="Based on php:8.3-cli-alpine3.20, without sql, with embed."
@@ -30,10 +30,10 @@ ENV PHPIZE_DEPS="\
     PHP_CPPFLAGS="$PHP_CFLAGS" \
     PHP_LDFLAGS="-Wl,-O1 -pie" \
     GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA" \
-    PHP_VERSION="8.3.9" \
-    PHP_URL="https://www.php.net/distributions/php-8.3.9.tar.xz" \
-    PHP_ASC_URL="https://www.php.net/distributions/php-8.3.9.tar.xz.asc" \
-    PHP_SHA256="bf4d7b8ea60a356064f88485278bd6f941a230ec16f0fc401574ce1445ad6c77"
+    PHP_VERSION="8.3.10" \
+    PHP_URL="https://www.php.net/distributions/php-8.3.10.tar.xz" \
+    PHP_ASC_URL="https://www.php.net/distributions/php-8.3.10.tar.xz.asc" \
+    PHP_SHA256="a0f2179d00931fe7631a12cbc3428f898ca3d99fe564260c115af381d2a1978d"
 
 # persistent / runtime deps
 RUN apk add --no-cache \
@@ -59,7 +59,7 @@ RUN set -eux; \
 
 RUN set -eux; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
-# allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
+# allow running AS an arbitrary user (https://github.com/docker-library/php/issues/743)
 	[ ! -d /var/www/html ]; \
 	mkdir -p /var/www/html; \
 	chown www-data:www-data /var/www/html; \
@@ -211,13 +211,13 @@ RUN set -eux; \
 COPY ./docker/php-embed/docker-php-ext-* /usr/local/bin/
 COPY ./docker/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 
-# sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
+# sodium was built AS a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 
 
-FROM php_embed as nginx_unit_builder
+FROM php_embed AS nginx_unit_builder
 LABEL org.opencontainers.image.source="https://github.com/nginx/unit/blob/master/pkg/docker/Dockerfile.php8.1" \
     org.opencontainers.image.title="Adapted nginx/unit:8.1" \
     org.opencontainers.image.description="Based on nginx/unit:8.1, updated to PHP 8.3 and rewritten to work on Alpine."
@@ -271,7 +271,7 @@ RUN set -eux \
 
 
 
-FROM php_embed as php
+FROM php_embed AS php
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
@@ -321,7 +321,7 @@ WORKDIR /var/www/html
 
 
 
-FROM php as production-build
+FROM php AS production-build
 
 COPY bin/console /var/www/html/bin/console
 COPY config /var/www/html/config
@@ -336,7 +336,7 @@ RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize
 
 
 
-FROM scratch as production
+FROM scratch AS production
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
@@ -361,7 +361,7 @@ ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 WORKDIR /var/www/html
 
 
-FROM php as development
+FROM php AS development
 
 COPY ./docker/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
