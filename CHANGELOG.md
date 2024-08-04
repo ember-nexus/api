@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Update versions of Neo4j used inside the CI, closes #326.
+- Upgrade PHP to 8.3.10, closes #329.
 
 ## 0.1.11 - 2024-07-08
 ### Changed
