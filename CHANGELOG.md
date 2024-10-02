@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Upgrade PHP to 8.3.12, skipping 8.3.11, closes #332.
+- Upgrade upstream dependency NGINX Unit to 1.33.0, closes #333.
 
 ## 0.1.12 - 2024-08-04
 ### Changed
