@@ -3,6 +3,7 @@
 ![GitHub License](https://img.shields.io/github/license/ember-nexus/api)
 [![Docker Pulls](https://img.shields.io/docker/pulls/embernexus/api?logo=docker&label=Docker%20pulls&color=%232496ed)](https://hub.docker.com/r/embernexus/api)
 [![Docker Image Version](https://img.shields.io/docker/v/embernexus/api?sort=semver)](https://hub.docker.com/r/embernexus/api)
+[![Demo API](https://img.shields.io/website?url=https%3A%2F%2Freference-dataset.ember-nexus.dev%2F&label=Demo%20API)](https://reference-dataset.ember-nexus.dev/)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ember-nexus/api/ci-test.yml?label=CI)
 [![Discord](https://img.shields.io/discord/1135243882360221787?logo=discord&label=Discord&color=%235865f2)](https://discord.gg/qbQFBrJrRC)
 
@@ -17,6 +18,7 @@ currently support AMD and ARM architectures.
 - [Getting Started](https://ember-nexus.github.io/api/#/getting-started/tech-stack)
 - [Check out the documentation](https://ember-nexus.github.io/api)
 - [Find us on Docker Hub](https://hub.docker.com/r/embernexus/api)
+- [Demo API](https://reference-dataset.ember-nexus.dev/)
 
 ## Features
 
