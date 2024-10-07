@@ -5,8 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.14 - 2024-10-07
 ### Added
-- Add HTTP header `Access-Control-Expose-Headers`, closes #336.
+- Add HTTP header `Access-Control-Expose-Headers`, closes [#336].
 
 ## 0.1.13 - 2024-10-02
 ### Changed
