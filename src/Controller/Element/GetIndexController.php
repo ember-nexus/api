@@ -37,21 +37,28 @@ class GetIndexController extends AbstractController
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(element)\n".
-            "RETURN element.id\n".
-            "ORDER BY element.id\n".
+            "WITH count(element.id) AS totalCount, collect(element.id) as elementIds\n".
+            "UNWIND elementIds AS elementId\n".
+            "WITH elementId, totalCount\n".
+            "ORDER BY elementId\n".
             "SKIP \$skip\n".
-            'LIMIT $limit',
+            "LIMIT \$limit\n".
+            'RETURN collect(elementId) AS elementIds, totalCount',
             [
                 'userId' => $userId->toString(),
                 'skip' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
                 'limit' => $this->collectionService->getPageSize(),
             ]
         ));
+        $totalCount = 0;
         $nodeIds = [];
-        foreach ($res as $resultSet) {
-            $nodeIds[] = UuidV4::fromString($resultSet->get('element.id'));
+        if (count($res) > 0) {
+            $totalCount = $res->first()->get('totalCount');
+            foreach ($res->first()->get('elementIds') as $elementId) {
+                $nodeIds[] = UuidV4::fromString($elementId);
+            }
         }
 
-        return $this->collectionService->buildCollectionFromIds($nodeIds, [], count($nodeIds));
+        return $this->collectionService->buildCollectionFromIds($nodeIds, [], $totalCount);
     }
 }
