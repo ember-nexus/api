@@ -17,6 +17,7 @@ imports:
   - {resource: ../src/EventSystem/ElementPropertyChange/config.yaml}
   - {resource: ../src/EventSystem/ElementPropertyReset/config.yaml}
   - {resource: ../src/EventSystem/ElementPropertyReturn/config.yaml}
+  - {resource: ../src/EventSystem/SearchQuery/config.yaml}
 
 services:
   # default configuration for services in *this* file

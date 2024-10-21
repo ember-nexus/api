@@ -1,0 +1,11 @@
+services:
+
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\EventSystem\SearchQuery\EventListener\CypherSimpleSearchQueryEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\SearchQuery\Event\SearchQueryEvent'
+        method: 'onSearchQueryEvent'
