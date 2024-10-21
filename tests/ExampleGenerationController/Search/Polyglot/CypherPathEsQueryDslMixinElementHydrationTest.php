@@ -1,0 +1,39 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\tests\ExampleGenerationController\Search\Polyglot;
+
+use App\Tests\ExampleGenerationController\BaseRequestTestCase;
+
+class CypherPathEsQueryDslMixinElementHydrationTest extends BaseRequestTestCase
+{
+    private const string PATH_TO_ROOT = __DIR__.'/../../../../';
+    private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
+
+    public function testSearchRequest(): void
+    {
+        $path = \Safe\realpath(__DIR__.'/../../../../docs/search/example/polyglot/cypher-path-es-query-dsl-mixin-element-hydration/request-payload.json');
+
+        $data = \Safe\file_get_contents($path);
+        $data = json_decode($data, true);
+        $response = $this->runPostRequest(
+            '/search',
+            self::TOKEN,
+            $data
+        );
+
+        $documentationHeadersPath = 'docs/search/example/polyglot/cypher-path-es-query-dsl-mixin-element-hydration/response-header.txt';
+        $documentationBodyPath = 'docs/search/example/polyglot/cypher-path-es-query-dsl-mixin-element-hydration/response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertSearchResultInDocumentationIsIdenticalToSearchResultFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response,
+        );
+    }
+}

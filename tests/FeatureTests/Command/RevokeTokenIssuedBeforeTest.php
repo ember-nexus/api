@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\tests\FeatureTests\Command;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group command
- */
+#[Group('command')]
 class RevokeTokenIssuedBeforeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:A919tLukSQ5pGTdA5M30b5';

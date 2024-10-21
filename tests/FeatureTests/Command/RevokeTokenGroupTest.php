@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\tests\FeatureTests\Command;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group command
- */
+#[Group('command')]
 class RevokeTokenGroupTest extends BaseRequestTestCase
 {
     private const string GROUP_2_UUID = '6a8d7c70-59f4-4033-98ba-e9386cbda95f';

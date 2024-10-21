@@ -8,6 +8,7 @@
     "php": ">=8.3",
     "ext-ctype": "*",
     "ext-iconv": "*",
+    "antlr/antlr4-php-runtime": "^0.9.1",
     "async-aws/s3": "^2.2",
     "guzzlehttp/guzzle": "^7.8",
     "league/flysystem": "^3.23",
@@ -17,38 +18,39 @@
     "php-amqplib/php-amqplib": "^3.6",
     "predis/predis": "^2.2",
     "ramsey/uuid": "^4.7",
-    "symfony/asset": "7.2.*",
-    "symfony/console": "7.2.*",
-    "symfony/dotenv": "7.2.*",
-    "symfony/event-dispatcher": "7.2.*",
-    "symfony/filesystem": "7.2.*",
+    "symfony/asset": "7.3.*",
+    "symfony/console": "7.3.*",
+    "symfony/dotenv": "7.3.*",
+    "symfony/event-dispatcher": "7.3.*",
+    "symfony/filesystem": "7.3.*",
     "symfony/flex": "^2.4",
-    "symfony/framework-bundle": "7.2.*",
+    "symfony/framework-bundle": "7.3.*",
     "symfony/monolog-bundle": "^3.10",
-    "symfony/runtime": "7.2.*",
-    "symfony/string": "7.2.*",
-    "symfony/yaml": "7.2.*",
+    "symfony/process": "7.3.*",
+    "symfony/runtime": "7.3.*",
+    "symfony/stopwatch": "7.3.*",
+    "symfony/string": "7.3.*",
+    "symfony/yaml": "7.3.*",
     "syndesi/cypher-entity-manager": "^0.2.0",
     "syndesi/elastic-entity-manager": "^0.1.0",
     "syndesi/mongo-entity-manager": "^0.1.0",
-    "thecodingmachine/safe": "v3.0.2 as v2.6",
+    "thecodingmachine/safe": "^v3.3",
     "tuupola/base58": "^2.1"
   },
   "require-dev": {
     "beste/psr-testlogger": "^1.0",
-    "brianium/paratest": "^7.4",
+    "brianium/paratest": "^7.13",
     "friendsofphp/php-cs-fixer": "^3.48",
-    "infection/infection": "^0.29.8",
+    "infection/infection": "^0.31",
     "phpbench/phpbench": "^1.2",
     "phpmd/phpmd": "^2.15",
     "phpspec/prophecy-phpunit": "^2.1",
     "phpstan/phpstan": "^2.1",
-    "phpunit/php-code-coverage": "^11",
-    "phpunit/phpunit": "^11",
+    "phpunit/php-code-coverage": "^12",
+    "phpunit/phpunit": "^12",
     "symfony/maker-bundle": "^1.53",
     "symfony/phpunit-bridge": "^7.2",
-    "symfony/stopwatch": "7.2.*",
-    "symfony/web-profiler-bundle": "7.2.*",
+    "symfony/web-profiler-bundle": "7.3.*",
     "thecodingmachine/phpstan-safe-rule": "^1.4",
     "vimeo/psalm": "^6.2"
   },
@@ -66,7 +68,10 @@
     "psr-4": {
       "EmberNexusBundle\\": "lib/EmberNexusBundle/src/",
       "App\\": "src/"
-    }
+    },
+    "classmap": [
+      "antlr/dist/"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
@@ -94,12 +99,14 @@
       "@auto-scripts"
     ],
     "test:unit": "php vendor/bin/paratest -p 6 --configuration tests/phpunit.xml.dist",
+    "test:unit:test": "php vendor/bin/paratest -p 6 --configuration tests/phpunit.xml.dist --group test",
     "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/bin/paratest -p 6 --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude-group command --exclude-group deprecated && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group command",
     "test:feature:deprecated": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group deprecated",
     "test:feature:test": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group test",
     "test:example-generation-controller": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationController --exclude-group deprecated && php bin/console cache:clear",
     "test:example-generation-controller:deprecated": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationController --group deprecated && php bin/console cache:clear",
-    "test:example-generation-controller:test": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationController --group test && php bin/console cache:clear",
+    "test:example-generation-controller:test-orig": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationController --group test && php bin/console cache:clear",
+    "test:example-generation-controller:test": "php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationController --group test",
     "test:example-generation-command": "php bin/console cache:clear && ./bin/test-feature-command-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationCommand --exclude-group deprecated && php bin/console cache:clear",
     "test:coverage:xml": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --coverage-clover coverage.xml",
     "test:coverage:html": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --coverage-html ./tmp",
@@ -113,6 +120,7 @@
     "mess": "vendor/bin/phpmd src,lib,tests text tests/phpmd.xml",
     "yml:lint": "docker run --rm -it -v \"$(pwd):/data\" cytopia/yamllint --config-file=tests/.yamllint .",
     "markdown:lint": "docker run --rm -it -v \"$(pwd):/work\" tmknom/markdownlint '**/*.md' --config tests/.markdownlintrc --ignore vendor --ignore CHANGELOG.md --ignore var --ignore tmp",
+    "build:antlr": "./bin/build-antlr.sh",
     "docs:serve": "docker run --rm -d -p 3000:3000 -v \"$(pwd)/docs:/docs\" sujaykumarh/docsify serve"
   },
   "conflict": {
@@ -121,7 +129,7 @@
   "extra": {
     "symfony": {
       "allow-contrib": false,
-      "require": "7.2.*"
+      "require": "7.3.*"
     }
   }
 }

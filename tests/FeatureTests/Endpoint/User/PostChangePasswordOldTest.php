@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\tests\FeatureTests\Endpoint\User;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group deprecated
- */
+#[Group('deprecated')]
 class PostChangePasswordOldTest extends BaseRequestTestCase
 {
     private const string EMAIL = 'user@changePassword.user.endpoint.localhost.dev';

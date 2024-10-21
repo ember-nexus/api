@@ -1,0 +1,819 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
+      "data": {
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Columbine",
+        "scenario": "general.botanicExample",
+        "scientificName": "A. canadensis",
+        "link": "https://en.wikipedia.org/wiki/Aquilegia_canadensis",
+        "description": "Aquilegia canadensis, the Canadian or Canada columbine, eastern red columbine, or wild columbine, is a species of flowering plant in the buttercup family Ranunculaceae. It is an herbaceous perennial native to woodland and rocky slopes in eastern North America, prized for its red and yellow flowers. It readily hybridizes with other species in the genus Aquilegia."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "eb5373ef-50ae-462f-a07a-5ccf767bff21",
+      "data": {
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Eucalyptus Blossom",
+        "scenario": "general.botanicExample",
+        "scientificName": "C. ficifolia",
+        "link": "https://en.wikipedia.org/wiki/Corymbia_ficifolia",
+        "description": "Corymbia ficifolia, commonly known as red flowering gum,[2] is a species of small tree that is endemic to the south-west of Western Australia. It has rough, fibrous bark on the trunk and branches, egg-shaped to broadly lance-shape adult leaves, flower buds in groups of seven, bright red, pink or orange flowers and urn-shaped fruit. It has a restricted distribution in the wild but is one of the most commonly planted ornamental eucalypts."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "731fd394-6e0d-4a43-9693-4a7a7d97731e",
+      "data": {
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Bromeliad",
+        "scenario": "general.botanicExample",
+        "scientificName": "G. lingulata",
+        "link": "https://en.wikipedia.org/wiki/Guzmania_lingulata",
+        "description": "Guzmania lingulata, the droophead tufted airplant or scarlet star, is a species of flowering plant in the family Bromeliaceae, subfamily Tillandsioideae. This evergreen epiphytic perennial[2] is native to rainforest habitats in Central America, northern and central South America and southern Mexico.[1] The Latin word lingulata means \"tongue-shaped\".[3] The foliage grows in a star-shaped basal rosette culminating in an orange and red bracted inflorescence. It is among the most commonly cultivated bromeliad types, with cultivars producing flowers in shades of maroon, red, orange, yellow or pink."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
+      "data": {
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Poppy",
+        "scenario": "general.botanicExample",
+        "scientificName": "P. rhoeas",
+        "link": "https://en.wikipedia.org/wiki/Papaver_rhoeas",
+        "description": "Papaver rhoeas, with common names including common poppy,[3] corn poppy, corn rose, field poppy,[4] Flanders poppy, red poppy, and Odai, is an annual herbaceous species of flowering plant in the poppy family Papaveraceae. It is native to north Africa and temperate Eurasia and is introduced into temperate areas on all other continents except Antarctica."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "3f6be764-d780-44d0-a12f-15326abe091d",
+      "data": {
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Grevillea",
+        "scenario": "general.botanicExample",
+        "scientificName": "G. rosmarinifolia",
+        "link": "https://en.wikipedia.org/wiki/Grevillea_rosmarinifolia",
+        "description": "Grevillea rosmarinifolia, commonly known as rosemary grevillea,[2] is a species of flowering plant in the family Proteaceae and is endemic to south-eastern continental Australia and naturalised in other parts of the country. It is usually an erect, compact to open shrub with linear, narrowly elliptic or narrowly oblong leaves with the edges rolled under, and loose clusters of pink to red flowers."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
+      "data": {
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Sturt\\u2019s Desert Pea",
+        "scenario": "general.botanicExample",
+        "scientificName": "S. formosa",
+        "link": "https://en.wikipedia.org/wiki/Swainsona_formosa",
+        "description": "Swainsona formosa, commonly known as Sturt's desert pea or Sturt pea,[3] is a species of flowering plant in the family Fabaceae and is native to all continental states and the Northern Territory of Australia, with the exception of Victoria. It is a prostrate annual or short lived perennial herb with imparipinnate leaves with about 15 elliptic to egg-shaped leaflets with the narrower end towards the base, and racemes of usually red flowers in racemes of 2 to 6."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+      "data": {
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Tulip",
+        "scenario": "general.botanicExample",
+        "scientificName": "Tulipa",
+        "link": "https://en.wikipedia.org/wiki/Tulip",
+        "description": "Tulips are spring-blooming perennial herbaceous bulbiferous geophytes in the Tulipa genus. Their flowers are usually large, showy, and brightly coloured, generally red, orange, pink, yellow, or white. They often have a different coloured blotch at the base of the tepals, internally. Because of a degree of variability within the populations and a long history of cultivation, classification has been complex and controversial. The tulip is a member of the lily family, Liliaceae,[2] along with 14 other genera, where it is most closely related to Amana, Erythronium, and Gagea in the tribe Lilieae."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "0f3aced5-8484-49d4-9579-e3ec5facde95",
+      "data": {
+        "description": "Telopea speciosissima, commonly known as the New South Wales waratah or simply waratah, is a large shrub in the plant family Proteaceae. It is endemic to New South Wales in Australia. No subspecies are recognised; the closely related Telopea aspera was classified as a separate species in 1995. T. speciosissima is a shrub to 3 or 4 m (9.8 or 13.1 ft) high and 2 m (6.6 ft) wide, with dark green leaves. Its several stems arise from a pronounced woody base known as a lignotuber. The species is well renowned for its striking large red springtime inflorescences (flowerheads), each including hundreds of individual flowers. These are visited by the eastern pygmy possum (Cercartetus nanus), birds such as honeyeaters (Meliphagidae), and various insects.\n\nThe floral emblem for its home state of New South Wales, Telopea speciosissima has featured prominently in art, architecture, and advertising, particularly since Australian federation. Commercially grown in several countries as a cut flower, it is also cultivated in home gardens, requiring good drainage yet adequate moisture, but is vulnerable to various fungal diseases and pests. A number of cultivars with various shades of red, pink and even white flowers are available. Horticulturists have also developed hybrids with T. oreades and T. mongaensis which are more tolerant of cold, shade, and heavier soils.",
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Waratah",
+        "scenario": "general.botanicExample",
+        "scientificName": "T. speciosissima",
+        "link": "https://en.wikipedia.org/wiki/Telopea_speciosissima"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "c05a9e25-11bc-48db-8fea-6d1b885119b0",
+      "data": {
+        "created": "2025-09-19T19:25:03+00:00",
+        "updated": "2025-09-19T19:25:03+00:00",
+        "name": "Kangaroo Paw",
+        "scenario": "general.botanicExample",
+        "scientificName": "Anigozanthos",
+        "link": "https://en.wikipedia.org/wiki/Anigozanthos",
+        "description": "Anigozanthos is a genus of plant found naturally in the Southwestern Australia biogeographic region, belonging to the bloodwort family Haemodoraceae.[1][2] The 11 species and their subspecies are commonly known as kangaroo paw or catspaw, depending on their size, and the shape and colour of their flowers. A further species, previously identified as Anigozanthos fuliginosus (black kangaroo paw), was separated to a monotypic genus as Macropidia fuliginosa. All 11 species of Anigozanthos are endemic to the south west of Western Australia,[3] Noongar Boodjar.\n\nThe species are recognised by their unusual flowers, numerous hybrids and cultivars have been developed for cultivation and floristry in recent years; kangaroo paws are much in demand as house plants and as cut flowers. The red-and-green kangaroo paw is the floral emblem of Western Australia."
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "cypher-path-subset",
+        "query": "MATCH path=((plant:Plant)-[:HAS_TAG]->(:Tag {name: $color})) RETURN path ORDER BY plant.name",
+        "parameters": {
+          "color": "red",
+          "stepResults": []
+        }
+      },
+      "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
+      "start": 1758309972.331905,
+      "end": 1758309972.769065,
+      "duration": 0.43716001510620117
+    },
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "match": {
+                  "description": {
+                    "query": "{{color}}"
+                  }
+                }
+              },
+              {
+                "terms": {
+                  "_id": "{{map(stepResults[0].paths, #.nodeIds[0])}}"
+                }
+              }
+            ]
+          }
+        },
+        "parameters": {
+          "color": "red",
+          "stepResults": [
+            {
+              "paths": [
+                {
+                  "nodeIds": [
+                    "ef54daa7-f62c-47ea-8762-fae02bd44485",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "16a24900-396e-4866-8cdc-23e4ff1cbd3e"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "78dd0a4d-2b94-4997-b4a4-353de854047c",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "0b60664b-3064-46d9-b039-e5e4a96b1ba6"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8d955a77-5a82-42b5-9428-aee5b12d9fb1",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "a2825e76-c51c-4196-bfe9-da1ea8b3be1a"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8a962b8f-09e5-41d1-9573-bda6a9ab8b9f",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "92981474-c5cb-42af-b624-ae7b20945343"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "731fd394-6e0d-4a43-9693-4a7a7d97731e",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "66805679-a945-4a60-a985-405d46749060"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "e47275f2-77d8-4f5e-8327-d79da53bf43e",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "283494a0-a75a-42bd-ac86-82cfc56d1269"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8f517129-a09e-4243-a81a-428606b247b2",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "07ac3104-60df-45af-863d-d5b33de6ae09"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "dc5f5351-8e25-4fff-83b4-9a1786693e2f",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "2d70aa25-311b-4435-8d51-c687b7d99373"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "6d6f7c95-07dd-44e1-bf5d-d75bbe9c5952",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "e1c790fc-94e8-49db-a709-1172691a67aa"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "9822db18-7708-4c46-b8e8-aa4e37b2abf6"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "e12d7b32-936b-4cb1-8cd9-17b389f97c9b",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "282ec7e3-2e2a-4ff8-9ce7-c331c030c678"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "de004523-5165-4f10-872b-92eb9637a5d1",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "c2ba292c-54ce-41bb-905b-f0e4662a84c2"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "eb5373ef-50ae-462f-a07a-5ccf767bff21",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "93bc48b1-4648-46d3-857c-ef33d7c59a1b"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "faee03e1-7db0-4ca3-a2b2-7ef3a50fc9a3"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8d5bf150-ec8d-42cc-8f5e-2b72f31ec54a",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "a14ab65a-0470-4b55-be7f-290616842b6e"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "4d56b1ba-a757-4bd4-8b55-a23d95dc6e96",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "11a9f60d-13af-44b2-b84f-c77d12be8a2f"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "3f6be764-d780-44d0-a12f-15326abe091d",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "cd5f9c66-8d20-4383-9bd5-ffa5036b11ce"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "2f35f5cf-4153-40bd-a8eb-58b8fc27dcf4",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "17376f46-291f-48f0-92e3-084c9ac0696b"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "c2c476f0-7e57-49ba-9f01-da3dde6f363d",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "8eb2d5d8-a173-4208-b3e0-7c64a719adcd"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "c05a9e25-11bc-48db-8fea-6d1b885119b0",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "39e0c728-1f27-4295-8b80-d98e26b51b76"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "0fd4edcb-59d0-4369-aa50-3c2318a2a6ac"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "f565f37d-caae-450e-a413-af8cfaa8fab7",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "a2e77f94-1361-4bea-9f59-0a0426b71900"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "0fdd52ba-55da-430c-b015-3277a231e895",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "2466f79b-1aaf-4cda-b329-cc225f2ba421"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "5b275ae7-cd32-48fa-8072-d476d43727e7"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "a8d6a387-a3a1-426d-89cf-67de624d5a49"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "0f3aced5-8484-49d4-9579-e3ec5facde95",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "83d8741d-55dd-40d5-ae76-09cf32b65600"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1758309972.769442,
+      "indices": "*",
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 25,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "bool": {
+                  "must": [
+                    {
+                      "match": {
+                        "description": {
+                          "query": "red"
+                        }
+                      }
+                    },
+                    {
+                      "terms": {
+                        "_id": [
+                          "ef54daa7-f62c-47ea-8762-fae02bd44485",
+                          "78dd0a4d-2b94-4997-b4a4-353de854047c",
+                          "8d955a77-5a82-42b5-9428-aee5b12d9fb1",
+                          "8a962b8f-09e5-41d1-9573-bda6a9ab8b9f",
+                          "731fd394-6e0d-4a43-9693-4a7a7d97731e",
+                          "e47275f2-77d8-4f5e-8327-d79da53bf43e",
+                          "8f517129-a09e-4243-a81a-428606b247b2",
+                          "dc5f5351-8e25-4fff-83b4-9a1786693e2f",
+                          "6d6f7c95-07dd-44e1-bf5d-d75bbe9c5952",
+                          "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
+                          "e12d7b32-936b-4cb1-8cd9-17b389f97c9b",
+                          "de004523-5165-4f10-872b-92eb9637a5d1",
+                          "eb5373ef-50ae-462f-a07a-5ccf767bff21",
+                          "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                          "8d5bf150-ec8d-42cc-8f5e-2b72f31ec54a",
+                          "4d56b1ba-a757-4bd4-8b55-a23d95dc6e96",
+                          "3f6be764-d780-44d0-a12f-15326abe091d",
+                          "2f35f5cf-4153-40bd-a8eb-58b8fc27dcf4",
+                          "c2c476f0-7e57-49ba-9f01-da3dde6f363d",
+                          "c05a9e25-11bc-48db-8fea-6d1b885119b0",
+                          "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
+                          "f565f37d-caae-450e-a413-af8cfaa8fab7",
+                          "0fdd52ba-55da-430c-b015-3277a231e895",
+                          "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
+                          "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+                          "0f3aced5-8484-49d4-9579-e3ec5facde95"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "end": 1758309972.939119,
+      "duration": 0.169677
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "color": "red",
+          "stepResults": [
+            {
+              "paths": [
+                {
+                  "nodeIds": [
+                    "ef54daa7-f62c-47ea-8762-fae02bd44485",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "16a24900-396e-4866-8cdc-23e4ff1cbd3e"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "78dd0a4d-2b94-4997-b4a4-353de854047c",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "0b60664b-3064-46d9-b039-e5e4a96b1ba6"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8d955a77-5a82-42b5-9428-aee5b12d9fb1",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "a2825e76-c51c-4196-bfe9-da1ea8b3be1a"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8a962b8f-09e5-41d1-9573-bda6a9ab8b9f",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "92981474-c5cb-42af-b624-ae7b20945343"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "731fd394-6e0d-4a43-9693-4a7a7d97731e",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "66805679-a945-4a60-a985-405d46749060"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "e47275f2-77d8-4f5e-8327-d79da53bf43e",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "283494a0-a75a-42bd-ac86-82cfc56d1269"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8f517129-a09e-4243-a81a-428606b247b2",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "07ac3104-60df-45af-863d-d5b33de6ae09"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "dc5f5351-8e25-4fff-83b4-9a1786693e2f",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "2d70aa25-311b-4435-8d51-c687b7d99373"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "6d6f7c95-07dd-44e1-bf5d-d75bbe9c5952",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "e1c790fc-94e8-49db-a709-1172691a67aa"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "9822db18-7708-4c46-b8e8-aa4e37b2abf6"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "e12d7b32-936b-4cb1-8cd9-17b389f97c9b",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "282ec7e3-2e2a-4ff8-9ce7-c331c030c678"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "de004523-5165-4f10-872b-92eb9637a5d1",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "c2ba292c-54ce-41bb-905b-f0e4662a84c2"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "eb5373ef-50ae-462f-a07a-5ccf767bff21",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "93bc48b1-4648-46d3-857c-ef33d7c59a1b"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "faee03e1-7db0-4ca3-a2b2-7ef3a50fc9a3"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8d5bf150-ec8d-42cc-8f5e-2b72f31ec54a",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "a14ab65a-0470-4b55-be7f-290616842b6e"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "4d56b1ba-a757-4bd4-8b55-a23d95dc6e96",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "11a9f60d-13af-44b2-b84f-c77d12be8a2f"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "3f6be764-d780-44d0-a12f-15326abe091d",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "cd5f9c66-8d20-4383-9bd5-ffa5036b11ce"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "2f35f5cf-4153-40bd-a8eb-58b8fc27dcf4",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "17376f46-291f-48f0-92e3-084c9ac0696b"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "c2c476f0-7e57-49ba-9f01-da3dde6f363d",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "8eb2d5d8-a173-4208-b3e0-7c64a719adcd"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "c05a9e25-11bc-48db-8fea-6d1b885119b0",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "39e0c728-1f27-4295-8b80-d98e26b51b76"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "0fd4edcb-59d0-4369-aa50-3c2318a2a6ac"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "f565f37d-caae-450e-a413-af8cfaa8fab7",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "a2e77f94-1361-4bea-9f59-0a0426b71900"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "0fdd52ba-55da-430c-b015-3277a231e895",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "2466f79b-1aaf-4cda-b329-cc225f2ba421"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "5b275ae7-cd32-48fa-8072-d476d43727e7"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "a8d6a387-a3a1-426d-89cf-67de624d5a49"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "0f3aced5-8484-49d4-9579-e3ec5facde95",
+                    "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3"
+                  ],
+                  "relationIds": [
+                    "83d8741d-55dd-40d5-ae76-09cf32b65600"
+                  ]
+                }
+              ]
+            },
+            {
+              "elements": [
+                {
+                  "id": "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.463559
+                  }
+                },
+                {
+                  "id": "eb5373ef-50ae-462f-a07a-5ccf767bff21",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.296052
+                  }
+                },
+                {
+                  "id": "731fd394-6e0d-4a43-9693-4a7a7d97731e",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.206095
+                  }
+                },
+                {
+                  "id": "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.8846285
+                  }
+                },
+                {
+                  "id": "3f6be764-d780-44d0-a12f-15326abe091d",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.8042715
+                  }
+                },
+                {
+                  "id": "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.6625946
+                  }
+                },
+                {
+                  "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.599828
+                  }
+                },
+                {
+                  "id": "0f3aced5-8484-49d4-9579-e3ec5facde95",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.5568495
+                  }
+                },
+                {
+                  "id": "c05a9e25-11bc-48db-8fea-6d1b885119b0",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.3461056
+                  }
+                }
+              ],
+              "totalHits": 9,
+              "maxScore": 3.463559
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758309972.939293,
+      "accessibleElementIds": [
+        "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
+        "eb5373ef-50ae-462f-a07a-5ccf767bff21",
+        "731fd394-6e0d-4a43-9693-4a7a7d97731e",
+        "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
+        "3f6be764-d780-44d0-a12f-15326abe091d",
+        "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
+        "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+        "0f3aced5-8484-49d4-9579-e3ec5facde95",
+        "c05a9e25-11bc-48db-8fea-6d1b885119b0"
+      ],
+      "end": 1758309972.976991,
+      "duration": 0.037698
+    }
+  ]
+}

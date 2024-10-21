@@ -5,19 +5,38 @@
   - [Local Deployment](/getting-started/local-deployment)
   - [Configuration](/getting-started/configuration)
   - [Graph Database Fundamentals](/getting-started/graph-database-fundamentals)
-- Security
-  - [Ownership](/security/ownership)
-  - [Access](/security/access)
-  - [Workflow](/security/workflow)
-  - [Token and Rate Limiting](/security/token-and-rate-limiting)
-  - [Predefined Data Types](/security/predefined-data-types)
-  - [Passwords, Tokens and Hashing](/security/passwords-tokens-and-hashing)
-  - [Security Tests](/security/test/general)
 
 - Concepts
   - [Authentication](/concepts/authentication)
   - [Caching](/concepts/caching)
-  - [Pagination](/concepts/pagination)
+  - [Grammars](/concepts/grammars)
+
+- Search Steps
+  - [Elasticsearch Query DSL Mixin](/search/step/elasticsearch-query-dsl-mixin)
+  - [Cypher Path Subset](/search/step/cypher-path-subset)
+  - [Element Hydration](/search/step/element-hydration)
+
+- Search Examples
+  - Elasticsearch Query DSL Mixins
+    - [Simple Full Text Search](/search/example/elasticsearch-query-dsl-mixin/simple-full-text-search)
+    - [Advanced Full Text Search](/search/example/elasticsearch-query-dsl-mixin/advanced-full-text-search)
+    - [Keyword Search](/search/example/elasticsearch-query-dsl-mixin/keyword-search)
+    - [Text Prefix Search](/search/example/elasticsearch-query-dsl-mixin/text-prefix-search)
+    - [Wildcard Search](/search/example/elasticsearch-query-dsl-mixin/wildcard-search)
+    - [Query String Search](/search/example/elasticsearch-query-dsl-mixin/query-string-search)
+    - [Parameterized Search](/search/example/elasticsearch-query-dsl-mixin/parameterized-elasticsearch-query-dsl-mixin-search)
+  - Cypher Path Subset
+    - [Find Tagged Elements](/search/example/cypher-path-subset/find-tagged-elements)
+    - [Find Nested Elements](/search/example/cypher-path-subset/find-nested-elements)
+    - [Parameterized Cypher Search](/search/example/cypher-path-subset/parameterized-cypher-search)
+  - Element Hydration
+    - [Implicit Elements Hydration](/search/example/element-hydration/implicit-elements-hydration)
+    - [Implicit Paths Hydration](/search/example/element-hydration/implicit-paths-hydration)
+    - [Explicit ElementIds Hydration](/search/example/element-hydration/explicit-elementids-hydration)
+    - [Parameterized ElementIds Hydration](/search/example/element-hydration/parameterized-elementids-hydration)
+  - Polyglot
+    - [Elasticsearch -> Cypher -> Hydration](/search/example/polyglot/es-query-dsl-mixin-cypher-path-element-hydration)
+    - [Cypher -> Elasticsearch -> Hydration](/search/example/polyglot/cypher-path-es-query-dsl-mixin-element-hydration)
 
 - API Endpoints
 
@@ -39,24 +58,12 @@
     - [<span class="method-put">PUT</span>` /<uuid> -` Replace Element Endpoint](/api-endpoints/element/put-element)
     - [<span class="method-patch">PATCH</span>` /<uuid> -` Update Element Endpoint](/api-endpoints/element/patch-element)
     - [<span class="method-delete">DELETE</span>` /<uuid> -` Delete Element Endpoint](/api-endpoints/element/delete-element)
-  - **File Endpoints**
-    - [<span class="method-get">🚧 GET</span>` /<uuid>/file -` Get Element File Endpoint](/api-endpoints/file/get-element-file)
-    - [<span class="method-post">🚧 POST</span>` /<uuid>/file -` Create Element File Endpoint](/api-endpoints/file/post-element-file)
-    - [<span class="method-put">🚧 PUT</span>` /<uuid>/file -` Replace Element File Endpoint](/api-endpoints/file/put-element-file)
-    - [<span class="method-patch">🚧 PATCH</span>` /<uuid>/file -` Update Element File Endpoint](/api-endpoints/file/patch-element-file)
-    - [<span class="method-delete">🚧 DELETE</span>` /<uuid>/file -` Delete Element File Endpoint](/api-endpoints/file/delete-element-file)
-  - **WebDAV Endpoints**
-    - [<span class="method-copy">🚧 COPY</span>` /<uuid> -` Copy Element Endpoint](/api-endpoints/webdav/copy-element)
-    - [<span class="method-lock">🚧 LOCK</span>` /<uuid> -` Lock Element Endpoint](/api-endpoints/webdav/lock-element)
-    - [<span class="method-unlock">🚧 UNLOCK</span>` /<uuid> -` Unlock Element Endpoint](/api-endpoints/webdav/unlock-element)
-    - [<span class="method-mkcol">🚧 MKCOL</span>` /<uuid> -` Create Folder Endpoint](/api-endpoints/webdav/mkcol-folder)
-    - [<span class="method-move">🚧 MOVE</span>` /<uuid> -` Move Element Endpoint](/api-endpoints/webdav/move-element)
-    - [<span class="method-propfind">🚧 PROPFIND</span>` /<uuid> -` Find Element Property Endpoint](/api-endpoints/webdav/propfind-element)
-    - [<span class="method-proppatch">🚧 PROPPATCH</span>` /<uuid> -` Change Element Property Endpoint](/api-endpoints/webdav/proppatch-element)
   - **Search Endpoints**
     - [<span class="method-post">POST</span>` /search -` Search Endpoint](/api-endpoints/search/post-search)
+    - [<span class="method-post">POST</span>` /search -` Search Endpoint (old)](/api-endpoints/search/post-search-old)
   - **System Endpoints**
     - [<span class="method-get">GET</span>` /instance-configuration -` Get Instance Configuration Endpoint](/api-endpoints/system/get-instance-configuration)
+    - [<span class="method-get">GET</span>` /graph-structure -` Get Graph Structure Endpoint](/api-endpoints/system/get-graph-structure)
     - [<span class="method-get">GET</span>` /.well-known/security.txt -` Get Well Known security.txt Endpoint](/api-endpoints/system/get-well-known-security-txt)
   - **Error Endpoints**
     - [<span class="method-get">GET</span>` /error/400/bad-content -` Get Details for Error 400 Bad Content Endpoint](/api-endpoints/error/get-400-bad-content)
@@ -70,6 +77,20 @@
     - [<span class="method-get">GET</span>` /error/412/precondition-failed -` Get Details for Error 412 Precondition Failed Endpoint](/api-endpoints/error/get-412-precondition-failed)
     - [<span class="method-get">GET</span>` /error/500/internal-server-error -` Get Details for Error 500 Internal Server Error Endpoint](/api-endpoints/error/get-500-internal-server-error)
     - [<span class="method-get">GET</span>` /error/501/not-implemented -` Get Details for Error 501 Not Implemented Endpoint](/api-endpoints/error/get-501-not-implemented)
+  - **File Endpoints (TBI)**
+    - [<span class="method-get">🚧 GET</span>` /<uuid>/file -` Get Element File Endpoint](/api-endpoints/file/get-element-file)
+    - [<span class="method-post">🚧 POST</span>` /<uuid>/file -` Create Element File Endpoint](/api-endpoints/file/post-element-file)
+    - [<span class="method-put">🚧 PUT</span>` /<uuid>/file -` Replace Element File Endpoint](/api-endpoints/file/put-element-file)
+    - [<span class="method-patch">🚧 PATCH</span>` /<uuid>/file -` Update Element File Endpoint](/api-endpoints/file/patch-element-file)
+    - [<span class="method-delete">🚧 DELETE</span>` /<uuid>/file -` Delete Element File Endpoint](/api-endpoints/file/delete-element-file)
+  - **WebDAV Endpoints (TBI)**
+    - [<span class="method-copy">🚧 COPY</span>` /<uuid> -` Copy Element Endpoint](/api-endpoints/webdav/copy-element)
+    - [<span class="method-lock">🚧 LOCK</span>` /<uuid> -` Lock Element Endpoint](/api-endpoints/webdav/lock-element)
+    - [<span class="method-unlock">🚧 UNLOCK</span>` /<uuid> -` Unlock Element Endpoint](/api-endpoints/webdav/unlock-element)
+    - [<span class="method-mkcol">🚧 MKCOL</span>` /<uuid> -` Create Folder Endpoint](/api-endpoints/webdav/mkcol-folder)
+    - [<span class="method-move">🚧 MOVE</span>` /<uuid> -` Move Element Endpoint](/api-endpoints/webdav/move-element)
+    - [<span class="method-propfind">🚧 PROPFIND</span>` /<uuid> -` Find Element Property Endpoint](/api-endpoints/webdav/propfind-element)
+    - [<span class="method-proppatch">🚧 PROPPATCH</span>` /<uuid> -` Change Element Property Endpoint](/api-endpoints/webdav/proppatch-element)
 
 - Commands
   - **System Commands**
@@ -88,6 +109,16 @@
     - [`backup:load`](/commands/backup/backup-load)
   - **Database Commands**
     - [`database:drop`](/commands/database/database-drop)
+
+- Security
+  - [Ownership](/security/ownership)
+  - [Access](/security/access)
+  - [Workflow](/security/workflow)
+  - [Token and Rate Limiting](/security/token-and-rate-limiting)
+  - [Predefined Data Types](/security/predefined-data-types)
+  - [Passwords, Tokens and Hashing](/security/passwords-tokens-and-hashing)
+  - [Security Tests](/security/test/general)
+
 - Development
   - [Long Term Plans](/development/long-term-plans)
   - [Best Practices](/development/best-practices)

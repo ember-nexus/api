@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Controller\Element;
 
 use App\Attribute\EndpointSupportsEtag;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use App\Type\EtagType;
 use Laudis\Neo4j\Databags\Statement;
+use Laudis\Neo4j\Types\CypherList;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +23,7 @@ class GetIndexController extends AbstractController
         private CypherEntityManager $cypherEntityManager,
         private AuthProvider $authProvider,
         private CollectionService $collectionService,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -54,7 +57,14 @@ class GetIndexController extends AbstractController
         $nodeIds = [];
         if (count($res) > 0) {
             $totalCount = $res->first()->get('totalCount');
-            foreach ($res->first()->get('elementIds') as $elementId) {
+            if (!is_int($totalCount)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property totalCount as int, not %s.', get_debug_type($totalCount))); // @codeCoverageIgnore
+            }
+            $rawElementIds = $res->first()->get('elementIds');
+            if (!($rawElementIds instanceof CypherList)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementIds as CypherList, not %s.', get_debug_type($rawElementIds))); // @codeCoverageIgnore
+            }
+            foreach ($rawElementIds as $elementId) {
                 $nodeIds[] = UuidV4::fromString($elementId);
             }
         }

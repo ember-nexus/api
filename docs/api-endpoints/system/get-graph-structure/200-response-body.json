@@ -1,0 +1,29 @@
+{
+  "nodeTypes": [
+    "Collection",
+    "Comment",
+    "Data",
+    "Group",
+    "Location",
+    "Plant",
+    "Sphere",
+    "Tag",
+    "Taxon",
+    "Token",
+    "User"
+  ],
+  "relationTypes": [
+    "CREATED",
+    "HAS_READ_ACCESS",
+    "HAS_SEARCH_ACCESS",
+    "HAS_TAG",
+    "IS_IN_GROUP",
+    "IS_LOCATED_IN",
+    "IS_MEMBER_OF",
+    "LIKES",
+    "OWNS",
+    "RELATED",
+    "RELATION",
+    "SOME_RELATION"
+  ]
+}

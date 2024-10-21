@@ -1,0 +1,194 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Tag",
+      "id": "12de56ab-8e89-4281-ab44-403c7c7ecb00",
+      "data": {
+        "description": "Magenta (/m\\u0259\\u02c8d\\u0292\\u025bnt\\u0259/) is a purple-red color.[2][3] On color wheels of the RGB (additive) and CMY (subtractive) color models, it is located precisely midway between blue and red. It is one of the four colors of ink used in color printing by most color printers, along with yellow, cyan, and black to make all the other colors. The tone of magenta used in printing, printer's magenta, is redder than the magenta of the RGB (additive) model, the former being closer to rose.\n\nMagenta took its name from an aniline dye made and patented in 1859 by the French chemist Fran\\u00e7ois-Emmanuel Verguin, who originally called it fuchsine. It was renamed to celebrate the French-Sardinian victory under French Emperor Napoleon III at the Battle of Magenta against the larger army of the Austrian Empire on 4 June 1859 near the Italian town of Magenta, at the time in Austria. This battle was decisive in liberating Italy from Austrian domination.[4][5]\n\nA virtually identical color, called roseine, was created in 1860 by two British chemists, Edward Chambers Nicholson, and George Maule.\n\nThe web color magenta is also called fuchsia.",
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "magenta",
+        "color": "#f032e6",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Magenta"
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "1594e5c8-4d33-43bd-8d0c-86b454e25dc1",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "apricot",
+        "color": "#ffd8b1",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Apricot_(color)",
+        "description": "Apricot is a light yellowish-orangish color that is similar to the color of apricots. However, it is paler than actual apricots."
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "25d0c9a8-8864-42bd-9ea1-6157fb688998",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "cyan",
+        "color": "#42d4f4",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Cyan",
+        "description": "Cyan (/\\u02c8sa\\u026a.\\u0259n, -\\u00e6n/)[2][3][4] is the color between blue and green on the visible spectrum of light.[5][6] It is evoked by light with a predominant wavelength between 500 and 520 nm, between the wavelengths of green and blue.[7]\n\nIn the subtractive color system, or CMYK color model, which can be overlaid to produce all colors in paint and color printing, cyan is one of the primary colors, along with magenta and yellow. In the additive color system, or RGB color model, used to create all the colors on a computer or television display, cyan is made by mixing equal amounts of green and blue light. Cyan is the complement of red; it can be made by the removal of red from white. Mixing red light and cyan light at the right intensity will make white light. It is commonly seen on a bright, sunny day in the sky."
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "2ebe38e6-0bf6-4af5-9acc-87e8a3db13ee",
+      "data": {
+        "description": "Maroon (US: UK: /m\\u0259\\u02c8ru\\u02d0n/ m\\u0259-ROON,[2] Australia: /m\\u0259\\u02c8ro\\u028an/ m\\u0259-ROHN[3]) is a brownish crimson color that takes its name from the French word marron, meaning chestnut.[4] Marron is also one of the French translations for \"brown\".\n\nTerms describing interchangeable shades, with overlapping RGB ranges, include burgundy, claret, mulberry, and crimson.\n\nDifferent dictionaries define maroon differently. The Cambridge English Dictionary defines maroon as a dark reddish-purple color while its \"American Dictionary\" section defines maroon as dark brown-red.[5] Lexico online dictionary defines maroon as a brownish-red.[6] Similarly, Dictionary.com defines maroon as a dark brownish-red.[7] The Shorter Oxford English Dictionary describes maroon as \"a brownish-crimson or claret colour,\"[8] while the Merriam-Webster online dictionary simply defines it as a dark red.[9]\n\nIn the sRGB color model for additive color representation, the web color called maroon is created by turning down the brightness of pure red to about one half. It is also noted that maroon is the complement of the web color called teal.[1]",
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "maroon",
+        "color": "#800000",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Maroon"
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "39662e6a-15d4-43ec-bc68-3f2afd7e8f0e",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "teal",
+        "color": "#469990",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Teal",
+        "description": "Teal is a dark cyan color. Its name comes from that of a bird\\u2014the Eurasian teal (Anas crecca)\\u2014which presents a similarly colored stripe on its head. The word is often used colloquially to refer to shades of cyan in general.\n\nIt can be created by mixing cyan into a green base, or deepened as needed with black or gray.[2] It is also one of the first group of 16 HTML/CSS web colors. In the RGB model used to create colors on computer screens and televisions, teal is created by reducing the brightness of cyan to about one half.\n\nIn North America, teal became a fad color during the 1990s, with many sports teams adopting it for their uniforms.[3][4]"
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "wildcard": {
+            "description": {
+              "value": "colo*r"
+            }
+          }
+        },
+        "parameters": {
+          "pageSize": 5,
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1758021997.820463,
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 5,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "wildcard": {
+                  "description": {
+                    "value": "colo*r"
+                  }
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "indices": "*",
+      "end": 1758021997.837855,
+      "duration": 0.017392
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "elements": [
+                {
+                  "id": "12de56ab-8e89-4281-ab44-403c7c7ecb00",
+                  "type": "Tag",
+                  "metadata": {
+                    "score": 1.0219789
+                  }
+                },
+                {
+                  "id": "1594e5c8-4d33-43bd-8d0c-86b454e25dc1",
+                  "type": "Tag",
+                  "metadata": {
+                    "score": 1.0219789
+                  }
+                },
+                {
+                  "id": "25d0c9a8-8864-42bd-9ea1-6157fb688998",
+                  "type": "Tag",
+                  "metadata": {
+                    "score": 1.0219789
+                  }
+                },
+                {
+                  "id": "2ebe38e6-0bf6-4af5-9acc-87e8a3db13ee",
+                  "type": "Tag",
+                  "metadata": {
+                    "score": 1.0219789
+                  }
+                },
+                {
+                  "id": "39662e6a-15d4-43ec-bc68-3f2afd7e8f0e",
+                  "type": "Tag",
+                  "metadata": {
+                    "score": 1.0219789
+                  }
+                }
+              ],
+              "totalHits": 25,
+              "maxScore": 1.0219789
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758021997.838022,
+      "accessibleElementIds": [
+        "12de56ab-8e89-4281-ab44-403c7c7ecb00",
+        "1594e5c8-4d33-43bd-8d0c-86b454e25dc1",
+        "25d0c9a8-8864-42bd-9ea1-6157fb688998",
+        "2ebe38e6-0bf6-4af5-9acc-87e8a3db13ee",
+        "39662e6a-15d4-43ec-bc68-3f2afd7e8f0e"
+      ],
+      "end": 1758021997.864312,
+      "duration": 0.02629
+    }
+  ]
+}

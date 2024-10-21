@@ -1,0 +1,17 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "cypher-path-subset",
+      "query": "MATCH path=((:Plant)-[:IS_MEMBER_OF*..]->(t:Taxon)) WHERE t.name IN $taxonNames RETURN path LIMIT 5",
+      "parameters": {
+        "taxonNames": [
+          "Liliales"
+        ]
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

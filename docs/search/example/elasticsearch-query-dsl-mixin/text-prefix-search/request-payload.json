@@ -1,0 +1,18 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "prefix": {
+          "name": {
+            "value": "blu"
+          }
+        }
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

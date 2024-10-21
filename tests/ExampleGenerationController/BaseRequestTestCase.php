@@ -119,6 +119,87 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         );
     }
 
+    public function getSignatureOfPathResult(array $path): string
+    {
+        $nodeIds = $path['nodeIds'] ?? [];
+        $relationIds = $path['relationIds'] ?? [];
+
+        $parts = [];
+        $count = max(count($nodeIds), count($relationIds));
+
+        for ($i = 0; $i < $count; ++$i) {
+            if (isset($nodeIds[$i])) {
+                $parts[] = $nodeIds[$i];
+            }
+            if (isset($relationIds[$i])) {
+                $parts[] = $relationIds[$i];
+            }
+        }
+
+        return implode('-', $parts);
+    }
+
+    public function assertSearchResultInDocumentationIsIdenticalToSearchResultFromRequest(
+        string $pathToProjectRoot,
+        string $pathToDocumentationFile,
+        ResponseInterface $response,
+    ): void {
+        $rawResponseData = \Safe\json_decode((string) $response->getBody(), true);
+        $responseData = $rawResponseData;
+
+        foreach ($responseData['results'] as &$result) {
+            unset($result['data']['created']);
+            unset($result['data']['updated']);
+        }
+        foreach ($responseData['debug'] as &$debug) {
+            unset($debug['start']);
+            unset($debug['end']);
+            unset($debug['duration']);
+            foreach ($debug['input']['parameters']['stepResults'] as &$stepResult) {
+                if (array_key_exists('paths', $stepResult)) {
+                    usort($stepResult['paths'], function ($a, $b) {
+                        return strcmp($this->getSignatureOfPathResult($a), $this->getSignatureOfPathResult($b));
+                    });
+                }
+            }
+        }
+
+        $documentationData = json_decode(file_get_contents($pathToProjectRoot.$pathToDocumentationFile), true);
+
+        foreach ($documentationData['results'] as &$result) {
+            unset($result['data']['created']);
+            unset($result['data']['updated']);
+        }
+        foreach ($documentationData['debug'] as &$debug) {
+            unset($debug['start']);
+            unset($debug['end']);
+            unset($debug['duration']);
+            foreach ($debug['input']['parameters']['stepResults'] as &$stepResult) {
+                if (array_key_exists('paths', $stepResult)) {
+                    usort($stepResult['paths'], function ($a, $b) {
+                        return strcmp($this->getSignatureOfPathResult($a), $this->getSignatureOfPathResult($b));
+                    });
+                }
+            }
+        }
+
+        $prettyPrintedRawResponse = json_encode(
+            $rawResponseData,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+        );
+        $prettyPrintedRawResponse = str_replace('    ', '  ', $prettyPrintedRawResponse);
+
+        $this->assertEquals(
+            $responseData,
+            $documentationData,
+            sprintf(
+                "Content of file %s should be as following:\n\n%s\n",
+                $pathToDocumentationFile,
+                $prettyPrintedRawResponse
+            )
+        );
+    }
+
     public function getFormattedResponseBodyAsJsonString(ResponseInterface $response): string
     {
         $data = json_decode((string) $response->getBody(), true);

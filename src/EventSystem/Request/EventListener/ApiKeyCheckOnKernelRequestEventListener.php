@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\EventSystem\Request\EventListener;
 
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use App\Type\TokenStateType;
 use App\Type\UserIdAndTokenIdObject;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
+use Laudis\Neo4j\Types\DateTimeZoneId;
 use Predis\Client as RedisClient;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\Uuid;
@@ -29,6 +31,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         private RedisClient $redisClient,
         private AuthProvider $authProvider,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -78,16 +81,25 @@ class ApiKeyCheckOnKernelRequestEventListener
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
-        $userId = Uuid::fromString($res->first()->get('user.id'));
-        $tokenId = Uuid::fromString($res->first()->get('token.id'));
+        $rawUserId = $res->first()->get('user.id');
+        if (!is_string($rawUserId)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
+        }
+        $userId = Uuid::fromString($rawUserId);
+        $rawTokenId = $res->first()->get('token.id');
+        if (!is_string($rawTokenId)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property token.id as string, not %s.', get_debug_type($rawTokenId))); // @codeCoverageIgnore
+        }
+        $tokenId = Uuid::fromString($rawTokenId);
 
         $tokenLifetimeInRedis = 60 * 30; // 30 minutes
-        if ($res->first()->get('token.expirationDate')) {
-            /**
-             * @var LaudisDateTime $tokenExpirationDate
-             */
-            $tokenExpirationDate = $res->first()->get('token.expirationDate');
-            $secondsUntilTokenExpires = $tokenExpirationDate->toDateTime()->getTimestamp() - (new DateTime())->getTimestamp();
+
+        $rawTokenExpiration = $res->first()->get('token.expirationDate');
+        if (null !== $rawTokenExpiration) {
+            if (!($rawTokenExpiration instanceof LaudisDateTime) && !($rawTokenExpiration instanceof DateTimeZoneId)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property token.expirationDate as LaudisDateTime|DateTimeZoneId, not %s.', get_debug_type($rawTokenExpiration))); // @codeCoverageIgnore
+            }
+            $secondsUntilTokenExpires = $rawTokenExpiration->toDateTime()->getTimestamp() - (new DateTime())->getTimestamp();
             $tokenLifetimeInRedis = min($tokenLifetimeInRedis, $secondsUntilTokenExpires);
         }
 

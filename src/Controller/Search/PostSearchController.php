@@ -4,35 +4,129 @@ declare(strict_types=1);
 
 namespace App\Controller\Search;
 
+use App\EventSystem\SearchStep\Event\SearchStepEvent;
+use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
-use App\Security\AccessChecker;
-use App\Security\AuthProvider;
-use App\Service\CollectionService;
-use Elastic\Elasticsearch\Response\Elasticsearch;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Response\JsonResponse;
+use App\Type\SearchStepType;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
+use Throwable;
 
-/**
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- * @SuppressWarnings("PHPMD.NPathComplexity")
- */
 class PostSearchController extends AbstractController
 {
     public function __construct(
-        private AuthProvider $authProvider,
-        private AccessChecker $accessChecker,
-        private ElasticEntityManager $elasticEntityManager,
-        private CollectionService $collectionService,
+        private EventDispatcherInterface $eventDispatcher,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
     ) {
+    }
+
+    private function getIsDebugFromBody(mixed $body): bool
+    {
+        if (!array_key_exists('debug', $body)) {
+            return false;
+        }
+        $debug = $body['debug'];
+        if (!is_bool($debug)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('debug', 'bool', $debug);
+        }
+
+        return $debug;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getGlobalParametersFromBody(mixed $body): array
+    {
+        $globalParameters = [];
+        if (!array_key_exists('parameters', $body)) {
+            return $globalParameters;
+        }
+        $globalParameters = $body['parameters'];
+        if (!is_array($globalParameters)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('parameters', 'array', $globalParameters);
+        }
+
+        return $globalParameters;
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    private function getStepsFromBody(mixed $body): array
+    {
+        if (!array_key_exists('steps', $body)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('steps', 'array');
+        }
+        $steps = $body['steps'];
+        if (!is_array($steps)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('steps', 'array', $steps);
+        }
+
+        // force non-associative array
+        return array_values($steps);
+    }
+
+    /**
+     * @param array<string, mixed> $step
+     */
+    private function getTypeFromStepDefinition(array $step, int $stepIndex): SearchStepType
+    {
+        if (!array_key_exists('type', $step)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate(sprintf('steps[%d].type', $stepIndex), 'string');
+        }
+        $type = $step['type'];
+        if (!is_string($type)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].type', $stepIndex), 'string', $type);
+        }
+
+        return SearchStepType::from($type);
+    }
+
+    /**
+     * @param array<string, mixed> $step
+     *
+     * @return string|array<string, mixed>|null
+     */
+    private function getQueryFromStepDefinition(array $step, int $stepIndex): string|array|null
+    {
+        $query = null;
+        if (!array_key_exists('query', $step)) {
+            return $query;
+        }
+        $query = $step['query'];
+        if (!(is_string($query) || is_array($query) || is_null($query))) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].query', $stepIndex), 'null | string | array', $query);
+        }
+
+        return $query;
+    }
+
+    /**
+     * @param array<string, mixed> $step
+     *
+     * @return array<string, mixed>
+     */
+    private function getStepParametersFromStepDefinition(array $step, int $stepIndex): array
+    {
+        $stepParameters = [];
+        if (!array_key_exists('parameters', $step)) {
+            return $stepParameters;
+        }
+        $stepParameters = $step['parameters'];
+        if (!is_array($stepParameters)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].parameters', $stepIndex), 'array', $stepParameters);
+        }
+
+        return $stepParameters;
     }
 
     #[Route(
@@ -44,98 +138,52 @@ class PostSearchController extends AbstractController
     {
         $body = \Safe\json_decode($request->getContent(), true);
 
-        $currentUserId = $this->authProvider->getUserId();
+        $debug = $this->getIsDebugFromBody($body);
+        $globalParameters = $this->getGlobalParametersFromBody($body);
+        $steps = $this->getStepsFromBody($body);
 
-        $userGroups = $this->accessChecker->getUsersGroups($currentUserId);
-        $stringUserGroups = [];
-        foreach ($userGroups as $userGroup) {
-            $stringUserGroups[] = $userGroup->toString();
-        }
+        $stepResults = [];
+        $lastStepResults = [];
+        $debugData = [];
+        foreach ($steps as $index => $step) {
+            $type = $this->getTypeFromStepDefinition($step, $index);
+            $query = $this->getQueryFromStepDefinition($step, $index);
+            $stepParameters = $this->getStepParametersFromStepDefinition($step, $index);
 
-        if (!array_key_exists('query', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('query', 'an valid Elasticsearch query object');
-        }
-        $userQuery = $body['query'];
+            $parameters = [
+                ...$globalParameters,
+                ...$stepParameters,
+                'stepResults' => $stepResults,
+            ];
 
-        $nodeTypes = [];
-        if (array_key_exists('nodeTypes', $body)) {
-            $rawNodeTypes = $body['nodeTypes'];
-            if (!is_array($rawNodeTypes)) {
-                throw $this->client400BadContentExceptionFactory->createFromTemplate('nodeTypes', 'array', $rawNodeTypes);
+            $event = new SearchStepEvent(
+                $type,
+                $query,
+                $parameters
+            );
+            try {
+                $this->eventDispatcher->dispatch($event);
+            } catch (Throwable $t) {
+                if ($t instanceof ProblemJsonException) {
+                    throw $t;
+                }
+                throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate(sprintf('Exception of type %s got thrown during search step %d (type %s): %s', get_debug_type($t), $index + 1, $type->value, $t->getMessage()), previous: $t);
             }
-            foreach ($rawNodeTypes as $rawNodeType) {
-                $nodeTypes[] = sprintf('node_%s', strtolower($rawNodeType));
-            }
+
+            $lastStepResults = $event->getResults();
+            $stepResults[] = $lastStepResults;
+            $debugData[] = $event->getDebugData();
         }
 
-        $relationTypes = [];
-        if (array_key_exists('relationTypes', $body)) {
-            $rawRelationTypes = $body['relationTypes'];
-            if (!is_array($rawRelationTypes)) {
-                throw $this->client400BadContentExceptionFactory->createFromTemplate('relationTypes', 'array', $rawRelationTypes);
-            }
-            foreach ($rawRelationTypes as $rawRelationType) {
-                $relationTypes[] = sprintf('relation_%s', strtolower($rawRelationType));
-            }
+        $responseObject = [
+            'type' => '_SearchResultResponse',
+            'results' => $lastStepResults,
+            'debug' => $debugData,
+        ];
+        if (!$debug) {
+            unset($responseObject['debug']);
         }
 
-        $indices = [...$nodeTypes, ...$relationTypes];
-        /**
-         * @psalm-suppress TypeDoesNotContainType
-         */
-        if (0 === count($indices)) {
-            $indices = '*';
-        } else {
-            $indices = implode(',', $indices);
-        }
-
-        $res = $this->elasticEntityManager->getClient()->search([
-            'index' => $indices,
-            'body' => [
-                '_source' => [
-                    '_id',
-                ],
-                'from' => ($this->collectionService->getCurrentPage() - 1) * $this->collectionService->getPageSize(),
-                'size' => $this->collectionService->getPageSize(),
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            $userQuery,
-                            [
-                                'bool' => [
-                                    'should' => [
-                                        [
-                                            'terms' => [
-                                                '_groupsWithSearchAccess.keyword' => $stringUserGroups,
-                                            ],
-                                        ],
-                                        [
-                                            'term' => [
-                                                '_usersWithSearchAccess.keyword' => [
-                                                    'value' => $currentUserId->toString(),
-                                                ],
-                                            ],
-                                        ],
-                                    ],
-                                    'minimum_should_match' => 1,
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-
-        if (!($res instanceof Elasticsearch)) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Unknown response type for elastic search query.', ['response' => $res]);
-        }
-
-        $elementIds = [];
-        foreach ($res->asArray()['hits']['hits'] as $element) {
-            $elementIds[] = UuidV4::fromString($element['_id']);
-        }
-        $totalElements = $res->asArray()['hits']['total']['value'];
-
-        return $this->collectionService->buildElementCollectionFromIds($elementIds, $totalElements);
+        return new JsonResponse($responseObject);
     }
 }

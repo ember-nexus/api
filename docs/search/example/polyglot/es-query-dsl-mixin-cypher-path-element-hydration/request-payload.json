@@ -1,0 +1,22 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "match": {
+          "description": {
+            "query": "lily"
+          }
+        }
+      }
+    },
+    {
+      "type": "cypher-path-subset",
+      "query": "UNWIND $stepResults[0].elements AS element MATCH path=((plant:Plant)-[:IS_MEMBER_OF*..]->(:Taxon)) WHERE plant.id = element.id RETURN path"
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

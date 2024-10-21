@@ -6,7 +6,7 @@ namespace App\tests\ExampleGenerationController\System;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 
-class GetInstanceConfigurationTest extends BaseRequestTestCase
+class AGetInstanceConfigurationTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
 

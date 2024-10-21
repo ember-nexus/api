@@ -1,0 +1,109 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "Bluebell",
+        "scenario": "general.botanicExample",
+        "scientificName": "M. virginica",
+        "link": "https://en.wikipedia.org/wiki/Mertensia_virginica",
+        "description": "Mertensia virginica (common names Virginia bluebells,[1] Virginia cowslip,[2] lungwort oysterleaf, Roanoke bells) is a spring ephemeral plant in the Boraginaceae (borage) family with bell-shaped sky-blue flowers, native to eastern North America."
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "term": {
+            "name.keyword": {
+              "value": "Bluebell"
+            }
+          }
+        },
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1758021996.451814,
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 25,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "term": {
+                  "name.keyword": {
+                    "value": "Bluebell"
+                  }
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "indices": "*",
+      "end": 1758021996.471125,
+      "duration": 0.019311
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "elements": [
+                {
+                  "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.9060724
+                  }
+                }
+              ],
+              "totalHits": 1,
+              "maxScore": 3.9060724
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758021996.471308,
+      "accessibleElementIds": [
+        "83b35321-4a91-4e9f-a49b-66d718c32ba7"
+      ],
+      "end": 1758021996.6405,
+      "duration": 0.169192
+    }
+  ]
+}

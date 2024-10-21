@@ -1,0 +1,23 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "terms": {
+          "_id": "{{someElementIds}}"
+        }
+      },
+      "parameters": {
+        "someElementIds": [
+          "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+          "23508e6c-632a-496d-9bd6-8c62a03216af",
+          "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+        ]
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

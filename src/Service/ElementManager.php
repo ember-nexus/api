@@ -15,6 +15,8 @@ use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Helper\Neo4jClientHelper;
 use Laudis\Neo4j\Databags\Statement;
+use Laudis\Neo4j\Types\Node;
+use Laudis\Neo4j\Types\Relationship;
 use OutOfBoundsException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\UuidInterface;
@@ -148,7 +150,11 @@ class ElementManager
             )
         );
         try {
-            $cypherFragment = $this->neo4jClientHelper->getNodeFromLaudisNode($res->first()->get('node'));
+            $rawNode = $res->first()->get('node');
+            if (!($rawNode instanceof Node)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property node as Node, not %s.', get_debug_type($rawNode))); // @codeCoverageIgnore
+            }
+            $cypherFragment = $this->neo4jClientHelper->getNodeFromLaudisNode($rawNode);
         } catch (OutOfBoundsException $e) {
             return null;
         }
@@ -174,10 +180,22 @@ class ElementManager
             )
         );
         try {
+            $rawRelation = $res->first()->get('relation');
+            if (!($rawRelation instanceof Relationship)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property relation as Relationship, not %s.', get_debug_type($rawRelation))); // @codeCoverageIgnore
+            }
+            $rawStartNode = $res->first()->get('startNode');
+            if (!($rawStartNode instanceof Node)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property startNode as Node, not %s.', get_debug_type($rawStartNode))); // @codeCoverageIgnore
+            }
+            $rawEndNode = $res->first()->get('endNode');
+            if (!($rawEndNode instanceof Node)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property endNode as Node, not %s.', get_debug_type($rawEndNode))); // @codeCoverageIgnore
+            }
             $cypherFragment = $this->neo4jClientHelper->getRelationFromLaudisRelation(
-                $res->first()->get('relation'),
-                $res->first()->get('startNode'),
-                $res->first()->get('endNode')
+                $rawRelation,
+                $rawStartNode,
+                $rawEndNode
             );
         } catch (OutOfBoundsException $e) {
             return null;

@@ -6,6 +6,7 @@ namespace App\Controller\User;
 
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
@@ -30,9 +31,10 @@ class PostRegisterController extends AbstractController
         private UrlGeneratorInterface $router,
         private UserPasswordHasher $userPasswordHasher,
         private EmberNexusConfiguration $emberNexusConfiguration,
+        private RequestUtilService $requestUtilService,
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
-        private RequestUtilService $requestUtilService,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -79,7 +81,11 @@ class PostRegisterController extends AbstractController
                 'uniqueUserIdentifier' => $uniqueUserIdentifier,
             ]
         ));
-        if ($res->first()->get('count') > 0) {
+        $rawCount = $res->first()->get('count');
+        if (!is_int($rawCount)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawCount))); // @codeCoverageIgnore
+        }
+        if ($rawCount > 0) {
             throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($uniqueUserIdentifier);
         }
     }

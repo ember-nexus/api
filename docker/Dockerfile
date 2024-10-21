@@ -267,6 +267,14 @@ RUN set -eux \
     && rm -rf /usr/src/unit
 
 
+FROM golang:1.25-alpine AS go_builder
+COPY ./lib/ExprCli /build
+RUN cd /build && \
+    apk add upx && \
+    go mod download && \
+    go build -ldflags="-s -w" -o expr-cli main.go && \
+    upx --best --lzma expr-cli
+
 
 FROM php_embed AS php
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
@@ -292,6 +300,7 @@ RUN apk add pcre-dev ${PHPIZE_DEPS} curl-dev openssl-dev \
 COPY --from=nginx_unit_builder /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=nginx_unit_builder /usr/sbin/unitd-debug /usr/sbin/unitd-debug
 COPY --from=nginx_unit_builder /usr/lib/unit/ /usr/lib/unit/
+COPY --from=go_builder /build/expr-cli /usr/local/bin/expr-cli
 COPY ./docker/nginx-unit/unit-entrypoint.sh /usr/local/bin/
 COPY ./docker/nginx-unit/unit.json /docker-entrypoint.d/unit.json
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/
@@ -320,11 +329,12 @@ WORKDIR /var/www/html
 
 FROM php AS production-build
 
+COPY antlr/dist /var/www/html/antlr/dist
 COPY bin/console /var/www/html/bin/console
 COPY config /var/www/html/config
 COPY public /var/www/html/public
 COPY src /var/www/html/src
-COPY lib /var/www/html/lib
+COPY lib/EmberNexusBundle /var/www/html/lib/EmberNexusBundle
 COPY docker/.env.docker /var/www/html/.env
 COPY composer.json /var/www/html/composer.json
 COPY composer.lock /var/www/html/composer.lock
@@ -366,7 +376,18 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-he
     && pecl install xdebug-3.4.1 memprof-3.0.2 \
     && docker-php-ext-enable xdebug memprof \
     && apk del --no-network .build-deps \
-    && apk add --no-cache judy aha git openssh
+    && apk add --no-cache judy aha git openssh openjdk21-jdk maven wget \
+    && wget https://www.antlr.org/download/antlr-4.13.2-complete.jar -O /usr/local/lib/antlr-4.13.2-complete.jar
+
+RUN mkdir /tmp/rrd-antlr4-build && \
+    cd /tmp/rrd-antlr4-build && \
+    git clone https://github.com/bkiers/rrd-antlr4.git . && \
+    mvn clean package && \
+    mv target/rrd-antlr4-0.1.2.jar /usr/local/lib/rrd-antlr4-0.1.2.jar && \
+    cd / && \
+    rm -rf /tmp/rrd-antlr4-build
+
+ENV CLASSPATH=".:/usr/local/lib/antlr-4.13.2-complete.jar:/usr/local/lib/rrd-antlr4-0.1.2.jar:$CLASSPATH"
 
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD php bin/console healthcheck

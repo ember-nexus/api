@@ -51,6 +51,9 @@ class TokenGenerator
             if (0 === $res->count()) {
                 break;
             }
+            /**
+             * @phpstan-ignore-next-line greater.alwaysTrue
+             */
             if ($res->count() > 0 && 2 == $i) {
                 throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to generate new token hash without collision. Please repeat your last call at a later time.');
             }

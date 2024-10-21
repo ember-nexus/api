@@ -65,7 +65,7 @@ class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
         $normalizedValue = $event->getNormalizedValue();
         $this->assertInstanceOf(DateTimeInterface::class, $normalizedValue);
         /**
-         * @var $normalizedValue \DateTimeInterface
+         * @var DateTimeInterface $normalizedValue
          */
         $this->assertSame('2005-08-15T15:52:01+00:00', $normalizedValue->format(DateTime::ATOM));
     }
@@ -79,7 +79,7 @@ class DateTimeRawValueToNormalizedValueEventListenerTest extends TestCase
         $normalizedValue = $event->getNormalizedValue();
         $this->assertInstanceOf(DateTimeInterface::class, $normalizedValue);
         /**
-         * @var $normalizedValue \DateTimeInterface
+         * @var DateTimeInterface $normalizedValue
          */
         $this->assertSame('0001-08-15T15:52:01+00:00', $normalizedValue->format(DateTime::ATOM));
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Helper;
 
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\Node as LaudisNode;
 use Laudis\Neo4j\Types\Relationship as LaudisRelationship;
@@ -15,6 +16,7 @@ class Neo4jClientHelper
 {
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -52,6 +54,9 @@ class Neo4jClientHelper
                 )
             );
             $startNode = $res->first()->get('startNode');
+            if (!($startNode instanceof LaudisNode)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property startNode as Node, not %s.', get_debug_type($startNode))); // @codeCoverageIgnore
+            }
             $res = $this->cypherEntityManager->getClient()->runStatement(
                 Statement::create(
                     'MATCH (endNode) WHERE elementId(endNode) = $endNodeId',
@@ -61,6 +66,9 @@ class Neo4jClientHelper
                 )
             );
             $endNode = $res->first()->get('endNode');
+            if (!($endNode instanceof LaudisNode)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property endNode as Node, not %s.', get_debug_type($endNode))); // @codeCoverageIgnore
+            }
         }
         $startNode = $this->getNodeFromLaudisNode($startNode);
         $endNode = $this->getNodeFromLaudisNode($endNode);

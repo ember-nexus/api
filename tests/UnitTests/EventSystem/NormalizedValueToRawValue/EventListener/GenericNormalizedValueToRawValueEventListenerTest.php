@@ -91,7 +91,7 @@ class GenericNormalizedValueToRawValueEventListenerTest extends TestCase
         $this->assertIsArray($event->getNormalizedValue());
         $normalizedValue = $event->getNormalizedValue();
         /**
-         * @var $normalizedValue array
+         * @var array $normalizedValue
          */
         $this->assertSame(3, count($normalizedValue));
         $this->assertSame('a', $normalizedValue[0]);
@@ -108,7 +108,7 @@ class GenericNormalizedValueToRawValueEventListenerTest extends TestCase
         $this->assertIsArray($event->getNormalizedValue());
         $normalizedValue = $event->getNormalizedValue();
         /**
-         * @var $normalizedValue array
+         * @var array $normalizedValue
          */
         $this->assertSame(3, count($normalizedValue));
         $this->assertSame('a', $normalizedValue['A']);

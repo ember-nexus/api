@@ -1,0 +1,17 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "query_string": {
+          "query": "+blue -red",
+          "default_field": "description"
+        }
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

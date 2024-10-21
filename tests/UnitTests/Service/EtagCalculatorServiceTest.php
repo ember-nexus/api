@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Service;
 
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\EtagCalculatorService;
 use Beste\Psr\Log\TestLogger;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -72,7 +73,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -135,7 +137,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -187,7 +190,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -229,7 +233,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -292,7 +297,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -368,7 +374,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -440,7 +447,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -491,7 +499,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -529,7 +538,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unexpected result.');
@@ -592,7 +602,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -668,7 +679,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -740,7 +752,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -791,7 +804,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -829,7 +843,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unexpected result.');
@@ -892,7 +907,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -967,7 +983,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1038,7 +1055,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1089,7 +1107,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -1127,7 +1146,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unexpected result.');
@@ -1190,7 +1210,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1265,7 +1286,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1336,7 +1358,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1387,7 +1410,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -1425,7 +1449,8 @@ class EtagCalculatorServiceTest extends TestCase
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unexpected result.');

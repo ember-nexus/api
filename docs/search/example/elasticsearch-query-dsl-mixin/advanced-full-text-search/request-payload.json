@@ -1,0 +1,34 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match": {
+                "name": {
+                  "query": "blue",
+                  "fuzziness": "AUTO",
+                  "boost": 10.0
+                }
+              }
+            },
+            {
+              "match": {
+                "description": {
+                  "query": "blue"
+                }
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

@@ -6,8 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- Add new polyglot search endpoint, closes #109.
+- Add support for parsing Cypher queries via ANTLR grammars, enabling advanced security checks without manual
+  verification.
+- Add support for expressions in Elasticsearch Query DSL and Element Hydration search steps using the library
+  [Expr library](https://github.com/expr-lang/expr).
+- Add `GET /graph-structure` endpoint.
 - Increase general test coverage to 28.2% (lines) and 54.1% (classes), increase mutant score indicator for covered code
   to 91%, closes #364. Feature tests do not count towards code coverage.
+### Changed
+- Improve documentation.
+- Upgrade Symfony and other PHP dependencies.
+### Removed
+- Removed old search endpoint logic. Existing search queries need to be adapted for the new search endpoint.
 
 ## 0.1.23 - 2025-08-16
 ### Changed

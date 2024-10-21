@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests;
 
 use Beste\Psr\Log\TestLogger;
+use Countable;
 
 trait AssertLoggerTrait
 {
     abstract public static function assertSame(mixed $expected, mixed $actual, string $message = ''): void;
+
+    abstract public static function assertCount(int $expectedCount, Countable|iterable $haystack, string $message = ''): void;
 
     abstract public static function fail(string $message = ''): never;
 
@@ -38,5 +41,11 @@ trait AssertLoggerTrait
 
             return null;
         }
+    }
+
+    public function assertLogNotHappened(TestLogger $logger, string $message): void
+    {
+        $filteredMessages = $logger->records->filteredByMessageContaining($message)->all();
+        $this->assertCount(0, $filteredMessages);
     }
 }

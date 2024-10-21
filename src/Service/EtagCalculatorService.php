@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
+use Laudis\Neo4j\Types\CypherList;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -21,6 +23,7 @@ class EtagCalculatorService
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private LoggerInterface $logger,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -114,7 +117,11 @@ class EtagCalculatorService
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($parentId);
-        foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
+        $rawSortedTuples = $result[0]['sortedTuples'];
+        if (!($rawSortedTuples instanceof CypherList)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+        }
+        foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
             $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
         }
@@ -182,7 +189,11 @@ class EtagCalculatorService
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($childId);
-        foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
+        $rawSortedTuples = $result[0]['sortedTuples'];
+        if (!($rawSortedTuples instanceof CypherList)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+        }
+        foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
             $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
         }
@@ -249,7 +260,11 @@ class EtagCalculatorService
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($centerId);
-        foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
+        $rawSortedTuples = $result[0]['sortedTuples'];
+        if (!($rawSortedTuples instanceof CypherList)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+        }
+        foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
             $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
         }
@@ -316,7 +331,11 @@ class EtagCalculatorService
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addUuid($userId);
-        foreach ($result[0]['sortedTuples'] as $idUpdatedPair) {
+        $rawSortedTuples = $result[0]['sortedTuples'];
+        if (!($rawSortedTuples instanceof CypherList)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+        }
+        foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
             $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
         }

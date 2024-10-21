@@ -9,6 +9,7 @@ use App\Exception\Client400ReservedIdentifierException;
 use App\Exception\Client403ForbiddenException;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
@@ -42,9 +43,10 @@ class PostRegisterControllerTest extends TestCase
         ?UrlGeneratorInterface $router = null,
         ?UserPasswordHasher $userPasswordHasher = null,
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
+        ?RequestUtilService $requestUtilService = null,
         ?Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory = null,
         ?Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory = null,
-        ?RequestUtilService $requestUtilService = null,
+        ?Server500LogicExceptionFactory $server500LogicExceptionFactory = null,
     ): PostRegisterController {
         return new PostRegisterController(
             $elementManager ?? $this->createMock(ElementManager::class),
@@ -52,9 +54,10 @@ class PostRegisterControllerTest extends TestCase
             $router ?? $this->createMock(UrlGeneratorInterface::class),
             $userPasswordHasher ?? $this->createMock(UserPasswordHasher::class),
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
+            $requestUtilService ?? $this->createMock(RequestUtilService::class),
             $client400ReservedIdentifierExceptionFactory ?? $this->createMock(Client400ReservedIdentifierExceptionFactory::class),
             $client403ForbiddenExceptionFactory ?? $this->createMock(Client403ForbiddenExceptionFactory::class),
-            $requestUtilService ?? $this->createMock(RequestUtilService::class)
+            $server500LogicExceptionFactory ?? $this->createMock(Server500LogicExceptionFactory::class)
         );
     }
 
@@ -121,7 +124,7 @@ class PostRegisterControllerTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client403ForbiddenException::class, $e);
             /**
-             * @var $e Client403ForbiddenException
+             * @var Client403ForbiddenException $e
              */
             $this->assertSame('Requested endpoint, element or action is forbidden.', $e->getDetail());
         }

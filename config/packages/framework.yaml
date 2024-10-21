@@ -8,6 +8,12 @@ framework:
   php_errors:
     log: true
 
+when@dev:
+  framework:
+    trusted_proxies: '127.0.0.1,REMOTE_ADDR'
+    router:
+      default_uri: 'https://api.localhost/'
+
 when@test:
   framework:
     test: true

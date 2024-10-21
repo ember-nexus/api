@@ -26,23 +26,24 @@ class _07_01_SearchAccessTest extends BaseRequestTestCase
             '/search',
             $token,
             [
-                'query' => [
-                    'term' => [
-                        'scenario.keyword' => 'security.limitedAccess.searchAccess',
+                'steps' => [
+                    [
+                        'type' => 'elasticsearch-query-dsl-mixin',
+                        'query' => [
+                            'term' => [
+                                'scenario.keyword' => 'security.limitedAccess.searchAccess',
+                            ],
+                        ],
+                        'parameters' => [
+                            'nodeTypes' => ['Data'],
+                        ],
                     ],
                 ],
-                'nodeTypes' => ['Data'],
             ]
         );
 
-        $this->assertIsElementCollectionResponse(
-            $response,
-            3,
-            [
-                self::DATA_1,
-                self::DATA_2,
-                self::DATA_3,
-            ]
+        $this->assertIsSearchResultResponse(
+            $response
         );
     }
 

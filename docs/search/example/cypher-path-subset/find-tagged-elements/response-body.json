@@ -1,0 +1,270 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "78dd0a4d-2b94-4997-b4a4-353de854047c",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Bird of Paradise",
+        "scenario": "general.botanicExample",
+        "scientificName": "S. reginae",
+        "link": "https://en.wikipedia.org/wiki/Strelitzia_reginae",
+        "description": "Strelitzia reginae, commonly known as the crane flower, bird of paradise, or isigude in Nguni,[3] is a species of flowering plant native to the Cape Provinces and KwaZulu-Natal in South Africa. An evergreen perennial, it is widely cultivated for its dramatic flowers. In temperate areas it is a popular houseplant."
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "data": {
+        "description": "Blue is one of the three primary colours in the RGB (additive) colour model, as well as in the RYB colour model (traditional colour theory).[2] It lies between violet and cyan on the spectrum of visible light. The term blue generally describes colours perceived by humans observing light with a dominant wavelength that's between approximately 450 and 495 nanometres. The clear daytime sky and the deep sea appear blue because of an optical effect known as Rayleigh scattering. An optical effect called the Tyndall effect explains blue eyes. Distant objects appear more blue because of another optical effect called aerial perspective.\n\nBlue has been an important colour in art and decoration since ancient times. The semi-precious stone lapis lazuli was used in ancient Egypt for jewellery and ornament and later, in the Renaissance, to make the pigment ultramarine, the most expensive of all pigments.[3] In the eighth century Chinese artists used cobalt blue to colour fine blue and white porcelain. In the Middle Ages, European artists used it in the windows of cathedrals. Europeans wore clothing coloured with the vegetable dye woad until it was replaced by the finer indigo from America. In the 19th century, synthetic blue dyes and pigments gradually replaced organic dyes and mineral pigments. Dark blue became a common colour for military uniforms and later, in the late 20th century, for business suits. Because blue has commonly been associated with harmony, it was chosen as the colour of the flags of the United Nations and the European Union.[4]\n\nIn the United States and Europe, blue is the colour that both men and women are most likely to choose as their favourite, with at least one recent survey showing the same across several other countries, including China, Malaysia, and Indonesia.[5][6] Past surveys in the US and Europe have found that blue is the colour most commonly associated with harmony, confidence, masculinity, knowledge, intelligence, calmness, distance, infinity, the imagination, cold, and sadness.[7]",
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "blue",
+        "color": "#4363d8",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Blue"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Bluebell",
+        "scenario": "general.botanicExample",
+        "scientificName": "M. virginica",
+        "link": "https://en.wikipedia.org/wiki/Mertensia_virginica",
+        "description": "Mertensia virginica (common names Virginia bluebells,[1] Virginia cowslip,[2] lungwort oysterleaf, Roanoke bells) is a spring ephemeral plant in the Boraginaceae (borage) family with bell-shaped sky-blue flowers, native to eastern North America."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "884dd581-bcdd-43f1-9dab-11524578d9e2",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Cornflower",
+        "scenario": "general.botanicExample",
+        "scientificName": "C. cyanus",
+        "link": "https://en.wikipedia.org/wiki/Centaurea_cyanus",
+        "description": "Centaurea cyanus, commonly known as cornflower or bachelor's button (among other names[note 1]), is an annual flowering plant in the family Asteraceae native to Europe. In the past, it often grew as a weed in cornfields (in the broad sense of \"corn\", referring to grains, such as wheat, barley, rye, or oats), hence its name. It is now endangered in its native habitat by agricultural intensification, particularly by over-use of herbicides. However, Centaurea cyanus is now also naturalised in many other parts of the world, including North America and parts of Australia through introduction as an ornamental plant in gardens and as a seed contaminant in crop seeds.[3]"
+      }
+    },
+    {
+      "type": "HAS_TAG",
+      "id": "9200e5be-fbd6-4592-86bd-fdf40125a712",
+      "start": "78dd0a4d-2b94-4997-b4a4-353de854047c",
+      "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "data": {
+        "created": "2025-09-17T07:34:31+00:00",
+        "updated": "2025-09-17T07:34:31+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "ad80a619-2b53-4f27-a4bd-56a316c15251",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Jacaranda",
+        "scenario": "general.botanicExample",
+        "scientificName": "J. mimosifolia",
+        "link": "https://en.wikipedia.org/wiki/Jacaranda_mimosifolia",
+        "description": "Jacaranda mimosifolia is a sub-tropical tree native to south-central South America that has been widely planted elsewhere because of its attractive and long-lasting violet-colored flowers. It is also known as the jacaranda, blue jacaranda, black poui, Nupur or fern tree. Older sources call it J. acutifolia, but modern authorities usually classify it as J. mimosifolia. In scientific usage, the name \"jacaranda\" refers to the genus Jacaranda, which has many other members, but in horticultural and everyday usage, it nearly always means the blue jacaranda.\n\nIn its native range in the wild, J. mimosifolia is listed as Vulnerable by the IUCN.[1]"
+      }
+    },
+    {
+      "type": "HAS_TAG",
+      "id": "cae5b040-b013-4cb3-9ecd-62fd6e30e46e",
+      "start": "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+      "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "data": {
+        "created": "2025-09-17T07:34:31+00:00",
+        "updated": "2025-09-17T07:34:31+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Cape Forget-me-not",
+        "scenario": "general.botanicExample",
+        "scientificName": "A. capensis",
+        "link": "https://en.wikipedia.org/wiki/Anchusa_capensis",
+        "description": "Anchusa capensis, is a species of flowering plant in the family Boraginaceae, native to Namibia, South Africa and Lesotho.[1][2] The genus Anchusa is from the Greek word anchousa, which makes reference to its use as a dye base for cosmetic paint obtained from the roots of another plant in the genus Anchusa tinctoria. The species capensis translates to \\u2018from the Cape\\u2019 referring to South Africa[3]\n\nA. capensis typically reaches about 60 cm (24 in) tall, and grows best in full sun.[4] In summer, red buds open to reveal small, bright cobalt blue flowers with five petals and five white scales protecting the stigma and anthers.[5]\n\nIn the US, it grows well in zones 8\\u201311.[6] Cultivars include 'Dawn', with white, pink, mauve and blue flowers, 'Blue Angel', with dark blue flowers, and 'Blue Bird', taller and with indigo blue flowers.[7]"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "ef54daa7-f62c-47ea-8762-fae02bd44485",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "African Violet",
+        "scenario": "general.botanicExample",
+        "scientificName": "S. sect. Saintpaulia",
+        "link": "https://en.wikipedia.org/wiki/Streptocarpus_sect._Saintpaulia",
+        "description": "Streptocarpus sect. Saintpaulia is a section within Streptocarpus subgenus Streptocarpella[1] consisting of about ten species of herbaceous perennial flowering plants in the family Gesneriaceae, native to Tanzania and adjacent southeastern Kenya in eastern tropical Africa. The section was previously treated as a separate genus, Saintpaulia, but molecular phylogenetic studies showed that it was nested within the genus Streptocarpus.\n\nSpecies and cultivars are commonly called African violets (although they are not closely related to true violets) or saintpaulias. They are commonly sold as house plants."
+      }
+    },
+    {
+      "type": "HAS_TAG",
+      "id": "f096b595-d67b-4600-9b88-a0255d55db32",
+      "start": "ad80a619-2b53-4f27-a4bd-56a316c15251",
+      "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "data": {
+        "created": "2025-09-17T07:34:31+00:00",
+        "updated": "2025-09-17T07:34:31+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "HAS_TAG",
+      "id": "f4391558-41f8-4d43-9b8d-01dd638192af",
+      "start": "ef54daa7-f62c-47ea-8762-fae02bd44485",
+      "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "data": {
+        "created": "2025-09-17T07:34:31+00:00",
+        "updated": "2025-09-17T07:34:31+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "HAS_TAG",
+      "id": "f63ef383-ad99-48c6-9699-9d71c7c9cd16",
+      "start": "884dd581-bcdd-43f1-9dab-11524578d9e2",
+      "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "data": {
+        "created": "2025-09-17T07:34:31+00:00",
+        "updated": "2025-09-17T07:34:31+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "HAS_TAG",
+      "id": "f8d6e90d-455c-46d8-b02d-430ad02217ee",
+      "start": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+      "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "data": {
+        "created": "2025-09-17T07:34:31+00:00",
+        "updated": "2025-09-17T07:34:31+00:00",
+        "scenario": "general.botanicExample"
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "cypher-path-subset",
+        "query": "MATCH path=((:Plant)-[:HAS_TAG]->(:Tag {name: \"blue\"})) RETURN path",
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "start": 1758094526.641536,
+      "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
+      "end": 1758094526.916812,
+      "duration": 0.27527594566345215
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "paths": [
+                {
+                  "nodeIds": [
+                    "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+                    "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                  ],
+                  "relationIds": [
+                    "cae5b040-b013-4cb3-9ecd-62fd6e30e46e"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "884dd581-bcdd-43f1-9dab-11524578d9e2",
+                    "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                  ],
+                  "relationIds": [
+                    "f63ef383-ad99-48c6-9699-9d71c7c9cd16"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "78dd0a4d-2b94-4997-b4a4-353de854047c",
+                    "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                  ],
+                  "relationIds": [
+                    "9200e5be-fbd6-4592-86bd-fdf40125a712"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                    "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                  ],
+                  "relationIds": [
+                    "f8d6e90d-455c-46d8-b02d-430ad02217ee"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "ad80a619-2b53-4f27-a4bd-56a316c15251",
+                    "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                  ],
+                  "relationIds": [
+                    "f096b595-d67b-4600-9b88-a0255d55db32"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "ef54daa7-f62c-47ea-8762-fae02bd44485",
+                    "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                  ],
+                  "relationIds": [
+                    "f4391558-41f8-4d43-9b8d-01dd638192af"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758094526.916977,
+      "element-hydration:redundantElementIds": {
+        "message": "Removed 5 redundant elementIds.",
+        "removedElementIds": [
+          "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+        ]
+      },
+      "accessibleElementIds": [
+        "78dd0a4d-2b94-4997-b4a4-353de854047c",
+        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+        "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+        "884dd581-bcdd-43f1-9dab-11524578d9e2",
+        "9200e5be-fbd6-4592-86bd-fdf40125a712",
+        "ad80a619-2b53-4f27-a4bd-56a316c15251",
+        "cae5b040-b013-4cb3-9ecd-62fd6e30e46e",
+        "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+        "ef54daa7-f62c-47ea-8762-fae02bd44485",
+        "f096b595-d67b-4600-9b88-a0255d55db32",
+        "f4391558-41f8-4d43-9b8d-01dd638192af",
+        "f63ef383-ad99-48c6-9699-9d71c7c9cd16",
+        "f8d6e90d-455c-46d8-b02d-430ad02217ee"
+      ],
+      "end": 1758094526.977683,
+      "duration": 0.060706
+    }
+  ]
+}

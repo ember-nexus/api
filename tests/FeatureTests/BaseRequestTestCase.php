@@ -201,6 +201,19 @@ abstract class BaseRequestTestCase extends TestCase
         }
     }
 
+    public function assertIsSearchResultResponse(ResponseInterface $response): void
+    {
+        $this->assertSame(200, $response->getStatusCode());
+
+        $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
+
+        $body = \Safe\json_decode((string) $response->getBody(), true);
+
+        $this->assertSame('_SearchResultResponse', $body['type']);
+        $this->assertArrayHasKey('results', $body);
+        $this->assertIsArray($body['results']);
+    }
+
     public function assertIsNodeResponse(ResponseInterface $response, string $type): void
     {
         $this->assertSame(200, $response->getStatusCode());

@@ -33,7 +33,7 @@ class RequestUtilService
         }
         $type = $body['type'];
         if (!is_string($type)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'string', gettype($type));
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'string', $type);
         }
         if ($expectedType !== $type) {
             throw $this->client400BadContentExceptionFactory->createFromTemplate('type', $expectedType, $body['type']);
@@ -64,7 +64,7 @@ class RequestUtilService
         }
         $uniqueUserIdentifier = $data[$uniqueIdentifier];
         if (!is_string($uniqueUserIdentifier)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('data.%s', $uniqueIdentifier), 'string', gettype($uniqueUserIdentifier));
+            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('data.%s', $uniqueIdentifier), 'string', $uniqueUserIdentifier);
         }
 
         return $uniqueUserIdentifier;
@@ -83,7 +83,7 @@ class RequestUtilService
         }
         $uniqueUserIdentifier = $body['uniqueUserIdentifier'];
         if (!is_string($uniqueUserIdentifier)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('uniqueUserIdentifier', 'string', gettype($uniqueUserIdentifier));
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('uniqueUserIdentifier', 'string', $uniqueUserIdentifier);
         }
 
         return $uniqueUserIdentifier;
@@ -148,7 +148,7 @@ class RequestUtilService
         }
         $value = $body[$key];
         if (!is_string($value)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate($key, 'string', gettype($value));
+            throw $this->client400BadContentExceptionFactory->createFromTemplate($key, 'string', $value);
         }
 
         return $value;

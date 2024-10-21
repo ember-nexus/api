@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
 use App\Style\EmberNexusStyle;
@@ -47,6 +48,7 @@ class BackupCreateCommand extends Command
         private FilesystemOperator $backupStorage,
         private ElementToRawService $elementToRawService,
         private ParameterBagInterface $bag,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -143,7 +145,11 @@ class BackupCreateCommand extends Command
             }
             $nodeIds = [];
             foreach ($rawNodeIds->toArray() as $rawNodeId) {
-                $nodeIds[] = Uuid::fromString($rawNodeId->get('n.id'));
+                $rawNodeIdContent = $rawNodeId->get('n.id');
+                if (!is_string($rawNodeIdContent)) {
+                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawNodeIdContent))); // @codeCoverageIgnore
+                }
+                $nodeIds[] = Uuid::fromString($rawNodeIdContent);
             }
 
             foreach ($nodeIds as $nodeId) {
@@ -194,7 +200,11 @@ class BackupCreateCommand extends Command
             }
             $relationIds = [];
             foreach ($rawRelationIds->toArray() as $rawRelationId) {
-                $relationIds[] = Uuid::fromString($rawRelationId->get('r.id'));
+                $rawRelationIdContent = $rawRelationId->get('r.id');
+                if (!is_string($rawRelationIdContent)) {
+                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawRelationIdContent))); // @codeCoverageIgnore
+                }
+                $relationIds[] = Uuid::fromString($rawRelationIdContent);
             }
 
             foreach ($relationIds as $relationId) {
@@ -296,11 +306,19 @@ class BackupCreateCommand extends Command
 
     private function initCount(): void
     {
-        $this->nodeCount = $this->cypherEntityManager->getClient()->runStatement(
+        $rawNodeCount = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create('MATCH (n) RETURN count(n) as count')
         )->first()->get('count');
-        $this->relationCount = $this->cypherEntityManager->getClient()->runStatement(
+        if (!is_int($rawNodeCount)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawNodeCount))); // @codeCoverageIgnore
+        }
+        $this->nodeCount = $rawNodeCount;
+        $rawRelationCount = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create('MATCH ()-[r]->() RETURN count(r) as count')
         )->first()->get('count');
+        if (!is_int($rawRelationCount)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawRelationCount))); // @codeCoverageIgnore
+        }
+        $this->relationCount = $rawRelationCount;
     }
 }

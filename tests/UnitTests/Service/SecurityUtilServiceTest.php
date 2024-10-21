@@ -32,7 +32,6 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Syndesi\CypherEntityManager\Type\EntityManager;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[Small]
@@ -88,7 +87,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
-             * @var $e Client400MissingPropertyException
+             * @var Client400MissingPropertyException $e
              */
             $this->assertSame("Endpoint requires that the request contains property '_passwordHash' to be set to string.", $e->getDetail());
         }
@@ -115,7 +114,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
@@ -156,7 +155,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
-             * @var $e Server500LogicErrorException
+             * @var Server500LogicErrorException $e
              */
             $this->assertSame('Environment variable "ANONYMOUS_USER_UUID" must be set to a valid UUID.', $e->getDetail());
         }
@@ -177,7 +176,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client403ForbiddenException::class, $e);
             /**
-             * @var $e Client403ForbiddenException
+             * @var Client403ForbiddenException $e
              */
             $this->assertSame('Requested endpoint, element or action is forbidden.', $e->getDetail());
         }
@@ -241,7 +240,7 @@ class SecurityUtilServiceTest extends TestCase
                 $null,
                 []
             ));
-        $cypherEntityManager = $this->createMock(EntityManager::class);
+        $cypherEntityManager = $this->createMock(CypherEntityManager::class);
         $cypherEntityManager->method('getClient')->willReturn($cypherClient);
 
         $securityUtilService = $this->getSecurityUtilService(
@@ -254,7 +253,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
@@ -287,7 +286,7 @@ class SecurityUtilServiceTest extends TestCase
                     ]),
                 ]
             ));
-        $cypherEntityManager = $this->createMock(EntityManager::class);
+        $cypherEntityManager = $this->createMock(CypherEntityManager::class);
         $cypherEntityManager->method('getClient')->willReturn($cypherClient);
 
         $securityUtilService = $this->getSecurityUtilService(
@@ -300,7 +299,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
@@ -330,7 +329,7 @@ class SecurityUtilServiceTest extends TestCase
                     ]),
                 ]
             ));
-        $cypherEntityManager = $this->createMock(EntityManager::class);
+        $cypherEntityManager = $this->createMock(CypherEntityManager::class);
         $cypherEntityManager->method('getClient')->willReturn($cypherClient);
 
         $elementManager = $this->createMock(ElementManager::class);
@@ -353,7 +352,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
@@ -383,7 +382,7 @@ class SecurityUtilServiceTest extends TestCase
                     ]),
                 ]
             ));
-        $cypherEntityManager = $this->createMock(EntityManager::class);
+        $cypherEntityManager = $this->createMock(CypherEntityManager::class);
         $cypherEntityManager->method('getClient')->willReturn($cypherClient);
 
         $elementManager = $this->createMock(ElementManager::class);
@@ -420,7 +419,7 @@ class SecurityUtilServiceTest extends TestCase
                     ]),
                 ]
             ));
-        $cypherEntityManager = $this->createMock(EntityManager::class);
+        $cypherEntityManager = $this->createMock(CypherEntityManager::class);
         $cypherEntityManager->method('getClient')->willReturn($cypherClient);
 
         $elementManager = $this->createMock(ElementManager::class);
@@ -435,5 +434,45 @@ class SecurityUtilServiceTest extends TestCase
 
         $userNode = $securityUtilService->findUserByUniqueUserIdentifier('test@localhost.dev');
         $this->assertInstanceOf(NodeElement::class, $userNode);
+    }
+
+    public function testFindUserByUniqueUserIdentifierWithBadNode(): void
+    {
+        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
+
+        $expectedCypherQuery = 'MATCH (u:User {email: $uniqueUserIdentifier}) RETURN u.id AS id';
+
+        $null = null;
+        $cypherClient = $this->createMock(ClientInterface::class);
+        $cypherClient->expects($this->once())
+            ->method('runStatement')
+            ->with(
+                $this->callback(function (Statement $statement) use ($expectedCypherQuery) {
+                    return $statement->getText() === $expectedCypherQuery;
+                })
+            )
+            ->willReturn(new SummarizedResult(
+                $null,
+                [
+                    new CypherMap([
+                        'id' => 5345354,
+                    ]),
+                ]
+            ));
+        $cypherEntityManager = $this->createMock(CypherEntityManager::class);
+        $cypherEntityManager->method('getClient')->willReturn($cypherClient);
+
+        $securityUtilService = $this->getSecurityUtilService(
+            emberNexusConfiguration: $emberNexusConfiguration,
+            cypherEntityManager: $cypherEntityManager
+        );
+
+        try {
+            $securityUtilService->findUserByUniqueUserIdentifier('test@localhost.dev');
+            $this->fail();
+        } catch (Exception $e) {
+            $this->assertSame('Expected cypher response to return property id as string, not int.', $e->getDetail());
+        }
     }
 }

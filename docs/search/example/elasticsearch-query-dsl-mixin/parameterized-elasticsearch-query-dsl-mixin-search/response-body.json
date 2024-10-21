@@ -1,0 +1,156 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "L. candidum",
+        "link": "https://en.wikipedia.org/wiki/Lilium_candidum",
+        "description": "Lilium candidum, the Madonna lily[2][3] or white lily,[4] is a plant in the true lily family. It is native to the Balkans and Middle East, and naturalized in other parts of Europe, including France, Italy, and Ukraine, and in North Africa, the Canary Islands, Mexico, and other regions.[1][5] It has been cultivated since antiquity, for at least 3,000 years,[6] and has great symbolic value since then for many cultures. It is susceptible to several virus diseases common to lilies, and especially to Botrytis fungus. One technique to avoid problems with viruses is to grow plants from seed instead of bulblets."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "Flame Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "G. superba",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
+        "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include flame lily, climbing lily, creeping lily, glory lily,[3] gloriosa lily, tiger claw,[4] and fire lily.[5]"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "Tulip",
+        "scenario": "general.botanicExample",
+        "scientificName": "Tulipa",
+        "link": "https://en.wikipedia.org/wiki/Tulip",
+        "description": "Tulips are spring-blooming perennial herbaceous bulbiferous geophytes in the Tulipa genus. Their flowers are usually large, showy, and brightly coloured, generally red, orange, pink, yellow, or white. They often have a different coloured blotch at the base of the tepals, internally. Because of a degree of variability within the populations and a long history of cultivation, classification has been complex and controversial. The tulip is a member of the lily family, Liliaceae,[2] along with 14 other genera, where it is most closely related to Amana, Erythronium, and Gagea in the tribe Lilieae."
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "terms": {
+            "_id": "{{someElementIds}}"
+          }
+        },
+        "parameters": {
+          "someElementIds": [
+            "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+            "23508e6c-632a-496d-9bd6-8c62a03216af",
+            "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+          ],
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1758021996.868963,
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 25,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "terms": {
+                  "_id": [
+                    "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                    "23508e6c-632a-496d-9bd6-8c62a03216af",
+                    "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+                  ]
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "indices": "*",
+      "end": 1758021996.886942,
+      "duration": 0.017979
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "elements": [
+                {
+                  "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 1.0101794
+                  }
+                },
+                {
+                  "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 1.0101794
+                  }
+                },
+                {
+                  "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 1.0101794
+                  }
+                }
+              ],
+              "totalHits": 3,
+              "maxScore": 1.0101794
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758021996.887109,
+      "accessibleElementIds": [
+        "23508e6c-632a-496d-9bd6-8c62a03216af",
+        "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+        "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+      ],
+      "end": 1758021997.041104,
+      "duration": 0.153995
+    }
+  ]
+}

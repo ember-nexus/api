@@ -1,0 +1,70 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "data": {
+        "created": "2025-09-17T06:52:40+00:00",
+        "updated": "2025-09-17T06:52:40+00:00",
+        "name": "Flame Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "G. superba",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
+        "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include flame lily, climbing lily, creeping lily, glory lily,[3] gloriosa lily, tiger claw,[4] and fire lily.[5]"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "3283fd3d-8083-4170-882a-41b1cd152c55",
+      "data": {
+        "created": "2025-09-17T06:52:40+00:00",
+        "updated": "2025-09-17T06:52:40+00:00",
+        "name": "Lotus",
+        "scenario": "general.botanicExample",
+        "scientificName": "N. nucifera",
+        "link": "https://en.wikipedia.org/wiki/Nelumbo_nucifera",
+        "description": "Nelumbo nucifera, also known as Padma (Sanskrit: \\u092a\\u0926\\u094d\\u092e, romanized: Padm\\u0101, lit.\\u2009'Lotus') or Kamala (Sanskrit: \\u0915\\u092e\\u0932, lit. 'Lotus'), sacred lotus, pink lotus, Indian lotus,[1] or simply lotus, is one of two extant species of aquatic plant in the family Nelumbonaceae. It is sometimes colloquially called a water lily, though this more often refers to members of the family Nymphaeaceae.[2] The lotus belongs in the order Proteales."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+      "data": {
+        "created": "2025-09-17T06:52:40+00:00",
+        "updated": "2025-09-17T06:52:40+00:00",
+        "name": "Tulip",
+        "scenario": "general.botanicExample",
+        "scientificName": "Tulipa",
+        "link": "https://en.wikipedia.org/wiki/Tulip",
+        "description": "Tulips are spring-blooming perennial herbaceous bulbiferous geophytes in the Tulipa genus. Their flowers are usually large, showy, and brightly coloured, generally red, orange, pink, yellow, or white. They often have a different coloured blotch at the base of the tepals, internally. Because of a degree of variability within the populations and a long history of cultivation, classification has been complex and controversial. The tulip is a member of the lily family, Liliaceae,[2] along with 14 other genera, where it is most closely related to Amana, Erythronium, and Gagea in the tribe Lilieae."
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": {
+          "elementIds": [
+            "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+            "3283fd3d-8083-4170-882a-41b1cd152c55",
+            "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+          ]
+        },
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758092048.96602,
+      "accessibleElementIds": [
+        "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+        "3283fd3d-8083-4170-882a-41b1cd152c55",
+        "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+      ],
+      "end": 1758092049.009023,
+      "duration": 0.043003
+    }
+  ]
+}

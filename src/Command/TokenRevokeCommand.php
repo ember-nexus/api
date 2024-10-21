@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
@@ -35,6 +36,7 @@ use function Safe\preg_match;
  *
  * @SuppressWarnings("PHPMD.CyclomaticComplexity")
  * @SuppressWarnings("PHPMD.NPathComplexity")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[AsCommand(name: 'token:revoke', description: 'Revoke tokens.')]
 class TokenRevokeCommand extends Command
@@ -70,6 +72,7 @@ class TokenRevokeCommand extends Command
         private EmberNexusConfiguration $emberNexusConfiguration,
         private AuthProvider $authProvider,
         private LoggerInterface $logger,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -236,7 +239,11 @@ class TokenRevokeCommand extends Command
                     throw new Exception(sprintf('Unable to find user identified by %s.', $userIdentifier));
                 }
 
-                $this->userId = Uuid::fromString($res[0]['u.id']);
+                $rawUserId = $res[0]['u.id'];
+                if (!is_string($rawUserId)) {
+                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property u.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
+                }
+                $this->userId = Uuid::fromString($rawUserId);
             }
         }
 
@@ -303,19 +310,37 @@ class TokenRevokeCommand extends Command
         );
         $result = [];
         foreach ($queryResultLines as $queryResultLine) {
-            $tokenCreated = $queryResultLine['t.created'];
+            $rawTokenId = $queryResultLine['t.id'];
+            if (!is_string($rawTokenId)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.id as string, not %s.', get_debug_type($rawTokenId))); // @codeCoverageIgnore
+            }
+            $rawTokenCreated = $queryResultLine['t.created'];
+            if (!($rawTokenCreated instanceof \Laudis\Neo4j\Types\DateTime) && !($rawTokenCreated instanceof DateTimeZoneId)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.created as DateTime|DateTimeZoneId, not %s.', get_debug_type($rawTokenCreated))); // @codeCoverageIgnore
+            }
             $expirationDate = $queryResultLine['t.expirationDate'];
-            /**
-             * @var DateTimeZoneId  $tokenCreated
-             * @var ?DateTimeZoneId $expirationDate
-             */
+            if (!($expirationDate instanceof \Laudis\Neo4j\Types\DateTime) && !($expirationDate instanceof DateTimeZoneId) && !is_null($expirationDate)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.expirationDate as DateTime|DateTimeZoneId or null, not %s.', get_debug_type($expirationDate))); // @codeCoverageIgnore
+            }
+            $rawUserId = $queryResultLine['u.id'];
+            if (!is_string($rawUserId)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property u.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
+            }
+            $rawUserUniqueIdentifier = $queryResultLine['userUniqueIdentifier'];
+            if (!is_string($rawUserUniqueIdentifier)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property userUniqueIdentifier as string, not %s.', get_debug_type($rawUserUniqueIdentifier))); // @codeCoverageIgnore
+            }
+            $rawTokenHash = $queryResultLine['t.hash'];
+            if (!is_string($rawTokenHash)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.hash as string, not %s.', get_debug_type($rawTokenHash))); // @codeCoverageIgnore
+            }
             $result[] = new TokenRevokeEntry(
-                Uuid::fromString($queryResultLine['t.id']),
-                $tokenCreated->toDateTime(),
+                Uuid::fromString($rawTokenId),
+                $rawTokenCreated->toDateTime(),
                 $expirationDate?->toDateTime(),
-                Uuid::fromString($queryResultLine['u.id']),
-                $queryResultLine['userUniqueIdentifier'],
-                $queryResultLine['t.hash']
+                Uuid::fromString($rawUserId),
+                $rawUserUniqueIdentifier,
+                $rawTokenHash
             );
         }
 
