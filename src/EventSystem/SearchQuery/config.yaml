@@ -9,3 +9,9 @@ services:
       - name: kernel.event_listener
         event: 'App\EventSystem\SearchQuery\Event\SearchQueryEvent'
         method: 'onSearchQueryEvent'
+
+  App\EventSystem\SearchQuery\EventListener\ElasticsearchSearchQueryEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\SearchQuery\Event\SearchQueryEvent'
+        method: 'onSearchQueryEvent'

@@ -13,6 +13,7 @@ class SearchQueryEvent implements EventInterface
     use StoppableEventTrait;
 
     private array $result = [];
+    private int $numberOfResults = 0;
 
     public function __construct(
         private SearchQueryType $searchQueryType,
@@ -29,6 +30,18 @@ class SearchQueryEvent implements EventInterface
     public function setResult(array $result): self
     {
         $this->result = $result;
+
+        return $this;
+    }
+
+    public function getNumberOfResults(): int
+    {
+        return $this->numberOfResults;
+    }
+
+    public function setNumberOfResults(int $numberOfResults): self
+    {
+        $this->numberOfResults = $numberOfResults;
 
         return $this;
     }

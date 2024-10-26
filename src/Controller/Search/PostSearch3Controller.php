@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @SuppressWarnings(PHPMD.CyclomaticComplexity)
  * @SuppressWarnings(PHPMD.NPathComplexity)
  */
-class PostSearch2Controller extends AbstractController
+class PostSearch3Controller extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
@@ -35,11 +35,11 @@ class PostSearch2Controller extends AbstractController
     }
 
     #[Route(
-        '/search2',
-        name: 'post-search2',
+        '/search3',
+        name: 'post-search3',
         methods: ['POST']
     )]
-    public function postSearch2(Request $request): Response
+    public function postSearch3(Request $request): Response
     {
         $body = \Safe\json_decode($request->getContent(), true);
 

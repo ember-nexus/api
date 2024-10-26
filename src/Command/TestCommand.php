@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Search\CypherSearchStep;
+use App\Search\ElasticsearchSearchStep;
+use App\Search\ElementHydrationStep;
 use App\Style\EmberNexusStyle;
-use Laudis\Neo4j\Databags\Statement;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\OutputStyle;
-use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
@@ -22,7 +23,9 @@ class TestCommand extends Command
     private OutputStyle $io;
 
     public function __construct(
-        private CypherEntityManager $cypherEntityManager
+        private CypherSearchStep $cypherSearchStep,
+        private ElasticsearchSearchStep $elasticsearchSearchStep,
+        private ElementHydrationStep $elementHydrationStep,
     ) {
         parent::__construct();
     }
@@ -33,30 +36,71 @@ class TestCommand extends Command
 
         $this->io->title('Test');
 
-        $result = $this->cypherEntityManager->getClient()->runStatement(
-            Statement::create(
-                sprintf(
-                    "MATCH (parent {id: \$parentId})\n".
-                    "MATCH (parent)-[:OWNS]->(children)\n".
-                    "MATCH (parent)-[relations]->(children)\n".
-                    "WITH children, relations\n".
-                    "LIMIT %d\n".
-                    "WITH children, relations\n".
-                    "ORDER BY children.id, relations.id\n".
-                    "WITH COLLECT([children.id, children.updated]) + COLLECT([relations.id, relations.updated]) AS allTuples\n".
-                    "WITH allTuples\n".
-                    "UNWIND allTuples AS tuple\n".
-                    "WITH tuple ORDER BY tuple[0]\n".
-                    'RETURN COLLECT(tuple) AS sortedTuples;',
-                    100
-                ),
-                [
-                    'parentId' => '7b80b203-2b82-40f5-accd-c7089fe6114e',
-                ]
-            )
-        );
+        $globalParameters = [];
 
-        print_r($result->toArray());
+//        $steps = [
+//            [
+//                'type' => 'cypher',
+//                'query' => 'MATCH (n:Data)-[:OWNS]->(:Data) WITH n.id AS elementId, n.created AS created ORDER BY created DESC LIMIT 5 RETURN collect(elementId) as elementIds',
+//                'parameters' => [],
+//            ],
+//            [
+//                'type' => 'elementHydration',
+//                'query' => null,
+//                'parameters' => [],
+//            ],
+//        ];
+
+//        $steps = [
+//            [
+//                'type' => 'elasticsearch',
+//                'query' => [
+//                    'match' => [
+//                        'scenario' => 'general'
+//                    ]
+//                ],
+//                'parameters' => [],
+//            ],
+//            [
+//                'type' => 'elementHydration',
+//                'query' => null,
+//                'parameters' => [],
+//            ],
+//        ];
+
+        $steps = [
+            [
+                'type' => 'elementHydration',
+                'query' => null,
+                'parameters' => [
+                    'elementIds' => ['9edb178e-1b4a-4518-a9d3-0fa97e6d1007']
+                ],
+            ],
+        ];
+
+        $stepRunners = [
+            'cypher' => $this->cypherSearchStep,
+            'elementHydration' => $this->elementHydrationStep,
+            'elasticsearch' => $this->elasticsearchSearchStep,
+        ];
+
+        $previousResults = [];
+        foreach ($steps as $step) {
+            $parameters = [...$previousResults, ...$step['parameters'], ...$globalParameters];
+            $previousResults = $stepRunners[$step['type']]->executeStep($step['query'], $parameters)->getResults();
+        }
+        $results = $previousResults;
+
+        //        $results = $this->cypherSearchStep->executeStep('MATCH (n:Data)-[:OWNS]->(:Data) WITH n.id AS elementId, n.created AS created ORDER BY created DESC LIMIT 10 RETURN collect(elementId) as elementIds', []);
+        //        $results = $this->elementHydrationStep->executeStep(null, [
+        //            'elementIds' => [
+        //                '2d270f7b-0ced-4830-a1fe-9bbfdede8043'
+        //            ]
+        //        ]);
+
+        //        $this->io->writeln(json_encode($results->getResults(), JSON_PRETTY_PRINT));
+        //        $this->io->writeln(json_encode($results->getDebugData(), JSON_PRETTY_PRINT));
+        $this->io->writeln(json_encode($results, JSON_PRETTY_PRINT));
 
         return Command::SUCCESS;
     }
