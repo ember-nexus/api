@@ -12,5 +12,5 @@ interface SearchStepResultInterface
 
     public function getDebugData(): array;
 
-    public function setDebugData(array $debugData): self;
+    public function setDebugData(string $type, array $debugData): self;
 }

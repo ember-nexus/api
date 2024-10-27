@@ -12,6 +12,7 @@ use App\Service\ElementManager;
 use App\Service\ElementToRawService;
 use App\Type\SearchStepResult;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 class ElementHydrationStep implements SearchStepInterface
 {
@@ -28,6 +29,11 @@ class ElementHydrationStep implements SearchStepInterface
         return false;
     }
 
+    public function getIdentifier(): string
+    {
+        return 'elementHydration';
+    }
+
     public function executeStep(array|string|null $query, array $parameters): SearchStepResultInterface
     {
         if (null !== $query) {
@@ -39,10 +45,14 @@ class ElementHydrationStep implements SearchStepInterface
         }
         $elementIds = [];
         foreach ($parameters['elementIds'] as $rawElementId) {
-            if (!is_string($rawElementId)) {
-                throw $this->client400BadContentExceptionFactory->createFromTemplate('elementId', 'string', $rawElementId);
+            if ($rawElementId instanceof UuidInterface) {
+                $elementIds[] = $rawElementId;
+            } else {
+                if (!is_string($rawElementId)) {
+                    throw $this->client400BadContentExceptionFactory->createFromTemplate('elementId', 'string', $rawElementId);
+                }
+                $elementIds[] = Uuid::fromString($rawElementId);
             }
-            $elementIds[] = Uuid::fromString($rawElementId);
         }
 
         $elementData = [];
@@ -57,10 +67,13 @@ class ElementHydrationStep implements SearchStepInterface
 
         $searchStepResult = new SearchStepResult();
         $searchStepResult->setResults($elementData);
-        $searchStepResult->setDebugData([
-            'query' => $query,
-            'parameters' => $parameters,
-        ]);
+        $searchStepResult->setDebugData(
+            $this->getIdentifier(),
+            [
+                'query' => $query,
+                'parameters' => $parameters,
+            ]
+        );
 
         return $searchStepResult;
     }

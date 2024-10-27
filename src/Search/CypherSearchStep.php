@@ -24,6 +24,11 @@ class CypherSearchStep implements SearchStepInterface
         return true;
     }
 
+    public function getIdentifier(): string
+    {
+        return 'cypher';
+    }
+
     public function executeStep(array|string $query, array $parameters): SearchStepResultInterface
     {
         if (!is_string($query)) {
@@ -40,10 +45,11 @@ class CypherSearchStep implements SearchStepInterface
 
         $searchStepResult = new SearchStepResult();
         $searchStepResult->setResults($results);
-        $searchStepResult->setDebugData([
-            'query' => $query,
-            'parameters' => $parameters,
-        ]);
+        $searchStepResult->setDebugData(
+            $this->getIdentifier(), [
+                'query' => $query,
+                'parameters' => $parameters,
+            ]);
 
         return $searchStepResult;
     }

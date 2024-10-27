@@ -32,9 +32,12 @@ class SearchStepResult implements SearchStepResultInterface
         return $this->debugData;
     }
 
-    public function setDebugData(array $debugData): SearchStepResultInterface
+    public function setDebugData(string $type, array $debugData): SearchStepResultInterface
     {
-        $this->debugData = $debugData;
+        $this->debugData = [
+            'type' => $type,
+            ...$debugData,
+        ];
 
         return $this;
     }

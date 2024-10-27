@@ -33,6 +33,11 @@ class ElasticsearchSearchStep implements SearchStepInterface
         return false;
     }
 
+    public function getIdentifier(): string
+    {
+        return 'elasticsearch';
+    }
+
     public function executeStep(array|string $query, array $parameters): SearchStepResultInterface
     {
         if (!is_array($query)) {
@@ -98,8 +103,8 @@ class ElasticsearchSearchStep implements SearchStepInterface
             '_source' => [
                 '_id',
             ],
-            'from' => ($page - 1) *$pageSize,
-            'size' =>$pageSize,
+            'from' => ($page - 1) * $pageSize,
+            'size' => $pageSize,
             'query' => [
                 'bool' => [
                     'must' => [
@@ -140,7 +145,7 @@ class ElasticsearchSearchStep implements SearchStepInterface
             throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Unknown response type for elastic search query.', ['response' => $res]);
         }
 
-//        print_r($res->asArray());
+        //        print_r($res->asArray());
 
         $elementIds = [];
         foreach ($res->asArray()['hits']['hits'] as $element) {
@@ -153,12 +158,13 @@ class ElasticsearchSearchStep implements SearchStepInterface
             'elementIds' => $elementIds,
             'totalElements' => $totalElements,
         ]);
-        $searchStepResult->setDebugData([
-            'query' => $query,
-            'combinedQuery' => $combinedQuery,
-            'parameters' => $parameters,
-            'indices' => $indices,
-        ]);
+        $searchStepResult->setDebugData(
+            $this->getIdentifier(), [
+                'query' => $query,
+                'combinedQuery' => $combinedQuery,
+                'parameters' => $parameters,
+                'indices' => $indices,
+            ]);
 
         return $searchStepResult;
     }

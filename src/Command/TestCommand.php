@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Search\CypherPathSearchStep;
 use App\Search\CypherSearchStep;
 use App\Search\ElasticsearchSearchStep;
 use App\Search\ElementHydrationStep;
@@ -24,6 +25,7 @@ class TestCommand extends Command
 
     public function __construct(
         private CypherSearchStep $cypherSearchStep,
+        private CypherPathSearchStep $cypherPathSearchStep,
         private ElasticsearchSearchStep $elasticsearchSearchStep,
         private ElementHydrationStep $elementHydrationStep,
     ) {
@@ -38,48 +40,57 @@ class TestCommand extends Command
 
         $globalParameters = [];
 
-//        $steps = [
-//            [
-//                'type' => 'cypher',
-//                'query' => 'MATCH (n:Data)-[:OWNS]->(:Data) WITH n.id AS elementId, n.created AS created ORDER BY created DESC LIMIT 5 RETURN collect(elementId) as elementIds',
-//                'parameters' => [],
-//            ],
-//            [
-//                'type' => 'elementHydration',
-//                'query' => null,
-//                'parameters' => [],
-//            ],
-//        ];
+        //        $steps = [
+        //            [
+        //                'type' => 'cypher',
+        //                'query' => 'MATCH (n:Data)-[:OWNS]->(:Data) WITH n.id AS elementId, n.created AS created ORDER BY created DESC LIMIT 5 RETURN collect(elementId) as elementIds',
+        //                'parameters' => [],
+        //            ],
+        //            [
+        //                'type' => 'elementHydration',
+        //                'query' => null,
+        //                'parameters' => [],
+        //            ],
+        //        ];
 
-//        $steps = [
-//            [
-//                'type' => 'elasticsearch',
-//                'query' => [
-//                    'match' => [
-//                        'scenario' => 'general'
-//                    ]
-//                ],
-//                'parameters' => [],
-//            ],
-//            [
-//                'type' => 'elementHydration',
-//                'query' => null,
-//                'parameters' => [],
-//            ],
-//        ];
+        //        $steps = [
+        //            [
+        //                'type' => 'elasticsearch',
+        //                'query' => [
+        //                    'match' => [
+        //                        'scenario' => 'general'
+        //                    ]
+        //                ],
+        //                'parameters' => [],
+        //            ],
+        //            [
+        //                'type' => 'elementHydration',
+        //                'query' => null,
+        //                'parameters' => [],
+        //            ],
+        //        ];
+
+        //        $steps = [
+        //            [
+        //                'type' => 'elementHydration',
+        //                'query' => null,
+        //                'parameters' => [
+        //                    'elementIds' => ['9edb178e-1b4a-4518-a9d3-0fa97e6d1007']
+        //                ],
+        //            ],
+        //        ];
 
         $steps = [
             [
-                'type' => 'elementHydration',
-                'query' => null,
-                'parameters' => [
-                    'elementIds' => ['9edb178e-1b4a-4518-a9d3-0fa97e6d1007']
-                ],
+                'type' => 'cypherPath',
+                'query' => 'MATCH path=((:Data)-[:OWNS]->(:Data)-[:OWNS]->(:Data)) RETURN path LIMIT 2',
+                'parameters' => [],
             ],
         ];
 
         $stepRunners = [
             'cypher' => $this->cypherSearchStep,
+            'cypherPath' => $this->cypherPathSearchStep,
             'elementHydration' => $this->elementHydrationStep,
             'elasticsearch' => $this->elasticsearchSearchStep,
         ];

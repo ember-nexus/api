@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller\Search;
 
-use App\EventSystem\SearchQuery\Event\SearchQueryEvent;
+use App\Contract\SearchStepInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
-use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Response\JsonResponse;
-use App\Security\AccessChecker;
-use App\Security\AuthProvider;
-use App\Type\SearchQueryType;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,12 +21,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class PostSearch3Controller extends AbstractController
 {
     public function __construct(
-        private AuthProvider $authProvider,
-        private AccessChecker $accessChecker,
-        private EventDispatcherInterface $eventDispatcher,
+        #[TaggedIterator('app.searchStep')] private iterable $searchStepHandlers,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory
     ) {
     }
 
@@ -43,33 +36,84 @@ class PostSearch3Controller extends AbstractController
     {
         $body = \Safe\json_decode($request->getContent(), true);
 
-        if (!array_key_exists('queries', $body)) {
-            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('queries', 'list with at least one query object');
-        }
-        $queries = $body['queries'];
-
-        $previousResult = [];
-        foreach ($queries as $query) {
-            if (!array_key_exists('type', $query)) {
-                throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('queries[].type', 'valid query type');
+        $debug = false;
+        if (array_key_exists('debug', $body)) {
+            $debug = $body['debug'];
+            if (!is_bool($debug)) {
+                throw $this->client400BadContentExceptionFactory->createFromTemplate('debug', 'bool', $debug);
             }
-            $type = $query['type'];
+        }
+
+        $globalParameters = [];
+        if (array_key_exists('parameters', $body)) {
+            $globalParameters = $body['parameters'];
+            if (!is_array($globalParameters)) {
+                throw $this->client400BadContentExceptionFactory->createFromTemplate('parameters', 'array', $globalParameters);
+            }
+        }
+
+        if (!array_key_exists('steps', $body)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('steps', 'array');
+        }
+        $steps = $body['steps'];
+        if (!is_array($steps)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('steps', 'array', $steps);
+        }
+
+        $searchStepHandlersDictionary = [];
+        foreach ($this->searchStepHandlers as $searchStepHandler) {
+            /**
+             * @var $searchStepHandler SearchStepInterface
+             */
+            $searchStepHandlersDictionary[$searchStepHandler->getIdentifier()] = $searchStepHandler;
+        }
+
+        $lastStepResult = [];
+        $debugData = [];
+        foreach ($steps as $index => $step) {
+            if (!array_key_exists('type', $step)) {
+                throw $this->client400MissingPropertyExceptionFactory->createFromTemplate(sprintf('steps[%d].type', $index), 'string');
+            }
+            $type = $step['type'];
             if (!is_string($type)) {
-                throw $this->client400BadContentExceptionFactory->createFromTemplate('queries[].type', 'string', $type);
+                throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].type', $index), 'string', $type);
             }
-            $type = SearchQueryType::from($type);
-            if (!array_key_exists('query', $query)) {
-                throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('queries[].query', 'valid query');
+
+            $query = null;
+            if (array_key_exists('query', $step)) {
+                $query = $step['query'];
+                if (!(is_string($query) || is_array($query) || is_null($query))) {
+                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].query', $index), 'null | string | array', $query);
+                }
             }
-            $searchQuery = $query['query'];
-            $searchQueryEvent = new SearchQueryEvent($type, $searchQuery, $previousResult);
-            $this->eventDispatcher->dispatch($searchQueryEvent);
-            $previousResult = $searchQueryEvent->getResult();
+
+            $parameters = [];
+            if (array_key_exists('parameters', $step)) {
+                $parameters = $step['parameters'];
+                if (!is_array($parameters)) {
+                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].parameters', $index), 'array', $parameters);
+                }
+            }
+
+            $currentStepParameters = [...$lastStepResult, ...$parameters, ...$globalParameters];
+
+            if (!array_key_exists($type, $searchStepHandlersDictionary)) {
+                throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].type', $index), 'valid type', $type);
+            }
+            $currentStepResult = $searchStepHandlersDictionary[$type]->executeStep($query, $currentStepParameters);
+
+            $lastStepResult = $currentStepResult->getResults();
+            $debugData[] = $currentStepResult->getDebugData();
         }
-        $result = $previousResult;
 
-        //        if () {}
+        $responseObject = [
+            'result' => $lastStepResult,
+            'debug' => $debugData,
+        ];
+        if (!$debug) {
+            unset($responseObject['debug']);
+        }
 
-        return new JsonResponse($result);
+        return new JsonResponse($responseObject);
     }
 }
