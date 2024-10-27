@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve error handling when request contains malformed JSON, closes #343.
 ### Changed
 - Upgrade PHP to 8.3.13, closes #341.
+- Rework search endpoint to support multiple stackable search operations, especially Elasticsearch and Cypher search
+  queries. Old search behaviour is still supported albeit deprecated, and will be removed in version 0.2.0. Closes #109.
 
 ## 0.1.15 - 2024-10-12
 ### Changed

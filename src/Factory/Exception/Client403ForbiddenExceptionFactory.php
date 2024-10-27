@@ -14,7 +14,7 @@ class Client403ForbiddenExceptionFactory
     ) {
     }
 
-    public function createFromTemplate(): Client403ForbiddenException
+    public function createFromTemplate(?string $detail = null): Client403ForbiddenException
     {
         return new Client403ForbiddenException(
             $this->urlGenerator->generate(
@@ -24,7 +24,8 @@ class Client403ForbiddenExceptionFactory
                     'name' => 'forbidden',
                 ],
                 UrlGeneratorInterface::ABSOLUTE_URL
-            )
+            ),
+            detail: $detail ?? 'Requested endpoint, element or action is forbidden.'
         );
     }
 }
