@@ -16,3 +16,10 @@ services:
         event: 'kernel.exception'
         method: 'onKernelException'
         priority: 2048
+
+  App\EventSystem\Exception\EventListener\JsonExceptionEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'kernel.exception'
+        method: 'onKernelException'
+        priority: 2048
