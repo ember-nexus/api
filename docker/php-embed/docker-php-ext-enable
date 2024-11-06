@@ -1,4 +1,7 @@
 #!/bin/sh
+
+# source from https://github.com/docker-library/php , licensed under MIT
+
 set -e
 
 extDir="$(php -d 'display_errors=stderr' -r 'echo ini_get("extension_dir");')"

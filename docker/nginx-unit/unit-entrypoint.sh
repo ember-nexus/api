@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# source from https://github.com/nginx/unit , licensed under Apache 2.0
+
 set -e
 
 WAITLOOPS=5
