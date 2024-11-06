@@ -3,17 +3,15 @@
 Store anything, connect everything, search it all? Sure thing! 😃
 
 Ember Nexus API is a dynamic and versatile REST-API that leverages the power of graphs to provide flexible and secure
-data storage and retrieval for data-minded people. It is open source and can be hosted on your own hardware - we
-currently support AMD and ARM architectures.
+data storage and retrieval for data-minded people. It is [source first](https://sourcefirst.com/) and can be hosted on
+your own hardware - we currently support AMD and ARM architectures.
 
 ## Quick Links
 
 - [Getting Started](https://ember-nexus.github.io/api/#/getting-started/tech-stack)
 - [Check out the documentation](https://ember-nexus.github.io/api)
 - [Find us on Docker Hub](https://hub.docker.com/r/embernexus/api)
-
-Find us on [GitHub](https://github.com/ember-nexus/api), [our website ember-nexus.dev](https://ember-nexus.dev), and
-[Discord](https://discord.gg/3UhupSvMAa).
+- [Demo API](https://reference-dataset.ember-nexus.dev/)
 
 ## Features
 

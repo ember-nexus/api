@@ -1,2 +1,3 @@
 - [GitHub](https://github.com/ember-nexus/api)
 - [Docker Hub](https://hub.docker.com/r/embernexus/api)
+- [Demo API](https://reference-dataset.ember-nexus.dev/)

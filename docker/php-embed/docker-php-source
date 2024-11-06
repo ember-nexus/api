@@ -1,4 +1,7 @@
 #!/bin/sh
+
+# source from https://github.com/docker-library/php , licensed under MIT
+
 set -e
 
 dir=/usr/src/php

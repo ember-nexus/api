@@ -1,3 +1,7 @@
+# this file is based upon https://github.com/docker-library/php/blob/master/8.3/alpine3.20/cli/Dockerfile , licensed MIT
+# and https://github.com/nginx/unit/blob/master/pkg/docker/Dockerfile.php8.3 , licensed Apache 2.0
+
+
 FROM alpine:3.20 AS php_embed
 LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.20/cli" \
     org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.20" \
@@ -275,7 +279,7 @@ FROM php_embed AS php
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
-    org.opencontainers.image.licenses="AGPL-3.0-only" \
+    org.opencontainers.image.licenses="LicenseRef-Source-First-License-1.1" \
     org.opencontainers.image.source="https://github.com/ember-nexus/api" \
     org.opencontainers.image.title="API" \
     org.opencontainers.image.description="Knowledge Graph API."
@@ -340,7 +344,7 @@ FROM scratch AS production
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
-    org.opencontainers.image.licenses="AGPL-3.0-only" \
+    org.opencontainers.image.licenses="LicenseRef-Source-First-License-1.1" \
     org.opencontainers.image.source="https://github.com/ember-nexus/api" \
     org.opencontainers.image.title="API" \
     org.opencontainers.image.description="Knowledge Graph API."

@@ -1,6 +1,6 @@
 # Ember Nexus: Knowledge Graph API
 
-![GitHub License](https://img.shields.io/github/license/ember-nexus/api)
+![GitHub License](https://img.shields.io/badge/license-Source%20First%20License%201.1-blue)
 [![Docker Pulls](https://img.shields.io/docker/pulls/embernexus/api?logo=docker&label=Docker%20pulls&color=%232496ed)](https://hub.docker.com/r/embernexus/api)
 [![Docker Image Version](https://img.shields.io/docker/v/embernexus/api?sort=semver)](https://hub.docker.com/r/embernexus/api)
 [![Demo API](https://img.shields.io/website?url=https%3A%2F%2Freference-dataset.ember-nexus.dev%2F&label=Demo%20API)](https://reference-dataset.ember-nexus.dev/)
@@ -10,8 +10,8 @@
 Store anything, connect everything, search it all? Sure thing! 😃
 
 Ember Nexus API is a dynamic and versatile REST-API that leverages the power of graphs to provide flexible and secure
-data storage and retrieval for data-minded people. It is open source and can be hosted on your own hardware - we
-currently support AMD and ARM architectures.
+data storage and retrieval for data-minded people. It is [source first](https://sourcefirst.com/) and can be hosted on
+your own hardware - we currently support AMD and ARM architectures.
 
 ## Quick Links
 

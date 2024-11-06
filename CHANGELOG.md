@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve error handling when request contains malformed JSON, closes #343.
 ### Changed
 - Upgrade PHP to 8.3.13, closes #341.
+- Change license from AGPL 3 to Source First License 1.1, closes #345.
 
 ## 0.1.15 - 2024-10-12
 ### Changed
