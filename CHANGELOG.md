@@ -5,11 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.16 - 2024-11-06
 ### Added
-- Improve error handling when request contains malformed JSON, closes #343.
+- Improve error handling when request contains malformed JSON, closes [#343].
+
 ### Changed
-- Upgrade PHP to 8.3.13, closes #341.
-- Change license from AGPL 3 to Source First License 1.1, closes #345.
+- Upgrade PHP to 8.3.13, closes [#341].
+- Change license from AGPL 3 to Source First License 1.1, closes [#345].
 
 ## 0.1.15 - 2024-10-12
 ### Changed
