@@ -17,7 +17,7 @@ class GetInstanceConfigurationController extends AbstractController
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private ParameterBagInterface $bag,
-        private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory
+        private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
     ) {
     }
 

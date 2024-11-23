@@ -36,7 +36,7 @@ class PostIndexController extends AbstractController
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private CreateElementFromRawDataService $createElementFromRawDataService
+        private CreateElementFromRawDataService $createElementFromRawDataService,
     ) {
     }
 

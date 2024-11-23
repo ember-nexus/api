@@ -30,7 +30,7 @@ class ProblemJsonException extends Exception implements ExceptionInterface
         int $status,
         string $detail,
         ?string $instance = null,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ) {
         parent::__construct('', 0, $previous);
         $this->type = $type;

@@ -21,7 +21,7 @@ class CreateElementFromRawDataService
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client400IncompleteMutualDependencyExceptionFactory $client400IncompleteMutualDependencyExceptionFactory,
         private ElementManager $elementManager,
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -33,7 +33,7 @@ class CreateElementFromRawDataService
         string $type,
         ?UuidInterface $startNodeId = null,
         ?UuidInterface $endNodeId = null,
-        array $rawData = []
+        array $rawData = [],
     ): NodeElementInterface|RelationElementInterface {
         if (null !== $startNodeId && null === $endNodeId) {
             throw $this->client400IncompleteMutualDependencyExceptionFactory->createFromTemplate(['start', 'end'], ['start'], ['end']);

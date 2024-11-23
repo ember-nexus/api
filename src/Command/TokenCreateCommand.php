@@ -33,7 +33,7 @@ class TokenCreateCommand extends Command
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private TokenGenerator $tokenGenerator,
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
     ) {
         parent::__construct();
     }

@@ -15,7 +15,7 @@ class Server500InternalServerErrorExceptionFactory
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private ParameterBagInterface $bag,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 

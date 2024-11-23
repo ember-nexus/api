@@ -18,7 +18,7 @@ class GetTokenController extends AbstractController
         private ElementResponseService $elementResponseService,
         private AuthProvider $authProvider,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 

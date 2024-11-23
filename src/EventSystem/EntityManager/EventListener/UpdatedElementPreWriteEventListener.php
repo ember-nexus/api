@@ -13,7 +13,7 @@ use Safe\DateTime;
 class UpdatedElementPreWriteEventListener
 {
     public function __construct(
-        private AppStateService $appStateService
+        private AppStateService $appStateService,
     ) {
     }
 

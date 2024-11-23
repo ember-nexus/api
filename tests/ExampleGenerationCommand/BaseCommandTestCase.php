@@ -28,7 +28,7 @@ abstract class BaseCommandTestCase extends TestCase
         string $pathToProjectRoot,
         string $pathToDocumentationFile,
         string $commandOutput,
-        array $ignoreLinesContainingString = []
+        array $ignoreLinesContainingString = [],
     ): void {
         $documentationCommandOutput = file_get_contents($pathToProjectRoot.$pathToDocumentationFile);
         $filteredDocumentationCommandOutput = [];

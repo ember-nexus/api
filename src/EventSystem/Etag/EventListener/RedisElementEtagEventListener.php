@@ -16,7 +16,7 @@ class RedisElementEtagEventListener
     public function __construct(
         private RedisClient $redisClient,
         private RedisKeyFactory $redisKeyTypeFactory,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 

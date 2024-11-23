@@ -33,7 +33,7 @@ class HealthcheckCommand extends Command
         private MongoEntityManager $mongoEntityManager,
         private ElasticEntityManager $elasticEntityManager,
         private RedisClient $redisClient,
-        private AMQPStreamConnection $AMQPStreamConnection
+        private AMQPStreamConnection $AMQPStreamConnection,
     ) {
         parent::__construct();
     }

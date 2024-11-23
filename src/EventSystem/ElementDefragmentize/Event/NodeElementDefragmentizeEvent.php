@@ -18,7 +18,7 @@ class NodeElementDefragmentizeEvent implements EventInterface
         private NodeElementInterface $nodeElement,
         private NodeInterface $cypherFragment,
         private ?DocumentInterface $documentFragment,
-        private mixed $fileFragment = null
+        private mixed $fileFragment = null,
     ) {
     }
 

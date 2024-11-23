@@ -25,7 +25,7 @@ class EmberNexusStyle extends SymfonyStyle
 
     public function __construct(
         private InputInterface $input, /** @phpstan-ignore-line */
-        private OutputInterface $output
+        private OutputInterface $output,
     ) {
         if ($output instanceof ConsoleOutput) {
             $terminal = new Terminal();

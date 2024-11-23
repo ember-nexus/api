@@ -14,7 +14,7 @@ use MongoDB\BSON\UTCDateTime;
 class UpdatedPropertyElementFragmentizeEventListener
 {
     public function __construct(
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
     ) {
     }
 

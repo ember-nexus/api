@@ -21,7 +21,7 @@ class CalculateSearchAccessEventListener
     public function __construct(
         private AccessChecker $accessChecker,
         private AppStateService $appStateService,
-        private ElasticEntityManager $elasticEntityManager
+        private ElasticEntityManager $elasticEntityManager,
     ) {
     }
 

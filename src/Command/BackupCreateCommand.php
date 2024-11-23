@@ -46,7 +46,7 @@ class BackupCreateCommand extends Command
         private CypherEntityManager $cypherEntityManager,
         private FilesystemOperator $backupStorage,
         private ElementToRawService $elementToRawService,
-        private ParameterBagInterface $bag
+        private ParameterBagInterface $bag,
     ) {
         parent::__construct();
     }

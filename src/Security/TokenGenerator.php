@@ -26,7 +26,7 @@ class TokenGenerator
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         $this->encoder = new Base58();
     }

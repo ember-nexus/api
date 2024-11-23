@@ -10,7 +10,7 @@ use App\Factory\Exception\Server500LogicExceptionFactory;
 class NodeElementFragmentizeEventListener
 {
     public function __construct(
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 

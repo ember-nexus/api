@@ -15,7 +15,7 @@ class UpdateElementFromRawDataService
 {
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -24,7 +24,7 @@ class UpdateElementFromRawDataService
      */
     public function updateElementFromRawData(
         NodeElementInterface|RelationElementInterface $element,
-        array $rawData = []
+        array $rawData = [],
     ): NodeElementInterface|RelationElementInterface {
         /**
          * @var array<string, mixed> $normalizedData

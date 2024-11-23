@@ -12,7 +12,7 @@ class Server503ServiceUnavailableExceptionFactory
 {
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
-        private ParameterBagInterface $bag
+        private ParameterBagInterface $bag,
     ) {
     }
 

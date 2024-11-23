@@ -40,7 +40,7 @@ class PostRegisterControllerTest extends TestCase
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
         ?Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory = null,
         ?Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory = null,
-        ?RequestUtilService $requestUtilService = null
+        ?RequestUtilService $requestUtilService = null,
     ): PostRegisterController {
         return new PostRegisterController(
             $elementManager ?? $this->createMock(ElementManager::class),

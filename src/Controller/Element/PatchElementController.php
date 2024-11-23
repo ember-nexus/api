@@ -27,7 +27,7 @@ class PatchElementController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
-        private UpdateElementFromRawDataService $updateElementFromRawDataService
+        private UpdateElementFromRawDataService $updateElementFromRawDataService,
     ) {
     }
 

@@ -30,7 +30,7 @@ class OwnershipChangeEventListener
     ];
 
     public function __construct(
-        private AMQPStreamConnection $AMQPStreamConnection
+        private AMQPStreamConnection $AMQPStreamConnection,
     ) {
     }
 

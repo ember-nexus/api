@@ -21,7 +21,7 @@ use Laudis\Neo4j\Types\LocalTime as LaudisLocalTime;
 class GenericPropertyElementFragmentizeEventListener
 {
     public function __construct(
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
     ) {
     }
 

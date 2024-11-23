@@ -11,7 +11,7 @@ use Ramsey\Uuid\Rfc4122\UuidV4;
 class RelationElementDefragmentizeEventListener
 {
     public function __construct(
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 

@@ -14,7 +14,7 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 class AccessChecker
 {
     public function __construct(
-        private CypherEntityManager $cypherEntityManager
+        private CypherEntityManager $cypherEntityManager,
     ) {
     }
 

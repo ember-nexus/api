@@ -22,7 +22,7 @@ class TestCommand extends Command
     private OutputStyle $io;
 
     public function __construct(
-        private CypherEntityManager $cypherEntityManager
+        private CypherEntityManager $cypherEntityManager,
     ) {
         parent::__construct();
     }

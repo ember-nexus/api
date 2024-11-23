@@ -14,7 +14,7 @@ class Server500LogicErrorException extends ProblemJsonException
         int $status = 500,
         string $detail = '',
         ?string $instance = null,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

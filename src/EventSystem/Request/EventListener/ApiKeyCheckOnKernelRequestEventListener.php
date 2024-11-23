@@ -28,7 +28,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         private CypherEntityManager $cypherEntityManager,
         private RedisClient $redisClient,
         private AuthProvider $authProvider,
-        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
     ) {
     }
 

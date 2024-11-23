@@ -13,12 +13,12 @@ class ElementResponseService
     public function __construct(
         private ElementManager $elementManager,
         private ElementToRawService $elementToRawService,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
     public function buildElementResponseFromId(
-        UuidInterface $id
+        UuidInterface $id,
     ): ElementResponse {
         $element = $this->elementManager->getElement($id);
         if (null === $element) {

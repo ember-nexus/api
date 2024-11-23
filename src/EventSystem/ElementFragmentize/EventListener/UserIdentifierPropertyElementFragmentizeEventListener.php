@@ -10,7 +10,7 @@ use EmberNexusBundle\Service\EmberNexusConfiguration;
 class UserIdentifierPropertyElementFragmentizeEventListener
 {
     public function __construct(
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
     ) {
     }
 

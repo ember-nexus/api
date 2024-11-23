@@ -14,7 +14,7 @@ class Server501NotImplementedException extends ProblemJsonException
         int $status = 501,
         string $detail = 'Endpoint is currently not implemented.',
         ?string $instance = null,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

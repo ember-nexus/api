@@ -23,7 +23,7 @@ class PostTokenController extends AbstractController
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private RequestUtilService $requestUtilService,
-        private SecurityUtilService $securityUtilService
+        private SecurityUtilService $securityUtilService,
     ) {
     }
 

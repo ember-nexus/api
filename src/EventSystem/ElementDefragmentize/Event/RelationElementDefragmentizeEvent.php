@@ -18,7 +18,7 @@ class RelationElementDefragmentizeEvent implements EventInterface
         private RelationElementInterface $relationElement,
         private RelationInterface $cypherFragment,
         private ?DocumentInterface $documentFragment,
-        private mixed $fileFragment = null
+        private mixed $fileFragment = null,
     ) {
     }
 

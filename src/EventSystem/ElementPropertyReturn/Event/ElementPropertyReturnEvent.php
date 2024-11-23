@@ -18,7 +18,7 @@ class ElementPropertyReturnEvent implements EventInterface
     private array $blockedProperties = [];
 
     public function __construct(
-        private ElementInterface $element
+        private ElementInterface $element,
     ) {
     }
 

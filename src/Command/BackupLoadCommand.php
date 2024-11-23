@@ -48,7 +48,7 @@ class BackupLoadCommand extends Command
         private RawToElementService $rawToElementService,
         private EventDispatcherInterface $eventDispatcher,
         private AppStateService $appStateService,
-        private ElasticEntityManager $elasticEntityManager
+        private ElasticEntityManager $elasticEntityManager,
     ) {
         parent::__construct();
     }

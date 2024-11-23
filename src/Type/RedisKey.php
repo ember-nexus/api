@@ -12,7 +12,7 @@ class RedisKey implements Stringable
 
     public function __construct(
         RedisPrefixType $prefix,
-        string $value
+        string $value,
     ) {
         $this->redisKey = sprintf('%s%s', $prefix->value, $value);
     }

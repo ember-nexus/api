@@ -33,7 +33,7 @@ class DatabaseDropCommand extends Command
         private MongoEntityManager $mongoEntityManager,
         private ElasticEntityManager $elasticEntityManager,
         private Client $redisClient,
-        private AMQPStreamConnection $AMQPStreamConnection
+        private AMQPStreamConnection $AMQPStreamConnection,
     ) {
         parent::__construct();
     }

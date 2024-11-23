@@ -27,7 +27,7 @@ class PostChangePasswordControllerTest extends TestCase
 
     private function getPostChangePasswordController(
         ?RequestUtilService $requestUtilService = null,
-        ?SecurityUtilService $securityUtilService = null
+        ?SecurityUtilService $securityUtilService = null,
     ): PostChangePasswordController {
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');

@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class EmberNexusOutputWrapper implements OutputInterface
 {
     public function __construct(
-        private OutputInterface $output
+        private OutputInterface $output,
     ) {
     }
 

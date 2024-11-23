@@ -19,7 +19,7 @@ class DeactivatableTraceableEventDispatcher extends TraceableEventDispatcher
         EventDispatcherInterface $dispatcher,
         Stopwatch $stopwatch,
         ?LoggerInterface $logger = null,
-        ?RequestStack $requestStack = null
+        ?RequestStack $requestStack = null,
     ) {
         $this->eventDispatcher = $dispatcher;
         parent::__construct($dispatcher, $stopwatch, $logger, $requestStack);

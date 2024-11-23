@@ -34,7 +34,7 @@ class BackupFetchCommand extends Command
     private EmberNexusStyle $io;
 
     public function __construct(
-        private FilesystemOperator $backupStorage
+        private FilesystemOperator $backupStorage,
     ) {
         parent::__construct();
     }

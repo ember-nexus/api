@@ -15,7 +15,7 @@ class FragmentGroup
         private NodeInterface|RelationInterface $cypherFragment,
         private MongoDocumentInterface $mongoFragment,
         private ElasticDocumentInterface $elasticFragment,
-        private mixed $fileFragment
+        private mixed $fileFragment,
     ) {
     }
 

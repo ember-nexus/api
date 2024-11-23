@@ -20,7 +20,7 @@ class ExpireEtagOnChangeEventListener
     public function __construct(
         private Client $redisClient,
         private CypherEntityManager $cypherEntityManager,
-        private RedisKeyFactory $redisKeyTypeFactory
+        private RedisKeyFactory $redisKeyTypeFactory,
     ) {
     }
 

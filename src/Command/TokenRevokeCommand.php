@@ -69,7 +69,7 @@ class TokenRevokeCommand extends Command
         private RedisClient $redisClient,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private AuthProvider $authProvider,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
         parent::__construct();
     }

@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class PutElementFileController extends AbstractController
 {
     public function __construct(
-        private Server501NotImplementedExceptionFactory $server501NotImplementedExceptionFactory
+        private Server501NotImplementedExceptionFactory $server501NotImplementedExceptionFactory,
     ) {
     }
 

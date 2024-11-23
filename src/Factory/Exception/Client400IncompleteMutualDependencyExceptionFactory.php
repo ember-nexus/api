@@ -11,7 +11,7 @@ class Client400IncompleteMutualDependencyExceptionFactory
 {
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 

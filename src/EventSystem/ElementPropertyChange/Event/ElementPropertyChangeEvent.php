@@ -18,7 +18,7 @@ class ElementPropertyChangeEvent implements EventInterface
     public function __construct(
         private string $labelOrType,
         private ?ElementInterface $element,
-        private array $changedProperties
+        private array $changedProperties,
     ) {
     }
 

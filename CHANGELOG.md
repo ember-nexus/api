@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Upgrade PHP to 8.4.1, closes #348.
+- Update dependencies, related to #348.
+- Update code style, related to #348.
+- Disable psalm for the time being, as it does not support PHP 8.4 yet. Activation is being tracked in ticket #349.
 
 ## 0.1.16 - 2024-11-06
 ### Added

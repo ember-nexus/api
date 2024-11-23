@@ -15,7 +15,7 @@ class IfNoneMatchControllerEventListener
 {
     public function __construct(
         private EtagService $etagService,
-        private Client412PreconditionFailedExceptionFactory $client412PreconditionFailedExceptionFactory
+        private Client412PreconditionFailedExceptionFactory $client412PreconditionFailedExceptionFactory,
     ) {
     }
 

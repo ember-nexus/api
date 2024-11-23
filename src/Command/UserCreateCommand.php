@@ -31,7 +31,7 @@ class UserCreateCommand extends Command
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private UserPasswordHasher $userPasswordHasher,
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
     ) {
         parent::__construct();
     }

@@ -14,12 +14,12 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 class Neo4jClientHelper
 {
     public function __construct(
-        private CypherEntityManager $cypherEntityManager
+        private CypherEntityManager $cypherEntityManager,
     ) {
     }
 
     public function getNodeFromLaudisNode(
-        LaudisNode $node
+        LaudisNode $node,
     ): Node {
         $newNode = (new Node())
             ->addLabels($node->getLabels())
@@ -34,7 +34,7 @@ class Neo4jClientHelper
     public function getRelationFromLaudisRelation(
         LaudisRelationship $relation,
         ?LaudisNode $startNode = null,
-        ?LaudisNode $endNode = null
+        ?LaudisNode $endNode = null,
     ): Relation {
         $newRelation = (new Relation())
             ->setType($relation->getType())

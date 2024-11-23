@@ -15,7 +15,7 @@ readonly class TokenRevokeEntry
         private ?DateTimeInterface $tokenExpirationDate,
         private UuidInterface $userId,
         private string $userUniqueIdentifier,
-        private string $tokenHash
+        private string $tokenHash,
     ) {
     }
 

@@ -20,7 +20,7 @@ class AuthProvider
     public function __construct(
         private ParameterBagInterface $bag,
         private TokenGenerator $tokenGenerator,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         $anonymousUserId = $this->bag->get('anonymousUserUUID');
         if (!is_string($anonymousUserId)) {
@@ -48,7 +48,7 @@ class AuthProvider
         UuidInterface $userId,
         ?UuidInterface $tokenId = null,
         ?string $hashedToken = null,
-        bool $isAnonymous = false
+        bool $isAnonymous = false,
     ): self {
         $this->userId = $userId;
         $this->tokenId = $tokenId;

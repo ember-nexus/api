@@ -81,7 +81,7 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         string $pathToDocumentationFile,
         ResponseInterface $response,
         bool $isJson = true,
-        array $ignoreLinesContainingString = []
+        array $ignoreLinesContainingString = [],
     ): void {
         $body = (string) $response->getBody();
         if ($isJson) {
