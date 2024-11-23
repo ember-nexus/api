@@ -13,8 +13,8 @@ use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 class CollectionService
 {
@@ -24,7 +24,7 @@ class CollectionService
         private ElementToRawService $elementToRawService,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -139,7 +139,7 @@ class CollectionService
     public function buildCollectionFromIds(
         array $nodeIds = [],
         array $relationIds = [],
-        int $totalNodes = 0
+        int $totalNodes = 0,
     ): CollectionResponse {
         $nodeData = [];
         $relationData = [];
@@ -194,7 +194,7 @@ class CollectionService
      */
     public function buildElementCollectionFromIds(
         array $elementIds = [],
-        int $totalElements = 0
+        int $totalElements = 0,
     ): CollectionResponse {
         $elementData = [];
 

@@ -11,7 +11,7 @@ use Throwable;
 class Client404NotFoundExceptionFactory
 {
     public function __construct(
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 

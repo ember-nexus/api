@@ -19,7 +19,7 @@ class ElementPropertyResetEvent implements EventInterface
     private array $propertyNamesWhichAreKept = [];
 
     public function __construct(
-        private NodeElementInterface|RelationElementInterface $element
+        private NodeElementInterface|RelationElementInterface $element,
     ) {
     }
 

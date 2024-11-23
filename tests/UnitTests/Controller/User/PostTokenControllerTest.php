@@ -29,7 +29,7 @@ class PostTokenControllerTest extends TestCase
     private function getPostTokenController(
         ?TokenGenerator $tokenGenerator = null,
         ?RequestUtilService $requestUtilService = null,
-        ?SecurityUtilService $securityUtilService = null
+        ?SecurityUtilService $securityUtilService = null,
     ): PostTokenController {
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');

@@ -17,41 +17,40 @@
     "php-amqplib/php-amqplib": "^3.6",
     "predis/predis": "^2.2",
     "ramsey/uuid": "^4.7",
-    "symfony/asset": "7.1.*",
-    "symfony/console": "7.1.*",
-    "symfony/dotenv": "7.1.*",
-    "symfony/event-dispatcher": "7.1.*",
-    "symfony/filesystem": "7.1.*",
+    "symfony/asset": "7.2.*",
+    "symfony/console": "7.2.*",
+    "symfony/dotenv": "7.2.*",
+    "symfony/event-dispatcher": "7.2.*",
+    "symfony/filesystem": "7.2.*",
     "symfony/flex": "^2.4",
-    "symfony/framework-bundle": "7.1.*",
+    "symfony/framework-bundle": "7.2.*",
     "symfony/monolog-bundle": "^3.10",
-    "symfony/runtime": "7.1.*",
-    "symfony/string": "7.1.*",
-    "symfony/yaml": "7.1.*",
-    "syndesi/cypher-entity-manager": "^0.1.0",
-    "syndesi/elastic-entity-manager": "^0.0.3",
-    "syndesi/mongo-entity-manager": "^0.0.6",
-    "thecodingmachine/safe": "^2.5",
+    "symfony/runtime": "7.2.*",
+    "symfony/string": "7.2.*",
+    "symfony/yaml": "7.2.*",
+    "syndesi/cypher-entity-manager": "^0.2.0",
+    "syndesi/elastic-entity-manager": "^0.1.0",
+    "syndesi/mongo-entity-manager": "^0.1.0",
+    "thecodingmachine/safe": "v3.0.0 as v2.6",
     "tuupola/base58": "^2.1"
   },
   "require-dev": {
     "beste/psr-testlogger": "^1.0",
-    "boesing/psalm-plugin-stringf": "^1.4",
     "brianium/paratest": "^7.4",
     "friendsofphp/php-cs-fixer": "^3.48",
-    "infection/infection": "^0.27",
+    "infection/infection": "^0.29.8",
     "phpbench/phpbench": "^1.2",
     "phpmd/phpmd": "^2.15",
     "phpspec/prophecy-phpunit": "^2.1",
-    "phpstan/phpstan": "^1.10",
-    "phpunit/php-code-coverage": "^10",
-    "phpunit/phpunit": "^10",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/php-code-coverage": "^11",
+    "phpunit/phpunit": "^11",
     "symfony/maker-bundle": "^1.53",
-    "symfony/phpunit-bridge": "^7.1",
-    "symfony/stopwatch": "7.1.*",
-    "symfony/web-profiler-bundle": "7.1.*",
-    "thecodingmachine/phpstan-safe-rule": "^1.2",
-    "vimeo/psalm": "^5.21"
+    "symfony/phpunit-bridge": "^7.2",
+    "symfony/stopwatch": "7.2.*",
+    "symfony/web-profiler-bundle": "7.2.*",
+    "thecodingmachine/phpstan-safe-rule": "^1.4",
+    "vimeo/psalm": "^6.2"
   },
   "config": {
     "allow-plugins": {
@@ -95,7 +94,7 @@
       "@auto-scripts"
     ],
     "test:unit": "php vendor/bin/paratest -p 6 --configuration tests/phpunit.xml.dist",
-    "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/bin/paratest -p 6 --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude-group command,deprecated && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group command",
+    "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/bin/paratest -p 6 --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude-group command --exclude-group deprecated && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group command",
     "test:feature:deprecated": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group deprecated",
     "test:feature:test": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group test",
     "test:example-generation-controller": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationController --exclude-group deprecated && php bin/console cache:clear",
@@ -122,7 +121,7 @@
   "extra": {
     "symfony": {
       "allow-contrib": false,
-      "require": "7.1.*"
+      "require": "7.2.*"
     }
   }
 }

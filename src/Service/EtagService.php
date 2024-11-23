@@ -23,7 +23,7 @@ class EtagService
 
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
-        private AuthProvider $authProvider
+        private AuthProvider $authProvider,
     ) {
     }
 

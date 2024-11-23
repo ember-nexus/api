@@ -18,14 +18,14 @@ use Syndesi\MongoDataStructures\Contract\DocumentInterface;
 class ElementDefragmentizeService
 {
     public function __construct(
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
     public function defragmentize(
         NodeInterface|RelationInterface $cypherFragment,
         ?DocumentInterface $documentFragment,
-        mixed $fileFragment
+        mixed $fileFragment,
     ): NodeElementInterface|RelationElementInterface {
         if ($cypherFragment instanceof NodeInterface) {
             $event = new NodeElementDefragmentizeEvent(

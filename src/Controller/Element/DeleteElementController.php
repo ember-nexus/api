@@ -24,7 +24,7 @@ class DeleteElementController extends AbstractController
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 

@@ -22,7 +22,7 @@ class CacheClearEtagCommand extends Command
     private OutputStyle $io;
 
     public function __construct(
-        private RedisClient $redisClient
+        private RedisClient $redisClient,
     ) {
         parent::__construct();
     }

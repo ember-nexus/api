@@ -20,7 +20,7 @@ class DeleteTokenController extends AbstractController
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 

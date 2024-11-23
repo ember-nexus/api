@@ -15,7 +15,7 @@ class GetWellKnownSecurityTxtController extends AbstractController
     public const string PATH_TO_WELL_KNOWN_SECURITY_TXT = '/well-known-security.txt';
 
     public function __construct(
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 

@@ -16,7 +16,7 @@ class ElementEtagEvent implements EventInterface
     private ?Etag $etag = null;
 
     public function __construct(
-        private UuidInterface $elementId
+        private UuidInterface $elementId,
     ) {
     }
 

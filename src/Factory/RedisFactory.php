@@ -9,7 +9,7 @@ use Predis\Client;
 class RedisFactory
 {
     public function __construct(
-        private string $redisAuth
+        private string $redisAuth,
     ) {
     }
 

@@ -3,9 +3,9 @@
 
 
 FROM alpine:3.21 AS php_embed
-LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.21/cli" \
-    org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.21" \
-    org.opencontainers.image.description="Based on php:8.3-cli-alpine3.21, without sql, with embed."
+LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.4/alpine3.21/cli" \
+    org.opencontainers.image.title="Adapted php:8.4-cli-alpine3.21" \
+    org.opencontainers.image.description="Based on php:8.4-cli-alpine3.21, without sql, with embed."
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -33,11 +33,11 @@ ENV PHPIZE_DEPS="\
     PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64" \
     PHP_CPPFLAGS="$PHP_CFLAGS" \
     PHP_LDFLAGS="-Wl,-O1 -pie" \
-    GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA" \
-    PHP_VERSION="8.3.13" \
-    PHP_URL="https://www.php.net/distributions/php-8.3.13.tar.xz" \
-    PHP_ASC_URL="https://www.php.net/distributions/php-8.3.13.tar.xz.asc" \
-    PHP_SHA256="89adb978cca209124fe53fd6327bc4966ca21213a7fa2e9504f854e340873018"
+    GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD" \
+    PHP_VERSION="8.4.4" \
+    PHP_URL="https://www.php.net/distributions/php-8.4.4.tar.xz" \
+    PHP_ASC_URL="https://www.php.net/distributions/php-8.4.4.tar.xz.asc" \
+    PHP_SHA256="05a6c9a2cc894dd8be719ecab221b311886d5e0c02cb6fac648dd9b3459681ac"
 
 # persistent / runtime deps
 RUN apk add --no-cache \
@@ -63,7 +63,7 @@ RUN set -eux; \
 
 RUN set -eux; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
-# allow running AS an arbitrary user (https://github.com/docker-library/php/issues/743)
+# allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
 	[ ! -d /var/www/html ]; \
 	mkdir -p /var/www/html; \
 	chown www-data:www-data /var/www/html; \
@@ -148,13 +148,6 @@ RUN set -eux; \
         --disable-pdo \
         --without-sqlite3 \
         --without-pdo-sqlite \
-        --without-pdo-mysql \
-        --without-mysqli \
-        --without-pdo-pgsql \
-        --without-pdo-sqlite \
-        --without-pdo-oci \
-        --without-pdo-dblib \
-        --without-pdo-odbc \
 		\
 		--with-curl \
 		--with-iconv=/usr \
@@ -215,7 +208,7 @@ RUN set -eux; \
 COPY ./docker/php-embed/docker-php-ext-* /usr/local/bin/
 COPY ./docker/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 
-# sodium was built AS a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
+# sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -231,7 +224,7 @@ RUN set -eux \
     && apk add git gcc g++ make pcre-dev openssl-dev \
     && mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules /usr/src/unit \
     && cd /usr/src/unit \
-    && git clone --depth 1 -b 1.33.0-1 https://github.com/nginx/unit
+    && git clone --depth 1 -b 1.34.0-1 https://github.com/nginx/unit
 RUN set -eux \
     && cd /usr/src/unit/unit \
     && NCPU="$(getconf _NPROCESSORS_ONLN)" \
@@ -370,7 +363,7 @@ FROM php AS development
 COPY ./docker/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers \
-    && pecl install xdebug-3.3.2 memprof-3.0.2 \
+    && pecl install xdebug-3.4.1 memprof-3.0.2 \
     && docker-php-ext-enable xdebug memprof \
     && apk del --no-network .build-deps \
     && apk add --no-cache judy aha git openssh

@@ -96,7 +96,7 @@ class RequestUtilService
      * @param array<string, mixed> $body
      * @param array<string, mixed> $data
      *
-     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     * @SuppressWarnings("PHPMD.EmptyCatchBlock")
      *
      * @throws Client400BadContentException
      * @throws Client400MissingPropertyException

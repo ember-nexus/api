@@ -45,13 +45,14 @@ body         {color: white; background-color: black;}
   backup:create [options] [--] [&lt;name&gt;]
 
 <span class="yellow ">Arguments:</span>
-  <span class="green ">name</span>                      Name of the backup, defaults to the current timestamp.<span class="yellow "> [default: &quot;20240421221141&quot;]</span>
+  <span class="green ">name</span>                      Name of the backup, defaults to the current timestamp.<span class="yellow "> [default: &quot;20250216230746&quot;]</span>
 
 <span class="yellow ">Options:</span>
   <span class="green ">-p, --pretty|--no-pretty</span>  Activates pretty print of JSON.
   <span class="green ">    --ndjson|--no-ndjson</span>  Saves multiple JSON documents in a few .ndjson files.
   <span class="green ">-h, --help</span>                Display help for the given command. When no command is given display help for the <span class="green ">list</span> command
-  <span class="green ">-q, --quiet</span>               Do not output any message
+  <span class="green ">    --silent</span>              Do not output any message
+  <span class="green ">-q, --quiet</span>               Only errors are displayed. All other output is suppressed
   <span class="green ">-V, --version</span>             Display this application version
   <span class="green ">    --ansi|--no-ansi</span>      Force (or disable --no-ansi) ANSI output
   <span class="green ">-n, --no-interaction</span>      Do not ask any interactive question

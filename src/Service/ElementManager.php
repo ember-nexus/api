@@ -45,7 +45,7 @@ class ElementManager
         private ElementDefragmentizeService $elementDefragmentizeService,
         private Neo4jClientHelper $neo4jClientHelper,
         private EventDispatcherInterface $eventDispatcher,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 

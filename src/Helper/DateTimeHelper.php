@@ -14,7 +14,7 @@ use Laudis\Neo4j\Types\LocalDateTime;
 class DateTimeHelper
 {
     public static function getDateTimeFromLaudisObject(
-        mixed $laudisObject
+        mixed $laudisObject,
     ): DateTimeInterface {
         if ($laudisObject instanceof Date) {
             return $laudisObject->toDateTime();

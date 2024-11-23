@@ -11,7 +11,7 @@ use Syndesi\CypherDataStructures\Type\Node;
 class RelationElementFragmentizeEventListener
 {
     public function __construct(
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 

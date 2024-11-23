@@ -9,7 +9,7 @@ use Stringable;
 readonly class Etag implements Stringable
 {
     public function __construct(
-        private string $etag
+        private string $etag,
     ) {
     }
 

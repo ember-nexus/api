@@ -15,7 +15,7 @@ class ExpireTokenOnTokenDeleteEventListener
     public function __construct(
         private AuthProvider $authProvider,
         private Client $redisClient,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 

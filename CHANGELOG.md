@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Upgrade PHP to 8.4.4, closes #348.
+- Update dependencies, related to #348.
+- Update code style, related to #348.
+- Remove dev dependencies `roave/no-leaks` and `boesing/psalm-plugin-stringf` due to conflict with newer PHP versions,
+  related to #348.
 
 ## 0.1.17 - 2024-12-10
 ### Changed

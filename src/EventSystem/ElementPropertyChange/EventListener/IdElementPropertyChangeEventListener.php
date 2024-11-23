@@ -10,7 +10,7 @@ use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 class IdElementPropertyChangeEventListener
 {
     public function __construct(
-        private Client400ForbiddenPropertyExceptionFactory $client400ForbiddenPropertyExceptionFactory
+        private Client400ForbiddenPropertyExceptionFactory $client400ForbiddenPropertyExceptionFactory,
     ) {
     }
 

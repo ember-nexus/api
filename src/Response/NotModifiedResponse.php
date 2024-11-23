@@ -15,7 +15,7 @@ class NotModifiedResponse extends Response
     public function __construct(
         ?string $content = '',
         int $status = self::HTTP_NOT_MODIFIED,
-        array $headers = []
+        array $headers = [],
     ) {
         $this->charset = 'UTF-8';
         parent::__construct($content, $status, $headers);

@@ -14,7 +14,7 @@ class MongoEntityManagerFactory
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
         private LoggerInterface $logger,
-        private string $mongoAuth
+        private string $mongoAuth,
     ) {
     }
 

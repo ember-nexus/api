@@ -30,8 +30,8 @@ class GenericPropertyElementDefragmentizeEventListener
     }
 
     /**
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     private function handleEvent(NodeElementDefragmentizeEvent|RelationElementDefragmentizeEvent $event): void
     {

@@ -14,7 +14,7 @@ class ElementPreDeleteEvent implements EventInterface
     use StoppableEventTrait;
 
     public function __construct(
-        private NodeElementInterface|RelationElementInterface $element
+        private NodeElementInterface|RelationElementInterface $element,
     ) {
     }
 

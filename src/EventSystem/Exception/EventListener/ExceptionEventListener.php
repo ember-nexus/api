@@ -19,14 +19,14 @@ class ExceptionEventListener
         private UrlGeneratorInterface $urlGenerator,
         private KernelInterface $kernel,
         private LoggerInterface $logger,
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
     ) {
     }
 
     /**
      * @psalm-suppress UndefinedInterfaceMethod
      *
-     * @SuppressWarnings(PHPMD.EmptyCatchBlock)
+     * @SuppressWarnings("PHPMD.EmptyCatchBlock")
      */
     public function onKernelException(ExceptionEvent $event): void
     {

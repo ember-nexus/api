@@ -16,7 +16,7 @@ class RelatedCollectionEtagEvent implements EventInterface
     private ?Etag $etag = null;
 
     public function __construct(
-        private UuidInterface $centerId
+        private UuidInterface $centerId,
     ) {
     }
 

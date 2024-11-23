@@ -19,8 +19,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
 /**
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 class PostSearchController extends AbstractController
 {
@@ -31,7 +31,7 @@ class PostSearchController extends AbstractController
         private CollectionService $collectionService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
     ) {
     }
 

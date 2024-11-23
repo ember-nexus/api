@@ -34,7 +34,7 @@ class BackupFetchCommand extends Command
     private EmberNexusStyle $io;
 
     public function __construct(
-        private FilesystemOperator $backupStorage
+        private FilesystemOperator $backupStorage,
     ) {
         parent::__construct();
     }
@@ -220,7 +220,7 @@ class BackupFetchCommand extends Command
     }
 
     /**
-     * @SuppressWarnings(PHPMD.CountInLoopExpression)
+     * @SuppressWarnings("PHPMD.CountInLoopExpression")
      */
     private function findBackupRootFolder(Filesystem $filesystem): ?string
     {

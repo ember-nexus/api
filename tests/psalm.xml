@@ -20,5 +20,9 @@
                 <referencedProperty name="Symfony\Bundle\FrameworkBundle\Controller\AbstractController::$container"/>
             </errorLevel>
         </PropertyNotSetInConstructor>
+        <ClassMustBeFinal errorLevel="suppress" />
+        <UnusedClass errorLevel="suppress" />
+        <PossiblyUnusedMethod errorLevel="suppress" />
+        <PossiblyUnusedReturnValue errorLevel="suppress" />
     </issueHandlers>
-<plugins><pluginClass class="Boesing\PsalmPluginStringf\Plugin"/></plugins></psalm>
+</psalm>

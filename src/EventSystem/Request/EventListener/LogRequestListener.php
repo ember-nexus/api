@@ -22,7 +22,7 @@ class LogRequestListener
     public function __construct(
         private UrlMatcherInterface|RequestMatcherInterface $matcher,
         private AuthProvider $authProvider,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 

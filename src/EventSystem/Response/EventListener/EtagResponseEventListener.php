@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 class EtagResponseEventListener
 {
     public function __construct(
-        private EtagService $etagService
+        private EtagService $etagService,
     ) {
     }
 
