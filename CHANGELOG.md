@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Upgrade to Alpine 3.21, closes #350.
+- Change GitHub action runner version from `latest` to `2404`, closes #353.
 
 ## 0.1.16 - 2024-11-06
 ### Added

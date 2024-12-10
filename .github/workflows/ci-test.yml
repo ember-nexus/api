@@ -6,7 +6,7 @@ on:
 jobs:
 
   yml-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'YML lint'
     timeout-minutes: 3
     steps:
@@ -15,7 +15,7 @@ jobs:
       - run: docker run --rm -t -v $(pwd):/data cytopia/yamllint --config-file=tests/.yamllint .
 
   markdown-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'Markdown lint'
     timeout-minutes: 3
     steps:
@@ -24,7 +24,7 @@ jobs:
       - run: docker run --rm -v $(pwd):/work tmknom/markdownlint '**/*.md' --config tests/.markdownlintrc --ignore vendor --ignore CHANGELOG.md --ignore var --ignore tmp
 
   build-docker-image:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: buildjet-4vcpu-ubuntu-2404
     name: 'Build Docker Image'
     timeout-minutes: 20
     needs:
@@ -67,7 +67,7 @@ jobs:
           retention-days: 7
 
   cs-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'CS Lint'
     timeout-minutes: 5
     needs:
@@ -85,7 +85,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && PHP_CS_FIXER_IGNORE_ENV=1 composer cs:list"
 
   psalm:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'Psalm'
     timeout-minutes: 5
     needs:
@@ -103,7 +103,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer psalm"
 
   phpstan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'Phpstan'
     timeout-minutes: 5
     needs:
@@ -121,7 +121,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer phpstan"
 
   test-unit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'Unit Test'
     timeout-minutes: 5
     needs:
@@ -139,7 +139,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
   test-mutant:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'Mutant Test'
     timeout-minutes: 5
     needs:
@@ -158,7 +158,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:mutant"
 
   test-mess-detector:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 'Mess Detector'
     timeout-minutes: 5
     needs:
@@ -177,7 +177,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
   test-feature:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: buildjet-4vcpu-ubuntu-2404
     name: 'Feature Test'
     timeout-minutes: 15
     needs:
@@ -221,7 +221,7 @@ jobs:
           docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api-prod\" && echo \$API_DOMAIN && composer install --ignore-platform-req=php --quiet && composer test:feature && composer test:feature:deprecated"
 
   test-example-generation-controller:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: buildjet-2vcpu-ubuntu-2404
     name: 'Controller Example Generation Test'
     timeout-minutes: 15
     needs:
@@ -260,7 +260,7 @@ jobs:
 
 
   test-example-generation-command:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: buildjet-2vcpu-ubuntu-2404
     name: 'Command Example Generation Test'
     timeout-minutes: 15
     needs:
