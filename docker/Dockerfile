@@ -1,11 +1,11 @@
-# this file is based upon https://github.com/docker-library/php/blob/master/8.3/alpine3.20/cli/Dockerfile , licensed MIT
+# this file is based upon https://github.com/docker-library/php/blob/master/8.3/alpine3.21/cli/Dockerfile , licensed MIT
 # and https://github.com/nginx/unit/blob/master/pkg/docker/Dockerfile.php8.3 , licensed Apache 2.0
 
 
-FROM alpine:3.20 AS php_embed
-LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.20/cli" \
-    org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.20" \
-    org.opencontainers.image.description="Based on php:8.3-cli-alpine3.20, without sql, with embed."
+FROM alpine:3.21 AS php_embed
+LABEL org.opencontainers.image.source="https://github.com/docker-library/php/tree/master/8.3/alpine3.21/cli" \
+    org.opencontainers.image.title="Adapted php:8.3-cli-alpine3.21" \
+    org.opencontainers.image.description="Based on php:8.3-cli-alpine3.21, without sql, with embed."
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
