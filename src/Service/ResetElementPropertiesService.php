@@ -12,12 +12,12 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 class ResetElementPropertiesService
 {
     public function __construct(
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
     public function resetElementProperties(
-        NodeElementInterface|RelationElementInterface $element
+        NodeElementInterface|RelationElementInterface $element,
     ): NodeElementInterface|RelationElementInterface {
         $elementPropertyResetEvent = new ElementPropertyResetEvent($element);
         $this->eventDispatcher->dispatch($elementPropertyResetEvent);

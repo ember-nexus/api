@@ -20,7 +20,7 @@ class RelationElementFragmentizeEvent implements EventInterface
         private RelationInterface $cypherFragment,
         private MongoDocumentInterface $mongoFragment,
         private ElasticDocumentInterface $elasticFragment,
-        private mixed $fileFragment
+        private mixed $fileFragment,
     ) {
     }
 

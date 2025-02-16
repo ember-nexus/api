@@ -23,7 +23,7 @@ class EtagCalculator
 
     public function __construct(
         string $seed,
-        string $algorithm = self::HASH_ALGORITHM
+        string $algorithm = self::HASH_ALGORITHM,
     ) {
         $this->hashContext = hash_init($algorithm);
         hash_update($this->hashContext, $seed);

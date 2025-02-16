@@ -33,7 +33,7 @@ class HealthcheckCommand extends Command
         private MongoEntityManager $mongoEntityManager,
         private ElasticEntityManager $elasticEntityManager,
         private RedisClient $redisClient,
-        private AMQPStreamConnection $AMQPStreamConnection
+        private AMQPStreamConnection $AMQPStreamConnection,
     ) {
         parent::__construct();
     }
@@ -110,7 +110,7 @@ class HealthcheckCommand extends Command
 
         $this->io->startSection('Check internal services');
 
-        $alpineVersion = \Safe\shell_exec('cat /etc/os-release | grep -i version');
+        $alpineVersion = \Safe\shell_exec('cat /etc/os-release | grep -i version') ?? '=unknown';
         $alpineVersion = trim(explode('=', $alpineVersion, 2)[1]);
 
         $this->io->writeln(sprintf(
@@ -118,7 +118,7 @@ class HealthcheckCommand extends Command
             $alpineVersion
         ));
 
-        $nginxUnitVersion = \Safe\shell_exec('unitd --version 2>&1');
+        $nginxUnitVersion = \Safe\shell_exec('unitd --version 2>&1') ?? "\n: unknown";
         $nginxUnitVersion = explode("\n", $nginxUnitVersion, 2)[0];
         $nginxUnitVersion = explode(': ', $nginxUnitVersion, 2)[1];
 
@@ -127,6 +127,9 @@ class HealthcheckCommand extends Command
             $nginxUnitVersion
         ));
 
+        /**
+         * @psalm-suppress PossiblyFalseArgument
+         */
         $this->io->writeln(sprintf(
             'PHP version:           %s',
             phpversion()

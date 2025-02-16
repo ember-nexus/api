@@ -14,7 +14,7 @@ class Client400ReservedIdentifierException extends ProblemJsonException
         int $status = 400,
         string $detail = '',
         ?string $instance = null,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

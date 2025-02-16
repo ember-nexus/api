@@ -13,7 +13,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 class ElementToRawService
 {
     public function __construct(
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 

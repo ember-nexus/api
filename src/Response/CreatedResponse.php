@@ -14,7 +14,7 @@ class CreatedResponse extends Response
     public function __construct(
         ?string $location = '',
         int $status = self::HTTP_CREATED,
-        array $headers = []
+        array $headers = [],
     ) {
         $this->charset = 'UTF-8';
         $headers['Location'] = $location;

@@ -14,7 +14,7 @@ class Client429TooManyRequestsException extends ProblemJsonException
         int $status = 429,
         string $detail = 'You have sent too many requests, please slow down.',
         ?string $instance = null,
-        ?Throwable $previous = null
+        ?Throwable $previous = null,
     ) {
         parent::__construct($type, $title, $status, $detail, $instance, $previous);
     }

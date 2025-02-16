@@ -20,7 +20,7 @@ class ExpireEtagOnChangeEventListener
     public function __construct(
         private Client $redisClient,
         private CypherEntityManager $cypherEntityManager,
-        private RedisKeyFactory $redisKeyTypeFactory
+        private RedisKeyFactory $redisKeyTypeFactory,
     ) {
     }
 
@@ -40,8 +40,8 @@ class ExpireEtagOnChangeEventListener
     }
 
     /**
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     private function handleEvent(ElementPostCreateEvent|ElementPostMergeEvent|ElementPreDeleteEvent $event): void
     {

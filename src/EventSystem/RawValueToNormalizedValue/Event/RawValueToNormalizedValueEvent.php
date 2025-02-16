@@ -14,7 +14,7 @@ class RawValueToNormalizedValueEvent implements EventInterface
     private mixed $normalizedValue;
 
     public function __construct(
-        private readonly mixed $rawValue
+        private readonly mixed $rawValue,
     ) {
     }
 

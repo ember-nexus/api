@@ -33,7 +33,7 @@ class DatabaseDropCommand extends Command
         private MongoEntityManager $mongoEntityManager,
         private ElasticEntityManager $elasticEntityManager,
         private Client $redisClient,
-        private AMQPStreamConnection $AMQPStreamConnection
+        private AMQPStreamConnection $AMQPStreamConnection,
     ) {
         parent::__construct();
     }
@@ -119,10 +119,10 @@ class DatabaseDropCommand extends Command
         $this->io->startSection('Task 4 of 6: Elastic Search');
         $this->io->writeln('Deleting Elastic data...');
         /**
-         * @phpstan-ignore-next-line
-         *
          * @psalm-suppress PossiblyUndefinedMethod
          * @psalm-suppress InvalidArgument
+         *
+         * @phpstan-ignore-next-line method.notFound
          */
         $rawIndices = $this->elasticEntityManager->getClient()->cat()->indices(['index' => '*'])->asString();
         $rawIndices = explode("\n", $rawIndices);

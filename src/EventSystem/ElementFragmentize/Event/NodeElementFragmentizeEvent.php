@@ -20,7 +20,7 @@ class NodeElementFragmentizeEvent implements EventInterface
         private NodeInterface $cypherFragment,
         private MongoDocumentInterface $mongoFragment,
         private ElasticDocumentInterface $elasticFragment,
-        private mixed $fileFragment
+        private mixed $fileFragment,
     ) {
     }
 

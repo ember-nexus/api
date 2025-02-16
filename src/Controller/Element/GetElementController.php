@@ -23,7 +23,7 @@ class GetElementController extends AbstractController
         private ElementResponseService $elementResponseService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 

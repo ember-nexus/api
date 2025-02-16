@@ -15,7 +15,7 @@ use function Safe\preg_match;
 class ExceptionDetailController extends AbstractController
 {
     public function __construct(
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 

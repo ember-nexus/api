@@ -23,7 +23,7 @@ class BackupListCommand extends Command
 
     public function __construct(
         private FilesystemOperator $backupStorage,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
         parent::__construct();
     }

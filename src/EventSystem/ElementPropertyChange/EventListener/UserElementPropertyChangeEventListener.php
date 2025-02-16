@@ -12,7 +12,7 @@ class UserElementPropertyChangeEventListener
 {
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private Client400ForbiddenPropertyExceptionFactory $client400ForbiddenPropertyExceptionFactory
+        private Client400ForbiddenPropertyExceptionFactory $client400ForbiddenPropertyExceptionFactory,
     ) {
     }
 

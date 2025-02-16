@@ -33,7 +33,7 @@ class PostElementController extends AbstractController
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
-        private CreateElementFromRawDataService $createElementFromRawDataService
+        private CreateElementFromRawDataService $createElementFromRawDataService,
     ) {
     }
 

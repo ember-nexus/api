@@ -17,7 +17,7 @@ class ElementFragmentizeService
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
         private NodeElementFragmentizeEventFactory $nodeElementFragmentizeEventFactory,
-        private RelationElementFragmentizeEventFactory $relationElementFragmentizeEventFactory
+        private RelationElementFragmentizeEventFactory $relationElementFragmentizeEventFactory,
     ) {
     }
 

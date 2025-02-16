@@ -23,8 +23,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 class PostIndexController extends AbstractController
 {
@@ -36,7 +36,7 @@ class PostIndexController extends AbstractController
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private CreateElementFromRawDataService $createElementFromRawDataService
+        private CreateElementFromRawDataService $createElementFromRawDataService,
     ) {
     }
 

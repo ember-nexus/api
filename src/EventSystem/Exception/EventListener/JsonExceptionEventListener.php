@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 class JsonExceptionEventListener
 {
     public function __construct(
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
 

@@ -11,7 +11,7 @@ use Attribute;
 readonly class EndpointSupportsEtag
 {
     public function __construct(
-        private EtagType $etagType
+        private EtagType $etagType,
     ) {
     }
 

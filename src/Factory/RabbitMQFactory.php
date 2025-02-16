@@ -13,7 +13,7 @@ class RabbitMQFactory
 {
     public function __construct(
         private string $rabbitMQAuth,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 

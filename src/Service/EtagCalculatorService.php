@@ -20,7 +20,7 @@ class EtagCalculatorService
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 

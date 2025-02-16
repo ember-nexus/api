@@ -14,7 +14,7 @@ class Server500LogicExceptionFactory
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private ParameterBagInterface $bag,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 

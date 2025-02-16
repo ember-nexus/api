@@ -33,8 +33,8 @@ use function Safe\preg_match;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  *
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 #[AsCommand(name: 'token:revoke', description: 'Revoke tokens.')]
 class TokenRevokeCommand extends Command
@@ -69,7 +69,7 @@ class TokenRevokeCommand extends Command
         private RedisClient $redisClient,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private AuthProvider $authProvider,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
         parent::__construct();
     }

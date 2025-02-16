@@ -13,7 +13,7 @@ use Monolog\Processor\ProcessorInterface;
 class RequestProcessor implements ProcessorInterface
 {
     public function __construct(
-        private RequestIdService $requestIdService
+        private RequestIdService $requestIdService,
     ) {
     }
 

@@ -25,7 +25,7 @@ class EmberNexusStyle extends SymfonyStyle
 
     public function __construct(
         private InputInterface $input, /** @phpstan-ignore-line */
-        private OutputInterface $output
+        private OutputInterface $output,
     ) {
         if ($output instanceof ConsoleOutput) {
             $terminal = new Terminal();
@@ -56,10 +56,12 @@ class EmberNexusStyle extends SymfonyStyle
         $envVersion = getenv('VERSION');
         if (is_string($envVersion)) {
             if ($envVersion) {
-                /**
-                 * @psalm-suppress PossiblyInvalidOperand
-                 */
-                $versionString = 'v'.preg_replace('/[^0-9.]/', '', $envVersion);
+                $version = preg_replace('/[^0-9.]/', '', $envVersion);
+                // @phpstan-ignore-next-line
+                if (is_array($version)) {
+                    $version = implode('', $version);
+                }
+                $versionString = 'v'.$version;
             }
         }
         $this->newLine();

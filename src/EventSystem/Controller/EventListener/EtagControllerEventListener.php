@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Event\ControllerEvent;
 class EtagControllerEventListener
 {
     public function __construct(
-        private EtagService $etagService
+        private EtagService $etagService,
     ) {
     }
 

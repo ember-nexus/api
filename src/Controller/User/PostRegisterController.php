@@ -32,7 +32,7 @@ class PostRegisterController extends AbstractController
         private EmberNexusConfiguration $emberNexusConfiguration,
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
-        private RequestUtilService $requestUtilService
+        private RequestUtilService $requestUtilService,
     ) {
     }
 

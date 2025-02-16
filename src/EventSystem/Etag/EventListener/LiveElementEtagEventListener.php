@@ -18,7 +18,7 @@ class LiveElementEtagEventListener
         private RedisClient $redisClient,
         private RedisKeyFactory $redisKeyTypeFactory,
         private EtagCalculatorService $etagCalculatorService,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 

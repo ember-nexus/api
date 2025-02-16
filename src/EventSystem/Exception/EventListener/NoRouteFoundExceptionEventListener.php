@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class NoRouteFoundExceptionEventListener
 {
     public function __construct(
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 

@@ -15,13 +15,13 @@ use Laudis\Neo4j\Types\LocalDateTime as LaudisLocalDateTime;
 use Laudis\Neo4j\Types\LocalTime as LaudisLocalTime;
 
 /**
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 class GenericPropertyElementFragmentizeEventListener
 {
     public function __construct(
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
     ) {
     }
 
