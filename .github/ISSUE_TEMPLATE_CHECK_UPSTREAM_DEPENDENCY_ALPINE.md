@@ -9,6 +9,7 @@ Open tasks:
 - [ ] Check if Dockerfile compiles with the newest Alpine version.
 - If there are updates:
   - [ ] Update local Dockerfile.
+  - [ ] Update documentation by running `FIX_COMMAND_OUTPUT=1 BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command`.
   - [ ] Add changelog entry.
   - [ ] Release new patch release.
 - See also:
