@@ -19,7 +19,7 @@ class UserIdAndTokenIdObject
         return $this->userId;
     }
 
-    public function setUserId(UuidInterface $userId): self
+    public function setUserId(UuidInterface $userId): static
     {
         $this->userId = $userId;
 
@@ -31,7 +31,7 @@ class UserIdAndTokenIdObject
         return $this->tokenId;
     }
 
-    public function setTokenId(UuidInterface $tokenId): self
+    public function setTokenId(UuidInterface $tokenId): static
     {
         $this->tokenId = $tokenId;
 

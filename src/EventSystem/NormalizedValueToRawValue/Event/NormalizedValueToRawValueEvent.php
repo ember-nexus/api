@@ -28,7 +28,7 @@ class NormalizedValueToRawValueEvent implements EventInterface
         return $this->rawValue;
     }
 
-    public function setRawValue(mixed $rawValue): self
+    public function setRawValue(mixed $rawValue): static
     {
         $this->rawValue = $rawValue;
 

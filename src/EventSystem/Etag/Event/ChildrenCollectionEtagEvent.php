@@ -25,7 +25,7 @@ class ChildrenCollectionEtagEvent implements EventInterface
         return $this->etag;
     }
 
-    public function setEtag(?Etag $etag): self
+    public function setEtag(?Etag $etag): static
     {
         $this->etag = $etag;
 

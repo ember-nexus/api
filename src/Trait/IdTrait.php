@@ -15,7 +15,7 @@ trait IdTrait
         return $this->id;
     }
 
-    public function setId(?UuidInterface $id): self
+    public function setId(?UuidInterface $id): static
     {
         $this->id = $id;
 

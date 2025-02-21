@@ -30,7 +30,7 @@ class EtagCalculator
         $this->encoder = new Base58();
     }
 
-    public function addDateTime(DateTimeInterface $dateTime): self
+    public function addDateTime(DateTimeInterface $dateTime): static
     {
         if ($this->finalEtag) {
             throw new LogicException('Etag is already finalized, no new data can be added.');
@@ -42,7 +42,7 @@ class EtagCalculator
         return $this;
     }
 
-    public function addUuid(UuidInterface $id): self
+    public function addUuid(UuidInterface $id): static
     {
         if ($this->finalEtag) {
             throw new LogicException('Etag is already finalized, no new data can be added.');

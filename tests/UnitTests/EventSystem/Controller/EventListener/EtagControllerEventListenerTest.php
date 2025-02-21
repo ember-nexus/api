@@ -52,7 +52,8 @@ class EtagControllerEventListenerTest extends TestCase
 
         $etagService = $this->prophesize(EtagService::class);
         $etagService->setCurrentRequestEtagFromRequestAndEtagType(Argument::is($request), Argument::is(EtagType::ELEMENT))
-            ->shouldBeCalledOnce();
+            ->shouldBeCalledOnce()
+            ->willReturn($etagService);
 
         $eventListener = new EtagControllerEventListener(
             $etagService->reveal()

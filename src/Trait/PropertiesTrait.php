@@ -13,14 +13,14 @@ trait PropertiesTrait
      */
     private array $properties = [];
 
-    public function addProperty(string $name, mixed $value = null): self
+    public function addProperty(string $name, mixed $value = null): static
     {
         $this->properties[$name] = $value;
 
         return $this;
     }
 
-    public function addProperties(iterable $properties): self
+    public function addProperties(iterable $properties): static
     {
         foreach ($properties as $name => $value) {
             $this->properties[$name] = $value;
@@ -51,14 +51,14 @@ trait PropertiesTrait
         return $this->properties;
     }
 
-    public function removeProperty(string $name): self
+    public function removeProperty(string $name): static
     {
         unset($this->properties[$name]);
 
         return $this;
     }
 
-    public function removeProperties(): self
+    public function removeProperties(): static
     {
         $this->properties = [];
 

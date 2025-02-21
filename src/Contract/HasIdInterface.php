@@ -10,5 +10,5 @@ interface HasIdInterface
 {
     public function getId(): ?UuidInterface;
 
-    public function setId(?UuidInterface $id): self;
+    public function setId(?UuidInterface $id): static;
 }

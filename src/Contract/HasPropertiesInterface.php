@@ -6,12 +6,12 @@ namespace App\Contract;
 
 interface HasPropertiesInterface
 {
-    public function addProperty(string $name, mixed $value = null): self;
+    public function addProperty(string $name, mixed $value = null): static;
 
     /**
      * @param iterable<string, mixed> $properties
      */
-    public function addProperties(iterable $properties): self;
+    public function addProperties(iterable $properties): static;
 
     public function hasProperty(string $name): bool;
 
@@ -22,7 +22,7 @@ interface HasPropertiesInterface
      */
     public function getProperties(): array;
 
-    public function removeProperty(string $name): self;
+    public function removeProperty(string $name): static;
 
-    public function removeProperties(): self;
+    public function removeProperties(): static;
 }

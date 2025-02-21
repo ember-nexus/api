@@ -50,7 +50,7 @@ class ElementPropertyReturnEvent implements EventInterface
         return $properties;
     }
 
-    public function addBlockedProperty(string $name): self
+    public function addBlockedProperty(string $name): static
     {
         if (!in_array($name, $this->blockedProperties)) {
             $this->blockedProperties[] = $name;
