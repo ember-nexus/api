@@ -28,7 +28,7 @@ class ElementPropertyResetEvent implements EventInterface
         return $this->element;
     }
 
-    public function addPropertyNameToBeKept(string $propertyName): self
+    public function addPropertyNameToBeKept(string $propertyName): static
     {
         $this->propertyNamesWhichAreKept[] = $propertyName;
 

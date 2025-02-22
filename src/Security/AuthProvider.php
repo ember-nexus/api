@@ -49,7 +49,7 @@ class AuthProvider
         ?UuidInterface $tokenId = null,
         ?string $hashedToken = null,
         bool $isAnonymous = false,
-    ): self {
+    ): static {
         $this->userId = $userId;
         $this->tokenId = $tokenId;
         $this->hashedToken = $hashedToken;

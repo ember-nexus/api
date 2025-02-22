@@ -49,28 +49,28 @@ class ElementManager
     ) {
     }
 
-    public function create(NodeElementInterface|RelationElementInterface $element): self
+    public function create(NodeElementInterface|RelationElementInterface $element): static
     {
         $this->createQueue[] = $element;
 
         return $this;
     }
 
-    public function merge(NodeElementInterface|RelationElementInterface $element): self
+    public function merge(NodeElementInterface|RelationElementInterface $element): static
     {
         $this->mergeQueue[] = $element;
 
         return $this;
     }
 
-    public function delete(NodeElementInterface|RelationElementInterface $element): self
+    public function delete(NodeElementInterface|RelationElementInterface $element): static
     {
         $this->deleteQueue[] = $element;
 
         return $this;
     }
 
-    public function flush(): self
+    public function flush(): static
     {
         foreach ($this->createQueue as $element) {
             $this->eventDispatcher->dispatch(new ElementPreCreateEvent($element));

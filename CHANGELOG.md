@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Upgrade upstream dependency NGINX Unit to 1.34.1, closes #356.
+- Change method declaration from `self` to `static`, general improvement.
+### Fixed
+- Fix bad release 0.1.18 by upgrading `neo4j-php/Bolt` to version 7.2.3, closes #361.
 
 ## 0.1.18 - 2025-02-16
 ### Changed

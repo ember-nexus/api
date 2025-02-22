@@ -91,6 +91,8 @@ class PostSearchController extends AbstractController
 
         /**
          * @psalm-suppress InvalidArgument
+         *
+         * @phpstan-ignore-next-line
          */
         $res = $this->elasticEntityManager->getClient()->search([
             'index' => $indices,

@@ -10,13 +10,13 @@ interface RelationElementInterface extends ElementInterface
 {
     public function getType(): ?string;
 
-    public function setType(?string $type): self;
+    public function setType(?string $type): static;
 
     public function getStart(): ?UuidInterface;
 
-    public function setStart(?UuidInterface $start): self;
+    public function setStart(?UuidInterface $start): static;
 
     public function getEnd(): ?UuidInterface;
 
-    public function setEnd(?UuidInterface $end): self;
+    public function setEnd(?UuidInterface $end): static;
 }

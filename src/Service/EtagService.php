@@ -27,7 +27,7 @@ class EtagService
     ) {
     }
 
-    public function setCurrentRequestEtagFromRequestAndEtagType(Request $request, EtagType $etagType): self
+    public function setCurrentRequestEtagFromRequestAndEtagType(Request $request, EtagType $etagType): static
     {
         if (EtagType::INDEX_COLLECTION == $etagType) {
             $event = new IndexCollectionEtagEvent($this->authProvider->getUserId());

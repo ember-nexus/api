@@ -27,7 +27,7 @@ class RelationElement implements RelationElementInterface
         return $this->type;
     }
 
-    public function setType(?string $type): self
+    public function setType(?string $type): static
     {
         $this->type = $type;
 
@@ -39,7 +39,7 @@ class RelationElement implements RelationElementInterface
         return $this->start;
     }
 
-    public function setStart(?UuidInterface $start): self
+    public function setStart(?UuidInterface $start): static
     {
         $this->start = $start;
 
@@ -51,7 +51,7 @@ class RelationElement implements RelationElementInterface
         return $this->end;
     }
 
-    public function setEnd(?UuidInterface $end): self
+    public function setEnd(?UuidInterface $end): static
     {
         $this->end = $end;
 

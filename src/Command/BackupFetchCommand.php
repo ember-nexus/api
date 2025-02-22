@@ -117,7 +117,7 @@ class BackupFetchCommand extends Command
         $unit = ['B', 'KB', 'MB', 'GB'];
         $exp = (int) floor(log($bytes, 1024)) | 0;
 
-        return round($bytes / pow(1024, $exp), $precision).' '.$unit[$exp];
+        return sprintf('%.2f %s', round($bytes / pow(1024, $exp), $precision), $unit[$exp]);
     }
 
     public function extractNodes(Filesystem $filesystem, string $backupLocation, string $backupName): void
