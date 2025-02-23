@@ -13,6 +13,9 @@ class RedisFactory
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function createRedis(): Client
     {
         return new Client($this->redisAuth);

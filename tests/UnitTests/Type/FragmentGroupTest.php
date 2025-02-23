@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Type;
+namespace App\Tests\UnitTests\Type;
 
 use App\Type\FragmentGroup;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Syndesi\CypherDataStructures\Type\Node;
 use Syndesi\ElasticDataStructures\Type\Document as ElasticDocument;
 use Syndesi\MongoDataStructures\Type\Document as MongoDocument;
 
+#[Small]
+#[CoversClass(FragmentGroup::class)]
 class FragmentGroupTest extends TestCase
 {
     public function testFragmentGroup(): void

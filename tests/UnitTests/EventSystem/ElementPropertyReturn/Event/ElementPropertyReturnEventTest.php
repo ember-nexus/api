@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\ElementPropertyReturn\Event;
+namespace App\Tests\UnitTests\EventSystem\ElementPropertyReturn\Event;
 
 use App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
+#[Small]
+#[CoversClass(ElementPropertyReturnEvent::class)]
 class ElementPropertyReturnEventTest extends TestCase
 {
     public function testEventWithEmptyNode(): void

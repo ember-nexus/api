@@ -35,7 +35,7 @@ class EtagCalculator
         if ($this->finalEtag) {
             throw new LogicException('Etag is already finalized, no new data can be added.');
         }
-        $timestamp = (int) $dateTime->format('Uu');
+        $timestamp = $dateTime->format('Uu');
         $timestampAsBinaryString = pack('C*', ...array_reverse(unpack('C*', pack('L', $timestamp))));
         hash_update($this->hashContext, $timestampAsBinaryString);
 

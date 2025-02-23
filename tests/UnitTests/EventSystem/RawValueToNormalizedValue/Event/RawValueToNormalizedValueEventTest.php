@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\RawValueToNormalizedValue\Event;
+namespace App\Tests\UnitTests\EventSystem\RawValueToNormalizedValue\Event;
 
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
+#[Small]
+#[CoversClass(RawValueToNormalizedValueEvent::class)]
 class RawValueToNormalizedValueEventTest extends TestCase
 {
     public function testNormalizedValueIsNotInitializedOnCreation(): void

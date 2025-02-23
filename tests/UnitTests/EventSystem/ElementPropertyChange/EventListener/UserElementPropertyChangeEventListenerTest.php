@@ -2,18 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
+namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\ElementPropertyChange\EventListener\UserElementPropertyChangeEventListener;
 use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(UserElementPropertyChangeEventListener::class)]
 class UserElementPropertyChangeEventListenerTest extends TestCase
 {
     use ProphecyTrait;

@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Factory\Type;
+namespace App\Tests\UnitTests\Factory\Type;
 
 use App\Factory\Type\RedisKeyFactory;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
+#[Small]
+#[CoversClass(RedisKeyFactory::class)]
 class RedisKeyFactoryTest extends TestCase
 {
     public function testGetTokenRedisKey(): void

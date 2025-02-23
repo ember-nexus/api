@@ -24,8 +24,6 @@ class ExceptionEventListener
     }
 
     /**
-     * @psalm-suppress UndefinedInterfaceMethod
-     *
      * @SuppressWarnings("PHPMD.EmptyCatchBlock")
      */
     public function onKernelException(ExceptionEvent $event): void
@@ -84,6 +82,9 @@ class ExceptionEventListener
             $data,
             $data['status']
         ));
+        /**
+         * @infection-ignore-all
+         */
         $event->stopPropagation();
     }
 }

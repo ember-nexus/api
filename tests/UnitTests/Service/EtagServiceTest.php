@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Service;
+namespace App\Tests\UnitTests\Service;
 
 use App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent;
 use App\EventSystem\Etag\Event\ElementEtagEvent;
@@ -13,6 +13,8 @@ use App\Security\AuthProvider;
 use App\Service\EtagService;
 use App\Type\Etag;
 use App\Type\EtagType;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -20,6 +22,8 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 
+#[Small]
+#[CoversClass(EtagService::class)]
 class EtagServiceTest extends TestCase
 {
     use ProphecyTrait;

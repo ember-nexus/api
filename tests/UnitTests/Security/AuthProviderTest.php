@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Security;
+namespace App\Tests\UnitTests\Security;
 
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -15,6 +17,8 @@ use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+#[Small]
+#[CoversClass(AuthProvider::class)]
 class AuthProviderTest extends TestCase
 {
     use ProphecyTrait;

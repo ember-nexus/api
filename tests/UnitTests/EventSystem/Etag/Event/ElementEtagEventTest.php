@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\Etag\Event;
+namespace App\Tests\UnitTests\EventSystem\Etag\Event;
 
 use App\EventSystem\Etag\Event\ElementEtagEvent;
 use App\Type\Etag;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
+#[Small]
+#[CoversClass(ElementEtagEvent::class)]
 class ElementEtagEventTest extends TestCase
 {
     public function testEventWithEtag(): void

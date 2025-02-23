@@ -17,6 +17,9 @@ class RabbitMQFactory
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function createRabbitMQ(): AMQPStreamConnection
     {
         $parsed = parse_url($this->rabbitMQAuth);

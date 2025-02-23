@@ -2,16 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Logger;
+namespace App\Tests\UnitTests\Logger;
 
 use App\Logger\RequestProcessor;
 use App\Service\RequestIdService;
 use DateTimeImmutable;
 use Monolog\Level;
 use Monolog\LogRecord;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
+#[Small]
+#[CoversClass(RequestProcessor::class)]
 class RequestProcessorTest extends TestCase
 {
     public function testRequestProcessor(): void

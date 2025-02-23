@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Controller\User;
+namespace App\Tests\UnitTests\Controller\User;
 
 use App\Controller\User\PostChangePasswordController;
 use App\Exception\Client400BadContentException;
@@ -14,6 +14,8 @@ use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Uuid;
@@ -21,6 +23,8 @@ use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(PostChangePasswordController::class)]
 class PostChangePasswordControllerTest extends TestCase
 {
     use ProphecyTrait;

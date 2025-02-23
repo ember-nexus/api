@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Controller\User;
+namespace App\Tests\UnitTests\Controller\User;
 
 use App\Controller\User\PostTokenController;
 use App\Exception\Client400BadContentException;
@@ -15,6 +15,8 @@ use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Uuid;
@@ -22,6 +24,8 @@ use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(PostTokenController::class)]
 class PostTokenControllerTest extends TestCase
 {
     use ProphecyTrait;

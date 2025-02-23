@@ -15,9 +15,6 @@ class NoRouteFoundExceptionEventListener
     ) {
     }
 
-    /**
-     * @psalm-suppress UndefinedInterfaceMethod
-     */
     public function onKernelException(ExceptionEvent $event): void
     {
         $throwable = $event->getThrowable();

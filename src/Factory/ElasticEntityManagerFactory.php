@@ -18,6 +18,9 @@ class ElasticEntityManagerFactory
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function createElasticEntityManager(): EntityManager
     {
         $client = ClientBuilder::create()

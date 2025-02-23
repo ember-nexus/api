@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\ElementPropertyChange\Event;
+namespace App\Tests\UnitTests\EventSystem\ElementPropertyChange\Event;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\Type\NodeElement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
+#[Small]
+#[CoversClass(ElementPropertyChangeEvent::class)]
 class ElementPropertyChangeEventTest extends TestCase
 {
     public function testEventReturnsCorrectWithoutElementData(): void
