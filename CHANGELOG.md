@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Increase general test coverage to 28.2% (lines) and 54.1% (classes), increase mutant score indicator for covered code
+  to 91%, closes #364. Feature tests do not count towards code coverage.
 
 ## 0.1.23 - 2025-08-16
 ### Changed
