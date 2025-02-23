@@ -8,4 +8,5 @@
 .phpunit.cache
 /phpunit.xml
 .phpunit.cache
+infection.html
 ###< symfony/phpunit-bridge ###
