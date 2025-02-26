@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Type;
+namespace App\Tests\UnitTests\Type;
 
 use App\Type\UserIdAndTokenIdObject;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
+#[Small]
+#[CoversClass(UserIdAndTokenIdObject::class)]
 class UserIdAndTokenIdObjectTest extends TestCase
 {
     public function testUserIdAndTokenIdObject(): void

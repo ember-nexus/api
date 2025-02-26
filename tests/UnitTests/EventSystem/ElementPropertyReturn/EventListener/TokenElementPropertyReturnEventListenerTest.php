@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\ElementPropertyReturn\EventListener;
+namespace App\Tests\UnitTests\EventSystem\ElementPropertyReturn\EventListener;
 
 use App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent;
 use App\EventSystem\ElementPropertyReturn\EventListener\TokenElementPropertyReturnEventListener;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
+#[Small]
+#[CoversClass(TokenElementPropertyReturnEventListener::class)]
 class TokenElementPropertyReturnEventListenerTest extends TestCase
 {
     public function testEventListenerWithNonTokenElements(): void

@@ -18,6 +18,9 @@ class CypherEntityManagerFactory
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function createCypherEntityManager(): EntityManager
     {
         $client = ClientBuilder::create()

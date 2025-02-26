@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Security;
+namespace App\Tests\UnitTests\Security;
 
 use App\Security\UserPasswordHasher;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
+#[Small]
+#[CoversClass(UserPasswordHasher::class)]
 class UserPasswordHasherTest extends TestCase
 {
     public function testHashing(): void

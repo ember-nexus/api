@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Factory\Exception;
+namespace App\Tests\UnitTests\Factory\Exception;
 
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(Client400ReservedIdentifierExceptionFactory::class)]
 class Client400ReservedIdentifierExceptionFactoryTest extends TestCase
 {
     use ProphecyTrait;
@@ -17,7 +21,14 @@ class Client400ReservedIdentifierExceptionFactoryTest extends TestCase
     public function testCreateFromTemplate(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
-        $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
+        $urlGenerator->generate(
+            Argument::is('exception-detail'),
+            Argument::is([
+                'code' => '400',
+                'name' => 'reserved-identifier',
+            ]),
+            Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
+        )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400ReservedIdentifierExceptionFactory($urlGenerator->reveal());
 
         $exception = $factory->createFromTemplate('a');

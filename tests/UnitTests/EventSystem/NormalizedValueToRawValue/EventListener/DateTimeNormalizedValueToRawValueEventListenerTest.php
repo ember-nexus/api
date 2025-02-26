@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\NormalizedValueToRawValue\EventListener;
+namespace App\Tests\UnitTests\EventSystem\NormalizedValueToRawValue\EventListener;
 
 use App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent;
 use App\EventSystem\NormalizedValueToRawValue\EventListener\DateTimeNormalizedValueToRawValueEventListener;
 use DateTime;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
+#[Small]
+#[CoversClass(DateTimeNormalizedValueToRawValueEventListener::class)]
 class DateTimeNormalizedValueToRawValueEventListenerTest extends TestCase
 {
     public function testNonDatetimeValuesAreIgnored(): void

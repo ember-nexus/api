@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\Exception\EventListener;
+namespace App\Tests\UnitTests\EventSystem\Exception\EventListener;
 
 use App\EventSystem\Exception\EventListener\JsonExceptionEventListener;
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Safe\Exceptions\JsonException;
@@ -17,6 +19,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 
+#[Small]
+#[CoversClass(JsonExceptionEventListener::class)]
 class JsonExceptionEventListenerTest extends TestCase
 {
     use ProphecyTrait;

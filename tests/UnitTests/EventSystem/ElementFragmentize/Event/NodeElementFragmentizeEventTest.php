@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\ElementFragmentize\Event;
+namespace App\Tests\UnitTests\EventSystem\ElementFragmentize\Event;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\Type\NodeElement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Syndesi\CypherDataStructures\Type\Node;
 use Syndesi\ElasticDataStructures\Type\Document as ElasticDocument;
 use Syndesi\MongoDataStructures\Type\Document as MongoDocument;
 
+#[Small]
+#[CoversClass(NodeElementFragmentizeEvent::class)]
 class NodeElementFragmentizeEventTest extends TestCase
 {
     public function testNodeElementFragmentizeEvent(): void

@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Factory\Exception;
+namespace App\Tests\UnitTests\Factory\Exception;
 
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(Client403ForbiddenExceptionFactory::class)]
 class Client403ForbiddenExceptionFactoryTest extends TestCase
 {
     use ProphecyTrait;
@@ -17,7 +21,14 @@ class Client403ForbiddenExceptionFactoryTest extends TestCase
     public function testCreateFromTemplate(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
-        $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
+        $urlGenerator->generate(
+            Argument::is('exception-detail'),
+            Argument::is([
+                'code' => '403',
+                'name' => 'forbidden',
+            ]),
+            Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
+        )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client403ForbiddenExceptionFactory($urlGenerator->reveal());
 
         $exception = $factory->createFromTemplate();

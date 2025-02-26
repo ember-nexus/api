@@ -2,25 +2,31 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\Etag\EventListener;
+namespace App\Tests\UnitTests\EventSystem\Etag\EventListener;
 
 use App\EventSystem\Etag\Event\ParentsCollectionEtagEvent;
 use App\EventSystem\Etag\EventListener\RedisParentsCollectionEtagEventListener;
 use App\Factory\Type\RedisKeyFactory;
+use App\Tests\UnitTests\AssertLoggerTrait;
 use App\Type\Etag;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
 use App\Type\RedisValueType;
 use Beste\Psr\Log\TestLogger;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Uuid;
 
+#[Small]
+#[CoversClass(RedisParentsCollectionEtagEventListener::class)]
 class RedisParentsCollectionEtagEventListenerTest extends TestCase
 {
     use ProphecyTrait;
+    use AssertLoggerTrait;
 
     public function testRedisParentsCollectionEtagEventListenerWithElementNotInRedis(): void
     {
@@ -55,8 +61,14 @@ class RedisParentsCollectionEtagEventListenerTest extends TestCase
         $this->assertNull($elementParentsCollectionEvent->getEtag());
 
         // assert logs
-        $this->assertTrue($logger->records->includeMessagesContaining('Trying to find Etag for parents collection in Redis.'));
-        $this->assertTrue($logger->records->includeMessagesContaining('Unable to find Etag for parents collection in Redis.'));
+        $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for parents collection in Redis.', [
+            'childId' => '977245a7-a584-44bd-8992-1bfd80251a41',
+            'redisKey' => 'etag:parents:977245a7-a584-44bd-8992-1bfd80251a41',
+        ]);
+        $this->assertLogHappened($logger, 'debug', 'Unable to find Etag for parents collection in Redis.', [
+            'childId' => '977245a7-a584-44bd-8992-1bfd80251a41',
+            'redisKey' => 'etag:parents:977245a7-a584-44bd-8992-1bfd80251a41',
+        ]);
     }
 
     public function testRedisParentsCollectionEtagEventListenerWithElementInRedisWithNullValue(): void
@@ -92,8 +104,15 @@ class RedisParentsCollectionEtagEventListenerTest extends TestCase
         $this->assertNull($elementParentsCollectionEvent->getEtag());
 
         // assert logs
-        $this->assertTrue($logger->records->includeMessagesContaining('Trying to find Etag for parents collection in Redis.'));
-        $this->assertTrue($logger->records->includeMessagesContaining('Found Etag for parents collection in Redis.'));
+        $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for parents collection in Redis.', [
+            'childId' => '977245a7-a584-44bd-8992-1bfd80251a41',
+            'redisKey' => 'etag:parents:977245a7-a584-44bd-8992-1bfd80251a41',
+        ]);
+        $this->assertLogHappened($logger, 'debug', 'Found Etag for parents collection in Redis.', [
+            'childId' => '977245a7-a584-44bd-8992-1bfd80251a41',
+            'redisKey' => 'etag:parents:977245a7-a584-44bd-8992-1bfd80251a41',
+            'etag' => null,
+        ]);
     }
 
     public function testRedisParentsCollectionEtagEventListenerWithElementInRedisWithValue(): void
@@ -130,7 +149,13 @@ class RedisParentsCollectionEtagEventListenerTest extends TestCase
         $this->assertSame('someEtag', (string) $elementParentsCollectionEvent->getEtag());
 
         // assert logs
-        $this->assertTrue($logger->records->includeMessagesContaining('Trying to find Etag for parents collection in Redis.'));
-        $this->assertTrue($logger->records->includeMessagesContaining('Found Etag for parents collection in Redis.'));
+        $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for parents collection in Redis.', [
+            'childId' => '977245a7-a584-44bd-8992-1bfd80251a41',
+            'redisKey' => 'etag:parents:977245a7-a584-44bd-8992-1bfd80251a41',
+        ]);
+        $data = $this->assertLogHappened($logger, 'debug', 'Found Etag for parents collection in Redis.', false);
+        $this->assertSame('977245a7-a584-44bd-8992-1bfd80251a41', $data['childId']);
+        $this->assertSame('etag:parents:977245a7-a584-44bd-8992-1bfd80251a41', $data['redisKey']);
+        $this->assertSame('someEtag', (string) $data['etag']);
     }
 }

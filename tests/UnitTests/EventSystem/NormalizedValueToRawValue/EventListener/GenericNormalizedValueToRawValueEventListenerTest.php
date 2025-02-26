@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\NormalizedValueToRawValue\EventListener;
+namespace App\Tests\UnitTests\EventSystem\NormalizedValueToRawValue\EventListener;
 
 use App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent;
 use App\EventSystem\NormalizedValueToRawValue\EventListener\GenericNormalizedValueToRawValueEventListener;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
+#[Small]
+#[CoversClass(GenericNormalizedValueToRawValueEventListener::class)]
 class GenericNormalizedValueToRawValueEventListenerTest extends TestCase
 {
     public function testIntegerValuesAreDenormalized(): void

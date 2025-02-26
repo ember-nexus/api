@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Service;
+namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Client400BadContentException;
 use App\Exception\Client400MissingPropertyException;
@@ -11,10 +11,14 @@ use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Service\RequestUtilService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(RequestUtilService::class)]
 class RequestUtilServiceTest extends TestCase
 {
     private function getRequestUtilService(

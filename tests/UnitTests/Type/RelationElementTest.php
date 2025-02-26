@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Type;
+namespace App\Tests\UnitTests\Type;
 
 use App\Type\RelationElement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
+#[Small]
+#[CoversClass(RelationElement::class)]
 class RelationElementTest extends TestCase
 {
     public function testPropertiesTrait(): void

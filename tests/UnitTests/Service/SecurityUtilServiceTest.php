@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Service;
+namespace App\Tests\UnitTests\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Exception\Client400MissingPropertyException;
@@ -24,6 +24,8 @@ use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
@@ -33,6 +35,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+#[Small]
+#[CoversClass(SecurityUtilService::class)]
 class SecurityUtilServiceTest extends TestCase
 {
     private function getSecurityUtilService(

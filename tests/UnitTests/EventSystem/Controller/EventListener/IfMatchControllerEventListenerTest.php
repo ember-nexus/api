@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\Controller\EventListener;
+namespace App\Tests\UnitTests\EventSystem\Controller\EventListener;
 
 use App\Attribute\EndpointSupportsEtag;
 use App\EventSystem\Controller\EventListener\IfMatchControllerEventListener;
@@ -11,12 +11,16 @@ use App\Factory\Exception\Client412PreconditionFailedExceptionFactory;
 use App\Service\EtagService;
 use App\Type\Etag;
 use App\Type\EtagType;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
+#[Small]
+#[CoversClass(IfMatchControllerEventListener::class)]
 class IfMatchControllerEventListenerTest extends TestCase
 {
     use ProphecyTrait;

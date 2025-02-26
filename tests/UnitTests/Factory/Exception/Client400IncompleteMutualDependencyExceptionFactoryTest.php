@@ -2,16 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Factory\Exception;
+namespace App\Tests\UnitTests\Factory\Exception;
 
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Client400IncompleteMutualDependencyExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(Client400IncompleteMutualDependencyExceptionFactory::class)]
 class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
 {
     use ProphecyTrait;
@@ -51,7 +55,14 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
     public function testSuccessWithNoSetProperty(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
-        $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
+        $urlGenerator->generate(
+            Argument::is('exception-detail'),
+            Argument::is([
+                'code' => '400',
+                'name' => 'incomplete-mutual-dependency',
+            ]),
+            Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
+        )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
             $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
@@ -70,7 +81,14 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
     public function testSuccessWithOneSetProperty(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
-        $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
+        $urlGenerator->generate(
+            Argument::is('exception-detail'),
+            Argument::is([
+                'code' => '400',
+                'name' => 'incomplete-mutual-dependency',
+            ]),
+            Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
+        )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
             $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
@@ -89,7 +107,14 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
     public function testSuccessWithMultipleSetProperties(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
-        $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
+        $urlGenerator->generate(
+            Argument::is('exception-detail'),
+            Argument::is([
+                'code' => '400',
+                'name' => 'incomplete-mutual-dependency',
+            ]),
+            Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
+        )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
             $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
@@ -108,7 +133,14 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
     public function testSuccessWithSingleMissingProperty(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
-        $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
+        $urlGenerator->generate(
+            Argument::is('exception-detail'),
+            Argument::is([
+                'code' => '400',
+                'name' => 'incomplete-mutual-dependency',
+            ]),
+            Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
+        )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
             $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
@@ -127,7 +159,14 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
     public function testSuccessWithMultipleMissingProperties(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
-        $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
+        $urlGenerator->generate(
+            Argument::is('exception-detail'),
+            Argument::is([
+                'code' => '400',
+                'name' => 'incomplete-mutual-dependency',
+            ]),
+            Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
+        )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
             $this->prophesize(Server500LogicExceptionFactory::class)->reveal()

@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\Response\EventListener;
+namespace App\Tests\UnitTests\EventSystem\Response\EventListener;
 
 use App\EventSystem\Response\EventListener\EtagResponseEventListener;
 use App\Response\CollectionResponse;
 use App\Response\ElementResponse;
 use App\Service\EtagService;
 use App\Type\Etag;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +18,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
+#[Small]
+#[CoversClass(EtagResponseEventListener::class)]
 class EtagResponseEventListenerTest extends TestCase
 {
     use ProphecyTrait;

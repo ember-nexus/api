@@ -18,6 +18,9 @@ class MongoEntityManagerFactory
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function createMongoEntityManager(): EntityManager
     {
         $client = new Client($this->mongoAuth);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Service;
+namespace App\Tests\UnitTests\Service;
 
 use App\Service\EtagCalculatorService;
 use Beste\Psr\Log\TestLogger;
@@ -13,6 +13,8 @@ use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherList;
 use Laudis\Neo4j\Types\CypherMap;
 use Laudis\Neo4j\Types\DateTimeZoneId;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -23,6 +25,8 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassLength)
  */
+#[Small]
+#[CoversClass(EtagCalculatorService::class)]
 class EtagCalculatorServiceTest extends TestCase
 {
     use ProphecyTrait;

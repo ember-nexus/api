@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Response;
+namespace App\Tests\UnitTests\Response;
 
 use App\Response\ProblemJsonResponse;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
+#[Small]
+#[CoversClass(ProblemJsonResponse::class)]
 class ProblemJsonResponseTest extends TestCase
 {
     public function testEmptyProblemJsonResponse(): void

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Controller\User;
+namespace App\Tests\UnitTests\Controller\User;
 
 use App\Controller\User\PostRegisterController;
 use App\Exception\Client400ReservedIdentifierException;
@@ -20,6 +20,8 @@ use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Nonstandard\Uuid;
@@ -28,6 +30,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager;
 
+#[Small]
+#[CoversClass(PostRegisterController::class)]
 class PostRegisterControllerTest extends TestCase
 {
     use ProphecyTrait;

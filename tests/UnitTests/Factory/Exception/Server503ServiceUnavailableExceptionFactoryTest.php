@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Factory\Exception;
+namespace App\Tests\UnitTests\Factory\Exception;
 
 use App\Factory\Exception\Server503ServiceUnavailableExceptionFactory;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(Server503ServiceUnavailableExceptionFactory::class)]
 class Server503ServiceUnavailableExceptionFactoryTest extends TestCase
 {
     use ProphecyTrait;
@@ -18,7 +22,14 @@ class Server503ServiceUnavailableExceptionFactoryTest extends TestCase
     public function testCreateFromTemplateInProductionEnvironment(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
-        $urlGenerator->generate(Argument::cetera())->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
+        $urlGenerator->generate(
+            Argument::is('exception-detail'),
+            Argument::is([
+                'code' => '503',
+                'name' => 'service-unavailable',
+            ]),
+            Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
+        )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $bag = $this->prophesize(ParameterBagInterface::class);
         $bag->get(Argument::is('kernel.environment'))->shouldBeCalledOnce()->willReturn('prod');
         $factory = new Server503ServiceUnavailableExceptionFactory($urlGenerator->reveal(), $bag->reveal());

@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Type;
+namespace App\Tests\UnitTests\Type;
 
 use App\Type\EtagCalculator;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 
+#[Small]
+#[CoversClass(EtagCalculator::class)]
 class EtagCalculatorTest extends TestCase
 {
     use ProphecyTrait;
