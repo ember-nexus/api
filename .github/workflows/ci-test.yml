@@ -148,7 +148,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
   test-mutant:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-4vcpu-ubuntu-2204
     name: 'Mutant Test'
     timeout-minutes: 5
     needs:
@@ -218,7 +218,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Feature Test
+      - name: Setup
         run: |
           chmod 777 ./bin/test-feature-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
@@ -227,7 +227,12 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api-prod\" && echo \$API_DOMAIN && composer install --ignore-platform-req=php --quiet && composer test:feature && composer test:feature:deprecated"
+          docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml ps
+          docker exec ember-nexus-api-dev bash -c "composer install --ignore-platform-req=php --quiet"
+          docker exec ember-nexus-api-dev bash -c "php bin/console healthcheck"
+      - name: Feature Test
+        run: |
+          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api-prod\" && echo \$API_DOMAIN && composer test:feature && composer test:feature:deprecated"
 
   test-example-generation-controller:
     runs-on: buildjet-2vcpu-ubuntu-2204
@@ -256,7 +261,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Controller Example Generation Test
+      - name: Setup
         run: |
           chmod 777 ./bin/test-feature-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
@@ -265,7 +270,12 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api\" && echo \$API_DOMAIN && composer install --ignore-platform-req=php --quiet && composer test:example-generation-controller && composer test:example-generation-controller:deprecated"
+          docker compose -f ./tests/ExampleGenerationController/docker-compose.yml ps
+          docker exec ember-nexus-api-dev bash -c "composer install --ignore-platform-req=php --quiet"
+          docker exec ember-nexus-api-dev bash -c "php bin/console healthcheck"
+      - name: Controller Example Generation Test
+        run: |
+          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api\" && echo \$API_DOMAIN && composer test:example-generation-controller && composer test:example-generation-controller:deprecated"
 
 
   test-example-generation-command:
@@ -291,7 +301,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Command Example Generation Test
+      - name: Setup
         run: |
           chmod 777 ./bin/test-feature-command-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
@@ -299,4 +309,9 @@ jobs:
           echo "waiting for containers to star tup (10s)"
           sleep 10
           echo "finished waiting"
-          docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet && BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"
+          docker compose -f ./tests/ExampleGenerationCommand/docker-compose.yml ps
+          docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet"
+          docker exec ember-nexus-api bash -c "php bin/console healthcheck"
+      - name: Command Example Generation Test
+        run: |
+          docker exec ember-nexus-api bash -c "BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"
