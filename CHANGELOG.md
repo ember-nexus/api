@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Increase general test coverage to 28.2% (lines) and 54.1% (classes), increase mutant score indicator for covered code
   to 91%, closes #364. Feature tests do not count towards code coverage.
+- Add Docker build cache to CI/CD, closes #352.
 
 ## 0.1.19 - 2025-02-22
 ### Changed
