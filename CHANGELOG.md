@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add Docker build cache to CI/CD, closes #352.
 ### Changed
 - Health state of production tests are getting printed in CI/CD, closes #362.
-- Mutant tests are now being executed on `buildjet-4vcpu-ubuntu-2204` to increase CI/CD speed. 
+- Mutant tests are now being executed on `buildjet-4vcpu-ubuntu-2204` to increase CI/CD speed.
+- Enable Originstamp support, closes #328.
 
 ## 0.1.19 - 2025-02-22
 ### Changed
