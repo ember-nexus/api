@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Increase general test coverage to 28.2% (lines) and 54.1% (classes), increase mutant score indicator for covered code
   to 91%, closes #364. Feature tests do not count towards code coverage.
 - Add Docker build cache to CI/CD, closes #352.
+- Docker images used in CI/CD are getting rebuilt weekly, closes #369.
 ### Changed
 - Health state of production tests are getting printed in CI/CD, closes #362.
 - Mutant tests are now being executed on `buildjet-4vcpu-ubuntu-2204` to increase CI/CD speed.
