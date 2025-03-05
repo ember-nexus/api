@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Health state of production tests are getting printed in CI/CD, closes #362.
 - Mutant tests are now being executed on `buildjet-4vcpu-ubuntu-2204` to increase CI/CD speed.
 - Enable Originstamp support, closes #328.
+- Upgrade upstream dependency NGINX Unit to 1.34.2, closes #371.
+- Update dependencies, related to #371.
 
 ## 0.1.19 - 2025-02-22
 ### Changed

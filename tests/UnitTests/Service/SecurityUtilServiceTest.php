@@ -219,8 +219,6 @@ class SecurityUtilServiceTest extends TestCase
         );
 
         $securityUtilService->changeUserPassword($userNode, '1234');
-
-        $this->expectNotToPerformAssertions();
     }
 
     public function testFindUserByUniqueUserIdentifierWithNoResults(): void
