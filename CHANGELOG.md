@@ -5,17 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.20 - 2025-03-05
 ### Added
 - Increase general test coverage to 28.2% (lines) and 54.1% (classes), increase mutant score indicator for covered code
-  to 91%, closes #364. Feature tests do not count towards code coverage.
-- Add Docker build cache to CI/CD, closes #352.
-- Docker images used in CI/CD are getting rebuilt weekly, closes #369.
+  to 91%, closes [#364]. Feature tests do not count towards code coverage.
+- Add Docker build cache to CI/CD, closes [#352].
+- Docker images used in CI/CD are getting rebuilt weekly, closes [#369].
+
 ### Changed
-- Health state of production tests are getting printed in CI/CD, closes #362.
+- Health state of production tests are getting printed in CI/CD, closes [#362].
 - Mutant tests are now being executed on `buildjet-4vcpu-ubuntu-2204` to increase CI/CD speed.
-- Enable Originstamp support, closes #328.
-- Upgrade upstream dependency NGINX Unit to 1.34.2, closes #371.
-- Update dependencies, related to #371.
+- Enable Originstamp support, closes [#328].
+- Upgrade upstream dependency NGINX Unit to 1.34.2, closes [#371].
+- Update dependencies, related to [#371].
 
 ## 0.1.19 - 2025-02-22
 ### Changed
