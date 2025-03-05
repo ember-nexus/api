@@ -31,7 +31,7 @@
     "syndesi/cypher-entity-manager": "^0.2.0",
     "syndesi/elastic-entity-manager": "^0.1.0",
     "syndesi/mongo-entity-manager": "^0.1.0",
-    "thecodingmachine/safe": "v3.0.0 as v2.6",
+    "thecodingmachine/safe": "v3.0.2 as v2.6",
     "tuupola/base58": "^2.1"
   },
   "require-dev": {
