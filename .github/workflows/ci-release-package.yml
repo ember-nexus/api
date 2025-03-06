@@ -380,7 +380,7 @@ jobs:
             -H "Authorization: ${{ secrets.ORIGINSTAMP_AUTH_TOKEN }}" \
             -d \
             "{
-              \"comment\": \"Release ${{ env.NEW_VERSION }} of ember-nexus/web-sdk\",
+              \"comment\": \"Release ${{ env.NEW_VERSION }} of ember-nexus/api\",
               \"hash\": \"${{ env.SHA }}\"
             }"
         env:
