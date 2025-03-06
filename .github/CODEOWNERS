@@ -1,0 +1,3 @@
+/.github/ @ember-nexus/secops
+/docker/ @ember-nexus/secops
+*.env @ember-nexus/secops
