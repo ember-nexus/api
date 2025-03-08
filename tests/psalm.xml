@@ -11,6 +11,7 @@
 >
     <projectFiles>
         <directory name="../src"/>
+        <directory name="../tests"/>
         <ignoreFiles>
             <directory name="../vendor"/>
         </ignoreFiles>
@@ -25,5 +26,55 @@
         <UnusedClass errorLevel="suppress" />
         <PossiblyUnusedMethod errorLevel="suppress" />
         <PossiblyUnusedReturnValue errorLevel="suppress" />
+        <PossiblyNullReference>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </PossiblyNullReference>
+        <UndefinedMagicMethod>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </UndefinedMagicMethod>
+        <MissingClosureParamType>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </MissingClosureParamType>
+        <MissingClosureReturnType>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </MissingClosureReturnType>
+        <RedundantCondition>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </RedundantCondition>
+        <PossiblyFalseArgument>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </PossiblyFalseArgument>
+        <PossiblyNullArrayAccess>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </PossiblyNullArrayAccess>
+        <InvalidClass>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </InvalidClass>
+        <RiskyTruthyFalsyComparison>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </RiskyTruthyFalsyComparison>
+        <PossiblyInvalidArgument>
+            <errorLevel type="suppress">
+                <directory name="../tests" />
+            </errorLevel>
+        </PossiblyInvalidArgument>
     </issueHandlers>
 </psalm>

@@ -31,7 +31,7 @@ class Server501NotImplementedExceptionFactoryTest extends TestCase
         )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Server501NotImplementedExceptionFactory($urlGenerator->reveal());
 
-        $exception = $factory->createFromTemplate('a');
+        $exception = $factory->createFromTemplate();
 
         $this->assertSame(501, $exception->getStatus());
         $this->assertSame('Not implemented', $exception->getTitle());

@@ -6,12 +6,13 @@ namespace App\tests\FeatureTests\General\Exception;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 
 class MalformedJsonRequestTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
 
-    private function runRawPostRequest(string $uri, ?string $token = null, ?string $body = null, ?array $headers = [])
+    private function runRawPostRequest(string $uri, ?string $token = null, ?string $body = null, ?array $headers = []): ResponseInterface
     {
         $client = new Client([
             'base_uri' => $_ENV['API_DOMAIN'],

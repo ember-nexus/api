@@ -121,7 +121,7 @@ class PostRegisterControllerTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client403ForbiddenException::class, $e);
             /**
-             * @var $e Client403ForbiddenException
+             * @var Client403ForbiddenException $e
              */
             $this->assertSame('Requested endpoint, element or action is forbidden.', $e->getDetail());
         }

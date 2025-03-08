@@ -34,7 +34,7 @@ class DateTimeNormalizedValueToRawValueEventListenerTest extends TestCase
         $rawValue = $event->getRawValue();
         $this->assertIsString($rawValue);
         /**
-         * @var $rawValue string
+         * @var string $rawValue
          */
         $this->assertSame('2005-08-15T15:52:01+00:00', $rawValue);
     }

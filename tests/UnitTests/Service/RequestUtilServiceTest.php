@@ -48,7 +48,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
-             * @var $e Client400MissingPropertyException
+             * @var Client400MissingPropertyException $e
              */
             $this->assertSame("Endpoint requires that the request contains property 'type' to be set to string.", $e->getDetail());
         }
@@ -61,7 +61,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'type' to be string, got 'integer'.", $e->getDetail());
         }
@@ -76,7 +76,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'type' to be string, got 'array'.", $e->getDetail());
         }
@@ -89,7 +89,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'type' to be Test, got 'notATest'.", $e->getDetail());
         }
@@ -117,7 +117,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
-             * @var $e Client400MissingPropertyException
+             * @var Client400MissingPropertyException $e
              */
             $this->assertSame("Endpoint requires that the request contains property 'data.email' to be set to string.", $e->getDetail());
         }
@@ -131,7 +131,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'data.email' to be string, got 'integer'.", $e->getDetail());
         }
@@ -147,7 +147,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'data.email' to be string, got 'array'.", $e->getDetail());
         }
@@ -179,7 +179,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
-             * @var $e Client400MissingPropertyException
+             * @var Client400MissingPropertyException $e
              */
             $this->assertSame("Endpoint requires that the request contains property 'uniqueUserIdentifier' to be set to string.", $e->getDetail());
         }
@@ -192,7 +192,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'uniqueUserIdentifier' to be string, got 'integer'.", $e->getDetail());
         }
@@ -207,7 +207,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'uniqueUserIdentifier' to be string, got 'array'.", $e->getDetail());
         }
@@ -236,7 +236,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
-             * @var $e Client400MissingPropertyException
+             * @var Client400MissingPropertyException $e
              */
             $this->assertSame("Endpoint requires that the request contains property 'uniqueUserIdentifier' to be set to string.", $e->getDetail());
         }
@@ -250,7 +250,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'uniqueUserIdentifier' to be string, got 'integer'.", $e->getDetail());
         }
@@ -266,7 +266,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'uniqueUserIdentifier' to be string, got 'array'.", $e->getDetail());
         }
@@ -335,7 +335,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
-             * @var $e Client400MissingPropertyException
+             * @var Client400MissingPropertyException $e
              */
             $this->assertSame("Endpoint requires that the request contains property 'password' to be set to string.", $e->getDetail());
         }
@@ -348,7 +348,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'password' to be string, got 'integer'.", $e->getDetail());
         }
@@ -363,7 +363,7 @@ class RequestUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
             $this->assertSame("Endpoint expects property 'password' to be string, got 'array'.", $e->getDetail());
         }

@@ -78,11 +78,11 @@ class EmberNexusOutputWrapperTest extends TestCase
     {
         $output = $this->prophesize(OutputInterface::class);
         $output
-            ->setVerbosity(Argument::is(123))
+            ->setVerbosity(Argument::is(128))
             ->shouldBeCalledOnce();
 
         $emberNexusOutputWrapper = new EmberNexusOutputWrapper($output->reveal());
-        $emberNexusOutputWrapper->setVerbosity(123);
+        $emberNexusOutputWrapper->setVerbosity(128);
     }
 
     public function testGetVerbosity(): void

@@ -88,7 +88,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
-             * @var $e Client400MissingPropertyException
+             * @var Client400MissingPropertyException $e
              */
             $this->assertSame("Endpoint requires that the request contains property '_passwordHash' to be set to string.", $e->getDetail());
         }
@@ -115,7 +115,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
@@ -156,7 +156,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
-             * @var $e Server500LogicErrorException
+             * @var Server500LogicErrorException $e
              */
             $this->assertSame('Environment variable "ANONYMOUS_USER_UUID" must be set to a valid UUID.', $e->getDetail());
         }
@@ -177,7 +177,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client403ForbiddenException::class, $e);
             /**
-             * @var $e Client403ForbiddenException
+             * @var Client403ForbiddenException $e
              */
             $this->assertSame('Requested endpoint, element or action is forbidden.', $e->getDetail());
         }
@@ -254,7 +254,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
@@ -300,7 +300,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
@@ -353,7 +353,7 @@ class SecurityUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }

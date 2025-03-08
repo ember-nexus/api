@@ -22,7 +22,7 @@ class ElementPropertyChangeEventTest extends TestCase
         $changedProperties = $event->getChangedProperties();
         $this->assertIsArray($changedProperties);
         /**
-         * @var $changedProperties array<string, mixed>
+         * @var array<string, mixed> $changedProperties
          */
         $this->assertSame('A', $changedProperties['a']);
     }
@@ -37,7 +37,7 @@ class ElementPropertyChangeEventTest extends TestCase
         $changedProperties = $event->getChangedProperties();
         $this->assertIsArray($changedProperties);
         /**
-         * @var $changedProperties array<string, mixed>
+         * @var array<string, mixed> $changedProperties
          */
         $this->assertSame('B', $changedProperties['b']);
     }
