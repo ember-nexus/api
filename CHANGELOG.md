@@ -5,12 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.21 - 2025-03-22
 ### Added
-- Add `CODEOWNERS` file, closes #331.
+- Add `CODEOWNERS` file, closes [#331].
+
 ### Changed
-- Upgrade PHP to 8.4.5, closes #377.
+- Upgrade PHP to 8.4.5, closes [#377].
+
 ### Fixed
-- Fix post release task regarding Originstamp certificates, closes #373
+- Fix post release task regarding Originstamp certificates, closes [#373]
 
 ## 0.1.20 - 2025-03-05
 ### Added
