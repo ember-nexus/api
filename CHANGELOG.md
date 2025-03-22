@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add `CODEOWNERS` file, closes #331.
+### Changed
+- Upgrade PHP to 8.4.5, closes #377.
 ### Fixed
 - Fix post release task regarding Originstamp certificates, closes #373
 
