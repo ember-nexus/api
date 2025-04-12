@@ -89,11 +89,6 @@ class PostSearchController extends AbstractController
             $indices = implode(',', $indices);
         }
 
-        /**
-         * @psalm-suppress InvalidArgument
-         *
-         * @phpstan-ignore-next-line
-         */
         $res = $this->elasticEntityManager->getClient()->search([
             'index' => $indices,
             'body' => [
