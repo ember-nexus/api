@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Upgrade PHP to 8.4.5, closes #380.
+- Fixed pecl mongodb to version 1.21.0 due to breaking changes in version 2.x.
 
 ## 0.1.21 - 2025-03-22
 ### Added

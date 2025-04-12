@@ -134,11 +134,6 @@ class DatabaseDropCommand extends Command
             }
         }
         foreach ($indices as $index) {
-            /**
-             * @psalm-suppress InvalidArgument
-             *
-             * @phpstan-ignore-next-line
-             */
             $this->elasticEntityManager->getClient()->indices()->delete(['index' => $index]);
         }
         $this->io->stopSection('Successfully deleted Elastic data.');
