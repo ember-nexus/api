@@ -1,6 +1,6 @@
 {
   "type": "project",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "license": "LicenseRef-Source-First-License-1.1",
   "minimum-stability": "dev",
   "prefer-stable": true,

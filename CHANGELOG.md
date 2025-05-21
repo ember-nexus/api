@@ -5,13 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.22 - 2025-05-21
 ### Changed
-- Upgrade PHP to 8.4.7, closes #383.
-- Upgrade PHP to 8.4.6, closes #380.
+- Upgrade PHP to 8.4.7, closes [#383].
+- Upgrade PHP to 8.4.6, closes [#380].
 - Fixed pecl mongodb to version 1.21.0 due to breaking changes in version 2.x.
 
 ### Fixed
-- Fix bug in CI check upstream dependency NGINX Unit, closes #384.
+- Fix bug in CI check upstream dependency NGINX Unit, closes [#384].
 
 ## 0.1.21 - 2025-03-22
 ### Added
