@@ -51,7 +51,7 @@ For local and development purposes, the whole stack can be hosted on a single ma
 use, as certain services like ElasticSearch can consume so much RAM, that other services are starved. Additionally, the
 lack of service distribution means that if one storage layer service crashes, the entire stack becomes unavailable.
 
-A Docker Compose configuration is available [here](/getting-started/local-deployment).
+A Docker Compose configuration is available [in the local deployment guide](/getting-started/local-deployment).
 
 ## Production Setups
 
