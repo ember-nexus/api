@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Upgrade to Alpine 3.22, closes #389.
+- Upgrade PHP to 8.4.11, closes #395.
 
 ## 0.1.22 - 2025-05-21
 ### Changed
