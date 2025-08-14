@@ -74,7 +74,7 @@ class PostTokenControllerTest extends TestCase
 
         $response = $postTokenController->postToken($request);
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(201, $response->getStatusCode());
         $responseBody = json_decode($response->getContent(), true);
         $this->assertSame('_TokenResponse', $responseBody['type']);
         $this->assertSame('someToken', $responseBody['token']);
@@ -115,7 +115,7 @@ class PostTokenControllerTest extends TestCase
 
         $response = $method->invokeArgs($postTokenController, ['1234']);
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(201, $response->getStatusCode());
         $body = \Safe\json_decode($response->getContent(), true);
         $this->assertSame('_TokenResponse', $body['type']);
         $this->assertSame('1234', $body['token']);

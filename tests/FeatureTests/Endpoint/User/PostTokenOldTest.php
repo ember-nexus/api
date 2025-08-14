@@ -30,7 +30,7 @@ class PostTokenOldTest extends BaseRequestTestCase
             ]
         );
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(201, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
         $body = \Safe\json_decode((string) $response->getBody(), true);
         $this->assertSame('_TokenResponse', $body['type']);
@@ -60,7 +60,7 @@ class PostTokenOldTest extends BaseRequestTestCase
             ]
         );
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(201, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
         $body = \Safe\json_decode((string) $response->getBody(), true);
         $this->assertSame('_TokenResponse', $body['type']);
@@ -90,7 +90,7 @@ class PostTokenOldTest extends BaseRequestTestCase
             ]
         );
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(201, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
         $body = \Safe\json_decode((string) $response->getBody(), true);
         $this->assertSame('_TokenResponse', $body['type']);
@@ -120,7 +120,7 @@ class PostTokenOldTest extends BaseRequestTestCase
             ]
         );
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(201, $response->getStatusCode());
         $this->assertSame('application/json; charset=utf-8', $response->getHeader('content-type')[0]);
         $body = \Safe\json_decode((string) $response->getBody(), true);
         $this->assertSame('_TokenResponse', $body['type']);
