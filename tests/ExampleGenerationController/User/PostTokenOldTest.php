@@ -26,8 +26,8 @@ class PostTokenOldTest extends BaseRequestTestCase
                 'password' => self::PASSWORD,
             ]
         );
-        $documentationHeadersPath = 'docs/api-endpoints/user/post-token-old/200-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/post-token-old/200-response-body.json';
+        $documentationHeadersPath = 'docs/api-endpoints/user/post-token-old/201-response-header.txt';
+        $documentationBodyPath = 'docs/api-endpoints/user/post-token-old/201-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

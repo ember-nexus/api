@@ -47,15 +47,15 @@ curl \
 
 <!-- tabs:start -->
 
-### **🟢 Success 200**
+### **🟢 Success 201**
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-token-old/200-response-header.txt ':include :type=code')
+[Response Body](./post-token-old/201-response-header.txt ':include :type=code')
 
 <div class="code-title auto-refresh">Response Body</div>
 
-[Response Body](./post-token-old/200-response-body.json ':include :type=code')
+[Response Body](./post-token-old/201-response-body.json ':include :type=code')
 
 ### **🔴 Error 400**
 
@@ -144,7 +144,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'createToken', ...workflowStep, label: "create token" },
     { id: 'error400', ...workflowEndError, label: "return 400" },
     { id: 'error401', ...workflowEndError, label: 'return 401' },
-    { id: 'success200', ...workflowEndSuccess , label: "return 200"},
+    { id: 'success201', ...workflowEndSuccess , label: "return 201"},
   ],
   edges: [
     { source: 'init', target: 'checkType', label: '' },
@@ -158,7 +158,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkPasswordProperty', target: 'error400', label: 'no' },
     { source: 'checkCredentials', target: 'createToken', label: 'yes' },
     { source: 'checkCredentials', target: 'error401', label: 'no' },
-    { source: 'createToken', target: 'success200', label: '' },
+    { source: 'createToken', target: 'success201', label: '' },
   ],
 }, 'TB');
 </script>

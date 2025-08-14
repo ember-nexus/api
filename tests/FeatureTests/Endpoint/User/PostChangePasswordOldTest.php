@@ -51,7 +51,7 @@ class PostChangePasswordOldTest extends BaseRequestTestCase
                 'password' => self::NEW_PASSWORD,
             ]
         );
-        $this->assertSame(200, $createTokenWithNewPasswordResponse->getStatusCode());
+        $this->assertSame(201, $createTokenWithNewPasswordResponse->getStatusCode());
 
         $changePasswordWithOldCredentialsFails = $this->runPostRequest(
             '/change-password',

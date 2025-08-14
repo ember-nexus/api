@@ -58,10 +58,13 @@ class PostTokenController extends AbstractController
 
     private function createTokenResponse(string $token): JsonResponse
     {
-        return new JsonResponse([
-            'type' => '_TokenResponse',
-            'token' => $token,
-        ]);
+        return new JsonResponse(
+            [
+                'type' => '_TokenResponse',
+                'token' => $token,
+            ],
+            201
+        );
     }
 
     /**
