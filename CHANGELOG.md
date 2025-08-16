@@ -5,11 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.23 - 2025-08-16
 ### Changed
-- Upgrade to Alpine 3.22, closes #389.
-- Upgrade PHP to 8.4.11, closes #395.
+- Upgrade to Alpine 3.22, closes [#389].
+- Upgrade PHP to 8.4.11, closes [#395].
+
 ### Fixed
-- Post token endpoint returns status code 201 instead of 200, closes #392.
+- Post token endpoint returns status code 201 instead of 200, closes [#392].
 
 ## 0.1.22 - 2025-05-21
 ### Changed
