@@ -1,0 +1,18 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "term": {
+          "name.keyword": {
+            "value": "Bluebell"
+          }
+        }
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

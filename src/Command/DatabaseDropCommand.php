@@ -19,6 +19,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
+use Throwable;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor
@@ -133,8 +134,18 @@ class DatabaseDropCommand extends Command
                 $indices[] = $parts[2];
             }
         }
+        $indices = array_unique($indices);
+        sort($indices);
         foreach ($indices as $index) {
-            $this->elasticEntityManager->getClient()->indices()->delete(['index' => $index]);
+            try {
+                $this->elasticEntityManager->getClient()->indices()->delete(['index' => $index]);
+            } catch (Throwable $t) {
+                $this->io->warning(sprintf(
+                    "Unable to delete Elasticsearch index '%s'.\n%s",
+                    $index,
+                    $t->getMessage()
+                ));
+            }
         }
         $this->io->stopSection('Successfully deleted Elastic data.');
     }

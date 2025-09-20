@@ -1,0 +1,36 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "cypher-path-subset",
+      "query": "MATCH path=((plant:Plant)-[:HAS_TAG]->(:Tag {name: $color})) RETURN path ORDER BY plant.name"
+    },
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "match": {
+                "description": {
+                  "query": "{{color}}"
+                }
+              }
+            },
+            {
+              "terms": {
+                "_id": "{{map(stepResults[0].paths, #.nodeIds[0])}}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ],
+  "parameters": {
+    "color": "red"
+  }
+}

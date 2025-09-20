@@ -23,13 +23,13 @@ class GetInstanceConfigurationWithDifferentConfigurationTest extends BaseRequest
             "  instanceConfiguration:\n".
             "    enabled: false\n"
         );
-        exec('cd ../../.. && php bin/console cache:clear');
+        shell_exec('cd ../../.. && php bin/console cache:clear');
     }
 
     public function tearDown(): void
     {
         file_put_contents(self::PATH_TO_CONFIGURATION, $this->originalConfiguration);
-        exec('cd ../../.. && php bin/console cache:clear');
+        shell_exec('cd ../../.. && php bin/console cache:clear');
         parent::tearDown();
     }
 

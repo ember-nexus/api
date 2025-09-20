@@ -3,78 +3,84 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-!> **Note**: This endpoint might be changed during development to the
-[0.3.0](https://github.com/ember-nexus/api/milestone/3) version.
+The search endpoint allows you to query internal databases like Neo4j and Elasticsearch with user defined queries,
+returning exactly the data you need in the most optimal way.  
+Each search request can contain multiple search steps, which are executed sequentially. Later steps have access to data
+returned by earlier steps.
 
-The post search endpoint at `POST /search` is used to execute [Elasticsearch](https://www.elastic.co/) queries and
-return found elements.
+**WHY IT MATTERS**: Chaining steps together enables to search across different databases, uncovering insights that
+single-database queries cannot.
 
-As there is no logical difference between found nodes and found relations, both types are merged in a single elements
-response.
+## Supported Search Steps
+
+- [Elasticsearch Query DSL Mixin](/search/step/elasticsearch-query-dsl-mixin): Ideal for finding elements
+  based solely on their own properties. Supports all [Elasticsearch Query DSL features](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl).
+- [Cypher Path](/search/step/cypher-path): Ideal to find collections of elements based on the relation
+  between them. Uses a safe subset of [Cypher 25](https://neo4j.com/docs/cypher-manual/25/queries/concepts/).
+- [Element Hydration](/search/step/element-hydration): Converts a list of element ids to a list containing
+  the full element objects, i.e. all its properties "hydrated". Useful as a last step in a search query to return
+  collection responses.
 
 ## Request Parameters
 
-- `page`: Integer, number of the page to be returned. The first page is `1`, which is also the default if not explicitly
-  set.
-- `pageSize`: Integer, is the upper limit of elements to be returned. Limited by the APIs instance configuration. By
-  default, 25 and can be set between 5 and 100.
+This endpoint does not require parameters.
 
-## Available Request Properties
+## Request Headers
+
+<div class="table-request-headers">
+
+| Header          | Description                                                                                         | Required | Default |
+|-----------------|-----------------------------------------------------------------------------------------------------|----------|---------|
+| `Authorization` | Contains an authentication token. <br />See [authentication](/concepts/authentication) for details. | no       | -       |
+
+</div>
+
+## Response Headers
+
+This endpoint does not expose specialized response headers.
+
+## Request Body
 
 The posted request must be a valid JSON document.
 
-### Query
+The request can contain the following attributes:
 
-The `query` property is required and contains the Elasticsearch sub query, which is internally combined with security
-related sub queries. For available options, see [Elasticsearch's documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html).
+- `debug`: Optional, boolean. If set to true, the response object will contain additional details like intermediate
+  search results, performance data and more.
+- `parameters`: Optional, object of arbitrary form. All top level or "global" parameters are injected to search steps to
+  provide static data to queries.
+- `steps`: Required, list of step definitions.
 
-Available properties depend on the Elasticsearch configuration, which usually is automatically created. Available
-options can be explored with Kibana (requires admin privileges to the Ember Nexus instance).
+Each step definition can have the following attributes:
 
-The combined query will look like this:
+- `type`: Required, string. Must match one of the supported search steps, e.g. `element-hydration`.
+- `query`: Optional, if set it must be either a string or object. Content depends on the used search step.
+- `parameters`: Optional, object of arbitrary form. Has priority over global parameters, i.e. overwrites them for the
+  current step.
 
-```json
-{
-  "query": {
-    "bool": {
-      "must": [
-        "<query uploaded by user>",
-        {
-          "bool": {
-            "should": [
-              {
-                "terms": {
-                  "_groupsWithSearchAccess.keyword": [
-                    "array with UUIDs of the group, to which the current user has access"
-                  ]
-                }
-              },
-              {
-                "term": {
-                  "_usersWithSearchAccess.keyword": {
-                    "value": "UUID of current user"
-                  }
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        }
-      ]
-    }
-  }
-}
-```
+The parameters of a step are evaluated in the following order:
 
-### NodeTypes
+- Results of previous steps are used as the base.
+- Later step results will overwrite earlier step results.
+- Global parameters will overwrite step results.
+- Step specific parameters will overwrite global parameters as well as step results.
 
-The `nodeTypes` property is optional and if present, must be an array of node types, to which the search will be limited
-to. Internally these types are matched to the correct Elasticsearch indices.
+## Examples
 
-### RelationTypes
+Examples using mostly Elasticsearch Query DSL Mixins:
 
-The `relationTypes` property is optional and if present, must be an array of relation types, to which the search will be
-limited to. Internally these types are matched to the correct Elasticsearch indices.
+- [Simple Full Text Search](/search/example/simple-full-text-search)
+- [Advanced Full Text Search](/search/example/advanced-full-text-search)
+- [Keyword Search](/search/example/keyword-search)
+- [Text Prefix Search](/search/example/text-prefix-search)
+- [Wildcard Search](/search/example/wildcard-search)
+- [Query String Search](/search/example/query-string-search)
+
+Examples using mostly Cypher Paths:
+
+- [Find Tagged Elements](./)
+- [Find Elements by Type (Cypher)](./)
+- [Find Nested Elements](./)
 
 ## Request Example
 

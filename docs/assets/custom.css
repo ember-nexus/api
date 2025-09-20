@@ -7,6 +7,15 @@
   --ember-nexus-text-green: #4CAF50;
   --ember-nexus-text-blue: #0074E4;
   --ember-nexus-text-purple: #7E57C2;
+  font-size: 18px;
+}
+
+.markdown-section {
+  font-size: 18px;
+}
+
+html > body {
+  font-family: "Roboto";
 }
 
 .text-red {
@@ -41,6 +50,23 @@ body,
 .markdown-section h6,
 .markdown-section strong {
   color: #1a1a1a;
+}
+
+.markdown-section h1,
+.markdown-section h2,
+.markdown-section h3,
+.markdown-section h4,
+.markdown-section h5,
+.markdown-section h6 {
+  font-weight: 400;
+}
+
+.markdown-section a {
+  font-weight: inherit;
+}
+
+.markdown-section li + li {
+  margin-top: 0.25em;
 }
 
 /*.anchor span {*/
@@ -122,6 +148,11 @@ table th {
 
 .sidebar-nav li {
   font-size: 14px;
+}
+
+.sidebar-nav li > p,
+.sidebar-nav li > strong {
+  font-weight: 500;
 }
 
 .graph-container {

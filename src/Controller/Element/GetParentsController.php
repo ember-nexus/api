@@ -6,6 +6,7 @@ namespace App\Controller\Element;
 
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
@@ -14,12 +15,16 @@ use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\EtagType;
 use Laudis\Neo4j\Databags\Statement;
+use Laudis\Neo4j\Types\CypherList;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+/**
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ */
 class GetParentsController extends AbstractController
 {
     public function __construct(
@@ -28,6 +33,7 @@ class GetParentsController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -124,9 +130,23 @@ class GetParentsController extends AbstractController
         $relationIds = [];
         if (count($res) > 0) {
             $totalCount = $res->first()->get('totalCount');
+            if (!is_int($totalCount)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property totalCount as int, not %s.', get_debug_type($totalCount))); // @codeCoverageIgnore
+            }
             foreach ($res as $resultSet) {
-                $nodeIds[] = UuidV4::fromString($resultSet->get('parent'));
-                foreach ($resultSet->get('r') as $relationId) {
+                $rawParent = $resultSet->get('parent');
+                if (!is_string($rawParent)) {
+                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property parent as string, not %s.', get_debug_type($rawParent))); // @codeCoverageIgnore
+                }
+                $nodeIds[] = UuidV4::fromString($rawParent);
+                $rawRelations = $resultSet->get('r');
+                if (!($rawRelations instanceof CypherList)) {
+                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r as CypherList, not %s.', get_debug_type($rawRelations))); // @codeCoverageIgnore
+                }
+                foreach ($rawRelations as $relationId) {
+                    if (!is_string($relationId)) {
+                        throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.item as string, not %s.', get_debug_type($relationId))); // @codeCoverageIgnore
+                    }
                     $relationIds[] = UuidV4::fromString($relationId);
                 }
             }

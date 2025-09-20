@@ -79,7 +79,7 @@ class PostTokenController extends AbstractController
         }
         $lifetimeInSeconds = $body['lifetimeInSeconds'];
         if (!is_int($lifetimeInSeconds)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('lifetimeInSeconds', 'int', gettype($lifetimeInSeconds));
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('lifetimeInSeconds', 'int', $lifetimeInSeconds);
         }
 
         return $lifetimeInSeconds;

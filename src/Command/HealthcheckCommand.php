@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Style\EmberNexusStyle;
 use Exception;
 use GuzzleHttp\Client;
@@ -34,6 +35,7 @@ class HealthcheckCommand extends Command
         private ElasticEntityManager $elasticEntityManager,
         private RedisClient $redisClient,
         private AMQPStreamConnection $AMQPStreamConnection,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -54,10 +56,18 @@ class HealthcheckCommand extends Command
                 'CALL dbms.components() YIELD versions, edition UNWIND versions AS version RETURN version, edition;'
             )
         );
+        $rawVersion = $neo4jInfo->first()->get('version');
+        if (!is_string($rawVersion)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property version as string, not %s.', get_debug_type($rawVersion))); // @codeCoverageIgnore
+        }
+        $rawEdition = $neo4jInfo->first()->get('edition');
+        if (!is_string($rawEdition)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property edition as string, not %s.', get_debug_type($rawEdition))); // @codeCoverageIgnore
+        }
         $neo4jVersion = sprintf(
             '%s (%s)',
-            $neo4jInfo->first()->get('version'),
-            $neo4jInfo->first()->get('edition')
+            $rawVersion,
+            $rawEdition
         );
 
         $this->io->writeln(sprintf(

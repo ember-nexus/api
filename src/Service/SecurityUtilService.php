@@ -97,7 +97,11 @@ class SecurityUtilService
         if (1 !== count($res)) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
-        $userId = Uuid::fromString($res->first()->get('id'));
+        $rawUserId = $res->first()->get('id');
+        if (!is_string($rawUserId)) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawUserId)));
+        }
+        $userId = Uuid::fromString($rawUserId);
         $element = $this->elementManager->getElement($userId);
         if (null === $element) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();

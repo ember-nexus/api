@@ -9,6 +9,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Throwable;
 
 class Server500InternalServerErrorExceptionFactory
 {
@@ -24,7 +25,7 @@ class Server500InternalServerErrorExceptionFactory
      *
      * @param mixed[] $context
      */
-    public function createFromTemplate(string $developmentDetail, array $context = []): Server500InternalServerErrorException
+    public function createFromTemplate(string $developmentDetail, array $context = [], ?Throwable $previous = null): Server500InternalServerErrorException
     {
         $this->logger->error($developmentDetail, $context);
         $message = 'Internal server error, see log.';
@@ -41,7 +42,8 @@ class Server500InternalServerErrorExceptionFactory
                 ],
                 UrlGeneratorInterface::ABSOLUTE_URL
             ),
-            detail: $message
+            detail: $message,
+            previous: $previous
         );
     }
 }

@@ -15,6 +15,8 @@ class Configuration implements ConfigurationInterface
     public const int THIRTEEN_MONTHS_IN_SECONDS = 3600 * 24 * (365 + 31);
     public const int TWO_WEEKS_IN_SECONDS = 3600 * 24 * 14;
     public const int CACHE_ETAG_DEFAULT_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS = 100;
+    public const int EXPRESSION_WARNING_LENGTH = 512;
+    public const int EXPRESSION_MAX_LENGTH = 10 * 1024;
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -60,6 +62,27 @@ class Configuration implements ConfigurationInterface
                     ->scalarNode(EmberNexusConfiguration::REGISTER_UNIQUE_IDENTIFIER_REGEX)
                         ->info('Either false or a regex for checking the identifier content.')
                         ->defaultFalse()
+                    ->end()
+                ->end()
+            ->end()
+
+            ->arrayNode(EmberNexusConfiguration::EXPRESSION)
+                ->info('Configures settings related to the execution of expressions')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->booleanNode(EmberNexusConfiguration::EXPRESSION_ENABLED)
+                        ->info('If true, expressions are executed.')
+                        ->defaultTrue()
+                    ->end()
+                    ->integerNode(EmberNexusConfiguration::EXPRESSION_WARNING_LENGTH)
+                        ->info('Minimum length for executable expressions to trigger a warning in the logs.')
+                        ->min(1)
+                        ->defaultValue(self::EXPRESSION_WARNING_LENGTH)
+                    ->end()
+                    ->integerNode(EmberNexusConfiguration::EXPRESSION_MAX_LENGTH)
+                        ->info('Maximum length for executable expressions. Exceeding the limit will throw an exception.')
+                        ->min(1)
+                        ->defaultValue(self::EXPRESSION_MAX_LENGTH)
                     ->end()
                 ->end()
             ->end()

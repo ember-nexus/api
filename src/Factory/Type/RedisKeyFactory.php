@@ -19,6 +19,16 @@ class RedisKeyFactory
         );
     }
 
+    public function getValidatedQueryCypherPathSubsetRedisKey(string $cypherQuery): RedisKey
+    {
+        $hashedCypherQuery = sha1($cypherQuery);
+
+        return new RedisKey(
+            RedisPrefixType::VALIDATED_QUERY_CYPHER_PATH_SUBSET,
+            $hashedCypherQuery
+        );
+    }
+
     public function getEtagElementRedisKey(UuidInterface $elementId): RedisKey
     {
         return new RedisKey(

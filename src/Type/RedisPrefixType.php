@@ -7,6 +7,7 @@ namespace App\Type;
 enum RedisPrefixType: string
 {
     case TOKEN = 'token:';
+    case VALIDATED_QUERY_CYPHER_PATH_SUBSET = 'validated-query:cypher-path-subset:';
 
     case ETAG_ELEMENT = 'etag:element:';
     case ETAG_CHILDREN_COLLECTION = 'etag:children:';

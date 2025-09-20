@@ -2,5 +2,5 @@
   "type": "http://ember-nexus-api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "detail": "Endpoint expects property 'type' to be ActionChangePassword, got 'NotActionChangePassword'."
+  "detail": "Endpoint expects property 'type' to be ActionChangePassword, got string 'NotActionChangePassword'."
 }

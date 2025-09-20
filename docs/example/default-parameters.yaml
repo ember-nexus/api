@@ -25,6 +25,18 @@ ember_nexus:
     # Either false or a regex for checking the identifier content.
     uniqueIdentifierRegex: false
 
+  # Configures settings related to the execution of expressions
+  expression:
+
+    # If true, expressions are executed.
+    enabled: true
+
+    # Minimum length for executable expressions to trigger a warning in the logs.
+    warningLength: 512
+
+    # Maximum length for executable expressions. Exceeding the limit will throw an exception.
+    maxLength: 10240
+
   # Configures the /instance-configuration endpoint.
   instanceConfiguration:
 

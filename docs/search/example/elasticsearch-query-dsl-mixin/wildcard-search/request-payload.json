@@ -1,0 +1,21 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "wildcard": {
+          "description": {
+            "value": "colo*r"
+          }
+        }
+      },
+      "parameters": {
+        "pageSize": 5
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

@@ -1,0 +1,418 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "024e049b-219a-477c-9b8c-be1244c16dab",
+      "start": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+      "end": "b7cda919-deea-49f9-9151-49132f83cbff",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "06faa138-14b9-48f1-b967-1ae536a9d3ef",
+      "start": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+      "end": "30cb4ff2-591f-4fba-aa47-ca6ada630b9a",
+      "data": {
+        "created": "2025-09-17T07:34:31+00:00",
+        "updated": "2025-09-17T07:34:31+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Gloriosa",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Colchicaceae/Gloriosa",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "1852bdff-a4dd-4f91-9243-0e802775f757",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Liliales",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Lilieae",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae/Lilieae",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "L. candidum",
+        "link": "https://en.wikipedia.org/wiki/Lilium_candidum",
+        "description": "Lilium candidum, the Madonna lily[2][3] or white lily,[4] is a plant in the true lily family. It is native to the Balkans and Middle East, and naturalized in other parts of Europe, including France, Italy, and Ukraine, and in North Africa, the Canary Islands, Mexico, and other regions.[1][5] It has been cultivated since antiquity, for at least 3,000 years,[6] and has great symbolic value since then for many cultures. It is susceptible to several virus diseases common to lilies, and especially to Botrytis fungus. One technique to avoid problems with viruses is to grow plants from seed instead of bulblets."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Flame Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "G. superba",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
+        "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include flame lily, climbing lily, creeping lily, glory lily,[3] gloriosa lily, tiger claw,[4] and fire lily.[5]"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "30cb4ff2-591f-4fba-aa47-ca6ada630b9a",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Melanthiaceae",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Melanthiaceae",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "425235d6-75ab-4ccb-8208-783ced0decc6",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Liliaceae",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "49d9a28c-b712-4be6-9cf1-11d2062ffa89",
+      "start": "b7cda919-deea-49f9-9151-49132f83cbff",
+      "end": "1852bdff-a4dd-4f91-9243-0e802775f757",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Trillium",
+        "scenario": "general.botanicExample",
+        "scientificName": "T. grandiflorum",
+        "link": "https://en.wikipedia.org/wiki/Trillium_grandiflorum",
+        "description": "Trillium grandiflorum, the white trillium,[3] large-flowered trillium, great white trillium,[4] white wake-robin or French: trille blanc, is a species of flowering plant in the family Melanthiaceae. A monocotyledonous, herbaceous perennial, the plant is native to eastern North America, from northern Quebec to the southern parts of the United States through the Appalachian Mountains into northernmost Georgia and west to Minnesota. There are also several isolated populations in Nova Scotia, Maine, southern Illinois, and Iowa.[5]"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "78228dfa-196a-48ef-9a46-e8fa5dc2628f",
+      "start": "7dd3a650-d60e-40c9-89d0-bccaf395369f",
+      "end": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "7dd3a650-d60e-40c9-89d0-bccaf395369f",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Lilium",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae/Lilieae/Lilium",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "81b19288-a74b-4496-84a9-0d07386b8e26",
+      "start": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+      "end": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Lilioideae",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+      "data": {
+        "created": "2025-09-17T07:34:19+00:00",
+        "updated": "2025-09-17T07:34:19+00:00",
+        "name": "Tulip",
+        "scenario": "general.botanicExample",
+        "scientificName": "Tulipa",
+        "link": "https://en.wikipedia.org/wiki/Tulip",
+        "description": "Tulips are spring-blooming perennial herbaceous bulbiferous geophytes in the Tulipa genus. Their flowers are usually large, showy, and brightly coloured, generally red, orange, pink, yellow, or white. They often have a different coloured blotch at the base of the tepals, internally. Because of a degree of variability within the populations and a long history of cultivation, classification has been complex and controversial. The tulip is a member of the lily family, Liliaceae,[2] along with 14 other genera, where it is most closely related to Amana, Erythronium, and Gagea in the tribe Lilieae."
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Trillium",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Melanthiaceae/Trillium",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "9bea8667-ab81-48ff-871a-00334afc1a07",
+      "start": "425235d6-75ab-4ccb-8208-783ced0decc6",
+      "end": "1852bdff-a4dd-4f91-9243-0e802775f757",
+      "data": {
+        "created": "2025-09-17T07:34:31+00:00",
+        "updated": "2025-09-17T07:34:31+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "b60561b3-46d1-4632-9320-b0e02afa4198",
+      "start": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+      "end": "425235d6-75ab-4ccb-8208-783ced0decc6",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "b7cda919-deea-49f9-9151-49132f83cbff",
+      "data": {
+        "created": "2025-09-17T07:34:22+00:00",
+        "updated": "2025-09-17T07:34:22+00:00",
+        "name": "Colchicaceae",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Colchicaceae",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "b9fee9e3-f0c5-451c-b9a6-f5a3578e023c",
+      "start": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "end": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "e73faa5c-2c41-4d04-8a09-f160c4accea8",
+      "start": "23508e6c-632a-496d-9bd6-8c62a03216af",
+      "end": "7dd3a650-d60e-40c9-89d0-bccaf395369f",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "e8e3fb73-5129-4cb3-99cd-d564e191d500",
+      "start": "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
+      "end": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "ee29e267-63c8-45fb-a9a5-47835f46a839",
+      "start": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+      "end": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    },
+    {
+      "type": "IS_MEMBER_OF",
+      "id": "ee933330-c413-4680-be79-03f51b18aa7b",
+      "start": "30cb4ff2-591f-4fba-aa47-ca6ada630b9a",
+      "end": "1852bdff-a4dd-4f91-9243-0e802775f757",
+      "data": {
+        "created": "2025-09-17T07:34:33+00:00",
+        "updated": "2025-09-17T07:34:33+00:00",
+        "scenario": "general.botanicExample"
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "cypher-path-subset",
+        "query": "MATCH path=((:Plant)-[:IS_MEMBER_OF*..]->(:Taxon {name: \"Liliales\"})) RETURN path LIMIT 5",
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "start": 1758094526.041398,
+      "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
+      "end": 1758094526.343532,
+      "duration": 0.30213403701782227
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "paths": [
+                {
+                  "nodeIds": [
+                    "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+                    "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+                    "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+                    "425235d6-75ab-4ccb-8208-783ced0decc6",
+                    "1852bdff-a4dd-4f91-9243-0e802775f757"
+                  ],
+                  "relationIds": [
+                    "ee29e267-63c8-45fb-a9a5-47835f46a839",
+                    "81b19288-a74b-4496-84a9-0d07386b8e26",
+                    "b60561b3-46d1-4632-9320-b0e02afa4198",
+                    "9bea8667-ab81-48ff-871a-00334afc1a07"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "23508e6c-632a-496d-9bd6-8c62a03216af",
+                    "7dd3a650-d60e-40c9-89d0-bccaf395369f",
+                    "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+                    "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+                    "425235d6-75ab-4ccb-8208-783ced0decc6",
+                    "1852bdff-a4dd-4f91-9243-0e802775f757"
+                  ],
+                  "relationIds": [
+                    "e73faa5c-2c41-4d04-8a09-f160c4accea8",
+                    "78228dfa-196a-48ef-9a46-e8fa5dc2628f",
+                    "81b19288-a74b-4496-84a9-0d07386b8e26",
+                    "b60561b3-46d1-4632-9320-b0e02afa4198",
+                    "9bea8667-ab81-48ff-871a-00334afc1a07"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
+                    "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+                    "30cb4ff2-591f-4fba-aa47-ca6ada630b9a",
+                    "1852bdff-a4dd-4f91-9243-0e802775f757"
+                  ],
+                  "relationIds": [
+                    "e8e3fb73-5129-4cb3-99cd-d564e191d500",
+                    "06faa138-14b9-48f1-b967-1ae536a9d3ef",
+                    "ee933330-c413-4680-be79-03f51b18aa7b"
+                  ]
+                },
+                {
+                  "nodeIds": [
+                    "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                    "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+                    "b7cda919-deea-49f9-9151-49132f83cbff",
+                    "1852bdff-a4dd-4f91-9243-0e802775f757"
+                  ],
+                  "relationIds": [
+                    "b9fee9e3-f0c5-451c-b9a6-f5a3578e023c",
+                    "024e049b-219a-477c-9b8c-be1244c16dab",
+                    "49d9a28c-b712-4be6-9cf1-11d2062ffa89"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758094526.343716,
+      "element-hydration:redundantElementIds": {
+        "message": "Removed 9 redundant elementIds.",
+        "removedElementIds": [
+          "1852bdff-a4dd-4f91-9243-0e802775f757",
+          "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+          "425235d6-75ab-4ccb-8208-783ced0decc6",
+          "81b19288-a74b-4496-84a9-0d07386b8e26",
+          "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+          "9bea8667-ab81-48ff-871a-00334afc1a07",
+          "b60561b3-46d1-4632-9320-b0e02afa4198"
+        ]
+      },
+      "accessibleElementIds": [
+        "024e049b-219a-477c-9b8c-be1244c16dab",
+        "06faa138-14b9-48f1-b967-1ae536a9d3ef",
+        "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+        "1852bdff-a4dd-4f91-9243-0e802775f757",
+        "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+        "23508e6c-632a-496d-9bd6-8c62a03216af",
+        "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+        "30cb4ff2-591f-4fba-aa47-ca6ada630b9a",
+        "425235d6-75ab-4ccb-8208-783ced0decc6",
+        "49d9a28c-b712-4be6-9cf1-11d2062ffa89",
+        "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
+        "78228dfa-196a-48ef-9a46-e8fa5dc2628f",
+        "7dd3a650-d60e-40c9-89d0-bccaf395369f",
+        "81b19288-a74b-4496-84a9-0d07386b8e26",
+        "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+        "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+        "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+        "9bea8667-ab81-48ff-871a-00334afc1a07",
+        "b60561b3-46d1-4632-9320-b0e02afa4198",
+        "b7cda919-deea-49f9-9151-49132f83cbff",
+        "b9fee9e3-f0c5-451c-b9a6-f5a3578e023c",
+        "e73faa5c-2c41-4d04-8a09-f160c4accea8",
+        "e8e3fb73-5129-4cb3-99cd-d564e191d500",
+        "ee29e267-63c8-45fb-a9a5-47835f46a839",
+        "ee933330-c413-4680-be79-03f51b18aa7b"
+      ],
+      "end": 1758094526.446777,
+      "duration": 0.103061
+    }
+  ]
+}

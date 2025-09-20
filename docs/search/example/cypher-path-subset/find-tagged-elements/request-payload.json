@@ -1,0 +1,12 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "cypher-path-subset",
+      "query": "MATCH path=((:Plant)-[:HAS_TAG]->(:Tag {name: \"blue\"})) RETURN path"
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

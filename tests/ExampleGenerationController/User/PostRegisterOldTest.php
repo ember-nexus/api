@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\tests\ExampleGenerationController\User;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @group deprecated
- */
+#[Group('deprecated')]
 class PostRegisterOldTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';

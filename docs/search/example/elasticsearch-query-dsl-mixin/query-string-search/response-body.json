@@ -1,0 +1,233 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "Bluebell",
+        "scenario": "general.botanicExample",
+        "scientificName": "M. virginica",
+        "link": "https://en.wikipedia.org/wiki/Mertensia_virginica",
+        "description": "Mertensia virginica (common names Virginia bluebells,[1] Virginia cowslip,[2] lungwort oysterleaf, Roanoke bells) is a spring ephemeral plant in the Boraginaceae (borage) family with bell-shaped sky-blue flowers, native to eastern North America."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "ad80a619-2b53-4f27-a4bd-56a316c15251",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "Jacaranda",
+        "scenario": "general.botanicExample",
+        "scientificName": "J. mimosifolia",
+        "link": "https://en.wikipedia.org/wiki/Jacaranda_mimosifolia",
+        "description": "Jacaranda mimosifolia is a sub-tropical tree native to south-central South America that has been widely planted elsewhere because of its attractive and long-lasting violet-colored flowers. It is also known as the jacaranda, blue jacaranda, black poui, Nupur or fern tree. Older sources call it J. acutifolia, but modern authorities usually classify it as J. mimosifolia. In scientific usage, the name \"jacaranda\" refers to the genus Jacaranda, which has many other members, but in horticultural and everyday usage, it nearly always means the blue jacaranda.\n\nIn its native range in the wild, J. mimosifolia is listed as Vulnerable by the IUCN.[1]"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "26dfaa98-5f15-4170-9fdc-94661c1a26c5",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "Prairie Gentian",
+        "scenario": "general.botanicExample",
+        "scientificName": "E. russellianum",
+        "link": "https://en.wikipedia.org/wiki/Eustoma_russellianum",
+        "description": "Eustoma russellianum is a species of flowering plant in the gentian family. One of its previous binomial names was Eustoma grandiflorum.[1] Common names include showy prairie gentian, prairie gentian, Texas bluebells, Texas bluebell, bluebell,[2] and Lisianthus.\n\nThere is a cultivar, 'Bolero Deep Blue'.[3]"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "152d527e-4e33-4ad4-b13b-1de643740cce",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "Acacia",
+        "scenario": "general.botanicExample",
+        "scientificName": "A. dealbata",
+        "link": "https://en.wikipedia.org/wiki/Acacia_dealbata",
+        "description": "Acacia dealbata, commonly known as silver wattle, blue wattle or mimosa,[2] is a species of flowering plant in the legume family, Fabaceae and is endemic to south-eastern mainland Australia. It is a bushy shrub or spreading tree with smooth bark, bluish grey or silvery and glaucous bipinnate leaves, spherical heads of yellow to bright yellow flowers, and straight to slightly curved pods. The Wiradjuri people of New South Wales use the name giigandul for the species.[3]"
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "data": {
+        "description": "Blue is one of the three primary colours in the RGB (additive) colour model, as well as in the RYB colour model (traditional colour theory).[2] It lies between violet and cyan on the spectrum of visible light. The term blue generally describes colours perceived by humans observing light with a dominant wavelength that's between approximately 450 and 495 nanometres. The clear daytime sky and the deep sea appear blue because of an optical effect known as Rayleigh scattering. An optical effect called the Tyndall effect explains blue eyes. Distant objects appear more blue because of another optical effect called aerial perspective.\n\nBlue has been an important colour in art and decoration since ancient times. The semi-precious stone lapis lazuli was used in ancient Egypt for jewellery and ornament and later, in the Renaissance, to make the pigment ultramarine, the most expensive of all pigments.[3] In the eighth century Chinese artists used cobalt blue to colour fine blue and white porcelain. In the Middle Ages, European artists used it in the windows of cathedrals. Europeans wore clothing coloured with the vegetable dye woad until it was replaced by the finer indigo from America. In the 19th century, synthetic blue dyes and pigments gradually replaced organic dyes and mineral pigments. Dark blue became a common colour for military uniforms and later, in the late 20th century, for business suits. Because blue has commonly been associated with harmony, it was chosen as the colour of the flags of the United Nations and the European Union.[4]\n\nIn the United States and Europe, blue is the colour that both men and women are most likely to choose as their favourite, with at least one recent survey showing the same across several other countries, including China, Malaysia, and Indonesia.[5][6] Past surveys in the US and Europe have found that blue is the colour most commonly associated with harmony, confidence, masculinity, knowledge, intelligence, calmness, distance, infinity, the imagination, cold, and sadness.[7]",
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "blue",
+        "color": "#4363d8",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Blue"
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "3e5b01a7-5856-461e-bde5-d8388b6d909c",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "navy",
+        "color": "#000075",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Navy_blue",
+        "description": "Navy blue is a dark shade of the color blue. The name navy blue originally referred to the color of uniforms worn by officers in the British navy. In the late 18th century, the British Royal Navy adopted the color for its sailors' uniforms, partly due to the practical reason that dark colors were less prone to showing dirt and wear during long sea voyages. The color became so associated with naval service that it came to be known simply as \"navy blue.\""
+      }
+    },
+    {
+      "type": "Tag",
+      "id": "b7121a49-8f17-4858-b988-4bd837a5f1fe",
+      "data": {
+        "created": "2025-09-16T11:25:29+00:00",
+        "updated": "2025-09-16T11:25:29+00:00",
+        "name": "lavender",
+        "color": "#dcbeff",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Lavender_(color)",
+        "description": "Lavender is a light shade of purple or violet. It applies particularly to the color of the flower of the same name. The web color called lavender is displayed adjacent\\u2014it matches the color of the palest part of the flower; however, the more saturated color shown as floral lavender more closely matches the average color of the lavender flower as shown in the picture and is the tone of lavender historically and traditionally considered lavender by average people as opposed to website designers.[3] The color lavender might be described as a medium purple, a pale bluish purple,[4] or a light pinkish-purple. The term lavender may be used in general to apply to a wide range of pale, light, or grayish-purples, but only on the blue side; lilac is pale purple on the pink side. In paints, the color lavender is made by mixing purple and white paint."
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "query_string": {
+            "query": "+blue -red",
+            "default_field": "description"
+          }
+        },
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1758021997.211783,
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 25,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "query_string": {
+                  "query": "+blue -red",
+                  "default_field": "description"
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "indices": "*",
+      "end": 1758021997.229793,
+      "duration": 0.01801
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "elements": [
+                {
+                  "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.2498505
+                  }
+                },
+                {
+                  "id": "ad80a619-2b53-4f27-a4bd-56a316c15251",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.1922612
+                  }
+                },
+                {
+                  "id": "26dfaa98-5f15-4170-9fdc-94661c1a26c5",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.038499
+                  }
+                },
+                {
+                  "id": "152d527e-4e33-4ad4-b13b-1de643740cce",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.5810764
+                  }
+                },
+                {
+                  "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                  "type": "Tag",
+                  "metadata": {
+                    "score": 1.5438207
+                  }
+                },
+                {
+                  "id": "3e5b01a7-5856-461e-bde5-d8388b6d909c",
+                  "type": "Tag",
+                  "metadata": {
+                    "score": 1.5008786
+                  }
+                },
+                {
+                  "id": "b7121a49-8f17-4858-b988-4bd837a5f1fe",
+                  "type": "Tag",
+                  "metadata": {
+                    "score": 0.87871504
+                  }
+                }
+              ],
+              "totalHits": 7,
+              "maxScore": 3.2498505
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758021997.229962,
+      "accessibleElementIds": [
+        "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+        "ad80a619-2b53-4f27-a4bd-56a316c15251",
+        "26dfaa98-5f15-4170-9fdc-94661c1a26c5",
+        "152d527e-4e33-4ad4-b13b-1de643740cce",
+        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+        "3e5b01a7-5856-461e-bde5-d8388b6d909c",
+        "b7121a49-8f17-4858-b988-4bd837a5f1fe"
+      ],
+      "end": 1758021997.262434,
+      "duration": 0.032472
+    }
+  ]
+}

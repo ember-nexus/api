@@ -9,6 +9,8 @@ use Exception;
 /**
  * @SuppressWarnings(PHPMD.CyclomaticComplexity)
  * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ * @SuppressWarnings(PHPMD.TooManyFields)
  */
 class EmberNexusConfiguration
 {
@@ -21,6 +23,11 @@ class EmberNexusConfiguration
     public const string REGISTER_ENABLED = 'enabled';
     public const string REGISTER_UNIQUE_IDENTIFIER = 'uniqueIdentifier';
     public const string REGISTER_UNIQUE_IDENTIFIER_REGEX = 'uniqueIdentifierRegex';
+
+    public const string EXPRESSION = 'expression';
+    public const string EXPRESSION_ENABLED = 'enabled';
+    public const string EXPRESSION_WARNING_LENGTH = 'warningLength';
+    public const string EXPRESSION_MAX_LENGTH = 'maxLength';
 
     public const string INSTANCE_CONFIGURATION = 'instanceConfiguration';
     public const string INSTANCE_CONFIGURATION_ENABLED = 'enabled';
@@ -44,6 +51,9 @@ class EmberNexusConfiguration
     private bool $registerEnabled;
     private string $registerUniqueIdentifier;
     private string|false $registerUniqueIdentifierRegex;
+    private bool $expressionEnabled;
+    private int $expressionWarningLength;
+    private int $expressionMaxLength;
     private bool $instanceConfigurationEnabled;
     private bool $instanceConfigurationShowVersion;
     private int $tokenMinLifetimeInSeconds;
@@ -129,6 +139,28 @@ class EmberNexusConfiguration
             $value = (string) $value;
         }
         $emberNexusConfiguration->setRegisterUniqueIdentifierRegex($value);
+
+        $emberNexusConfiguration->setExpressionEnabled((bool) self::getValueFromConfig(
+            $configuration,
+            [
+                self::EXPRESSION,
+                self::EXPRESSION_ENABLED,
+            ]
+        ));
+        $emberNexusConfiguration->setExpressionWarningLength((int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::EXPRESSION,
+                self::EXPRESSION_WARNING_LENGTH,
+            ]
+        ));
+        $emberNexusConfiguration->setExpressionMaxLength((int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::EXPRESSION,
+                self::EXPRESSION_MAX_LENGTH,
+            ]
+        ));
 
         $emberNexusConfiguration->setInstanceConfigurationEnabled((bool) self::getValueFromConfig(
             $configuration,
@@ -295,6 +327,42 @@ class EmberNexusConfiguration
     public function setRegisterUniqueIdentifierRegex(string|false $registerUniqueIdentifierRegex): self
     {
         $this->registerUniqueIdentifierRegex = $registerUniqueIdentifierRegex;
+
+        return $this;
+    }
+
+    public function isExpressionEnabled(): bool
+    {
+        return $this->expressionEnabled;
+    }
+
+    public function setExpressionEnabled(bool $expressionEnabled): self
+    {
+        $this->expressionEnabled = $expressionEnabled;
+
+        return $this;
+    }
+
+    public function getExpressionWarningLength(): int
+    {
+        return $this->expressionWarningLength;
+    }
+
+    public function setExpressionWarningLength(int $expressionWarningLength): self
+    {
+        $this->expressionWarningLength = $expressionWarningLength;
+
+        return $this;
+    }
+
+    public function getExpressionMaxLength(): int
+    {
+        return $this->expressionMaxLength;
+    }
+
+    public function setExpressionMaxLength(int $expressionMaxLength): self
+    {
+        $this->expressionMaxLength = $expressionMaxLength;
 
         return $this;
     }

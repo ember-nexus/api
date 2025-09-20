@@ -1,0 +1,31 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "element-hydration",
+      "query": {
+        "elementIds": "{{map(sortBy(filter(elements, #.score > 1.0), .score, \"desc\"), #.id)}}"
+      },
+      "parameters": {
+        "elements": [
+          {
+            "id": "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+            "score": 0.9
+          },
+          {
+            "id": "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
+            "score": 4.0
+          },
+          {
+            "id": "b133d1d5-a24c-4409-955f-99b53b3f2a73",
+            "score": 1.4
+          },
+          {
+            "id": "4a335e0b-e6bf-4c64-8c28-2a17bd6f0dec",
+            "score": 3.2
+          }
+        ]
+      }
+    }
+  ]
+}

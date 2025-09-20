@@ -44,6 +44,10 @@ class GetInstanceConfigurationController extends AbstractController
                 'uniqueIdentifier' => $this->emberNexusConfiguration->getRegisterUniqueIdentifier(),
                 'uniqueIdentifierRegex' => $this->emberNexusConfiguration->getRegisterUniqueIdentifierRegex(),
             ],
+            'expression' => [
+                'enabled' => $this->emberNexusConfiguration->isExpressionEnabled(),
+                'maxLength' => $this->emberNexusConfiguration->getExpressionMaxLength(),
+            ],
         ];
 
         if ($this->emberNexusConfiguration->isInstanceConfigurationShowVersion()) {

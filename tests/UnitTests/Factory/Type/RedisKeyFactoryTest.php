@@ -22,6 +22,16 @@ class RedisKeyFactoryTest extends TestCase
         $this->assertSame('token:', (string) $tokenRedisKey);
     }
 
+    public function testGetValidatedQueryCypherPathSubsetRedisKey(): void
+    {
+        $redisKeyTypeFactory = new RedisKeyFactory();
+
+        $query = 'MATCH path = ((:Type)) RETURN path LIMIT 10';
+
+        $getValidatedQueryCypherPathSubsetRedisKey = $redisKeyTypeFactory->getValidatedQueryCypherPathSubsetRedisKey($query);
+        $this->assertSame('validated-query:cypher-path-subset:132920224a38db1b499b5280b5714d895d58d111', (string) $getValidatedQueryCypherPathSubsetRedisKey);
+    }
+
     public function testGetEtagElementRedisKey(): void
     {
         $redisKeyTypeFactory = new RedisKeyFactory();

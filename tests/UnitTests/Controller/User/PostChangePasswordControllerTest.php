@@ -103,7 +103,7 @@ class PostChangePasswordControllerTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
-             * @var $e Client401UnauthorizedException
+             * @var Client401UnauthorizedException $e
              */
             $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
         }
@@ -121,9 +121,9 @@ class PostChangePasswordControllerTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
-             * @var $e Client400BadContentException
+             * @var Client400BadContentException $e
              */
-            $this->assertSame("Endpoint expects property 'newPassword' to be password which is not identical to the old password, got '<redacted>'.", $e->getDetail());
+            $this->assertSame("Endpoint expects property 'newPassword' to be password which is not identical to the old password, got string '<redacted>'.", $e->getDetail());
         }
 
         $method->invokeArgs($postChangePasswordController, ['1234', '4321']);

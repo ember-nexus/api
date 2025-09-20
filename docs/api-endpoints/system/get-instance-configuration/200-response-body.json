@@ -9,5 +9,9 @@
     "enabled": true,
     "uniqueIdentifier": "email",
     "uniqueIdentifierRegex": false
+  },
+  "expression": {
+    "enabled": true,
+    "maxLength": 10240
   }
 }
