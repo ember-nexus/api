@@ -15,7 +15,7 @@ single-database queries cannot.
 
 - [Elasticsearch Query DSL Mixin](/search/step/elasticsearch-query-dsl-mixin): Ideal for finding elements
   based solely on their own properties. Supports all [Elasticsearch Query DSL features](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl).
-- [Cypher Path](/search/step/cypher-path): Ideal to find collections of elements based on the relation
+- [Cypher Path](/search/step/cypher-path-subset): Ideal to find collections of elements based on the relation
   between them. Uses a safe subset of [Cypher 25](https://neo4j.com/docs/cypher-manual/25/queries/concepts/).
 - [Element Hydration](/search/step/element-hydration): Converts a list of element ids to a list containing
   the full element objects, i.e. all its properties "hydrated". Useful as a last step in a search query to return
