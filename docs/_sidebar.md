@@ -60,7 +60,6 @@
     - [<span class="method-delete">DELETE</span>` /<uuid> -` Delete Element Endpoint](/api-endpoints/element/delete-element)
   - **Search Endpoints**
     - [<span class="method-post">POST</span>` /search -` Search Endpoint](/api-endpoints/search/post-search)
-    - [<span class="method-post">POST</span>` /search -` Search Endpoint (old)](/api-endpoints/search/post-search-old)
   - **System Endpoints**
     - [<span class="method-get">GET</span>` /instance-configuration -` Get Instance Configuration Endpoint](/api-endpoints/system/get-instance-configuration)
     - [<span class="method-get">GET</span>` /graph-structure -` Get Graph Structure Endpoint](/api-endpoints/system/get-graph-structure)
