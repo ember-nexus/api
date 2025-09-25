@@ -2,11 +2,38 @@
   "type": "_SearchResultResponse",
   "results": [
     {
+      "type": "Taxon",
+      "id": "36e02d35-f6b4-4ccc-ae2f-b035ef02e0d6",
+      "data": {
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Dahlia",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Eudicots/Asterids/Asterales/Asteraceae/Dahlia",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Dahlia",
+        "description": "Dahlia (UK: /ˈdeɪliə/ DAY-lee-ə, US: /ˈdæljə, ˈdɑːljə, ˈdeɪljə/ DA(H)L-yə, DAYL-yə) is a genus of bushy, tuberous, herbaceous perennial plants native to Mexico and Central America. Dahlias are members of the Asteraceae (synonym name: Compositae) family of dicotyledonous plants, its relatives include the sunflower, daisy, chrysanthemum, and zinnia. There are 49 species of dahlia, with flowers in almost every hue (except blue), with hybrids commonly grown as garden plants.\n\nDahlias were known only to the Aztecs and other southern North American peoples until the Spanish conquest, after which the plants were brought to Europe. The tubers of some varieties are of medicinal and dietary value to humans because, in common with species of Inula and many other flowering plants, they use inulin, a polymer of the fruit sugar fructose, instead of starch as a storage polysaccharide."
+      }
+    },
+    {
       "type": "Plant",
       "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "Mertensia virginica Virginia Bluebell seen in Brooklyn Botanic Garden",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/31/Mertensia_virginica.bbg.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Mertensia_virginica.bbg.jpg/960px-Mertensia_virginica.bbg.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Mertensia_virginica.bbg.jpg"
+          },
+          {
+            "description": "Virginia Bluebells along the Rocky River in Berea, OH. Photo by Geoffrey A. Landis",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Virginia_Bluebells_at_Rocky_River.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Virginia_Bluebells_at_Rocky_River.jpg/960px-Virginia_Bluebells_at_Rocky_River.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Virginia_Bluebells_at_Rocky_River.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Bluebell",
         "scenario": "general.botanicExample",
         "scientificName": "M. virginica",
@@ -18,8 +45,28 @@
       "type": "Plant",
       "id": "ad80a619-2b53-4f27-a4bd-56a316c15251",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "Jacarandas in New Farm Park October 2006",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/f3/New_Farm_Park_Jacaranda-001%2B_%28273298097%29.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/New_Farm_Park_Jacaranda-001%2B_%28273298097%29.jpg/960px-New_Farm_Park_Jacaranda-001%2B_%28273298097%29.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:New_Farm_Park_Jacaranda-001%2B_(273298097).jpg"
+          },
+          {
+            "description": "Jacaranda tree in flower in Whakatāne, New Zealand",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Jacaranda1212.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Jacaranda1212.jpg/960px-Jacaranda1212.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Jacaranda1212.jpg"
+          },
+          {
+            "description": "trees are in bloom in Cyprus",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Jacaranda_mimosifolia_5334.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Jacaranda_mimosifolia_5334.jpg/960px-Jacaranda_mimosifolia_5334.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Jacaranda_mimosifolia_5334.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Jacaranda",
         "scenario": "general.botanicExample",
         "scientificName": "J. mimosifolia",
@@ -31,8 +78,16 @@
       "type": "Plant",
       "id": "26dfaa98-5f15-4170-9fdc-94661c1a26c5",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/1/18/Eustoma_grandiflorum_purple_02.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Eustoma_grandiflorum_purple_02.jpg/500px-Eustoma_grandiflorum_purple_02.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Eustoma_grandiflorum_purple_02.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Prairie Gentian",
         "scenario": "general.botanicExample",
         "scientificName": "E. russellianum",
@@ -41,11 +96,45 @@
       }
     },
     {
+      "type": "Taxon",
+      "id": "7359834e-c79c-4773-89ac-46befceb5f72",
+      "data": {
+        "description": "Actinotus is a genus of flowering plants in the family Apiaceae, subfamily Mackinlayoideae, with about 18 species. It is native to Australasia. Its best known member is the flannel flower, a common sight in Sydney bushland in the spring. The generic name, meaning \"furnished with rays\" is derived from the Greek stem aktin-/ακτιν- \"ray\" or \"sunbeam\".\n\nMost species are endemic to Australia with one from New Zealand. Other notable species are A. schwarzii from the Macdonnell Ranges in Central Australia, which closely resembles A. helianthi in appearance, and the rare pink-flowering A. forsythii from the Blue Mountains.\n\nThe genus was established by the French botanist Jacques Labillardière with his description of A. helianthi on page 67 of the first volume of his Novae Hollandiae Plantarum Specimen. However the habitat statement is anomalous and according to historian Edward Duyker Labillardière could not have collected the type specimen personally and might have received it from Jean-Baptiste Leschenault de La Tour botanist on the expedition of Nicolas Baudin or another early French visitor to New South Wales.\n\nIts closest relative is Apiopetalum from New Caledonia.",
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Actinotus",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Eudicots/Asterids/Apiales/Apiaceae/Actinotus",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Actinotus"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "3a123b1c-8bdc-482c-9d12-c3e9e22ec4fd",
+      "data": {
+        "description": "Mertensia is a genus of flowering plants in the borage family Boraginaceae. They are perennial herbaceous plants with blue or sometimes white flowers that open from pink-tinged buds. Such a change in flower color is common in Boraginaceae and is caused by changes in soil pH. Mertensia is one of several plants that are commonly called \"bluebell\". In spite of their common name, the flowers are usually salverform (trumpet-shaped) rather than campanulate (bell-shaped).\n\nMertensia is native to most of North America and to a large part of Asia from western China to northeastern Russia. Its center of diversity is in the Rocky Mountains. Mertensia is mostly restricted to alpine, subalpine, and montane habitats. Notable exceptions are Mertensia maritima, a maritime plant of Arctic and subarctic coastlines, and Mertensia virginica, which is found from the Appalachian Mountains west to Minnesota, Iowa, and Missouri. Most of the species are endemic to very small areas of the Rocky Mountains.\n\nMertensia virginica has the largest flowers in the genus and is commonly cultivated. It is sparingly naturalized in Europe. About 12 other species are known in cultivation. The Inuit ate the rhizomes of Mertensia maritima.\n\nMany of the species of Mertensia are hard to distinguish and some are possibly cryptic. Around 150 species names have been published in Mertensia. Most authors have recognized about 45 species, but in 2014, the authors of a molecular phylogenetic study recommended the acceptance of at least 62.",
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Mertensia",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Eudicots/Asterids/Boraginales/Boraginaceae/Mertensia",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Mertensia"
+      }
+    },
+    {
       "type": "Plant",
       "id": "152d527e-4e33-4ad4-b13b-1de643740cce",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "Mimosa, Silver Wattle",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/8/82/Acacia_dealbata-1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Acacia_dealbata-1.jpg/500px-Acacia_dealbata-1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Acacia_dealbata-1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Acacia",
         "scenario": "general.botanicExample",
         "scientificName": "A. dealbata",
@@ -58,8 +147,8 @@
       "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
         "description": "Blue is one of the three primary colours in the RGB (additive) colour model, as well as in the RYB colour model (traditional colour theory).[2] It lies between violet and cyan on the spectrum of visible light. The term blue generally describes colours perceived by humans observing light with a dominant wavelength that's between approximately 450 and 495 nanometres. The clear daytime sky and the deep sea appear blue because of an optical effect known as Rayleigh scattering. An optical effect called the Tyndall effect explains blue eyes. Distant objects appear more blue because of another optical effect called aerial perspective.\n\nBlue has been an important colour in art and decoration since ancient times. The semi-precious stone lapis lazuli was used in ancient Egypt for jewellery and ornament and later, in the Renaissance, to make the pigment ultramarine, the most expensive of all pigments.[3] In the eighth century Chinese artists used cobalt blue to colour fine blue and white porcelain. In the Middle Ages, European artists used it in the windows of cathedrals. Europeans wore clothing coloured with the vegetable dye woad until it was replaced by the finer indigo from America. In the 19th century, synthetic blue dyes and pigments gradually replaced organic dyes and mineral pigments. Dark blue became a common colour for military uniforms and later, in the late 20th century, for business suits. Because blue has commonly been associated with harmony, it was chosen as the colour of the flags of the United Nations and the European Union.[4]\n\nIn the United States and Europe, blue is the colour that both men and women are most likely to choose as their favourite, with at least one recent survey showing the same across several other countries, including China, Malaysia, and Indonesia.[5][6] Past surveys in the US and Europe have found that blue is the colour most commonly associated with harmony, confidence, masculinity, knowledge, intelligence, calmness, distance, infinity, the imagination, cold, and sadness.[7]",
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
         "name": "blue",
         "color": "#4363d8",
         "scenario": "general.botanicExample",
@@ -70,8 +159,8 @@
       "type": "Tag",
       "id": "3e5b01a7-5856-461e-bde5-d8388b6d909c",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
         "name": "navy",
         "color": "#000075",
         "scenario": "general.botanicExample",
@@ -83,8 +172,8 @@
       "type": "Tag",
       "id": "b7121a49-8f17-4858-b988-4bd837a5f1fe",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
         "name": "lavender",
         "color": "#dcbeff",
         "scenario": "general.botanicExample",
@@ -108,7 +197,8 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1758021997.211783,
+      "start": 1758825390.992112,
+      "indices": "*",
       "combinedQuery": {
         "_source": [
           "_id"
@@ -147,9 +237,8 @@
           }
         }
       },
-      "indices": "*",
-      "end": 1758021997.229793,
-      "duration": 0.01801
+      "end": 1758825391.023698,
+      "duration": 0.031586
     },
     {
       "input": {
@@ -159,6 +248,13 @@
           "stepResults": [
             {
               "elements": [
+                {
+                  "id": "36e02d35-f6b4-4ccc-ae2f-b035ef02e0d6",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 3.3171558
+                  }
+                },
                 {
                   "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
                   "type": "Plant",
@@ -178,6 +274,20 @@
                   "type": "Plant",
                   "metadata": {
                     "score": 3.038499
+                  }
+                },
+                {
+                  "id": "7359834e-c79c-4773-89ac-46befceb5f72",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 2.9056842
+                  }
+                },
+                {
+                  "id": "3a123b1c-8bdc-482c-9d12-c3e9e22ec4fd",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 2.5851276
                   }
                 },
                 {
@@ -209,25 +319,28 @@
                   }
                 }
               ],
-              "totalHits": 7,
-              "maxScore": 3.2498505
+              "totalHits": 10,
+              "maxScore": 3.3171558
             }
           ]
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758021997.229962,
+      "start": 1758825391.023871,
       "accessibleElementIds": [
+        "36e02d35-f6b4-4ccc-ae2f-b035ef02e0d6",
         "83b35321-4a91-4e9f-a49b-66d718c32ba7",
         "ad80a619-2b53-4f27-a4bd-56a316c15251",
         "26dfaa98-5f15-4170-9fdc-94661c1a26c5",
+        "7359834e-c79c-4773-89ac-46befceb5f72",
+        "3a123b1c-8bdc-482c-9d12-c3e9e22ec4fd",
         "152d527e-4e33-4ad4-b13b-1de643740cce",
         "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
         "3e5b01a7-5856-461e-bde5-d8388b6d909c",
         "b7121a49-8f17-4858-b988-4bd837a5f1fe"
       ],
-      "end": 1758021997.262434,
-      "duration": 0.032472
+      "end": 1758825391.067116,
+      "duration": 0.043245
     }
   ]
 }

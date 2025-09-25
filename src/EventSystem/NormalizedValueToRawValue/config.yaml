@@ -11,6 +11,13 @@ services:
         method: 'onNormalizedValueToRawValueEvent'
         priority: 16
 
+  App\EventSystem\NormalizedValueToRawValue\EventListener\MongoDBNormalizedValueToRawValueEventListener:
+    tags:
+      - name: kernel.event_listener
+        event: 'App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent'
+        method: 'onNormalizedValueToRawValueEvent'
+        priority: 15
+
   App\EventSystem\NormalizedValueToRawValue\EventListener\GenericNormalizedValueToRawValueEventListener:
     tags:
       - name: kernel.event_listener

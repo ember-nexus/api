@@ -5,8 +5,22 @@
       "type": "Plant",
       "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "Mertensia virginica Virginia Bluebell seen in Brooklyn Botanic Garden",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/31/Mertensia_virginica.bbg.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Mertensia_virginica.bbg.jpg/960px-Mertensia_virginica.bbg.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Mertensia_virginica.bbg.jpg"
+          },
+          {
+            "description": "Virginia Bluebells along the Rocky River in Berea, OH. Photo by Geoffrey A. Landis",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Virginia_Bluebells_at_Rocky_River.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Virginia_Bluebells_at_Rocky_River.jpg/960px-Virginia_Bluebells_at_Rocky_River.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Virginia_Bluebells_at_Rocky_River.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Bluebell",
         "scenario": "general.botanicExample",
         "scientificName": "M. virginica",
@@ -31,7 +45,8 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1758021996.451814,
+      "start": 1758825390.524884,
+      "indices": "*",
       "combinedQuery": {
         "_source": [
           "_id"
@@ -71,9 +86,8 @@
           }
         }
       },
-      "indices": "*",
-      "end": 1758021996.471125,
-      "duration": 0.019311
+      "end": 1758825390.554652,
+      "duration": 0.029768
     },
     {
       "input": {
@@ -98,12 +112,12 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758021996.471308,
+      "start": 1758825390.554819,
       "accessibleElementIds": [
         "83b35321-4a91-4e9f-a49b-66d718c32ba7"
       ],
-      "end": 1758021996.6405,
-      "duration": 0.169192
+      "end": 1758825390.569048,
+      "duration": 0.014229
     }
   ]
 }

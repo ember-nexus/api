@@ -5,8 +5,22 @@
       "type": "Plant",
       "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
       "data": {
-        "created": "2025-09-17T06:52:40+00:00",
-        "updated": "2025-09-17T06:52:40+00:00",
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flame_lily.png",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flame_lily.png/500px-Flame_lily.png",
+            "link": "https://en.wikipedia.org/wiki/File:Flame_lily.png"
+          },
+          {
+            "description": "Gloriosa superba at Mabvuku, Harare, Zimbabwe",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Gloriosa_superba_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gloriosa_superba_1.jpg/960px-Gloriosa_superba_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Flame Lily",
         "scenario": "general.botanicExample",
         "scientificName": "G. superba",
@@ -18,8 +32,22 @@
       "type": "Plant",
       "id": "3283fd3d-8083-4170-882a-41b1cd152c55",
       "data": {
-        "created": "2025-09-17T06:52:40+00:00",
-        "updated": "2025-09-17T06:52:40+00:00",
+        "images": [
+          {
+            "description": "Flower of Nelumbo nucifera, bean of India.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Sacred_lotus_Nelumbo_nucifera.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Sacred_lotus_Nelumbo_nucifera.jpg/960px-Sacred_lotus_Nelumbo_nucifera.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Sacred_lotus_Nelumbo_nucifera.jpg"
+          },
+          {
+            "description": "Nelumbo nucifera",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/34/Nelumbo_nucifera1romainguy.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Nelumbo_nucifera1romainguy.jpg/500px-Nelumbo_nucifera1romainguy.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Nelumbo_nucifera1romainguy.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Lotus",
         "scenario": "general.botanicExample",
         "scientificName": "N. nucifera",
@@ -31,8 +59,28 @@
       "type": "Plant",
       "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
       "data": {
-        "created": "2025-09-17T06:52:40+00:00",
-        "updated": "2025-09-17T06:52:40+00:00",
+        "images": [
+          {
+            "description": "in Seoul Forest, South Korea",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg/500px-Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Tulips_in_Seoul_Forest,_South_Korea1.jpg"
+          },
+          {
+            "description": "A Yonina cultivar (Division 6) tulip at the Tulip Fest in Albany, New York, United States.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Yonina_Tulip.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Yonina_Tulip.jpg/960px-Yonina_Tulip.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Yonina_Tulip.jpg"
+          },
+          {
+            "description": "Tulipa orphanidea, garden plant",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Tulipa_orphanidea_060506.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Tulipa_orphanidea_060506.jpg/500px-Tulipa_orphanidea_060506.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Tulipa_orphanidea_060506.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
         "name": "Tulip",
         "scenario": "general.botanicExample",
         "scientificName": "Tulipa",
@@ -57,14 +105,14 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758092048.96602,
+      "start": 1758825391.88911,
       "accessibleElementIds": [
         "258c0dfe-b1d8-4839-beed-d00d1b544a96",
         "3283fd3d-8083-4170-882a-41b1cd152c55",
         "8940d70b-5b6f-43b7-bee4-41d073396ff8"
       ],
-      "end": 1758092049.009023,
-      "duration": 0.043003
+      "end": 1758825391.926094,
+      "duration": 0.036984
     }
   ]
 }

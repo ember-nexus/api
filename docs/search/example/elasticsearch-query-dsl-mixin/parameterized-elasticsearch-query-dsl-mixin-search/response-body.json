@@ -5,8 +5,22 @@
       "type": "Plant",
       "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "Lilium candidum, Israel",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg/500px-ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:ShoshanTzachor-2-wiki-Zachi-Evenor.jpg"
+          },
+          {
+            "description": "Photo of Lilium candidum at VanDusen Botanical Garden",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/30/Lilium_candidum_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Lilium_candidum_1.jpg/960px-Lilium_candidum_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Lilium_candidum_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Lily",
         "scenario": "general.botanicExample",
         "scientificName": "L. candidum",
@@ -18,8 +32,22 @@
       "type": "Plant",
       "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flame_lily.png",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flame_lily.png/500px-Flame_lily.png",
+            "link": "https://en.wikipedia.org/wiki/File:Flame_lily.png"
+          },
+          {
+            "description": "Gloriosa superba at Mabvuku, Harare, Zimbabwe",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Gloriosa_superba_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gloriosa_superba_1.jpg/960px-Gloriosa_superba_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Flame Lily",
         "scenario": "general.botanicExample",
         "scientificName": "G. superba",
@@ -31,8 +59,28 @@
       "type": "Plant",
       "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "in Seoul Forest, South Korea",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg/500px-Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Tulips_in_Seoul_Forest,_South_Korea1.jpg"
+          },
+          {
+            "description": "A Yonina cultivar (Division 6) tulip at the Tulip Fest in Albany, New York, United States.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Yonina_Tulip.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Yonina_Tulip.jpg/960px-Yonina_Tulip.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Yonina_Tulip.jpg"
+          },
+          {
+            "description": "Tulipa orphanidea, garden plant",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Tulipa_orphanidea_060506.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Tulipa_orphanidea_060506.jpg/500px-Tulipa_orphanidea_060506.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Tulipa_orphanidea_060506.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
         "name": "Tulip",
         "scenario": "general.botanicExample",
         "scientificName": "Tulipa",
@@ -60,7 +108,8 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1758021996.868963,
+      "start": 1758825390.715234,
+      "indices": "*",
       "combinedQuery": {
         "_source": [
           "_id"
@@ -102,9 +151,8 @@
           }
         }
       },
-      "indices": "*",
-      "end": 1758021996.886942,
-      "duration": 0.017979
+      "end": 1758825390.823238,
+      "duration": 0.108004
     },
     {
       "input": {
@@ -143,14 +191,14 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758021996.887109,
+      "start": 1758825390.823414,
       "accessibleElementIds": [
         "23508e6c-632a-496d-9bd6-8c62a03216af",
         "258c0dfe-b1d8-4839-beed-d00d1b544a96",
         "8940d70b-5b6f-43b7-bee4-41d073396ff8"
       ],
-      "end": 1758021997.041104,
-      "duration": 0.153995
+      "end": 1758825390.844799,
+      "duration": 0.021385
     }
   ]
 }

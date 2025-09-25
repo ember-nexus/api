@@ -7,8 +7,8 @@
       "start": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
       "end": "b7cda919-deea-49f9-9151-49132f83cbff",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:24+00:00",
+        "updated": "2025-09-25T18:43:24+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -18,8 +18,8 @@
       "start": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
       "end": "30cb4ff2-591f-4fba-aa47-ca6ada630b9a",
       "data": {
-        "created": "2025-09-17T07:34:31+00:00",
-        "updated": "2025-09-17T07:34:31+00:00",
+        "created": "2025-09-25T18:43:24+00:00",
+        "updated": "2025-09-25T18:43:24+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -27,41 +27,61 @@
       "type": "Taxon",
       "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Gloriosa",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Colchicaceae/Gloriosa",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_(plant)",
+        "description": "Gloriosa is a genus of 12 species in the plant family Colchicaceae, and includes the formerly recognised genus Littonia. They are native in tropical and southern Africa to Asia, and naturalised in Australia and the Pacific as well as being widely cultivated. The most common English names are flame lily, fire lily, gloriosa lily, glory lily, superb lily, climbing lily, and creeping lily.\nThe leaf tips are modified to form tendrils\n\nThey are tender, tuberous rooted deciduous perennials, adapted to monsoon rainfall with a dormant dry season. All parts of the plant contain colchicine and related alkaloids and are therefore dangerously toxic if ingested, and contact with the stems and leaves can cause skin irritation. Various preparations of the plant are used in traditional medicines for a variety of complaints in both Africa and India. Plants have leaf tip tendrils."
       }
     },
     {
       "type": "Taxon",
       "id": "1852bdff-a4dd-4f91-9243-0e802775f757",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "description": "Liliales is an order of monocotyledonous flowering plants in the Angiosperm Phylogeny Group and Angiosperm Phylogeny Web system, within the lilioid monocots. This order of necessity includes the family Liliaceae. The APG III system (2009) places this order in the monocot clade. In APG III, the family Luzuriagaceae is combined with the family Alstroemeriaceae and the family Petermanniaceae is recognized. Both the order Lililiales and the family Liliaceae have had a widely disputed history, with the circumscription varying greatly from one taxonomist to another. Previous members of this order, which at one stage included most monocots with conspicuous tepals and lacking starch in the endosperm are now distributed over three orders, Liliales, Dioscoreales and Asparagales, using predominantly molecular phylogenetics. The newly delimited Liliales is monophyletic, with ten families. Well known plants from the order include Lilium (lily), tulip, the North American wildflower Trillium, and greenbrier.\n\nThus circumscribed, this order consists mostly of herbaceous plants, but lianas and shrubs also occur. They are mostly perennial plants, with food storage organs such as corms or rhizomes. The family Corsiaceae is notable for being heterotrophic.\n\nThe order has worldwide distribution. The larger families (with more than 100 species) are roughly confined to the Northern Hemisphere, or are distributed worldwide, centering on the north. On the other hand, the smaller families (with up to 10 species) are confined to the Southern Hemisphere, or sometimes just to Australia or South America. The total number of species in the order is now about 1768.\n\nAs with any herbaceous group, the fossil record of the Liliales is rather scarce. There are several species from the Eocene, such as Petermanniopsis anglesaensis or Smilax, but their identification is not definite. Another known fossil is Ripogonum scandens from the Miocene. Due to the scarcity of data, it seems impossible to determine precisely the age and the initial distribution of the order. It is assumed that the Liliales originate from the Lower Cretaceous, over 100 million years ago. Fossil aquatic plants from the Cretaceous of northeastern Brazil and a new terrestrial species placed in the new genus Cratosmilax suggest that the first species have appeared around 120 million years ago when the continents formed Pangea, before dispersing as Asia, Africa and America. The initial diversification to the current families took place between 82 and 48 million years ago. The order consists of 10 families, 67 genera and about 1,768 species.",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Liliales",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Liliales"
       }
     },
     {
       "type": "Taxon",
       "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Lilieae",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae/Lilieae",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Lilieae",
+        "description": "The Lilieae are a monophyletic tribe of monocotyledon perennial, herbaceous mainly bulbous flowering plants in the lily family (Liliaceae)."
       }
     },
     {
       "type": "Plant",
       "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
       "data": {
-        "created": "2025-09-17T07:34:19+00:00",
-        "updated": "2025-09-17T07:34:19+00:00",
+        "images": [
+          {
+            "description": "Lilium candidum, Israel",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg/500px-ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:ShoshanTzachor-2-wiki-Zachi-Evenor.jpg"
+          },
+          {
+            "description": "Photo of Lilium candidum at VanDusen Botanical Garden",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/30/Lilium_candidum_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Lilium_candidum_1.jpg/960px-Lilium_candidum_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Lilium_candidum_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:43:14+00:00",
+        "updated": "2025-09-25T18:43:14+00:00",
         "name": "Lily",
         "scenario": "general.botanicExample",
         "scientificName": "L. candidum",
@@ -73,8 +93,22 @@
       "type": "Plant",
       "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
       "data": {
-        "created": "2025-09-17T07:34:19+00:00",
-        "updated": "2025-09-17T07:34:19+00:00",
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flame_lily.png",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flame_lily.png/500px-Flame_lily.png",
+            "link": "https://en.wikipedia.org/wiki/File:Flame_lily.png"
+          },
+          {
+            "description": "Gloriosa superba at Mabvuku, Harare, Zimbabwe",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Gloriosa_superba_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gloriosa_superba_1.jpg/960px-Gloriosa_superba_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:43:14+00:00",
+        "updated": "2025-09-25T18:43:14+00:00",
         "name": "Flame Lily",
         "scenario": "general.botanicExample",
         "scientificName": "G. superba",
@@ -86,22 +120,26 @@
       "type": "Taxon",
       "id": "30cb4ff2-591f-4fba-aa47-ca6ada630b9a",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Melanthiaceae",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Melanthiaceae",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Melanthiaceae",
+        "description": "Melanthiaceae, also called the bunchflower family, is a family of flowering herbaceous perennial plants native to the Northern Hemisphere. Along with many other lilioid monocots, early authors considered members of this family to belong to the family Liliaceae, in part because both their sepals and petals closely resemble each other and are often large and showy like those of lilies, while some more recent taxonomists have placed them in a family Trilliaceae. The most authoritative modern treatment, however, the APG III system of 2009 (unchanged from the 2003 APG II system and the 1998 APG system), places the family in the order Liliales, in the clade monocots. Circumscribed in this way, the family includes up to 17 genera.\n\nFamiliar members of the family include the genera Paris and Trillium."
       }
     },
     {
       "type": "Taxon",
       "id": "425235d6-75ab-4ccb-8208-783ced0decc6",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "description": "The lily family, Liliaceae, consists of about 15 genera and 610 species of flowering plants within the order Liliales. They are monocotyledonous, perennial, herbaceous, often bulbous geophytes. Plants in this family have evolved with a fair amount of morphological diversity despite genetic similarity. Common characteristics include large flowers with parts arranged in threes: with six colored or patterned petaloid tepals (undifferentiated petals and sepals) arranged in two whorls, six stamens and a superior ovary. The leaves are linear in shape, with their veins usually arranged parallel to the edges, single and arranged alternating on the stem, or in a rosette at the base. Most species are grown from bulbs, although some have rhizomes. First described in 1789, the lily family became a paraphyletic \"catch-all\" (wastebasket) group of lilioid monocots that did not fit into other families and included a great number of genera now included in other families and in some cases in other orders. Consequently, many sources and descriptions labelled \"Liliaceae\" deal with the broader sense of the family.\n\nThe family evolved approximately 68 million years ago during the Late Cretaceous to Early Paleogene epochs. Liliaceae are widely distributed, mainly in temperate regions of the Northern Hemisphere and the flowers are insect pollinated. Many Liliaceae are important ornamental plants, widely grown for their attractive flowers and involved in a major floriculture of cut flowers and dry bulbs. Some species are poisonous if eaten and can have adverse health effects in humans and household pets.\n\nA number of Liliaceae genera are popular cultivated plants in private and public spaces. Lilies and tulips in particular have had considerable symbolic and decorative value, and appear frequently in paintings and the decorative arts. They are also an economically important product. Most of their genera, Lilium in particular, face considerable herbivory pressure from deer in some areas, both wild and domestic.",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Liliaceae",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Liliaceae"
       }
     },
     {
@@ -110,8 +148,8 @@
       "start": "b7cda919-deea-49f9-9151-49132f83cbff",
       "end": "1852bdff-a4dd-4f91-9243-0e802775f757",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -119,8 +157,28 @@
       "type": "Plant",
       "id": "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
       "data": {
-        "created": "2025-09-17T07:34:19+00:00",
-        "updated": "2025-09-17T07:34:19+00:00",
+        "images": [
+          {
+            "description": "White trillium (Trillium grandiflorum) blooming in Backus Woods.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Trillium_grandiflorum_at_Backus_Woods.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Trillium_grandiflorum_at_Backus_Woods.jpg/960px-Trillium_grandiflorum_at_Backus_Woods.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Trillium_grandiflorum_at_Backus_Woods.jpg"
+          },
+          {
+            "description": "Pink form of Trillium grandiflorum",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Trillium_grandiflorum_pink1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Trillium_grandiflorum_pink1.jpg/960px-Trillium_grandiflorum_pink1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Trillium_grandiflorum_pink1.jpg"
+          },
+          {
+            "description": "Photograph of the flower of the White Trilliumen (Trillium grandiflorum en ). Photo taken at the Mt. Cuba Center where it was identified.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/0/0c/White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg/960px-White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:43:14+00:00",
+        "updated": "2025-09-25T18:43:14+00:00",
         "name": "Trillium",
         "scenario": "general.botanicExample",
         "scientificName": "T. grandiflorum",
@@ -134,8 +192,8 @@
       "start": "7dd3a650-d60e-40c9-89d0-bccaf395369f",
       "end": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -143,11 +201,13 @@
       "type": "Taxon",
       "id": "7dd3a650-d60e-40c9-89d0-bccaf395369f",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Lilium",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae/Lilieae/Lilium",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Lilium",
+        "description": "Lilium (/ˈlɪliəm/ LIL-ee-əm) is a genus of herbaceous flowering plants growing from bulbs, all with large and often prominent flowers. Lilies are a group of flowering plants which are important in culture and literature in much of the world. Most species are native to the Northern Hemisphere and their range is temperate climates and extends into the subtropics. Many other plants have \"lily\" in their common names, but do not belong to the same genus and are therefore not true lilies. True lilies are known to be highly toxic to cats."
       }
     },
     {
@@ -156,8 +216,8 @@
       "start": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
       "end": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -165,19 +225,41 @@
       "type": "Taxon",
       "id": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Lilioideae",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Lilioideae",
+        "description": "The Lilioideae are a subfamily of monocotyledonous perennial, herbaceous mainly bulbous flowering plants in the lily family, Liliaceae. They are found predominantly in the temperate and colder regions of the Northern Hemisphere, particularly East Asia and North America. The subfamily includes two tribes. They are of economic importance, particularly the lilies and tulips."
       }
     },
     {
       "type": "Plant",
       "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
       "data": {
-        "created": "2025-09-17T07:34:19+00:00",
-        "updated": "2025-09-17T07:34:19+00:00",
+        "images": [
+          {
+            "description": "in Seoul Forest, South Korea",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg/500px-Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Tulips_in_Seoul_Forest,_South_Korea1.jpg"
+          },
+          {
+            "description": "A Yonina cultivar (Division 6) tulip at the Tulip Fest in Albany, New York, United States.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Yonina_Tulip.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Yonina_Tulip.jpg/960px-Yonina_Tulip.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Yonina_Tulip.jpg"
+          },
+          {
+            "description": "Tulipa orphanidea, garden plant",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Tulipa_orphanidea_060506.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Tulipa_orphanidea_060506.jpg/500px-Tulipa_orphanidea_060506.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Tulipa_orphanidea_060506.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:43:14+00:00",
+        "updated": "2025-09-25T18:43:14+00:00",
         "name": "Tulip",
         "scenario": "general.botanicExample",
         "scientificName": "Tulipa",
@@ -189,11 +271,13 @@
       "type": "Taxon",
       "id": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Trillium",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Melanthiaceae/Trillium",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Trillium",
+        "description": "Trillium (trillium, wakerobin, toadshade, tri flower, birthroot, birthwort, and sometimes \"wood lily\") is a genus of about fifty flowering plant species in the family Melanthiaceae. Trillium species are native to temperate regions of North America and Asia, with the greatest diversity of species found in the southern Appalachian Mountains in the southeastern United States."
       }
     },
     {
@@ -202,8 +286,8 @@
       "start": "425235d6-75ab-4ccb-8208-783ced0decc6",
       "end": "1852bdff-a4dd-4f91-9243-0e802775f757",
       "data": {
-        "created": "2025-09-17T07:34:31+00:00",
-        "updated": "2025-09-17T07:34:31+00:00",
+        "created": "2025-09-25T18:43:24+00:00",
+        "updated": "2025-09-25T18:43:24+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -213,8 +297,8 @@
       "start": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
       "end": "425235d6-75ab-4ccb-8208-783ced0decc6",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -222,11 +306,13 @@
       "type": "Taxon",
       "id": "b7cda919-deea-49f9-9151-49132f83cbff",
       "data": {
-        "created": "2025-09-17T07:34:22+00:00",
-        "updated": "2025-09-17T07:34:22+00:00",
+        "created": "2025-09-25T18:43:12+00:00",
+        "updated": "2025-09-25T18:43:12+00:00",
         "name": "Colchicaceae",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Colchicaceae",
-        "scenario": "general.botanicExample"
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Colchicaceae",
+        "description": "Colchicaceae is a family of flowering plants that includes 15 genera with a total of about 285 known species according to Christenhusz and Byng in 2016."
       }
     },
     {
@@ -235,8 +321,8 @@
       "start": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
       "end": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -246,8 +332,8 @@
       "start": "23508e6c-632a-496d-9bd6-8c62a03216af",
       "end": "7dd3a650-d60e-40c9-89d0-bccaf395369f",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -257,8 +343,8 @@
       "start": "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
       "end": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -268,8 +354,8 @@
       "start": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
       "end": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -279,8 +365,8 @@
       "start": "30cb4ff2-591f-4fba-aa47-ca6ada630b9a",
       "end": "1852bdff-a4dd-4f91-9243-0e802775f757",
       "data": {
-        "created": "2025-09-17T07:34:33+00:00",
-        "updated": "2025-09-17T07:34:33+00:00",
+        "created": "2025-09-25T18:43:22+00:00",
+        "updated": "2025-09-25T18:43:22+00:00",
         "scenario": "general.botanicExample"
       }
     }
@@ -294,10 +380,10 @@
           "stepResults": []
         }
       },
-      "start": 1758094526.041398,
       "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
-      "end": 1758094526.343532,
-      "duration": 0.30213403701782227
+      "start": 1758825856.933289,
+      "end": 1758825857.210775,
+      "duration": 0.27748584747314453
     },
     {
       "input": {
@@ -371,7 +457,7 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758094526.343716,
+      "start": 1758825857.210962,
       "element-hydration:redundantElementIds": {
         "message": "Removed 9 redundant elementIds.",
         "removedElementIds": [
@@ -411,8 +497,8 @@
         "ee29e267-63c8-45fb-a9a5-47835f46a839",
         "ee933330-c413-4680-be79-03f51b18aa7b"
       ],
-      "end": 1758094526.446777,
-      "duration": 0.103061
+      "end": 1758825857.318839,
+      "duration": 0.107877
     }
   ]
 }

@@ -6,8 +6,8 @@
       "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
         "description": "Blue is one of the three primary colours in the RGB (additive) colour model, as well as in the RYB colour model (traditional colour theory).[2] It lies between violet and cyan on the spectrum of visible light. The term blue generally describes colours perceived by humans observing light with a dominant wavelength that's between approximately 450 and 495 nanometres. The clear daytime sky and the deep sea appear blue because of an optical effect known as Rayleigh scattering. An optical effect called the Tyndall effect explains blue eyes. Distant objects appear more blue because of another optical effect called aerial perspective.\n\nBlue has been an important colour in art and decoration since ancient times. The semi-precious stone lapis lazuli was used in ancient Egypt for jewellery and ornament and later, in the Renaissance, to make the pigment ultramarine, the most expensive of all pigments.[3] In the eighth century Chinese artists used cobalt blue to colour fine blue and white porcelain. In the Middle Ages, European artists used it in the windows of cathedrals. Europeans wore clothing coloured with the vegetable dye woad until it was replaced by the finer indigo from America. In the 19th century, synthetic blue dyes and pigments gradually replaced organic dyes and mineral pigments. Dark blue became a common colour for military uniforms and later, in the late 20th century, for business suits. Because blue has commonly been associated with harmony, it was chosen as the colour of the flags of the United Nations and the European Union.[4]\n\nIn the United States and Europe, blue is the colour that both men and women are most likely to choose as their favourite, with at least one recent survey showing the same across several other countries, including China, Malaysia, and Indonesia.[5][6] Past surveys in the US and Europe have found that blue is the colour most commonly associated with harmony, confidence, masculinity, knowledge, intelligence, calmness, distance, infinity, the imagination, cold, and sadness.[7]",
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
         "name": "blue",
         "color": "#4363d8",
         "scenario": "general.botanicExample",
@@ -18,8 +18,22 @@
       "type": "Plant",
       "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
+        "images": [
+          {
+            "description": "Mertensia virginica Virginia Bluebell seen in Brooklyn Botanic Garden",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/31/Mertensia_virginica.bbg.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Mertensia_virginica.bbg.jpg/960px-Mertensia_virginica.bbg.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Mertensia_virginica.bbg.jpg"
+          },
+          {
+            "description": "Virginia Bluebells along the Rocky River in Berea, OH. Photo by Geoffrey A. Landis",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Virginia_Bluebells_at_Rocky_River.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Virginia_Bluebells_at_Rocky_River.jpg/960px-Virginia_Bluebells_at_Rocky_River.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Virginia_Bluebells_at_Rocky_River.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Bluebell",
         "scenario": "general.botanicExample",
         "scientificName": "M. virginica",
@@ -44,7 +58,8 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1758021997.634987,
+      "start": 1758825391.494736,
+      "indices": "*",
       "combinedQuery": {
         "_source": [
           "_id"
@@ -84,9 +99,8 @@
           }
         }
       },
-      "indices": "*",
-      "end": 1758021997.652516,
-      "duration": 0.017529
+      "end": 1758825391.524346,
+      "duration": 0.02961
     },
     {
       "input": {
@@ -118,13 +132,13 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758021997.652683,
+      "start": 1758825391.524511,
       "accessibleElementIds": [
         "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
         "83b35321-4a91-4e9f-a49b-66d718c32ba7"
       ],
-      "end": 1758021997.670293,
-      "duration": 0.01761
+      "end": 1758825391.541848,
+      "duration": 0.017337
     }
   ]
 }
