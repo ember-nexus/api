@@ -5,8 +5,22 @@
       "type": "Plant",
       "id": "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
       "data": {
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "Wild columbine (Aquilegia canadensis) in Talcott Mountain State Park",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/9/93/Wild_Columbine.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Wild_Columbine.jpg/960px-Wild_Columbine.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Wild_Columbine.jpg"
+          },
+          {
+            "description": "Wild Columbine (Aquilegia canadensis) in Normal, IL. Shows flower and seed pod.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/5/57/Aquilegia_canadensis_Redmarkviolinist.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Aquilegia_canadensis_Redmarkviolinist.jpg/500px-Aquilegia_canadensis_Redmarkviolinist.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Aquilegia_canadensis_Redmarkviolinist.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Columbine",
         "scenario": "general.botanicExample",
         "scientificName": "A. canadensis",
@@ -18,8 +32,22 @@
       "type": "Plant",
       "id": "eb5373ef-50ae-462f-a07a-5ccf767bff21",
       "data": {
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "Flowering Corymbia ficifolia, Austins Ferry, Tasmania, Australia",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Corymbia_ficifolia_Flowers.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Corymbia_ficifolia_Flowers.jpg/500px-Corymbia_ficifolia_Flowers.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Corymbia_ficifolia_Flowers.jpg"
+          },
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Corymbia_ficifolia_in_Berkeley_California.jpg/500px-Corymbia_ficifolia_in_Berkeley_California.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Corymbia_ficifolia_in_Berkeley_California.jpg/500px-Corymbia_ficifolia_in_Berkeley_California.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Corymbia_ficifolia_in_Berkeley_California.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Eucalyptus Blossom",
         "scenario": "general.botanicExample",
         "scientificName": "C. ficifolia",
@@ -31,8 +59,16 @@
       "type": "Plant",
       "id": "731fd394-6e0d-4a43-9693-4a7a7d97731e",
       "data": {
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/8/84/Bromeliaceae03.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Bromeliaceae03.jpg/500px-Bromeliaceae03.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Bromeliaceae03.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Bromeliad",
         "scenario": "general.botanicExample",
         "scientificName": "G. lingulata",
@@ -44,8 +80,16 @@
       "type": "Plant",
       "id": "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
       "data": {
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "A poster showing three different stages of a Common Poppy flower (Papaver rhoeas): bud, flower and fruit (capsule).",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/ff/Poster_papaver_3a.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Poster_papaver_3a.jpg/960px-Poster_papaver_3a.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Poster_papaver_3a.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
         "name": "Poppy",
         "scenario": "general.botanicExample",
         "scientificName": "P. rhoeas",
@@ -57,8 +101,16 @@
       "type": "Plant",
       "id": "3f6be764-d780-44d0-a12f-15326abe091d",
       "data": {
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "Grevillea rosmarinifolia subsp. glabella at Stocks Nursery and Botanic Gardens, Harden, NSW",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/76/Grevillea_rosmarinifolia_glabella.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/76/Grevillea_rosmarinifolia_glabella.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Grevillea_rosmarinifolia_glabella.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Grevillea",
         "scenario": "general.botanicExample",
         "scientificName": "G. rosmarinifolia",
@@ -70,8 +122,22 @@
       "type": "Plant",
       "id": "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
       "data": {
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "Sturt's Desert Pea Swainsona formosa, Melbourne Zoo",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Sturts_desert_pea.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Sturts_desert_pea.jpg/960px-Sturts_desert_pea.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Sturts_desert_pea.jpg"
+          },
+          {
+            "description": "Sturt's Desert Peas at The Australian Inland Botanic Gardens.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/4/44/A.I.B.T_Sturt_Peas.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/A.I.B.T_Sturt_Peas.jpg/500px-A.I.B.T_Sturt_Peas.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:A.I.B.T_Sturt_Peas.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Sturt\\u2019s Desert Pea",
         "scenario": "general.botanicExample",
         "scientificName": "S. formosa",
@@ -83,8 +149,28 @@
       "type": "Plant",
       "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
       "data": {
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "in Seoul Forest, South Korea",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg/500px-Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Tulips_in_Seoul_Forest,_South_Korea1.jpg"
+          },
+          {
+            "description": "A Yonina cultivar (Division 6) tulip at the Tulip Fest in Albany, New York, United States.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Yonina_Tulip.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Yonina_Tulip.jpg/960px-Yonina_Tulip.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Yonina_Tulip.jpg"
+          },
+          {
+            "description": "Tulipa orphanidea, garden plant",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Tulipa_orphanidea_060506.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Tulipa_orphanidea_060506.jpg/500px-Tulipa_orphanidea_060506.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Tulipa_orphanidea_060506.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
         "name": "Tulip",
         "scenario": "general.botanicExample",
         "scientificName": "Tulipa",
@@ -97,8 +183,22 @@
       "id": "0f3aced5-8484-49d4-9579-e3ec5facde95",
       "data": {
         "description": "Telopea speciosissima, commonly known as the New South Wales waratah or simply waratah, is a large shrub in the plant family Proteaceae. It is endemic to New South Wales in Australia. No subspecies are recognised; the closely related Telopea aspera was classified as a separate species in 1995. T. speciosissima is a shrub to 3 or 4 m (9.8 or 13.1 ft) high and 2 m (6.6 ft) wide, with dark green leaves. Its several stems arise from a pronounced woody base known as a lignotuber. The species is well renowned for its striking large red springtime inflorescences (flowerheads), each including hundreds of individual flowers. These are visited by the eastern pygmy possum (Cercartetus nanus), birds such as honeyeaters (Meliphagidae), and various insects.\n\nThe floral emblem for its home state of New South Wales, Telopea speciosissima has featured prominently in art, architecture, and advertising, particularly since Australian federation. Commercially grown in several countries as a cut flower, it is also cultivated in home gardens, requiring good drainage yet adequate moisture, but is vulnerable to various fungal diseases and pests. A number of cultivars with various shades of red, pink and even white flowers are available. Horticulturists have also developed hybrids with T. oreades and T. mongaensis which are more tolerant of cold, shade, and heavier soils.",
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "Telopea speciosissima inflorescence, Ingar Falls near Glenbrook",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/38/Telopea_speciosissima_Ingar_Falls_crop.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Telopea_speciosissima_Ingar_Falls_crop.jpg/960px-Telopea_speciosissima_Ingar_Falls_crop.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Telopea_speciosissima_Ingar_Falls_crop.jpg"
+          },
+          {
+            "description": "Telopea speciosissima inflorescence, past its best, fire trail off Bundeena Drive, Royal National Park",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Telopea_speciosissima_RNP.JPG",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Telopea_speciosissima_RNP.JPG/960px-Telopea_speciosissima_RNP.JPG",
+            "link": "https://en.wikipedia.org/wiki/File:Telopea_speciosissima_RNP.JPG"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Waratah",
         "scenario": "general.botanicExample",
         "scientificName": "T. speciosissima",
@@ -109,8 +209,16 @@
       "type": "Plant",
       "id": "c05a9e25-11bc-48db-8fea-6d1b885119b0",
       "data": {
-        "created": "2025-09-19T19:25:03+00:00",
-        "updated": "2025-09-19T19:25:03+00:00",
+        "images": [
+          {
+            "description": "Bush Ochre (Anigozanthos), Australian Garden, Royal Botanic Gardens, Cranbourne, Victoria, Australia. 29 June, 2006.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Bush-Pearl-in-RBG-Cranbourne.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Bush-Pearl-in-RBG-Cranbourne.jpg/500px-Bush-Pearl-in-RBG-Cranbourne.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Bush-Pearl-in-RBG-Cranbourne.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Kangaroo Paw",
         "scenario": "general.botanicExample",
         "scientificName": "Anigozanthos",
@@ -130,9 +238,9 @@
         }
       },
       "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
-      "start": 1758309972.331905,
-      "end": 1758309972.769065,
-      "duration": 0.43716001510620117
+      "start": 1758825392.880632,
+      "end": 1758825393.209822,
+      "duration": 0.3291900157928467
     },
     {
       "input": {
@@ -400,7 +508,7 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1758309972.769442,
+      "start": 1758825393.21006,
       "indices": "*",
       "combinedQuery": {
         "_source": [
@@ -479,8 +587,8 @@
           }
         }
       },
-      "end": 1758309972.939119,
-      "duration": 0.169677
+      "end": 1758825393.372277,
+      "duration": 0.162217
     },
     {
       "input": {
@@ -800,7 +908,7 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758309972.939293,
+      "start": 1758825393.372446,
       "accessibleElementIds": [
         "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
         "eb5373ef-50ae-462f-a07a-5ccf767bff21",
@@ -812,8 +920,8 @@
         "0f3aced5-8484-49d4-9579-e3ec5facde95",
         "c05a9e25-11bc-48db-8fea-6d1b885119b0"
       ],
-      "end": 1758309972.976991,
-      "duration": 0.037698
+      "end": 1758825393.410484,
+      "duration": 0.038038
     }
   ]
 }

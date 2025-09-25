@@ -3,67 +3,67 @@
   "results": [
     {
       "type": "Tag",
-      "id": "12de56ab-8e89-4281-ab44-403c7c7ecb00",
+      "id": "90819566-3121-42af-bdb5-19cbef67cd31",
       "data": {
-        "description": "Magenta (/m\\u0259\\u02c8d\\u0292\\u025bnt\\u0259/) is a purple-red color.[2][3] On color wheels of the RGB (additive) and CMY (subtractive) color models, it is located precisely midway between blue and red. It is one of the four colors of ink used in color printing by most color printers, along with yellow, cyan, and black to make all the other colors. The tone of magenta used in printing, printer's magenta, is redder than the magenta of the RGB (additive) model, the former being closer to rose.\n\nMagenta took its name from an aniline dye made and patented in 1859 by the French chemist Fran\\u00e7ois-Emmanuel Verguin, who originally called it fuchsine. It was renamed to celebrate the French-Sardinian victory under French Emperor Napoleon III at the Battle of Magenta against the larger army of the Austrian Empire on 4 June 1859 near the Italian town of Magenta, at the time in Austria. This battle was decisive in liberating Italy from Austrian domination.[4][5]\n\nA virtually identical color, called roseine, was created in 1860 by two British chemists, Edward Chambers Nicholson, and George Maule.\n\nThe web color magenta is also called fuchsia.",
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
-        "name": "magenta",
-        "color": "#f032e6",
+        "description": "White is the lightest color[2] and is achromatic (having no chroma). It is the color of objects such as snow, chalk, and milk, and is the opposite of black. White objects fully (or almost fully) reflect and scatter all the visible wavelengths of light. White on television and computer screens is created by a mixture of red, blue, and green light. The color white can be given with white pigments, especially titanium dioxide.[3]\n\nIn ancient Egypt and ancient Rome, priestesses wore white as a symbol of purity, and Romans wore white togas as symbols of citizenship. In the Middle Ages and Renaissance a white unicorn symbolized chastity, and a white lamb sacrifice and purity. It was the royal color of the kings of France as well as the flag of monarchist France from 1815 to 1830, and of the monarchist movement that opposed the Bolsheviks during the Russian Civil War (1917\\u20131922). Greek temples and Roman temples were faced with white marble, and beginning in the 18th century, with the advent of neoclassical architecture, white became the most common color of new churches, capitols, and other government buildings, especially in the United States. It was also widely used in 20th century modern architecture as a symbol of modernity and simplicity.\n\nAccording to surveys in Europe and the United States, white is the color most often associated with perfection, the good, honesty, cleanliness, the beginning, the new, neutrality, and exactitude.[4] White is an important color for almost all world religions. The pope, the head of the Roman Catholic Church, has worn white since 1566, as a symbol of purity and sacrifice. In Islam, and in the Shinto religion of Japan, it is worn by pilgrims. In Western cultures and in Japan, white is the most common color for wedding dresses, symbolizing purity and virginity. In many Asian cultures, white is also the color of mourning.[5]",
+        "created": "2025-09-25T18:45:42+00:00",
+        "updated": "2025-09-25T18:45:42+00:00",
+        "name": "white",
+        "color": "#ffffff",
         "scenario": "general.botanicExample",
-        "link": "https://en.wikipedia.org/wiki/Magenta"
+        "link": "https://en.wikipedia.org/wiki/White"
       }
     },
     {
       "type": "Tag",
-      "id": "1594e5c8-4d33-43bd-8d0c-86b454e25dc1",
+      "id": "b7121a49-8f17-4858-b988-4bd837a5f1fe",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
-        "name": "apricot",
-        "color": "#ffd8b1",
+        "created": "2025-09-25T18:45:42+00:00",
+        "updated": "2025-09-25T18:45:42+00:00",
+        "name": "lavender",
+        "color": "#dcbeff",
         "scenario": "general.botanicExample",
-        "link": "https://en.wikipedia.org/wiki/Apricot_(color)",
-        "description": "Apricot is a light yellowish-orangish color that is similar to the color of apricots. However, it is paler than actual apricots."
+        "link": "https://en.wikipedia.org/wiki/Lavender_(color)",
+        "description": "Lavender is a light shade of purple or violet. It applies particularly to the color of the flower of the same name. The web color called lavender is displayed adjacent\\u2014it matches the color of the palest part of the flower; however, the more saturated color shown as floral lavender more closely matches the average color of the lavender flower as shown in the picture and is the tone of lavender historically and traditionally considered lavender by average people as opposed to website designers.[3] The color lavender might be described as a medium purple, a pale bluish purple,[4] or a light pinkish-purple. The term lavender may be used in general to apply to a wide range of pale, light, or grayish-purples, but only on the blue side; lilac is pale purple on the pink side. In paints, the color lavender is made by mixing purple and white paint."
       }
     },
     {
       "type": "Tag",
-      "id": "25d0c9a8-8864-42bd-9ea1-6157fb688998",
+      "id": "b8674d32-af5f-4ef1-a5d8-fc5cbb56b795",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
-        "name": "cyan",
-        "color": "#42d4f4",
+        "description": "Purple is a color similar in appearance to violet light. In the RYB color model historically used in the arts, purple is a secondary color created by combining red and blue pigments. In the CMYK color model used in modern printing, purple is made by combining magenta pigment with either cyan pigment, black pigment, or both. In the RGB color model used in computer and television screens, purple is created by mixing red and blue light in order to create colors that appear similar to violet light. According to color theory, purple is considered a cool color.[1]\n\nPurple has long been associated with royalty, originally because Tyrian purple dye\\u2014made from the secretions of sea snails\\u2014was extremely expensive in antiquity.[2] Purple was the color worn by Roman magistrates; it became the imperial color worn by the rulers of the Byzantine Empire and the Holy Roman Empire, and later by Roman Catholic bishops. Similarly in Japan, the color is traditionally associated with the emperor and aristocracy.[3]\n\nAccording to contemporary surveys in Europe and the United States, purple is the color most often associated with rarity, royalty, luxury, ambition, magic, mystery, piety and spirituality.[4][5] When combined with pink, it is associated with eroticism, femininity, and seduction.[6]\nEtymology and definitions\n\nThe modern English word purple comes from the Old English purpul, which derives from Latin purpura, which, in turn, derives from the Greek \\u03c0\\u03bf\\u03c1\\u03c6\\u03cd\\u03c1\\u03b1 (porphura),[7] the name of the Tyrian purple dye manufactured in classical antiquity from a mucus secreted by the spiny dye-murex snail.[8][9] The first recorded use of the word purple dates to the late 900s AD.[8]",
+        "created": "2025-09-25T18:45:42+00:00",
+        "updated": "2025-09-25T18:45:42+00:00",
+        "name": "purple",
+        "color": "#911eb4",
         "scenario": "general.botanicExample",
-        "link": "https://en.wikipedia.org/wiki/Cyan",
-        "description": "Cyan (/\\u02c8sa\\u026a.\\u0259n, -\\u00e6n/)[2][3][4] is the color between blue and green on the visible spectrum of light.[5][6] It is evoked by light with a predominant wavelength between 500 and 520 nm, between the wavelengths of green and blue.[7]\n\nIn the subtractive color system, or CMYK color model, which can be overlaid to produce all colors in paint and color printing, cyan is one of the primary colors, along with magenta and yellow. In the additive color system, or RGB color model, used to create all the colors on a computer or television display, cyan is made by mixing equal amounts of green and blue light. Cyan is the complement of red; it can be made by the removal of red from white. Mixing red light and cyan light at the right intensity will make white light. It is commonly seen on a bright, sunny day in the sky."
+        "link": "https://en.wikipedia.org/wiki/Purple"
       }
     },
     {
       "type": "Tag",
-      "id": "2ebe38e6-0bf6-4af5-9acc-87e8a3db13ee",
+      "id": "bbc7529f-72da-4df2-aff5-e139a5618ccb",
       "data": {
-        "description": "Maroon (US: UK: /m\\u0259\\u02c8ru\\u02d0n/ m\\u0259-ROON,[2] Australia: /m\\u0259\\u02c8ro\\u028an/ m\\u0259-ROHN[3]) is a brownish crimson color that takes its name from the French word marron, meaning chestnut.[4] Marron is also one of the French translations for \"brown\".\n\nTerms describing interchangeable shades, with overlapping RGB ranges, include burgundy, claret, mulberry, and crimson.\n\nDifferent dictionaries define maroon differently. The Cambridge English Dictionary defines maroon as a dark reddish-purple color while its \"American Dictionary\" section defines maroon as dark brown-red.[5] Lexico online dictionary defines maroon as a brownish-red.[6] Similarly, Dictionary.com defines maroon as a dark brownish-red.[7] The Shorter Oxford English Dictionary describes maroon as \"a brownish-crimson or claret colour,\"[8] while the Merriam-Webster online dictionary simply defines it as a dark red.[9]\n\nIn the sRGB color model for additive color representation, the web color called maroon is created by turning down the brightness of pure red to about one half. It is also noted that maroon is the complement of the web color called teal.[1]",
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
-        "name": "maroon",
-        "color": "#800000",
+        "description": "Brown is a color. It can be thought as a darker, and usually desaturated, shade of orange. In the CMYK color model used in printing and painting, brown is usually made by combining yellow, magenta, and black inks (these two last in a lesser amount).[4][5][6]\n\nIn the RGB color model used to project colors onto television screens and computer monitors, brown is the result of combining red light at low intensity, and green light at an even lower intensity, with blue light also being present in most shades of the color. The color brown is seen widely in nature, wood, soil, human hair color, eye color and skin pigmentation. Brown is the color of dark wood or rich soil.[7]\n\nIn the RYB color model, brown is made by mixing the three primary colors, red, yellow, and blue.\n\nAccording to public opinion surveys in Europe and the United States, brown is the least favorite color of the public; it is often associated with fecal matter, plainness, the rustic, although it does also have positive associations, including baking, warmth, wildlife, the autumn and music.",
+        "created": "2025-09-25T18:45:42+00:00",
+        "updated": "2025-09-25T18:45:42+00:00",
+        "name": "brown",
+        "color": "#9a6324",
         "scenario": "general.botanicExample",
-        "link": "https://en.wikipedia.org/wiki/Maroon"
+        "link": "https://en.wikipedia.org/wiki/Brown"
       }
     },
     {
       "type": "Tag",
-      "id": "39662e6a-15d4-43ec-bc68-3f2afd7e8f0e",
+      "id": "be14916b-0068-4b49-b8d0-f9e528f3d10e",
       "data": {
-        "created": "2025-09-16T11:25:29+00:00",
-        "updated": "2025-09-16T11:25:29+00:00",
-        "name": "teal",
-        "color": "#469990",
+        "description": "Yellow is the color between green and orange on the spectrum of light. It is evoked by light with a dominant wavelength of roughly 575\\u2013585 nm. It is a primary color in subtractive color systems, used in painting or color printing. In the RGB color model, used to create colors on television and computer screens, yellow is a secondary color made by combining red and green at equal intensity. Carotenoids give the characteristic yellow color to autumn leaves, corn, canaries, daffodils, and lemons, as well as egg yolks, buttercups, and bananas. They absorb light energy and protect plants from photo damage in some cases.[3] Sunlight has a slight yellowish hue when the Sun is near the horizon, due to atmospheric scattering of shorter wavelengths (green, blue, and violet).\n\nBecause it was widely available, yellow ochre pigment was one of the first colors used in art; the Lascaux cave in France has a painting of a yellow horse 17,000 years old. Ochre and orpiment pigments were used to represent gold and skin color in Egyptian tombs, then in the murals in Roman villas.[4] In the early Christian church, yellow was the color associated with the Pope and the golden keys of the Kingdom, but it was also associated with Judas Iscariot and used to mark heretics. In the 20th century, Jews in Nazi-occupied Europe were forced to wear a yellow star. In China, bright yellow was the color of the Middle Kingdom, and could be worn only by the emperor and his household; special guests were welcomed on a yellow carpet.[5]\n\nAccording to surveys in Europe, Canada, the United States and elsewhere, yellow is the color people most often associate with amusement, gentleness, humor, happiness, and spontaneity; however it can also be associated with duplicity, envy, jealousy, greed, justice, and, in the U.S., cowardice.[6] In Iran it has connotations of pallor/sickness,[7] but also wisdom and connection.[8] In China and many Asian countries, it is seen as the color of royalty, nobility, respect, happiness, glory, harmony and wisdom.[9]",
+        "created": "2025-09-25T18:45:42+00:00",
+        "updated": "2025-09-25T18:45:42+00:00",
+        "name": "yellow",
+        "color": "#ffe119",
         "scenario": "general.botanicExample",
-        "link": "https://en.wikipedia.org/wiki/Teal",
-        "description": "Teal is a dark cyan color. Its name comes from that of a bird\\u2014the Eurasian teal (Anas crecca)\\u2014which presents a similarly colored stripe on its head. The word is often used colloquially to refer to shades of cyan in general.\n\nIt can be created by mixing cyan into a green base, or deepened as needed with black or gray.[2] It is also one of the first group of 16 HTML/CSS web colors. In the RGB model used to create colors on computer screens and televisions, teal is created by reducing the brightness of cyan to about one half.\n\nIn North America, teal became a fad color during the 1990s, with many sports teams adopting it for their uniforms.[3][4]"
+        "link": "https://en.wikipedia.org/wiki/Yellow"
       }
     }
   ],
@@ -84,7 +84,8 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1758021997.820463,
+      "start": 1758826006.799941,
+      "indices": "*",
       "combinedQuery": {
         "_source": [
           "_id"
@@ -124,9 +125,8 @@
           }
         }
       },
-      "indices": "*",
-      "end": 1758021997.837855,
-      "duration": 0.017392
+      "end": 1758826006.829988,
+      "duration": 0.030047
     },
     {
       "input": {
@@ -137,58 +137,58 @@
             {
               "elements": [
                 {
-                  "id": "12de56ab-8e89-4281-ab44-403c7c7ecb00",
+                  "id": "90819566-3121-42af-bdb5-19cbef67cd31",
                   "type": "Tag",
                   "metadata": {
                     "score": 1.0219789
                   }
                 },
                 {
-                  "id": "1594e5c8-4d33-43bd-8d0c-86b454e25dc1",
+                  "id": "b7121a49-8f17-4858-b988-4bd837a5f1fe",
                   "type": "Tag",
                   "metadata": {
                     "score": 1.0219789
                   }
                 },
                 {
-                  "id": "25d0c9a8-8864-42bd-9ea1-6157fb688998",
+                  "id": "b8674d32-af5f-4ef1-a5d8-fc5cbb56b795",
                   "type": "Tag",
                   "metadata": {
                     "score": 1.0219789
                   }
                 },
                 {
-                  "id": "2ebe38e6-0bf6-4af5-9acc-87e8a3db13ee",
+                  "id": "bbc7529f-72da-4df2-aff5-e139a5618ccb",
                   "type": "Tag",
                   "metadata": {
                     "score": 1.0219789
                   }
                 },
                 {
-                  "id": "39662e6a-15d4-43ec-bc68-3f2afd7e8f0e",
+                  "id": "be14916b-0068-4b49-b8d0-f9e528f3d10e",
                   "type": "Tag",
                   "metadata": {
                     "score": 1.0219789
                   }
                 }
               ],
-              "totalHits": 25,
+              "totalHits": 29,
               "maxScore": 1.0219789
             }
           ]
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758021997.838022,
+      "start": 1758826006.830163,
       "accessibleElementIds": [
-        "12de56ab-8e89-4281-ab44-403c7c7ecb00",
-        "1594e5c8-4d33-43bd-8d0c-86b454e25dc1",
-        "25d0c9a8-8864-42bd-9ea1-6157fb688998",
-        "2ebe38e6-0bf6-4af5-9acc-87e8a3db13ee",
-        "39662e6a-15d4-43ec-bc68-3f2afd7e8f0e"
+        "90819566-3121-42af-bdb5-19cbef67cd31",
+        "b7121a49-8f17-4858-b988-4bd837a5f1fe",
+        "b8674d32-af5f-4ef1-a5d8-fc5cbb56b795",
+        "bbc7529f-72da-4df2-aff5-e139a5618ccb",
+        "be14916b-0068-4b49-b8d0-f9e528f3d10e"
       ],
-      "end": 1758021997.864312,
-      "duration": 0.02629
+      "end": 1758826006.864428,
+      "duration": 0.034265
     }
   ]
 }

@@ -5,8 +5,28 @@
       "type": "Plant",
       "id": "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
       "data": {
-        "created": "2025-09-17T07:08:49+00:00",
-        "updated": "2025-09-17T07:08:49+00:00",
+        "images": [
+          {
+            "description": "White trillium (Trillium grandiflorum) blooming in Backus Woods.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Trillium_grandiflorum_at_Backus_Woods.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Trillium_grandiflorum_at_Backus_Woods.jpg/960px-Trillium_grandiflorum_at_Backus_Woods.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Trillium_grandiflorum_at_Backus_Woods.jpg"
+          },
+          {
+            "description": "Pink form of Trillium grandiflorum",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Trillium_grandiflorum_pink1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Trillium_grandiflorum_pink1.jpg/960px-Trillium_grandiflorum_pink1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Trillium_grandiflorum_pink1.jpg"
+          },
+          {
+            "description": "Photograph of the flower of the White Trilliumen (Trillium grandiflorum en ). Photo taken at the Mt. Cuba Center where it was identified.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/0/0c/White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg/960px-White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Trillium",
         "scenario": "general.botanicExample",
         "scientificName": "T. grandiflorum",
@@ -18,8 +38,22 @@
       "type": "Plant",
       "id": "4a335e0b-e6bf-4c64-8c28-2a17bd6f0dec",
       "data": {
-        "created": "2025-09-17T07:08:49+00:00",
-        "updated": "2025-09-17T07:08:49+00:00",
+        "images": [
+          {
+            "description": "Hibiscus heterophyllus cultivated plant growing in Thirlmere",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Hibiscus_heterophyllus_flower_image.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Hibiscus_heterophyllus_flower_image.jpg/500px-Hibiscus_heterophyllus_flower_image.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Hibiscus_heterophyllus_flower_image.jpg"
+          },
+          {
+            "description": "Hibiscus heterophyllus in flower, Chatswood West",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/1/19/Hibiscus_heterophyllus_Chatswood_West.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/19/Hibiscus_heterophyllus_Chatswood_West.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Hibiscus_heterophyllus_Chatswood_West.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Hibiscus",
         "scenario": "general.botanicExample",
         "scientificName": "H. heterophyllus",
@@ -31,8 +65,16 @@
       "type": "Plant",
       "id": "b133d1d5-a24c-4409-955f-99b53b3f2a73",
       "data": {
-        "created": "2025-09-17T07:08:49+00:00",
-        "updated": "2025-09-17T07:08:49+00:00",
+        "images": [
+          {
+            "description": "Arabian jasmin 'Grand Duke of Tuscany'",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Jasminum_sambac_%27Grand_Duke_of_Tuscany%27.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Jasminum_sambac_%27Grand_Duke_of_Tuscany%27.jpg/500px-Jasminum_sambac_%27Grand_Duke_of_Tuscany%27.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Jasminum_sambac_%27Grand_Duke_of_Tuscany%27.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
         "name": "Jasmine",
         "scenario": "general.botanicExample",
         "scientificName": "J. sambac",
@@ -71,14 +113,14 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758092998.224878,
+      "start": 1758825392.623079,
       "accessibleElementIds": [
         "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
         "4a335e0b-e6bf-4c64-8c28-2a17bd6f0dec",
         "b133d1d5-a24c-4409-955f-99b53b3f2a73"
       ],
-      "end": 1758092998.337163,
-      "duration": 0.112285
+      "end": 1758825392.730921,
+      "duration": 0.107842
     }
   ]
 }
