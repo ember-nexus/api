@@ -11,7 +11,7 @@ jobs:
 
 
   checkout-repo-and-bump-version:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: ubicloud-standard-2-ubuntu-2404
     name: Check out Repo and Bump Version
     timeout-minutes: 10
     steps:
@@ -68,7 +68,7 @@ jobs:
 
 
   build-docker-image-amd:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: ubicloud-standard-4-ubuntu-2404
     name: Build Docker Image - AMD
     timeout-minutes: 20
     needs: checkout-repo-and-bump-version
@@ -130,7 +130,7 @@ jobs:
 
 
   build-docker-image-arm:
-    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    runs-on: ubicloud-standard-4-arm-ubuntu-2404
     name: Build Docker Image - ARM
     timeout-minutes: 20
     needs: checkout-repo-and-bump-version
@@ -192,7 +192,7 @@ jobs:
 
 
   publish-release:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: ubicloud-standard-2-ubuntu-2404
     name: Publish release
     timeout-minutes: 10
     needs: [build-docker-image-amd, build-docker-image-arm]

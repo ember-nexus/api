@@ -24,7 +24,7 @@ jobs:
       - run: docker run --rm -v $(pwd):/work tmknom/markdownlint '**/*.md' --config tests/.markdownlintrc --ignore vendor --ignore CHANGELOG.md --ignore var --ignore tmp
 
   build-docker-image:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: ubicloud-standard-4-ubuntu-2404
     name: 'Build Docker Image'
     timeout-minutes: 20
     needs:
@@ -150,7 +150,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
   test-mutant:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: ubicloud-standard-4-ubuntu-2404
     name: 'Mutant Test'
     timeout-minutes: 5
     needs:
@@ -188,7 +188,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
   test-feature:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: ubicloud-standard-4-ubuntu-2404
     name: 'Feature Test'
     timeout-minutes: 15
     needs:
@@ -237,7 +237,7 @@ jobs:
           docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api-prod\" && echo \$API_DOMAIN && composer test:feature && composer test:feature:deprecated"
 
   test-example-generation-controller:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: ubicloud-standard-2-ubuntu-2404
     name: 'Controller Example Generation Test'
     timeout-minutes: 15
     needs:
@@ -281,7 +281,7 @@ jobs:
 
 
   test-example-generation-command:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: ubicloud-standard-2-ubuntu-2404
     name: 'Command Example Generation Test'
     timeout-minutes: 15
     needs:

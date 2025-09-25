@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add feature test case to validate post element behavior, closes #403.
 
+### Changed
+- Update CI to use Ubicloud instead of unsupported Buildjet; upgrade to Ubuntu 2404, closes #353.
+
 ### Fixed
 - Fix issue with deserializing array data from MongoDB which lead to exceptions.
 
