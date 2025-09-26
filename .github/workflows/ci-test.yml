@@ -150,7 +150,7 @@ jobs:
           docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
   test-mutant:
-    runs-on: ubicloud-standard-4-ubuntu-2404
+    runs-on: ubuntu-latest
     name: 'Mutant Test'
     timeout-minutes: 5
     needs:
