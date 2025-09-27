@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix issue with deserializing array data from MongoDB which lead to exceptions.
+- Created and updated properties in Elasticsearch now use correct datetime type and no longer plain text, closes #408.
 
 ### Changed
 - Upgrade PHP to 8.4.13, skipping 8.4.12, closes #405.

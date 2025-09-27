@@ -7,6 +7,7 @@ namespace App\EventSystem\ElementFragmentize\EventListener;
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
+use DateTime;
 use DateTimeInterface;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 use MongoDB\BSON\UTCDateTime;
@@ -58,6 +59,6 @@ class CreatedPropertyElementFragmentizeEventListener
         }
         $cypherFragment->addProperty('created', $created);
         $mongoFragment->addProperty('created', new UTCDateTime($created));
-        $elasticFragment->addProperty('created', $created->format('Uu'));
+        $elasticFragment->addProperty('created', $created->format(DateTime::ATOM));
     }
 }
