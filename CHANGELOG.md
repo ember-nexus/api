@@ -5,16 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.25 - 2025-09-27
 ### Added
-- Add feature test case to validate post element behavior, closes #403.
+- Add feature test case to validate post element behavior, closes [#403].
+
+### Changed
+- Upgrade PHP to 8.4.13, skipping 8.4.12, closes [#405].
+- Refactored event listener configuration from YAML files to PHP attributes, closes [#406].
 
 ### Fixed
 - Fix issue with deserializing array data from MongoDB which lead to exceptions.
-- Created and updated properties in Elasticsearch now use correct datetime type and no longer plain text, closes #408.
-
-### Changed
-- Upgrade PHP to 8.4.13, skipping 8.4.12, closes #405.
-- Refactored event listener configuration from YAML files to PHP attributes, closes #406.
+- Created and updated properties in Elasticsearch now use correct datetime type and no longer plain text, closes [#408].
 
 ## 0.1.24 - 2025-09-20
 ### Added
