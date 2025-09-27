@@ -6,6 +6,8 @@ namespace App\EventSystem\Request\EventListener;
 
 use App\Security\AuthProvider;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -20,12 +22,14 @@ class LogRequestListener
     private Request $request;
 
     public function __construct(
+        #[Autowire(service: 'router.default')]
         private UrlMatcherInterface|RequestMatcherInterface $matcher,
         private AuthProvider $authProvider,
         private LoggerInterface $logger,
     ) {
     }
 
+    #[AsEventListener]
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
@@ -34,6 +38,7 @@ class LogRequestListener
         $this->request = $event->getRequest();
     }
 
+    #[AsEventListener]
     public function onKernelResponse(ResponseEvent $event): void
     {
         $response = $event->getResponse();

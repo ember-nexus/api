@@ -6,6 +6,7 @@ namespace App\EventSystem\Controller\EventListener;
 
 use App\Attribute\EndpointSupportsEtag;
 use App\Service\EtagService;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
 class EtagControllerEventListener
@@ -15,6 +16,7 @@ class EtagControllerEventListener
     ) {
     }
 
+    #[AsEventListener(priority: 256)]
     public function onKernelController(ControllerEvent $event): void
     {
         $attributes = $event->getAttributes(EndpointSupportsEtag::class);

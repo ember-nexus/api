@@ -10,6 +10,7 @@ use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use DateTimeInterface;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 use MongoDB\BSON\UTCDateTime;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class UpdatedPropertyElementFragmentizeEventListener
 {
@@ -18,11 +19,13 @@ class UpdatedPropertyElementFragmentizeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onNodeElementFragmentizeEvent(NodeElementFragmentizeEvent $event): void
     {
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onRelationElementFragmentizeEvent(RelationElementFragmentizeEvent $event): void
     {
         $this->handleEvent($event);

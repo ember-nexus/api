@@ -11,6 +11,7 @@ use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\Type\RabbitMQQueueType;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 use function Safe\json_encode;
 
@@ -34,16 +35,19 @@ class OwnershipChangeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onElementPostCreate(ElementPostCreateEvent $event): void
     {
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onElementPostMerge(ElementPostMergeEvent $event): void
     {
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onElementPostDelete(ElementPostDeleteEvent $event): void
     {
         $this->handleEvent($event);

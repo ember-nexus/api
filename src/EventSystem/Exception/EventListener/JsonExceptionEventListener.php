@@ -6,6 +6,7 @@ namespace App\EventSystem\Exception\EventListener;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use Safe\Exceptions\JsonException;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 class JsonExceptionEventListener
@@ -18,6 +19,7 @@ class JsonExceptionEventListener
     /**
      * @psalm-suppress UndefinedInterfaceMethod
      */
+    #[AsEventListener(priority: 2048)]
     public function onKernelException(ExceptionEvent $event): void
     {
         $throwable = $event->getThrowable();

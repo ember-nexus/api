@@ -10,6 +10,7 @@ use App\Service\EtagCalculatorService;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class LiveParentsCollectionEtagEventListener
 {
@@ -23,6 +24,7 @@ class LiveParentsCollectionEtagEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onParentsCollectionEtagEvent(ParentsCollectionEtagEvent $event): void
     {
         $etag = $this->etagCalculatorService->calculateParentsCollectionEtag($event->getChildId());

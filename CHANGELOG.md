@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Upgrade PHP to 8.4.13, skipping 8.4.12, closes #405.
+- Refactored event listener configuration from YAML files to PHP attributes, closes #406.
 
 ## 0.1.24 - 2025-09-20
 ### Added

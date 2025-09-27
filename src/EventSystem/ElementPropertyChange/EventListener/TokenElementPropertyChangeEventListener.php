@@ -6,6 +6,7 @@ namespace App\EventSystem\ElementPropertyChange\EventListener;
 
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class TokenElementPropertyChangeEventListener
 {
@@ -14,6 +15,7 @@ class TokenElementPropertyChangeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onElementPropertyChangeEvent(ElementPropertyChangeEvent $event): void
     {
         if ('Token' !== $event->getLabelOrType()) {

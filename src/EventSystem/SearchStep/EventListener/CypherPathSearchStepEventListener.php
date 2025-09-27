@@ -19,6 +19,7 @@ use Laudis\Neo4j\Types\Path;
 use Laudis\Neo4j\Types\UnboundRelationship;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
@@ -143,6 +144,7 @@ class CypherPathSearchStepEventListener
         return $query;
     }
 
+    #[AsEventListener]
     public function onSearchStepEvent(SearchStepEvent $event): void
     {
         if (self::TYPE !== $event->getType()) {

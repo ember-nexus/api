@@ -7,6 +7,7 @@ namespace App\EventSystem\ElementPropertyChange\EventListener;
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class UserElementPropertyChangeEventListener
 {
@@ -16,6 +17,7 @@ class UserElementPropertyChangeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onElementPropertyChangeEvent(ElementPropertyChangeEvent $event): void
     {
         if ('User' !== $event->getLabelOrType()) {

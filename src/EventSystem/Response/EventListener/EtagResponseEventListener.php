@@ -8,6 +8,7 @@ use App\Response\CollectionResponse;
 use App\Response\ElementResponse;
 use App\Response\NotModifiedResponse;
 use App\Service\EtagService;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class EtagResponseEventListener
@@ -17,6 +18,7 @@ class EtagResponseEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onKernelResponse(ResponseEvent $event): void
     {
         $response = $event->getResponse();

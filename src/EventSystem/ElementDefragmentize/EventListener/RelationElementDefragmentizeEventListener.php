@@ -7,6 +7,7 @@ namespace App\EventSystem\ElementDefragmentize\EventListener;
 use App\EventSystem\ElementDefragmentize\Event\RelationElementDefragmentizeEvent;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use Ramsey\Uuid\Rfc4122\UuidV4;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class RelationElementDefragmentizeEventListener
 {
@@ -15,6 +16,7 @@ class RelationElementDefragmentizeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onRelationElementDefragmentizeEvent(RelationElementDefragmentizeEvent $event): void
     {
         $cypherFragment = $event->getCypherFragment();

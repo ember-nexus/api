@@ -9,6 +9,7 @@ use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
 use App\Service\AppStateService;
 use App\Type\AppStateType;
 use Safe\DateTime;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class UpdatedElementPreWriteEventListener
 {
@@ -17,11 +18,13 @@ class UpdatedElementPreWriteEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onElementPreCreateEvent(ElementPreCreateEvent $event): void
     {
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onElementPreMergeEvent(ElementPreMergeEvent $event): void
     {
         $this->handleEvent($event);
