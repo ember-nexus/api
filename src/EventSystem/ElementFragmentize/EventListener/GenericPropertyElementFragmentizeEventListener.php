@@ -7,6 +7,7 @@ namespace App\EventSystem\ElementFragmentize\EventListener;
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
+use DateTime;
 use DateTimeInterface;
 use Laudis\Neo4j\Types\Date as LaudisDate;
 use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
@@ -56,27 +57,27 @@ class GenericPropertyElementFragmentizeEventListener
             }
             if ($value instanceof DateTimeInterface) {
                 $cypherFragment->addProperty($name, $value);
-                $elasticFragment->addProperty($name, $value->format('Uu'));
+                $elasticFragment->addProperty($name, $value->format(DateTime::ATOM));
                 continue;
             }
             if ($value instanceof LaudisDateTimeZoneId) {
                 $cypherFragment->addProperty($name, $value);
-                $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
+                $elasticFragment->addProperty($name, $value->toDateTime()->format(DateTime::ATOM));
                 continue;
             }
             if ($value instanceof LaudisDateTime) {
                 $cypherFragment->addProperty($name, $value);
-                $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
+                $elasticFragment->addProperty($name, $value->toDateTime()->format(DateTime::ATOM));
                 continue;
             }
             if ($value instanceof LaudisDate) {
                 $cypherFragment->addProperty($name, $value);
-                $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
+                $elasticFragment->addProperty($name, $value->toDateTime()->format(DateTime::ATOM));
                 continue;
             }
             if ($value instanceof LaudisLocalDateTime) {
                 $cypherFragment->addProperty($name, $value);
-                $elasticFragment->addProperty($name, $value->toDateTime()->format('Uu'));
+                $elasticFragment->addProperty($name, $value->toDateTime()->format(DateTime::ATOM));
                 continue;
             }
             if ($value instanceof LaudisLocalTime) {
