@@ -2,9 +2,9 @@
   "type": "User",
   "id": "2d376349-c5e2-42c8-8ce0-d6f525256cf7",
   "data": {
-    "created": "2023-10-06T10:07:35+00:00",
-    "updated": "2023-10-06T10:07:35+00:00",
+    "created": "2025-09-27T10:39:54+00:00",
     "name": "User",
+    "updated": "2025-09-27T10:39:54+00:00",
     "email": "anonymous-user@localhost.dev",
     "note": "User contains password only due to testing purposes.",
     "password": "1234",
