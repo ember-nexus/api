@@ -6,6 +6,7 @@ namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class NamePropertyElementFragmentizeEventListener
 {
@@ -13,11 +14,13 @@ class NamePropertyElementFragmentizeEventListener
     {
     }
 
+    #[AsEventListener]
     public function onNodeElementFragmentizeEvent(NodeElementFragmentizeEvent $event): void
     {
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onRelationElementFragmentizeEvent(RelationElementFragmentizeEvent $event): void
     {
         $this->handleEvent($event);

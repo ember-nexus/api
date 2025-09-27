@@ -8,6 +8,7 @@ use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client412PreconditionFailedExceptionFactory;
 use App\Service\EtagService;
 use App\Type\Etag;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
 class IfMatchControllerEventListener
@@ -18,6 +19,7 @@ class IfMatchControllerEventListener
     ) {
     }
 
+    #[AsEventListener(priority: 128)]
     public function onKernelController(ControllerEvent $event): void
     {
         $attributes = $event->getAttributes(EndpointSupportsEtag::class);

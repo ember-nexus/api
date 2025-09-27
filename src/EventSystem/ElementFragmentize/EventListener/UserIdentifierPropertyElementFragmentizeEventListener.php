@@ -6,6 +6,7 @@ namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class UserIdentifierPropertyElementFragmentizeEventListener
 {
@@ -14,6 +15,7 @@ class UserIdentifierPropertyElementFragmentizeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onNodeElementFragmentizeEvent(NodeElementFragmentizeEvent $event): void
     {
         $element = $event->getNodeElement();

@@ -6,9 +6,11 @@ namespace App\EventSystem\ElementPropertyReset\EventListener;
 
 use App\Contract\NodeElementInterface;
 use App\EventSystem\ElementPropertyReset\Event\ElementPropertyResetEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class TokenElementPropertyResetEventListener
 {
+    #[AsEventListener]
     public function onElementPropertyResetEvent(ElementPropertyResetEvent $event): void
     {
         $element = $event->getElement();

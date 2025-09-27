@@ -10,6 +10,7 @@ use App\Type\Etag;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class RedisParentsCollectionEtagEventListener
 {
@@ -20,6 +21,7 @@ class RedisParentsCollectionEtagEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onParentsCollectionEtagEvent(ParentsCollectionEtagEvent $event): void
     {
         $redisKey = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey($event->getChildId());

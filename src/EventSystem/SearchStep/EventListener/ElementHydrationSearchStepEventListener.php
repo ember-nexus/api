@@ -16,6 +16,7 @@ use App\Type\SearchStepType;
 use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
@@ -284,6 +285,7 @@ class ElementHydrationSearchStepEventListener
         return $filteredElementIds;
     }
 
+    #[AsEventListener]
     public function onSearchStepEvent(SearchStepEvent $event): void
     {
         if (self::TYPE !== $event->getType()) {

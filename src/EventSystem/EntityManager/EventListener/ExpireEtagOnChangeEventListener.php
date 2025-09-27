@@ -15,6 +15,7 @@ use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\CypherList;
 use Predis\Client;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class ExpireEtagOnChangeEventListener
@@ -27,16 +28,19 @@ class ExpireEtagOnChangeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onElementPostCreateEvent(ElementPostCreateEvent $event): void
     {
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onElementPostMergeEvent(ElementPostMergeEvent $event): void
     {
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onElementPreDeleteEvent(ElementPreDeleteEvent $event): void
     {
         $this->handleEvent($event);

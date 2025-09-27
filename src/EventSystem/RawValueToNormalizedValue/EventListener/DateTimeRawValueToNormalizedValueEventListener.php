@@ -6,9 +6,11 @@ namespace App\EventSystem\RawValueToNormalizedValue\EventListener;
 
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
 use DateTime;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class DateTimeRawValueToNormalizedValueEventListener
 {
+    #[AsEventListener(priority: 16)]
     public function onRawValueToNormalizedValueEvent(RawValueToNormalizedValueEvent $event): void
     {
         $rawValue = $event->getRawValue();

@@ -13,6 +13,7 @@ use App\Service\AppStateService;
 use App\Type\AccessType;
 use App\Type\AppStateType;
 use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\ElasticDataStructures\Type\Document;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
@@ -25,6 +26,7 @@ class CalculateSearchAccessEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onElementPostCreate(ElementPostCreateEvent $event): void
     {
         if (AppStateType::LOADING_BACKUP === $this->appStateService->getAppState()) {
@@ -34,6 +36,7 @@ class CalculateSearchAccessEventListener
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onElementUpdateAfterBackupLoadEvent(ElementUpdateAfterBackupLoadEvent $event): void
     {
         $this->handleEvent($event);

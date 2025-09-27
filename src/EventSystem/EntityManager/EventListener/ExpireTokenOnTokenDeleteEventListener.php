@@ -9,6 +9,7 @@ use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\Security\AuthProvider;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class ExpireTokenOnTokenDeleteEventListener
 {
@@ -19,6 +20,7 @@ class ExpireTokenOnTokenDeleteEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onElementPostDeleteEvent(ElementPostDeleteEvent $event): void
     {
         $oldToken = $event->getElement();

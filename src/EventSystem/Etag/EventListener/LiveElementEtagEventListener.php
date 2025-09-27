@@ -9,6 +9,7 @@ use App\Factory\Type\RedisKeyFactory;
 use App\Service\EtagCalculatorService;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class LiveElementEtagEventListener
 {
@@ -22,6 +23,7 @@ class LiveElementEtagEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onElementEtagEvent(ElementEtagEvent $event): void
     {
         $etag = $this->etagCalculatorService->calculateElementEtag($event->getElementId());

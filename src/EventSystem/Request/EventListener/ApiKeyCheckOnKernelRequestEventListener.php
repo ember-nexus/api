@@ -17,6 +17,7 @@ use Predis\Client as RedisClient;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -35,6 +36,7 @@ class ApiKeyCheckOnKernelRequestEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {

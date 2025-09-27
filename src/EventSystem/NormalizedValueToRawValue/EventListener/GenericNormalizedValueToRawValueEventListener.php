@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\EventSystem\NormalizedValueToRawValue\EventListener;
 
 use App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class GenericNormalizedValueToRawValueEventListener
 {
+    #[AsEventListener(priority: 0)]
     public function onNormalizedValueToRawValueEvent(NormalizedValueToRawValueEvent $event): void
     {
         $normalizedValue = $event->getNormalizedValue();

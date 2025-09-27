@@ -6,9 +6,11 @@ namespace App\EventSystem\ElementPropertyReturn\EventListener;
 
 use App\Contract\NodeElementInterface;
 use App\EventSystem\ElementPropertyReturn\Event\ElementPropertyReturnEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class TokenElementPropertyReturnEventListener
 {
+    #[AsEventListener]
     public function onElementPropertyReturnEvent(ElementPropertyReturnEvent $event): void
     {
         $element = $event->getElement();

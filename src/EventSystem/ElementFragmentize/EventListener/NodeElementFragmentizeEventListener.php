@@ -6,6 +6,7 @@ namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
 use App\Factory\Exception\Server500LogicExceptionFactory;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class NodeElementFragmentizeEventListener
 {
@@ -14,6 +15,7 @@ class NodeElementFragmentizeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onNodeElementFragmentizeEvent(NodeElementFragmentizeEvent $event): void
     {
         $nodeElement = $event->getNodeElement();

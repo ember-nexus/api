@@ -10,6 +10,7 @@ use App\Service\EtagCalculatorService;
 use App\Type\RedisValueType;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class LiveIndexCollectionEtagEventListener
 {
@@ -23,6 +24,7 @@ class LiveIndexCollectionEtagEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onIndexCollectionEtagEvent(IndexCollectionEtagEvent $event): void
     {
         $etag = $this->etagCalculatorService->calculateIndexCollectionEtag($event->getUserId());

@@ -6,6 +6,7 @@ namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
 use App\Factory\Exception\Server500LogicExceptionFactory;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\CypherDataStructures\Type\Node;
 
 class RelationElementFragmentizeEventListener
@@ -15,6 +16,7 @@ class RelationElementFragmentizeEventListener
     ) {
     }
 
+    #[AsEventListener]
     public function onRelationElementFragmentizeEvent(RelationElementFragmentizeEvent $event): void
     {
         $relationElement = $event->getRelationElement();

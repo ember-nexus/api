@@ -14,6 +14,7 @@ use App\Service\GraphStructureService;
 use App\Type\SearchStepType;
 use Elastic\Elasticsearch\Response\Elasticsearch;
 use Ramsey\Uuid\Rfc4122\UuidV4;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
 class ElasticsearchQueryDslMixinSearchStepEventListener
@@ -236,6 +237,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
         return $combinedQuery;
     }
 
+    #[AsEventListener]
     public function onSearchStepEvent(SearchStepEvent $event): void
     {
         if (self::TYPE !== $event->getType()) {

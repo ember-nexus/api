@@ -12,6 +12,7 @@ use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
 use Laudis\Neo4j\Types\DateTimeZoneId as LaudisDateTimeZoneId;
 use Laudis\Neo4j\Types\LocalDateTime as LaudisLocalDateTime;
 use Laudis\Neo4j\Types\LocalTime as LaudisLocalTime;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class GenericPropertyElementDefragmentizeEventListener
 {
@@ -19,11 +20,13 @@ class GenericPropertyElementDefragmentizeEventListener
     {
     }
 
+    #[AsEventListener]
     public function onNodeElementDefragmentizeEvent(NodeElementDefragmentizeEvent $event): void
     {
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
     public function onRelationElementDefragmentizeEvent(RelationElementDefragmentizeEvent $event): void
     {
         $this->handleEvent($event);

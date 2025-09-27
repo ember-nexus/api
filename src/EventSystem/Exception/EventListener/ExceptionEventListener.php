@@ -9,6 +9,7 @@ use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Response\ProblemJsonResponse;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -26,6 +27,7 @@ class ExceptionEventListener
     /**
      * @SuppressWarnings("PHPMD.EmptyCatchBlock")
      */
+    #[AsEventListener]
     public function onKernelException(ExceptionEvent $event): void
     {
         $originalException = $extendedException = $event->getThrowable();
