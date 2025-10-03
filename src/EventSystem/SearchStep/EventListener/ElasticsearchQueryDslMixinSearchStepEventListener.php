@@ -98,13 +98,17 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     {
         $elements = [];
         foreach ($response->asArray()['hits']['hits'] as $element) {
-            $elements[] = [
+            $data = [
                 'id' => UuidV4::fromString($element['_id']),
                 'type' => $this->graphStructureService->getTypeFromElasticIndex($element['_index']),
                 'metadata' => [
                     'score' => $element['_score'],
                 ],
             ];
+            if (array_key_exists('highlight', $element)) {
+                $data['metadata']['highlight'] = $element['highlight'];
+            }
+            $elements[] = $data;
         }
 
         return $elements;
@@ -120,7 +124,69 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
             throw $this->client400BadContentExceptionFactory->createFromTemplate('query', 'array', $query);
         }
 
-        return $query;
+        if (!array_key_exists('query', $query)) {
+            // query is defined in shorthand variant, i.e. only the Elasticsearch query mixin is provided
+            return $query;
+        }
+        // $query['query'] exists, i.e. it is defined in extended variant
+
+        $elasticsearchQuery = $query['query'];
+        if (!is_array($elasticsearchQuery)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('query.query', 'array', $query);
+        }
+
+        return $elasticsearchQuery;
+    }
+
+    private function getHighlightOptionsFromQuery(SearchStepEvent $event): ?array
+    {
+        $query = $event->getQuery();
+        if (!is_array($query)) {
+            return null;
+        }
+
+        if (!array_key_exists('query', $query)) {
+            // query is defined in shorthand variant, i.e. only the Elasticsearch query mixin is provided - no highlight options are set
+            return null;
+        }
+        // $query['query'] exists, i.e. it is defined in extended variant
+
+        if (!array_key_exists('highlight', $query)) {
+            // $query['highlight'] does not exist -> no highlight options
+            return null;
+        }
+
+        $highlightOptions = $query['highlight'];
+        if (!is_array($highlightOptions)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('query.highlight', 'object', $query);
+        }
+
+        if (!array_key_exists('fields', $highlightOptions)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('query.highlight.fields', 'object', $query);
+        }
+        $fields = $highlightOptions['fields'];
+        if (!is_array($fields)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('query.highlight.fields', 'object', $query);
+        }
+        foreach ($fields as $fieldName => $value) {
+            if (str_starts_with($fieldName, '_')) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Property '%s' in 'query.highlight.fields' starts with underscore '_', which is forbidden.", $fieldName));
+            }
+            if (str_starts_with($fieldName, '*')) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Property '%s' in 'query.highlight.fields' starts with wildcard '*', which is forbidden.", $fieldName));
+            }
+            if (str_starts_with($fieldName, '?')) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Property '%s' in 'query.highlight.fields' starts with wildcard '?', which is forbidden.", $fieldName));
+            }
+            if (!is_array($value)) {
+                throw $this->client400BadContentExceptionFactory->createFromTemplate('query.highlight.fields[i]', 'object', $query);
+            }
+            if (empty($value)){
+                $highlightOptions['fields'][$fieldName] = (object)[];
+            }
+        }
+
+        return $highlightOptions;
     }
 
     /**
@@ -180,6 +246,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     private function buildCombinedQuery(SearchStepEvent $event): array
     {
         $query = $this->getQueryFromEvent($event);
+        $highlightOptions = $this->getHighlightOptionsFromQuery($event);
         $parameters = $event->getParameters();
 
         $this->executeExpressionsInQuery($query, $parameters);
@@ -229,9 +296,13 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
                     ],
                 ],
             ],
+            'highlight' => $highlightOptions,
         ];
         if (null === $minScore) {
             unset($combinedQuery['min_score']);
+        }
+        if (null === $highlightOptions) {
+            unset($combinedQuery['highlight']);
         }
 
         return $combinedQuery;
