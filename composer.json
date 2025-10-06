@@ -11,6 +11,7 @@
     "antlr/antlr4-php-runtime": "^0.9.1",
     "async-aws/s3": "^2.2",
     "guzzlehttp/guzzle": "^7.8",
+    "illuminate/collections": "^12.32",
     "league/flysystem": "^3.23",
     "league/flysystem-bundle": "^3.3",
     "league/flysystem-ziparchive": "^3.23",

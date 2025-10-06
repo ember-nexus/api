@@ -12,6 +12,7 @@ use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
 use App\Service\ExpressionService;
+use App\Type\ElementHydrationPartialElement;
 use App\Type\SearchStepType;
 use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
@@ -55,9 +56,9 @@ class ElementHydrationSearchStepEventListener
     }
 
     /**
-     * @return UuidInterface[]
+     * @return ElementHydrationPartialElement[]|null
      */
-    private function getElementIdsFromElementsResult(mixed $stepResult): ?array
+    private function getPartialElementsFromElementsResult(mixed $stepResult): ?array
     {
         if (!array_key_exists('elements', $stepResult)) {
             return null;
@@ -66,36 +67,45 @@ class ElementHydrationSearchStepEventListener
         if (!is_array($elements)) {
             return null;
         }
-        $elementIds = [];
+        $partialElements = [];
         foreach ($elements as $i => $element) {
             if (!array_key_exists('id', $element)) {
                 continue;
             }
+            $metadata = [];
+            if (array_key_exists('metadata', $element)) {
+                $rawMetadata = $element['metadata'];
+                if (is_array($rawMetadata)) {
+                    $metadata = $rawMetadata;
+                }
+            }
+            $elementId = null;
             $rawElementId = $element['id'];
             if ($rawElementId instanceof UuidInterface) {
-                $elementIds[] = $rawElementId;
-                continue;
+                $elementId = $rawElementId;
+            } else {
+                if (!is_string($rawElementId)) {
+                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elements[%d].id', $i), 'string', $rawElementId);
+                }
+                try {
+                    $elementId = Uuid::fromString($rawElementId);
+                } catch (InvalidUuidStringException $exception) {
+                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elements[%d].id', $i), 'uuid (string)', $rawElementId, previous: $exception);
+                }
             }
-            if (!is_string($rawElementId)) {
-                throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elements[%d].id', $i), 'string', $rawElementId);
-            }
-            try {
-                $elementIds[] = Uuid::fromString($rawElementId);
-            } catch (InvalidUuidStringException $exception) {
-                throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elements[%d].id', $i), 'uuid (string)', $rawElementId, previous: $exception);
-            }
+            $partialElements[] = new ElementHydrationPartialElement($elementId, $metadata);
         }
 
-        return $elementIds;
+        return $partialElements;
     }
 
     /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
      *
-     * @return UuidInterface[]
+     * @return ElementHydrationPartialElement[]|null
      */
-    private function getElementIdsFromPathsResult(mixed $stepResult): ?array
+    private function getPartialElementsFromPathsResult(mixed $stepResult): ?array
     {
         if (!array_key_exists('paths', $stepResult)) {
             return null;
@@ -104,53 +114,53 @@ class ElementHydrationSearchStepEventListener
         if (!is_array($paths)) {
             return null;
         }
-        $elementIds = [];
+        $partialElements = [];
         foreach ($paths as $i => $path) {
             if (!array_key_exists('nodeIds', $path) || !array_key_exists('relationIds', $path)) {
                 continue;
             }
             foreach ($path['nodeIds'] as $j => $rawNodeId) {
                 if ($rawNodeId instanceof UuidInterface) {
-                    $elementIds[] = $rawNodeId;
+                    $partialElements[] = new ElementHydrationPartialElement($rawNodeId);
                     continue;
                 }
                 if (!is_string($rawNodeId)) {
                     throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('paths[%d].nodeIds[%d]', $i, $j), 'string', $rawNodeId);
                 }
                 try {
-                    $elementIds[] = Uuid::fromString($rawNodeId);
+                    $partialElements[] = new ElementHydrationPartialElement(Uuid::fromString($rawNodeId));
                 } catch (InvalidUuidStringException $exception) {
                     throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('paths[%d].nodeIds[%d]', $i, $j), 'uuid (string)', $rawNodeId, previous: $exception);
                 }
             }
             foreach ($path['relationIds'] as $j => $rawRelationId) {
                 if ($rawRelationId instanceof UuidInterface) {
-                    $elementIds[] = $rawRelationId;
+                    $partialElements[] = new ElementHydrationPartialElement($rawRelationId);
                     continue;
                 }
                 if (!is_string($rawRelationId)) {
                     throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('paths[%d].relationIds[%d]', $i, $j), 'string', $rawRelationId);
                 }
                 try {
-                    $elementIds[] = Uuid::fromString($rawRelationId);
+                    $partialElements[] = new ElementHydrationPartialElement(Uuid::fromString($rawRelationId));
                 } catch (InvalidUuidStringException $exception) {
                     throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('paths[%d].relationIds[%d]', $i, $j), 'uuid (string)', $rawRelationId, previous: $exception);
                 }
             }
         }
 
-        sort($elementIds);
+        usort($partialElements, fn (ElementHydrationPartialElement $a, ElementHydrationPartialElement $b) => $a->getId()->toString() <=> $b->getId()->toString());
 
-        return $elementIds;
+        return $partialElements;
     }
 
     /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
      *
-     * @return UuidInterface[]
+     * @return ElementHydrationPartialElement[]|null
      */
-    private function getElementIdsFromQuery(SearchStepEvent $event): ?array
+    private function getPartialElementsFromQuery(SearchStepEvent $event): ?array
     {
         $query = $event->getQuery();
         if (null === $query) {
@@ -176,45 +186,45 @@ class ElementHydrationSearchStepEventListener
             throw $this->client400BadContentExceptionFactory->createFromTemplate('elementIds', 'array', $rawElementIds);
         }
 
-        $elementIds = [];
+        $partialElements = [];
         foreach ($rawElementIds as $i => $rawElementId) {
             if ($rawElementId instanceof UuidInterface) {
-                $elementIds[] = $rawElementId;
+                $partialElements[] = new ElementHydrationPartialElement($rawElementId);
             } else {
                 if (!is_string($rawElementId)) {
                     throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elementId[%d]', $i), 'string', $rawElementId);
                 }
                 try {
-                    $elementIds[] = Uuid::fromString($rawElementId);
+                    $partialElements[] = new ElementHydrationPartialElement(Uuid::fromString($rawElementId));
                 } catch (InvalidUuidStringException $exception) {
                     throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elementId[%d]', $i), 'uuid (string)', $rawElementId, previous: $exception);
                 }
             }
         }
 
-        return $elementIds;
+        return $partialElements;
     }
 
     /**
-     * @return UuidInterface[]
+     * @return ElementHydrationPartialElement[]
      */
-    private function parseElementIdsFromEvent(SearchStepEvent $event): array
+    private function parsePartialElementsFromEvent(SearchStepEvent $event): array
     {
-        $elementIds = $this->getElementIdsFromQuery($event);
-        if (null !== $elementIds) {
-            return $elementIds;
+        $partialElements = $this->getPartialElementsFromQuery($event);
+        if (null !== $partialElements) {
+            return $partialElements;
         }
         $previousStepResult = $this->getPreviousSearchStepResults($event);
         if (null === $previousStepResult) {
             throw $this->client400BadContentExceptionFactory->createFromDetail('Expected either query to be string|array or previous step result to contain elements or paths.');
         }
-        $elementIds = $this->getElementIdsFromElementsResult($previousStepResult);
-        if (null !== $elementIds) {
-            return $elementIds;
+        $partialElements = $this->getPartialElementsFromElementsResult($previousStepResult);
+        if (null !== $partialElements) {
+            return $partialElements;
         }
-        $elementIds = $this->getElementIdsFromPathsResult($previousStepResult);
-        if (null !== $elementIds) {
-            return $elementIds;
+        $partialElements = $this->getPartialElementsFromPathsResult($previousStepResult);
+        if (null !== $partialElements) {
+            return $partialElements;
         }
         throw $this->client400BadContentExceptionFactory->createFromDetail('Expected either query to be string|array or previous step result to contain elements or paths.');
     }
@@ -224,9 +234,11 @@ class ElementHydrationSearchStepEventListener
      */
     private function parseElementIds(SearchStepEvent $event): array
     {
-        $elementIds = $this->parseElementIdsFromEvent($event);
+        $partialElements = $this->parsePartialElementsFromEvent($event);
+
+        $elementIds = array_map(fn (ElementHydrationPartialElement $partialElement) => $partialElement->getId(), $partialElements);
         $uniqueElementIds = array_unique($elementIds);
-        if (count($uniqueElementIds) !== count($elementIds)) {
+        if (count($uniqueElementIds) !== count($partialElements)) {
             $event->addDebugData(
                 sprintf('%s:redundantElementIds', self::TYPE->value),
                 [
@@ -234,43 +246,55 @@ class ElementHydrationSearchStepEventListener
                     'removedElementIds' => array_map(fn (UuidInterface $elementId) => $elementId->toString(), array_values(array_unique(array_diff_assoc($elementIds, $uniqueElementIds)))),
                 ]
             );
-            $elementIds = array_values($uniqueElementIds);
+            $partialElements = array_values($uniqueElementIds);
         }
 
-        if (count($elementIds) > self::NUMBER_MAX_ELEMENTS) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Number of elementIds to hydrate is %d, which exceeds the limit of %d; please limit the number of results returned by previous steps or parameters.', count($elementIds), self::NUMBER_MAX_ELEMENTS));
+        if (count($partialElements) > self::NUMBER_MAX_ELEMENTS) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Number of elementIds to hydrate is %d, which exceeds the limit of %d; please limit the number of results returned by previous steps or parameters.', count($partialElements), self::NUMBER_MAX_ELEMENTS));
         }
 
-        return $elementIds;
+        return $partialElements;
     }
 
     /**
-     * @param UuidInterface[] $elementIds
+     * @param ElementHydrationPartialElement[] $partialElements
      *
      * @return array<mixed[]>
      */
-    private function getElementData(array $elementIds): array
+    private function hydratedElements(array $partialElements): array
     {
-        $elementData = [];
-        foreach ($elementIds as $elementId) {
-            $element = $this->elementManager->getElement($elementId);
-            if ($element) {
-                $elementData[] = $this->elementToRawService->elementToRaw(
-                    $element
-                );
+        $hydratedElements = [];
+        foreach ($partialElements as $partialElement) {
+            $element = $this->elementManager->getElement($partialElement->getId());
+            if (!$element) {
+                continue;
             }
+            $hydratedElement = $this->elementToRawService->elementToRaw(
+                $element
+            );
+            $metadata = $partialElement->getMetadata();
+            if (!empty($metadata)) {
+                $hydratedElement['metadata'] = $metadata;
+            }
+            $hydratedElements[] = $hydratedElement;
         }
 
-        return $elementData;
+        return $hydratedElements;
     }
 
     /**
-     * @param UuidInterface[] $elementIds
+     * @param ElementHydrationPartialElement[] $partialElements
      *
-     * @return UuidInterface[]
+     * @return ElementHydrationPartialElement[]
      */
-    private function filterElementIdsToAccessibleOnly(array $elementIds, SearchStepEvent $event): array
+    private function filterPartialElementsToAccessibleOnly(array $partialElements, SearchStepEvent $event): array
     {
+        $elementIds = array_map(
+            function (ElementHydrationPartialElement $partialElement): UuidInterface {
+                return $partialElement->getId();
+            },
+            $partialElements
+        );
         $filteredElementIds = $this->accessChecker->checkUserAccessToMultipleElements($this->authProvider->getUserId(), $elementIds);
 
         if (count($filteredElementIds) !== count($elementIds)) {
@@ -282,7 +306,11 @@ class ElementHydrationSearchStepEventListener
             );
         }
 
-        return $filteredElementIds;
+        /** @var ElementHydrationPartialElement[] */
+        return collect($partialElements)
+            ->filter(fn (ElementHydrationPartialElement $element): bool => in_array($element->getId(), $filteredElementIds))
+            ->values()
+            ->all();
     }
 
     #[AsEventListener]
@@ -297,14 +325,17 @@ class ElementHydrationSearchStepEventListener
         $start = microtime(true);
         $event->addDebugData('start', $start);
 
-        $elementIds = $this->parseElementIds($event);
-        $elementIds = $this->filterElementIdsToAccessibleOnly($elementIds, $event);
+        $elementHydrationPartialElements = $this->parsePartialElementsFromEvent($event);
+        $elementHydrationPartialElements = $this->filterPartialElementsToAccessibleOnly($elementHydrationPartialElements, $event);
 
-        $event->addDebugData('accessibleElementIds', $elementIds);
+        /** @var UuidInterface[] $accessibleElementIds */
+        $accessibleElementIds = collect($elementHydrationPartialElements)
+            ->map(fn (ElementHydrationPartialElement $partialElement): UuidInterface => $partialElement->getId())
+            ->all();
+        $event->addDebugData('accessibleElementIds', $accessibleElementIds);
 
-        $elementData = $this->getElementData($elementIds);
-
-        $event->setResults($elementData);
+        $elements = $this->hydratedElements($elementHydrationPartialElements);
+        $event->setResults($elements);
 
         $end = microtime(true);
         $event->addDebugData('end', $end);

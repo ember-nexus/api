@@ -181,8 +181,8 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
             if (!is_array($value)) {
                 throw $this->client400BadContentExceptionFactory->createFromTemplate('query.highlight.fields[i]', 'object', $query);
             }
-            if (empty($value)){
-                $highlightOptions['fields'][$fieldName] = (object)[];
+            if (empty($value)) {
+                $highlightOptions['fields'][$fieldName] = (object) [];
             }
         }
 
