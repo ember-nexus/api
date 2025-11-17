@@ -6,8 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.1.26 - 2025-11-17
 ### Changed
-- Upgrade PHP to 8.4.14, closes #414.
+- Upgrade PHP to 8.4.14, closes [#414].
 
 ## 0.1.25 - 2025-09-27
 ### Added

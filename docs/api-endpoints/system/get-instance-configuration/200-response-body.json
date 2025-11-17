@@ -1,5 +1,5 @@
 {
-  "version": "0.1.25",
+  "version": "0.1.26",
   "pageSize": {
     "min": 5,
     "default": 25,
