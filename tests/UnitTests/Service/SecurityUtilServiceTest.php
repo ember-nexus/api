@@ -24,6 +24,7 @@ use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -36,6 +37,7 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[Small]
 #[CoversClass(SecurityUtilService::class)]
+#[AllowMockObjectsWithoutExpectations]
 class SecurityUtilServiceTest extends TestCase
 {
     private function getSecurityUtilService(

@@ -15,6 +15,7 @@ use App\Type\AppStateType;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
+use Predis\Client;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -45,6 +46,7 @@ class BackupLoadCommand extends Command
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
+        private Client $redisClient,
         private FilesystemOperator $backupStorage,
         private RawToElementService $rawToElementService,
         private EventDispatcherInterface $eventDispatcher,
@@ -235,6 +237,8 @@ class BackupLoadCommand extends Command
             $this->elasticEntityManager->flush();
             ++$page;
         }
+
+        $this->redisClient->flushdb();
 
         $this->io->stopSection('Finished all after backup tasks.');
     }

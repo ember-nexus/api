@@ -67,7 +67,11 @@ class CypherPathSearchStepEventListener
             if (!($rawRelation instanceof UnboundRelationship)) {
                 throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.relationships as UnboundRelationship, not %s.', get_debug_type($rawRelation))); // @codeCoverageIgnore
             }
-            $relationIds[] = UuidV4::fromString($rawRelation->getProperty('id'));
+            $rawId = $rawRelation->getProperty('id');
+            if (!is_string($rawId)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.relationships.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+            }
+            $relationIds[] = UuidV4::fromString($rawId);
         }
         $nodeCount = count($nodeIds);
         $relationCount = count($relationIds);

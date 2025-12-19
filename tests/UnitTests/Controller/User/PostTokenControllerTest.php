@@ -15,6 +15,7 @@ use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
 use Exception;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -26,6 +27,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
 #[CoversClass(PostTokenController::class)]
+#[AllowMockObjectsWithoutExpectations]
 class PostTokenControllerTest extends TestCase
 {
     use ProphecyTrait;
@@ -111,7 +113,6 @@ class PostTokenControllerTest extends TestCase
     {
         $postTokenController = $this->getPostTokenController();
         $method = new ReflectionMethod(PostTokenController::class, 'createTokenResponse');
-        $method->setAccessible(true);
 
         $response = $method->invokeArgs($postTokenController, ['1234']);
         $this->assertInstanceOf(JsonResponse::class, $response);
@@ -125,7 +126,6 @@ class PostTokenControllerTest extends TestCase
     {
         $postTokenController = $this->getPostTokenController();
         $method = new ReflectionMethod(PostTokenController::class, 'getLifetimeInSecondsFromBody');
-        $method->setAccessible(true);
 
         $body = [];
         $result = $method->invokeArgs($postTokenController, [$body]);

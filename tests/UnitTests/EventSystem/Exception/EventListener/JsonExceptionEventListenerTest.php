@@ -8,6 +8,7 @@ use App\EventSystem\Exception\EventListener\JsonExceptionEventListener;
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use Exception;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +22,7 @@ use Throwable;
 
 #[Small]
 #[CoversClass(JsonExceptionEventListener::class)]
+#[AllowMockObjectsWithoutExpectations]
 class JsonExceptionEventListenerTest extends TestCase
 {
     use ProphecyTrait;

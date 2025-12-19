@@ -17,8 +17,7 @@ The Ember Nexus API stack currently supports the following CPU architectures:
 1: The architecture amd64 is supported by default.  
 2: The architecture arm64 is supported since 0.0.23.  
 3: The architecture riscv64 will likely be supported once a) computers and CI/CD infrastructure get more available and
-b) upstream dependencies get official support; see also [PHP](https://github.com/docker-library/php/issues/1279) and
-[NGINX Unit](https://github.com/nginx/unit/issues/926).  
+b) ecosystem get more stable; see also [PHP](https://github.com/docker-library/php/issues/1279).  
 4: No support is planned, although you can ask for it by opening a [GitHub issue](https://github.com/ember-nexus/api/issues).
 It likely requires hardware donation or general collaboration.  
 5: Neo4j [officially supports](https://neo4j.com/docs/operations-manual/current/installation/requirements/)

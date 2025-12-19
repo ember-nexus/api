@@ -9,6 +9,7 @@ use App\Service\RequestIdService;
 use DateTimeImmutable;
 use Monolog\Level;
 use Monolog\LogRecord;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -16,6 +17,7 @@ use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(RequestProcessor::class)]
+#[AllowMockObjectsWithoutExpectations]
 class RequestProcessorTest extends TestCase
 {
     public function testRequestProcessor(): void

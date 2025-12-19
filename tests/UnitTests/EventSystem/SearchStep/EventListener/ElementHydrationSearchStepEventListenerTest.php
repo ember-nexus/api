@@ -91,7 +91,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
 
         try {
             $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
@@ -131,7 +130,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
 
         try {
             $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
@@ -171,7 +169,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
 
         try {
             $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
@@ -213,7 +210,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
 
         try {
             $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
@@ -242,7 +238,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         /** @var UuidInterface[] $elementIds */
         $this->assertCount(1000, $elementIds);
@@ -261,7 +256,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
 
         $this->assertEmpty($elementIds);
@@ -283,7 +277,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         /** @var UuidInterface[] $elementIds */
         $this->assertCount(2, $elementIds);
@@ -307,7 +300,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         /** @var UuidInterface[] $elementIds */
         $this->assertCount(2, $elementIds);
@@ -334,7 +326,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
-        $method->setAccessible(true);
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         /** @var UuidInterface[] $elementIds */
         $this->assertCount(2, $elementIds);
@@ -358,7 +349,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getPreviousSearchStepResults');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -374,7 +364,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getPreviousSearchStepResults');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -392,7 +381,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getPreviousSearchStepResults');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -410,7 +398,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getPreviousSearchStepResults');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -440,7 +427,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromElementsResult');
-        $method->setAccessible(true);
 
         $stepResults = [];
 
@@ -452,7 +438,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromElementsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'elements' => 'something else',
@@ -466,7 +451,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromElementsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'elements' => [],
@@ -480,7 +464,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromElementsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'elements' => [
@@ -519,7 +502,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromElementsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'elements' => [
@@ -556,7 +538,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromElementsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'elements' => [
@@ -578,7 +559,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromPathsResult');
-        $method->setAccessible(true);
 
         $stepResults = [];
 
@@ -590,7 +570,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromPathsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'paths' => 'something else',
@@ -604,7 +583,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromPathsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'paths' => [],
@@ -618,7 +596,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromPathsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'paths' => [
@@ -675,7 +652,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromPathsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'paths' => [
@@ -713,7 +689,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromPathsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'paths' => [
@@ -751,7 +726,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromPathsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'paths' => [
@@ -789,7 +763,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromPathsResult');
-        $method->setAccessible(true);
 
         $stepResults = [
             'paths' => [
@@ -812,7 +785,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -843,7 +815,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -878,7 +849,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -905,7 +875,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             expressionService: $expressionService->reveal()
         );
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -947,7 +916,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -986,7 +954,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1008,7 +975,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1046,7 +1012,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1083,7 +1048,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementIdsFromQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1105,7 +1069,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIdsFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1143,7 +1106,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIdsFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1163,7 +1125,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIdsFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1194,7 +1155,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIdsFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1238,7 +1198,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIdsFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1262,7 +1221,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIdsFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1291,7 +1249,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIdsFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1373,7 +1330,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             elementToRawService: $elementToRawService->reveal()
         );
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementData');
-        $method->setAccessible(true);
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$elementIds]);
         $this->assertCount(2, $result);
@@ -1406,7 +1362,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             authProvider: $authProvider->reveal()
         );
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'filterElementIdsToAccessibleOnly');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
@@ -1451,7 +1406,6 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             authProvider: $authProvider->reveal()
         );
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'filterElementIdsToAccessibleOnly');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,

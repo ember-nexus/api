@@ -128,13 +128,22 @@ class HealthcheckCommand extends Command
             $alpineVersion
         ));
 
-        $nginxUnitVersion = \Safe\shell_exec('unitd --version 2>&1') ?? "\n: unknown";
-        $nginxUnitVersion = explode("\n", $nginxUnitVersion, 2)[0];
-        $nginxUnitVersion = explode(': ', $nginxUnitVersion, 2)[1];
-
+        $frankenPhpVersion = 'unknown';
+        $caddyVersion = 'unknown';
+        $frankenPhpVersionOutput = explode(' ', \Safe\shell_exec('frankenphp -v 2>&1') ?? '');
+        if (count($frankenPhpVersionOutput) > 6) {
+            $frankenPhpVersion = \Safe\preg_replace('/[^0-9.]/', '', $frankenPhpVersionOutput[1]);
+            $caddyVersion = \Safe\preg_replace('/[^0-9.]/', '', $frankenPhpVersionOutput[5]);
+        }
+        /** @var string $frankenPhpVersion */
+        /** @var string $caddyVersion */
         $this->io->writeln(sprintf(
-            'NGINX Unit version:    %s',
-            $nginxUnitVersion
+            'FrankenPHP version:    %s',
+            $frankenPhpVersion
+        ));
+        $this->io->writeln(sprintf(
+            'Caddy version:         %s',
+            $caddyVersion
         ));
 
         /**

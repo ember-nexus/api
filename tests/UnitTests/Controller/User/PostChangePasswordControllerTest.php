@@ -14,6 +14,7 @@ use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
 use Exception;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -25,6 +26,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
 #[CoversClass(PostChangePasswordController::class)]
+#[AllowMockObjectsWithoutExpectations]
 class PostChangePasswordControllerTest extends TestCase
 {
     use ProphecyTrait;
@@ -114,7 +116,6 @@ class PostChangePasswordControllerTest extends TestCase
         $postChangePasswordController = $this->getPostChangePasswordController();
 
         $method = new ReflectionMethod(PostChangePasswordController::class, 'validateNewPasswordIsDifferentFromCurrentPassword');
-        $method->setAccessible(true);
 
         try {
             $method->invokeArgs($postChangePasswordController, ['1234', '1234']);

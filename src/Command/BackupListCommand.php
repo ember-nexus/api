@@ -72,6 +72,11 @@ class BackupListCommand extends Command
             ];
         }
 
+        // sort backups by creation date, desc
+        usort($rows, function ($a, $b) {
+            return strcmp($b[3], $a[3]);
+        });
+
         $table = $this->io->createCompactTable();
         $table->setHeaders($header);
         $table->setRows($rows);

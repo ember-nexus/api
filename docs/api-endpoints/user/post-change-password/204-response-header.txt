@@ -5,5 +5,4 @@ Access-Control-Expose-Headers: ETag, Location
 Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
 Cache-Control: no-cache, private
 Date: Fri, 29 Sep 2023 10:05:24 GMT
-Server: Unit
 X-Powered-By: Ember Nexus API
