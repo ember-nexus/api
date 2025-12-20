@@ -21,6 +21,7 @@ use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -33,6 +34,7 @@ use Syndesi\CypherEntityManager\Type\EntityManager;
 
 #[Small]
 #[CoversClass(PostRegisterController::class)]
+#[AllowMockObjectsWithoutExpectations]
 class PostRegisterControllerTest extends TestCase
 {
     use ProphecyTrait;
@@ -90,8 +92,6 @@ class PostRegisterControllerTest extends TestCase
             router: $urlGenerator,
             cypherEntityManager: $cypherEntityManager
         );
-        $method = new ReflectionMethod(PostRegisterController::class, 'postRegister');
-        $method->setAccessible(true);
 
         $request = $this->createMock(Request::class);
         $request->method('getContent')->willReturn('{"type": "User", "password": "1234", "uniqueUserIdentifier": "test@example.com"}');
@@ -114,8 +114,6 @@ class PostRegisterControllerTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration,
             client403ForbiddenExceptionFactory: $client403ForbiddenExceptionFactory
         );
-        $method = new ReflectionMethod(PostRegisterController::class, 'postRegister');
-        $method->setAccessible(true);
 
         $request = $this->createMock(Request::class);
 
@@ -161,7 +159,6 @@ class PostRegisterControllerTest extends TestCase
             cypherEntityManager: $cypherEntityManager
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'checkForDuplicateUniqueUserIdentifier');
-        $method->setAccessible(true);
 
         $userId = Uuid::uuid4();
         try {
@@ -202,7 +199,6 @@ class PostRegisterControllerTest extends TestCase
             cypherEntityManager: $cypherEntityManager
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'checkForDuplicateUniqueUserIdentifier');
-        $method->setAccessible(true);
 
         $userId = Uuid::uuid4();
         $method->invokeArgs($postRegisterController, [$userId]);
@@ -217,7 +213,6 @@ class PostRegisterControllerTest extends TestCase
             userPasswordHasher: new UserPasswordHasher()
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'createUserNode');
-        $method->setAccessible(true);
 
         $userId = Uuid::uuid4();
         $data = [];
@@ -250,7 +245,6 @@ class PostRegisterControllerTest extends TestCase
             router: $urlGenerator
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'createCreatedResponse');
-        $method->setAccessible(true);
 
         $userId = Uuid::uuid4();
         $response = $method->invokeArgs($postRegisterController, [$userId]);

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512"><svg id="SvgjsSvg1001" data-name="Ebene 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ff073a;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #1a1a1a;
+      }
+
+      .cls-3 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <polygon class="cls-1" points="175.383 465.456 94.766 418.911 256 73.142 417.235 418.911 336.617 465.456 256 292.571 175.383 465.456"></polygon>
+  <polygon class="cls-2" points="444.107 403.396 256 0 67.893 403.396 94.766 418.911 256 73.142 417.235 418.911 444.107 403.396"></polygon>
+  <polygon class="cls-3" points="175.383 465.456 256 292.571 336.617 465.456 256 512 175.383 465.456"></polygon>
+</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>

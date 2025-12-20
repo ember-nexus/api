@@ -93,7 +93,7 @@ jobs:
       - name: CS Lint
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && PHP_CS_FIXER_IGNORE_ENV=1 composer cs:list"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && PHP_CS_FIXER_IGNORE_ENV=1 composer cs:list"
 
   psalm:
     runs-on: ubuntu-latest
@@ -111,7 +111,7 @@ jobs:
       - name: Psalm
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer psalm"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer psalm"
 
   phpstan:
     runs-on: ubuntu-latest
@@ -129,7 +129,7 @@ jobs:
       - name: Phpstan
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer phpstan"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer phpstan"
 
   test-unit:
     runs-on: ubuntu-latest
@@ -147,7 +147,7 @@ jobs:
       - name: Unit Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
   test-mutant:
     runs-on: buildjet-4vcpu-ubuntu-2204
@@ -166,7 +166,7 @@ jobs:
       - name: Mutant Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:mutant"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:mutant"
 
   test-mess-detector:
     runs-on: ubuntu-latest
@@ -185,7 +185,7 @@ jobs:
       - name: Mess Detector
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
   test-feature:
     runs-on: buildjet-4vcpu-ubuntu-2204
@@ -230,11 +230,11 @@ jobs:
           sleep 10
           echo "finished waiting"
           docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml ps
-          docker exec ember-nexus-api-dev bash -c "composer install --ignore-platform-req=php --quiet"
-          docker exec ember-nexus-api-dev bash -c "php bin/console healthcheck"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "composer install --ignore-platform-req=php --quiet"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "php bin/console healthcheck"
       - name: Feature Test
         run: |
-          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api-prod\" && echo \$API_DOMAIN && composer test:feature && composer test:feature:deprecated"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api-prod\" && echo \$API_DOMAIN && composer test:feature && composer test:feature:deprecated"
 
   test-example-generation-controller:
     runs-on: buildjet-2vcpu-ubuntu-2204
@@ -273,11 +273,11 @@ jobs:
           sleep 10
           echo "finished waiting"
           docker compose -f ./tests/ExampleGenerationController/docker-compose.yml ps
-          docker exec ember-nexus-api-dev bash -c "composer install --ignore-platform-req=php --quiet"
-          docker exec ember-nexus-api-dev bash -c "php bin/console healthcheck"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "composer install --ignore-platform-req=php --quiet"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "php bin/console healthcheck"
       - name: Controller Example Generation Test
         run: |
-          docker exec ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api\" && echo \$API_DOMAIN && composer test:example-generation-controller && composer test:example-generation-controller:deprecated"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api\" && echo \$API_DOMAIN && composer test:example-generation-controller && composer test:example-generation-controller:deprecated"
 
 
   test-example-generation-command:
@@ -312,8 +312,8 @@ jobs:
           sleep 10
           echo "finished waiting"
           docker compose -f ./tests/ExampleGenerationCommand/docker-compose.yml ps
-          docker exec ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet"
-          docker exec ember-nexus-api bash -c "php bin/console healthcheck"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api bash -c "composer install --ignore-platform-req=php --quiet"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api bash -c "php bin/console healthcheck"
       - name: Command Example Generation Test
         run: |
-          docker exec ember-nexus-api bash -c "BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api bash -c "BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"

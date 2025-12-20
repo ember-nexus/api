@@ -166,7 +166,6 @@ class Client400BadContentExceptionFactoryTest extends TestCase
     {
         $factory = new Client400BadContentExceptionFactory($this->prophesize(UrlGeneratorInterface::class)->reveal());
         $method = new ReflectionMethod(Client400BadContentExceptionFactory::class, 'getContentSummary');
-        $method->setAccessible(true);
 
         $result = $method->invokeArgs($factory, [$input]);
         $this->assertSame($result, $output);

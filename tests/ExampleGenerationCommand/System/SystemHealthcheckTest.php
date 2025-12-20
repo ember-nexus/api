@@ -36,7 +36,8 @@ class SystemHealthcheckTest extends BaseCommandTestCase
                 'Redis version:',
                 'RabbitMQ version:',
                 'Alpine version:',
-                'NGINX Unit version:',
+                'FrankenPHP version:',
+                'Caddy version:',
                 'PHP version:',
             ]
         );

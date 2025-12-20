@@ -10,7 +10,7 @@ set -e
 #fi
 
 if [ -z "$@" ]; then
-  /usr/local/bin/unit-entrypoint.sh unitd --no-daemon --control unix:/var/run/control.unit.sock
+  frankenphp run --config /etc/frankenphp/Caddyfile
 else
   exec "$@"
 fi

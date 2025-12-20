@@ -11,6 +11,7 @@ use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Service\RequestUtilService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -19,6 +20,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
 #[CoversClass(RequestUtilService::class)]
+#[AllowMockObjectsWithoutExpectations]
 class RequestUtilServiceTest extends TestCase
 {
     private function getRequestUtilService(
@@ -108,7 +110,6 @@ class RequestUtilServiceTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration
         );
         $method = new ReflectionMethod(RequestUtilService::class, 'getUniqueUserIdentifierFromBodyAndDataOld');
-        $method->setAccessible(true);
 
         $body = [];
         $data = [];
@@ -171,7 +172,6 @@ class RequestUtilServiceTest extends TestCase
     {
         $requestUtilService = $this->getRequestUtilService();
         $method = new ReflectionMethod(RequestUtilService::class, 'getUniqueUserIdentifierFromBodyNew');
-        $method->setAccessible(true);
 
         $body = [];
         try {

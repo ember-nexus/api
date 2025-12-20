@@ -373,22 +373,22 @@ jobs:
             /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-amd.tar.gz
             /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
 
-      - name: Initiate Originstamp certificate
-        run: |
-          curl -X POST "http://api.originstamp.com/v4/timestamp/create" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: ${{ secrets.ORIGINSTAMP_AUTH_TOKEN }}" \
-            -d \
-            "{
-              \"comment\": \"Release ${{ env.NEW_VERSION }} of ember-nexus/api\",
-              \"hash\": \"${{ env.SHA }}\"
-            }"
-        env:
-          SHA: ${{ github.sha }}
-
-      - uses: JasonEtco/create-an-issue@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          NEW_VERSION: ${{ env.NEW_VERSION }}
-        with:
-          filename: .github/ISSUE_TEMPLATE_POST_RELEASE_TASK.md
+#      - name: Initiate Originstamp certificate
+#        run: |
+#          curl -X POST "http://api.originstamp.com/v4/timestamp/create" \
+#            -H "Content-Type: application/json" \
+#            -H "Authorization: ${{ secrets.ORIGINSTAMP_AUTH_TOKEN }}" \
+#            -d \
+#            "{
+#              \"comment\": \"Release ${{ env.NEW_VERSION }} of ember-nexus/api\",
+#              \"hash\": \"${{ env.SHA }}\"
+#            }"
+#        env:
+#          SHA: ${{ github.sha }}
+#
+#      - uses: JasonEtco/create-an-issue@v2
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+#          NEW_VERSION: ${{ env.NEW_VERSION }}
+#        with:
+#          filename: .github/ISSUE_TEMPLATE_POST_RELEASE_TASK.md

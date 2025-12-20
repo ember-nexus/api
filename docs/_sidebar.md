@@ -1,6 +1,5 @@
 - [Home](/)
 - Getting started
-  - [Tech stack](/getting-started/tech-stack)
   - [Hardware Requirements](/getting-started/hardware-requirements)
   - [Local Deployment](/getting-started/local-deployment)
   - [Configuration](/getting-started/configuration)

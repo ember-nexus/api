@@ -73,7 +73,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
     {
         $cypherPathSearchStepEventListener = $this->buildCypherPathSearchStepEventListener();
         $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'parseRawPathFromRow');
-        $method->setAccessible(true);
 
         $row = new CypherMap([
             'path' => new Path(
@@ -117,7 +116,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'parseRawPathFromRow');
-        $method->setAccessible(true);
 
         $row = new CypherMap([
             'path' => new Path(
@@ -143,7 +141,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
     {
         $cypherPathSearchStepEventListener = $this->buildCypherPathSearchStepEventListener();
         $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'getElementIdsFromPaths');
-        $method->setAccessible(true);
 
         $elementIdA = Uuid::fromString('ad0c2924-0a22-4225-902f-b00cd6ad6e05');
         $elementIdB = Uuid::fromString('86534249-04d0-4b32-acea-7b47f7c6666d');
@@ -226,7 +223,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
             stopwatch: $stopwatch->reveal()
         );
         $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'filterPathsToAccessibleOnly');
-        $method->setAccessible(true);
 
         $paths = [
             [
@@ -258,7 +254,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
     {
         $cypherPathSearchStepEventListener = $this->buildCypherPathSearchStepEventListener();
         $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'getQueryFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::CYPHER_PATH_SUBSET,
@@ -290,7 +285,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'getQueryFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::CYPHER_PATH_SUBSET,
@@ -326,7 +320,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'getQueryFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::CYPHER_PATH_SUBSET,

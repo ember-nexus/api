@@ -68,7 +68,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getIndices');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN,
@@ -85,7 +84,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getIndices');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN,
@@ -121,7 +119,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getIndices');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN,
@@ -159,7 +156,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         );
 
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getIndices');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN,
@@ -181,7 +177,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'executeExpressionsInQuery');
-        $method->setAccessible(true);
 
         $originalArray = [
             'key' => 'value',
@@ -217,7 +212,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             expressionService: $expressionService->reveal()
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'executeExpressionsInQuery');
-        $method->setAccessible(true);
 
         $method->invokeArgs($elasticsearchQueryDslMixinSearchStepEventListener, [&$executedArray, $parameters]);
 
@@ -271,7 +265,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             graphStructureService: $graphStructureService->reveal()
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'formatElementResults');
-        $method->setAccessible(true);
 
         $result = $method->invokeArgs($elasticsearchQueryDslMixinSearchStepEventListener, [$response->reveal()]);
 
@@ -291,7 +284,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getQueryFromEvent');
-        $method->setAccessible(true);
 
         $query = [
             'key' => 'value',
@@ -326,7 +318,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             client400BadContentExceptionFactory: $client400BadContentExceptionFactory
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getQueryFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN,
@@ -361,7 +352,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             client400BadContentExceptionFactory: $client400BadContentExceptionFactory
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getQueryFromEvent');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN,
@@ -381,7 +371,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getPageFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [];
         $result = $method->invokeArgs($elasticsearchQueryDslMixinSearchStepEventListener, [$parameters]);
@@ -393,7 +382,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getPageFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [
             'page' => 1234,
@@ -422,7 +410,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             client400BadContentExceptionFactory: $client400BadContentExceptionFactory
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getPageFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [
             'page' => 'something else',
@@ -440,7 +427,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getPageSizeFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [];
         $result = $method->invokeArgs($elasticsearchQueryDslMixinSearchStepEventListener, [$parameters]);
@@ -452,7 +438,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getPageSizeFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [
             'pageSize' => 100,
@@ -481,7 +466,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             client400BadContentExceptionFactory: $client400BadContentExceptionFactory
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getPageSizeFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [
             'pageSize' => 'something else',
@@ -499,7 +483,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getMinScoreFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [];
         $result = $method->invokeArgs($elasticsearchQueryDslMixinSearchStepEventListener, [$parameters]);
@@ -511,7 +494,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getMinScoreFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [
             'minScore' => 10,
@@ -525,7 +507,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
     {
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getMinScoreFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [
             'minScore' => 0.23,
@@ -554,7 +535,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             client400BadContentExceptionFactory: $client400BadContentExceptionFactory
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getMinScoreFromParameters');
-        $method->setAccessible(true);
 
         $parameters = [
             'minScore' => 'something else',
@@ -589,7 +569,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             accessChecker: $accessChecker->reveal()
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'buildCombinedQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN,
@@ -672,7 +651,6 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             accessChecker: $accessChecker->reveal()
         );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'buildCombinedQuery');
-        $method->setAccessible(true);
 
         $event = new SearchStepEvent(
             SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN,
