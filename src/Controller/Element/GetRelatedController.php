@@ -19,7 +19,7 @@ use Laudis\Neo4j\Types\CypherList;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**

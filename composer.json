@@ -18,19 +18,19 @@
     "php-amqplib/php-amqplib": "^3.6",
     "predis/predis": "^3.3",
     "ramsey/uuid": "^4.7",
-    "symfony/asset": "7.3.*",
-    "symfony/console": "7.3.*",
-    "symfony/dotenv": "7.3.*",
-    "symfony/event-dispatcher": "7.3.*",
-    "symfony/filesystem": "7.3.*",
+    "symfony/asset": "7.4.*",
+    "symfony/console": "7.4.*",
+    "symfony/dotenv": "7.4.*",
+    "symfony/event-dispatcher": "7.4.*",
+    "symfony/filesystem": "7.4.*",
     "symfony/flex": "^2.4",
-    "symfony/framework-bundle": "7.3.*",
+    "symfony/framework-bundle": "7.4.*",
     "symfony/monolog-bundle": "^3.10",
-    "symfony/process": "7.3.*",
-    "symfony/runtime": "7.3.*",
-    "symfony/stopwatch": "7.3.*",
-    "symfony/string": "7.3.*",
-    "symfony/yaml": "7.3.*",
+    "symfony/process": "7.4.*",
+    "symfony/runtime": "7.4.*",
+    "symfony/stopwatch": "7.4.*",
+    "symfony/string": "7.4.*",
+    "symfony/yaml": "7.4.*",
     "syndesi/cypher-entity-manager": "^0.2.0",
     "syndesi/elastic-entity-manager": "^0.1.0",
     "syndesi/mongo-entity-manager": "^0.2.0",
@@ -50,7 +50,7 @@
     "phpunit/phpunit": "^12",
     "symfony/maker-bundle": "^1.53",
     "symfony/phpunit-bridge": "^7.2",
-    "symfony/web-profiler-bundle": "7.3.*",
+    "symfony/web-profiler-bundle": "7.4.*",
     "thecodingmachine/phpstan-safe-rule": "^1.4",
     "vimeo/psalm": "^6.2"
   },
@@ -130,7 +130,7 @@
   "extra": {
     "symfony": {
       "allow-contrib": false,
-      "require": "7.3.*"
+      "require": "7.4.*"
     }
   }
 }

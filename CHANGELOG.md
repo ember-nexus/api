@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Changed
 - Optimize Docker image from 206 MB down to ~54MB, closes #425.
+- Upgrade to Symfony 7.4, closes #421.
 
 ## 0.1.27 - 2025-12-20
 ### Added

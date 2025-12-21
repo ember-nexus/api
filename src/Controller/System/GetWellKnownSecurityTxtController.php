@@ -8,7 +8,7 @@ use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Response\TextResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class GetWellKnownSecurityTxtController extends AbstractController
 {
