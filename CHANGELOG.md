@@ -5,10 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.28 - 2025-12-21
 ### Changed
-- Optimize Docker image from 206 MB down to ~54MB, closes #425.
-- Upgrade to Symfony 7.4, closes #421.
-- Upgrade ExprCli to version 1.17.7, closes #428.
+- Optimize Docker image from 206 MB down to ~54MB, closes [#425].
+- Upgrade to Symfony 7.4, closes [#421].
+- Upgrade ExprCli to version 1.17.7, closes [#428].
 
 ## 0.1.27 - 2025-12-20
 ### Added
