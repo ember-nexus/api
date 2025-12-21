@@ -15,7 +15,7 @@ use App\Type\EtagType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class GetElementController extends AbstractController
 {
