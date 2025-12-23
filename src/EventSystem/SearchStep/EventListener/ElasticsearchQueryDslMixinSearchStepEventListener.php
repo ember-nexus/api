@@ -17,6 +17,10 @@ use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
+/**
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
+ */
 class ElasticsearchQueryDslMixinSearchStepEventListener
 {
     public const SearchStepType TYPE = SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN;
@@ -32,7 +36,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     ) {
     }
 
-    private function getIndices(SearchStepEvent $event): string
+    private function getIndices(SearchStepEvent $event): ?string
     {
         $parameters = $event->getParameters();
         $nodeTypes = [];
@@ -65,12 +69,25 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
          * @psalm-suppress TypeDoesNotContainType
          */
         if (0 === count($indices)) {
-            $indices = '*';
-        } else {
-            $indices = implode(',', $indices);
+            return '*';
         }
 
-        return $indices;
+        // remove unknown indices
+        $indicesWhichExist = [];
+        foreach ($indices as $index) {
+            if (null !== $this->graphStructureService->getTypeFromElasticIndex($index)) {
+                $indicesWhichExist[] = $index;
+            }
+        }
+
+        if (0 === count($indicesWhichExist)) {
+            // no requested index exists in the database, but indices _were_ requested
+            // -> the query would return zero results
+            // -> do _not_ return '*'
+            return null;
+        }
+
+        return implode(',', $indicesWhichExist);
     }
 
     /**
@@ -250,6 +267,19 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
         $event->addDebugData('start', $start);
 
         $indices = $this->getIndices($event);
+
+        if (null === $indices) {
+            $event->addDebugData('noRequestIndicesExist', 'Notice: None of the requested indices were found in the database, therefore short-circuiting the search request to zero results.');
+            $event->setResults([
+                'elements' => [],
+                'totalHits' => 0,
+                'maxScore' => 0,
+            ]);
+            $event->stopPropagation();
+
+            return;
+        }
+
         $combinedQuery = $this->buildCombinedQuery($event);
         $event->addDebugData('indices', $indices);
         $event->addDebugData('combinedQuery', $combinedQuery);

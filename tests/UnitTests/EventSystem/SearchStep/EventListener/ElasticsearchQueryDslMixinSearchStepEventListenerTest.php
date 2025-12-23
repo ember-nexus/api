@@ -18,6 +18,8 @@ use App\Type\SearchStepType;
 use Beste\Psr\Log\TestLogger;
 use Elastic\Elasticsearch\Client;
 use Elastic\Elasticsearch\Response\Elasticsearch;
+use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -32,6 +34,7 @@ use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
 #[Small]
 #[CoversClass(ElasticsearchQueryDslMixinSearchStepEventListener::class)]
+#[AllowMockObjectsWithoutExpectations]
 class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
 {
     use ProphecyTrait;
@@ -82,7 +85,23 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
 
     public function testGetIndicesReturnsIndicesStringWhenProvidedWithIndices(): void
     {
-        $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
+        $graphStructureService = $this->createMock(GraphStructureService::class);
+        $graphStructureService
+            ->method('getTypeFromElasticIndex')
+            ->willReturnCallback(static function (string $index): string {
+                return match ($index) {
+                    'node_data' => 'Data',
+                    'node_taxon' => 'Taxon',
+                    'node_plant' => 'Plant',
+                    'relation_is_member_of' => 'IS_MEMBER_OF',
+                    'relation_has_tag' => 'HAS_TAG',
+                    'relation_owns' => 'OWNS',
+                    default => throw new InvalidArgumentException(sprintf('Unexpected index: %s', $index)),
+                };
+            });
+        $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener(
+            graphStructureService: $graphStructureService
+        );
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getIndices');
 
         $event = new SearchStepEvent(
