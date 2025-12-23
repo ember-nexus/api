@@ -7,11 +7,14 @@ namespace App\Tests\UnitTests\Controller\User;
 use App\Controller\User\PostRegisterController;
 use App\Exception\Client400ReservedIdentifierException;
 use App\Exception\Client403ForbiddenException;
+use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
+use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
 use App\Service\RequestUtilService;
 use App\Type\NodeElement;
@@ -27,6 +30,7 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Nonstandard\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -39,6 +43,9 @@ class PostRegisterControllerTest extends TestCase
 {
     use ProphecyTrait;
 
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+     */
     private function getPostRegisterController(
         ?ElementManager $elementManager = null,
         ?EntityManager $cypherEntityManager = null,
@@ -46,6 +53,7 @@ class PostRegisterControllerTest extends TestCase
         ?UserPasswordHasher $userPasswordHasher = null,
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
         ?RequestUtilService $requestUtilService = null,
+        ?CreateElementFromRawDataService $createElementFromRawDataService = null,
         ?Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory = null,
         ?Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory = null,
         ?Server500LogicExceptionFactory $server500LogicExceptionFactory = null,
@@ -57,6 +65,7 @@ class PostRegisterControllerTest extends TestCase
             $userPasswordHasher ?? $this->createMock(UserPasswordHasher::class),
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
             $requestUtilService ?? $this->createMock(RequestUtilService::class),
+            $createElementFromRawDataService ?? $this->createMock(CreateElementFromRawDataService::class),
             $client400ReservedIdentifierExceptionFactory ?? $this->createMock(Client400ReservedIdentifierExceptionFactory::class),
             $client403ForbiddenExceptionFactory ?? $this->createMock(Client403ForbiddenExceptionFactory::class),
             $server500LogicExceptionFactory ?? $this->createMock(Server500LogicExceptionFactory::class)
@@ -84,17 +93,95 @@ class PostRegisterControllerTest extends TestCase
         $cypherEntityManager = $this->createMock(EntityManager::class);
         $cypherEntityManager->method('getClient')->willReturn($cypherClient);
 
+        $userNode = new NodeElement();
+        $createElementFromRawDataService = $this->createMock(CreateElementFromRawDataService::class);
+        $createElementFromRawDataService
+            ->expects($this->once())
+            ->method('createElementFromRawData')
+            ->with(
+                $this->callback(fn ($arg) => $arg instanceof UuidInterface),
+                'User',
+                null,
+                null,
+                []
+            )
+            ->willReturn($userNode);
+
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');
         $postRegisterController = $this->getPostRegisterController(
-            emberNexusConfiguration: $emberNexusConfiguration,
-            userPasswordHasher: new UserPasswordHasher(),
+            cypherEntityManager: $cypherEntityManager,
             router: $urlGenerator,
-            cypherEntityManager: $cypherEntityManager
+            userPasswordHasher: new UserPasswordHasher(),
+            emberNexusConfiguration: $emberNexusConfiguration,
+            createElementFromRawDataService: $createElementFromRawDataService
         );
 
         $request = $this->createMock(Request::class);
         $request->method('getContent')->willReturn('{"type": "User", "password": "1234", "uniqueUserIdentifier": "test@example.com"}');
+
+        $response = $postRegisterController->postRegister($request);
+        $this->assertInstanceOf(CreatedResponse::class, $response);
+        $this->assertSame(201, $response->getStatusCode());
+        $this->assertSame('url', $response->headers->get('Location'));
+    }
+
+    public function testPostRegisterWithEnabledRegisterAndData(): void
+    {
+        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
+        $emberNexusConfiguration->method('isRegisterEnabled')->willReturn(true);
+
+        $requestUtilService = new RequestUtilService(
+            $emberNexusConfiguration,
+            $this->createMock(Client400BadContentExceptionFactory::class),
+            $this->createMock(Client400MissingPropertyExceptionFactory::class),
+        );
+
+        $null = null;
+        $cypherClient = $this->createMock(ClientInterface::class);
+        $cypherClient->expects($this->once())
+            ->method('runStatement')
+            ->willReturn(new SummarizedResult(
+                $null,
+                [
+                    new CypherMap([
+                        'count' => 0,
+                    ]),
+                ]
+            ));
+        $cypherEntityManager = $this->createMock(EntityManager::class);
+        $cypherEntityManager->method('getClient')->willReturn($cypherClient);
+
+        $userNode = new NodeElement();
+        $createElementFromRawDataService = $this->createMock(CreateElementFromRawDataService::class);
+        $createElementFromRawDataService
+            ->expects($this->once())
+            ->method('createElementFromRawData')
+            ->with(
+                $this->callback(fn ($arg) => $arg instanceof UuidInterface),
+                'User',
+                null,
+                null,
+                [
+                    'a' => 'b',
+                ]
+            )
+            ->willReturn($userNode);
+
+        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator->method('generate')->willReturn('url');
+        $postRegisterController = $this->getPostRegisterController(
+            cypherEntityManager: $cypherEntityManager,
+            router: $urlGenerator,
+            userPasswordHasher: new UserPasswordHasher(),
+            emberNexusConfiguration: $emberNexusConfiguration,
+            requestUtilService: $requestUtilService,
+            createElementFromRawDataService: $createElementFromRawDataService
+        );
+
+        $request = $this->createMock(Request::class);
+        $request->method('getContent')->willReturn('{"type": "User", "password": "1234", "uniqueUserIdentifier": "test@example.com", "data": {"a": "b"}}');
 
         $response = $postRegisterController->postRegister($request);
         $this->assertInstanceOf(CreatedResponse::class, $response);
@@ -155,8 +242,8 @@ class PostRegisterControllerTest extends TestCase
         $cypherEntityManager = $this->createMock(EntityManager::class);
         $cypherEntityManager->method('getClient')->willReturn($cypherClient);
         $postRegisterController = $this->getPostRegisterController(
-            emberNexusConfiguration: $emberNexusConfiguration,
-            cypherEntityManager: $cypherEntityManager
+            cypherEntityManager: $cypherEntityManager,
+            emberNexusConfiguration: $emberNexusConfiguration
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'checkForDuplicateUniqueUserIdentifier');
 
@@ -195,46 +282,13 @@ class PostRegisterControllerTest extends TestCase
         $cypherEntityManager = $this->createMock(EntityManager::class);
         $cypherEntityManager->method('getClient')->willReturn($cypherClient);
         $postRegisterController = $this->getPostRegisterController(
-            emberNexusConfiguration: $emberNexusConfiguration,
-            cypherEntityManager: $cypherEntityManager
+            cypherEntityManager: $cypherEntityManager,
+            emberNexusConfiguration: $emberNexusConfiguration
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'checkForDuplicateUniqueUserIdentifier');
 
         $userId = Uuid::uuid4();
         $method->invokeArgs($postRegisterController, [$userId]);
-    }
-
-    public function testCreateUserNode(): void
-    {
-        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
-        $postRegisterController = $this->getPostRegisterController(
-            emberNexusConfiguration: $emberNexusConfiguration,
-            userPasswordHasher: new UserPasswordHasher()
-        );
-        $method = new ReflectionMethod(PostRegisterController::class, 'createUserNode');
-
-        $userId = Uuid::uuid4();
-        $data = [];
-        $uniqueUserIdentifier = 'test@localhost.dev';
-        $password = '1234';
-        $userNode = $method->invokeArgs($postRegisterController, [$userId, $data, $uniqueUserIdentifier, $password]);
-        $this->assertInstanceOf(NodeElement::class, $userNode);
-        $this->assertSame($userId, $userNode->getId());
-        $this->assertSame($uniqueUserIdentifier, $userNode->getProperty('email'));
-        $this->assertTrue($userNode->hasProperty('_passwordHash'));
-
-        $userId = Uuid::uuid4();
-        $data = [
-            'email' => 'manual-specified-email-which-should-be-overwritten@localhost.dev',
-        ];
-        $uniqueUserIdentifier = 'test@localhost.dev';
-        $password = '1234';
-        $userNode = $method->invokeArgs($postRegisterController, [$userId, $data, $uniqueUserIdentifier, $password]);
-        $this->assertInstanceOf(NodeElement::class, $userNode);
-        $this->assertSame($userId, $userNode->getId());
-        $this->assertSame($uniqueUserIdentifier, $userNode->getProperty('email'));
-        $this->assertTrue($userNode->hasProperty('_passwordHash'));
     }
 
     public function testCreateCreatedResponse(): void

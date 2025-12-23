@@ -9,9 +9,9 @@ use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
+use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
 use App\Service\RequestUtilService;
-use App\Type\NodeElement;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -25,6 +25,9 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class PostRegisterController extends AbstractController
 {
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+     */
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
@@ -32,6 +35,7 @@ class PostRegisterController extends AbstractController
         private UserPasswordHasher $userPasswordHasher,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private RequestUtilService $requestUtilService,
+        private CreateElementFromRawDataService $createElementFromRawDataService,
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
@@ -50,16 +54,27 @@ class PostRegisterController extends AbstractController
         }
 
         $body = \Safe\json_decode($request->getContent(), true);
-        $data = $this->requestUtilService->getDataFromBody($body);
+        $rawData = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('User', $body);
         $userId = UuidV4::uuid4();
         $password = $this->requestUtilService->getStringFromBody('password', $body);
-        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $rawData);
         $this->checkForDuplicateUniqueUserIdentifier($uniqueUserIdentifier);
 
-        $userNode = $this->createUserNode($userId, $data, $uniqueUserIdentifier, $password);
+        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
+        if (array_key_exists($uniqueIdentifier, $rawData)) {
+            // remove unique identifier from data payload, was required in releases before 0.1.6
+            unset($rawData[$uniqueIdentifier]);
+        }
 
+        $userNode = $this->createElementFromRawDataService->createElementFromRawData(
+            $userId,
+            'User',
+            rawData: $rawData
+        );
+        $userNode->addProperty($uniqueIdentifier, $uniqueUserIdentifier);
+        $userNode->addProperty('_passwordHash', $this->userPasswordHasher->hashPassword($password));
         $this->elementManager->create($userNode);
         $this->elementManager->flush();
 
@@ -88,24 +103,6 @@ class PostRegisterController extends AbstractController
         if ($rawCount > 0) {
             throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($uniqueUserIdentifier);
         }
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     */
-    private function createUserNode(UuidInterface $userId, array $data, string $uniqueUserIdentifier, string $password): NodeElement
-    {
-        $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        $userNode = (new NodeElement())
-            ->setId($userId)
-            ->setLabel('User')
-            ->addProperties([
-                ...$data,
-                $uniqueIdentifier => $uniqueUserIdentifier,
-                '_passwordHash' => $this->userPasswordHasher->hashPassword($password),
-            ]);
-
-        return $userNode;
     }
 
     private function createCreatedResponse(UuidInterface $userId): CreatedResponse

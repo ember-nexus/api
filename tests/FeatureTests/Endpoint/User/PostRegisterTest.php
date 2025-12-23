@@ -106,4 +106,22 @@ class PostRegisterTest extends BaseRequestTestCase
 
         $this->assertIsProblemResponse($response2, 400);
     }
+
+    public function testPostRegisterCanTriggerNormalizationExceptions(): void
+    {
+        $response = $this->runPostRequest(
+            '/register',
+            null,
+            [
+                'type' => 'User',
+                'password' => '1234',
+                'uniqueUserIdentifier' => 'user6@register.user.endpoint.localhost.dev',
+                'data' => [
+                    '_passwordHash' => 'The key "_passwordHash" can not be manually defined.',
+                ],
+            ]
+        );
+
+        $this->assertIsProblemResponse($response, 400);
+    }
 }
