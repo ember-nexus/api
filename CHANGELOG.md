@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Fixed
 - Implement behavior in which the data payload of user registration endpoint is correctly normalized, fixes #282.
+- Specifying node and relation types which do not exist no longer crash the API, fixes #416.
 
 ## 0.1.28 - 2025-12-21
 ### Changed
