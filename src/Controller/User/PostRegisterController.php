@@ -63,6 +63,11 @@ class PostRegisterController extends AbstractController
         $this->checkForDuplicateUniqueUserIdentifier($uniqueUserIdentifier);
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
+        if (array_key_exists($uniqueIdentifier, $rawData)) {
+            // remove unique identifier from data payload, was required in releases before 0.1.6
+            unset($rawData[$uniqueIdentifier]);
+        }
+
         $userNode = $this->createElementFromRawDataService->createElementFromRawData(
             $userId,
             'User',
