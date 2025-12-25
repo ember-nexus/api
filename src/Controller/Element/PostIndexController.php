@@ -7,6 +7,7 @@ namespace App\Controller\Element;
 use App\Contract\NodeElementInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
+use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\AccessChecker;
@@ -34,6 +35,7 @@ class PostIndexController extends AbstractController
         private ElementManager $elementManager,
         private UrlGeneratorInterface $router,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
+        private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService,
@@ -48,6 +50,13 @@ class PostIndexController extends AbstractController
     public function postIndex(Request $request): Response
     {
         $userId = $this->authProvider->getUserId();
+
+        if ($this->authProvider->isAnonymous()) {
+            $userNode = $this->elementManager->getElement($userId);
+            if (null === $userNode) {
+                throw $this->client403ForbiddenExceptionFactory->createFromTemplate(sprintf('Anonymous user with id %s does not exist.', $userId->toString()));
+            }
+        }
 
         $body = \Safe\json_decode($request->getContent(), true);
 
