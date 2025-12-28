@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Add support for executing cron jobs in a plug-n-play ready fashion, closes #433.
+
 ### Changed
 - Get me endpoint returns status code 403 instead of 500, if anonymous user is missing. Related to #415.
 

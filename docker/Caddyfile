@@ -8,6 +8,9 @@
 		output stdout
 		format json
 	}
+	supervisor {
+		supercronic -json /etc/crontabs/supercronic
+	}
 }
 
 :80 {

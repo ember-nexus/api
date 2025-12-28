@@ -1,3 +1,21 @@
+ARG FRANKENPHP_VERSION='1.11.1'
+ARG PHP_VERSION='8.5.1'
+
+FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-builder-php${PHP_VERSION}-alpine AS frankenphp_builder
+COPY --from=caddy:2-builder-alpine /usr/bin/xcaddy /usr/bin/xcaddy
+RUN CGO_ENABLED=1 \
+    XCADDY_SETCAP=1 \
+    XCADDY_GO_BUILD_FLAGS="-tags=nobadger,nomysql,nopgx -ldflags='-w -s -extldflags \'-Wl,-z,stack-size=0x80000\''" \
+    CGO_CFLAGS=$(php-config --includes) \
+    CGO_LDFLAGS="$(php-config --ldflags) $(php-config --libs)" \
+    xcaddy build \
+        --output /usr/local/bin/frankenphp \
+        --with github.com/dunglas/frankenphp=./ \
+        --with github.com/dunglas/frankenphp/caddy=./caddy/ \
+        --with github.com/dunglas/caddy-cbrotli \
+        --with github.com/baldinof/caddy-supervisor
+
+
 FROM golang:1.25-alpine AS go_builder
 COPY ./lib/ExprCli /build
 RUN cd /build && \
@@ -6,7 +24,8 @@ RUN cd /build && \
     go build -ldflags="-s -w" -o expr-cli main.go && \
     upx --best --lzma expr-cli
 
-FROM dunglas/frankenphp:1.11.1-php8.5.1-alpine AS php
+
+FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-php${PHP_VERSION}-alpine AS php
 # see also https://github.com/opencontainers/image-spec/blob/main/annotations.md
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
@@ -18,7 +37,10 @@ LABEL org.opencontainers.image.vendor="Ember Nexus" \
 # Background: If the en user uses the dev mode, it is epected that he knows what he does.
 ARG VERSION=dev
 ENV VERSION=${VERSION}
+ARG FRANKENPHP_VERSION
+ENV FRANKENPHP_VERSION=${FRANKENPHP_VERSION}
 
+COPY --from=frankenphp_builder /usr/local/bin/frankenphp /usr/local/bin/frankenphp
 RUN apk add --no-cache \
 		ca-certificates \
 		curl \
@@ -27,6 +49,7 @@ RUN apk add --no-cache \
 # https://github.com/docker-library/php/issues/494
 		openssl \
         pcre \
+        supercronic \
 		tar \
 		xz \
         zlib \
@@ -49,12 +72,13 @@ RUN apk add --no-cache \
 
 COPY ./docker/Caddyfile /etc/frankenphp/Caddyfile
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/
+COPY ./docker/supercronic /etc/crontabs/supercronic
 COPY --from=go_builder /build/expr-cli /usr/local/bin/expr-cli
 RUN set -x \
     && chmod +x /usr/local/bin/docker-entrypoint.sh \
     && adduser -D worker \
 	&& setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp \
-	&& chown -R worker:worker /config/caddy /data/caddy
+	&& chown -R worker:worker /config/caddy /data/caddy /etc/crontabs/supercronic
 
 STOPSIGNAL SIGTERM
 
@@ -103,6 +127,8 @@ LABEL org.opencontainers.image.vendor="Ember Nexus" \
 # Background: If the en user uses the dev mode, it is epected that he knows what he does.
 ARG VERSION=dev
 ENV VERSION=${VERSION}
+ARG FRANKENPHP_VERSION
+ENV FRANKENPHP_VERSION=${FRANKENPHP_VERSION}
 
 COPY --from=production-build / /
 
