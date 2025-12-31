@@ -277,7 +277,7 @@ jobs:
           docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "php bin/console healthcheck"
       - name: Controller Example Generation Test
         run: |
-          docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api\" && echo \$API_DOMAIN && composer test:example-generation-controller && composer test:example-generation-controller:deprecated"
+          docker exec --user "$(id -u):$(id -g)" ember-nexus-api-dev bash -c "export API_DOMAIN=\"http://ember-nexus-api\" && echo \$API_DOMAIN && composer test:example-generation-controller && composer test:example-generation-controller:with-different-configuration && composer test:example-generation-controller:deprecated"
 
 
   test-example-generation-command:

@@ -1,0 +1,10 @@
+#  + seconds
+#  |   + minutes
+#  |   |   + hours
+#  |   |   |   + day of month
+#  |   |   |   |   + month
+#  |   |   |   |   |   + day of week
+#  |   |   |   |   |   |   + year
+#  |   |   |   |   |   |   |   + command
+#  |   |   |   |   |   |   |   |
+   0   */2 *   *   *   *   *   php bin/console cron

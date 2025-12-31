@@ -128,22 +128,26 @@ class HealthcheckCommand extends Command
             $alpineVersion
         ));
 
-        $frankenPhpVersion = 'unknown';
         $caddyVersion = 'unknown';
-        $frankenPhpVersionOutput = explode(' ', \Safe\shell_exec('frankenphp -v 2>&1') ?? '');
-        if (count($frankenPhpVersionOutput) > 6) {
-            $frankenPhpVersion = \Safe\preg_replace('/[^0-9.]/', '', $frankenPhpVersionOutput[1]);
-            $caddyVersion = \Safe\preg_replace('/[^0-9.]/', '', $frankenPhpVersionOutput[5]);
+        $caddyVersionOutput = explode(' ', \Safe\shell_exec('frankenphp -v 2>&1') ?? '');
+        if (count($caddyVersionOutput) > 1) {
+            $caddyVersion = \Safe\preg_replace('/[^0-9.]/', '', $caddyVersionOutput[0]);
         }
-        /** @var string $frankenPhpVersion */
         /** @var string $caddyVersion */
-        $this->io->writeln(sprintf(
-            'FrankenPHP version:    %s',
-            $frankenPhpVersion
-        ));
         $this->io->writeln(sprintf(
             'Caddy version:         %s',
             $caddyVersion
+        ));
+
+        $frankenPhpVersion = 'unknown';
+        $frankenPhpVersionOutput = getenv('FRANKENPHP_VERSION');
+        if (is_string($frankenPhpVersionOutput)) {
+            $frankenPhpVersion = \Safe\preg_replace('/[^0-9.]/', '', $frankenPhpVersionOutput);
+        }
+        /** @var string $frankenPhpVersion */
+        $this->io->writeln(sprintf(
+            'FrankenPHP version:    %s',
+            $frankenPhpVersion
         ));
 
         /**
