@@ -1,5 +1,5 @@
 ember_nexus:
   register:
-      enabled: false
+    enabled: false
   instanceConfiguration:
     enabled: false
