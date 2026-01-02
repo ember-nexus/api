@@ -37,9 +37,9 @@ class HealthcheckCommand extends Command
         private ElasticEntityManager $elasticEntityManager,
         private RedisClient $redisClient,
         private AMQPStreamConnection $AMQPStreamConnection,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
         private S3Client $s3Client,
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         parent::__construct();
     }

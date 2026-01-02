@@ -17,6 +17,7 @@ class BinaryStreamResponse extends StreamedResponse
         $stream = $object->getBody()->getContentAsResource();
 
         $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
+        // todo: add content disposition header?
         $this->headers->set('Content-Type', 'application/octet-stream');
 
         $this->setCallback(function () use ($stream): void {
