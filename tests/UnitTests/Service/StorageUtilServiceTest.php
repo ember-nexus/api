@@ -9,16 +9,22 @@ use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\StorageUtilService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+#[Small]
+#[CoversClass(StorageUtilService::class)]
+#[AllowMockObjectsWithoutExpectations]
 class StorageUtilServiceTest extends TestCase
 {
     private function getStorageUtilService(
-        ?EmberNexusConfiguration $emberNexusConfiguration = null
+        ?EmberNexusConfiguration $emberNexusConfiguration = null,
     ): StorageUtilService {
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');
@@ -47,7 +53,7 @@ class StorageUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
-             * @var $e Server500LogicErrorException
+             * @var Server500LogicErrorException $e
              */
             $this->assertSame('Unable to generate nested folder structure from uuid with negative level argument.', $e->getDetail());
         }
@@ -57,7 +63,7 @@ class StorageUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
-             * @var $e Server500LogicErrorException
+             * @var Server500LogicErrorException $e
              */
             $this->assertSame('Unable to generate nested folder structure from uuid with level length less than 1.', $e->getDetail());
         }
@@ -67,7 +73,7 @@ class StorageUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
-             * @var $e Server500LogicErrorException
+             * @var Server500LogicErrorException $e
              */
             $this->assertSame('Unable to generate nested folder structure from uuid with level length less than 1.', $e->getDetail());
         }
@@ -77,7 +83,7 @@ class StorageUtilServiceTest extends TestCase
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
-             * @var $e Server500LogicErrorException
+             * @var Server500LogicErrorException $e
              */
             $this->assertSame('Unable to generate nested folder structure as long as product of levels and level length exceeds length of uuid without dashes.', $e->getDetail());
         }

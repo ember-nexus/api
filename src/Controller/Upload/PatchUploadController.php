@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\File;
+namespace App\Controller\Upload;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
@@ -16,10 +16,9 @@ use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-class GetElementFileController extends AbstractController
+class PatchUploadController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
@@ -32,14 +31,14 @@ class GetElementFileController extends AbstractController
     }
 
     #[Route(
-        '/{id}/file',
-        name: 'get-element-file',
+        '/upload/{id}',
+        name: 'patch-upload',
         requirements: [
             'id' => Regex::UUID_V4_CONTROLLER,
         ],
-        methods: ['GET']
+        methods: ['PATCH']
     )]
-    public function getElementFile(string $id): Response
+    public function patchUpload(string $id): Response
     {
         $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();
@@ -61,26 +60,5 @@ class GetElementFileController extends AbstractController
         $object = $this->s3Client->getObject($objectConfig);
 
         return new BinaryStreamResponse($object);
-
-        //        $stream = $object->getBody()->getContentAsResource();
-        //
-        //        $response = new StreamedResponse();
-        //        $response->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
-        //        $response->headers->set('Content-Type', 'application/octet-stream');
-        //
-        //        $response->setCallback(function () use ($stream): void {
-        //            while (!feof($stream)) {
-        //                $buffer = fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
-        //                if (false === $buffer || 0 === strlen($buffer)) {
-        //                    break;
-        //                }
-        //                echo $buffer;
-        //                //                ob_flush();
-        //                flush();
-        //            }
-        //            fclose($stream);
-        //        });
-        //
-        //        return $response;
     }
 }
