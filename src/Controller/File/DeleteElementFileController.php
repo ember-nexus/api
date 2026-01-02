@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
-use App\Factory\Exception\Server501NotImplementedExceptionFactory;
+use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
+use App\Response\NoContentResponse;
+use App\Security\AccessChecker;
+use App\Security\AuthProvider;
+use App\Service\ElementManager;
+use App\Service\StorageUtilService;
+use App\Type\AccessType;
+use AsyncAws\S3\S3Client;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -17,7 +25,13 @@ use Symfony\Component\Routing\Attribute\Route;
 class DeleteElementFileController extends AbstractController
 {
     public function __construct(
-        private Server501NotImplementedExceptionFactory $server501NotImplementedExceptionFactory,
+        private AuthProvider $authProvider,
+        private AccessChecker $accessChecker,
+        private S3Client $s3Client,
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private ElementManager $elementManager,
+        private StorageUtilService $storageUtilService,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 
@@ -29,8 +43,34 @@ class DeleteElementFileController extends AbstractController
         ],
         methods: ['DELETE']
     )]
-    public function deleteElementFile(string $id, Request $request): Response
+    public function deleteElementFile(string $id): Response
     {
-        throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
+        $elementId = UuidV4::fromString($id);
+        $userId = $this->authProvider->getUserId();
+
+        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        $element = $this->elementManager->getElement($elementId);
+        if (null === $element) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        $objectConfig = [
+            'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
+            'Key' => $this->storageUtilService->getStorageBucketKey($elementId),
+        ];
+        $status = $this->s3Client->objectExists($objectConfig);
+
+        if ($status->isSuccess()) {
+            $this->s3Client->deleteObject($objectConfig);
+        }
+
+        $element->removeProperty('file');
+        $this->elementManager->merge($element);
+        $this->elementManager->flush();
+
+        return new NoContentResponse();
     }
 }
