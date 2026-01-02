@@ -57,6 +57,7 @@ class ExceptionEventListener
             'status' => $extendedException->getStatus(),
             'instance' => $instanceLink,
             'detail' => $extendedException->getDetail(),
+            ...$extendedException->getAdditionalProperties(),
         ];
 
         if (null === $instanceLink) {
