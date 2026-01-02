@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller\Upload;
 
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Exception\Client409ConflictExceptionFactory;
+use App\Factory\Exception\Client410GoneExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Helper\Regex;
 use App\Response\JsonResponse;
@@ -17,6 +20,7 @@ use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
+use Safe\DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +35,10 @@ class PatchUploadController extends AbstractController
         private EmberNexusConfiguration $emberNexusConfiguration,
         private ElementManager $elementManager,
         private StorageUtilService $storageUtilService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
+        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
+        private Client410GoneExceptionFactory $client410GoneExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
@@ -66,6 +73,23 @@ class PatchUploadController extends AbstractController
 
         if ($uploadElement->getUploadOwner() !== $userId) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        if ($uploadElement->getExpires() < new DateTime()) {
+            throw $this->client410GoneExceptionFactory->createFromTemplate();
+        }
+
+        $requestContentType = $request->headers->get('Content-Type');
+        if (null === $requestContentType) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail("Endpoint requires the header 'content-type' to be present.");
+        }
+        if ('application/partial-upload' !== $requestContentType) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Expected content type 'application/partial-upload' for partial resumable uploads, got '%s'.", $requestContentType));
+        }
+
+        $requestUploadOffsetHeader = (int) $request->headers->get('Upload-Offset');
+        if ($requestUploadOffsetHeader !== $uploadElement->getUploadOffset()) {
+            throw $this->client409ConflictExceptionFactory->createFromDetail('offset from request does not match offset of resource', additionalDetails: ['expected-offset' => $uploadElement->getUploadOffset(), 'provided-offset' => $requestUploadOffsetHeader]);
         }
 
         $uploadTarget = $uploadElement->getUploadTarget();
