@@ -17,7 +17,7 @@ class Configuration implements ConfigurationInterface
     public const int CACHE_ETAG_DEFAULT_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS = 100;
     public const int EXPRESSION_WARNING_LENGTH = 512;
     public const int EXPRESSION_MAX_LENGTH = 10 * 1024;
-    public const int SIZE_OF_10GB_IN_BYTES = 10 * 1024 * 1024 * 1024;
+    public const int SIZE_OF_10GIB_IN_BYTES = 10 * 1024 * 1024 * 1024;
     public const int SIZE_OF_101MIB_IN_BYTES = 101 * 1024 * 1024;
 
     public function getConfigTreeBuilder(): TreeBuilder
@@ -160,7 +160,7 @@ class Configuration implements ConfigurationInterface
                     ->integerNode(EmberNexusConfiguration::FILE_MAX_FILE_SIZE_IN_BYTES)
                         ->info('Maximum supported file size in bytes. Note: Upstream services like S3 have limits of their own (5TB).')
                         ->min(1)
-                        ->defaultValue(self::SIZE_OF_10GB_IN_BYTES)
+                        ->defaultValue(self::SIZE_OF_10GIB_IN_BYTES)
                     ->end()
                     ->integerNode(EmberNexusConfiguration::FILE_UPLOAD_EXPIRES_IN_SECONDS_AFTER_FIRST_REQUEST)
                         ->info('Number of seconds after which unfinished uploads are expired.')

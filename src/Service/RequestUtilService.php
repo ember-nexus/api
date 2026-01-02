@@ -8,12 +8,8 @@ use App\Exception\Client400BadContentException;
 use App\Exception\Client400MissingPropertyException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
-use App\Type\TusIoExtensionType;
-use App\Type\TusIoHeaderType;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class RequestUtilService
 {
@@ -156,33 +152,5 @@ class RequestUtilService
         }
 
         return $value;
-    }
-
-    public function validateTusResumableHttpHeader(Request $request): void
-    {
-        // The Tus-Resumable header MUST be included in every request and response except for OPTIONS requests.
-        if (Request::METHOD_OPTIONS === $request->getMethod()) {
-            return;
-        }
-        if ($request->headers->has(TusIoHeaderType::TUS_RESUMABLE->value)) {
-        }
-    }
-
-    public function setCommonTusHeaders(Response $response): void
-    {
-        $response->headers->set(TusIoHeaderType::TUS_VERSION->value, '1.0.0');
-        $response->headers->set(TusIoHeaderType::TUS_RESUMABLE->value, '1.0.0');
-
-        $supportedExtensions = [
-            TusIoExtensionType::CREATION_WITH_UPLOAD->value,
-            TusIoExtensionType::CREATION_DEFER_LENGTH->value,
-            TusIoExtensionType::EXPIRATION->value,
-            TusIoExtensionType::CHECKSUM->value,
-            TusIoExtensionType::TERMINATION->value,
-        ];
-        $response->headers->set(TusIoHeaderType::TUS_EXTENSION->value, implode(',', $supportedExtensions));
-
-        // 5 TB, max limit of S3
-        $response->headers->set(TusIoHeaderType::TUS_MAX_SIZE->value, (string) (5 * 1024 * 1024 * 1024 * 1024));
     }
 }
