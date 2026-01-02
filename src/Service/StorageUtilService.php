@@ -31,15 +31,25 @@ class StorageUtilService
         );
     }
 
-    public function getUploadBucketKey(UuidInterface $id): string
+    public function getUploadBucketKey(UuidInterface $id, int $index = 0): string
     {
+        $digits = $this->emberNexusConfiguration->getFileUploadChunkDigitsLength();
+        if ($index < 0) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Chunk index can not be less than 0.');
+        }
+        $maxIndex = (10 ** $digits) - 1;
+        if ($index > $maxIndex) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Chunk index can not be longer than %d digits, i.e. bigger than %d.', $digits, $maxIndex));
+        }
+
         return sprintf(
-            '%s.bin',
+            '%s-%s.bin',
             $this->uuidToNestedFolderStructure(
                 $id,
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevels(),
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevelLength(),
-            )
+            ),
+            str_pad((string) $index, $digits, '0', STR_PAD_LEFT),
         );
     }
 

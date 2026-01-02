@@ -50,6 +50,8 @@ class PostElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
+        $request->getContent(true);
+
         return new NoContentResponse();
     }
 }

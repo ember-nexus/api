@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Controller\Upload;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Type\AccessType;
+use App\Type\UploadElement;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -26,7 +26,6 @@ class HeadUploadController extends AbstractController
         private AccessChecker $accessChecker,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private ElementManager $elementManager,
-        private UploadFactory $uploadFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -54,14 +53,14 @@ class HeadUploadController extends AbstractController
         }
 
         try {
-            $upload = $this->uploadFactory->getUploadFromElement($element);
+            $uploadElement = UploadElement::createFromElement($element);
         } catch (Exception $e) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        header(sprintf('Upload-Complete: ?%s', $upload->isUploadComplete() ? '1' : '0'));
-        header(sprintf('Upload-Offset: %d', $upload->getUploadOffset()));
-        $uploadLength = $upload->getUploadLength();
+        header(sprintf('Upload-Complete: ?%s', $uploadElement->isUploadComplete() ? '1' : '0'));
+        header(sprintf('Upload-Offset: %d', $uploadElement->getUploadOffset()));
+        $uploadLength = $uploadElement->getUploadLength();
         if (null !== $uploadLength) {
             header(sprintf('Upload-Length: %d', $uploadLength));
         }
