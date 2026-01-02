@@ -18,6 +18,7 @@ class UploadElement extends NodeElement
     private bool $uploadComplete = false;
     private ?UuidInterface $uploadTarget = null;
     private int $alreadyUploadedChunks = 0;
+    private ?UuidInterface $uploadOwner = null;
     private ?DateTime $created = null;
     private ?DateTime $updated = null;
     private ?DateTime $expires = null;
@@ -75,6 +76,14 @@ class UploadElement extends NodeElement
             $alreadyUploadedChunks = $properties['alreadyUploadedChunks'];
             if (is_int($alreadyUploadedChunks)) {
                 $upload->setAlreadyUploadedChunks($alreadyUploadedChunks);
+            }
+        }
+
+        if (array_key_exists('uploadOwner', $properties)) {
+            $uploadOwner = $properties['uploadOwner'];
+            if (is_string($uploadOwner)) {
+                $uploadOwner = Uuid::fromString($uploadOwner);
+                $upload->setUploadOwner($uploadOwner);
             }
         }
 
@@ -163,6 +172,19 @@ class UploadElement extends NodeElement
     {
         $this->addProperty('alreadyUploadedChunks', $alreadyUploadedChunks);
         $this->alreadyUploadedChunks = $alreadyUploadedChunks;
+
+        return $this;
+    }
+
+    public function getUploadOwner(): ?UuidInterface
+    {
+        return $this->uploadOwner;
+    }
+
+    public function setUploadOwner(?UuidInterface $uploadOwner): static
+    {
+        $this->addProperty('uploadOwner', $uploadOwner);
+        $this->uploadOwner = $uploadOwner;
 
         return $this;
     }
