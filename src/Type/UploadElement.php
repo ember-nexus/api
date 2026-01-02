@@ -17,7 +17,7 @@ class UploadElement extends NodeElement
     private int $uploadOffset = 0;
     private bool $uploadComplete = false;
     private ?UuidInterface $uploadTarget = null;
-    private int $uploadChunkIndex = 0;
+    private int $alreadyUploadedChunks = 0;
     private ?DateTime $created = null;
     private ?DateTime $updated = null;
     private ?DateTime $expires = null;
@@ -71,10 +71,10 @@ class UploadElement extends NodeElement
             }
         }
 
-        if (array_key_exists('uploadChunkIndex', $properties)) {
-            $uploadChunkIndex = $properties['uploadChunkIndex'];
-            if (is_int($uploadChunkIndex)) {
-                $upload->setUploadOffset($uploadChunkIndex);
+        if (array_key_exists('alreadyUploadedChunks', $properties)) {
+            $alreadyUploadedChunks = $properties['alreadyUploadedChunks'];
+            if (is_int($alreadyUploadedChunks)) {
+                $upload->setAlreadyUploadedChunks($alreadyUploadedChunks);
             }
         }
 
@@ -154,15 +154,15 @@ class UploadElement extends NodeElement
         return $this;
     }
 
-    public function getUploadChunkIndex(): int
+    public function getAlreadyUploadedChunks(): int
     {
-        return $this->uploadChunkIndex;
+        return $this->alreadyUploadedChunks;
     }
 
-    public function setUploadChunkIndex(int $uploadChunkIndex): static
+    public function setAlreadyUploadedChunks(int $alreadyUploadedChunks): static
     {
-        $this->addProperty('uploadChunkIndex', $uploadChunkIndex);
-        $this->uploadChunkIndex = $uploadChunkIndex;
+        $this->addProperty('alreadyUploadedChunks', $alreadyUploadedChunks);
+        $this->alreadyUploadedChunks = $alreadyUploadedChunks;
 
         return $this;
     }
