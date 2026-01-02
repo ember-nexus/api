@@ -7,10 +7,8 @@ namespace App\Controller\Upload;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
-use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Type\AccessType;
 use App\Type\UploadElement;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
@@ -23,7 +21,6 @@ class HeadUploadController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
-        private AccessChecker $accessChecker,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private ElementManager $elementManager,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
@@ -43,10 +40,6 @@ class HeadUploadController extends AbstractController
         $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();
 
-        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-
         $element = $this->elementManager->getElement($elementId);
         if (null === $element) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
@@ -55,6 +48,14 @@ class HeadUploadController extends AbstractController
         try {
             $uploadElement = UploadElement::createFromElement($element);
         } catch (Exception $e) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        if (null === $uploadElement->getUploadOwner()) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        if ($uploadElement->getUploadOwner() !== $userId) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
