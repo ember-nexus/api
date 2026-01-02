@@ -38,7 +38,7 @@ class DatabaseDropCommand extends Command
         private Client $redisClient,
         private AMQPStreamConnection $AMQPStreamConnection,
         private S3Client $s3Client,
-        private EmberNexusConfiguration $emberNexusConfiguration
+        private EmberNexusConfiguration $emberNexusConfiguration,
     ) {
         parent::__construct();
     }

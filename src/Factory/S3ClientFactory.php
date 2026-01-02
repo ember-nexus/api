@@ -12,7 +12,7 @@ class S3ClientFactory
     public function __construct(
         private string $s3Endpoint,
         private string $s3AccessKeyId,
-        private string $s3SecretAccessKey
+        private string $s3SecretAccessKey,
     ) {
     }
 
@@ -20,7 +20,7 @@ class S3ClientFactory
     {
         $configuration = Configuration::create([
             Configuration::OPTION_ENDPOINT => $this->s3Endpoint,
-            Configuration::OPTION_PATH_STYLE_ENDPOINT => true,
+            Configuration::OPTION_PATH_STYLE_ENDPOINT => 'true',
             Configuration::OPTION_ACCESS_KEY_ID => $this->s3AccessKeyId,
             Configuration::OPTION_SECRET_ACCESS_KEY => $this->s3SecretAccessKey,
         ]);

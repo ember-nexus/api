@@ -11,12 +11,7 @@ use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Type\AccessType;
-use App\Type\Lock\FileUploadCheckLock;
-use Laudis\Neo4j\Databags\Statement;
-use Laudis\Neo4j\Types\CypherMap;
-use Laudis\Neo4j\Types\Node;
 use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,8 +49,6 @@ class PostElementFileController extends AbstractController
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
-
-
 
         return new NoContentResponse();
     }
