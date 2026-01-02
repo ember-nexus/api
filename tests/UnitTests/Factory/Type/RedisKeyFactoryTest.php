@@ -71,4 +71,12 @@ class RedisKeyFactoryTest extends TestCase
         $etagIndexCollectionRedisKey = $redisKeyTypeFactory->getEtagIndexCollectionRedisKey(Uuid::fromString('644ddc69-de1e-4636-b3b6-06c8b001fbc1'));
         $this->assertSame('etag:index:644ddc69-de1e-4636-b3b6-06c8b001fbc1', (string) $etagIndexCollectionRedisKey);
     }
+
+    public function testGetEtagFileRedisKey(): void
+    {
+        $redisKeyTypeFactory = new RedisKeyFactory();
+
+        $etagFileRedisKey = $redisKeyTypeFactory->getEtagFileRedisKey(Uuid::fromString('fde09c2c-932c-4d61-bbfd-52096d5205c3'));
+        $this->assertSame('etag:file:fde09c2c-932c-4d61-bbfd-52096d5205c3', (string) $etagFileRedisKey);
+    }
 }

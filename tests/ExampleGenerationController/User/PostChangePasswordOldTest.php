@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationController\User;
+namespace App\Tests\ExampleGenerationController\User;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 use PHPUnit\Framework\Attributes\Group;

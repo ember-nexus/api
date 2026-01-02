@@ -6,7 +6,7 @@ namespace App\Tests\UnitTests\Factory\Exception;
 
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Client400IncompleteMutualDependencyExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -23,7 +23,7 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
     public function testFailWithLessThanTwoProperties(): void
     {
         $expectedException = new Server500LogicErrorException('');
-        $serverExceptionFactory = $this->prophesize(Server500LogicExceptionFactory::class);
+        $serverExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
         $serverExceptionFactory
             ->createFromTemplate(Argument::is('Mutual dependency requires at least two properties.'))
             ->shouldBeCalledOnce()
@@ -39,7 +39,7 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
     public function testFailWithNoMissingProperty(): void
     {
         $expectedException = new Server500LogicErrorException('');
-        $serverExceptionFactory = $this->prophesize(Server500LogicExceptionFactory::class);
+        $serverExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
         $serverExceptionFactory
             ->createFromTemplate(Argument::is('At least one missing property is required.'))
             ->shouldBeCalledOnce()
@@ -65,7 +65,7 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
         )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $exception = $factory->createFromTemplate(['a', 'b'], [], ['a']);
@@ -91,7 +91,7 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
         )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $exception = $factory->createFromTemplate(['a', 'b'], ['b'], ['a']);
@@ -117,7 +117,7 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
         )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $exception = $factory->createFromTemplate(['a', 'b', 'c'], ['b', 'c'], ['a']);
@@ -143,7 +143,7 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
         )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $exception = $factory->createFromTemplate(['a', 'b', 'c'], [], ['a']);
@@ -169,7 +169,7 @@ class Client400IncompleteMutualDependencyExceptionFactoryTest extends TestCase
         )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client400IncompleteMutualDependencyExceptionFactory(
             $urlGenerator->reveal(),
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $exception = $factory->createFromTemplate(['a', 'b', 'c'], [], ['a', 'b']);

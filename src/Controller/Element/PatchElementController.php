@@ -7,13 +7,13 @@ namespace App\Controller\Element;
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
-use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\UpdateElementFromRawDataService;
 use App\Type\AccessType;
 use App\Type\EtagType;
+use App\Type\Response\NoContentResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,10 +49,7 @@ class PatchElementController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElement($elementId);
-        if (null === $element) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
+        $element = $this->elementManager->getElementOrFail($elementId);
 
         /**
          * @var array<string, mixed> $rawData

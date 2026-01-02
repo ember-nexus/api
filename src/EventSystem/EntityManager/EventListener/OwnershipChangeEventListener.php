@@ -8,12 +8,9 @@ use App\Contract\RelationElementInterface;
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
+use App\Service\QueueService;
 use App\Type\RabbitMQQueueType;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-
-use function Safe\json_encode;
 
 class OwnershipChangeEventListener
 {
@@ -31,7 +28,7 @@ class OwnershipChangeEventListener
     ];
 
     public function __construct(
-        private AMQPStreamConnection $AMQPStreamConnection,
+        private QueueService $queueService,
     ) {
     }
 
@@ -74,14 +71,11 @@ class OwnershipChangeEventListener
         if (!$elementId) {
             return;
         }
-        $channel = $this->AMQPStreamConnection->channel();
-        $queue = RabbitMQQueueType::REBUILD_SEARCH_DOCUMENT_QUEUE->value;
-        $channel->queue_declare($queue, false, false, false, false);
-        $jsonMessage = json_encode([
-            'element' => $elementId->toString(),
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $message = new AMQPMessage($jsonMessage);
-        $channel->basic_publish($message, '', $queue);
-        $channel->close();
+        $this->queueService->publishEvent(
+            RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE,
+            [
+                'element' => $elementId->toString(),
+            ]
+        );
     }
 }

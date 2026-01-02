@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\System;
 
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
-use App\Response\JsonResponse;
+use App\Type\Response\JsonResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -47,6 +47,12 @@ class GetInstanceConfigurationController extends AbstractController
             'expression' => [
                 'enabled' => $this->emberNexusConfiguration->isExpressionEnabled(),
                 'maxLength' => $this->emberNexusConfiguration->getExpressionMaxLength(),
+            ],
+            'file' => [
+                'maxFileSizeInBytes' => $this->emberNexusConfiguration->getFileMaxFileSizeInBytes(),
+                'uploadExpiresInSecondsAfterFirstRequest' => $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest(),
+                'uploadMinChunkSizeInBytes' => $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(),
+                'uploadMaxChunkSizeInBytes' => $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(),
             ],
         ];
 

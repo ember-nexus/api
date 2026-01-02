@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
@@ -26,7 +26,7 @@ class TokenGenerator
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         $this->encoder = new Base58();
     }
@@ -55,7 +55,7 @@ class TokenGenerator
              * @phpstan-ignore-next-line greater.alwaysTrue
              */
             if ($res->count() > 0 && 2 == $i) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to generate new token hash without collision. Please repeat your last call at a later time.');
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to generate new token hash without collision. Please repeat your last call at a later time.');
             }
         }
 

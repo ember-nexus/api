@@ -6,9 +6,8 @@ namespace App\EventSystem\Controller\EventListener;
 
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client412PreconditionFailedExceptionFactory;
-use App\Response\NotModifiedResponse;
 use App\Service\EtagService;
-use App\Type\Etag;
+use App\Type\Response\NotModifiedResponse;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 

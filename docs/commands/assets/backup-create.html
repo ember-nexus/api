@@ -38,27 +38,30 @@ body         {color: white; background-color: black;}
 </head>
 <body>
 <pre>
-
-    <span class="highlighted dimgray ">▄</span>
-  <span class="highlighted dimgray ">▄</span><span class="highlighted dimgray bg-red ">▀ ▀</span><span class="highlighted dimgray ">▄</span>  <span class="bold ">Ember Nexus API</span>
-   <span class="highlighted red ">▀</span><span class="highlighted white ">█</span><span class="highlighted red ">▀</span>   v0.1.31, production mode
-
-  <span class="bold ">Backup Create</span>
-
-┌<span class="bold "> Step 1 of 3: Backing up Nodes </span>────────────────────────────────────────────────
-│ Found <span class="green ">0</span> nodes.
-└ Successfully backed up <span class="green ">0</span> nodes.
-
-┌<span class="bold "> Step 2 of 3: Backing up Relations </span>────────────────────────────────────────────
-│ Found <span class="green ">0</span> relations.
-└ Successfully backed up <span class="green ">0</span> relations.
-
-┌<span class="bold "> Step 3 of 3: Backing up Files </span>────────────────────────────────────────────────
-│ Currently not implemented.
-└ Successfully backed up <span class="green ">0</span> files.
-
-▶ Backup finished successfully.
-
+TypeError {#397
+  #message: &quot;App\Command\BackupCreateCommand::__construct(): Argument #5 ($elementService) must be of type App\Service\ElementService, Symfony\Component\DependencyInjection\ParameterBag\ContainerBag given, called in /var/www/html/var/cache/prod/ContainerRnqxWK2/getBackupCreateCommandService.php on line 21&quot;
+  #code: 0
+  #file: &quot;./src/Command/BackupCreateCommand.php&quot;
+  #line: 53
+  trace: {
+    ./src/Command/BackupCreateCommand.php:53 {
+      App\Command\BackupCreateCommand-&gt;__construct(ElementManager $elementManager, EntityManager $cypherEntityManager, FilesystemOperator $backupStorage, ElementToRawService $elementToRawService, ElementService $elementService, ParameterBagInterface $bag, FileService $fileService, S3Service $s3Service, FileOperationFactory $fileOperationFactory, Server500LogicExceptionFactory $server500LogicExceptionFactory)
+      › private ElementToRawService $elementToRawService,
+      › private ElementService $elementService,
+      › private ParameterBagInterface $bag,
+    }
+    ./var/cache/prod/ContainerRnqxWK2/getBackupCreateCommandService.php:21 { …}
+    ./var/cache/prod/ContainerRnqxWK2/App_KernelProdContainer.php:130 { …}
+    ./var/cache/prod/ContainerRnqxWK2/getBackupCreateCommand_LazyService.php:21 { …}
+    ./vendor/symfony/console/Command/LazyCommand.php:189 { …}
+    ./vendor/symfony/console/Application.php:352 { …}
+    ./vendor/symfony/framework-bundle/Console/Application.php:77 { …}
+    ./vendor/symfony/console/Application.php:195 { …}
+    ./vendor/symfony/runtime/Runner/Symfony/ConsoleApplicationRunner.php:49 { …}
+    ./vendor/autoload_runtime.php:32 { …}
+    ./bin/console:11 { …}
+  }
+}
 </pre>
 </body>
 </html>

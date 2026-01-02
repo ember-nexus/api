@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Response;
 
-use App\Response\CreatedResponse;
+use App\Type\Response\CreatedResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -18,7 +18,7 @@ class CreatedResponseTest extends TestCase
         $response = new CreatedResponse();
         $this->assertSame(201, $response->getStatusCode());
         $this->assertSame('', $response->getContent());
-        $this->assertSame('', $response->headers->get('Location'));
+        $this->assertNull($response->headers->get('Location'));
         $this->assertFalse($response->headers->has('Content-Type'));
     }
 

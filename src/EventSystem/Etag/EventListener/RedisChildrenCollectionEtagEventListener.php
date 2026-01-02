@@ -21,7 +21,7 @@ class RedisChildrenCollectionEtagEventListener
     ) {
     }
 
-    #[AsEventListener]
+    #[AsEventListener(priority: 10)]
     public function onChildrenCollectionEtagEvent(ChildrenCollectionEtagEvent $event): void
     {
         $redisKey = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey($event->getParentId());

@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests;
+namespace App\Tests\FeatureTests;
 
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ */
 abstract class BaseRequestTestCase extends TestCase
 {
     /**
@@ -118,6 +122,34 @@ abstract class BaseRequestTestCase extends TestCase
         if (null !== $data) {
             $options['headers']['Content-Type'] = 'application/json; charset=utf-8';
             $options['body'] = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        return $client->request(
+            $method,
+            $uri,
+            $options
+        );
+    }
+
+    /**
+     * @param resource $body
+     */
+    public function runUploadRequest(string $method, string $uri, $body, ?string $token = null, ?array $headers = []): ResponseInterface
+    {
+        $client = new Client([
+            'base_uri' => $_ENV['API_DOMAIN'],
+            'http_errors' => false,
+        ]);
+
+        $options = [
+            'headers' => $headers,
+            'body' => $body,
+        ];
+        if (null !== $token) {
+            $options['headers']['Authorization'] = sprintf(
+                'Bearer %s',
+                $token
+            );
         }
 
         return $client->request(
@@ -244,6 +276,21 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertIsArray($body['data']);
     }
 
+    public function assertIsBinaryStreamResponse(ResponseInterface $response, string $expectedMimeType): void
+    {
+        $this->assertSame(200, $response->getStatusCode());
+
+        $contentTypeHeaders = $response->getHeader('content-type');
+        if (1 !== count($contentTypeHeaders)) {
+            $this->fail(sprintf('Expected to find one content-type header in response, got %d.', count($contentTypeHeaders)));
+        }
+        $contentTypeHeader = $contentTypeHeaders[0];
+        $responseMimeType = strtolower(explode(';', $contentTypeHeader)[0]);
+
+        $this->assertSame(strtolower($expectedMimeType), $responseMimeType);
+        $this->assertCount(1, $response->getHeader('Content-Disposition'));
+    }
+
     public function assertIsProblemResponse(ResponseInterface $response, int $status): void
     {
         $this->assertSame($status, $response->getStatusCode());
@@ -273,18 +320,20 @@ abstract class BaseRequestTestCase extends TestCase
         );
     }
 
-    public function assertIsCreatedResponse(ResponseInterface $response): void
+    public function assertIsCreatedResponse(ResponseInterface $response, bool $requireLocation = true): void
     {
         $this->assertSame(201, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
-        $this->assertIsString($response->getHeader('Location')[0]);
+        if ($requireLocation) {
+            $this->assertIsString($response->getHeader('Location')[0]);
+        }
     }
 
-    public function assertNoContentResponse(ResponseInterface $response): void
+    public function assertNoContentResponse(ResponseInterface $response, bool $hasHeader = false): void
     {
         $this->assertSame(204, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
-        $this->assertFalse($response->hasHeader('Location'));
+        $this->assertSame($hasHeader, $response->hasHeader('Location'));
     }
 
     public function assertNotModifiedResponse(ResponseInterface $response): void
@@ -354,5 +403,91 @@ abstract class BaseRequestTestCase extends TestCase
         $location = $response->getHeader('Location')[0];
 
         return array_reverse(explode('/', $location))[0];
+    }
+
+    public function generateDeterministicFile(int $seed, int $targetSize, string $outputPath): void
+    {
+        $lineWidth = 120;
+        $chunkLines = 4096;
+        $groupSize = 32;
+
+        $fh = \Safe\fopen($outputPath, 'wb');
+        mt_srand($seed);
+
+        $written = 0;
+        $state = (string) mt_rand(); // rolling state, re-seeded every $groupSize lines
+
+        for ($counter = 0; $written < $targetSize; ++$counter) {
+            // Re-seed state from mt_rand every $groupSize lines
+            if (0 === $counter % $groupSize) {
+                $state = hash('xxh128', (string) mt_rand().$counter);
+            }
+
+            // Roll state forward, build 4 × 32 = 128 hex chars, trim to 120
+            $a = hash('xxh128', $state.$counter);
+            $b = hash('xxh128', $a.$counter);
+            $c = hash('xxh128', $b.$counter);
+            $d = hash('xxh128', $c.$counter);
+            $state = $d; // carry forward into next line / next group seed
+
+            $line = substr($a.$b.$c.$d, 0, $lineWidth);
+
+            // Buffer into chunks for efficient fwrite
+            $chunk ??= '';
+            $chunk .= $line."\n";
+
+            if ($counter % $chunkLines === $chunkLines - 1 || $written + strlen($chunk) >= $targetSize) {
+                if ($written + strlen($chunk) > $targetSize) {
+                    $chunk = substr($chunk, 0, $targetSize - $written);
+                }
+                $written += fwrite($fh, $chunk);
+                $chunk = '';
+            }
+        }
+
+        \Safe\fclose($fh);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function splitFileToChunks(string $inputPath, int $chunkSize): array
+    {
+        if (!is_file($inputPath) || !is_readable($inputPath)) {
+            throw new InvalidArgumentException(sprintf('File not readable: %s', $inputPath));
+        }
+
+        $uid = bin2hex(random_bytes(8));
+        $handle = fopen($inputPath, 'rb');
+        $index = 0;
+        $paths = [];
+
+        while (!feof($handle)) {
+            $chunk = fread($handle, $chunkSize);
+            if (false === $chunk || 0 === strlen($chunk)) {
+                break;
+            }
+
+            $filename = sprintf('/tmp/upload-%s-%02d.part', $uid, $index);
+            file_put_contents($filename, $chunk);
+            $paths[] = $filename;
+            ++$index;
+        }
+
+        fclose($handle);
+
+        return $paths;
+    }
+
+    /**
+     * @param string[] $paths
+     */
+    public function cleanupChunks(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
     }
 }

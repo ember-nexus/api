@@ -1,0 +1,10 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Ember Nexus API",
+    "version": "0.1.31"
+  },
+  "components": {
+    "schemas": null
+  }
+}

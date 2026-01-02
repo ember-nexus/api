@@ -6,10 +6,13 @@ namespace App\Command;
 
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
 use App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Factory\Type\S3\UploadFileOperationFactory;
+use App\Helper\Regex;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
 use App\Service\RawToElementService;
+use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
 use App\Type\AppStateType;
 use Laudis\Neo4j\Databags\Statement;
@@ -17,6 +20,8 @@ use League\Flysystem\FilesystemOperator;
 use LogicException;
 use Predis\Client;
 use Ramsey\Uuid\Rfc4122\UuidV4;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -34,15 +39,15 @@ class BackupLoadCommand extends Command
 {
     private string $backupName;
     private int $relationCount = 0;
-    /**
-     * @phpstan-ignore-next-line
-     */
     private int $fileCount = 0;
     private int $nodeCount = 0;
     private int $pageSize = 250;
 
     private EmberNexusStyle $io;
 
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+     */
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
@@ -52,7 +57,9 @@ class BackupLoadCommand extends Command
         private EventDispatcherInterface $eventDispatcher,
         private AppStateService $appStateService,
         private ElasticEntityManager $elasticEntityManager,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private S3Service $s3Service,
+        private UploadFileOperationFactory $uploadFileOperationFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -105,7 +112,7 @@ class BackupLoadCommand extends Command
                 continue;
             }
             $data = \Safe\json_decode($this->backupStorage->read($nodeFile->path()), true);
-            $nodeElement = $this->rawToElementService->rawToElement($data);
+            $nodeElement = $this->rawToElementService->rawToElement($data, true);
             unset($data);
             $this->elementManager->create($nodeElement);
             ++$pageCount;
@@ -142,7 +149,7 @@ class BackupLoadCommand extends Command
                 continue;
             }
             $data = \Safe\json_decode($this->backupStorage->read($relationFile->path()), true);
-            $relationElement = $this->rawToElementService->rawToElement($data);
+            $relationElement = $this->rawToElementService->rawToElement($data, true);
             unset($data);
             $this->elementManager->create($relationElement);
             ++$pageCount;
@@ -163,13 +170,65 @@ class BackupLoadCommand extends Command
         ));
     }
 
+    private function parseFilenameAsUuidFromPath(string $path): false|UuidInterface
+    {
+        $filename = basename($path);
+        $parts = explode('.', $filename, 2);
+        if (2 !== count($parts)) {
+            return false;
+        }
+        $name = $parts[0];
+        if (!\Safe\preg_match(Regex::UUID_V4, $name)) {
+            return false;
+        }
+
+        return Uuid::fromString($name);
+    }
+
     private function loadFiles(): void
     {
         $this->io->startSection('Step 3 of 4: Loading Files');
-        $this->io->writeln('Currently not implemented.');
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->fileCount);
+        $progressBar?->display();
+        $files = $this->backupStorage->listContents($this->backupName.'/file/', true);
+        $pageCount = 0;
+        $totalCount = 0;
+        foreach ($files as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
+            $path = $file->path();
+            $fileId = $this->parseFilenameAsUuidFromPath($path);
+            if (false === $fileId) {
+                continue;
+            }
+            $element = $this->elementManager->getElement($fileId);
+            if (null === $element) {
+                $this->io->warning(sprintf(
+                    'Found file in backup without corresponding element; can not import file: %s',
+                    $path
+                ));
+                continue;
+            }
+
+            $resource = $this->backupStorage->readStream($path);
+            $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, $resource);
+            $this->s3Service->uploadFile($uploadFileOperation);
+
+            ++$pageCount;
+            if ($pageCount >= $this->pageSize) {
+                $progressBar?->advance($pageCount);
+                $totalCount += $pageCount;
+                $pageCount = 0;
+            }
+        }
+        $this->elementManager->flush();
+        $progressBar?->advance($pageCount);
+        $progressBar?->clear();
+        $totalCount += $pageCount;
         $this->io->stopSection(sprintf(
             'Loaded <info>%d</info> files.',
-            0
+            $totalCount
         ));
     }
 
@@ -197,7 +256,7 @@ class BackupLoadCommand extends Command
             foreach ($res as $row) {
                 $rawId = $row->get('n.id');
                 if (!is_string($rawId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
                 }
                 $id = UuidV4::fromString($rawId);
                 $element = $this->elementManager->getNode($id);
@@ -225,7 +284,7 @@ class BackupLoadCommand extends Command
             foreach ($res as $row) {
                 $rawId = $row->get('r.id');
                 if (!is_string($rawId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
                 }
                 $id = UuidV4::fromString($rawId);
                 $element = $this->elementManager->getRelation($id);

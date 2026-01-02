@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
+use AsyncAws\Core\Exception\Http\ClientException;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
@@ -22,8 +24,11 @@ class EtagCalculatorService
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
+        private ElementManager $elementManager,
+        private S3Service $s3Service,
+        private FileOperationFactory $fileOperationFactory,
         private LoggerInterface $logger,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -119,7 +124,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($parentId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -191,7 +196,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($childId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -262,7 +267,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($centerId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -333,7 +338,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($userId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -346,6 +351,52 @@ class EtagCalculatorService
             'Calculated Etag for index collection.',
             [
                 'userId' => $userId->toString(),
+                'etag' => $etag,
+            ]
+        );
+
+        return $etag;
+    }
+
+    public function calculateFileEtag(UuidInterface $elementId): ?Etag
+    {
+        $this->logger->debug(
+            'Calculating Etag for file.',
+            [
+                'elementId' => $elementId->toString(),
+            ]
+        );
+
+        $element = $this->elementManager->getElementOrFail($elementId);
+        $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+        try {
+            $fileEtag = $this->s3Service->getEtag($fileOperation);
+        } catch (ClientException $exception) {
+            $this->logger->error(sprintf(
+                'Unable to calculate Etag for file of element %s.',
+                (string) $elementId
+            ));
+
+            return null;
+        }
+
+        $fileProperties = $element->getProperty('file');
+        $fileProperties = \Safe\json_encode($fileProperties);
+
+        $name = $element->getProperty('name');
+        $name = \Safe\json_encode($name);
+
+        $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etagCalculator->addUuid($elementId);
+        $etagCalculator->addString($fileEtag);
+        $etagCalculator->addString($fileProperties);
+        $etagCalculator->addString($name);
+        $etag = $etagCalculator->getEtag();
+
+        $this->logger->debug(
+            'Calculated Etag for file.',
+            [
+                'elementId' => $elementId->toString(),
                 'etag' => $etag,
             ]
         );

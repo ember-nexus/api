@@ -68,4 +68,12 @@ class RedisKeyFactory
             $userId->toString()
         );
     }
+
+    public function getEtagFileRedisKey(UuidInterface $elementId): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::ETAG_FILE,
+            $elementId->toString()
+        );
+    }
 }

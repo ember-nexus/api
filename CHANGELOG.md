@@ -9,18 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add taskfile.dev development environment into the API repository itself, closes #461.
 - Add S3 status check to healthcheck command, closes #200.
 - Add support to delete files in S3 / object storage through the `php bin/console database:drop` command, closes #309.
-- Add support for locks, related to #119.
+- Add support to back up files in S3 / object storage through the `php bin/console backup:create` command, closes #308.
+- Add support for `Content-Disposition` HTTP header, including transliteration of non-latin-characters, closes #447.
+- Add dependency to PHP library `cardinalby/content-disposition`.
+- Add 'reserved type' exception; nodes of type 'User', 'Token' and 'Upload' can not be manually created through generic
+  API endpoints.
+- Store value `true` as placeholder for non-scalar properties in Neo4j. Does not change API responses, but is available
+  for Neo4j based queries, e.g. to check whether a non-scalar property exists on the element.
 
 ### Changed
 - Upgrade FrankenPHP to 1.12.1, related to #457 and #461.
+- Upgrade PHP to 8.5.4, related to #457 and #461.
 - Upgrade PHP dependencies, related to #457 and #461.
 - Upgrade GitHub Actions in CI/CD.
-- Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.
+- Increase max post limit from 2 MB (PHP default) to 101 MiB, related to #119.
 - Change header `Access-Control-Allow-Headers` to `*`, due to growing number of supported headers.
+
 ### Fixed
-- Fix deprecation "The "Symfony\Component\HttpKernel\DependencyInjection\Extension" class is considered internal since
-  Symfony 7.1, to be deprecated in 8.1; use Symfony\Component\DependencyInjection\Extension\Extension instead. It may
-  change without further notice.".
+- Fix bug with deserialization of MongoDB documents.
 
 ## 0.1.31 - 2026-02-10
 ### Changed

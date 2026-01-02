@@ -1,0 +1,10 @@
+{
+  "name": "If-Match",
+  "in": "header",
+  "required": false,
+  "example": "\"blub\"",
+  "description": "Makes the GET request conditional. See caching for details.",
+  "schema": {
+    "type": "string"
+  }
+}

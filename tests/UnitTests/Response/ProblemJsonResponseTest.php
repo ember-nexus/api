@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Response;
 
-use App\Response\ProblemJsonResponse;
+use App\Type\Response\ProblemJsonResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;

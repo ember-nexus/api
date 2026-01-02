@@ -4,59 +4,31 @@ declare(strict_types=1);
 
 namespace App\Type;
 
+use App\Contract\UploadInterface;
 use DateTime;
+use Ramsey\Uuid\UuidInterface;
 
-class Upload extends NodeElement
+/**
+ * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+ */
+final readonly class Upload implements UploadInterface
 {
-    private UploadVariantType $variant;
-    private UploadVariantVersionType $variantVersion;
-    private ?UploadConcatType $concat;
-    private ?int $uploadLength;
-    private bool $isUploadLengthDeferred;
-    private int $uploadOffset;
-    private DateTime $created;
-    private ?DateTime $updated;
-    private ?DateTime $expires;
-
-    public function __construct()
-    {
-        parent::__construct();
+    public function __construct(
+        private UuidInterface $id,
+        private ?int $uploadLength,
+        private int $uploadOffset,
+        private bool $uploadComplete,
+        private UuidInterface $uploadTarget,
+        private int $alreadyUploadedChunks,
+        private UuidInterface $uploadOwner,
+        private string $extension,
+        private DateTime $expires,
+    ) {
     }
 
-    public function getVariant(): UploadVariantType
+    public function getId(): UuidInterface
     {
-        return $this->variant;
-    }
-
-    public function setVariant(UploadVariantType $variant): self
-    {
-        $this->variant = $variant;
-
-        return $this;
-    }
-
-    public function getVariantVersion(): UploadVariantVersionType
-    {
-        return $this->variantVersion;
-    }
-
-    public function setVariantVersion(UploadVariantVersionType $variantVersion): self
-    {
-        $this->variantVersion = $variantVersion;
-
-        return $this;
-    }
-
-    public function getConcat(): ?UploadConcatType
-    {
-        return $this->concat;
-    }
-
-    public function setConcat(?UploadConcatType $concat): self
-    {
-        $this->concat = $concat;
-
-        return $this;
+        return $this->id;
     }
 
     public function getUploadLength(): ?int
@@ -64,70 +36,38 @@ class Upload extends NodeElement
         return $this->uploadLength;
     }
 
-    public function setUploadLength(?int $uploadLength): self
-    {
-        $this->uploadLength = $uploadLength;
-
-        return $this;
-    }
-
-    public function isUploadLengthDeferred(): bool
-    {
-        return $this->isUploadLengthDeferred;
-    }
-
-    public function setIsUploadLengthDeferred(bool $isUploadLengthDeferred): self
-    {
-        $this->isUploadLengthDeferred = $isUploadLengthDeferred;
-
-        return $this;
-    }
-
     public function getUploadOffset(): int
     {
         return $this->uploadOffset;
     }
 
-    public function setUploadOffset(int $uploadOffset): self
+    public function isUploadComplete(): bool
     {
-        $this->uploadOffset = $uploadOffset;
-
-        return $this;
+        return $this->uploadComplete;
     }
 
-    public function getCreated(): DateTime
+    public function getUploadTarget(): UuidInterface
     {
-        return $this->created;
+        return $this->uploadTarget;
     }
 
-    public function setCreated(DateTime $created): self
+    public function getAlreadyUploadedChunks(): int
     {
-        $this->created = $created;
-
-        return $this;
+        return $this->alreadyUploadedChunks;
     }
 
-    public function getUpdated(): ?DateTime
+    public function getUploadOwner(): UuidInterface
     {
-        return $this->updated;
+        return $this->uploadOwner;
     }
 
-    public function setUpdated(?DateTime $updated): self
+    public function getExtension(): string
     {
-        $this->updated = $updated;
-
-        return $this;
+        return $this->extension;
     }
 
-    public function getExpires(): ?DateTime
+    public function getExpires(): DateTime
     {
         return $this->expires;
-    }
-
-    public function setExpires(?DateTime $expires): self
-    {
-        $this->expires = $expires;
-
-        return $this;
     }
 }

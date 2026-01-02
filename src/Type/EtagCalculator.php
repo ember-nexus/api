@@ -52,6 +52,16 @@ class EtagCalculator
         return $this;
     }
 
+    public function addString(string $data): static
+    {
+        if ($this->finalEtag) {
+            throw new LogicException('Etag is already finalized, no new data can be added.');
+        }
+        hash_update($this->hashContext, $data);
+
+        return $this;
+    }
+
     public function getEtag(): Etag
     {
         if ($this->finalEtag) {

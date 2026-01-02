@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use Laudis\Neo4j\Databags\Statement;
@@ -20,7 +20,7 @@ class AccessChecker
 {
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -39,7 +39,7 @@ class AccessChecker
         foreach ($res as $row) {
             $rawGroupId = $row->get('group.id');
             if (!is_string($rawGroupId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group.id as string, not %s.', get_debug_type($rawGroupId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group.id as string, not %s.', get_debug_type($rawGroupId))); // @codeCoverageIgnore
             }
             $groupIds[] = UuidV4::fromString($rawGroupId);
         }
@@ -500,7 +500,7 @@ class AccessChecker
         foreach ($res as $row) {
             $rawGroupId = $row->get('group.id');
             if (!is_string($rawGroupId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group.id as string, not %s.', get_debug_type($rawGroupId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group.id as string, not %s.', get_debug_type($rawGroupId))); // @codeCoverageIgnore
             }
             $groups[] = UuidV4::fromString($rawGroupId);
         }
@@ -612,7 +612,7 @@ class AccessChecker
         foreach ($res as $row) {
             $rawGroup = $row->get('group');
             if (!is_string($rawGroup)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group as string, not %s.', get_debug_type($rawGroup))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group as string, not %s.', get_debug_type($rawGroup))); // @codeCoverageIgnore
             }
             $groups[] = UuidV4::fromString($rawGroup);
         }
@@ -706,7 +706,7 @@ class AccessChecker
         foreach ($res as $row) {
             $rawUserId = $row->get('user.id');
             if (!is_string($rawUserId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
             }
             $users[] = UuidV4::fromString($rawUserId);
         }
@@ -854,7 +854,7 @@ class AccessChecker
         foreach ($res as $row) {
             $rawUser = $row->get('user');
             if (!is_string($rawUser)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user as string, not %s.', get_debug_type($rawUser))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user as string, not %s.', get_debug_type($rawUser))); // @codeCoverageIgnore
             }
             $users[] = UuidV4::fromString($rawUser);
         }
@@ -900,7 +900,7 @@ EOD,
         foreach ($res as $row) {
             $rawId = $row->get('id');
             if (!is_string($rawId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
             }
             $id = UuidV4::fromString($rawId);
 
@@ -909,7 +909,7 @@ EOD,
             if (is_string($rawStartId)) {
                 $startId = UuidV4::fromString($rawStartId);
             } elseif (!is_null($rawStartId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property startId as string or null, not %s.', get_debug_type($rawStartId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property startId as string or null, not %s.', get_debug_type($rawStartId))); // @codeCoverageIgnore
             }
 
             $rawEndId = $row->get('endId');
@@ -917,7 +917,7 @@ EOD,
             if (is_string($rawEndId)) {
                 $endId = UuidV4::fromString($rawEndId);
             } elseif (!is_null($rawEndId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property endId as string or null, not %s.', get_debug_type($rawEndId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property endId as string or null, not %s.', get_debug_type($rawEndId))); // @codeCoverageIgnore
             }
 
             $data[] = [
@@ -998,7 +998,7 @@ EOD,
         foreach ($res as $row) {
             $rawElementId = $row->get('elementId');
             if (!is_string($rawElementId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementId as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementId as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
             }
             $nodeIdsWithAccess[] = UuidV4::fromString($rawElementId);
         }

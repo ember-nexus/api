@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\Endpoint\WebDAV;
+namespace App\Tests\FeatureTests\Endpoint\WebDAV;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 

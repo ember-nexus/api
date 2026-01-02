@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationCommand;
+namespace App\Tests\ExampleGenerationCommand;
 
 use Exception;
 use PHPUnit\Framework\TestCase;

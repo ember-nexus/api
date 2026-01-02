@@ -6,9 +6,9 @@ namespace App\Controller\User;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Response\NoContentResponse;
 use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
+use App\Type\Response\NoContentResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

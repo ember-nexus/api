@@ -1,0 +1,52 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Type\Response;
+
+use App\Contract\EtagCapableResponseInterface;
+use App\Type\Etag;
+use AsyncAws\S3\Result\GetObjectOutput;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class BinaryStreamResponse extends StreamedResponse implements EtagCapableResponseInterface
+{
+    public const int STREAM_CHUNK_SIZE = 8192;
+
+    public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback)
+    {
+        parent::__construct();
+        $this->content = '';
+        $stream = $object->getBody()->getContentAsResource();
+
+        $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
+
+        // todo: use file's actual mime type, if available. otherwise fall back to current mime type?
+        $this->headers->set('Content-Type', 'application/octet-stream');
+
+        $disposition = $this->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $fileName,
+            $fileNameFallback
+        );
+        $this->headers->set('Content-Disposition', $disposition);
+
+        $this->setCallback(function () use ($stream): void {
+            while (!feof($stream)) {
+                $buffer = \Safe\fread($stream, self::STREAM_CHUNK_SIZE);
+                if (0 === strlen($buffer)) {
+                    break;
+                }
+                echo $buffer;
+                flush();
+            }
+            \Safe\fclose($stream);
+        });
+    }
+
+    public function setEtagFromEtagInstance(Etag $etag): static
+    {
+        return parent::setEtag((string) $etag);
+    }
+}

@@ -1,0 +1,259 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Ember Nexus API",
+    "version": "0.1.31"
+  },
+  "components": {
+    "schemas": {
+      "ElementId": {
+        "type": "string",
+        "format": "uuid",
+        "example": "00000000-0000-0000-0000-000000000000",
+        "description": "Global unique identifier for any element"
+      },
+      "Element": {
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "data"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "Data"
+          },
+          "id": {
+            "$ref": "#/components/schemas/ElementId"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "created": "2025-09-27T10:39:51+00:00",
+              "updated": "2025-09-27T10:39:51+00:00",
+              "name": "some name"
+            }
+          },
+          "file": {
+            "type": "object",
+            "additionalProperties": true,
+            "readOnly": true,
+            "example": {
+              "contentLength": 63933,
+              "extension": "jpg",
+              "mimeType": "image/jpeg"
+            }
+          },
+          "start": {
+            "$ref": "#/components/schemas/ElementId",
+            "description": "UUID of the start node. Required if end is present."
+          },
+          "end": {
+            "$ref": "#/components/schemas/ElementId",
+            "description": "UUID of the end node. Required if start is present."
+          }
+        }
+      },
+      "Problem": {
+        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+        "type": "object",
+        "description": "RFC 7807 Problem Details object.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "examples": {
+      "NotFoundProblemExample": {
+        "summary": "Not found",
+        "value": {
+          "type": "http://api/error/404/not-found",
+          "title": "Not Found",
+          "status": 404,
+          "detail": "Requested element was not found."
+        }
+      }
+    },
+    "parameters": {
+      "If-Match": {
+        "name": "If-Match",
+        "in": "header",
+        "required": false,
+        "example": "\"blub\"",
+        "description": "Makes the GET request conditional. See caching for details.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "If-None-Match": {
+        "name": "If-None-Match",
+        "in": "header",
+        "required": false,
+        "x-scalar-ignore": true,
+        "description": "Makes the GET request conditional. Returns 304 if ETag matches.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/{uuid}": {
+      "get": {
+        "summary": "Get Element",
+        "description": "Retrieves a single element (node or relationship) by UUID.",
+        "operationId": "getElement",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/If-Match"
+          },
+          {
+            "$ref": "#/components/parameters/If-None-Match"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Element found. Returns either a node or a relationship.",
+            "headers": {
+              "ETag": {
+                "description": "Entity tag for caching purposes.",
+                "schema": {
+                  "type": "string",
+                  "example": "\"YgbFC4u5EgC\""
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "example": "no-cache, private"
+                }
+              },
+              "X-Powered-By": {
+                "schema": {
+                  "type": "string",
+                  "example": "Ember Nexus API"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Element"
+                },
+                "examples": {
+                  "node": {
+                    "summary": "Node response",
+                    "value": {
+                      "type": "Comment",
+                      "id": "74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac",
+                      "data": {
+                        "created": "2025-09-27T10:39:51+00:00",
+                        "updated": "2025-09-27T10:39:51+00:00",
+                        "name": "Blue",
+                        "content": "Blue is one of the three primary colours in the RYB colour model...\n"
+                      }
+                    }
+                  },
+                  "relationship": {
+                    "summary": "Relationship response",
+                    "value": {
+                      "type": "OWNS",
+                      "id": "eb5d2879-c5e6-43a6-b8ce-2a1188ca7073",
+                      "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+                      "end": "ce8abdea-2e6c-41d4-b779-87b803f77836",
+                      "data": {
+                        "created": "2025-09-27T10:39:58+00:00",
+                        "updated": "2025-09-27T10:39:58+00:00"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified. Returned when If-None-Match header matches current ETag.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or expired token.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Element not found, or user lacks access.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                },
+                "examples": {
+                  "notFound": {
+                    "$ref": "#/components/examples/NotFoundProblemExample"
+                  }
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition failed. If-Match or If-None-Match condition not met.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. Rate limit exceeded.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Element"
+        ]
+      }
+    }
+  }
+}

@@ -4,29 +4,33 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\Regex;
-use App\Response\BinaryStreamResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
-use App\Service\StorageUtilService;
+use App\Service\ElementManager;
+use App\Service\ElementService;
+use App\Service\FileService;
+use App\Service\S3Service;
 use App\Type\AccessType;
-use AsyncAws\S3\S3Client;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
+use App\Type\EtagType;
+use App\Type\Response\BinaryStreamResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class GetElementFileController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private S3Client $s3Client,
-        private EmberNexusConfiguration $emberNexusConfiguration,
-        private StorageUtilService $storageUtilService,
+        private ElementManager $elementManager,
+        private ElementService $elementService,
+        private FileService $fileService,
+        private FileOperationFactory $fileOperationFactory,
+        private S3Service $s3Service,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -39,7 +43,8 @@ class GetElementFileController extends AbstractController
         ],
         methods: ['GET']
     )]
-    public function getElementFile(string $id): Response
+    #[EndpointSupportsEtag(EtagType::FILE)]
+    public function getElementFile(string $id): BinaryStreamResponse
     {
         $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();
@@ -48,39 +53,20 @@ class GetElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $objectConfig = [
-            'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->storageUtilService->getStorageBucketKey($elementId),
-        ];
-        $status = $this->s3Client->objectExists($objectConfig);
+        $element = $this->elementManager->getElementOrFail($elementId);
 
-        if (!$status->isSuccess()) {
+        $fileName = $this->elementService->getFileName($element);
+        $fileNameFallback = $this->fileService->getAsciiSafeFileName($fileName);
+
+        $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+
+        $doesFileExist = $this->s3Service->existsFile($fileOperation);
+        if (false === $doesFileExist) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $object = $this->s3Client->getObject($objectConfig);
+        $object = $this->s3Service->getFile($fileOperation);
 
-        return new BinaryStreamResponse($object);
-
-        //        $stream = $object->getBody()->getContentAsResource();
-        //
-        //        $response = new StreamedResponse();
-        //        $response->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
-        //        $response->headers->set('Content-Type', 'application/octet-stream');
-        //
-        //        $response->setCallback(function () use ($stream): void {
-        //            while (!feof($stream)) {
-        //                $buffer = fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
-        //                if (false === $buffer || 0 === strlen($buffer)) {
-        //                    break;
-        //                }
-        //                echo $buffer;
-        //                //                ob_flush();
-        //                flush();
-        //            }
-        //            fclose($stream);
-        //        });
-        //
-        //        return $response;
+        return new BinaryStreamResponse($object, $fileName, $fileNameFallback);
     }
 }

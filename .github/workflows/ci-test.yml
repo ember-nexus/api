@@ -196,7 +196,6 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-      - test-mutant
       - test-mess-detector
     strategy:
       matrix:
@@ -245,7 +244,6 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-      - test-mutant
       - test-mess-detector
     steps:
       - uses: actions/checkout@v5
@@ -289,7 +287,6 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-      - test-mutant
       - test-mess-detector
     steps:
       - uses: actions/checkout@v5

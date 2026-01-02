@@ -6,7 +6,7 @@ namespace App\Controller\Element;
 
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
@@ -33,7 +33,7 @@ class GetRelatedController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -131,21 +131,21 @@ class GetRelatedController extends AbstractController
         if (count($res) > 0) {
             $totalCount = $res->first()->get('totalCount');
             if (!is_int($totalCount)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property totalCount as int, not %s.', get_debug_type($totalCount))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property totalCount as int, not %s.', get_debug_type($totalCount))); // @codeCoverageIgnore
             }
             foreach ($res as $resultSet) {
                 $rawOuter = $resultSet->get('outer');
                 if (!is_string($rawOuter)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property outer as string, not %s.', get_debug_type($rawOuter))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property outer as string, not %s.', get_debug_type($rawOuter))); // @codeCoverageIgnore
                 }
                 $nodeIds[] = UuidV4::fromString($rawOuter);
                 $rawRelations = $resultSet->get('r');
                 if (!($rawRelations instanceof CypherList)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r as CypherList, not %s.', get_debug_type($rawRelations))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r as CypherList, not %s.', get_debug_type($rawRelations))); // @codeCoverageIgnore
                 }
                 foreach ($rawRelations as $relationId) {
                     if (!is_string($relationId)) {
-                        throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.item as string, not %s.', get_debug_type($relationId))); // @codeCoverageIgnore
+                        throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.item as string, not %s.', get_debug_type($relationId))); // @codeCoverageIgnore
                     }
                     $relationIds[] = UuidV4::fromString($relationId);
                 }

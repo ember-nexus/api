@@ -178,7 +178,8 @@ table th {
   font-family: 'Fira Code', 'Roboto Mono', Monaco, courier, monospace !important;
 }
 
-.method-get {
+.method-get,
+.method-head {
   color: var(--ember-nexus-text-blue) !important;
 }
 

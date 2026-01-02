@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Service\ElementManager;
+use App\Service\ElementService;
 use App\Service\ElementToRawService;
-use App\Service\StorageUtilService;
+use App\Service\FileService;
+use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
-use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
@@ -39,18 +41,24 @@ class BackupCreateCommand extends Command
     private string $backupName = '';
     private int $pageSize = 10;
     private bool $prettyPrint = false;
-    private bool $ndjson = false;
+    private bool $exportFiles = true;
 
     private EmberNexusStyle $io;
 
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+     */
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private FilesystemOperator $backupStorage,
         private ElementToRawService $elementToRawService,
+        private ElementService $elementService,
         private ParameterBagInterface $bag,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
-        private StorageUtilService $storageUtilService
+        private FileService $fileService,
+        private S3Service $s3Service,
+        private FileOperationFactory $fileOperationFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -71,11 +79,10 @@ class BackupCreateCommand extends Command
             false
         );
         $this->addOption(
-            'ndjson',
+            'no-files',
             null,
             InputOption::VALUE_NEGATABLE,
-            'Saves multiple JSON documents in a few .ndjson files.',
-            false
+            'Disable file export.'
         );
     }
 
@@ -85,10 +92,7 @@ class BackupCreateCommand extends Command
 
         $this->backupName = $this->checkBackupName($input->getArgument('name'));
         $this->prettyPrint = $input->getOption('pretty');
-        $this->ndjson = $input->getOption('ndjson');
-        if ($this->prettyPrint && $this->ndjson) {
-            throw new Exception('Pretty print and ndjson are mutually exclusive.');
-        }
+        $this->exportFiles = !$input->getOption('no-files');
         $this->io->title('Backup Create');
         $this->createBackupFolders();
         $this->initCount();
@@ -149,7 +153,7 @@ class BackupCreateCommand extends Command
             foreach ($rawNodeIds->toArray() as $rawNodeId) {
                 $rawNodeIdContent = $rawNodeId->get('n.id');
                 if (!is_string($rawNodeIdContent)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawNodeIdContent))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawNodeIdContent))); // @codeCoverageIgnore
                 }
                 $nodeIds[] = Uuid::fromString($rawNodeIdContent);
             }
@@ -204,7 +208,7 @@ class BackupCreateCommand extends Command
             foreach ($rawRelationIds->toArray() as $rawRelationId) {
                 $rawRelationIdContent = $rawRelationId->get('r.id');
                 if (!is_string($rawRelationIdContent)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawRelationIdContent))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawRelationIdContent))); // @codeCoverageIgnore
                 }
                 $relationIds[] = Uuid::fromString($rawRelationIdContent);
             }
@@ -234,7 +238,69 @@ class BackupCreateCommand extends Command
     private function backupFiles(): void
     {
         $this->io->startSection('Step 3 of 3: Backing up Files');
-        $this->io->writeln('Currently not implemented.');
+
+        if (false === $this->exportFiles) {
+            $this->io->stopSection('File backup skipped.');
+
+            return;
+        }
+
+        $rawFileElements = $this->cypherEntityManager->getClient()->runStatement(
+            Statement::create(
+                'OPTIONAL MATCH (n) WHERE n.file '.
+                'OPTIONAL MATCH ()-[r]->() WHERE r.file '.
+                'WITH coalesce(n, r) AS element '.
+                'WHERE element.file '.
+                'RETURN element.id'
+            )
+        );
+
+        $fileElementIds = [];
+        foreach ($rawFileElements->toArray() as $row) {
+            $fileElementIds[] = $row->get('element.id');
+        }
+
+        $this->fileCount = count($fileElementIds);
+
+        $this->io->writeln(sprintf(
+            'Found <info>%d</info> files.',
+            $this->fileCount
+        ));
+
+        if (0 === $this->fileCount) {
+            $this->io->stopSection('File backup skipped.');
+
+            return;
+        }
+
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->fileCount);
+        $progressBar?->display();
+
+        foreach ($fileElementIds as $rawElementId) {
+            if (!is_string($rawElementId)) {
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property element.id as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
+            }
+            $elementId = Uuid::fromString($rawElementId);
+            $element = $this->elementManager->getElement($elementId);
+
+            if (null === $element) {
+                $progressBar?->advance();
+                continue;
+            }
+
+            $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+            $resource = $this->s3Service->getFileAsResource($fileOperation);
+            $extension = $this->elementService->getFileNameExtension($element);
+
+            $this->backupStorage->writeStream(
+                $this->getFilePath($elementId, $extension),
+                $resource
+            );
+
+            $progressBar?->advance();
+        }
+
+        $progressBar?->clear();
         $this->io->stopSection(sprintf(
             'Successfully backed up <info>%d</info> files.',
             $this->fileCount
@@ -243,23 +309,35 @@ class BackupCreateCommand extends Command
 
     private function getNodePath(UuidInterface $nodeId): string
     {
-        $levels = (int) ceil(log($this->nodeCount, 256));
+        $levels = max(0, (int) ceil(log($this->nodeCount, 256)) - 1);
 
         return sprintf(
             '%s/node/%s.json',
             $this->backupName,
-            $this->storageUtilService->uuidToNestedFolderStructure($nodeId, $levels)
+            $this->fileService->uuidToNestedFolderStructure($nodeId, $levels)
         );
     }
 
     private function getRelationPath(UuidInterface $relationId): string
     {
-        $levels = (int) ceil(log($this->relationCount, 256));
+        $levels = max(0, (int) ceil(log($this->relationCount, 256)) - 1);
 
         return sprintf(
             '%s/relation/%s.json',
             $this->backupName,
-            $this->storageUtilService->uuidToNestedFolderStructure($relationId, $levels)
+            $this->fileService->uuidToNestedFolderStructure($relationId, $levels)
+        );
+    }
+
+    private function getFilePath(UuidInterface $elementId, string $extension): string
+    {
+        $levels = max(0, (int) ceil(log($this->fileCount, 256)) - 1);
+
+        return sprintf(
+            '%s/file/%s.%s',
+            $this->backupName,
+            $this->fileService->uuidToNestedFolderStructure($elementId, $levels),
+            $extension
         );
     }
 
@@ -267,16 +345,9 @@ class BackupCreateCommand extends Command
     {
         $backupName = trim($backupName);
 
-        if ('' === $backupName) {
-            throw new LogicException("Backup name can not be ''");
-        }
-
-        if ('.' === $backupName) {
-            throw new LogicException("Backup name can not be '.'");
-        }
-
-        if ('..' === $backupName) {
-            throw new LogicException("Backup name can not be '..'");
+        $forbiddenNames = ['', '.', '..'];
+        if (in_array($backupName, $forbiddenNames)) {
+            throw new LogicException(sprintf("Backup name can not be '%s'", $backupName));
         }
 
         if ($this->backupStorage->directoryExists($backupName)) {
@@ -288,6 +359,8 @@ class BackupCreateCommand extends Command
 
     private function createBackupFolders(): void
     {
+        $this->io->writeln(sprintf("Creating backup <info>%s</info> in folder <info>./var/backup</info>\n", $this->backupName));
+
         $this->backupStorage->createDirectory($this->backupName);
         $this->backupStorage->createDirectory($this->backupName.'/node');
         $this->backupStorage->createDirectory($this->backupName.'/relation');
@@ -300,14 +373,14 @@ class BackupCreateCommand extends Command
             Statement::create('MATCH (n) RETURN count(n) as count')
         )->first()->get('count');
         if (!is_int($rawNodeCount)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawNodeCount))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawNodeCount))); // @codeCoverageIgnore
         }
         $this->nodeCount = $rawNodeCount;
         $rawRelationCount = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create('MATCH ()-[r]->() RETURN count(r) as count')
         )->first()->get('count');
         if (!is_int($rawRelationCount)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawRelationCount))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawRelationCount))); // @codeCoverageIgnore
         }
         $this->relationCount = $rawRelationCount;
     }

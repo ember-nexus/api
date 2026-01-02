@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Response;
 
-use App\Response\NotModifiedResponse;
 use App\Type\Etag;
+use App\Type\Response\NotModifiedResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -20,9 +20,14 @@ class NotModifiedResponseTest extends TestCase
         $this->assertSame(304, $response->getStatusCode());
         $this->assertSame('', $response->getContent());
         $this->assertFalse($response->headers->has('Content-Type'));
+    }
+
+    public function testSetEtagFromEtagInstance(): void
+    {
+        $response = new NotModifiedResponse();
         $this->assertNull($response->getEtag());
-        $etag = new Etag('someEtag');
+        $etag = new Etag('some etag');
         $response->setEtagFromEtagInstance($etag);
-        $this->assertSame('"someEtag"', $response->getEtag());
+        $this->assertSame('"some etag"', $response->getEtag());
     }
 }
