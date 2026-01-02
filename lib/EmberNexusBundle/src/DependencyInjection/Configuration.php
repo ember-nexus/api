@@ -19,6 +19,7 @@ class Configuration implements ConfigurationInterface
     public const int EXPRESSION_MAX_LENGTH = 10 * 1024;
     public const int SIZE_OF_10GIB_IN_BYTES = 10 * 1024 * 1024 * 1024;
     public const int SIZE_OF_101MIB_IN_BYTES = 101 * 1024 * 1024;
+    public const int SIZE_OF_5MIB_IN_BYTES = 5 * 1024 * 1024;
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -167,10 +168,15 @@ class Configuration implements ConfigurationInterface
                         ->min(0)
                         ->defaultValue(self::THREE_HOURS_IN_SECONDS)
                     ->end()
+                    ->integerNode(EmberNexusConfiguration::FILE_UPLOAD_CHUNK_DIGITS_LENGTH)
+                        ->info('Number of digits for the upload chunk counter. Number of max chunks can be limited by upstream services, e.g. AWS can only support up to 10.000 chunks, i.e. a chunk digits length of 4.')
+                        ->min(1)
+                        ->defaultValue(4)
+                    ->end()
                     ->integerNode(EmberNexusConfiguration::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES)
-                        ->info('Minimum size in bytes of uploaded chunks.')
+                        ->info('Minimum size in bytes of uploaded chunks. Limited by the S3 provider, e.g. AWS requires that chunks are at least 5 MiB big.')
                         ->min(0)
-                        ->defaultValue(0)
+                        ->defaultValue(self::SIZE_OF_5MIB_IN_BYTES)
                     ->end()
                     ->integerNode(EmberNexusConfiguration::FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES)
                         ->info('Maximum size in bytes of uploaded chunks. Limited by the S3 provider and the PHP configuration.')

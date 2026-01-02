@@ -48,6 +48,7 @@ class EmberNexusConfiguration
     public const string FILE = 'file';
     public const string FILE_MAX_FILE_SIZE_IN_BYTES = 'maxFileSizeInBytes';
     public const string FILE_UPLOAD_EXPIRES_IN_SECONDS_AFTER_FIRST_REQUEST = 'uploadExpiresInSecondsAfterFirstRequest';
+    public const string FILE_UPLOAD_CHUNK_DIGITS_LENGTH = 'uploadChunkDigitsLength';
     public const string FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES = 'uploadMinChunkSizeInBytes';
     public const string FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES = 'uploadMaxChunkSizeInBytes';
     public const string FILE_S3_STORAGE_BUCKET = 'S3StorageBucket';
@@ -78,6 +79,7 @@ class EmberNexusConfiguration
 
     private int $fileMaxFileSizeInBytes;
     private int $fileUploadExpiresInSecondsAfterFirstRequest;
+    private int $fileUploadChunkDigitsLength;
     private int $fileUploadMinChunkSizeInBytes;
     private int $fileUploadMaxChunkSizeInBytes;
     private string $fileS3StorageBucket;
@@ -101,7 +103,7 @@ class EmberNexusConfiguration
         return $configuration;
     }
 
-    public static function createFromConfiguration(array $configuration): self
+    public static function createFromConfiguration(array $configuration): static
     {
         $emberNexusConfiguration = new self();
 
@@ -295,6 +297,15 @@ class EmberNexusConfiguration
             $configuration,
             [
                 self::FILE,
+                self::FILE_UPLOAD_CHUNK_DIGITS_LENGTH,
+            ]
+        );
+        $emberNexusConfiguration->setFileUploadChunkDigitsLength($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
                 self::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES,
             ]
         );
@@ -375,7 +386,7 @@ class EmberNexusConfiguration
         return $this->pageSizeMin;
     }
 
-    public function setPageSizeMin(int $pageSizeMin): self
+    public function setPageSizeMin(int $pageSizeMin): static
     {
         $this->pageSizeMin = $pageSizeMin;
 
@@ -387,7 +398,7 @@ class EmberNexusConfiguration
         return $this->pageSizeDefault;
     }
 
-    public function setPageSizeDefault(int $pageSizeDefault): self
+    public function setPageSizeDefault(int $pageSizeDefault): static
     {
         $this->pageSizeDefault = $pageSizeDefault;
 
@@ -399,7 +410,7 @@ class EmberNexusConfiguration
         return $this->pageSizeMax;
     }
 
-    public function setPageSizeMax(int $pageSizeMax): self
+    public function setPageSizeMax(int $pageSizeMax): static
     {
         $this->pageSizeMax = $pageSizeMax;
 
@@ -411,7 +422,7 @@ class EmberNexusConfiguration
         return $this->registerEnabled;
     }
 
-    public function setRegisterEnabled(bool $registerEnabled): self
+    public function setRegisterEnabled(bool $registerEnabled): static
     {
         $this->registerEnabled = $registerEnabled;
 
@@ -423,7 +434,7 @@ class EmberNexusConfiguration
         return $this->registerUniqueIdentifier;
     }
 
-    public function setRegisterUniqueIdentifier(string $registerUniqueIdentifier): self
+    public function setRegisterUniqueIdentifier(string $registerUniqueIdentifier): static
     {
         if (0 === strlen($registerUniqueIdentifier)) {
             throw new Exception('Unique identifier can not be an empty string.');
@@ -441,7 +452,7 @@ class EmberNexusConfiguration
         return $this->registerUniqueIdentifierRegex;
     }
 
-    public function setRegisterUniqueIdentifierRegex(string|false $registerUniqueIdentifierRegex): self
+    public function setRegisterUniqueIdentifierRegex(string|false $registerUniqueIdentifierRegex): static
     {
         $this->registerUniqueIdentifierRegex = $registerUniqueIdentifierRegex;
 
@@ -453,7 +464,7 @@ class EmberNexusConfiguration
         return $this->expressionEnabled;
     }
 
-    public function setExpressionEnabled(bool $expressionEnabled): self
+    public function setExpressionEnabled(bool $expressionEnabled): static
     {
         $this->expressionEnabled = $expressionEnabled;
 
@@ -465,7 +476,7 @@ class EmberNexusConfiguration
         return $this->expressionWarningLength;
     }
 
-    public function setExpressionWarningLength(int $expressionWarningLength): self
+    public function setExpressionWarningLength(int $expressionWarningLength): static
     {
         $this->expressionWarningLength = $expressionWarningLength;
 
@@ -477,7 +488,7 @@ class EmberNexusConfiguration
         return $this->expressionMaxLength;
     }
 
-    public function setExpressionMaxLength(int $expressionMaxLength): self
+    public function setExpressionMaxLength(int $expressionMaxLength): static
     {
         $this->expressionMaxLength = $expressionMaxLength;
 
@@ -489,7 +500,7 @@ class EmberNexusConfiguration
         return $this->instanceConfigurationEnabled;
     }
 
-    public function setInstanceConfigurationEnabled(bool $instanceConfigurationEnabled): self
+    public function setInstanceConfigurationEnabled(bool $instanceConfigurationEnabled): static
     {
         $this->instanceConfigurationEnabled = $instanceConfigurationEnabled;
 
@@ -501,7 +512,7 @@ class EmberNexusConfiguration
         return $this->instanceConfigurationShowVersion;
     }
 
-    public function setInstanceConfigurationShowVersion(bool $instanceConfigurationShowVersion): self
+    public function setInstanceConfigurationShowVersion(bool $instanceConfigurationShowVersion): static
     {
         $this->instanceConfigurationShowVersion = $instanceConfigurationShowVersion;
 
@@ -513,7 +524,7 @@ class EmberNexusConfiguration
         return $this->tokenMinLifetimeInSeconds;
     }
 
-    public function setTokenMinLifetimeInSeconds(int $tokenMinLifetimeInSeconds): self
+    public function setTokenMinLifetimeInSeconds(int $tokenMinLifetimeInSeconds): static
     {
         $this->tokenMinLifetimeInSeconds = $tokenMinLifetimeInSeconds;
 
@@ -525,7 +536,7 @@ class EmberNexusConfiguration
         return $this->tokenDefaultLifetimeInSeconds;
     }
 
-    public function setTokenDefaultLifetimeInSeconds(int $tokenDefaultLifetimeInSeconds): self
+    public function setTokenDefaultLifetimeInSeconds(int $tokenDefaultLifetimeInSeconds): static
     {
         $this->tokenDefaultLifetimeInSeconds = $tokenDefaultLifetimeInSeconds;
 
@@ -537,7 +548,7 @@ class EmberNexusConfiguration
         return $this->tokenMaxLifetimeInSeconds;
     }
 
-    public function setTokenMaxLifetimeInSeconds(bool|int $tokenMaxLifetimeInSeconds): self
+    public function setTokenMaxLifetimeInSeconds(bool|int $tokenMaxLifetimeInSeconds): static
     {
         $this->tokenMaxLifetimeInSeconds = $tokenMaxLifetimeInSeconds;
 
@@ -549,7 +560,7 @@ class EmberNexusConfiguration
         return $this->tokenDeleteExpiredTokensAutomaticallyInSeconds;
     }
 
-    public function setTokenDeleteExpiredTokensAutomaticallyInSeconds(bool|int $tokenDeleteExpiredTokensAutomaticallyInSeconds): self
+    public function setTokenDeleteExpiredTokensAutomaticallyInSeconds(bool|int $tokenDeleteExpiredTokensAutomaticallyInSeconds): static
     {
         $this->tokenDeleteExpiredTokensAutomaticallyInSeconds = $tokenDeleteExpiredTokensAutomaticallyInSeconds;
 
@@ -561,7 +572,7 @@ class EmberNexusConfiguration
         return $this->cacheEtagSeed;
     }
 
-    public function setCacheEtagSeed(string $cacheEtagSeed): self
+    public function setCacheEtagSeed(string $cacheEtagSeed): static
     {
         $this->cacheEtagSeed = $cacheEtagSeed;
 
@@ -573,7 +584,7 @@ class EmberNexusConfiguration
         return $this->cacheEtagUpperLimitInCollectionEndpoints;
     }
 
-    public function setCacheEtagUpperLimitInCollectionEndpoints(int $cacheEtagUpperLimitInCollectionEndpoints): self
+    public function setCacheEtagUpperLimitInCollectionEndpoints(int $cacheEtagUpperLimitInCollectionEndpoints): static
     {
         $this->cacheEtagUpperLimitInCollectionEndpoints = $cacheEtagUpperLimitInCollectionEndpoints;
 
@@ -585,7 +596,7 @@ class EmberNexusConfiguration
         return $this->featureFlag280OldUniqueUserIdentifierDisabled;
     }
 
-    public function setFeatureFlag280OldUniqueUserIdentifierDisabled(bool $featureFlag280OldUniqueUserIdentifierDisabled): self
+    public function setFeatureFlag280OldUniqueUserIdentifierDisabled(bool $featureFlag280OldUniqueUserIdentifierDisabled): static
     {
         $this->featureFlag280OldUniqueUserIdentifierDisabled = $featureFlag280OldUniqueUserIdentifierDisabled;
 
@@ -597,7 +608,7 @@ class EmberNexusConfiguration
         return $this->fileMaxFileSizeInBytes;
     }
 
-    public function setFileMaxFileSizeInBytes(int $fileMaxFileSizeInBytes): self
+    public function setFileMaxFileSizeInBytes(int $fileMaxFileSizeInBytes): static
     {
         $this->fileMaxFileSizeInBytes = $fileMaxFileSizeInBytes;
 
@@ -609,9 +620,24 @@ class EmberNexusConfiguration
         return $this->fileUploadExpiresInSecondsAfterFirstRequest;
     }
 
-    public function setFileUploadExpiresInSecondsAfterFirstRequest(int $fileUploadExpiresInSecondsAfterFirstRequest): self
+    public function setFileUploadExpiresInSecondsAfterFirstRequest(int $fileUploadExpiresInSecondsAfterFirstRequest): static
     {
         $this->fileUploadExpiresInSecondsAfterFirstRequest = $fileUploadExpiresInSecondsAfterFirstRequest;
+
+        return $this;
+    }
+
+    public function getFileUploadChunkDigitsLength(): int
+    {
+        return $this->fileUploadChunkDigitsLength;
+    }
+
+    public function setFileUploadChunkDigitsLength(int $fileUploadChunkDigitsLength): static
+    {
+        if ($fileUploadChunkDigitsLength < 1) {
+            throw new Exception('Chunk digits can not be less than 1.');
+        }
+        $this->fileUploadChunkDigitsLength = $fileUploadChunkDigitsLength;
 
         return $this;
     }
@@ -621,7 +647,7 @@ class EmberNexusConfiguration
         return $this->fileUploadMinChunkSizeInBytes;
     }
 
-    public function setFileUploadMinChunkSizeInBytes(int $fileUploadMinChunkSizeInBytes): self
+    public function setFileUploadMinChunkSizeInBytes(int $fileUploadMinChunkSizeInBytes): static
     {
         $this->fileUploadMinChunkSizeInBytes = $fileUploadMinChunkSizeInBytes;
 
@@ -633,7 +659,7 @@ class EmberNexusConfiguration
         return $this->fileUploadMaxChunkSizeInBytes;
     }
 
-    public function setFileUploadMaxChunkSizeInBytes(int $fileUploadMaxChunkSizeInBytes): self
+    public function setFileUploadMaxChunkSizeInBytes(int $fileUploadMaxChunkSizeInBytes): static
     {
         $this->fileUploadMaxChunkSizeInBytes = $fileUploadMaxChunkSizeInBytes;
 
@@ -645,7 +671,7 @@ class EmberNexusConfiguration
         return $this->fileS3StorageBucket;
     }
 
-    public function setFileS3StorageBucket(string $fileS3StorageBucket): self
+    public function setFileS3StorageBucket(string $fileS3StorageBucket): static
     {
         $this->fileS3StorageBucket = $fileS3StorageBucket;
 
@@ -657,7 +683,7 @@ class EmberNexusConfiguration
         return $this->fileS3UploadBucket;
     }
 
-    public function setFileS3UploadBucket(string $fileS3UploadBucket): self
+    public function setFileS3UploadBucket(string $fileS3UploadBucket): static
     {
         $this->fileS3UploadBucket = $fileS3UploadBucket;
 
@@ -669,7 +695,7 @@ class EmberNexusConfiguration
         return $this->fileS3StorageBucketLevels;
     }
 
-    public function setFileS3StorageBucketLevels(int $fileS3StorageBucketLevels): self
+    public function setFileS3StorageBucketLevels(int $fileS3StorageBucketLevels): static
     {
         $this->fileS3StorageBucketLevels = $fileS3StorageBucketLevels;
 
@@ -681,7 +707,7 @@ class EmberNexusConfiguration
         return $this->fileS3StorageBucketLevelLength;
     }
 
-    public function setFileS3StorageBucketLevelLength(int $fileS3StorageBucketLevelLength): self
+    public function setFileS3StorageBucketLevelLength(int $fileS3StorageBucketLevelLength): static
     {
         $this->fileS3StorageBucketLevelLength = $fileS3StorageBucketLevelLength;
 
@@ -693,7 +719,7 @@ class EmberNexusConfiguration
         return $this->fileS3UploadBucketLevels;
     }
 
-    public function setFileS3UploadBucketLevels(int $fileS3UploadBucketLevels): self
+    public function setFileS3UploadBucketLevels(int $fileS3UploadBucketLevels): static
     {
         $this->fileS3UploadBucketLevels = $fileS3UploadBucketLevels;
 
@@ -705,7 +731,7 @@ class EmberNexusConfiguration
         return $this->fileS3UploadBucketLevelLength;
     }
 
-    public function setFileS3UploadBucketLevelLength(int $fileS3UploadBucketLevelLength): self
+    public function setFileS3UploadBucketLevelLength(int $fileS3UploadBucketLevelLength): static
     {
         $this->fileS3UploadBucketLevelLength = $fileS3UploadBucketLevelLength;
 
