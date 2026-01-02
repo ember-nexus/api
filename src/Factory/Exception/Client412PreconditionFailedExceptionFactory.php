@@ -14,7 +14,7 @@ class Client412PreconditionFailedExceptionFactory
     ) {
     }
 
-    public function createFromTemplate(?string $detail = 'Precondition does not match.'): Client412PreconditionFailedException
+    public function createFromTemplate(string $detail = 'Precondition does not match.'): Client412PreconditionFailedException
     {
         return new Client412PreconditionFailedException(
             $this->urlGenerator->generate(

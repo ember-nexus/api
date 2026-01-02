@@ -14,6 +14,7 @@ class BinaryStreamResponse extends StreamedResponse
     public function __construct(GetObjectOutput $object)
     {
         parent::__construct();
+        $this->content = '';
         $stream = $object->getBody()->getContentAsResource();
 
         $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
@@ -22,8 +23,8 @@ class BinaryStreamResponse extends StreamedResponse
 
         $this->setCallback(function () use ($stream): void {
             while (!feof($stream)) {
-                $buffer = fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
-                if (false === $buffer || 0 === strlen($buffer)) {
+                $buffer = \Safe\fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
+                if (0 === strlen($buffer)) {
                     break;
                 }
                 echo $buffer;
@@ -31,7 +32,7 @@ class BinaryStreamResponse extends StreamedResponse
                 // ob_flush();
                 flush();
             }
-            fclose($stream);
+            \Safe\fclose($stream);
         });
     }
 

@@ -8,55 +8,16 @@ use DateTime;
 
 class Upload extends NodeElement
 {
-    private UploadVariantType $variant;
-    private UploadVariantVersionType $variantVersion;
-    private ?UploadConcatType $concat;
-    private ?int $uploadLength;
-    private bool $isUploadLengthDeferred;
-    private int $uploadOffset;
-    private DateTime $created;
-    private ?DateTime $updated;
-    private ?DateTime $expires;
+    private ?int $uploadLength = null;
+    private int $uploadOffset = 0;
+    private bool $uploadComplete = false;
+    private ?DateTime $created = null;
+    private ?DateTime $updated = null;
+    private ?DateTime $expires = null;
 
     public function __construct()
     {
         parent::__construct();
-    }
-
-    public function getVariant(): UploadVariantType
-    {
-        return $this->variant;
-    }
-
-    public function setVariant(UploadVariantType $variant): self
-    {
-        $this->variant = $variant;
-
-        return $this;
-    }
-
-    public function getVariantVersion(): UploadVariantVersionType
-    {
-        return $this->variantVersion;
-    }
-
-    public function setVariantVersion(UploadVariantVersionType $variantVersion): self
-    {
-        $this->variantVersion = $variantVersion;
-
-        return $this;
-    }
-
-    public function getConcat(): ?UploadConcatType
-    {
-        return $this->concat;
-    }
-
-    public function setConcat(?UploadConcatType $concat): self
-    {
-        $this->concat = $concat;
-
-        return $this;
     }
 
     public function getUploadLength(): ?int
@@ -64,21 +25,9 @@ class Upload extends NodeElement
         return $this->uploadLength;
     }
 
-    public function setUploadLength(?int $uploadLength): self
+    public function setUploadLength(?int $uploadLength): static
     {
         $this->uploadLength = $uploadLength;
-
-        return $this;
-    }
-
-    public function isUploadLengthDeferred(): bool
-    {
-        return $this->isUploadLengthDeferred;
-    }
-
-    public function setIsUploadLengthDeferred(bool $isUploadLengthDeferred): self
-    {
-        $this->isUploadLengthDeferred = $isUploadLengthDeferred;
 
         return $this;
     }
@@ -88,19 +37,31 @@ class Upload extends NodeElement
         return $this->uploadOffset;
     }
 
-    public function setUploadOffset(int $uploadOffset): self
+    public function setUploadOffset(int $uploadOffset): static
     {
         $this->uploadOffset = $uploadOffset;
 
         return $this;
     }
 
-    public function getCreated(): DateTime
+    public function isUploadComplete(): bool
+    {
+        return $this->uploadComplete;
+    }
+
+    public function setUploadComplete(bool $uploadComplete): static
+    {
+        $this->uploadComplete = $uploadComplete;
+
+        return $this;
+    }
+
+    public function getCreated(): ?DateTime
     {
         return $this->created;
     }
 
-    public function setCreated(DateTime $created): self
+    public function setCreated(?DateTime $created): static
     {
         $this->created = $created;
 
@@ -112,7 +73,7 @@ class Upload extends NodeElement
         return $this->updated;
     }
 
-    public function setUpdated(?DateTime $updated): self
+    public function setUpdated(?DateTime $updated): static
     {
         $this->updated = $updated;
 
@@ -124,7 +85,7 @@ class Upload extends NodeElement
         return $this->expires;
     }
 
-    public function setExpires(?DateTime $expires): self
+    public function setExpires(?DateTime $expires): static
     {
         $this->expires = $expires;
 
