@@ -35,7 +35,7 @@
     "syndesi/elastic-entity-manager": "^0.1.0",
     "syndesi/mongo-entity-manager": "^0.2.0",
     "thecodingmachine/safe": "^v3.3",
-    "tuupola/base58": "^2.1"
+    "tuupola/base58": "^2.2"
   },
   "require-dev": {
     "beste/psr-testlogger": "^1.0",
@@ -52,7 +52,7 @@
     "symfony/phpunit-bridge": "^7.2",
     "symfony/web-profiler-bundle": "7.4.*",
     "thecodingmachine/phpstan-safe-rule": "^1.4",
-    "vimeo/psalm": "^6.2"
+    "vimeo/psalm": "^6.14"
   },
   "config": {
     "allow-plugins": {

@@ -17,8 +17,8 @@ class Configuration implements ConfigurationInterface
     public const int CACHE_ETAG_DEFAULT_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS = 100;
     public const int EXPRESSION_WARNING_LENGTH = 512;
     public const int EXPRESSION_MAX_LENGTH = 10 * 1024;
-    public const int SIZE_OF_5TB_IN_BYTES = 5 * 1024 * 1024 * 1024 * 1024;
-    public const int SIZE_OF_100MB_IN_BYTES = 100 * 1024 * 1024;
+    public const int SIZE_OF_10GB_IN_BYTES = 10 * 1024 * 1024 * 1024;
+    public const int SIZE_OF_101MIB_IN_BYTES = 101 * 1024 * 1024;
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -158,9 +158,9 @@ class Configuration implements ConfigurationInterface
                 ->addDefaultsIfNotSet()
                 ->children()
                     ->integerNode(EmberNexusConfiguration::FILE_MAX_FILE_SIZE_IN_BYTES)
-                        ->info('Maximum supported file size in bytes. By default set to maximum file size of S3 (5TB).')
+                        ->info('Maximum supported file size in bytes. Note: Upstream services like S3 have limits of their own (5TB).')
                         ->min(1)
-                        ->defaultValue(self::SIZE_OF_5TB_IN_BYTES)
+                        ->defaultValue(self::SIZE_OF_10GB_IN_BYTES)
                     ->end()
                     ->integerNode(EmberNexusConfiguration::FILE_UPLOAD_EXPIRES_IN_SECONDS_AFTER_FIRST_REQUEST)
                         ->info('Number of seconds after which unfinished uploads are expired.')
@@ -169,13 +169,13 @@ class Configuration implements ConfigurationInterface
                     ->end()
                     ->integerNode(EmberNexusConfiguration::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES)
                         ->info('Minimum size in bytes of uploaded chunks.')
-                        ->min(1)
-                        ->defaultValue(8)
+                        ->min(0)
+                        ->defaultValue(0)
                     ->end()
                     ->integerNode(EmberNexusConfiguration::FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES)
                         ->info('Maximum size in bytes of uploaded chunks. Limited by the S3 provider and the PHP configuration.')
                         ->min(1)
-                        ->defaultValue(self::SIZE_OF_100MB_IN_BYTES)
+                        ->defaultValue(self::SIZE_OF_101MIB_IN_BYTES)
                     ->end()
                     ->scalarNode(EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET)
                         ->info('Name of the S3 bucket used for storage of files.')
@@ -188,7 +188,7 @@ class Configuration implements ConfigurationInterface
                     ->integerNode(EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET_LEVELS)
                         ->info('Number of levels (folders) used within the S3 storage bucket.')
                         ->min(1)
-                        ->defaultValue(2)
+                        ->defaultValue(3)
                     ->end()
                     ->integerNode(EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET_LEVEL_LENGTH)
                         ->info('Number of characters used for each level (folder) in the S3 storage bucket.')

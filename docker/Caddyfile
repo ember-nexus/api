@@ -20,6 +20,9 @@
 		-Server
 		-Set-Cookie
 	}
+	request_body {
+		max_size 101MiB
+	}
 	log {
 	    no_hostname
 		output stdout
