@@ -49,8 +49,8 @@ class BackupCreateCommand extends Command
         private FilesystemOperator $backupStorage,
         private ElementToRawService $elementToRawService,
         private ParameterBagInterface $bag,
+        private StorageUtilService $storageUtilService,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
-        private StorageUtilService $storageUtilService
     ) {
         parent::__construct();
     }
