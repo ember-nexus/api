@@ -72,14 +72,17 @@ class DeleteUploadController extends AbstractController
             ]
         );
 
-        $objectConfig = [
-            'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            'Key' => $this->storageUtilService->getUploadBucketKey($uploadId),
-        ];
-        $status = $this->s3Client->objectExists($objectConfig);
+        $uploadBucket = $this->emberNexusConfiguration->getFileS3UploadBucket();
+        for ($i = 0; $i <= $uploadElement->getAlreadyUploadedChunks(); ++$i) {
+            $objectConfig = [
+                'Bucket' => $uploadBucket,
+                'Key' => $this->storageUtilService->getUploadBucketKey($uploadId, $i),
+            ];
+            $status = $this->s3Client->objectExists($objectConfig);
 
-        if ($status->isSuccess()) {
-            $this->s3Client->deleteObject($objectConfig);
+            if ($status->isSuccess()) {
+                $this->s3Client->deleteObject($objectConfig);
+            }
         }
 
         $this->elementManager->delete($uploadElement);
