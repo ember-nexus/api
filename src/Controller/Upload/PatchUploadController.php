@@ -74,8 +74,8 @@ class PatchUploadController extends AbstractController
 
         $patchResource = $request->getContent(true);
 
-        $nextChunkIndex = $uploadElement->getUploadChunkIndex() + 1;
-        $nextChunkKey = $this->storageUtilService->getUploadBucketKey($uploadId, $nextChunkIndex);
+        $currentChunkIndex = $uploadElement->getAlreadyUploadedChunks();
+        $nextChunkKey = $this->storageUtilService->getUploadBucketKey($uploadId, $currentChunkIndex);
 
         $this->s3Client->putObject([
             'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
@@ -106,7 +106,7 @@ class PatchUploadController extends AbstractController
             }
         }
         $uploadElement->setUploadOffset($uploadElement->getUploadOffset() + $contentLength);
-        $uploadElement->setUploadChunkIndex($nextChunkIndex);
+        $uploadElement->setAlreadyUploadedChunks($uploadElement->getAlreadyUploadedChunks() + 1);
 
         $this->elementManager->merge($uploadElement);
         $this->elementManager->flush();
@@ -128,7 +128,7 @@ class PatchUploadController extends AbstractController
             $parts = [];
 
             try {
-                for ($i = 0; $i <= $nextChunkIndex; ++$i) {
+                for ($i = 0; $i <= $currentChunkIndex; ++$i) {
                     $sourceKey = $this->storageUtilService->getUploadBucketKey($uploadId, $i);
                     $copyResult = $this->s3Client->uploadPartCopy([
                         'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
