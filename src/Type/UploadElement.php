@@ -11,6 +11,10 @@ use Exception;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
+/**
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
+ */
 class UploadElement extends NodeElement
 {
     private ?int $uploadLength = null;
