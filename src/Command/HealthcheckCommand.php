@@ -25,6 +25,8 @@ use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 #[AsCommand(name: 'healthcheck', description: 'Check the health of the API and required databases.')]
 class HealthcheckCommand extends Command
