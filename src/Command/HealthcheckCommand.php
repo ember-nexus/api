@@ -25,6 +25,7 @@ use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
+ *
  * @SuppressWarnings("PHPMD.CyclomaticComplexity")
  * @SuppressWarnings("PHPMD.NPathComplexity")
  */

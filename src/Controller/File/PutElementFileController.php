@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
-use App\Factory\Exception\Server501NotImplementedExceptionFactory;
 use App\Helper\Regex;
+use App\Service\UploadCreationService;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class PutElementFileController extends AbstractController
 {
     public function __construct(
-        private Server501NotImplementedExceptionFactory $server501NotImplementedExceptionFactory,
+        private UploadCreationService $uploadCreationService,
     ) {
     }
 
@@ -31,6 +32,8 @@ class PutElementFileController extends AbstractController
     )]
     public function putElementFile(string $id, Request $request): Response
     {
-        throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
+        $elementId = UuidV4::fromString($id);
+
+        return $this->uploadCreationService->handleUploadCreationFromRequest($elementId, $request);
     }
 }
