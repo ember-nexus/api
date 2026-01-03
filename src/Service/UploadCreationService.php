@@ -183,6 +183,8 @@ class UploadCreationService
         $element->addProperty('_file', [
             'contentLength' => $contentLength,
         ]);
+        $this->elementManager->merge($element);
+        $this->elementManager->flush();
 
         return new CreatedResponse();
     }
