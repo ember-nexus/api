@@ -9,6 +9,8 @@ use App\Helper\Regex;
 use App\Response\BinaryStreamResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\ElementManager;
+use App\Service\FileUtilService;
 use App\Service\StorageUtilService;
 use App\Type\AccessType;
 use AsyncAws\S3\S3Client;
@@ -22,9 +24,11 @@ class GetElementFileController extends AbstractController
     public function __construct(
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private ElementManager $elementManager,
         private S3Client $s3Client,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private StorageUtilService $storageUtilService,
+        private FileUtilService $fileUtilService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -46,6 +50,13 @@ class GetElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
+        $element = $this->elementManager->getElement($elementId);
+        if (null === $element) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        $fileName = $this->fileUtilService->getFileName($element);
+
         $objectConfig = [
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
             'Key' => $this->storageUtilService->getStorageBucketKey($elementId),
@@ -58,6 +69,6 @@ class GetElementFileController extends AbstractController
 
         $object = $this->s3Client->getObject($objectConfig);
 
-        return new BinaryStreamResponse($object);
+        return new BinaryStreamResponse($object, $fileName);
     }
 }

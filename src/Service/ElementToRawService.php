@@ -28,6 +28,7 @@ class ElementToRawService
             'start' => null,
             'end' => null,
             'data' => [],
+            'file' => null,
         ];
 
         if ($element instanceof NodeElementInterface) {
@@ -49,6 +50,13 @@ class ElementToRawService
             $normalizedValueToRawValueEvent = new NormalizedValueToRawValueEvent($normalizedPropertyValue);
             $this->eventDispatcher->dispatch($normalizedValueToRawValueEvent);
             $rawData['data'][$normalizedPropertyName] = $normalizedValueToRawValueEvent->getRawValue();
+        }
+
+        if (array_key_exists('file', $rawData['data'])) {
+            $rawData['file'] = $rawData['data']['file'];
+            unset($rawData['data']['file']);
+        } else {
+            unset($rawData['file']);
         }
 
         return $rawData;

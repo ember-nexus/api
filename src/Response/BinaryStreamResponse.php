@@ -11,15 +11,21 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BinaryStreamResponse extends StreamedResponse
 {
-    public function __construct(GetObjectOutput $object)
+    public function __construct(GetObjectOutput $object, ?string $fileName = null)
     {
         parent::__construct();
         $this->content = '';
         $stream = $object->getBody()->getContentAsResource();
 
         $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
-        // todo: add content disposition header?
         $this->headers->set('Content-Type', 'application/octet-stream');
+
+        if (null !== $fileName) {
+            $this->headers->set('Content-Disposition', sprintf(
+                'attachment; filename="%s"',
+                str_replace('"', '', $fileName)
+            ));
+        }
 
         $this->setCallback(function () use ($stream): void {
             while (!feof($stream)) {
