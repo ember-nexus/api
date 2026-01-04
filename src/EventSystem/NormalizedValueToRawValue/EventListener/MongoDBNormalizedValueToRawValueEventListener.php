@@ -6,6 +6,7 @@ namespace App\EventSystem\NormalizedValueToRawValue\EventListener;
 
 use App\EventSystem\NormalizedValueToRawValue\Event\NormalizedValueToRawValueEvent;
 use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class MongoDBNormalizedValueToRawValueEventListener
@@ -14,7 +15,7 @@ class MongoDBNormalizedValueToRawValueEventListener
     public function onNormalizedValueToRawValueEvent(NormalizedValueToRawValueEvent $event): void
     {
         $normalizedValue = $event->getNormalizedValue();
-        if (!($normalizedValue instanceof BSONArray)) {
+        if (!($normalizedValue instanceof BSONArray) && !($normalizedValue instanceof BSONDocument)) {
             return;
         }
         $event->setRawValue($normalizedValue->getArrayCopy());

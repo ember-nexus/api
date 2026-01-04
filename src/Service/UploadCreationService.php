@@ -49,7 +49,7 @@ class UploadCreationService
     private function verifyElementDoesNotHaveFile(NodeElementInterface|RelationElementInterface $element): void
     {
         $properties = $element->getProperties();
-        if (array_key_exists('_file', $properties)) {
+        if (array_key_exists('file', $properties)) {
             throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Element with id '%s' already has an associated file; can not create new file. Delete existing file first or replace it with PUT.", $element->getId()?->toString() ?? 'missing element id'));
         }
     }
@@ -180,7 +180,7 @@ class UploadCreationService
             throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
         }
 
-        $element->addProperty('_file', [
+        $element->addProperty('file', [
             'contentLength' => $contentLength,
         ]);
         $this->elementManager->merge($element);
