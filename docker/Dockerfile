@@ -45,6 +45,7 @@ RUN apk add --no-cache \
 		ca-certificates \
 		curl \
         icu \
+        icu-data-full \
         libzip \
 # https://github.com/docker-library/php/issues/494
 		openssl \
