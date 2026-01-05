@@ -25,7 +25,7 @@ class Client412PreconditionFailedExceptionFactory
                 ],
                 UrlGeneratorInterface::ABSOLUTE_URL
             ),
-            $detail
+            detail: $detail
         );
     }
 }

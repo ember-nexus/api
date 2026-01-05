@@ -19,19 +19,20 @@ class StorageUtilService
     ) {
     }
 
-    public function getStorageBucketKey(UuidInterface $id): string
+    public function getStorageBucketKey(UuidInterface $id, string $extension = 'bin'): string
     {
         return sprintf(
-            '%s.bin',
+            '%s.%s',
             $this->uuidToNestedFolderStructure(
                 $id,
                 $this->emberNexusConfiguration->getFileS3StorageBucketLevels(),
                 $this->emberNexusConfiguration->getFileS3StorageBucketLevelLength(),
-            )
+            ),
+            $extension
         );
     }
 
-    public function getUploadBucketKey(UuidInterface $id, int $index = 0): string
+    public function getUploadBucketKey(UuidInterface $id, int $index = 0, string $extension = 'bin'): string
     {
         $digits = $this->emberNexusConfiguration->getFileUploadChunkDigitsLength();
         if ($index < 0) {
@@ -43,13 +44,14 @@ class StorageUtilService
         }
 
         return sprintf(
-            '%s-%s.bin',
+            '%s-%s.%s',
             $this->uuidToNestedFolderStructure(
                 $id,
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevels(),
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevelLength(),
             ),
             str_pad((string) $index, $digits, '0', STR_PAD_LEFT),
+            $extension
         );
     }
 

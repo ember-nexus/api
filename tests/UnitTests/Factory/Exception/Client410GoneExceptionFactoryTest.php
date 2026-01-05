@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\tests\UnitTests\Factory\Exception;
 
-use App\Factory\Exception\Client412PreconditionFailedExceptionFactory;
+use App\Factory\Exception\Client410GoneExceptionFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -13,8 +13,8 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
-#[CoversClass(Client412PreconditionFailedExceptionFactory::class)]
-class Client412PreconditionFailedExceptionFactoryTest extends TestCase
+#[CoversClass(Client410GoneExceptionFactory::class)]
+class Client410GoneExceptionFactoryTest extends TestCase
 {
     use ProphecyTrait;
 
@@ -24,20 +24,21 @@ class Client412PreconditionFailedExceptionFactoryTest extends TestCase
         $urlGenerator->generate(
             Argument::is('exception-detail'),
             Argument::is([
-                'code' => '412',
-                'name' => 'precondition-failed',
+                'code' => '410',
+                'name' => 'gone',
             ]),
             Argument::is(UrlGeneratorInterface::ABSOLUTE_URL)
         )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
-        $factory = new Client412PreconditionFailedExceptionFactory($urlGenerator->reveal());
+        $factory = new Client410GoneExceptionFactory($urlGenerator->reveal());
 
         $exception = $factory->createFromTemplate();
 
-        $this->assertSame(412, $exception->getStatus());
-        $this->assertSame('Precondition Failed', $exception->getTitle());
+        $this->assertSame(410, $exception->getStatus());
+        $this->assertSame('Gone', $exception->getTitle());
         $this->assertSame('https://mock.dev/123', $exception->getType());
-        $this->assertSame('Precondition does not match.', $exception->getDetail());
+        $this->assertSame('Requested resource is no longer available and is expected to soon be permanently deleted.', $exception->getDetail());
         $this->assertSame(null, $exception->getInstance());
         $this->assertSame('', $exception->getMessage());
+        $this->assertSame([], $exception->getAdditionalProperties());
     }
 }

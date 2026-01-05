@@ -31,6 +31,7 @@ class ProblemJsonExceptionTest extends TestCase
         $this->assertSame('', $problemJsonException->getMessage());
         $this->assertNull($problemJsonException->getPrevious());
         $this->assertSame(0, $problemJsonException->getCode());
+        $this->assertSame([], $problemJsonException->getAdditionalProperties());
     }
 
     public function testGetter(): void
@@ -41,7 +42,10 @@ class ProblemJsonExceptionTest extends TestCase
             123,
             'detail',
             'instance',
-            null
+            null,
+            [
+                'a' => 'b',
+            ]
         );
 
         $this->assertSame('type', $problemJsonException->getType());
@@ -52,6 +56,7 @@ class ProblemJsonExceptionTest extends TestCase
         $this->assertSame('', $problemJsonException->getMessage());
         $this->assertNull($problemJsonException->getPrevious());
         $this->assertSame(0, $problemJsonException->getCode());
+        $this->assertSame(['a' => 'b'], $problemJsonException->getAdditionalProperties());
     }
 
     public function testWithPrevious(): void

@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -23,6 +24,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[AllowMockObjectsWithoutExpectations]
 class StorageUtilServiceTest extends TestCase
 {
+    use ProphecyTrait;
+
     private function getStorageUtilService(
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
     ): StorageUtilService {
@@ -40,6 +43,104 @@ class StorageUtilServiceTest extends TestCase
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
             $server500LogicExceptionFactory,
         );
+    }
+
+    public function testGetUploadBucketKeyThrowsOnNegativeIndex(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
+
+        $storageUtilService = $this->getStorageUtilService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        try {
+            $storageUtilService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), -1);
+        } catch (Exception $e) {
+            $this->assertInstanceOf(Server500LogicErrorException::class, $e);
+            /**
+             * @var Server500LogicErrorException $e
+             */
+            $this->assertSame('Chunk index can not be less than 0.', $e->getDetail());
+        }
+    }
+
+    public function testGetUploadBucketKeyThrowsWhenIndexExceedsMaxDigitsValue(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
+
+        $storageUtilService = $this->getStorageUtilService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        try {
+            $storageUtilService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 10000);
+        } catch (Exception $e) {
+            $this->assertInstanceOf(Server500LogicErrorException::class, $e);
+            /**
+             * @var Server500LogicErrorException $e
+             */
+            $this->assertSame('Chunk index can not be longer than 4 digits, i.e. bigger than 9999.', $e->getDetail());
+        }
+    }
+
+    public function testGetUploadBucketKeyUsesBinAsDefaultExtension(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
+        $emberNexusConfiguration->getFileS3UploadBucketLevels()->shouldBeCalledOnce()->willReturn(3);
+        $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
+
+        $storageUtilService = $this->getStorageUtilService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        $key = $storageUtilService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1234);
+        $this->assertSame('8b/a1/17/8ba117cf-8983-4f13-be93-415e175cb64d-1234.bin', $key);
+    }
+
+    public function testGetUploadBucketKeySupportsOtherExtension(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
+        $emberNexusConfiguration->getFileS3UploadBucketLevels()->shouldBeCalledOnce()->willReturn(3);
+        $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
+
+        $storageUtilService = $this->getStorageUtilService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        $key = $storageUtilService->getUploadBucketKey(Uuid::fromString('befb450d-ae5e-4ed7-9f24-134f8a6a140a'), 52, 'jpg');
+        $this->assertSame('be/fb/45/befb450d-ae5e-4ed7-9f24-134f8a6a140a-0052.jpg', $key);
+    }
+
+    public function testGetStorageBucketKeyUsesBinAsDefaultExtension(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileS3StorageBucketLevels()->shouldBeCalledOnce()->willReturn(3);
+        $emberNexusConfiguration->getFileS3StorageBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
+
+        $storageUtilService = $this->getStorageUtilService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        $key = $storageUtilService->getStorageBucketKey(Uuid::fromString('3eda4085-968b-46a8-a729-cdaaa30b1d3f'));
+        $this->assertSame('3e/da/40/3eda4085-968b-46a8-a729-cdaaa30b1d3f.bin', $key);
+    }
+
+    public function testGetStorageBucketKeySupportsOtherExtension(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileS3StorageBucketLevels()->shouldBeCalledOnce()->willReturn(3);
+        $emberNexusConfiguration->getFileS3StorageBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
+
+        $storageUtilService = $this->getStorageUtilService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        $key = $storageUtilService->getStorageBucketKey(Uuid::fromString('5dbd948b-d9dc-4b6c-af1c-c12dc8120755'), 'png');
+        $this->assertSame('5d/bd/94/5dbd948b-d9dc-4b6c-af1c-c12dc8120755.png', $key);
     }
 
     public function testUuidToNestedFolderStructure(): void
