@@ -41,15 +41,15 @@ class BackupLoadCommand extends Command
 {
     private string $backupName;
     private int $relationCount = 0;
-    /**
-     * @phpstan-ignore-next-line
-     */
     private int $fileCount = 0;
     private int $nodeCount = 0;
     private int $pageSize = 250;
 
     private EmberNexusStyle $io;
 
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+     */
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
@@ -181,7 +181,7 @@ class BackupLoadCommand extends Command
             return false;
         }
         $name = $parts[0];
-        if (!preg_match(Regex::UUID_V4, $name)) {
+        if (!\Safe\preg_match(Regex::UUID_V4, $name)) {
             return false;
         }
 

@@ -7,11 +7,12 @@ namespace App\Response;
 use App\Service\StorageUtilService;
 use App\Type\Etag;
 use AsyncAws\S3\Result\GetObjectOutput;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BinaryStreamResponse extends StreamedResponse
 {
-    public function __construct(GetObjectOutput $object, ?string $fileName = null)
+    public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback)
     {
         parent::__construct();
         $this->content = '';
@@ -20,12 +21,12 @@ class BinaryStreamResponse extends StreamedResponse
         $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
         $this->headers->set('Content-Type', 'application/octet-stream');
 
-        if (null !== $fileName) {
-            $this->headers->set('Content-Disposition', sprintf(
-                'attachment; filename="%s"',
-                str_replace('"', '', $fileName)
-            ));
-        }
+        $disposition = $this->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $fileName,
+            $fileNameFallback
+        );
+        $this->headers->set('Content-Disposition', $disposition);
 
         $this->setCallback(function () use ($stream): void {
             while (!feof($stream)) {

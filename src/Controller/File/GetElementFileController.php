@@ -56,6 +56,7 @@ class GetElementFileController extends AbstractController
         }
 
         $fileName = $this->fileUtilService->getFileName($element);
+        $fileNameFallback = $this->fileUtilService->getAsciiSafeFileName($fileName);
 
         $objectConfig = [
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
@@ -69,6 +70,6 @@ class GetElementFileController extends AbstractController
 
         $object = $this->s3Client->getObject($objectConfig);
 
-        return new BinaryStreamResponse($object, $fileName);
+        return new BinaryStreamResponse($object, $fileName, $fileNameFallback);
     }
 }
