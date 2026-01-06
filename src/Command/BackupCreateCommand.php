@@ -235,6 +235,8 @@ class BackupCreateCommand extends Command
     {
         $this->io->startSection('Step 3 of 3: Backing up Files');
         $this->io->writeln('Currently not implemented.');
+        // todo: implement, and add flag to enable file backup (disabled by default?, incl. prominent warning?)
+        // if backup, then only storage bucket - elements in the upload bucket would time out anyways
         $this->io->stopSection(sprintf(
             'Successfully backed up <info>%d</info> files.',
             $this->fileCount

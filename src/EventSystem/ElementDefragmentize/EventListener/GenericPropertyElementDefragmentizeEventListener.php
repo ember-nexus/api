@@ -12,6 +12,8 @@ use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
 use Laudis\Neo4j\Types\DateTimeZoneId as LaudisDateTimeZoneId;
 use Laudis\Neo4j\Types\LocalDateTime as LaudisLocalDateTime;
 use Laudis\Neo4j\Types\LocalTime as LaudisLocalTime;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class GenericPropertyElementDefragmentizeEventListener
@@ -48,6 +50,11 @@ class GenericPropertyElementDefragmentizeEventListener
         if ($documentFragment) {
             $documentProperties = $documentFragment->getProperties();
             $documentProperties = ReservedPropertyNameHelper::removeReservedPropertyNamesFromArray($documentProperties);
+            foreach ($documentProperties as $key => $value) {
+                if (($value instanceof BSONArray) || ($value instanceof BSONDocument)) {
+                    $documentProperties[$key] = $value->getArrayCopy();
+                }
+            }
             $element->addProperties($documentProperties);
         }
         $cypherProperties = $cypherFragment->getProperties();

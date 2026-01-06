@@ -22,9 +22,11 @@ class RawToElementService
     }
 
     /**
+     * todo: make sure that $supportFile is never true in API calls. add feature tests.
+     *
      * @param array<string, mixed> $rawData
      */
-    public function rawToElement(array $rawData): NodeElementInterface|RelationElementInterface
+    public function rawToElement(array $rawData, bool $supportFile = false): NodeElementInterface|RelationElementInterface
     {
         if (!array_key_exists('type', $rawData)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'valid type');
@@ -58,6 +60,10 @@ class RawToElementService
             $rawValueToNormalizedValueEvent = new RawValueToNormalizedValueEvent($rawPropertyValue);
             $this->eventDispatcher->dispatch($rawValueToNormalizedValueEvent);
             $normalizedProperties[$rawPropertyName] = $rawValueToNormalizedValueEvent->getNormalizedValue();
+        }
+
+        if (true === $supportFile && array_key_exists('file', $rawData)) {
+            $normalizedProperties['file'] = $rawData['file'];
         }
 
         if (null !== $start && null !== $end) {

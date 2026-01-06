@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Contract\NodeElementInterface;
+use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
@@ -19,7 +21,28 @@ class StorageUtilService
     ) {
     }
 
-    public function getStorageBucketKey(UuidInterface $id, string $extension = 'bin'): string
+    public function getFileExtensionFromElement(NodeElementInterface|RelationElementInterface $element): string
+    {
+        $extension = FileUtilService::DEFAULT_EXTENSION;
+        if (!$element->hasProperty('file')) {
+            return $extension;
+        }
+        $fileProperty = $element->getProperty('file');
+        if (!is_array($fileProperty)) {
+            return $extension;
+        }
+        if (!array_key_exists('extension', $fileProperty)) {
+            return $extension;
+        }
+        $filePropertyExtension = $fileProperty['extension'];
+        if (!is_string($filePropertyExtension)) {
+            return $extension;
+        }
+
+        return $filePropertyExtension;
+    }
+
+    public function getStorageBucketKey(UuidInterface $id, string $extension = FileUtilService::DEFAULT_EXTENSION): string
     {
         return sprintf(
             '%s.%s',
@@ -32,7 +55,7 @@ class StorageUtilService
         );
     }
 
-    public function getUploadBucketKey(UuidInterface $id, int $index = 0, string $extension = 'bin'): string
+    public function getUploadBucketKey(UuidInterface $id, int $index = 0, string $extension = FileUtilService::DEFAULT_EXTENSION): string
     {
         $digits = $this->emberNexusConfiguration->getFileUploadChunkDigitsLength();
         if ($index < 0) {
