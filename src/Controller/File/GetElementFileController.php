@@ -57,10 +57,12 @@ class GetElementFileController extends AbstractController
 
         $fileName = $this->fileUtilService->getFileName($element);
         $fileNameFallback = $this->fileUtilService->getAsciiSafeFileName($fileName);
+        $extension = $this->storageUtilService->getFileExtensionFromElement($element);
+        // todo: refactor storageUtilService and fileUtilService
 
         $objectConfig = [
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->storageUtilService->getStorageBucketKey($elementId),
+            'Key' => $this->storageUtilService->getStorageBucketKey($elementId, $extension),
         ];
         $status = $this->s3Client->objectExists($objectConfig);
 

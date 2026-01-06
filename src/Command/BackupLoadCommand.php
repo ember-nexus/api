@@ -115,7 +115,7 @@ class BackupLoadCommand extends Command
                 continue;
             }
             $data = \Safe\json_decode($this->backupStorage->read($nodeFile->path()), true);
-            $nodeElement = $this->rawToElementService->rawToElement($data);
+            $nodeElement = $this->rawToElementService->rawToElement($data, true);
             unset($data);
             $this->elementManager->create($nodeElement);
             ++$pageCount;
@@ -152,7 +152,7 @@ class BackupLoadCommand extends Command
                 continue;
             }
             $data = \Safe\json_decode($this->backupStorage->read($relationFile->path()), true);
-            $relationElement = $this->rawToElementService->rawToElement($data);
+            $relationElement = $this->rawToElementService->rawToElement($data, true);
             unset($data);
             $this->elementManager->create($relationElement);
             ++$pageCount;
@@ -215,12 +215,15 @@ class BackupLoadCommand extends Command
             }
 
             // todo: optimize upload for larger files using multipart-upload?
+            $extension = $this->storageUtilService->getFileExtensionFromElement($element);
             $resource = $this->backupStorage->readStream($path);
             $this->s3Client->putObject(new PutObjectRequest([
                 'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-                'Key' => $this->storageUtilService->getStorageBucketKey($fileId),
+                'Key' => $this->storageUtilService->getStorageBucketKey($fileId, $extension),
                 'Body' => $resource,
             ]))->resolve();
+
+            // todo check file.size is identical to uploaded file, if not print warning
 
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {
