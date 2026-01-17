@@ -142,7 +142,8 @@ class PatchUploadController extends AbstractController
         $this->elementManager->flush();
 
         if ($canCreateFile) {
-            $targetKey = $this->storageUtilService->getStorageBucketKey($uploadTarget);
+            $extension = $uploadElement->getExtension();
+            $targetKey = $this->storageUtilService->getStorageBucketKey($uploadTarget, $extension);
 
             $createResult = $this->s3Client->createMultipartUpload([
                 'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
@@ -187,6 +188,10 @@ class PatchUploadController extends AbstractController
                         'Parts' => $parts,
                     ],
                 ]);
+
+                // todo: delete original file, if it a) existed and b) had a different file extension
+                // todo: set file property to actual element, merge and flush it?
+
             } catch (Throwable $e) {
                 /**
                  * Abort multipart upload on failure.

@@ -6,6 +6,7 @@ namespace App\Type;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\Service\FileUtilService;
 use DateTime;
 use Exception;
 use Ramsey\Uuid\Uuid;
@@ -23,6 +24,7 @@ class UploadElement extends NodeElement
     private ?UuidInterface $uploadTarget = null;
     private int $alreadyUploadedChunks = 0;
     private ?UuidInterface $uploadOwner = null;
+    private string $extension = FileUtilService::DEFAULT_EXTENSION;
     private ?DateTime $created = null;
     private ?DateTime $updated = null;
     private ?DateTime $expires = null;
@@ -88,6 +90,13 @@ class UploadElement extends NodeElement
             if (is_string($uploadOwner)) {
                 $uploadOwner = Uuid::fromString($uploadOwner);
                 $upload->setUploadOwner($uploadOwner);
+            }
+        }
+
+        if (array_key_exists('extension', $properties)) {
+            $extension = $properties['extension'];
+            if (is_string($extension)) {
+                $upload->setExtension($extension);
             }
         }
 
@@ -190,6 +199,18 @@ class UploadElement extends NodeElement
         $this->addProperty('uploadOwner', $uploadOwner);
         $this->uploadOwner = $uploadOwner;
 
+        return $this;
+    }
+
+    public function getExtension(): string
+    {
+        return $this->extension;
+    }
+
+    public function setExtension(string $extension): static
+    {
+        $this->addProperty('extension', $extension);
+        $this->extension = $extension;
         return $this;
     }
 
