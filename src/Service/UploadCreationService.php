@@ -159,6 +159,10 @@ class UploadCreationService
             }
         }
 
+        // todo: delete original file with original extension
+        // todo: set extension of current upload
+        // todo: implement mimetype detection
+
         $copyResult = $this->s3Client->copyObject([
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
             'Key' => $this->storageUtilService->getStorageBucketKey($elementId),
