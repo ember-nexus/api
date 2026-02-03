@@ -4,7 +4,7 @@ on:
     - cron: "10 2 * * 2"
 jobs:
   build-docker-image:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: gh-4vcpu-ubuntu-latest-amd
     name: 'Build Docker Image'
     timeout-minutes: 20
     steps:
