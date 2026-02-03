@@ -52,16 +52,15 @@ class AccessChecker
         if (ElementType::NODE === $this->getElementType($elementId)) {
             if (AccessType::READ === $accessType) {
                 return $this->hasReadAccessToNode($userId, $elementId);
-            } else {
-                return $this->hasGeneralAccessToNode($userId, $elementId, $accessType);
             }
-        } else {
-            if (AccessType::READ === $accessType) {
-                return $this->hasReadAccessToRelation($userId, $elementId);
-            } else {
-                return $this->hasGeneralAccessToRelation($userId, $elementId, $accessType);
-            }
+
+            return $this->hasGeneralAccessToNode($userId, $elementId, $accessType);
         }
+        if (AccessType::READ === $accessType) {
+            return $this->hasReadAccessToRelation($userId, $elementId);
+        }
+
+        return $this->hasGeneralAccessToRelation($userId, $elementId, $accessType);
     }
 
     public function hasReadAccessToNode(UuidInterface $userId, UuidInterface $elementId): bool
@@ -447,9 +446,9 @@ class AccessChecker
         }
         if (ElementType::NODE === $type) {
             return $this->getDirectGroupsWithAccessToNode($elementId, $accessType);
-        } else {
-            return $this->getDirectGroupsWithAccessToRelation($elementId, $accessType);
         }
+
+        return $this->getDirectGroupsWithAccessToRelation($elementId, $accessType);
     }
 
     /**
@@ -632,9 +631,9 @@ class AccessChecker
         }
         if (ElementType::NODE === $type) {
             return $this->getDirectUsersWithAccessToNode($elementId, $accessType);
-        } else {
-            return $this->getDirectUsersWithAccessToRelation($elementId, $accessType);
         }
+
+        return $this->getDirectUsersWithAccessToRelation($elementId, $accessType);
     }
 
     /**
