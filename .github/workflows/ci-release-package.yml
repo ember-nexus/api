@@ -11,7 +11,7 @@ jobs:
 
 
   checkout-repo-and-bump-version:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     name: Check out Repo and Bump Version
     timeout-minutes: 10
     steps:
@@ -68,7 +68,7 @@ jobs:
 
 
   build-docker-image-amd:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: gh-4vcpu-ubuntu-latest-amd
     name: Build Docker Image - AMD
     timeout-minutes: 20
     needs: checkout-repo-and-bump-version
@@ -130,7 +130,7 @@ jobs:
 
 
   build-docker-image-arm:
-    runs-on: buildjet-4vcpu-ubuntu-2204-arm
+    runs-on: gh-4vcpu-ubuntu-latest-arm
     name: Build Docker Image - ARM
     timeout-minutes: 20
     needs: checkout-repo-and-bump-version
@@ -192,7 +192,7 @@ jobs:
 
 
   publish-release:
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     name: Publish release
     timeout-minutes: 10
     needs: [build-docker-image-amd, build-docker-image-arm]
@@ -372,23 +372,3 @@ jobs:
           files: |
             /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-amd.tar.gz
             /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
-
-#      - name: Initiate Originstamp certificate
-#        run: |
-#          curl -X POST "http://api.originstamp.com/v4/timestamp/create" \
-#            -H "Content-Type: application/json" \
-#            -H "Authorization: ${{ secrets.ORIGINSTAMP_AUTH_TOKEN }}" \
-#            -d \
-#            "{
-#              \"comment\": \"Release ${{ env.NEW_VERSION }} of ember-nexus/api\",
-#              \"hash\": \"${{ env.SHA }}\"
-#            }"
-#        env:
-#          SHA: ${{ github.sha }}
-#
-#      - uses: JasonEtco/create-an-issue@v2
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-#          NEW_VERSION: ${{ env.NEW_VERSION }}
-#        with:
-#          filename: .github/ISSUE_TEMPLATE_POST_RELEASE_TASK.md

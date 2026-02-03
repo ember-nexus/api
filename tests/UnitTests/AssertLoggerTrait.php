@@ -36,11 +36,10 @@ trait AssertLoggerTrait
         $this->assertSame($level, $logMessage->level);
         if (false === $data) {
             return $logMessage->context->data;
-        } else {
-            $this->assertSame($data, $logMessage->context->data);
-
-            return null;
         }
+        $this->assertSame($data, $logMessage->context->data);
+
+        return null;
     }
 
     public function assertLogNotHappened(TestLogger $logger, string $message): void

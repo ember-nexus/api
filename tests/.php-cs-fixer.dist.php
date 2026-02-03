@@ -17,6 +17,9 @@ return (new PhpCsFixer\Config())
             'import_constants' => true,
             'import_functions' => true
         ],
+        'no_unneeded_control_parentheses' => [
+            'statements' => ['break', 'clone', 'continue', 'echo_print', 'others', 'return', 'switch_case', 'yield', 'yield_from']
+        ],
         'self_accessor' => true
     ])
     ->setFinder($finder)

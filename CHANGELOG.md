@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Update dependencies, closes #449.
+- Change GitHub runners from buildjet to native - necessary due to outdated immages, related to #353.
 
 ## 0.1.29 - 2025-12-31
 ### Added
