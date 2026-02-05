@@ -1,5 +1,5 @@
 ARG FRANKENPHP_VERSION='1.11.1'
-ARG PHP_VERSION='8.5.1'
+ARG PHP_VERSION='8.5.2'
 
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-builder-php${PHP_VERSION}-alpine AS frankenphp_builder
 COPY --from=caddy:2-builder-alpine /usr/bin/xcaddy /usr/bin/xcaddy
