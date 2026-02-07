@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
+use App\EventSystem\ElementFileDelete\Event\ElementFileDeleteEvent;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
@@ -13,12 +14,14 @@ use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
 use App\Type\AccessType;
+use App\Type\RabbitMQQueueType;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @SuppressWarnings("PHPMD.UnusedFormalParameter")
@@ -33,6 +36,7 @@ class DeleteElementFileController extends AbstractController
         private ElementManager $elementManager,
         private FileService $fileService,
         private ElementService $elementService,
+        private EventDispatcherInterface $eventDispatcher,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -70,11 +74,11 @@ class DeleteElementFileController extends AbstractController
             $this->s3Client->deleteObject($objectConfig);
         }
 
-        // todo: delete file data from elasticsearch
-
         $element->removeProperty('file');
         $this->elementManager->merge($element);
         $this->elementManager->flush();
+
+        $this->eventDispatcher->dispatch(new ElementFileDeleteEvent($elementId));
 
         return new NoContentResponse();
     }
