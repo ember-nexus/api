@@ -36,6 +36,9 @@ class FilePropertyService
         return $parsedFileProperty;
     }
 
+    /**
+     * @param array<string, mixed> $rawFileProperties
+     */
     protected function parseExtensionPropertyFromRawFileProperties(array $rawFileProperties, ?UuidInterface $elementId): string
     {
         if (!array_key_exists('extension', $rawFileProperties)) {

@@ -63,6 +63,6 @@ class ElementService
     ): string {
         $parsedFileProperty = $this->filePropertyService->parseFilePropertyFromElement($element);
 
-        return $parsedFileProperty->getExtension();
+        return $parsedFileProperty?->getExtension() ?? FileService::DEFAULT_EXTENSION;
     }
 }

@@ -20,7 +20,7 @@ class QueueService
         $channel = $this->AMQPStreamConnection->channel();
         $queue = $queueType->value;
         $channel->queue_declare($queue, false, false, false, false);
-        $jsonMessage = json_encode($eventData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $jsonMessage = \Safe\json_encode($eventData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $message = new AMQPMessage($jsonMessage);
         $channel->basic_publish($message, '', $queue);
         $channel->close();
