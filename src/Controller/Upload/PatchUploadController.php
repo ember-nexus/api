@@ -14,7 +14,7 @@ use App\Response\JsonResponse;
 use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\StorageUtilService;
+use App\Service\FileService;
 use App\Type\UploadElement;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -39,7 +39,7 @@ class PatchUploadController extends AbstractController
         private S3Client $s3Client,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private ElementManager $elementManager,
-        private StorageUtilService $storageUtilService,
+        private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
@@ -105,7 +105,7 @@ class PatchUploadController extends AbstractController
         $patchResource = $request->getContent(true);
 
         $currentChunkIndex = $uploadElement->getAlreadyUploadedChunks();
-        $nextChunkKey = $this->storageUtilService->getUploadBucketKey($uploadId, $currentChunkIndex);
+        $nextChunkKey = $this->fileService->getUploadBucketKey($uploadId, $currentChunkIndex);
 
         $this->s3Client->putObject([
             'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
@@ -143,7 +143,7 @@ class PatchUploadController extends AbstractController
 
         if ($canCreateFile) {
             $extension = $uploadElement->getExtension();
-            $targetKey = $this->storageUtilService->getStorageBucketKey($uploadTarget, $extension);
+            $targetKey = $this->fileService->getStorageBucketKey($uploadTarget, $extension);
 
             $createResult = $this->s3Client->createMultipartUpload([
                 'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
@@ -160,7 +160,7 @@ class PatchUploadController extends AbstractController
 
             try {
                 for ($i = 0; $i <= $currentChunkIndex; ++$i) {
-                    $sourceKey = $this->storageUtilService->getUploadBucketKey($uploadId, $i);
+                    $sourceKey = $this->fileService->getUploadBucketKey($uploadId, $i);
                     $copyResult = $this->s3Client->uploadPartCopy([
                         'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
                         'Key' => $targetKey,
@@ -204,6 +204,8 @@ class PatchUploadController extends AbstractController
 
                 throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
             }
+
+            // todo: re-ingest file into elasticsearch
 
             // upload complete
 

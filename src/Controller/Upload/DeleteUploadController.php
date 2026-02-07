@@ -9,7 +9,7 @@ use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\StorageUtilService;
+use App\Service\FileService;
 use App\Type\UploadElement;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -26,7 +26,7 @@ class DeleteUploadController extends AbstractController
         private S3Client $s3Client,
         private ElementManager $elementManager,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private StorageUtilService $storageUtilService,
+        private FileService $fileService,
         private LoggerInterface $logger,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
@@ -76,7 +76,7 @@ class DeleteUploadController extends AbstractController
         for ($i = 0; $i <= $uploadElement->getAlreadyUploadedChunks(); ++$i) {
             $objectConfig = [
                 'Bucket' => $uploadBucket,
-                'Key' => $this->storageUtilService->getUploadBucketKey($uploadId, $i),
+                'Key' => $this->fileService->getUploadBucketKey($uploadId, $i),
             ];
             $status = $this->s3Client->objectExists($objectConfig);
 

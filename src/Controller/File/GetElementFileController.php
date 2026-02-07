@@ -10,8 +10,8 @@ use App\Response\BinaryStreamResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\FileUtilService;
-use App\Service\StorageUtilService;
+use App\Service\ElementService;
+use App\Service\FileService;
 use App\Type\AccessType;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -26,9 +26,9 @@ class GetElementFileController extends AbstractController
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
         private S3Client $s3Client,
+        private ElementService $elementService,
+        private FileService $fileService,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private StorageUtilService $storageUtilService,
-        private FileUtilService $fileUtilService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -55,14 +55,13 @@ class GetElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $fileName = $this->fileUtilService->getFileName($element);
-        $fileNameFallback = $this->fileUtilService->getAsciiSafeFileName($fileName);
-        $extension = $this->storageUtilService->getFileExtensionFromElement($element);
-        // todo: refactor storageUtilService and fileUtilService
+        $fileName = $this->elementService->getFileName($element);
+        $fileNameFallback = $this->fileService->getAsciiSafeFileName($fileName);
+        $extension = $this->elementService->getFileNameExtension($element);
 
         $objectConfig = [
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->storageUtilService->getStorageBucketKey($elementId, $extension),
+            'Key' => $this->fileService->getStorageBucketKey($elementId, $extension),
         ];
         $status = $this->s3Client->objectExists($objectConfig);
 

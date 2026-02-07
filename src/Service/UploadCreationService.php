@@ -38,7 +38,8 @@ class UploadCreationService
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Client $s3Client,
         private ElementManager $elementManager,
-        private StorageUtilService $storageUtilService,
+        private ElementService $elementService,
+        private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
@@ -134,7 +135,7 @@ class UploadCreationService
         }
 
         $uploadBucket = $this->emberNexusConfiguration->getFileS3UploadBucket();
-        $uploadKey = $this->storageUtilService->getUploadBucketKey($elementId);
+        $uploadKey = $this->fileService->getUploadBucketKey($elementId, 0);
 
         $this->s3Client->putObject([
             'Bucket' => $uploadBucket,
@@ -163,9 +164,12 @@ class UploadCreationService
         // todo: set extension of current upload
         // todo: implement mimetype detection
 
+        $newExtension = 'todo';
+
+
         $copyResult = $this->s3Client->copyObject([
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->storageUtilService->getStorageBucketKey($elementId),
+            'Key' => $this->fileService->getStorageBucketKey($elementId, $newExtension),
             'CopySource' => sprintf(
                 '%s/%s',
                 $uploadBucket,
@@ -184,6 +188,9 @@ class UploadCreationService
             throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
         }
 
+        // todo: reingest file data into elasticsearch
+
+        // todo: replace manual array with fileProperty instance
         $element->addProperty('file', [
             'contentLength' => $contentLength,
         ]);
@@ -198,6 +205,7 @@ class UploadCreationService
         $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));
 
         $uploadId = Uuid::uuid4();
+        // todo: try to parse extension, and persist it
         $uploadElement = new UploadElement();
         $uploadElement
             ->setId($uploadId)
@@ -213,7 +221,7 @@ class UploadCreationService
         $contentLengthHeaderValue = $this->getContentLengthFromHeader($request->headers);
 
         $bucket = $this->emberNexusConfiguration->getFileS3UploadBucket();
-        $key = $this->storageUtilService->getUploadBucketKey($uploadId);
+        $key = $this->fileService->getUploadBucketKey($uploadId, 0);
 
         $this->s3Client->putObject([
             'Bucket' => $bucket,
