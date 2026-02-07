@@ -7,7 +7,7 @@ namespace App\Command;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
-use App\Service\StorageUtilService;
+use App\Service\FileService;
 use App\Style\EmberNexusStyle;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
@@ -49,7 +49,7 @@ class BackupCreateCommand extends Command
         private FilesystemOperator $backupStorage,
         private ElementToRawService $elementToRawService,
         private ParameterBagInterface $bag,
-        private StorageUtilService $storageUtilService,
+        private FileService $fileService,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         parent::__construct();
@@ -250,7 +250,7 @@ class BackupCreateCommand extends Command
         return sprintf(
             '%s/node/%s.json',
             $this->backupName,
-            $this->storageUtilService->uuidToNestedFolderStructure($nodeId, $levels)
+            $this->fileService->uuidToNestedFolderStructure($nodeId, $levels)
         );
     }
 
@@ -261,7 +261,7 @@ class BackupCreateCommand extends Command
         return sprintf(
             '%s/relation/%s.json',
             $this->backupName,
-            $this->storageUtilService->uuidToNestedFolderStructure($relationId, $levels)
+            $this->fileService->uuidToNestedFolderStructure($relationId, $levels)
         );
     }
 

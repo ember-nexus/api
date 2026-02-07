@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller\Upload;
 
-use App\EventSystem\ElementFileDelete\Event\ElementFileDeleteEvent;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
@@ -195,7 +194,6 @@ class PatchUploadController extends AbstractController
 
                 // todo: delete original file, if it a) existed and b) had a different file extension
                 // todo: set file property to actual element, merge and flush it?
-
             } catch (Throwable $e) {
                 /**
                  * Abort multipart upload on failure.

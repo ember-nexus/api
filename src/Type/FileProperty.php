@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Type;
 
-
 use App\Service\FileService;
 use JsonSerializable;
 
 class FileProperty implements JsonSerializable
 {
-
     private string $extension = FileService::DEFAULT_EXTENSION;
 
     public function __construct()
@@ -20,7 +18,7 @@ class FileProperty implements JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            'extension' => $this->getExtension()
+            'extension' => $this->getExtension(),
         ];
     }
 
@@ -32,7 +30,7 @@ class FileProperty implements JsonSerializable
     public function setExtension(string $extension): static
     {
         $this->extension = $extension;
+
         return $this;
     }
-
 }

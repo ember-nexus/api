@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 class ElasticsearchFileDeleteEventListener
 {
     public function __construct(
-        private QueueService $queueService
+        private QueueService $queueService,
     ) {
     }
 
@@ -22,9 +22,8 @@ class ElasticsearchFileDeleteEventListener
         $this->queueService->publishEvent(
             RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
             [
-                'elementId' => $event->getElementId()->toString()
+                'elementId' => $event->getElementId()->toString(),
             ]
         );
     }
-
 }

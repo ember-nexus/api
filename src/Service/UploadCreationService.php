@@ -168,7 +168,6 @@ class UploadCreationService
 
         $newExtension = 'todo';
 
-
         $copyResult = $this->s3Client->copyObject([
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
             'Key' => $this->fileService->getStorageBucketKey($elementId, $newExtension),
