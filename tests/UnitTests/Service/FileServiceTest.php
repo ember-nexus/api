@@ -6,11 +6,13 @@ namespace App\tests\UnitTests\Service;
 
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Service\StorageUtilService;
+use App\Service\FileService;
+use App\Service\StringService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -20,15 +22,15 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
-#[CoversClass(StorageUtilService::class)]
+#[CoversClass(FileService::class)]
 #[AllowMockObjectsWithoutExpectations]
-class StorageUtilServiceTest extends TestCase
+class FileServiceTest extends TestCase
 {
     use ProphecyTrait;
 
-    private function getStorageUtilService(
+    private function buildFileService(
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
-    ): StorageUtilService {
+    ): FileService {
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');
         $server500Bag = $this->createMock(ParameterBagInterface::class);
@@ -38,9 +40,11 @@ class StorageUtilServiceTest extends TestCase
             $server500Bag,
             $this->createMock(LoggerInterface::class)
         );
+        $stringService = new StringService($server500LogicExceptionFactory);
 
-        return new StorageUtilService(
+        return new FileService(
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
+            $stringService,
             $server500LogicExceptionFactory,
         );
     }
@@ -50,12 +54,12 @@ class StorageUtilServiceTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
 
-        $storageUtilService = $this->getStorageUtilService(
+        $storageService = $this->buildFileService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
         try {
-            $storageUtilService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), -1);
+            $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), -1);
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
@@ -70,12 +74,12 @@ class StorageUtilServiceTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
 
-        $storageUtilService = $this->getStorageUtilService(
+        $storageService = $this->buildFileService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
         try {
-            $storageUtilService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 10000);
+            $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 10000);
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
@@ -85,48 +89,19 @@ class StorageUtilServiceTest extends TestCase
         }
     }
 
-    public function testGetUploadBucketKeyUsesBinAsDefaultExtension(): void
+    public function testGetUploadBucketKey(): void
     {
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
         $emberNexusConfiguration->getFileS3UploadBucketLevels()->shouldBeCalledOnce()->willReturn(3);
         $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
 
-        $storageUtilService = $this->getStorageUtilService(
+        $storageService = $this->buildFileService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
-        $key = $storageUtilService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1234);
-        $this->assertSame('8b/a1/17/8ba117cf-8983-4f13-be93-415e175cb64d-1234.bin', $key);
-    }
-
-    public function testGetUploadBucketKeySupportsOtherExtension(): void
-    {
-        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
-        $emberNexusConfiguration->getFileS3UploadBucketLevels()->shouldBeCalledOnce()->willReturn(3);
-        $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
-
-        $storageUtilService = $this->getStorageUtilService(
-            emberNexusConfiguration: $emberNexusConfiguration->reveal()
-        );
-
-        $key = $storageUtilService->getUploadBucketKey(Uuid::fromString('befb450d-ae5e-4ed7-9f24-134f8a6a140a'), 52, 'jpg');
-        $this->assertSame('be/fb/45/befb450d-ae5e-4ed7-9f24-134f8a6a140a-0052.jpg', $key);
-    }
-
-    public function testGetStorageBucketKeyUsesBinAsDefaultExtension(): void
-    {
-        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getFileS3StorageBucketLevels()->shouldBeCalledOnce()->willReturn(3);
-        $emberNexusConfiguration->getFileS3StorageBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
-
-        $storageUtilService = $this->getStorageUtilService(
-            emberNexusConfiguration: $emberNexusConfiguration->reveal()
-        );
-
-        $key = $storageUtilService->getStorageBucketKey(Uuid::fromString('3eda4085-968b-46a8-a729-cdaaa30b1d3f'));
-        $this->assertSame('3e/da/40/3eda4085-968b-46a8-a729-cdaaa30b1d3f.bin', $key);
+        $key = $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1234);
+        $this->assertSame('8b/a1/17/8ba117cf-8983-4f13-be93-415e175cb64d-1234.wip', $key);
     }
 
     public function testGetStorageBucketKeySupportsOtherExtension(): void
@@ -135,22 +110,22 @@ class StorageUtilServiceTest extends TestCase
         $emberNexusConfiguration->getFileS3StorageBucketLevels()->shouldBeCalledOnce()->willReturn(3);
         $emberNexusConfiguration->getFileS3StorageBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
 
-        $storageUtilService = $this->getStorageUtilService(
+        $storageService = $this->buildFileService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
-        $key = $storageUtilService->getStorageBucketKey(Uuid::fromString('5dbd948b-d9dc-4b6c-af1c-c12dc8120755'), 'png');
+        $key = $storageService->getStorageBucketKey(Uuid::fromString('5dbd948b-d9dc-4b6c-af1c-c12dc8120755'), 'png');
         $this->assertSame('5d/bd/94/5dbd948b-d9dc-4b6c-af1c-c12dc8120755.png', $key);
     }
 
     public function testUuidToNestedFolderStructure(): void
     {
-        $storageUtilService = $this->getStorageUtilService();
+        $storageService = $this->buildFileService();
 
         $uuid = Uuid::fromString('3207d629-7199-4c2d-9b2a-b0fba10fe309');
 
         try {
-            $storageUtilService->uuidToNestedFolderStructure($uuid, -1);
+            $storageService->uuidToNestedFolderStructure($uuid, -1);
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
@@ -160,7 +135,7 @@ class StorageUtilServiceTest extends TestCase
         }
 
         try {
-            $storageUtilService->uuidToNestedFolderStructure($uuid, 0, -1);
+            $storageService->uuidToNestedFolderStructure($uuid, 0, -1);
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
@@ -170,7 +145,7 @@ class StorageUtilServiceTest extends TestCase
         }
 
         try {
-            $storageUtilService->uuidToNestedFolderStructure($uuid, 0, 0);
+            $storageService->uuidToNestedFolderStructure($uuid, 0, 0);
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
@@ -180,7 +155,7 @@ class StorageUtilServiceTest extends TestCase
         }
 
         try {
-            $storageUtilService->uuidToNestedFolderStructure($uuid, 8, 9);
+            $storageService->uuidToNestedFolderStructure($uuid, 8, 9);
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
@@ -189,25 +164,91 @@ class StorageUtilServiceTest extends TestCase
             $this->assertSame('Unable to generate nested folder structure as long as product of levels and level length exceeds length of uuid without dashes.', $e->getDetail());
         }
 
-        $generatedStructure = $storageUtilService->uuidToNestedFolderStructure($uuid);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid);
         $this->assertSame('3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
 
-        $generatedStructure = $storageUtilService->uuidToNestedFolderStructure($uuid, 1, 1);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 1, 1);
         $this->assertSame('3/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
 
-        $generatedStructure = $storageUtilService->uuidToNestedFolderStructure($uuid, 1, 3);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 1, 3);
         $this->assertSame('320/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
 
-        $generatedStructure = $storageUtilService->uuidToNestedFolderStructure($uuid, 3, 1);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 3, 1);
         $this->assertSame('3/2/0/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
 
-        $generatedStructure = $storageUtilService->uuidToNestedFolderStructure($uuid, 2, 2);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 2, 2);
         $this->assertSame('32/07/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
 
-        $generatedStructure = $storageUtilService->uuidToNestedFolderStructure($uuid, 6, 5);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 6, 5);
         $this->assertSame('3207d/62971/994c2/d9b2a/b0fba/10fe3/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
 
-        $generatedStructure = $storageUtilService->uuidToNestedFolderStructure($uuid, 15, 2);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 15, 2);
         $this->assertSame('32/07/d6/29/71/99/4c/2d/9b/2a/b0/fb/a1/0f/e3/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
+    }
+
+    public static function getAsciiSafeFileNameProvider(): array
+    {
+        return [
+            ['', ''],
+            ['abc', 'abc'],
+            [str_repeat('ooooooooo-', 30), 'ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooo'],
+            ['abc.txt', 'abc.txt'],
+            ['AbC.txt', 'AbC.txt'],
+            ['aä-oö-uü.txt', 'aa-oo-uu.txt'],
+            ['0123.txt', '0123.txt'],
+            ['hello world.txt', 'hello world.txt'],
+            ['fichier été résumé.txt', 'fichier ete resume.txt'],
+            ['garçon.txt', 'garcon.txt'],
+            ['mañana.txt', 'manana.txt'],
+            ['📄 emoji.txt', 'page facing up emoji.txt'],
+            ['😃 emoji.txt', 'grinning face with big eyes emoji.txt'],
+            ['✅ emoji.txt', 'check mark button emoji.txt'],
+            ['😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃.txt', 'grinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning.txt'],
+            ['서울.txt', 'seoul.txt'],
+            ['한국어.txt', 'hangug-eo.txt'],
+            ['हिन्दी.txt', 'hindi.txt'],
+            ['தமிழ்.txt', 'tamil.txt'],
+            ['বাংলা.txt', 'banla.txt'],
+            ['日本語.txt', 'ri ben yu.txt'],
+        ];
+    }
+
+    #[DataProvider('getAsciiSafeFileNameProvider')]
+    public function testGetAsciiSafeFileName(string $input, string $output): void
+    {
+        $fileUtilService = $this->buildFileService();
+        $this->assertSame($output, $fileUtilService->getAsciiSafeFileName($input));
+    }
+
+    public static function removeReservedCharactersFromFileNameProvider(): array
+    {
+        return [
+            ['', ''],
+            ['    ', ''],
+            ['hello', 'hello'],
+            ['Hello', 'Hello'],
+            ['HelLo', 'HelLo'],
+            ['  prefix trim', 'prefix trim'],
+            ['suffix trim  ', 'suffix trim'],
+            ['multi word name', 'multi word name'],
+            ['"quoted string"', 'quoted string'],
+            ['wild card *', 'wild card'],
+            [' * prefix sanitized trim', 'prefix sanitized trim'],
+            ['suffix sanitized trim * ', 'suffix sanitized trim'],
+            ['slash /', 'slash'],
+            ['colon :', 'colon'],
+            ['less <', 'less'],
+            ['greater >', 'greater'],
+            ['question ?', 'question'],
+            ['reverse slash \\', 'reverse slash'],
+            ['pipe |', 'pipe'],
+        ];
+    }
+
+    #[DataProvider('removeReservedCharactersFromFileNameProvider')]
+    public function testRemoveReservedCharactersFromFileName(string $input, string $output): void
+    {
+        $fileUtilService = $this->buildFileService();
+        $this->assertSame($output, $fileUtilService->removeReservedCharactersFromFileName($input));
     }
 }
