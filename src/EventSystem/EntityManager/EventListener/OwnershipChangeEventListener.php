@@ -10,11 +10,7 @@ use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\Service\QueueService;
 use App\Type\RabbitMQQueueType;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-
-use function Safe\json_encode;
 
 class OwnershipChangeEventListener
 {
@@ -32,7 +28,7 @@ class OwnershipChangeEventListener
     ];
 
     public function __construct(
-        private QueueService $queueService
+        private QueueService $queueService,
     ) {
     }
 

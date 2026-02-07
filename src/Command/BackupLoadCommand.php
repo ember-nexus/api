@@ -10,8 +10,9 @@ use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Helper\Regex;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
+use App\Service\ElementService;
+use App\Service\FileService;
 use App\Service\RawToElementService;
-use App\Service\StorageUtilService;
 use App\Style\EmberNexusStyle;
 use App\Type\AppStateType;
 use AsyncAws\S3\Input\PutObjectRequest;
@@ -55,7 +56,8 @@ class BackupLoadCommand extends Command
         private CypherEntityManager $cypherEntityManager,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Client $s3Client,
-        private StorageUtilService $storageUtilService,
+        private FileService $fileService,
+        private ElementService $elementService,
         private Client $redisClient,
         private FilesystemOperator $backupStorage,
         private RawToElementService $rawToElementService,
@@ -215,11 +217,11 @@ class BackupLoadCommand extends Command
             }
 
             // todo: optimize upload for larger files using multipart-upload?, handled by https://github.com/ember-nexus/api/issues/452
-            $extension = $this->storageUtilService->getFileExtensionFromElement($element);
+            $extension = $this->elementService->getFileNameExtension($element);
             $resource = $this->backupStorage->readStream($path);
             $this->s3Client->putObject(new PutObjectRequest([
                 'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-                'Key' => $this->storageUtilService->getStorageBucketKey($fileId, $extension),
+                'Key' => $this->fileService->getStorageBucketKey($fileId, $extension),
                 'Body' => $resource,
             ]))->resolve();
 

@@ -14,7 +14,6 @@ use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
 use App\Type\AccessType;
-use App\Type\RabbitMQQueueType;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\Rfc4122\UuidV4;

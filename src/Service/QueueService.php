@@ -4,17 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Contract\NodeElementInterface;
-use App\Contract\RelationElementInterface;
-use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
-use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
-use App\Type\NodeElement;
 use App\Type\RabbitMQQueueType;
-use App\Type\RelationElement;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Ramsey\Uuid\Uuid;
 
 class QueueService
 {
@@ -33,5 +25,4 @@ class QueueService
         $channel->basic_publish($message, '', $queue);
         $channel->close();
     }
-
 }

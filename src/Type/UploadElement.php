@@ -7,7 +7,6 @@ namespace App\Type;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Service\FileService;
-use App\Service\FileUtilService;
 use DateTime;
 use Exception;
 use Ramsey\Uuid\Uuid;
@@ -212,6 +211,7 @@ class UploadElement extends NodeElement
     {
         $this->addProperty('extension', $extension);
         $this->extension = $extension;
+
         return $this;
     }
 

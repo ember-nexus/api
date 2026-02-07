@@ -7,7 +7,6 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Type\FileProperty;
 use Ramsey\Uuid\UuidInterface;
 
 class ElementService
@@ -63,6 +62,7 @@ class ElementService
         NodeElementInterface|RelationElementInterface $element,
     ): string {
         $parsedFileProperty = $this->filePropertyService->parseFilePropertyFromElement($element);
+
         return $parsedFileProperty->getExtension();
     }
 }
