@@ -84,15 +84,15 @@ services:
         echo 'Waiting for MinIO...';
         sleep 1;
       done;
-  
+
       mc mb --ignore-existing minio/api-storage;
       mc mb --ignore-existing minio/api-upload;
-  
+
       mc anonymous set none minio/api-storage;
       mc anonymous set none minio/api-upload;
-  
+
       mc admin user add minio accessKey secretKey || true;
       mc admin policy attach minio readwrite --user accessKey;
-  
+
       echo 'MinIO buckets and user configured';
       "
