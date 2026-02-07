@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Response;
 
-use App\Service\StorageUtilService;
 use App\Type\Etag;
 use AsyncAws\S3\Result\GetObjectOutput;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -12,6 +11,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BinaryStreamResponse extends StreamedResponse
 {
+    public const int STREAM_CHUNK_SIZE = 8192;
+
     public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback)
     {
         parent::__construct();
@@ -30,7 +31,7 @@ class BinaryStreamResponse extends StreamedResponse
 
         $this->setCallback(function () use ($stream): void {
             while (!feof($stream)) {
-                $buffer = \Safe\fread($stream, StorageUtilService::STREAM_CHUNK_SIZE);
+                $buffer = \Safe\fread($stream, self::STREAM_CHUNK_SIZE);
                 if (0 === strlen($buffer)) {
                     break;
                 }

@@ -6,6 +6,7 @@ namespace App\Type;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\Service\FileService;
 use App\Service\FileUtilService;
 use DateTime;
 use Exception;
@@ -24,7 +25,7 @@ class UploadElement extends NodeElement
     private ?UuidInterface $uploadTarget = null;
     private int $alreadyUploadedChunks = 0;
     private ?UuidInterface $uploadOwner = null;
-    private string $extension = FileUtilService::DEFAULT_EXTENSION;
+    private string $extension = FileService::DEFAULT_EXTENSION;
     private ?DateTime $created = null;
     private ?DateTime $updated = null;
     private ?DateTime $expires = null;

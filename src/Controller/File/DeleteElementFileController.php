@@ -10,7 +10,8 @@ use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\StorageUtilService;
+use App\Service\ElementService;
+use App\Service\FileService;
 use App\Type\AccessType;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -30,7 +31,8 @@ class DeleteElementFileController extends AbstractController
         private S3Client $s3Client,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private ElementManager $elementManager,
-        private StorageUtilService $storageUtilService,
+        private FileService $fileService,
+        private ElementService $elementService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -57,15 +59,18 @@ class DeleteElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
+        $extension = $this->elementService->getFileNameExtension($element);
         $objectConfig = [
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->storageUtilService->getStorageBucketKey($elementId),
+            'Key' => $this->fileService->getStorageBucketKey($elementId, $extension),
         ];
         $status = $this->s3Client->objectExists($objectConfig);
 
         if ($status->isSuccess()) {
             $this->s3Client->deleteObject($objectConfig);
         }
+
+        // todo: delete file data from elasticsearch
 
         $element->removeProperty('file');
         $this->elementManager->merge($element);

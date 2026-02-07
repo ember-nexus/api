@@ -9,40 +9,61 @@ use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\Emoji\EmojiTransliterator;
+use Transliterator;
 
-class StorageUtilService
+class FileService
 {
-    public const int STREAM_CHUNK_SIZE = 8192;
-    //    public const int STREAM_CHUNK_SIZE = 1024 * 1024;
+    public const int MAX_FILENAME_LENGTH = 255;
+    public const int MAX_EXTENSION_LENGTH = 16;
+    public const string DEFAULT_EXTENSION = 'bin';
+    public const string UPLOAD_EXTENSION = 'wip';
 
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
+        private StringService $stringService,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
-    public function getFileExtensionFromElement(NodeElementInterface|RelationElementInterface $element): string
+    public function getAsciiSafeFileName(string $fileName): string
     {
-        $extension = FileUtilService::DEFAULT_EXTENSION;
-        if (!$element->hasProperty('file')) {
-            return $extension;
-        }
-        $fileProperty = $element->getProperty('file');
-        if (!is_array($fileProperty)) {
-            return $extension;
-        }
-        if (!array_key_exists('extension', $fileProperty)) {
-            return $extension;
-        }
-        $filePropertyExtension = $fileProperty['extension'];
-        if (!is_string($filePropertyExtension)) {
-            return $extension;
+        $fileName = $this->stringService->getAsciiSafeString($fileName);
+        $fileName = $this->removeReservedCharactersFromFileName($fileName);
+
+        $parts = explode('.', $fileName, 2);
+        if (2 === count($parts)) {
+            $baseName = $parts[0];
+            $extension = trim(substr($parts[1], 0, self::MAX_EXTENSION_LENGTH));
+
+            return sprintf(
+                '%s.%s',
+                trim(substr($baseName, 0, self::MAX_FILENAME_LENGTH - strlen($extension) - 1)),
+                $extension
+            );
         }
 
-        return $filePropertyExtension;
+        return substr($fileName, 0, self::MAX_FILENAME_LENGTH);
     }
 
-    public function getStorageBucketKey(UuidInterface $id, string $extension = FileUtilService::DEFAULT_EXTENSION): string
+    public function removeReservedCharactersFromFileName(string $fileName): string
+    {
+        return trim(str_replace(
+            ['"', '*', '/', ':', '<', '>', '?', '\\', '|'],
+            '',
+            $fileName
+        ));
+    }
+
+    public function buildFileNameFromParts(string $name, string $extension): string
+    {
+        $extension = trim(substr(trim($extension), 0, self::MAX_EXTENSION_LENGTH));
+        $name = trim(substr(trim($name), 0, self::MAX_FILENAME_LENGTH - strlen($extension) - 1));
+
+        return sprintf('%s.%s', $name, $extension);
+    }
+
+    public function getStorageBucketKey(UuidInterface $id, string $extension): string
     {
         return sprintf(
             '%s.%s',
@@ -55,14 +76,14 @@ class StorageUtilService
         );
     }
 
-    public function getUploadBucketKey(UuidInterface $id, int $index = 0, string $extension = FileUtilService::DEFAULT_EXTENSION): string
+    public function getUploadBucketKey(UuidInterface $id, int $chunkIndex): string
     {
         $digits = $this->emberNexusConfiguration->getFileUploadChunkDigitsLength();
-        if ($index < 0) {
+        if ($chunkIndex < 0) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Chunk index can not be less than 0.');
         }
         $maxIndex = (10 ** $digits) - 1;
-        if ($index > $maxIndex) {
+        if ($chunkIndex > $maxIndex) {
             throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Chunk index can not be longer than %d digits, i.e. bigger than %d.', $digits, $maxIndex));
         }
 
@@ -73,8 +94,8 @@ class StorageUtilService
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevels(),
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevelLength(),
             ),
-            str_pad((string) $index, $digits, '0', STR_PAD_LEFT),
-            $extension
+            str_pad((string) $chunkIndex, $digits, '0', STR_PAD_LEFT),
+            self::UPLOAD_EXTENSION
         );
     }
 
