@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Service;
 
 use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Service\ElementService;
 use App\Service\StringService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -20,7 +19,6 @@ class StringServiceTest extends TestCase
     use ProphecyTrait;
 
     private function buildStringService(
-        ?ElementService $elementService = null,
         ?Server500LogicExceptionFactory $server500LogicExceptionFactory = null,
     ): StringService {
         if (null === $server500LogicExceptionFactory) {

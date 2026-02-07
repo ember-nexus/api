@@ -13,6 +13,10 @@ use App\Type\RelationElement;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
+ */
 class RawToElementService
 {
     public function __construct(
