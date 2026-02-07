@@ -214,7 +214,7 @@ class BackupLoadCommand extends Command
                 continue;
             }
 
-            // todo: optimize upload for larger files using multipart-upload?
+            // todo: optimize upload for larger files using multipart-upload?, handled by https://github.com/ember-nexus/api/issues/452
             $extension = $this->storageUtilService->getFileExtensionFromElement($element);
             $resource = $this->backupStorage->readStream($path);
             $this->s3Client->putObject(new PutObjectRequest([

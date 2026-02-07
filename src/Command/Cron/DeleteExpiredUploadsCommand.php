@@ -16,8 +16,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
-#[AsCommand(name: 'cron:update-ownership', description: 'Updates element ownership data within Elasticsearch. Restricted to elements marked as updated.')]
-class UpdateOwnershipCommand extends Command
+#[AsCommand(name: 'cron:delete-expired-uploads', description: 'Deletes uploads which were not completed during their lifetime.')]
+class DeleteExpiredUploadsCommand extends Command
 {
     private OutputStyle $io;
 
@@ -36,7 +36,7 @@ class UpdateOwnershipCommand extends Command
         $this->io->writeln('This command is currently a placeholder.');
         $this->io->newLine();
 
-        // todo: implement command, see https://github.com/ember-nexus/api/issues/438
+        // todo: implement command, see https://github.com/ember-nexus/api/issues/441
 
         $isCronDisabled = $this->bag->get('isCronDisabled');
         if (!is_bool($isCronDisabled)) {
