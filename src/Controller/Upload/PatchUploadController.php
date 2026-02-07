@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller\Upload;
 
+use App\EventSystem\ElementFileDelete\Event\ElementFileDeleteEvent;
+use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
@@ -25,6 +27,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
 /**
@@ -40,6 +43,7 @@ class PatchUploadController extends AbstractController
         private EmberNexusConfiguration $emberNexusConfiguration,
         private ElementManager $elementManager,
         private FileService $fileService,
+        private EventDispatcherInterface $eventDispatcher,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
@@ -205,9 +209,7 @@ class PatchUploadController extends AbstractController
                 throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
             }
 
-            // todo: re-ingest file into elasticsearch
-
-            // upload complete
+            $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($uploadTarget));
 
             return new JsonResponse([
                 'upload' => 'complete',

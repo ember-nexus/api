@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
@@ -25,6 +26,7 @@ use Safe\DateTime;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
 /**
@@ -38,7 +40,7 @@ class UploadCreationService
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Client $s3Client,
         private ElementManager $elementManager,
-        private ElementService $elementService,
+        private EventDispatcherInterface $eventDispatcher,
         private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
@@ -188,7 +190,7 @@ class UploadCreationService
             throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
         }
 
-        // todo: reingest file data into elasticsearch
+        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($elementId));
 
         // todo: replace manual array with fileProperty instance
         $element->addProperty('file', [
