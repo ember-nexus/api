@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Upgrade PHP to 8.5.2, closes #448.
 
+### Fixed
+- Fix bad release 0.1.30, by fixing the CI, see #454.
+
 ## 0.1.30 - 2026-02-03
 ### Changed
 - Update dependencies, closes [#449].
