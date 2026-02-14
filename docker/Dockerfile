@@ -1,4 +1,4 @@
-ARG FRANKENPHP_VERSION='1.11.1'
+ARG FRANKENPHP_VERSION='1.11.2'
 ARG PHP_VERSION='8.5.2'
 
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-builder-php${PHP_VERSION}-alpine AS frankenphp_builder

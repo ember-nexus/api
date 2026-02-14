@@ -16,7 +16,7 @@
     "league/flysystem-ziparchive": "^3.23",
     "mongodb/mongodb": "^2.1",
     "php-amqplib/php-amqplib": "^3.6",
-    "predis/predis": "^3.3",
+    "predis/predis": "^3.4",
     "ramsey/uuid": "^4.7",
     "symfony/asset": "7.4.*",
     "symfony/console": "7.4.*",
