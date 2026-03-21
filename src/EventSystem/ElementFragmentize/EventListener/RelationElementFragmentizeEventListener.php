@@ -46,8 +46,6 @@ class RelationElementFragmentizeEventListener
 
         /**
          * @psalm-suppress UndefinedInterfaceMethod
-         *
-         * @phpstan-ignore-next-line
          */
         $event->getCypherFragment()
             ->setType($relationElement->getType())
@@ -62,7 +60,7 @@ class RelationElementFragmentizeEventListener
                     ->addIdentifier('id')
             )
             ->addProperty('id', $relationId)
-            ->addIdentifier('id');
+            ->addIdentifier('id'); // @phpstan-ignore-line
         $event->getMongoFragment()
             ->setCollection($relationType)
             ->setIdentifier($relationId);

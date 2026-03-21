@@ -1,8 +1,10 @@
-ARG FRANKENPHP_VERSION='1.11.2'
-ARG PHP_VERSION='8.5.2'
+ARG FRANKENPHP_VERSION='1.12.1'
+ARG PHP_VERSION='8.5.4'
+ARG CADDY_BUILDER_VERSION='2.11'
 
+FROM caddy:${CADDY_BUILDER_VERSION}-builder-alpine AS caddy_builder
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-builder-php${PHP_VERSION}-alpine AS frankenphp_builder
-COPY --from=caddy:2-builder-alpine /usr/bin/xcaddy /usr/bin/xcaddy
+COPY --from=caddy_builder /usr/bin/xcaddy /usr/bin/xcaddy
 RUN CGO_ENABLED=1 \
     XCADDY_SETCAP=1 \
     XCADDY_GO_BUILD_FLAGS="-tags=nobadger,nomysql,nopgx -ldflags='-w -s -extldflags \'-Wl,-z,stack-size=0x80000\''" \

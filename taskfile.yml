@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+
+  dev:build:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml build
+
+  dev:up:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml up -d  --remove-orphans
+
+  dev:down:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml down
+
+  dev:cli:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml exec api /bin/bash
