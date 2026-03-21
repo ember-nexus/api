@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Upgrade FrankenPHP to 1.12.1, related to #457 and #461.
 - Upgrade PHP dependencies, related to #457 and #461.
+- Upgrade GitHub Actions in CI/CD.
 
 ## 0.1.31 - 2026-02-10
 ### Changed
