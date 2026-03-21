@@ -1,7 +1,7 @@
 services:
 
-  ember-nexus-api:
-    container_name: ember-nexus-api
+  api:
+    container_name: api
     image: api:dev-amd
     expose:
       - "80"
@@ -9,8 +9,8 @@ services:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt
 
-  ember-nexus-neo4j:
-    container_name: ember-nexus-neo4j
+  neo4j:
+    container_name: neo4j
     image: neo4j:5.11
     expose:
       - "7474"
@@ -18,8 +18,8 @@ services:
     environment:
       - NEO4J_AUTH=neo4j/password
 
-  ember-nexus-mongodb:
-    container_name: ember-nexus-mongodb
+  mongodb:
+    container_name: mongodb
     image: mongo:7
     expose:
       - "27017"
@@ -27,8 +27,8 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=mongodb
       - MONGO_INITDB_ROOT_PASSWORD=password
 
-  ember-nexus-elasticsearch:
-    container_name: ember-nexus-elasticsearch
+  elasticsearch:
+    container_name: elasticsearch
     image: elasticsearch:8.8.1
     expose:
       - "9200"
@@ -37,15 +37,15 @@ services:
       - xpack.security.enabled=false
       - xpack.security.enrollment.enabled=true
 
-  ember-nexus-redis:
-    container_name: ember-nexus-redis
+  redis:
+    container_name: redis
     image: redis:7-alpine
     expose:
       - "6379"
     command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
 
-  ember-nexus-rabbitmq:
-    container_name: ember-nexus-rabbitmq
+  rabbitmq:
+    container_name: rabbitmq
     image: rabbitmq:3-management
     expose:
       - "5672"
