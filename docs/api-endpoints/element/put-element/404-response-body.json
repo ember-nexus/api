@@ -1,5 +1,5 @@
 {
-  "type": "http://ember-nexus-api/error/404/not-found",
+  "type": "http://api/error/404/not-found",
   "title": "Not found",
   "status": 404,
   "detail": "Requested element was not found."
