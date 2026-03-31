@@ -1,0 +1,100 @@
+name: dev
+
+services:
+
+  api:
+    container_name: api
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+      target: development
+    volumes:
+      - ..:/var/www/html
+      - ../volumes/well-known-security.txt:/well-known-security.txt
+    ports:
+      - "80:80"
+
+  docs:
+    container_name: docs
+    image: sujaykumarh/docsify:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../docs:/docs
+    command: serve
+
+  neo4j:
+    container_name: neo4j
+    image: neo4j:5.25
+    environment:
+      - NEO4J_AUTH=neo4j/password
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:8.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - GLIBC_TUNABLES="glibc.cpu.hwcaps=-SHSTK" # see https://github.com/docker-library/mongo/discussions/748#discussioncomment-15927486
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:8.16.1
+    mem_limit: 4gb
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=true
+
+  kibana:
+    container_name: kibana
+    image: kibana:8.16.1
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+
+  redis:
+    container_name: redis
+    image: redis:8.0-M02
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+
+  redisinsight:
+    container_name: redisinsight
+    image: redislabs/redisinsight:latest
+    ports:
+      - "5540:5540"
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+
+  minio:
+    container_name: minio
+    image: quay.io/minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ../volumes/minio:/data
+    environment:
+      - MINIO_ROOT_USER=ROOTNAME
+      - MINIO_ROOT_PASSWORD=CHANGEME123
+    command: server /data --console-address ":9001"

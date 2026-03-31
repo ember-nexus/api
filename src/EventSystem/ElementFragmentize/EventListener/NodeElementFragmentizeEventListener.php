@@ -33,13 +33,11 @@ class NodeElementFragmentizeEventListener
 
         /**
          * @psalm-suppress UndefinedInterfaceMethod
-         *
-         * @phpstan-ignore-next-line
          */
         $event->getCypherFragment()
             ->addLabel($nodeLabel)
             ->addProperty('id', $nodeElementIdentifier)
-            ->addIdentifier('id');
+            ->addIdentifier('id'); // @phpstan-ignore-line
         $event->getMongoFragment()
             ->setCollection($nodeLabel)
             ->setIdentifier($nodeElementIdentifier);
