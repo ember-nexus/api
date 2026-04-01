@@ -36,7 +36,8 @@
     "syndesi/elastic-entity-manager": "^0.1.0",
     "syndesi/mongo-entity-manager": "^0.2.0",
     "thecodingmachine/safe": "^v3.3",
-    "tuupola/base58": "^2.2"
+    "tuupola/base58": "^2.2",
+    "ext-fileinfo": "*"
   },
   "require-dev": {
     "beste/psr-testlogger": "^1.0",

@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
+use finfo;
 use Ramsey\Uuid\UuidInterface;
 
 class FileService
@@ -20,6 +21,15 @@ class FileService
         private StringService $stringService,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
+    }
+
+    public function getMimeTypeFromResource(mixed $resource): string
+    {
+        $chunk = \Safe\stream_get_contents($resource, 8192, 0);
+        \Safe\rewind($resource);
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->buffer($chunk);
+        return $mimeType ?: 'application/octet-stream';
     }
 
     public function getAsciiSafeFileName(string $fileName): string

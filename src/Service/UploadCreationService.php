@@ -40,6 +40,7 @@ class UploadCreationService
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Client $s3Client,
         private ElementManager $elementManager,
+        private ElementService $elementService,
         private EventDispatcherInterface $eventDispatcher,
         private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
@@ -128,6 +129,12 @@ class UploadCreationService
             throw $this->server500LogicExceptionFactory->createFromTemplate('Expected property $element to contain non-null element id, got null.');
         }
 
+        $previousStorageKey = null;
+        if ($element->hasProperty('file')) {
+            $previousExtension = $this->elementService->getFileNameExtension($element);
+            $previousStorageKey = $this->fileService->getStorageBucketKey($elementId, $previousExtension);
+        }
+
         $uploadLength = $this->getUploadLengthFromHeader($request->headers);
         $contentLengthHeaderValue = $this->getContentLengthFromHeader($request->headers);
         if (null !== $contentLengthHeaderValue && null !== $uploadLength) {
@@ -136,13 +143,19 @@ class UploadCreationService
             }
         }
 
+        // todo: make sure that existing uploads to not result in conflict; i.e. either cancel existing upload or block
+        //       new upload?
+
         $uploadBucket = $this->emberNexusConfiguration->getFileS3UploadBucket();
         $uploadKey = $this->fileService->getUploadBucketKey($elementId, 0);
 
+        $uploadResource = $request->getContent(true);
+        $mimeType = $this->fileService->getMimeTypeFromResource($uploadResource);
         $this->s3Client->putObject([
             'Bucket' => $uploadBucket,
             'Key' => $uploadKey,
-            'Body' => $request->getContent(true),
+            'Body' => $uploadResource,
+            'ContentType' => $mimeType
         ]);
 
         $headResult = $this->s3Client->headObject([
@@ -162,15 +175,14 @@ class UploadCreationService
             }
         }
 
-        // todo: delete original file with original extension
         // todo: set extension of current upload
-        // todo: implement mimetype detection
 
         $newExtension = 'todo';
 
+        $newStorageKey = $this->fileService->getStorageBucketKey($elementId, $newExtension);
         $copyResult = $this->s3Client->copyObject([
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->fileService->getStorageBucketKey($elementId, $newExtension),
+            'Key' => $newStorageKey,
             'CopySource' => sprintf(
                 '%s/%s',
                 $uploadBucket,
@@ -180,6 +192,17 @@ class UploadCreationService
 
         try {
             $copyResult->resolve();
+            if ($previousStorageKey !== $newStorageKey) {
+                $objectConfig = [
+                    'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
+                    'Key' => $previousStorageKey,
+                ];
+                $status = $this->s3Client->objectExists($objectConfig);
+
+                if ($status->isSuccess()) {
+                    $this->s3Client->deleteObject($objectConfig);
+                }
+            }
             $deleteResult = $this->s3Client->deleteObject([
                 'Bucket' => $uploadBucket,
                 'Key' => $uploadKey,

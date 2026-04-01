@@ -219,10 +219,12 @@ class BackupLoadCommand extends Command
             // todo: optimize upload for larger files using multipart-upload?, handled by https://github.com/ember-nexus/api/issues/452
             $extension = $this->elementService->getFileNameExtension($element);
             $resource = $this->backupStorage->readStream($path);
+            $mimeType = $this->fileService->getMimeTypeFromResource($resource);
             $this->s3Client->putObject(new PutObjectRequest([
                 'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
                 'Key' => $this->fileService->getStorageBucketKey($fileId, $extension),
                 'Body' => $resource,
+                'ContentType' => $mimeType
             ]))->resolve();
 
             // todo check file.size is identical to uploaded file, if not print warning
