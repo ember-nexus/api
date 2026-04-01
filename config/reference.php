@@ -958,7 +958,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         uploadExpiresInSecondsAfterFirstRequest?: int|Param, // Number of seconds after which unfinished uploads are expired. // Default: 10800
  *         uploadChunkDigitsLength?: int|Param, // Number of digits for the upload chunk counter. Number of max chunks can be limited by upstream services, e.g. AWS can only support up to 10.000 chunks, i.e. a chunk digits length of 4. // Default: 4
  *         uploadMinChunkSizeInBytes?: int|Param, // Minimum size in bytes of uploaded chunks. Limited by the S3 provider, e.g. AWS requires that chunks are at least 5 MiB big. // Default: 5242880
- *         uploadMaxChunkSizeInBytes?: int|Param, // Maximum size in bytes of uploaded chunks. Limited by the S3 provider and the PHP configuration. // Default: 105906176
+ *         uploadMaxChunkSizeInBytes?: int|Param, // Maximum size in bytes of uploaded chunks. Limited by the S3 provider, Caddy and the PHP configuration. // Default: 105906176
  *         S3StorageBucket?: scalar|Param|null, // Name of the S3 bucket used for storage of files. // Default: "api-storage"
  *         S3UploadBucket?: scalar|Param|null, // Name of the S3 bucket used for temporary storage of uploads. // Default: "api-upload"
  *         S3StorageBucketLevels?: int|Param, // Number of levels (folders) used within the S3 storage bucket. // Default: 3

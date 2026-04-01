@@ -179,7 +179,7 @@ class Configuration implements ConfigurationInterface
                         ->defaultValue(self::SIZE_OF_5MIB_IN_BYTES)
                     ->end()
                     ->integerNode(EmberNexusConfiguration::FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES)
-                        ->info('Maximum size in bytes of uploaded chunks. Limited by the S3 provider and the PHP configuration.')
+                        ->info('Maximum size in bytes of uploaded chunks. Limited by the S3 provider, Caddy and the PHP configuration.')
                         ->min(1)
                         ->defaultValue(self::SIZE_OF_101MIB_IN_BYTES)
                     ->end()
