@@ -68,7 +68,7 @@ class PostElementController extends AbstractController
         }
         if (array_key_exists('end', $body)) {
             // owns-relation can only target nodes
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('start', 'non-existent', 'existent');
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('end', 'non-existent', 'existent');
         }
 
         if (array_key_exists('id', $body)) {
