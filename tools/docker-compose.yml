@@ -98,3 +98,26 @@ services:
       - MINIO_ROOT_USER=ROOTNAME
       - MINIO_ROOT_PASSWORD=CHANGEME123
     command: server /data --console-address ":9001"
+
+  minio-init:
+    image: quay.io/minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set minio http://minio:9000 ROOTNAME CHANGEME123; do
+        echo 'Waiting for MinIO...';
+        sleep 1;
+      done;
+
+      mc mb --ignore-existing minio/api-storage;
+      mc mb --ignore-existing minio/api-upload;
+
+      mc anonymous set none minio/api-storage;
+      mc anonymous set none minio/api-upload;
+
+      mc admin user add minio accessKey secretKey || true;
+      mc admin policy attach minio readwrite --user accessKey;
+
+      echo 'MinIO buckets and user configured';
+      "

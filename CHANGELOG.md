@@ -13,10 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Upgrade FrankenPHP to 1.12.1, related to #457 and #461.
+- Upgrade PHP to 8.5.4, related to #457 and #461.
 - Upgrade PHP dependencies, related to #457 and #461.
 - Upgrade GitHub Actions in CI/CD.
-- Increase max post limit from 2 MB (PHP default) to 100 MB, related to #119.
+- Increase max post limit from 2 MB (PHP default) to 101 MiB, related to #119.
 - Change header `Access-Control-Allow-Headers` to `*`, due to growing number of supported headers.
+
 ### Fixed
 - Fix bug with deserialization of MongoDB documents.
 

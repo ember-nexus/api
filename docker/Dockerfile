@@ -1,5 +1,6 @@
-ARG FRANKENPHP_VERSION='1.11.1'
-ARG PHP_VERSION='8.5.2'
+ARG FRANKENPHP_VERSION='1.12.1'
+ARG PHP_VERSION='8.5.4'
+ARG CADDY_BUILDER_VERSION='2.11'
 
 FROM caddy:${CADDY_BUILDER_VERSION}-builder-alpine AS caddy_builder
 FROM dunglas/frankenphp:${FRANKENPHP_VERSION}-builder-php${PHP_VERSION}-alpine AS frankenphp_builder

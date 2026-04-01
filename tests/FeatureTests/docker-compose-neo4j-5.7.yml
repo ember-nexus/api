@@ -63,8 +63,8 @@ services:
       - RABBITMQ_DEFAULT_USER=user
       - RABBITMQ_DEFAULT_PASS=password
 
-  ember-nexus-minio:
-    container_name: ember-nexus-minio
+  minio:
+    container_name: minio
     image: quay.io/minio/minio:latest
     expose:
       - "9000"
@@ -74,13 +74,13 @@ services:
       - MINIO_ROOT_PASSWORD=CHANGEME123
     command: server /data --console-address ":9001"
 
-  ember-nexus-minio-init:
+  minio-init:
     image: quay.io/minio/mc:latest
     depends_on:
-      - ember-nexus-minio
+      - minio
     entrypoint: >
       /bin/sh -c "
-      until mc alias set minio http://ember-nexus-minio:9000 ROOTNAME CHANGEME123; do
+      until mc alias set minio http://minio:9000 ROOTNAME CHANGEME123; do
         echo 'Waiting for MinIO...';
         sleep 1;
       done;
