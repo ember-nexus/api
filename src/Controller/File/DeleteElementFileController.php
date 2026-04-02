@@ -40,6 +40,7 @@ class DeleteElementFileController extends AbstractController
     ) {
     }
 
+    // todo: add support for etags
     #[Route(
         '/{id}/file',
         name: 'delete-element-file',

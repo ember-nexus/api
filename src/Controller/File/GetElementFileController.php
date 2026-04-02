@@ -33,6 +33,7 @@ class GetElementFileController extends AbstractController
     ) {
     }
 
+    // todo: add support for etags
     #[Route(
         '/{id}/file',
         name: 'get-element-file',

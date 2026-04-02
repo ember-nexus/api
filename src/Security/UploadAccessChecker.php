@@ -17,7 +17,7 @@ class UploadAccessChecker
     ) {
     }
 
-    private function verifyUserCanUploadFileToElement(UuidInterface $userId, UuidInterface $elementId): void
+    public function verifyUserCanUploadFileToElement(UuidInterface $userId, UuidInterface $elementId): void
     {
         // creating files only requires update privileges to the element itself
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {

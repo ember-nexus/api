@@ -15,6 +15,7 @@ use App\Response\CreatedResponse;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Security\UploadAccessChecker;
 use App\Type\AccessType;
 use App\Type\UploadElement;
 use AsyncAws\S3\S3Client;
@@ -36,28 +37,17 @@ class UploadCreationService
 {
     public function __construct(
         private AuthProvider $authProvider,
-        private AccessChecker $accessChecker,
+        private UploadAccessChecker $uploadAccessChecker,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Client $s3Client,
         private ElementManager $elementManager,
         private ElementService $elementService,
         private EventDispatcherInterface $eventDispatcher,
         private FileService $fileService,
+        private HeaderParseService $headerParseService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
-    }
-
-
-    private function getElementFromElementManager(UuidInterface $elementId): NodeElementInterface|RelationElementInterface
-    {
-        $element = $this->elementManager->getElement($elementId);
-        if (null === $element) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-
-        return $element;
     }
 
 
@@ -218,23 +208,15 @@ class UploadCreationService
     public function handleUploadCreationFromRequest(UuidInterface $elementId, Request $request): Response
     {
         $userId = $this->authProvider->getUserId();
-        $this->verifyUserCanUploadFileToElement($userId, $elementId);
-        $element = $this->getElementFromElementManager($elementId);
+        $this->uploadAccessChecker->verifyUserCanUploadFileToElement($userId, $elementId);
+        $element = $this->elementManager->getElementOrFail($elementId);
 
-        $method = $request->getMethod();
-        if (!in_array($method, ['POST', 'PUT'])) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Endpoint must use HTTP method 'POST' or 'PUT', but got '%s'.", $method));
-        }
-        if ('POST' === $method) {
-            $this->verifyElementDoesNotHaveFile($element);
+        $isUploadComplete = $this->headerParseService->isUploadCompleteFromHeaders($request->headers);
+
+        if (false === $isUploadComplete) {
+            return $this->createNewResumableUpload($elementId, $request, $userId);
         }
 
-        $isUploadComplete = $this->getIsUploadCompleteFromHeader($request->headers);
-
-        if (null === $isUploadComplete || true === $isUploadComplete) {
-            return $this->setOrReplaceElementFileDirectly($element, $request);
-        }
-
-        return $this->createNewResumableUpload($elementId, $request, $userId);
+        return $this->setOrReplaceElementFileDirectly($element, $request);
     }
 }
