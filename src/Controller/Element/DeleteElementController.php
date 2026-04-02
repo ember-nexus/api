@@ -46,10 +46,7 @@ class DeleteElementController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElement($elementId);
-        if (null === $element) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
+        $element = $this->elementManager->getElementOrFail($elementId);
         $this->elementManager->delete($element);
         $this->elementManager->flush();
 

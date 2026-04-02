@@ -50,10 +50,7 @@ class GetElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElement($elementId);
-        if (null === $element) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
+        $element = $this->elementManager->getElementOrFail($elementId);
 
         $fileName = $this->elementService->getFileName($element);
         $fileNameFallback = $this->fileService->getAsciiSafeFileName($fileName);

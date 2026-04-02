@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Security;
 
-use App\Security\UserPasswordHasher;
+use App\Security\UploadAccessChecker;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
 #[Small]
-#[CoversClass(UserPasswordHasher::class)]
+#[CoversClass(UploadAccessChecker::class)]
 class UserPasswordHasherTest extends TestCase
 {
     public function testHashing(): void
     {
-        $userPasswordHasher = new UserPasswordHasher();
+        $userPasswordHasher = new UploadAccessChecker();
         $hashedPassword = $userPasswordHasher->hashPassword('1234');
         $this->assertNotSame('1234', $hashedPassword);
         $this->assertTrue($userPasswordHasher->verifyPassword('1234', $hashedPassword));

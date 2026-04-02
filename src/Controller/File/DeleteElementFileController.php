@@ -57,10 +57,7 @@ class DeleteElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElement($elementId);
-        if (null === $element) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
+        $element = $this->elementManager->getElementOrFail($elementId);
 
         $extension = $this->elementService->getFileNameExtension($element);
         $objectConfig = [

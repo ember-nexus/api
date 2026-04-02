@@ -45,18 +45,10 @@ class UploadCreationService
         private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
-        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
-    private function verifyElementDoesNotHaveFile(NodeElementInterface|RelationElementInterface $element): void
-    {
-        $properties = $element->getProperties();
-        if (array_key_exists('file', $properties)) {
-            throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Element with id '%s' already has an associated file; can not create new file. Delete existing file first or replace it with PUT.", $element->getId()?->toString() ?? 'missing element id'));
-        }
-    }
 
     private function getElementFromElementManager(UuidInterface $elementId): NodeElementInterface|RelationElementInterface
     {
@@ -68,59 +60,6 @@ class UploadCreationService
         return $element;
     }
 
-    private function verifyUserCanUploadFileToElement(UuidInterface $userId, UuidInterface $elementId): void
-    {
-        // creating files only requires update privileges to the element itself
-        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-    }
-
-    private function getIsUploadCompleteFromHeader(HeaderBag $headers): ?bool
-    {
-        $possibleValues = [
-            '?0' => false,
-            '?1' => true,
-        ];
-        $uploadCompleteHeader = $headers->get('Upload-Complete');
-
-        if (null === $uploadCompleteHeader) {
-            return null;
-        }
-        if (!array_key_exists($uploadCompleteHeader, $possibleValues)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Upload-Complete' must contain a boolean value, either '?0' or '?1', got '%s'.", $uploadCompleteHeader));
-        }
-
-        return $possibleValues[$uploadCompleteHeader];
-    }
-
-    private function getUploadLengthFromHeader(HeaderBag $headers): ?int
-    {
-        $uploadLength = $headers->get('Upload-Length');
-        if (null === $uploadLength) {
-            return null;
-        }
-        $uploadLength = (int) $uploadLength;
-        if ($uploadLength < 0) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Upload-Length' requires a non-negative integer as its value, got '%d'.", $uploadLength));
-        }
-
-        return $uploadLength;
-    }
-
-    private function getContentLengthFromHeader(HeaderBag $headers): ?int
-    {
-        $contentLength = $headers->get('Content-Length');
-        if (null === $contentLength) {
-            return null;
-        }
-        $contentLength = (int) $contentLength;
-        if ($contentLength < 0) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Content-Length' requires a non-negative integer as its value, got '%d'.", $contentLength));
-        }
-
-        return $contentLength;
-    }
 
     private function setOrReplaceElementFileDirectly(NodeElementInterface|RelationElementInterface $element, Request $request): Response
     {
@@ -135,13 +74,13 @@ class UploadCreationService
             $previousStorageKey = $this->fileService->getStorageBucketKey($elementId, $previousExtension);
         }
 
-        $uploadLength = $this->getUploadLengthFromHeader($request->headers);
+//        $uploadLength = $this->getUploadLengthFromHeader($request->headers);
         $contentLengthHeaderValue = $this->getContentLengthFromHeader($request->headers);
-        if (null !== $contentLengthHeaderValue && null !== $uploadLength) {
-            if ($contentLengthHeaderValue !== $uploadLength) {
-                throw $this->client400BadContentExceptionFactory->createFromDetail("Inconsistent length values provided in headers 'Content-Length' and 'Upload-Length'.");
-            }
-        }
+//        if (null !== $contentLengthHeaderValue && null !== $uploadLength) {
+//            if ($contentLengthHeaderValue !== $uploadLength) {
+//                throw $this->client400BadContentExceptionFactory->createFromDetail("Inconsistent length values provided in headers 'Content-Length' and 'Upload-Length'.");
+//            }
+//        }
 
         // todo: make sure that existing uploads to not result in conflict; i.e. either cancel existing upload or block
         //       new upload?

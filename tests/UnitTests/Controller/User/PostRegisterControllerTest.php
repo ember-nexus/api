@@ -13,7 +13,7 @@ use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\CreatedResponse;
-use App\Security\UserPasswordHasher;
+use App\Security\UploadAccessChecker;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
 use App\Service\RequestUtilService;
@@ -47,22 +47,22 @@ class PostRegisterControllerTest extends TestCase
      * @SuppressWarnings("PHPMD.ExcessiveParameterList")
      */
     private function getPostRegisterController(
-        ?ElementManager $elementManager = null,
-        ?EntityManager $cypherEntityManager = null,
-        ?UrlGeneratorInterface $router = null,
-        ?UserPasswordHasher $userPasswordHasher = null,
-        ?EmberNexusConfiguration $emberNexusConfiguration = null,
-        ?RequestUtilService $requestUtilService = null,
-        ?CreateElementFromRawDataService $createElementFromRawDataService = null,
+        ?ElementManager                              $elementManager = null,
+        ?EntityManager                               $cypherEntityManager = null,
+        ?UrlGeneratorInterface                       $router = null,
+        ?UploadAccessChecker                         $userPasswordHasher = null,
+        ?EmberNexusConfiguration                     $emberNexusConfiguration = null,
+        ?RequestUtilService                          $requestUtilService = null,
+        ?CreateElementFromRawDataService             $createElementFromRawDataService = null,
         ?Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory = null,
-        ?Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory = null,
-        ?Server500LogicExceptionFactory $server500LogicExceptionFactory = null,
+        ?Client403ForbiddenExceptionFactory          $client403ForbiddenExceptionFactory = null,
+        ?Server500LogicExceptionFactory              $server500LogicExceptionFactory = null,
     ): PostRegisterController {
         return new PostRegisterController(
             $elementManager ?? $this->createMock(ElementManager::class),
             $cypherEntityManager ?? $this->createMock(EntityManager::class),
             $router ?? $this->createMock(UrlGeneratorInterface::class),
-            $userPasswordHasher ?? $this->createMock(UserPasswordHasher::class),
+            $userPasswordHasher ?? $this->createMock(UploadAccessChecker::class),
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
             $requestUtilService ?? $this->createMock(RequestUtilService::class),
             $createElementFromRawDataService ?? $this->createMock(CreateElementFromRawDataService::class),
@@ -112,7 +112,7 @@ class PostRegisterControllerTest extends TestCase
         $postRegisterController = $this->getPostRegisterController(
             cypherEntityManager: $cypherEntityManager,
             router: $urlGenerator,
-            userPasswordHasher: new UserPasswordHasher(),
+            userPasswordHasher: new UploadAccessChecker(),
             emberNexusConfiguration: $emberNexusConfiguration,
             createElementFromRawDataService: $createElementFromRawDataService
         );
@@ -174,7 +174,7 @@ class PostRegisterControllerTest extends TestCase
         $postRegisterController = $this->getPostRegisterController(
             cypherEntityManager: $cypherEntityManager,
             router: $urlGenerator,
-            userPasswordHasher: new UserPasswordHasher(),
+            userPasswordHasher: new UploadAccessChecker(),
             emberNexusConfiguration: $emberNexusConfiguration,
             requestUtilService: $requestUtilService,
             createElementFromRawDataService: $createElementFromRawDataService

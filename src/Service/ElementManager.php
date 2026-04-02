@@ -12,6 +12,7 @@ use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
+use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Helper\Neo4jClientHelper;
 use Laudis\Neo4j\Databags\Statement;
@@ -47,6 +48,7 @@ class ElementManager
         private ElementDefragmentizeService $elementDefragmentizeService,
         private Neo4jClientHelper $neo4jClientHelper,
         private EventDispatcherInterface $eventDispatcher,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
@@ -137,6 +139,15 @@ class ElementManager
         }
 
         return null;
+    }
+
+    public function getElementOrFail(UuidInterface $id): NodeElementInterface|RelationElementInterface
+    {
+        $element = $this->getElement($id);
+        if ($element === null) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+        return $element;
     }
 
     public function getNode(UuidInterface $id): ?NodeElementInterface

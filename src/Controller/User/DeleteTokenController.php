@@ -45,10 +45,7 @@ class DeleteTokenController extends AbstractController
             throw new LogicException('Token must be provided.');
         }
 
-        $tokenElement = $this->elementManager->getElement($tokenId);
-        if (null === $tokenElement) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
+        $tokenElement = $this->elementManager->getElementOrFail($tokenId);
         $this->elementManager->delete($tokenElement);
         $this->elementManager->flush();
 
