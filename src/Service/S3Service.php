@@ -52,6 +52,9 @@ class S3Service
         }
     }
 
+    /**
+     * todo: optimize upload for larger files using multipart-upload?, handled by https://github.com/ember-nexus/api/issues/452.
+     */
     public function uploadFile(UploadFileOperation $uploadFileOperation): void
     {
         // intermediate upload to "upload bucket"

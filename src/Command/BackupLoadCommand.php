@@ -7,17 +7,14 @@ namespace App\Command;
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
 use App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent;
 use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Helper\Regex;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
-use App\Service\ElementService;
-use App\Service\FileService;
 use App\Service\RawToElementService;
+use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
 use App\Type\AppStateType;
-use AsyncAws\S3\Input\PutObjectRequest;
-use AsyncAws\S3\S3Client;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
@@ -54,16 +51,14 @@ class BackupLoadCommand extends Command
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
-        private EmberNexusConfiguration $emberNexusConfiguration,
-        private S3Client $s3Client,
-        private FileService $fileService,
-        private ElementService $elementService,
         private Client $redisClient,
         private FilesystemOperator $backupStorage,
         private RawToElementService $rawToElementService,
         private EventDispatcherInterface $eventDispatcher,
         private AppStateService $appStateService,
         private ElasticEntityManager $elasticEntityManager,
+        private S3Service $s3Service,
+        private UploadFileOperationFactory $uploadFileOperationFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         parent::__construct();
@@ -216,18 +211,9 @@ class BackupLoadCommand extends Command
                 continue;
             }
 
-            // todo: optimize upload for larger files using multipart-upload?, handled by https://github.com/ember-nexus/api/issues/452
-            $extension = $this->elementService->getFileNameExtension($element);
             $resource = $this->backupStorage->readStream($path);
-            $mimeType = $this->fileService->getMimeTypeFromResource($resource);
-            $this->s3Client->putObject(new PutObjectRequest([
-                'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-                'Key' => $this->fileService->getStorageBucketKey($fileId, $extension),
-                'Body' => $resource,
-                'ContentType' => $mimeType,
-            ]))->resolve();
-
-            // todo check file.size is identical to uploaded file, if not print warning
+            $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, $resource);
+            $this->s3Service->uploadFile($uploadFileOperation);
 
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {

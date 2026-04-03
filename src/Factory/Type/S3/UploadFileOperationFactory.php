@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Factory\Type\S3;
 
+use App\Contract\NodeElementInterface;
+use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
@@ -20,6 +23,7 @@ class UploadFileOperationFactory
         private ElementService $elementService,
         private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -48,6 +52,30 @@ class UploadFileOperationFactory
             $this->fileService->getStorageBucketKey($elementId, $resumableUploadRequest->getExtension()),
             $resource,
             $resumableUploadRequest->getContentLength(),
+            $this->fileService->getMimeTypeFromResource($resource)
+        );
+    }
+
+    /**
+     * @param resource $resource
+     */
+    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, mixed $resource): UploadFileOperation
+    {
+        $elementId = $element->getId();
+        if (null === $elementId) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Expected element.id to not be null.');
+        }
+
+        $extension = $this->elementService->getFileNameExtension($element);
+
+        return new UploadFileOperation(
+            $this->emberNexusConfiguration->getFileS3UploadBucket(),
+            $this->fileService->getUploadBucketKey($elementId, 0),
+            $this->emberNexusConfiguration->getFileS3StorageBucket(),
+            null,
+            $this->fileService->getStorageBucketKey($elementId, $extension),
+            $resource,
+            null,
             $this->fileService->getMimeTypeFromResource($resource)
         );
     }
