@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
+use App\Type\S3\DeleteFileOperation;
 use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
 use AsyncAws\S3\S3Client;
@@ -95,6 +96,24 @@ class S3Service
             $deleteResult->resolve();
         } catch (Throwable $e) {
             throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
+        }
+    }
+
+    public function deleteFile(DeleteFileOperation $deleteFileOperation): void
+    {
+        $objectConfig = [
+            'Bucket' => $deleteFileOperation->getBucket(),
+            'Key' => $deleteFileOperation->getKey(),
+        ];
+        $status = $this->s3Client->objectExists($objectConfig);
+
+        if ($status->isSuccess()) {
+            $this->s3Client->deleteObject($objectConfig);
+        }
+
+        $status = $this->s3Client->objectExists($objectConfig);
+        if ($status->isSuccess()) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to delete file.');
         }
     }
 }

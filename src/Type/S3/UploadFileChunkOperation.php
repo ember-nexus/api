@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Type\S3;
 
-class UploadFileChunkOperation
+final readonly class UploadFileChunkOperation
 {
     /**
      * @param resource $content
      */
     public function __construct(
-        private readonly string $uploadBucket,
-        private readonly string $uploadKey,
-        private readonly mixed $content,
-        private readonly ?int $contentLength,
-        private readonly string $mimeType,
+        private string $uploadBucket,
+        private string $uploadKey,
+        private mixed  $content,
+        private ?int   $contentLength,
+        private string $mimeType,
     ) {
     }
 

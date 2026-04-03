@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Type\S3;
 
-class UploadFileOperation
+final readonly class UploadFileOperation
 {
     /**
      * @param resource $content
      */
     public function __construct(
-        private readonly string $uploadBucket,
-        private readonly string $uploadKey,
-        private readonly string $storageBucket,
-        private readonly ?string $previousStorageKey,
-        private readonly string $storageKey,
-        private readonly mixed $content,
-        private readonly ?int $contentLength,
-        private readonly string $mimeType,
+        private string  $uploadBucket,
+        private string  $uploadKey,
+        private string  $storageBucket,
+        private ?string $previousStorageKey,
+        private string  $storageKey,
+        private mixed   $content,
+        private ?int    $contentLength,
+        private string  $mimeType,
     ) {
     }
 

@@ -61,15 +61,15 @@ class DeleteElementFileController extends AbstractController
         $element = $this->elementManager->getElementOrFail($elementId);
 
         $extension = $this->elementService->getFileNameExtension($element);
-        $objectConfig = [
-            'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->fileService->getStorageBucketKey($elementId, $extension),
-        ];
-        $status = $this->s3Client->objectExists($objectConfig);
-
-        if ($status->isSuccess()) {
-            $this->s3Client->deleteObject($objectConfig);
-        }
+//        $objectConfig = [
+//            'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
+//            'Key' => $this->fileService->getStorageBucketKey($elementId, $extension),
+//        ];
+//        $status = $this->s3Client->objectExists($objectConfig);
+//
+//        if ($status->isSuccess()) {
+//            $this->s3Client->deleteObject($objectConfig);
+//        }
 
         $element->removeProperty('file');
         $this->elementManager->merge($element);
