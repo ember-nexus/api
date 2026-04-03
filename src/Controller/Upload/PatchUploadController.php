@@ -170,6 +170,7 @@ class PatchUploadController extends AbstractController
         try {
             for ($i = 0; $i <= $uploadElement->getAlreadyUploadedChunks(); ++$i) {
                 $sourceKey = $this->fileService->getUploadBucketKey($uploadId, $i);
+                // todo: possible bug with upload bucket vs storage bucket; needs to be tested live
                 $copyResult = $this->s3Client->uploadPartCopy([
                     'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
                     'Key' => $targetKey,
