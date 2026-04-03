@@ -7,28 +7,23 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
-use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Exception\Client409ConflictExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Type\Request\ResumableUploadRequestFactory;
+use App\Factory\Type\S3\UploadFileChunkOperationFactory;
+use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Response\CreatedResponse;
 use App\Response\NoContentResponse;
-use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Security\UploadAccessChecker;
-use App\Type\AccessType;
+use App\Type\Request\ResumableUploadRequest;
 use App\Type\UploadElement;
-use AsyncAws\S3\S3Client;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
-use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Throwable;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveParameterList")
@@ -39,113 +34,44 @@ class UploadCreationService
         private AuthProvider $authProvider,
         private UploadAccessChecker $uploadAccessChecker,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private S3Client $s3Client,
+        private S3Service $s3Service,
         private ElementManager $elementManager,
-        private ElementService $elementService,
+        private UploadFileOperationFactory $uploadFileOperationFactory,
+        private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
+        private ResumableUploadRequestFactory $resumableUploadRequestFactory,
         private EventDispatcherInterface $eventDispatcher,
-        private FileService $fileService,
-        private HeaderParseService $headerParseService,
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
-
-    private function setOrReplaceElementFileDirectly(NodeElementInterface|RelationElementInterface $element, Request $request): Response
+    public function handleUploadCreationFromRequest(UuidInterface $elementId, Request $request): Response
     {
-        $elementId = $element->getId();
-        if (null === $elementId) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Expected property $element to contain non-null element id, got null.');
+        $userId = $this->authProvider->getUserId();
+        $this->uploadAccessChecker->verifyUserCanUploadFileToElement($userId, $elementId);
+        $element = $this->elementManager->getElementOrFail($elementId);
+
+        $resumableUploadRequest = $this->resumableUploadRequestFactory->createResumableUploadRequestFromRequest($request);
+
+        if (false === $resumableUploadRequest->isUploadComplete()) {
+            return $this->createNewResumableUpload($resumableUploadRequest, $userId);
         }
 
-        $previousStorageKey = null;
-        if ($element->hasProperty('file')) {
-            $previousExtension = $this->elementService->getFileNameExtension($element);
-            $previousStorageKey = $this->fileService->getStorageBucketKey($elementId, $previousExtension);
-        }
+        return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest);
+    }
 
-//        $uploadLength = $this->getUploadLengthFromHeader($request->headers);
-        $contentLengthHeaderValue = $this->getContentLengthFromHeader($request->headers);
-//        if (null !== $contentLengthHeaderValue && null !== $uploadLength) {
-//            if ($contentLengthHeaderValue !== $uploadLength) {
-//                throw $this->client400BadContentExceptionFactory->createFromDetail("Inconsistent length values provided in headers 'Content-Length' and 'Upload-Length'.");
-//            }
-//        }
 
-        // todo: make sure that existing uploads to not result in conflict; i.e. either cancel existing upload or block
-        //       new upload?
+    private function setOrReplaceElementFileDirectly(
+        NodeElementInterface|RelationElementInterface $element,
+        ResumableUploadRequest $resumableUploadRequest
+    ): Response
+    {
+        $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
+        $this->s3Service->uploadFile($uploadFileOperation);
 
-        $uploadBucket = $this->emberNexusConfiguration->getFileS3UploadBucket();
-        $uploadKey = $this->fileService->getUploadBucketKey($elementId, 0);
-
-        $uploadResource = $request->getContent(true);
-        $mimeType = $this->fileService->getMimeTypeFromResource($uploadResource);
-        $this->s3Client->putObject([
-            'Bucket' => $uploadBucket,
-            'Key' => $uploadKey,
-            'Body' => $uploadResource,
-            'ContentType' => $mimeType
-        ]);
-
-        $headResult = $this->s3Client->headObject([
-            'Bucket' => $uploadBucket,
-            'Key' => $uploadKey,
-        ]);
-
-        $contentLength = $headResult->getContentLength();
-
-        if (null === $contentLength) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of created chunk.');
-        }
-
-        if (null !== $contentLengthHeaderValue) {
-            if ($contentLengthHeaderValue !== $contentLength) {
-                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Inconsistent length values between header 'Content-Length' (%d) and actual content (%d) detected.", $contentLengthHeaderValue, $contentLength));
-            }
-        }
-
-        // todo: set extension of current upload
-
-        $newExtension = 'todo';
-
-        $newStorageKey = $this->fileService->getStorageBucketKey($elementId, $newExtension);
-        $copyResult = $this->s3Client->copyObject([
-            'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $newStorageKey,
-            'CopySource' => sprintf(
-                '%s/%s',
-                $uploadBucket,
-                $uploadKey
-            ),
-        ]);
-
-        try {
-            $copyResult->resolve();
-            if ($previousStorageKey !== $newStorageKey) {
-                $objectConfig = [
-                    'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-                    'Key' => $previousStorageKey,
-                ];
-                $status = $this->s3Client->objectExists($objectConfig);
-
-                if ($status->isSuccess()) {
-                    $this->s3Client->deleteObject($objectConfig);
-                }
-            }
-            $deleteResult = $this->s3Client->deleteObject([
-                'Bucket' => $uploadBucket,
-                'Key' => $uploadKey,
-            ]);
-            $deleteResult->resolve();
-        } catch (Throwable $e) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
-        }
-
-        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($elementId));
+        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
 
         // todo: replace manual array with fileProperty instance
         $element->addProperty('file', [
-            'contentLength' => $contentLength,
+            'contentLength' => $uploadFileOperation->getContentLength(),
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
@@ -153,7 +79,7 @@ class UploadCreationService
         return new CreatedResponse();
     }
 
-    private function createNewResumableUpload(UuidInterface $elementId, Request $request, UuidInterface $userId): Response
+    private function createNewResumableUpload(ResumableUploadRequest $resumableUploadRequest, UuidInterface $userId): Response
     {
         $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));
 
@@ -163,60 +89,17 @@ class UploadCreationService
         $uploadElement
             ->setId($uploadId)
             ->setUploadOwner($userId)
-            ->setUploadTarget($elementId)
-            ->setExpires($expires);
+            ->setUploadTarget($resumableUploadRequest->getElementId())
+            ->setExtension($resumableUploadRequest->getExtension())
+            ->setExpires($expires)
+            ->setUploadLength($resumableUploadRequest->getUploadLength());
 
-        $uploadLength = $this->getUploadLengthFromHeader($request->headers);
-        if (null !== $uploadLength) {
-            $uploadElement->setUploadLength($uploadLength);
-        }
-
-        $contentLengthHeaderValue = $this->getContentLengthFromHeader($request->headers);
-
-        $bucket = $this->emberNexusConfiguration->getFileS3UploadBucket();
-        $key = $this->fileService->getUploadBucketKey($uploadId, 0);
-
-        $this->s3Client->putObject([
-            'Bucket' => $bucket,
-            'Key' => $key,
-            'Body' => $request->getContent(true),
-        ]);
-
-        $headResult = $this->s3Client->headObject([
-            'Bucket' => $bucket,
-            'Key' => $key,
-        ]);
-
-        $contentLength = $headResult->getContentLength();
-
-        if (null === $contentLength) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of created chunk.');
-        }
-
-        if (null !== $contentLengthHeaderValue) {
-            if ($contentLengthHeaderValue !== $contentLength) {
-                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Inconsistent length values between header 'Content-Length' (%d) and actual content (%d) detected.", $contentLengthHeaderValue, $contentLength));
-            }
-        }
+        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest);
+        $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
 
         $this->elementManager->merge($uploadElement);
         $this->elementManager->flush();
 
         return new NoContentResponse();
-    }
-
-    public function handleUploadCreationFromRequest(UuidInterface $elementId, Request $request): Response
-    {
-        $userId = $this->authProvider->getUserId();
-        $this->uploadAccessChecker->verifyUserCanUploadFileToElement($userId, $elementId);
-        $element = $this->elementManager->getElementOrFail($elementId);
-
-        $isUploadComplete = $this->headerParseService->isUploadCompleteFromHeaders($request->headers);
-
-        if (false === $isUploadComplete) {
-            return $this->createNewResumableUpload($elementId, $request, $userId);
-        }
-
-        return $this->setOrReplaceElementFileDirectly($element, $request);
     }
 }

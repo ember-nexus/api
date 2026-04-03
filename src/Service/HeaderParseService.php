@@ -31,6 +31,28 @@ class HeaderParseService
         return $contentType;
     }
 
+    public function getExtensionFromHeaders(HeaderBag $headers): string
+    {
+        $contentDisposition = $headers->get('Content-Disposition');
+        if (null === $contentDisposition) {
+            return FileService::DEFAULT_EXTENSION;
+        }
+        if (!preg_match('/filename=["\']?([^"\'\s;]+)["\']?/i', $contentDisposition, $matches)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(
+                "Header 'Content-Disposition' is present but does not contain a valid filename."
+            );
+        }
+        $fileName = $matches[1];
+        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+        if (empty($extension)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(
+                sprintf("Could not parse a file extension from the filename in 'Content-Disposition': '%s'.", $fileName)
+            );
+        }
+
+        return $extension;
+    }
+
     public function getUploadOffsetFromHeaders(HeaderBag $headers): int
     {
         return (int)$headers->get('Upload-Offset');

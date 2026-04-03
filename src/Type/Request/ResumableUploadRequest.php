@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Type\Request;
 
+use App\Service\FileService;
+use Ramsey\Uuid\UuidInterface;
+
 class ResumableUploadRequest {
+
+    private UuidInterface $elementId;
 
     /**
      * @var resource
@@ -14,6 +19,18 @@ class ResumableUploadRequest {
     private bool | null $isUploadComplete = false;
     private int | null $uploadLength = null;
     private int | null $contentLength = null;
+    private string $extension = FileService::DEFAULT_EXTENSION;
+
+    public function getElementId(): UuidInterface
+    {
+        return $this->elementId;
+    }
+
+    public function setElementId(UuidInterface $elementId): static
+    {
+        $this->elementId = $elementId;
+        return $this;
+    }
 
     /**
      * @return resource
@@ -62,6 +79,17 @@ class ResumableUploadRequest {
     public function setContentLength(?int $contentLength): static
     {
         $this->contentLength = $contentLength;
+        return $this;
+    }
+
+    public function getExtension(): string
+    {
+        return $this->extension;
+    }
+
+    public function setExtension(string $extension): static
+    {
+        $this->extension = $extension;
         return $this;
     }
 

@@ -26,6 +26,7 @@ class ResumableUploadRequestFactory
         $isUploadComplete = $this->headerParseService->isUploadCompleteFromHeaders($headers);
         $uploadLength = $this->headerParseService->getUploadLengthFromHeaders($headers);
         $contentLength = $this->headerParseService->getContentLengthFromHeaders($headers);
+        $extension = $this->headerParseService->getExtensionFromHeaders($headers);
         $content = $request->getContent(true);
 
         if ($uploadLength !== null && $contentLength !== null && $uploadLength !== $contentLength) {
@@ -36,6 +37,7 @@ class ResumableUploadRequestFactory
         $resumableUploadRequest->setIsUploadComplete($isUploadComplete);
         $resumableUploadRequest->setUploadLength($uploadLength);
         $resumableUploadRequest->setContentLength($contentLength);
+        $resumableUploadRequest->setExtension($extension);
         $resumableUploadRequest->setContent($content);
 
         return $resumableUploadRequest;
