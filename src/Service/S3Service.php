@@ -7,9 +7,10 @@ namespace App\Service;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
-use App\Type\S3\DeleteFileOperation;
+use App\Type\S3\FileOperation;
 use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
+use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
 use Throwable;
 
@@ -99,11 +100,11 @@ class S3Service
         }
     }
 
-    public function deleteFile(DeleteFileOperation $deleteFileOperation): void
+    public function deleteFile(FileOperation $fileOperation): void
     {
         $objectConfig = [
-            'Bucket' => $deleteFileOperation->getBucket(),
-            'Key' => $deleteFileOperation->getKey(),
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
         ];
         $status = $this->s3Client->objectExists($objectConfig);
 
@@ -115,5 +116,26 @@ class S3Service
         if ($status->isSuccess()) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to delete file.');
         }
+    }
+
+    public function existsFile(FileOperation $fileOperation): bool
+    {
+        $objectConfig = [
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+        ];
+        $status = $this->s3Client->objectExists($objectConfig);
+
+        return $status->isSuccess();
+    }
+
+    public function getFile(FileOperation $fileOperation): GetObjectOutput
+    {
+        $objectConfig = [
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+        ];
+
+        return $this->s3Client->getObject($objectConfig);
     }
 }

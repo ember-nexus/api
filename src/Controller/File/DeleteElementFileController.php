@@ -6,16 +6,14 @@ namespace App\Controller\File;
 
 use App\EventSystem\ElementFileDelete\Event\ElementFileDeleteEvent;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\ElementService;
-use App\Service\FileService;
+use App\Service\S3Service;
 use App\Type\AccessType;
-use AsyncAws\S3\S3Client;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,12 +28,10 @@ class DeleteElementFileController extends AbstractController
     public function __construct(
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private S3Client $s3Client,
-        private EmberNexusConfiguration $emberNexusConfiguration,
+        private S3Service $s3Service,
         private ElementManager $elementManager,
-        private FileService $fileService,
-        private ElementService $elementService,
         private EventDispatcherInterface $eventDispatcher,
+        private FileOperationFactory $fileOperationFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -59,17 +55,8 @@ class DeleteElementFileController extends AbstractController
         }
 
         $element = $this->elementManager->getElementOrFail($elementId);
-
-        $extension = $this->elementService->getFileNameExtension($element);
-//        $objectConfig = [
-//            'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-//            'Key' => $this->fileService->getStorageBucketKey($elementId, $extension),
-//        ];
-//        $status = $this->s3Client->objectExists($objectConfig);
-//
-//        if ($status->isSuccess()) {
-//            $this->s3Client->deleteObject($objectConfig);
-//        }
+        $deleteFileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+        $this->s3Service->deleteFile($deleteFileOperation);
 
         $element->removeProperty('file');
         $this->elementManager->merge($element);

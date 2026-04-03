@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Type\S3;
 
-final readonly class DeleteFileOperation
+final readonly class FileOperation
 {
     public function __construct(
         private string $bucket,
@@ -21,5 +21,4 @@ final readonly class DeleteFileOperation
     {
         return $this->key;
     }
-
 }

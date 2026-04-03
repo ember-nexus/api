@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\File;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\Regex;
 use App\Response\BinaryStreamResponse;
 use App\Security\AccessChecker;
@@ -12,9 +13,8 @@ use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
+use App\Service\S3Service;
 use App\Type\AccessType;
-use AsyncAws\S3\S3Client;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,10 +25,10 @@ class GetElementFileController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
-        private S3Client $s3Client,
         private ElementService $elementService,
         private FileService $fileService,
-        private EmberNexusConfiguration $emberNexusConfiguration,
+        private FileOperationFactory $fileOperationFactory,
+        private S3Service $s3Service,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -55,19 +55,15 @@ class GetElementFileController extends AbstractController
 
         $fileName = $this->elementService->getFileName($element);
         $fileNameFallback = $this->fileService->getAsciiSafeFileName($fileName);
-        $extension = $this->elementService->getFileNameExtension($element);
 
-        $objectConfig = [
-            'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $this->fileService->getStorageBucketKey($elementId, $extension),
-        ];
-        $status = $this->s3Client->objectExists($objectConfig);
+        $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
 
-        if (!$status->isSuccess()) {
+        $doesFileExist = $this->s3Service->existsFile($fileOperation);
+        if (false === $doesFileExist) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $object = $this->s3Client->getObject($objectConfig);
+        $object = $this->s3Service->getFile($fileOperation);
 
         return new BinaryStreamResponse($object, $fileName, $fileNameFallback);
     }

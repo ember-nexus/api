@@ -10,14 +10,14 @@ final readonly class UploadFileOperation
      * @param resource $content
      */
     public function __construct(
-        private string  $uploadBucket,
-        private string  $uploadKey,
-        private string  $storageBucket,
+        private string $uploadBucket,
+        private string $uploadKey,
+        private string $storageBucket,
         private ?string $previousStorageKey,
-        private string  $storageKey,
-        private mixed   $content,
-        private ?int    $contentLength,
-        private string  $mimeType,
+        private string $storageKey,
+        private mixed $content,
+        private ?int $contentLength,
+        private string $mimeType,
     ) {
     }
 

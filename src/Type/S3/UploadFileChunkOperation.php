@@ -12,8 +12,8 @@ final readonly class UploadFileChunkOperation
     public function __construct(
         private string $uploadBucket,
         private string $uploadKey,
-        private mixed  $content,
-        private ?int   $contentLength,
+        private mixed $content,
+        private ?int $contentLength,
         private string $mimeType,
     ) {
     }
