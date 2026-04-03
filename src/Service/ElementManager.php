@@ -144,9 +144,10 @@ class ElementManager
     public function getElementOrFail(UuidInterface $id): NodeElementInterface|RelationElementInterface
     {
         $element = $this->getElement($id);
-        if ($element === null) {
+        if (null === $element) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
+
         return $element;
     }
 

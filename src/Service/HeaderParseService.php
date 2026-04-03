@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Type\AppStateType;
 use Symfony\Component\HttpFoundation\HeaderBag;
 
 class HeaderParseService
 {
-
     public function __construct(
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-    )
-    {
+    ) {
     }
 
     public function getContentTypeFromHeaders(HeaderBag $headers, ?string $expectedContentType): string
@@ -23,11 +20,13 @@ class HeaderParseService
         if (null === $contentType) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("Endpoint requires the header 'content-type' to be present.");
         }
-        if ($expectedContentType !== null) {
+        $contentType = trim(explode(';', $contentType)[0]);
+        if (null !== $expectedContentType) {
             if ($expectedContentType !== $contentType) {
                 throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Expected content type '%s' for partial resumable uploads, got '%s'.", $expectedContentType, $contentType));
             }
         }
+
         return $contentType;
     }
 
@@ -38,16 +37,12 @@ class HeaderParseService
             return FileService::DEFAULT_EXTENSION;
         }
         if (!preg_match('/filename=["\']?([^"\'\s;]+)["\']?/i', $contentDisposition, $matches)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(
-                "Header 'Content-Disposition' is present but does not contain a valid filename."
-            );
+            throw $this->client400BadContentExceptionFactory->createFromDetail("Header 'Content-Disposition' is present but does not contain a valid filename.");
         }
         $fileName = $matches[1];
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
         if (empty($extension)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(
-                sprintf("Could not parse a file extension from the filename in 'Content-Disposition': '%s'.", $fileName)
-            );
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not parse a file extension from the filename in 'Content-Disposition': '%s'.", $fileName));
         }
 
         return $extension;
@@ -55,9 +50,16 @@ class HeaderParseService
 
     public function getUploadOffsetFromHeaders(HeaderBag $headers): int
     {
-        return (int)$headers->get('Upload-Offset');
-    }
+        $uploadOffset = $headers->get('Upload-Offset');
+        if (null === $uploadOffset) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail("Header 'Upload-Offset' is required.");
+        }
+        if (!ctype_digit($uploadOffset)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Upload-Offset' requires a non-negative integer as its value, got '%s'.", $uploadOffset));
+        }
 
+        return (int) $uploadOffset;
+    }
 
     public function isUploadCompleteFromHeaders(HeaderBag $headers): ?bool
     {
@@ -83,7 +85,10 @@ class HeaderParseService
         if (null === $contentLength) {
             return null;
         }
-        $contentLength = (int)$contentLength;
+        if (!ctype_digit($contentLength)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Content-Length' requires a non-negative integer as its value, got '%s'.", $contentLength));
+        }
+        $contentLength = (int) $contentLength;
         if ($contentLength < 0) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Content-Length' requires a non-negative integer as its value, got '%d'.", $contentLength));
         }
@@ -97,12 +102,11 @@ class HeaderParseService
         if (null === $uploadLength) {
             return null;
         }
-        $uploadLength = (int)$uploadLength;
+        $uploadLength = (int) $uploadLength;
         if ($uploadLength < 0) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Upload-Length' requires a non-negative integer as its value, got '%d'.", $uploadLength));
         }
 
         return $uploadLength;
     }
-
 }

@@ -42,5 +42,4 @@ class NoContentResponseFactory
 
         return $response;
     }
-
 }

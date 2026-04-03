@@ -13,7 +13,7 @@ use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Security\UploadAccessChecker;
+use App\Security\UserPasswordHasher;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -25,15 +25,15 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 class SecurityUtilService
 {
     public function __construct(
-        private EmberNexusConfiguration                  $emberNexusConfiguration,
-        private CypherEntityManager                      $cypherEntityManager,
-        private ElementManager                           $elementManager,
-        private UploadAccessChecker                      $userPasswordHasher,
-        private ParameterBagInterface                    $bag,
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private CypherEntityManager $cypherEntityManager,
+        private ElementManager $elementManager,
+        private UserPasswordHasher $userPasswordHasher,
+        private ParameterBagInterface $bag,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
-        private Client401UnauthorizedExceptionFactory    $client401UnauthorizedExceptionFactory,
-        private Client403ForbiddenExceptionFactory       $client403ForbiddenExceptionFactory,
-        private Server500LogicExceptionFactory           $server500LogicExceptionFactory,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
+        private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 

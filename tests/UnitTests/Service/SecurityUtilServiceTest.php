@@ -42,10 +42,10 @@ class SecurityUtilServiceTest extends TestCase
 {
     private function getSecurityUtilService(
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
-        ?CypherEntityManager     $cypherEntityManager = null,
-        ?ElementManager          $elementManager = null,
-        ?UploadAccessChecker     $userPasswordHasher = null,
-        ?ParameterBagInterface   $bag = null,
+        ?CypherEntityManager $cypherEntityManager = null,
+        ?ElementManager $elementManager = null,
+        ?UploadAccessChecker $userPasswordHasher = null,
+        ?ParameterBagInterface $bag = null,
     ): SecurityUtilService {
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');

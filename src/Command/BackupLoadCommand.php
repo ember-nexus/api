@@ -224,7 +224,7 @@ class BackupLoadCommand extends Command
                 'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
                 'Key' => $this->fileService->getStorageBucketKey($fileId, $extension),
                 'Body' => $resource,
-                'ContentType' => $mimeType
+                'ContentType' => $mimeType,
             ]))->resolve();
 
             // todo check file.size is identical to uploaded file, if not print warning

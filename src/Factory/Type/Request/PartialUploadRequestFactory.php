@@ -10,11 +10,9 @@ use Symfony\Component\HttpFoundation\Request;
 
 class PartialUploadRequestFactory
 {
-
     public function __construct(
         private HeaderParseService $headerParseService,
-    )
-    {
+    ) {
     }
 
     public function createPartialUploadRequestFromRequest(Request $request): PartialUploadRequest
@@ -27,15 +25,12 @@ class PartialUploadRequestFactory
         $contentLength = $this->headerParseService->getContentLengthFromHeaders($headers);
         $content = $request->getContent(true);
 
-        $partialUploadRequest = new PartialUploadRequest();
-        $partialUploadRequest->setContentType($contentType);
-        $partialUploadRequest->setUploadOffset($uploadOffset);
-        $partialUploadRequest->setUploadComplete($isUploadComplete);
-        $partialUploadRequest->setContentLength($contentLength);
-        $partialUploadRequest->setContent($content);
-
-        return $partialUploadRequest;
+        return new PartialUploadRequest(
+            $content,
+            $contentType,
+            $uploadOffset,
+            $isUploadComplete,
+            $contentLength
+        );
     }
-
-
 }

@@ -7,19 +7,18 @@ namespace App\Factory\Type\Request;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\HeaderParseService;
 use App\Type\Request\ResumableUploadRequest;
+use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class ResumableUploadRequestFactory
 {
-
     public function __construct(
         private HeaderParseService $headerParseService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-    )
-    {
+    ) {
     }
 
-    public function createResumableUploadRequestFromRequest(Request $request): ResumableUploadRequest
+    public function createResumableUploadRequestFromRequest(Request $request, UuidInterface $elementId): ResumableUploadRequest
     {
         $headers = $request->headers;
 
@@ -29,18 +28,17 @@ class ResumableUploadRequestFactory
         $extension = $this->headerParseService->getExtensionFromHeaders($headers);
         $content = $request->getContent(true);
 
-        if ($uploadLength !== null && $contentLength !== null && $uploadLength !== $contentLength) {
+        if (null !== $uploadLength && null !== $contentLength && $uploadLength !== $contentLength) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("Inconsistent length values provided in headers 'Content-Length' and 'Upload-Length'.");
         }
 
-        $resumableUploadRequest = new ResumableUploadRequest();
-        $resumableUploadRequest->setIsUploadComplete($isUploadComplete);
-        $resumableUploadRequest->setUploadLength($uploadLength);
-        $resumableUploadRequest->setContentLength($contentLength);
-        $resumableUploadRequest->setExtension($extension);
-        $resumableUploadRequest->setContent($content);
-
-        return $resumableUploadRequest;
+        return new ResumableUploadRequest(
+            $elementId,
+            $content,
+            $isUploadComplete,
+            $uploadLength,
+            $contentLength,
+            $extension
+        );
     }
-
 }

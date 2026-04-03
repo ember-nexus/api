@@ -7,9 +7,11 @@
   "require": {
     "php": ">=8.5",
     "ext-ctype": "*",
+    "ext-fileinfo": "*",
     "ext-iconv": "*",
     "antlr/antlr4-php-runtime": "^0.9.1",
     "async-aws/s3": "^2.2",
+    "cardinalby/content-disposition": "^1.1",
     "guzzlehttp/guzzle": "^7.8",
     "league/flysystem": "^3.23",
     "league/flysystem-bundle": "^3.3",
@@ -36,8 +38,7 @@
     "syndesi/elastic-entity-manager": "^0.1.0",
     "syndesi/mongo-entity-manager": "^0.2.0",
     "thecodingmachine/safe": "^v3.3",
-    "tuupola/base58": "^2.2",
-    "ext-fileinfo": "*"
+    "tuupola/base58": "^2.2"
   },
   "require-dev": {
     "beste/psr-testlogger": "^1.0",

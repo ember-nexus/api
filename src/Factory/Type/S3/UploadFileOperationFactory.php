@@ -9,29 +9,24 @@ use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
 use App\Type\Request\ResumableUploadRequest;
-use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 class UploadFileOperationFactory
 {
-
     public function __construct(
-        private EmberNexusConfiguration             $emberNexusConfiguration,
-        private ElementManager                      $elementManager,
-        private ElementService                      $elementService,
-        private FileService                         $fileService,
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private ElementManager $elementManager,
+        private ElementService $elementService,
+        private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-    )
-    {
+    ) {
     }
 
     public function createUploadFileOperationFromResumableUploadRequest(ResumableUploadRequest $resumableUploadRequest): UploadFileOperation
     {
-        if ($resumableUploadRequest->isUploadComplete() === false) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(
-                "'UploadFileOperation' requires 'ResumableUploadRequest' to contain the whole content, i.e. be a non-chunked upload request."
-            );
+        if (false === $resumableUploadRequest->isUploadComplete()) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileOperation' requires 'ResumableUploadRequest' to contain the whole content, i.e. be a non-chunked upload request.");
         }
 
         $elementId = $resumableUploadRequest->getElementId();
@@ -56,5 +51,4 @@ class UploadFileOperationFactory
             $this->fileService->getMimeTypeFromResource($resource)
         );
     }
-
 }

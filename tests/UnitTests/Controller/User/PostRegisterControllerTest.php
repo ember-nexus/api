@@ -47,16 +47,16 @@ class PostRegisterControllerTest extends TestCase
      * @SuppressWarnings("PHPMD.ExcessiveParameterList")
      */
     private function getPostRegisterController(
-        ?ElementManager                              $elementManager = null,
-        ?EntityManager                               $cypherEntityManager = null,
-        ?UrlGeneratorInterface                       $router = null,
-        ?UploadAccessChecker                         $userPasswordHasher = null,
-        ?EmberNexusConfiguration                     $emberNexusConfiguration = null,
-        ?RequestUtilService                          $requestUtilService = null,
-        ?CreateElementFromRawDataService             $createElementFromRawDataService = null,
+        ?ElementManager $elementManager = null,
+        ?EntityManager $cypherEntityManager = null,
+        ?UrlGeneratorInterface $router = null,
+        ?UploadAccessChecker $userPasswordHasher = null,
+        ?EmberNexusConfiguration $emberNexusConfiguration = null,
+        ?RequestUtilService $requestUtilService = null,
+        ?CreateElementFromRawDataService $createElementFromRawDataService = null,
         ?Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory = null,
-        ?Client403ForbiddenExceptionFactory          $client403ForbiddenExceptionFactory = null,
-        ?Server500LogicExceptionFactory              $server500LogicExceptionFactory = null,
+        ?Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory = null,
+        ?Server500LogicExceptionFactory $server500LogicExceptionFactory = null,
     ): PostRegisterController {
         return new PostRegisterController(
             $elementManager ?? $this->createMock(ElementManager::class),

@@ -6,7 +6,6 @@ namespace App\Type\S3;
 
 class UploadFileChunkOperation
 {
-
     /**
      * @param resource $content
      */
@@ -14,10 +13,9 @@ class UploadFileChunkOperation
         private readonly string $uploadBucket,
         private readonly string $uploadKey,
         private readonly mixed $content,
-        private readonly int|null $contentLength,
+        private readonly ?int $contentLength,
         private readonly string $mimeType,
-    )
-    {
+    ) {
     }
 
     public function getUploadBucket(): string
@@ -47,5 +45,4 @@ class UploadFileChunkOperation
     {
         return $this->mimeType;
     }
-
 }

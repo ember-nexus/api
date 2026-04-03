@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller\Upload;
 
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
-use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Exception\Client410GoneExceptionFactory;
@@ -14,7 +13,6 @@ use App\Factory\Response\NoContentResponseFactory;
 use App\Factory\Type\Request\PartialUploadRequestFactory;
 use App\Helper\Regex;
 use App\Response\JsonResponse;
-use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\FileService;
@@ -30,7 +28,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 use Throwable;
 
 /**
@@ -92,12 +89,7 @@ class PatchUploadController extends AbstractController
         $partialUploadRequest = $this->partialUploadRequestFactory->createPartialUploadRequestFromRequest($request);
 
         if ($partialUploadRequest->getUploadOffset() !== $uploadElement->getUploadOffset()) {
-            throw $this->client409ConflictExceptionFactory->createFromDetail(
-                'offset from request does not match offset of resource',
-                additionalDetails: [
-                    'expected-offset' => $uploadElement->getUploadOffset(),
-                    'provided-offset' => $partialUploadRequest->getUploadOffset()
-                ]);
+            throw $this->client409ConflictExceptionFactory->createFromDetail('offset from request does not match offset of resource', additionalDetails: ['expected-offset' => $uploadElement->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
         }
 
         $uploadTarget = $uploadElement->getUploadTarget();
@@ -129,8 +121,8 @@ class PatchUploadController extends AbstractController
 
         $canCreateFile = false;
 
-        if ($partialUploadRequest->getContentLength() !== null &&
-            $partialUploadRequest->getContentLength() !== $contentLength
+        if (null !== $partialUploadRequest->getContentLength()
+            && $partialUploadRequest->getContentLength() !== $contentLength
         ) {
             throw $this->server500LogicExceptionFactory->createFromTemplate('Issue with upload; uploaded chunk has different length than provided content length.');
         }

@@ -49,7 +49,7 @@ class UploadCreationService
         $this->uploadAccessChecker->verifyUserCanUploadFileToElement($userId, $elementId);
         $element = $this->elementManager->getElementOrFail($elementId);
 
-        $resumableUploadRequest = $this->resumableUploadRequestFactory->createResumableUploadRequestFromRequest($request);
+        $resumableUploadRequest = $this->resumableUploadRequestFactory->createResumableUploadRequestFromRequest($request, $elementId);
 
         if (false === $resumableUploadRequest->isUploadComplete()) {
             return $this->createNewResumableUpload($resumableUploadRequest, $userId);
@@ -58,12 +58,10 @@ class UploadCreationService
         return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest);
     }
 
-
     private function setOrReplaceElementFileDirectly(
         NodeElementInterface|RelationElementInterface $element,
-        ResumableUploadRequest $resumableUploadRequest
-    ): Response
-    {
+        ResumableUploadRequest $resumableUploadRequest,
+    ): Response {
         $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
         $this->s3Service->uploadFile($uploadFileOperation);
 

@@ -29,7 +29,8 @@ class FileService
         \Safe\rewind($resource);
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->buffer($chunk);
-        return $mimeType ?: 'application/octet-stream';
+
+        return false === $mimeType ? 'application/octet-stream' : $mimeType;
     }
 
     public function getAsciiSafeFileName(string $fileName): string

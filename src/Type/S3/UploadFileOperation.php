@@ -6,7 +6,6 @@ namespace App\Type\S3;
 
 class UploadFileOperation
 {
-
     /**
      * @param resource $content
      */
@@ -14,13 +13,12 @@ class UploadFileOperation
         private readonly string $uploadBucket,
         private readonly string $uploadKey,
         private readonly string $storageBucket,
-        private readonly string|null $previousStorageKey,
+        private readonly ?string $previousStorageKey,
         private readonly string $storageKey,
         private readonly mixed $content,
-        private readonly int|null $contentLength,
+        private readonly ?int $contentLength,
         private readonly string $mimeType,
-    )
-    {
+    ) {
     }
 
     public function getUploadBucket(): string
@@ -65,5 +63,4 @@ class UploadFileOperation
     {
         return $this->mimeType;
     }
-
 }

@@ -28,7 +28,7 @@ class S3Service
             'Bucket' => $uploadFileChunkOperation->getUploadBucket(),
             'Key' => $uploadFileChunkOperation->getUploadKey(),
             'Body' => $uploadFileChunkOperation->getContent(),
-            'ContentType' => $uploadFileChunkOperation->getMimeType()
+            'ContentType' => $uploadFileChunkOperation->getMimeType(),
         ]);
 
         $headResult = $this->s3Client->headObject([
@@ -45,7 +45,7 @@ class S3Service
         $providedContentLength = $uploadFileChunkOperation->getContentLength();
         if (null !== $providedContentLength) {
             if ($providedContentLength !== $uploadContentLength) {
-                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Inconsistent length values between provided content-length (%d) and actual content length (%d) detected.", $providedContentLength, $uploadContentLength));
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Inconsistent length values between provided content-length (%d) and actual content length (%d) detected.', $providedContentLength, $uploadContentLength));
             }
         }
     }
@@ -66,14 +66,14 @@ class S3Service
                 $uploadFileOperation->getUploadBucket(),
                 $uploadFileOperation->getUploadKey()
             ),
-            'ContentType'       => $uploadFileOperation->getMimeType(),
+            'ContentType' => $uploadFileOperation->getMimeType(),
             'MetadataDirective' => 'REPLACE',
         ]);
 
         try {
             $copyResult->resolve();
-            if ($uploadFileOperation->getPreviousStorageKey() !== null &&
-                $uploadFileOperation->getPreviousStorageKey() !== $uploadFileOperation->getStorageKey()) {
+            if (null !== $uploadFileOperation->getPreviousStorageKey()
+                && $uploadFileOperation->getPreviousStorageKey() !== $uploadFileOperation->getStorageKey()) {
                 // delete previous uploaded element, if available
                 $objectConfig = [
                     'Bucket' => $uploadFileOperation->getStorageBucket(),
@@ -97,5 +97,4 @@ class S3Service
             throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
         }
     }
-
 }

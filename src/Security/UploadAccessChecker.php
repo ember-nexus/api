@@ -10,7 +10,6 @@ use Ramsey\Uuid\UuidInterface;
 
 class UploadAccessChecker
 {
-
     public function __construct(
         private AccessChecker $accessChecker,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
@@ -24,5 +23,4 @@ class UploadAccessChecker
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
     }
-
 }

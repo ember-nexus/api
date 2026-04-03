@@ -13,21 +13,17 @@ use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 class UploadFileChunkOperationFactory
 {
-
     public function __construct(
-        private EmberNexusConfiguration             $emberNexusConfiguration,
-        private FileService                         $fileService,
+        private EmberNexusConfiguration $emberNexusConfiguration,
+        private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-    )
-    {
+    ) {
     }
 
     public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequest $resumableUploadRequest): UploadFileChunkOperation
     {
-        if ($resumableUploadRequest->isUploadComplete() !== false) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(
-                "'UploadFileChunkOperation' requires 'ResumableUploadRequest' to contain partial content, i.e. be a chunked upload request."
-            );
+        if (false !== $resumableUploadRequest->isUploadComplete()) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileChunkOperation' requires 'ResumableUploadRequest' to contain partial content, i.e. be a chunked upload request.");
         }
 
         $elementId = $resumableUploadRequest->getElementId();
@@ -52,5 +48,4 @@ class UploadFileChunkOperationFactory
             $uploadFileOperation->getMimeType()
         );
     }
-
 }

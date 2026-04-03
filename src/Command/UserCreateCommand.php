@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Security\UploadAccessChecker;
+use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
 use App\Type\NodeElement;
@@ -28,9 +28,9 @@ class UserCreateCommand extends Command
     private OutputStyle $io;
 
     public function __construct(
-        private ElementManager          $elementManager,
-        private CypherEntityManager     $cypherEntityManager,
-        private UploadAccessChecker     $userPasswordHasher,
+        private ElementManager $elementManager,
+        private CypherEntityManager $cypherEntityManager,
+        private UserPasswordHasher $userPasswordHasher,
         private EmberNexusConfiguration $emberNexusConfiguration,
     ) {
         parent::__construct();

@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Type\Request;
 
-class PartialUploadRequest {
-
+final readonly class PartialUploadRequest
+{
     /**
-     * @var resource
+     * @param resource $content
      */
-    private mixed $content;
-
-    private string $contentType;
-    private int $uploadOffset;
-    private bool | null $isUploadComplete = false;
-    private int | null $contentLength = null;
+    public function __construct(
+        private mixed $content,
+        private string $contentType,
+        private int $uploadOffset,
+        private ?bool $isUploadComplete = false,
+        private ?int $contentLength = null,
+    ) {
+    }
 
     /**
      * @return resource
@@ -24,24 +26,9 @@ class PartialUploadRequest {
         return $this->content;
     }
 
-    /**
-     * @param resource $content
-     */
-    public function setContent(mixed $content): static
-    {
-        $this->content = $content;
-        return $this;
-    }
-
     public function getContentType(): string
     {
         return $this->contentType;
-    }
-
-    public function setContentType(string $contentType): static
-    {
-        $this->contentType = $contentType;
-        return $this;
     }
 
     public function getUploadOffset(): int
@@ -49,32 +36,13 @@ class PartialUploadRequest {
         return $this->uploadOffset;
     }
 
-    public function setUploadOffset(int $uploadOffset): static
-    {
-        $this->uploadOffset = $uploadOffset;
-        return $this;
-    }
-
     public function isUploadComplete(): ?bool
     {
         return $this->isUploadComplete;
-    }
-
-    public function setUploadComplete(?bool $isUploadComplete): static
-    {
-        $this->isUploadComplete = $isUploadComplete;
-        return $this;
     }
 
     public function getContentLength(): ?int
     {
         return $this->contentLength;
     }
-
-    public function setContentLength(?int $contentLength): static
-    {
-        $this->contentLength = $contentLength;
-        return $this;
-    }
-
 }
