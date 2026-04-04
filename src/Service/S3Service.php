@@ -24,7 +24,13 @@ class S3Service
     ) {
     }
 
-    public function uploadFileChunk(UploadFileChunkOperation $uploadFileChunkOperation): void
+    /**
+     * @param UploadFileChunkOperation $uploadFileChunkOperation
+     * @return int length of the uploaded chunk
+     * @throws \App\Exception\Client400BadContentException
+     * @throws \App\Exception\Server500LogicErrorException
+     */
+    public function uploadFileChunk(UploadFileChunkOperation $uploadFileChunkOperation): int
     {
         $this->s3Client->putObject([
             'Bucket' => $uploadFileChunkOperation->getUploadBucket(),
@@ -50,6 +56,8 @@ class S3Service
                 throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Inconsistent length values between provided content-length (%d) and actual content length (%d) detected.', $providedContentLength, $uploadContentLength));
             }
         }
+
+        return $uploadContentLength;
     }
 
     /**

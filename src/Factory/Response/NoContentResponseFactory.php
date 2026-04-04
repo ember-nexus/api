@@ -15,6 +15,15 @@ class NoContentResponseFactory
     ) {
     }
 
+    public function createNoContentResponseWithLocationHeader(string $location): NoContentResponse
+    {
+        $response = new NoContentResponse();
+        $headers = $response->headers;
+
+        $headers->set('Location', $location);
+        return $response;
+    }
+
     public function createNoContentResponseWithResumableUploadHeaders(UploadElement $uploadElement): NoContentResponse
     {
         $response = new NoContentResponse();

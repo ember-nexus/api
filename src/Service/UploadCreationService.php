@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
+use App\Factory\Response\NoContentResponseFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\S3\UploadFileOperationFactory;
@@ -23,6 +24,7 @@ use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -40,6 +42,8 @@ class UploadCreationService
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
         private ResumableUploadRequestFactory $resumableUploadRequestFactory,
         private EventDispatcherInterface $eventDispatcher,
+        private NoContentResponseFactory $noContentResponseFactory,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -70,6 +74,7 @@ class UploadCreationService
         // todo: replace manual array with fileProperty instance
         $element->addProperty('file', [
             'contentLength' => $uploadFileOperation->getContentLength(),
+            'extension' => $resumableUploadRequest->getExtension()
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
@@ -82,10 +87,10 @@ class UploadCreationService
         $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));
 
         $uploadId = Uuid::uuid4();
-        // todo: try to parse extension, and persist it
         $uploadElement = new UploadElement();
         $uploadElement
             ->setId($uploadId)
+            ->setLabel('Upload')
             ->setUploadOwner($userId)
             ->setUploadTarget($resumableUploadRequest->getElementId())
             ->setExtension($resumableUploadRequest->getExtension())
@@ -93,11 +98,21 @@ class UploadCreationService
             ->setUploadLength($resumableUploadRequest->getUploadLength());
 
         $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest);
-        $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+        $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+
+        $uploadElement->setUploadOffset($chunkLength);
+        $uploadElement->setAlreadyUploadedChunks(1);
 
         $this->elementManager->merge($uploadElement);
         $this->elementManager->flush();
 
-        return new NoContentResponse();
+        $location = $this->urlGenerator->generate(
+            'head-upload',
+            [
+                'id' => $uploadId->toString()
+            ],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
+        return $this->noContentResponseFactory->createNoContentResponseWithLocationHeader($location);
     }
 }

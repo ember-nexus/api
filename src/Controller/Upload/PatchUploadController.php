@@ -78,10 +78,9 @@ class PatchUploadController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if ($uploadElement->getUploadOwner() !== $userId) {
+        if ($uploadElement->getUploadOwner()?->toString() !== $userId->toString()) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
-
         if ($uploadElement->getExpires() < new DateTime()) {
             throw $this->client410GoneExceptionFactory->createFromTemplate();
         }
@@ -99,7 +98,7 @@ class PatchUploadController extends AbstractController
 
         $patchResource = $request->getContent(true);
 
-        $currentChunkIndex = $uploadElement->getAlreadyUploadedChunks();
+        $currentChunkIndex = $uploadElement->getAlreadyUploadedChunks() + 1;
         $nextChunkKey = $this->fileService->getUploadBucketKey($uploadId, $currentChunkIndex);
 
         $this->s3Client->putObject([
@@ -119,6 +118,8 @@ class PatchUploadController extends AbstractController
             throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of created chunk.');
         }
 
+        // update uploadelement to update chunk index +1 and upload offset + n bytes
+
         $canCreateFile = false;
 
         if (null !== $partialUploadRequest->getContentLength()
@@ -133,8 +134,15 @@ class PatchUploadController extends AbstractController
             $uploadElement->setUploadComplete(true);
         }
 
-        $uploadElement->setUploadOffset($uploadElement->getUploadOffset() + $contentLength);
-        $uploadElement->setAlreadyUploadedChunks($uploadElement->getAlreadyUploadedChunks() + 1);
+
+//        print_r($uploadElement);
+
+        $uploadElement = $uploadElement
+            ->setUploadOffset($uploadElement->getUploadOffset() + $contentLength)
+            ->setAlreadyUploadedChunks($uploadElement->getAlreadyUploadedChunks() + 1);
+
+//        print_r($uploadElement);
+//        exit;
 
         $this->elementManager->merge($uploadElement);
         $this->elementManager->flush();
@@ -168,14 +176,15 @@ class PatchUploadController extends AbstractController
         $parts = [];
 
         try {
-            for ($i = 0; $i <= $uploadElement->getAlreadyUploadedChunks(); ++$i) {
+            for ($i = 1; $i <= $uploadElement->getAlreadyUploadedChunks(); ++$i) {
                 $sourceKey = $this->fileService->getUploadBucketKey($uploadId, $i);
                 // todo: possible bug with upload bucket vs storage bucket; needs to be tested live
                 $copyResult = $this->s3Client->uploadPartCopy([
-                    'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
+                    'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
                     'Key' => $targetKey,
                     'UploadId' => $multipartUploadId,
-                    'PartNumber' => $i + 1,
+//                    'PartNumber' => $i + 1,
+                    'PartNumber' => $i,
                     'CopySource' => sprintf('%s/%s', $this->emberNexusConfiguration->getFileS3UploadBucket(), $sourceKey),
                 ]);
 
@@ -185,7 +194,8 @@ class PatchUploadController extends AbstractController
                 }
 
                 $parts[] = [
-                    'PartNumber' => $i + 1,
+//                    'PartNumber' => $i + 1,
+                    'PartNumber' => $i,
                     'ETag' => $copyPartResult->getETag(),
                 ];
             }
@@ -199,6 +209,7 @@ class PatchUploadController extends AbstractController
                 ],
             ]);
 
+            // important todos:
             // todo: delete original file, if it a) existed and b) had a different file extension
             // todo: set file property to actual element, merge and flush it?
         } catch (Throwable $e) {

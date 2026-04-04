@@ -8,6 +8,7 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Service\FileService;
 use DateTime;
+use DateTimeImmutable;
 use Exception;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -46,6 +47,8 @@ class UploadElement extends NodeElement
         if ('Upload' !== $label) {
             throw new Exception(sprintf('Can not cast element of type %s to upload.', $label));
         }
+        $upload->setLabel('Upload');
+        $upload->setId($element->getId());
 
         $properties = $element->getProperties();
 
@@ -119,6 +122,9 @@ class UploadElement extends NodeElement
             if ($expires instanceof DateTime) {
                 $upload->setExpires($expires);
             }
+            if ($expires instanceof DateTimeImmutable) {
+                $upload->setExpires(DateTime::createFromImmutable($expires));
+            }
         }
 
         return $upload;
@@ -170,7 +176,7 @@ class UploadElement extends NodeElement
 
     public function setUploadTarget(?UuidInterface $uploadTarget): static
     {
-        $this->addProperty('uploadTarget', $uploadTarget);
+        $this->addProperty('uploadTarget', $uploadTarget?->toString());
         $this->uploadTarget = $uploadTarget;
 
         return $this;
@@ -196,7 +202,7 @@ class UploadElement extends NodeElement
 
     public function setUploadOwner(?UuidInterface $uploadOwner): static
     {
-        $this->addProperty('uploadOwner', $uploadOwner);
+        $this->addProperty('uploadOwner', $uploadOwner?->toString());
         $this->uploadOwner = $uploadOwner;
 
         return $this;
