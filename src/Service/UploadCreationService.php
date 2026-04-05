@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Response\NoContentResponseFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
@@ -43,6 +44,7 @@ class UploadCreationService
         private EventDispatcherInterface $eventDispatcher,
         private NoContentResponseFactory $noContentResponseFactory,
         private UrlGeneratorInterface $urlGenerator,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
 
@@ -98,6 +100,13 @@ class UploadCreationService
 
         $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
         $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+
+        if ($chunkLength < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $chunkLength));
+        }
+        if ($chunkLength > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $chunkLength));
+        }
 
         $uploadElement->setUploadOffset($chunkLength);
         $uploadElement->setAlreadyUploadedChunks(1);
