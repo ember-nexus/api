@@ -211,6 +211,15 @@ class PatchUploadController extends AbstractController
             // important todos:
             // todo: delete original file, if it a) existed and b) had a different file extension
             // todo: set file property to actual element, merge and flush it?
+
+            $element = $this->elementManager->getElementOrFail($uploadTarget);
+
+            $element->addProperty('file', [
+                //                'contentLength' => $uploadFileOperation->getContentLength(),
+                'extension' => $extension,
+            ]);
+            $this->elementManager->merge($element);
+            $this->elementManager->flush();
         } catch (Throwable $e) {
             /**
              * Abort multipart upload on failure.

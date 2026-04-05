@@ -10,6 +10,7 @@ use App\Type\Request\ResumableUploadRequest;
 use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
+use Ramsey\Uuid\UuidInterface;
 
 class UploadFileChunkOperationFactory
 {
@@ -20,18 +21,17 @@ class UploadFileChunkOperationFactory
     ) {
     }
 
-    public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequest $resumableUploadRequest): UploadFileChunkOperation
+    public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequest $resumableUploadRequest, UuidInterface $uploadId): UploadFileChunkOperation
     {
         if (false !== $resumableUploadRequest->isUploadComplete()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileChunkOperation' requires 'ResumableUploadRequest' to contain partial content, i.e. be a chunked upload request.");
         }
 
-        $elementId = $resumableUploadRequest->getElementId();
         $resource = $resumableUploadRequest->getContent();
 
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($elementId, 0),
+            $this->fileService->getUploadBucketKey($uploadId, 1),
             $resource,
             $resumableUploadRequest->getContentLength(),
             'application/octet-stream'

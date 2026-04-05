@@ -96,7 +96,7 @@ class UploadCreationService
             ->setExpires($expires)
             ->setUploadLength($resumableUploadRequest->getUploadLength());
 
-        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest);
+        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
         $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
 
         $uploadElement->setUploadOffset($chunkLength);
