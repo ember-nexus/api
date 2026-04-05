@@ -25,8 +25,8 @@ class S3Service
     }
 
     /**
-     * @param UploadFileChunkOperation $uploadFileChunkOperation
      * @return int length of the uploaded chunk
+     *
      * @throws \App\Exception\Client400BadContentException
      * @throws \App\Exception\Server500LogicErrorException
      */

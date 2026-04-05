@@ -58,8 +58,8 @@ class GetElementFileController extends AbstractController
 
         $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
 
-//        print_r($fileOperation);
-//        exit;
+        //        print_r($fileOperation);
+        //        exit;
 
         $doesFileExist = $this->s3Service->existsFile($fileOperation);
         if (false === $doesFileExist) {

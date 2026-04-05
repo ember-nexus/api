@@ -21,6 +21,7 @@ class NoContentResponseFactory
         $headers = $response->headers;
 
         $headers->set('Location', $location);
+
         return $response;
     }
 

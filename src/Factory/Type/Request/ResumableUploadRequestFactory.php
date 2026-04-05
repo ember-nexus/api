@@ -28,7 +28,7 @@ class ResumableUploadRequestFactory
         $extension = $this->headerParseService->getExtensionFromHeaders($headers);
         $content = $request->getContent(true);
 
-        if (null !== $uploadLength && null !== $contentLength && $uploadLength !== $contentLength && $isUploadComplete === true) {
+        if (null !== $uploadLength && null !== $contentLength && $uploadLength !== $contentLength && true === $isUploadComplete) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("Inconsistent length values provided in headers 'Content-Length' and 'Upload-Length'.");
         }
 

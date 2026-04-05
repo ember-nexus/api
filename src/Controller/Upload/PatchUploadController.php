@@ -134,15 +134,14 @@ class PatchUploadController extends AbstractController
             $uploadElement->setUploadComplete(true);
         }
 
-
-//        print_r($uploadElement);
+        //        print_r($uploadElement);
 
         $uploadElement = $uploadElement
             ->setUploadOffset($uploadElement->getUploadOffset() + $contentLength)
             ->setAlreadyUploadedChunks($uploadElement->getAlreadyUploadedChunks() + 1);
 
-//        print_r($uploadElement);
-//        exit;
+        //        print_r($uploadElement);
+        //        exit;
 
         $this->elementManager->merge($uploadElement);
         $this->elementManager->flush();
@@ -183,7 +182,7 @@ class PatchUploadController extends AbstractController
                     'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
                     'Key' => $targetKey,
                     'UploadId' => $multipartUploadId,
-//                    'PartNumber' => $i + 1,
+                    //                    'PartNumber' => $i + 1,
                     'PartNumber' => $i,
                     'CopySource' => sprintf('%s/%s', $this->emberNexusConfiguration->getFileS3UploadBucket(), $sourceKey),
                 ]);
@@ -194,7 +193,7 @@ class PatchUploadController extends AbstractController
                 }
 
                 $parts[] = [
-//                    'PartNumber' => $i + 1,
+                    //                    'PartNumber' => $i + 1,
                     'PartNumber' => $i,
                     'ETag' => $copyPartResult->getETag(),
                 ];

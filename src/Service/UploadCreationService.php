@@ -12,7 +12,6 @@ use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Response\CreatedResponse;
-use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
 use App\Security\UploadAccessChecker;
 use App\Type\Request\ResumableUploadRequest;
@@ -74,7 +73,7 @@ class UploadCreationService
         // todo: replace manual array with fileProperty instance
         $element->addProperty('file', [
             'contentLength' => $uploadFileOperation->getContentLength(),
-            'extension' => $resumableUploadRequest->getExtension()
+            'extension' => $resumableUploadRequest->getExtension(),
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
@@ -109,10 +108,11 @@ class UploadCreationService
         $location = $this->urlGenerator->generate(
             'head-upload',
             [
-                'id' => $uploadId->toString()
+                'id' => $uploadId->toString(),
             ],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
+
         return $this->noContentResponseFactory->createNoContentResponseWithLocationHeader($location);
     }
 }
