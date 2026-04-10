@@ -27,7 +27,7 @@ class UploadFileChunkOperationFactory
             throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileChunkOperation' requires 'ResumableUploadRequest' to contain partial content, i.e. be a chunked upload request.");
         }
 
-        if () {}
+        // todo: check resource stream for at least 5 mb of length?
 
         $resource = $resumableUploadRequest->getContent();
 
