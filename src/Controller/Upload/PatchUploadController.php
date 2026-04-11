@@ -11,12 +11,14 @@ use App\Factory\Exception\Client410GoneExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Factory\Response\NoContentResponseFactory;
 use App\Factory\Type\Request\PartialUploadRequestFactory;
+use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Response\JsonResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\FileService;
+use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\Upload;
 use AsyncAws\S3\S3Client;
@@ -49,6 +51,8 @@ class PatchUploadController extends AbstractController
         private NoContentResponseFactory $noContentResponseFactory,
         private UploadFactory $uploadFactory,
         private UploadService $uploadService,
+        private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
+        private S3Service $s3Service,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private Client410GoneExceptionFactory $client410GoneExceptionFactory,
@@ -87,49 +91,15 @@ class PatchUploadController extends AbstractController
             throw $this->client409ConflictExceptionFactory->createFromDetail('offset from request does not match offset of resource', additionalDetails: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
         }
 
-        $patchResource = $request->getContent(true);
-
-        $currentChunkIndex = $upload->getAlreadyUploadedChunks() + 1;
-        $nextChunkKey = $this->fileService->getUploadBucketKey($upload->getId(), $currentChunkIndex);
-
-        $this->s3Client->putObject([
-            'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            'Key' => $nextChunkKey,
-            'Body' => $patchResource,
-        ]);
-
-        $headResult = $this->s3Client->headObject([
-            'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            'Key' => $nextChunkKey,
-        ]);
-
-        $contentLength = $headResult->getContentLength();
-
-        if (null === $contentLength) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of created chunk.');
-        }
-
-        // update uploadelement to update chunk index +1 and upload offset + n bytes
-
-        $canCreateFile = false;
-
-        if (null !== $partialUploadRequest->getContentLength()
-            && $partialUploadRequest->getContentLength() !== $contentLength
-        ) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Issue with upload; uploaded chunk has different length than provided content length.');
-        }
+        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload);
+        $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+        $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength);
+        $this->uploadService->persistUpload($upload);
 
         if ($partialUploadRequest->isUploadComplete()) {
             // the final chunk was successfully uploaded -> we can create the file
-            $canCreateFile = true;
             $upload = $this->uploadFactory->markUploadAsComplete($upload);
-        }
-
-        $upload = $this->uploadFactory->addNewChunkToUpload($upload, $contentLength);
-
-        $this->uploadService->persistUpload($upload);
-
-        if ($canCreateFile) {
+            $this->uploadService->persistUpload($upload);
             $this->createFile($upload);
         }
 
@@ -194,7 +164,7 @@ class PatchUploadController extends AbstractController
             $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
             $element->addProperty('file', [
-                //                'contentLength' => $uploadFileOperation->getContentLength(),
+                // 'contentLength' => $uploadFileOperation->getContentLength(),
                 'extension' => $upload->getExtension(),
             ]);
             $this->elementManager->merge($element);

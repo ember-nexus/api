@@ -6,9 +6,11 @@ namespace App\Factory\Type\S3;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\FileService;
+use App\Type\Request\PartialUploadRequest;
 use App\Type\Request\ResumableUploadRequest;
 use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
+use App\Type\Upload;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
 
@@ -36,6 +38,23 @@ class UploadFileChunkOperationFactory
             $this->fileService->getUploadBucketKey($uploadId, 1),
             $resource,
             $resumableUploadRequest->getContentLength(),
+            'application/octet-stream'
+        );
+    }
+
+    public function createUploadFileChunkOperationFromPartialUploadRequest(PartialUploadRequest $partialUploadRequest, Upload $upload): UploadFileChunkOperation
+    {
+        if (true !== $partialUploadRequest->isUploadComplete()) {
+            // todo: check resource stream for at least 5 mb of length
+        }
+
+        $resource = $partialUploadRequest->getContent();
+
+        return new UploadFileChunkOperation(
+            $this->emberNexusConfiguration->getFileS3UploadBucket(),
+            $this->fileService->getUploadBucketKey($upload->getId(), $upload->getAlreadyUploadedChunks() + 1),
+            $resource,
+            $partialUploadRequest->getContentLength(),
             'application/octet-stream'
         );
     }

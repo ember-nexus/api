@@ -42,7 +42,7 @@ class HeadUploadController extends AbstractController
             $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
         } catch (Exception $e) {
             throw $e;
-            //throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+            // throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         if ($upload->getUploadOwner() !== $this->authProvider->getUserId()) {
