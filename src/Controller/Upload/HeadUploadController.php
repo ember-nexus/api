@@ -6,10 +6,10 @@ namespace App\Controller\Upload;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Response\NoContentResponseFactory;
+use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Type\UploadElement;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +22,7 @@ class HeadUploadController extends AbstractController
         private AuthProvider $authProvider,
         private ElementManager $elementManager,
         private NoContentResponseFactory $noContentResponseFactory,
+        private UploadFactory $uploadFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -36,25 +37,18 @@ class HeadUploadController extends AbstractController
     )]
     public function headUpload(string $id): Response
     {
-        $elementId = UuidV4::fromString($id);
-        $userId = $this->authProvider->getUserId();
-
-        $element = $this->elementManager->getElementOrFail($elementId);
-
+        $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
         try {
-            $uploadElement = UploadElement::createFromElement($element);
+            $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
         } catch (Exception $e) {
+            throw $e;
+            //throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        if ($upload->getUploadOwner() !== $this->authProvider->getUserId()) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if (null === $uploadElement->getUploadOwner()) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-
-        if ($uploadElement->getUploadOwner()?->toString() !== $userId->toString()) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-
-        return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeaders($uploadElement);
+        return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }
 }

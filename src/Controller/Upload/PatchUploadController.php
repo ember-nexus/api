@@ -11,17 +11,18 @@ use App\Factory\Exception\Client410GoneExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Factory\Response\NoContentResponseFactory;
 use App\Factory\Type\Request\PartialUploadRequestFactory;
+use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Response\JsonResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\FileService;
-use App\Type\UploadElement;
+use App\Service\UploadService;
+use App\Type\Upload;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,6 +47,8 @@ class PatchUploadController extends AbstractController
         private EventDispatcherInterface $eventDispatcher,
         private PartialUploadRequestFactory $partialUploadRequestFactory,
         private NoContentResponseFactory $noContentResponseFactory,
+        private UploadFactory $uploadFactory,
+        private UploadService $uploadService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private Client410GoneExceptionFactory $client410GoneExceptionFactory,
@@ -63,43 +66,31 @@ class PatchUploadController extends AbstractController
     )]
     public function patchUpload(string $id, Request $request): Response
     {
-        $uploadId = UuidV4::fromString($id);
-        $userId = $this->authProvider->getUserId();
-
-        $uploadElement = $this->elementManager->getElementOrFail($uploadId);
-
+        $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
         try {
-            $uploadElement = UploadElement::createFromElement($uploadElement);
+            $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
         } catch (Exception $e) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if (null === $uploadElement->getUploadOwner()) {
+        if ($upload->getUploadOwner() !== $this->authProvider->getUserId()) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if ($uploadElement->getUploadOwner()?->toString() !== $userId->toString()) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-        if ($uploadElement->getExpires() < new DateTime()) {
+        if ($upload->getExpires() < new DateTime()) {
             throw $this->client410GoneExceptionFactory->createFromTemplate();
         }
 
         $partialUploadRequest = $this->partialUploadRequestFactory->createPartialUploadRequestFromRequest($request);
 
-        if ($partialUploadRequest->getUploadOffset() !== $uploadElement->getUploadOffset()) {
-            throw $this->client409ConflictExceptionFactory->createFromDetail('offset from request does not match offset of resource', additionalDetails: ['expected-offset' => $uploadElement->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
-        }
-
-        $uploadTarget = $uploadElement->getUploadTarget();
-        if (null === $uploadTarget) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Upload element does not contain target.');
+        if ($partialUploadRequest->getUploadOffset() !== $upload->getUploadOffset()) {
+            throw $this->client409ConflictExceptionFactory->createFromDetail('offset from request does not match offset of resource', additionalDetails: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
         }
 
         $patchResource = $request->getContent(true);
 
-        $currentChunkIndex = $uploadElement->getAlreadyUploadedChunks() + 1;
-        $nextChunkKey = $this->fileService->getUploadBucketKey($uploadId, $currentChunkIndex);
+        $currentChunkIndex = $upload->getAlreadyUploadedChunks() + 1;
+        $nextChunkKey = $this->fileService->getUploadBucketKey($upload->getId(), $currentChunkIndex);
 
         $this->s3Client->putObject([
             'Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket(),
@@ -131,35 +122,23 @@ class PatchUploadController extends AbstractController
         if ($partialUploadRequest->isUploadComplete()) {
             // the final chunk was successfully uploaded -> we can create the file
             $canCreateFile = true;
-            $uploadElement->setUploadComplete(true);
+            $upload = $this->uploadFactory->markUploadAsComplete($upload);
         }
 
-        //        print_r($uploadElement);
+        $upload = $this->uploadFactory->addNewChunkToUpload($upload, $contentLength);
 
-        $uploadElement = $uploadElement
-            ->setUploadOffset($uploadElement->getUploadOffset() + $contentLength)
-            ->setAlreadyUploadedChunks($uploadElement->getAlreadyUploadedChunks() + 1);
-
-        //        print_r($uploadElement);
-        //        exit;
-
-        $this->elementManager->merge($uploadElement);
-        $this->elementManager->flush();
+        $this->uploadService->persistUpload($upload);
 
         if ($canCreateFile) {
-            $this->createFile($uploadElement, $uploadTarget);
+            $this->createFile($upload);
         }
 
-        return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeaders($uploadElement);
+        return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }
 
-    public function createFile(UploadElement $uploadElement, UuidInterface $uploadTarget): Response
+    public function createFile(Upload $upload): Response
     {
-        $uploadId = $uploadElement->getId();
-        // upload id is not null -> refactor to dto?
-
-        $extension = $uploadElement->getExtension();
-        $targetKey = $this->fileService->getStorageBucketKey($uploadTarget, $extension);
+        $targetKey = $this->fileService->getStorageBucketKey($upload->getUploadTarget(), $upload->getExtension());
 
         $createResult = $this->s3Client->createMultipartUpload([
             'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
@@ -175,8 +154,8 @@ class PatchUploadController extends AbstractController
         $parts = [];
 
         try {
-            for ($i = 1; $i <= $uploadElement->getAlreadyUploadedChunks(); ++$i) {
-                $sourceKey = $this->fileService->getUploadBucketKey($uploadId, $i);
+            for ($i = 1; $i <= $upload->getAlreadyUploadedChunks(); ++$i) {
+                $sourceKey = $this->fileService->getUploadBucketKey($upload->getId(), $i);
                 // todo: possible bug with upload bucket vs storage bucket; needs to be tested live
                 $copyResult = $this->s3Client->uploadPartCopy([
                     'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
@@ -212,11 +191,11 @@ class PatchUploadController extends AbstractController
             // todo: delete original file, if it a) existed and b) had a different file extension
             // todo: set file property to actual element, merge and flush it?
 
-            $element = $this->elementManager->getElementOrFail($uploadTarget);
+            $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
             $element->addProperty('file', [
                 //                'contentLength' => $uploadFileOperation->getContentLength(),
-                'extension' => $extension,
+                'extension' => $upload->getExtension(),
             ]);
             $this->elementManager->merge($element);
             $this->elementManager->flush();
@@ -233,7 +212,7 @@ class PatchUploadController extends AbstractController
             throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
         }
 
-        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($uploadTarget));
+        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
 
         return new JsonResponse([
             'upload' => 'complete',

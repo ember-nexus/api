@@ -51,6 +51,36 @@ class UploadFactory
         );
     }
 
+    public function markUploadAsComplete(Upload $upload): Upload
+    {
+        return new Upload(
+            $upload->getId(),
+            $upload->getUploadLength(),
+            $upload->getUploadOffset(),
+            true,
+            $upload->getUploadTarget(),
+            $upload->getAlreadyUploadedChunks(),
+            $upload->getUploadOwner(),
+            $upload->getExtension(),
+            $upload->getExpires()
+        );
+    }
+
+    public function addNewChunkToUpload(Upload $upload, int $chunkLength): Upload
+    {
+        return new Upload(
+            $upload->getId(),
+            $upload->getUploadLength(),
+            $upload->getUploadOffset() + $chunkLength,
+            $upload->isUploadComplete(),
+            $upload->getUploadTarget(),
+            $upload->getAlreadyUploadedChunks() + 1,
+            $upload->getUploadOwner(),
+            $upload->getExtension(),
+            $upload->getExpires()
+        );
+    }
+
     /**
      * @param mixed[] $properties
      */
