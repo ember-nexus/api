@@ -113,6 +113,9 @@ class PatchUploadController extends AbstractController
         $this->elementManager->merge($element);
         $this->elementManager->flush();
 
+        $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
+        $this->uploadService->deleteUpload($upload);
+
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
 
         return new JsonResponse([

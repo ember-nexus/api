@@ -90,7 +90,36 @@ class S3Service
             throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of merged data.');
         }
 
+        if (null !== $mergeFileChunksOperation->getPreviousStorageKey()
+            && $mergeFileChunksOperation->getPreviousStorageKey() !== $mergeFileChunksOperation->getStorageKey()) {
+            // delete previous uploaded element, if available
+            $objectConfig = [
+                'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
+                'Key' => $mergeFileChunksOperation->getPreviousStorageKey(),
+            ];
+            $status = $this->s3Client->objectExists($objectConfig);
+
+            if ($status->isSuccess()) {
+                $this->s3Client->deleteObject($objectConfig);
+            }
+        }
+
         return $mergedContentLength;
+    }
+
+    public function deleteFileChunks(MergeFileChunksOperation $mergeFileChunksOperation): void
+    {
+        foreach ($mergeFileChunksOperation->getUploadKeys() as $uploadKey) {
+            $objectConfig = [
+                'Bucket' => $mergeFileChunksOperation->getUploadBucket(),
+                'Key' => $uploadKey,
+            ];
+            $status = $this->s3Client->objectExists($objectConfig);
+
+            if ($status->isSuccess()) {
+                $this->s3Client->deleteObject($objectConfig);
+            }
+        }
     }
 
     /**

@@ -32,4 +32,12 @@ class UploadService
         $this->elementManager->merge($element);
         $this->elementManager->flush();
     }
+
+    public function deleteUpload(Upload $upload): void
+    {
+        $element = $this->elementManager->getElementOrFail($upload->getId());
+
+        $this->elementManager->delete($element);
+        $this->elementManager->flush();
+    }
 }

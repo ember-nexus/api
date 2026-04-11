@@ -13,6 +13,7 @@ final readonly class MergeFileChunksOperation
         private string $uploadBucket,
         private array $uploadKeys,
         private string $storageBucket,
+        private ?string $previousStorageKey,
         private string $storageKey,
         private string $mimeType,
     ) {
@@ -34,6 +35,11 @@ final readonly class MergeFileChunksOperation
     public function getStorageBucket(): string
     {
         return $this->storageBucket;
+    }
+
+    public function getPreviousStorageKey(): ?string
+    {
+        return $this->previousStorageKey;
     }
 
     public function getStorageKey(): string
