@@ -8,6 +8,7 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Type\S3\FileOperation;
+use App\Type\S3\MergeFileChunksOperation;
 use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
 use AsyncAws\S3\Result\GetObjectOutput;
@@ -22,6 +23,74 @@ class S3Service
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
+    }
+
+    public function mergeFileChunks(MergeFileChunksOperation $mergeFileChunksOperation): int
+    {
+        $createResult = $this->s3Client->createMultipartUpload([
+            'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
+            'Key' => $mergeFileChunksOperation->getStorageKey(),
+        ]);
+
+        $multipartUploadId = $createResult->getUploadId();
+
+        if (null === $multipartUploadId) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to create multipart upload.');
+        }
+
+        $parts = [];
+
+        try {
+            foreach ($mergeFileChunksOperation->getUploadKeys() as $i => $uploadKey) {
+                $copyResult = $this->s3Client->uploadPartCopy([
+                    'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
+                    'Key' => $mergeFileChunksOperation->getStorageKey(),
+                    'UploadId' => $multipartUploadId,
+                    'PartNumber' => $i + 1,
+                    'CopySource' => sprintf('%s/%s', $mergeFileChunksOperation->getUploadBucket(), $uploadKey),
+                ]);
+
+                $copyPartResult = $copyResult->getCopyPartResult();
+                if (null === $copyPartResult) {
+                    throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read copy part result.');
+                }
+
+                $parts[] = [
+                    'PartNumber' => $i + 1,
+                    'ETag' => $copyPartResult->getETag(),
+                ];
+            }
+
+            $this->s3Client->completeMultipartUpload([
+                'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
+                'Key' => $mergeFileChunksOperation->getStorageKey(),
+                'UploadId' => $multipartUploadId,
+                'MultipartUpload' => [
+                    'Parts' => $parts,
+                ],
+            ]);
+        } catch (Throwable $e) {
+            $this->s3Client->abortMultipartUpload([
+                'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
+                'Key' => $mergeFileChunksOperation->getStorageKey(),
+                'UploadId' => $multipartUploadId,
+            ]);
+
+            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
+        }
+
+        $headResult = $this->s3Client->headObject([
+            'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
+            'Key' => $mergeFileChunksOperation->getStorageKey(),
+        ]);
+
+        $mergedContentLength = $headResult->getContentLength();
+
+        if (null === $mergedContentLength) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of merged data.');
+        }
+
+        return $mergedContentLength;
     }
 
     /**

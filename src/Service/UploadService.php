@@ -18,7 +18,7 @@ class UploadService
 
     public function persistUpload(Upload $upload): void
     {
-        $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
+        $element = $this->elementManager->getElementOrFail($upload->getId());
 
         $element->addProperty('uploadLength', $upload->getUploadLength());
         $element->addProperty('uploadOffset', $upload->getUploadOffset());

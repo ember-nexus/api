@@ -8,21 +8,18 @@ use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Exception\Client410GoneExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Factory\Response\NoContentResponseFactory;
 use App\Factory\Type\Request\PartialUploadRequestFactory;
+use App\Factory\Type\S3\MergeFileChunksOperationFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Response\JsonResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\FileService;
 use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\Upload;
-use AsyncAws\S3\S3Client;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Safe\DateTime;
@@ -31,7 +28,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Throwable;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveParameterList")
@@ -42,21 +38,18 @@ class PatchUploadController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
-        private S3Client $s3Client,
-        private EmberNexusConfiguration $emberNexusConfiguration,
         private ElementManager $elementManager,
-        private FileService $fileService,
         private EventDispatcherInterface $eventDispatcher,
         private PartialUploadRequestFactory $partialUploadRequestFactory,
         private NoContentResponseFactory $noContentResponseFactory,
         private UploadFactory $uploadFactory,
         private UploadService $uploadService,
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
+        private MergeFileChunksOperationFactory $mergeFileChunksOperationFactory,
         private S3Service $s3Service,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private Client410GoneExceptionFactory $client410GoneExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
@@ -77,7 +70,7 @@ class PatchUploadController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if ($upload->getUploadOwner() !== $this->authProvider->getUserId()) {
+        if ($upload->getUploadOwner()->toString() !== $this->authProvider->getUserId()->toString()) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
@@ -108,79 +101,17 @@ class PatchUploadController extends AbstractController
 
     public function createFile(Upload $upload): Response
     {
-        $targetKey = $this->fileService->getStorageBucketKey($upload->getUploadTarget(), $upload->getExtension());
+        $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
+        $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
 
-        $createResult = $this->s3Client->createMultipartUpload([
-            'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            'Key' => $targetKey,
+        $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
+
+        $element->addProperty('file', [
+            'contentLength' => $mergedContentLength,
+            'extension' => $upload->getExtension(),
         ]);
-
-        $multipartUploadId = $createResult->getUploadId();
-
-        if (null === $multipartUploadId) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to create multipart upload.');
-        }
-
-        $parts = [];
-
-        try {
-            for ($i = 1; $i <= $upload->getAlreadyUploadedChunks(); ++$i) {
-                $sourceKey = $this->fileService->getUploadBucketKey($upload->getId(), $i);
-                // todo: possible bug with upload bucket vs storage bucket; needs to be tested live
-                $copyResult = $this->s3Client->uploadPartCopy([
-                    'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-                    'Key' => $targetKey,
-                    'UploadId' => $multipartUploadId,
-                    //                    'PartNumber' => $i + 1,
-                    'PartNumber' => $i,
-                    'CopySource' => sprintf('%s/%s', $this->emberNexusConfiguration->getFileS3UploadBucket(), $sourceKey),
-                ]);
-
-                $copyPartResult = $copyResult->getCopyPartResult();
-                if (null === $copyPartResult) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read copy part result.');
-                }
-
-                $parts[] = [
-                    //                    'PartNumber' => $i + 1,
-                    'PartNumber' => $i,
-                    'ETag' => $copyPartResult->getETag(),
-                ];
-            }
-
-            $this->s3Client->completeMultipartUpload([
-                'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-                'Key' => $targetKey,
-                'UploadId' => $multipartUploadId,
-                'MultipartUpload' => [
-                    'Parts' => $parts,
-                ],
-            ]);
-
-            // important todos:
-            // todo: delete original file, if it a) existed and b) had a different file extension
-            // todo: set file property to actual element, merge and flush it?
-
-            $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
-
-            $element->addProperty('file', [
-                // 'contentLength' => $uploadFileOperation->getContentLength(),
-                'extension' => $upload->getExtension(),
-            ]);
-            $this->elementManager->merge($element);
-            $this->elementManager->flush();
-        } catch (Throwable $e) {
-            /**
-             * Abort multipart upload on failure.
-             */
-            $this->s3Client->abortMultipartUpload([
-                'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
-                'Key' => $targetKey,
-                'UploadId' => $multipartUploadId,
-            ]);
-
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
-        }
+        $this->elementManager->merge($element);
+        $this->elementManager->flush();
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
 

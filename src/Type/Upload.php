@@ -18,6 +18,7 @@ final readonly class Upload
         private int $alreadyUploadedChunks,
         private UuidInterface $uploadOwner,
         private string $extension,
+        private string $mimeType,
         private DateTime $expires,
     ) {
     }
@@ -60,6 +61,11 @@ final readonly class Upload
     public function getExtension(): string
     {
         return $this->extension;
+    }
+
+    public function getMimeType(): string
+    {
+        return $this->mimeType;
     }
 
     public function getExpires(): DateTime

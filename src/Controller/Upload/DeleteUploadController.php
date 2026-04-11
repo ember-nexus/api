@@ -48,7 +48,7 @@ class DeleteUploadController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if ($upload->getUploadOwner() !== $this->authProvider->getUserId()) {
+        if ($upload->getUploadOwner()->toString() !== $this->authProvider->getUserId()->toString()) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 

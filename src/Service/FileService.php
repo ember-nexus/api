@@ -14,6 +14,7 @@ class FileService
     public const int MAX_FILENAME_LENGTH = 255;
     public const int MAX_EXTENSION_LENGTH = 16;
     public const string DEFAULT_EXTENSION = 'bin';
+    public const string DEFAULT_MIME_TYPE = 'application/octet-stream';
     public const string UPLOAD_EXTENSION = 'wip';
 
     public function __construct(
