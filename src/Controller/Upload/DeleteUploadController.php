@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace App\Controller\Upload;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\FileService;
-use App\Type\UploadElement;
-use AsyncAws\S3\S3Client;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
+use App\Service\S3Service;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -23,11 +22,11 @@ class DeleteUploadController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
-        private S3Client $s3Client,
         private ElementManager $elementManager,
-        private EmberNexusConfiguration $emberNexusConfiguration,
-        private FileService $fileService,
         private LoggerInterface $logger,
+        private S3Service $s3Service,
+        private FileOperationFactory $fileOperationFactory,
+        private UploadFactory $uploadFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -42,44 +41,28 @@ class DeleteUploadController extends AbstractController
     )]
     public function deleteUpload(string $id): NoContentResponse
     {
-        $uploadId = UuidV4::fromString($id);
-        $userId = $this->authProvider->getUserId();
-
-        $uploadElement = $this->elementManager->getElementOrFail($uploadId);
-
+        $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
         try {
-            $uploadElement = UploadElement::createFromElement($uploadElement);
+            $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
         } catch (Exception $e) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if (null === $uploadElement->getUploadOwner()) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-
-        if ($uploadElement->getUploadOwner() !== $userId) {
+        if ($upload->getUploadOwner() !== $this->authProvider->getUserId()) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
         $this->logger->info(
             'Deleting upload element from database and S3.',
             [
-                'uploadId' => $uploadId->toString(),
-                'elementId' => false,
+                'uploadId' => $upload->getId()->toString(),
+                'elementId' => $upload->getUploadTarget()->toString(),
             ]
         );
 
-        $uploadBucket = $this->emberNexusConfiguration->getFileS3UploadBucket();
-        for ($i = 0; $i <= $uploadElement->getAlreadyUploadedChunks(); ++$i) {
-            $objectConfig = [
-                'Bucket' => $uploadBucket,
-                'Key' => $this->fileService->getUploadBucketKey($uploadId, $i),
-            ];
-            $status = $this->s3Client->objectExists($objectConfig);
-
-            if ($status->isSuccess()) {
-                $this->s3Client->deleteObject($objectConfig);
-            }
+        for ($i = 0; $i <= $upload->getAlreadyUploadedChunks(); ++$i) {
+            $deleteChunkOperation = $this->fileOperationFactory->createFileOperationFromUpload($upload, $i);
+            $this->s3Service->deleteFile($deleteChunkOperation);
         }
 
         $this->elementManager->delete($uploadElement);

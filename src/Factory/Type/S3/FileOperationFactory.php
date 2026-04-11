@@ -10,6 +10,7 @@ use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\ElementService;
 use App\Service\FileService;
 use App\Type\S3\FileOperation;
+use App\Type\Upload;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 class FileOperationFactory
@@ -33,6 +34,14 @@ class FileOperationFactory
         return new FileOperation(
             $this->emberNexusConfiguration->getFileS3StorageBucket(),
             $this->fileService->getStorageBucketKey($elementId, $extension)
+        );
+    }
+
+    public function createFileOperationFromUpload(Upload $upload, int $chunk): FileOperation
+    {
+        return new FileOperation(
+            $this->emberNexusConfiguration->getFileS3UploadBucket(),
+            $this->fileService->getUploadBucketKey($upload->getId(), $chunk)
         );
     }
 }
