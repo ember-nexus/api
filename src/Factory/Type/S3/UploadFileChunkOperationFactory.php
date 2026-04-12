@@ -25,18 +25,14 @@ class UploadFileChunkOperationFactory
 
     public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequest $resumableUploadRequest, UuidInterface $uploadId): UploadFileChunkOperation
     {
-        if (false !== $resumableUploadRequest->isUploadComplete()) {
+        if (true === $resumableUploadRequest->isUploadComplete()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileChunkOperation' requires 'ResumableUploadRequest' to contain partial content, i.e. be a chunked upload request.");
         }
-
-        // todo: check resource stream for at least 5 mb of length?
-
-        $resource = $resumableUploadRequest->getContent();
 
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
             $this->fileService->getUploadBucketKey($uploadId, 1),
-            $resource,
+            $resumableUploadRequest->getContent(),
             $resumableUploadRequest->getContentLength(),
             'application/octet-stream'
         );

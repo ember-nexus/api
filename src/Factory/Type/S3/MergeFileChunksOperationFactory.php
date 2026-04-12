@@ -47,8 +47,7 @@ class MergeFileChunksOperationFactory
             $uploadKeys,
             $this->emberNexusConfiguration->getFileS3StorageBucket(),
             $previousStorageKey,
-            $this->fileService->getStorageBucketKey($upload->getUploadTarget(), $upload->getExtension()),
-            'todo: change mimetype'
+            $this->fileService->getStorageBucketKey($upload->getUploadTarget(), $upload->getExtension())
         );
     }
 }

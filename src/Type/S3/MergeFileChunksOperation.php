@@ -15,7 +15,6 @@ final readonly class MergeFileChunksOperation
         private string $storageBucket,
         private ?string $previousStorageKey,
         private string $storageKey,
-        private string $mimeType,
     ) {
     }
 
@@ -45,10 +44,5 @@ final readonly class MergeFileChunksOperation
     public function getStorageKey(): string
     {
         return $this->storageKey;
-    }
-
-    public function getMimeType(): string
-    {
-        return $this->mimeType;
     }
 }
