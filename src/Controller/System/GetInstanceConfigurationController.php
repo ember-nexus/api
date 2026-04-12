@@ -48,6 +48,12 @@ class GetInstanceConfigurationController extends AbstractController
                 'enabled' => $this->emberNexusConfiguration->isExpressionEnabled(),
                 'maxLength' => $this->emberNexusConfiguration->getExpressionMaxLength(),
             ],
+            'file' => [
+                'maxFileSizeInBytes' => $this->emberNexusConfiguration->getFileMaxFileSizeInBytes(),
+                'uploadExpiresInSecondsAfterFirstRequest' => $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest(),
+                'uploadMinChunkSizeInBytes' => $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(),
+                'uploadMaxChunkSizeInBytes' => $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(),
+            ],
         ];
 
         if ($this->emberNexusConfiguration->isInstanceConfigurationShowVersion()) {

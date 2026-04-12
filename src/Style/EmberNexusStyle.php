@@ -46,32 +46,35 @@ class EmberNexusStyle extends SymfonyStyle
         parent::__construct($input, $output);
     }
 
+    private function getVersion(): ?string
+    {
+        $version = getenv('VERSION');
+        if (!is_string($version)) {
+            return null;
+        }
+        $version = trim(preg_replace('/[^0-9.]/', '', $version));
+        if ('' === $version) {
+            return null;
+        }
+
+        return 'v'.$version;
+    }
+
     public function title(string $message): void
     {
-        $versionString = 'development version';
         $appMode = 'production';
         if ('prod' !== getenv('APP_ENV')) {
             $appMode = 'development';
         }
-        $envVersion = getenv('VERSION');
-        if (is_string($envVersion)) {
-            if ($envVersion) {
-                $version = preg_replace('/[^0-9.]/', '', $envVersion);
-                // @phpstan-ignore-next-line
-                if (is_array($version)) {
-                    $version = implode('', $version);
-                }
-                $versionString = 'v'.$version;
-            }
-        }
+        $version = $this->getVersion();
         $this->newLine();
         $this->writeln(sprintf(
             "    <fg=gray>▄</>   \n".
             "  <fg=gray>▄<fg=gray;bg=bright-red>▀ ▀</>▄</>  <options=bold>Ember Nexus API</>\n".
-            "   <fg=bright-red>▀<fg=bright-white>█</>▀</>   %s, %s mode\n".
+            "   <fg=bright-red>▀<fg=bright-white>█</>▀</>   %s%s mode\n".
             "\n".
             "  <options=bold>%s</>\n",
-            $versionString,
+            $version ? sprintf('%s, ', $version) : '',
             $appMode,
             $message
         ));
