@@ -13,6 +13,7 @@ use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
+use finfo;
 use Throwable;
 
 class S3Service
@@ -25,11 +26,47 @@ class S3Service
     ) {
     }
 
+    public function getMimeTypeFromFile(FileOperation $fileOperation): string
+    {
+        $headResult = $this->s3Client->headObject([
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+        ]);
+        $contentLength = $headResult->getContentLength();
+
+        $result = $this->s3Client->getObject([
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+            'Range' => sprintf('bytes=0-%d', min($contentLength, 5 * 1024 * 1024)), // get first 5 MiB of file for mime type detection
+        ]);
+
+        $resource = $result->getBody()->getContentAsString();
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->buffer($resource);
+
+        return false === $mimeType ? FileService::DEFAULT_MIME_TYPE : $mimeType;
+    }
+
+    public function getMimeTypeFromMergeFileChunksOperation(MergeFileChunksOperation $mergeFileChunksOperation): string
+    {
+        $uploadKeys = $mergeFileChunksOperation->getUploadKeys();
+        if (0 === count($uploadKeys)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Creating a single file from multiple uploaded chunks requires at least one chunk to be present, got none.');
+        }
+
+        return $this->getMimeTypeFromFile(new FileOperation(
+            $mergeFileChunksOperation->getUploadBucket(),
+            $uploadKeys[0]
+        ));
+    }
+
     public function mergeFileChunks(MergeFileChunksOperation $mergeFileChunksOperation): int
     {
         $createResult = $this->s3Client->createMultipartUpload([
             'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
             'Key' => $mergeFileChunksOperation->getStorageKey(),
+            'ContentType' => $this->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation),
         ]);
 
         $multipartUploadId = $createResult->getUploadId();
