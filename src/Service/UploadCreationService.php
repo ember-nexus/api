@@ -69,7 +69,6 @@ class UploadCreationService
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
 
-        // todo: replace manual array with fileProperty instance
         $element->addProperty('file', [
             'contentLength' => $uploadFileOperation->getContentLength(),
             'extension' => $resumableUploadRequest->getExtension(),

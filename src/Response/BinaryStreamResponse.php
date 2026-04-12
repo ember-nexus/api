@@ -36,8 +36,6 @@ class BinaryStreamResponse extends StreamedResponse
                     break;
                 }
                 echo $buffer;
-                // todo is this comment safe to remove?
-                // ob_flush();
                 flush();
             }
             \Safe\fclose($stream);

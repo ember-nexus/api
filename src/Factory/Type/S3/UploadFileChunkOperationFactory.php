@@ -40,16 +40,10 @@ class UploadFileChunkOperationFactory
 
     public function createUploadFileChunkOperationFromPartialUploadRequest(PartialUploadRequest $partialUploadRequest, Upload $upload): UploadFileChunkOperation
     {
-        if (true !== $partialUploadRequest->isUploadComplete()) {
-            // todo: check resource stream for at least 5 mb of length
-        }
-
-        $resource = $partialUploadRequest->getContent();
-
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
             $this->fileService->getUploadBucketKey($upload->getId(), $upload->getAlreadyUploadedChunks() + 1),
-            $resource,
+            $partialUploadRequest->getContent(),
             $partialUploadRequest->getContentLength(),
             'application/octet-stream'
         );
