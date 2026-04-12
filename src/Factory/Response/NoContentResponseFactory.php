@@ -6,6 +6,7 @@ namespace App\Factory\Response;
 
 use App\Response\NoContentResponse;
 use App\Type\Upload;
+use DateTimeZone;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 class NoContentResponseFactory
@@ -25,13 +26,17 @@ class NoContentResponseFactory
         return $response;
     }
 
-    public function createNoContentResponseWithResumableUploadHeadersFromUpload(Upload $upload): NoContentResponse
+    public function createNoContentResponseWithResumableUploadHeadersFromUpload(Upload $upload, ?string $location = null): NoContentResponse
     {
         $response = new NoContentResponse();
         $headers = $response->headers;
 
         $headers->set('Upload-Complete', sprintf('?%s', $upload->isUploadComplete() ? '1' : '0'));
         $headers->set('Upload-Offset', sprintf('%d', $upload->getUploadOffset()));
+
+        if (null !== $location) {
+            $headers->set('Location', $location);
+        }
 
         $uploadLength = $upload->getUploadLength();
         if (null !== $uploadLength) {
@@ -48,6 +53,7 @@ class NoContentResponseFactory
                 $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(),
             )
         );
+        $headers->set('Expires', $upload->getExpires()->setTimezone(new DateTimeZone('UTC'))->format('D, d M Y H:i:s \\G\\M\\T'));
         $headers->set('Cache-Control', 'no-store');
 
         return $response;

@@ -15,10 +15,12 @@ use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Response\JsonResponse;
+use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\S3Service;
 use App\Service\UploadService;
+use App\Type\AccessType;
 use App\Type\Upload;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -38,6 +40,7 @@ class PatchUploadController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
+        private AccessChecker $accessChecker,
         private ElementManager $elementManager,
         private EventDispatcherInterface $eventDispatcher,
         private PartialUploadRequestFactory $partialUploadRequestFactory,
@@ -70,7 +73,12 @@ class PatchUploadController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if ($upload->getUploadOwner()->toString() !== $this->authProvider->getUserId()->toString()) {
+        $userId = $this->authProvider->getUserId();
+        if ($upload->getUploadOwner()->toString() !== $userId->toString()) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+        // verify that user has still update access to upload target
+        if (!$this->accessChecker->hasAccessToElement($userId, $upload->getUploadTarget(), AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
@@ -81,11 +89,18 @@ class PatchUploadController extends AbstractController
         $partialUploadRequest = $this->partialUploadRequestFactory->createPartialUploadRequestFromRequest($request);
 
         if ($partialUploadRequest->getUploadOffset() !== $upload->getUploadOffset()) {
-            throw $this->client409ConflictExceptionFactory->createFromDetail('offset from request does not match offset of resource', additionalDetails: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
+            throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalDetails: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
         }
 
         $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload);
         $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+
+        if (null !== $upload->getUploadLength()) {
+            if ($upload->getUploadLength() < $upload->getUploadOffset() + $chunkLength) {
+                throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
+            }
+        }
+
         $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength);
         $this->uploadService->mergeUploadElement($upload);
 

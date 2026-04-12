@@ -129,6 +129,6 @@ class UploadCreationService
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        return $this->noContentResponseFactory->createNoContentResponseWithLocationHeader($location);
+        return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload, $location);
     }
 }

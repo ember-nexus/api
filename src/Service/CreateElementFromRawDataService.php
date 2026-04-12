@@ -31,6 +31,7 @@ class CreateElementFromRawDataService
 
     /**
      * @param array<string, mixed> $rawData
+     *
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
      */
