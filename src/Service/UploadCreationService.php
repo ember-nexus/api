@@ -14,7 +14,6 @@ use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Response\CreatedResponse;
 use App\Security\AuthProvider;
-use App\Security\UploadAccessChecker;
 use App\Type\Request\ResumableUploadRequest;
 use App\Type\UploadElement;
 use DateInterval;
@@ -34,7 +33,6 @@ class UploadCreationService
 {
     public function __construct(
         private AuthProvider $authProvider,
-        private UploadAccessChecker $uploadAccessChecker,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Service $s3Service,
         private ElementManager $elementManager,
@@ -50,14 +48,12 @@ class UploadCreationService
 
     public function handleUploadCreationFromRequest(UuidInterface $elementId, Request $request): Response
     {
-        $userId = $this->authProvider->getUserId();
-        $this->uploadAccessChecker->verifyUserCanUploadFileToElement($userId, $elementId);
         $element = $this->elementManager->getElementOrFail($elementId);
 
         $resumableUploadRequest = $this->resumableUploadRequestFactory->createResumableUploadRequestFromRequest($request, $elementId);
 
         if (false === $resumableUploadRequest->isUploadComplete()) {
-            return $this->createNewResumableUpload($resumableUploadRequest, $userId);
+            return $this->createNewResumableUpload($resumableUploadRequest);
         }
 
         return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest);
@@ -83,7 +79,7 @@ class UploadCreationService
         return new CreatedResponse();
     }
 
-    private function createNewResumableUpload(ResumableUploadRequest $resumableUploadRequest, UuidInterface $userId): Response
+    private function createNewResumableUpload(ResumableUploadRequest $resumableUploadRequest): Response
     {
         $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));
 
@@ -92,7 +88,7 @@ class UploadCreationService
         $uploadElement
             ->setId($uploadId)
             ->setLabel('Upload')
-            ->setUploadOwner($userId)
+            ->setUploadOwner($this->authProvider->getUserId())
             ->setUploadTarget($resumableUploadRequest->getElementId())
             ->setExtension($resumableUploadRequest->getExtension())
             ->setExpires($expires)

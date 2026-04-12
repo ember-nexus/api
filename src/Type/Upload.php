@@ -7,6 +7,9 @@ namespace App\Type;
 use DateTime;
 use Ramsey\Uuid\UuidInterface;
 
+/**
+ * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+ */
 final readonly class Upload
 {
     public function __construct(
