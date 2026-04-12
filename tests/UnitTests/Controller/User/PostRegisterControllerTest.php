@@ -13,7 +13,7 @@ use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Response\CreatedResponse;
-use App\Security\UploadAccessChecker;
+use App\Security\UserPasswordHasher;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
 use App\Service\RequestUtilService;
@@ -50,7 +50,7 @@ class PostRegisterControllerTest extends TestCase
         ?ElementManager $elementManager = null,
         ?EntityManager $cypherEntityManager = null,
         ?UrlGeneratorInterface $router = null,
-        ?UploadAccessChecker $userPasswordHasher = null,
+        ?UserPasswordHasher $userPasswordHasher = null,
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
         ?RequestUtilService $requestUtilService = null,
         ?CreateElementFromRawDataService $createElementFromRawDataService = null,
@@ -62,7 +62,7 @@ class PostRegisterControllerTest extends TestCase
             $elementManager ?? $this->createMock(ElementManager::class),
             $cypherEntityManager ?? $this->createMock(EntityManager::class),
             $router ?? $this->createMock(UrlGeneratorInterface::class),
-            $userPasswordHasher ?? $this->createMock(UploadAccessChecker::class),
+            $userPasswordHasher ?? $this->createMock(UserPasswordHasher::class),
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
             $requestUtilService ?? $this->createMock(RequestUtilService::class),
             $createElementFromRawDataService ?? $this->createMock(CreateElementFromRawDataService::class),
@@ -112,7 +112,7 @@ class PostRegisterControllerTest extends TestCase
         $postRegisterController = $this->getPostRegisterController(
             cypherEntityManager: $cypherEntityManager,
             router: $urlGenerator,
-            userPasswordHasher: new UploadAccessChecker(),
+            userPasswordHasher: new UserPasswordHasher(),
             emberNexusConfiguration: $emberNexusConfiguration,
             createElementFromRawDataService: $createElementFromRawDataService
         );
@@ -174,7 +174,7 @@ class PostRegisterControllerTest extends TestCase
         $postRegisterController = $this->getPostRegisterController(
             cypherEntityManager: $cypherEntityManager,
             router: $urlGenerator,
-            userPasswordHasher: new UploadAccessChecker(),
+            userPasswordHasher: new UserPasswordHasher(),
             emberNexusConfiguration: $emberNexusConfiguration,
             requestUtilService: $requestUtilService,
             createElementFromRawDataService: $createElementFromRawDataService

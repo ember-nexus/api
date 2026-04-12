@@ -34,6 +34,10 @@ class S3Service
         ]);
         $contentLength = $headResult->getContentLength();
 
+        if (null === $contentLength) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of file.');
+        }
+
         $result = $this->s3Client->getObject([
             'Bucket' => $fileOperation->getBucket(),
             'Key' => $fileOperation->getKey(),

@@ -10,6 +10,7 @@ use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
 use App\Factory\Exception\Client400IncompleteMutualDependencyExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
+use App\Factory\Exception\Client400ReservedTypeExceptionFactory;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
 use Ramsey\Uuid\UuidInterface;
@@ -17,8 +18,11 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class CreateElementFromRawDataService
 {
+    public const array RESERVED_TYPES = ['User', 'Token', 'Upload'];
+
     public function __construct(
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
+        private Client400ReservedTypeExceptionFactory $client400ReservedTypeExceptionFactory,
         private Client400IncompleteMutualDependencyExceptionFactory $client400IncompleteMutualDependencyExceptionFactory,
         private ElementManager $elementManager,
         private EventDispatcherInterface $eventDispatcher,
@@ -27,6 +31,8 @@ class CreateElementFromRawDataService
 
     /**
      * @param array<string, mixed> $rawData
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     public function createElementFromRawData(
         UuidInterface $elementId,
@@ -53,6 +59,10 @@ class CreateElementFromRawDataService
             $rawValueToNormalizedValueEvent = new RawValueToNormalizedValueEvent($rawPropertyValue);
             $this->eventDispatcher->dispatch($rawValueToNormalizedValueEvent);
             $normalizedData[$rawPropertyName] = $rawValueToNormalizedValueEvent->getNormalizedValue();
+        }
+
+        if (in_array($type, self::RESERVED_TYPES)) {
+            throw $this->client400ReservedTypeExceptionFactory->createFromTemplate($type);
         }
 
         $elementPropertyChangeEvent = new ElementPropertyChangeEvent($type, null, $normalizedData);

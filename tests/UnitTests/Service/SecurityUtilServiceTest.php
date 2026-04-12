@@ -13,7 +13,7 @@ use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Security\UploadAccessChecker;
+use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
@@ -44,7 +44,7 @@ class SecurityUtilServiceTest extends TestCase
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
         ?CypherEntityManager $cypherEntityManager = null,
         ?ElementManager $elementManager = null,
-        ?UploadAccessChecker $userPasswordHasher = null,
+        ?UserPasswordHasher $userPasswordHasher = null,
         ?ParameterBagInterface $bag = null,
     ): SecurityUtilService {
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
@@ -64,7 +64,7 @@ class SecurityUtilServiceTest extends TestCase
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
             $cypherEntityManager ?? $this->createMock(CypherEntityManager::class),
             $elementManager ?? $this->createMock(ElementManager::class),
-            $userPasswordHasher ?? $this->createMock(UploadAccessChecker::class),
+            $userPasswordHasher ?? $this->createMock(UserPasswordHasher::class),
             $bag ?? $this->createMock(ParameterBagInterface::class),
             $client400MissingPropertyExceptionFactory,
             $client401UnauthorizedExceptionFactory,
@@ -100,7 +100,7 @@ class SecurityUtilServiceTest extends TestCase
         $bag = $this->createMock(ParameterBagInterface::class);
         $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
 
-        $userPasswordHasher = $this->createMock(UploadAccessChecker::class);
+        $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
         $userPasswordHasher->method('verifyPassword')->willReturn(false);
 
         $securityUtilService = $this->getSecurityUtilService(
@@ -127,7 +127,7 @@ class SecurityUtilServiceTest extends TestCase
         $bag = $this->createMock(ParameterBagInterface::class);
         $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
 
-        $userPasswordHasher = $this->createMock(UploadAccessChecker::class);
+        $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
         $userPasswordHasher->method('verifyPassword')->willReturn(true);
 
         $securityUtilService = $this->getSecurityUtilService(
@@ -200,7 +200,7 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testChangeUserPassword(): void
     {
-        $userPasswordHasher = $this->createMock(UploadAccessChecker::class);
+        $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
         $userPasswordHasher->method('hashPassword')->willReturn('someHash');
 
         $elementManager = $this->createMock(ElementManager::class);
