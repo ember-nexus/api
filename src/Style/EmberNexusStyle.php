@@ -52,6 +52,7 @@ class EmberNexusStyle extends SymfonyStyle
         if (!is_string($version)) {
             return null;
         }
+        /** @psalm-suppress PossiblyInvalidArgument */
         $version = trim(preg_replace('/[^0-9.]/', '', $version));
         if ('' === $version) {
             return null;
@@ -74,7 +75,7 @@ class EmberNexusStyle extends SymfonyStyle
             "   <fg=bright-red>▀<fg=bright-white>█</>▀</>   %s%s mode\n".
             "\n".
             "  <options=bold>%s</>\n",
-            $version ? sprintf('%s, ', $version) : '',
+            null !== $version ? sprintf('%s, ', $version) : '',
             $appMode,
             $message
         ));

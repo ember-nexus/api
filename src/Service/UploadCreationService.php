@@ -15,7 +15,7 @@ use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Response\CreatedResponse;
 use App\Security\AuthProvider;
 use App\Type\Request\ResumableUploadRequest;
-use App\Type\UploadElement;
+use App\Type\Upload;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\Uuid;
@@ -42,6 +42,7 @@ class UploadCreationService
         private EventDispatcherInterface $eventDispatcher,
         private NoContentResponseFactory $noContentResponseFactory,
         private UrlGeneratorInterface $urlGenerator,
+        private UploadService $uploadService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
@@ -81,33 +82,43 @@ class UploadCreationService
 
     private function createNewResumableUpload(ResumableUploadRequest $resumableUploadRequest): Response
     {
-        $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));
-
         $uploadId = Uuid::uuid4();
-        $uploadElement = new UploadElement();
-        $uploadElement
-            ->setId($uploadId)
-            ->setLabel('Upload')
-            ->setUploadOwner($this->authProvider->getUserId())
-            ->setUploadTarget($resumableUploadRequest->getElementId())
-            ->setExtension($resumableUploadRequest->getExtension())
-            ->setExpires($expires)
-            ->setUploadLength($resumableUploadRequest->getUploadLength());
 
-        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
-        $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
-
-        if ($chunkLength < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $chunkLength));
+        $uploadOffset = 0;
+        $alreadyUploadedChunks = 0;
+        if (0 !== $resumableUploadRequest->getContentLength()) {
+            $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
+            $uploadOffset = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+            $alreadyUploadedChunks = 1;
+            if ($uploadOffset < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
+                /**
+                 * file chunk has to be bigger than <min> length, unless:
+                 *   - it is the last file chunk, which can contain data of arbitrary length (max limit still applies)
+                 *   - it is of zero length -> no actual content / client just asks for upload limits & starts upload process
+                 */
+                if (false === $resumableUploadRequest->isUploadComplete()) {
+                    throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $uploadOffset));
+                }
+            }
+            if ($uploadOffset > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $uploadOffset));
+            }
         }
-        if ($chunkLength > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $chunkLength));
-        }
 
-        $uploadElement->setUploadOffset($chunkLength);
-        $uploadElement->setAlreadyUploadedChunks(1);
+        $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));
+        $upload = new Upload(
+            $uploadId,
+            $resumableUploadRequest->getUploadLength(),
+            $uploadOffset,
+            $resumableUploadRequest->isUploadComplete() ?? false,
+            $resumableUploadRequest->getElementId(),
+            $alreadyUploadedChunks,
+            $this->authProvider->getUserId(),
+            $resumableUploadRequest->getExtension(),
+            $expires
+        );
 
-        $this->elementManager->merge($uploadElement);
+        $this->uploadService->mergeUploadElement($upload);
         $this->elementManager->flush();
 
         $location = $this->urlGenerator->generate(

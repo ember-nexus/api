@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Contract\NodeElementInterface;
+use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Type\NodeElement;
 use App\Type\Upload;
 
 /**
@@ -13,24 +16,36 @@ class UploadService
 {
     public function __construct(
         private ElementManager $elementManager,
+        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
     }
 
-    public function persistUpload(Upload $upload): void
+    public function mergeUploadElement(Upload $upload): void
     {
-        $element = $this->elementManager->getElementOrFail($upload->getId());
+        $element = $this->elementManager->getElement($upload->getId());
+        if (null !== $element) {
+            if (!($element instanceof NodeElementInterface)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected upload element to be a node, received %s.', get_debug_type($element)));
+            }
+            if ('Upload' !== $element->getLabel()) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Expected upload element to be of type 'Upload', not '%s'.", $element->getLabel() ?? 'null'));
+            }
+        } else {
+            $element = (new NodeElement())
+                ->setId($upload->getId())
+                ->setLabel('Upload');
+        }
 
         $element->addProperty('uploadLength', $upload->getUploadLength());
         $element->addProperty('uploadOffset', $upload->getUploadOffset());
         $element->addProperty('uploadComplete', $upload->isUploadComplete());
-        $element->addProperty('uploadTarget', $upload->getUploadTarget()); // cast to string?
+        $element->addProperty('uploadTarget', $upload->getUploadTarget()->toString());
         $element->addProperty('alreadyUploadedChunks', $upload->getAlreadyUploadedChunks());
-        $element->addProperty('uploadOwner', $upload->getUploadOwner()); // cast to string?
+        $element->addProperty('uploadOwner', $upload->getUploadOwner()->toString());
         $element->addProperty('extension', $upload->getExtension());
-        $element->addProperty('expires', $upload->getExpires()); // cast to something?
+        $element->addProperty('expires', $upload->getExpires());
 
         $this->elementManager->merge($element);
-        $this->elementManager->flush();
     }
 
     public function deleteUpload(Upload $upload): void
@@ -38,6 +53,5 @@ class UploadService
         $element = $this->elementManager->getElementOrFail($upload->getId());
 
         $this->elementManager->delete($element);
-        $this->elementManager->flush();
     }
 }

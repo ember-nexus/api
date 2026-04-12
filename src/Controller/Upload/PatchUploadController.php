@@ -87,14 +87,16 @@ class PatchUploadController extends AbstractController
         $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload);
         $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
         $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength);
-        $this->uploadService->persistUpload($upload);
+        $this->uploadService->mergeUploadElement($upload);
 
         if ($partialUploadRequest->isUploadComplete()) {
             // the final chunk was successfully uploaded -> we can create the file
             $upload = $this->uploadFactory->markUploadAsComplete($upload);
-            $this->uploadService->persistUpload($upload);
+            $this->uploadService->mergeUploadElement($upload);
             $this->createFile($upload);
         }
+
+        $this->elementManager->flush();
 
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }
@@ -115,6 +117,7 @@ class PatchUploadController extends AbstractController
 
         $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
         $this->uploadService->deleteUpload($upload);
+        $this->elementManager->flush();
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
 

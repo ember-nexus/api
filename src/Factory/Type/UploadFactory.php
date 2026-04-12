@@ -47,7 +47,6 @@ class UploadFactory
             $this->getAlreadyUploadedChunksFromProperties($properties),
             $this->getUploadOwnerFromProperties($properties),
             $this->getExtensionFromProperties($properties),
-            $this->getMimeTypeFromProperties($properties),
             $this->getExpiresFromProperties($properties)
         );
     }
@@ -63,7 +62,6 @@ class UploadFactory
             $upload->getAlreadyUploadedChunks(),
             $upload->getUploadOwner(),
             $upload->getExtension(),
-            $upload->getMimeType(),
             $upload->getExpires()
         );
     }
@@ -79,7 +77,6 @@ class UploadFactory
             $upload->getAlreadyUploadedChunks() + 1,
             $upload->getUploadOwner(),
             $upload->getExtension(),
-            $upload->getMimeType(),
             $upload->getExpires()
         );
     }
@@ -206,22 +203,6 @@ class UploadFactory
         }
 
         return $extension;
-    }
-
-    /**
-     * @param mixed[] $properties
-     */
-    private function getMimeTypeFromProperties(mixed $properties): string
-    {
-        if (!array_key_exists('mimeType', $properties)) {
-            return FileService::DEFAULT_MIME_TYPE;
-        }
-        $mimeType = $properties['mimeType'];
-        if (!is_string($mimeType)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property mimeType to be string.');
-        }
-
-        return $mimeType;
     }
 
     /**
