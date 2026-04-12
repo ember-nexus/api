@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Response;
 
+use App\Contract\EtagCapableResponseInterface;
 use App\Type\Etag;
 use Symfony\Component\HttpFoundation\Response;
 
-class NotModifiedResponse extends Response
+class NotModifiedResponse extends Response implements EtagCapableResponseInterface
 {
     /**
      * @param array<string, string> $headers

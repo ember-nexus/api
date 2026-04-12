@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Response;
 
 use App\Response\ElementResponse;
+use App\Type\Etag;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -29,5 +30,14 @@ class ElementResponseTest extends TestCase
         $this->assertSame('{"some":"data"}', $response->getContent());
         $this->assertSame('application/json; charset=utf-8', $response->headers->get('Content-Type'));
         $this->assertSame('UTF-8', $response->getCharset());
+    }
+
+    public function testSetEtagFromEtagInstance(): void
+    {
+        $response = new ElementResponse();
+        $this->assertNull($response->getEtag());
+        $etag = new Etag('some etag');
+        $response->setEtagFromEtagInstance($etag);
+        $this->assertSame('"some etag"', $response->getEtag());
     }
 }
