@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
@@ -22,6 +23,9 @@ class EtagCalculatorService
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
+        private ElementManager $elementManager,
+        private S3Service $s3Service,
+        private FileOperationFactory $fileOperationFactory,
         private LoggerInterface $logger,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
@@ -346,6 +350,43 @@ class EtagCalculatorService
             'Calculated Etag for index collection.',
             [
                 'userId' => $userId->toString(),
+                'etag' => $etag,
+            ]
+        );
+
+        return $etag;
+    }
+
+    public function calculateFileEtag(UuidInterface $elementId): ?Etag
+    {
+        $this->logger->debug(
+            'Calculating Etag for file.',
+            [
+                'elementId' => $elementId->toString(),
+            ]
+        );
+
+        $element = $this->elementManager->getElementOrFail($elementId);
+        $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+        $fileEtag = $this->s3Service->getEtag($fileOperation);
+
+        $fileProperties = $element->getProperty('file');
+        $fileProperties = \Safe\json_encode($fileProperties);
+
+        $name = $element->getProperty('name');
+        $name = \Safe\json_encode($name);
+
+        $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etagCalculator->addUuid($elementId);
+        $etagCalculator->addString($fileEtag);
+        $etagCalculator->addString($fileProperties);
+        $etagCalculator->addString($name);
+        $etag = $etagCalculator->getEtag();
+
+        $this->logger->debug(
+            'Calculated Etag for file.',
+            [
+                'elementId' => $elementId->toString(),
                 'etag' => $etag,
             ]
         );

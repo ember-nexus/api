@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Response;
 
+use App\Contract\EtagCapableResponseInterface;
 use App\Type\Etag;
 use AsyncAws\S3\Result\GetObjectOutput;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class BinaryStreamResponse extends StreamedResponse
+class BinaryStreamResponse extends StreamedResponse implements EtagCapableResponseInterface
 {
     public const int STREAM_CHUNK_SIZE = 8192;
 

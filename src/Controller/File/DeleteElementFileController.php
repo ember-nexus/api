@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\EventSystem\ElementFileDelete\Event\ElementFileDeleteEvent;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Type\S3\FileOperationFactory;
@@ -14,6 +15,7 @@ use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\S3Service;
 use App\Type\AccessType;
+use App\Type\EtagType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,7 +38,6 @@ class DeleteElementFileController extends AbstractController
     ) {
     }
 
-    // todo: add support for etags
     #[Route(
         '/{id}/file',
         name: 'delete-element-file',
@@ -45,6 +46,7 @@ class DeleteElementFileController extends AbstractController
         ],
         methods: ['DELETE']
     )]
+    #[EndpointSupportsEtag(EtagType::FILE)]
     public function deleteElementFile(string $id): Response
     {
         $elementId = UuidV4::fromString($id);

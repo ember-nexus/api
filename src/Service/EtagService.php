@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent;
 use App\EventSystem\Etag\Event\ElementEtagEvent;
+use App\EventSystem\Etag\Event\FileEtagEvent;
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
 use App\EventSystem\Etag\Event\ParentsCollectionEtagEvent;
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
@@ -48,6 +49,9 @@ class EtagService
                     break;
                 case EtagType::RELATED_COLLECTION:
                     $event = new RelatedCollectionEtagEvent($requestId);
+                    break;
+                case EtagType::FILE:
+                    $event = new FileEtagEvent($requestId);
                     break;
             }
         }

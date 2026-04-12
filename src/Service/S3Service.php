@@ -288,4 +288,20 @@ class S3Service
 
         return $this->s3Client->getObject($objectConfig);
     }
+
+    public function getEtag(FileOperation $fileOperation): string
+    {
+        $headResult = $this->s3Client->headObject([
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+        ]);
+
+        $etag = $headResult->getETag();
+
+        if (null === $etag) {
+            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to retrieve file.');
+        }
+
+        return $etag;
+    }
 }

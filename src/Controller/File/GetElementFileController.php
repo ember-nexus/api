@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\Regex;
@@ -15,6 +16,7 @@ use App\Service\ElementService;
 use App\Service\FileService;
 use App\Service\S3Service;
 use App\Type\AccessType;
+use App\Type\EtagType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
@@ -33,7 +35,6 @@ class GetElementFileController extends AbstractController
     ) {
     }
 
-    // todo: add support for etags
     #[Route(
         '/{id}/file',
         name: 'get-element-file',
@@ -42,6 +43,7 @@ class GetElementFileController extends AbstractController
         ],
         methods: ['GET']
     )]
+    #[EndpointSupportsEtag(EtagType::FILE)]
     public function getElementFile(string $id): BinaryStreamResponse
     {
         $elementId = UuidV4::fromString($id);
