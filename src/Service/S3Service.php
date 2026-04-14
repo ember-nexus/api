@@ -7,7 +7,6 @@ namespace App\Service;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
-use App\Type\S3\DownloadFileOperation;
 use App\Type\S3\FileOperation;
 use App\Type\S3\MergeFileChunksOperation;
 use App\Type\S3\UploadFileChunkOperation;
@@ -290,6 +289,21 @@ class S3Service
         return $this->s3Client->getObject($objectConfig);
     }
 
+    /**
+     * @return resource
+     */
+    public function getFileAsResource(FileOperation $fileOperation): mixed
+    {
+        $objectConfig = [
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+        ];
+
+        $object = $this->s3Client->getObject($objectConfig);
+
+        return $object->getBody()->getContentAsResource();
+    }
+
     public function getEtag(FileOperation $fileOperation): string
     {
         $headResult = $this->s3Client->headObject([
@@ -304,18 +318,5 @@ class S3Service
         }
 
         return $etag;
-    }
-
-    /**
-     * @return resource
-     */
-    public function downloadFileToStream(DownloadFileOperation $downloadFileOperation): mixed
-    {
-        $result = $this->s3Client->getObject([
-            'Bucket' => $downloadFileOperation->getBucket(),
-            'Key' => $downloadFileOperation->getKey(),
-        ]);
-
-        return $result->getBody()->getContentAsResource();
     }
 }

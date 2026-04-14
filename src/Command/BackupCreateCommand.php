@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Factory\Type\S3\DownloadFileOperationFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Service\ElementManager;
+use App\Service\ElementService;
 use App\Service\ElementToRawService;
 use App\Service\FileService;
+use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
@@ -48,10 +50,11 @@ class BackupCreateCommand extends Command
         private CypherEntityManager $cypherEntityManager,
         private FilesystemOperator $backupStorage,
         private ElementToRawService $elementToRawService,
+        private ElementService $elementService,
         private ParameterBagInterface $bag,
         private FileService $fileService,
         private S3Service $s3Service,
-        private DownloadFileOperationFactory $downloadFileOperationFactory,
+        private FileOperationFactory $fileOperationFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         parent::__construct();
@@ -73,11 +76,11 @@ class BackupCreateCommand extends Command
             false
         );
         $this->addOption(
-        'no-files',
-        'f',
-        InputOption::VALUE_NEGATABLE,
-        'Disable file export.'
-    );
+            'no-files',
+            null,
+            InputOption::VALUE_NEGATABLE,
+            'Disable file export.'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -233,37 +236,48 @@ class BackupCreateCommand extends Command
     {
         $this->io->startSection('Step 3 of 3: Backing up Files');
 
+        if (false === $this->exportFiles) {
+            $this->io->stopSection('File backup skipped.');
+
+            return;
+        }
+
         $rawFileElements = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                'OPTIONAL MATCH (n) WHERE n.file IS NOT NULL ' .
-                'OPTIONAL MATCH ()-[r]->() WHERE r.file IS NOT NULL ' .
-                'WITH coalesce(n, r) AS element ' .
-                'WHERE element IS NOT NULL ' .
+                'OPTIONAL MATCH (n) WHERE n.file '.
+                'OPTIONAL MATCH ()-[r]->() WHERE r.file '.
+                'WITH coalesce(n, r) AS element '.
+                'WHERE element.file '.
                 'RETURN element.id'
             )
         );
 
         $fileElementIds = [];
         foreach ($rawFileElements->toArray() as $row) {
-            $fileElementIds[] = $row->get('n.id');
+            $fileElementIds[] = $row->get('element.id');
         }
 
         $this->fileCount = count($fileElementIds);
 
         $this->io->writeln(sprintf(
-            'Found <info>%d</info> elements with files.',
+            'Found <info>%d</info> files.',
             $this->fileCount
         ));
+
+        if (0 === $this->fileCount) {
+            $this->io->stopSection('File backup skipped.');
+
+            return;
+        }
 
         $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->fileCount);
         $progressBar?->display();
 
-        $levels = $this->fileCount > 0
-            ? (int) ceil(log($this->fileCount, 256))
-            : 0;
-
-        foreach ($fileElementIds as $rawId) {
-            $elementId = Uuid::fromString($rawId);
+        foreach ($fileElementIds as $rawElementId) {
+            if (!is_string($rawElementId)) {
+                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property element.id as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
+            }
+            $elementId = Uuid::fromString($rawElementId);
             $element = $this->elementManager->getElement($elementId);
 
             if (null === $element) {
@@ -271,29 +285,28 @@ class BackupCreateCommand extends Command
                 continue;
             }
 
-            $downloadFileOperation = $this->downloadFileOperationFactory->createDownloadFileOperationFromElement(
-                $element,
-                $this->backupName,
-                $levels
-            );
-
-            $stream = $this->s3Service->downloadFileToStream($downloadFileOperation);
+            $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+            $resource = $this->s3Service->getFileAsResource($fileOperation);
+            $extension = $this->elementService->getFileNameExtension($element);
 
             $this->backupStorage->writeStream(
-                $downloadFileOperation->getTargetPath(),
-                $stream
+                $this->getFilePath($elementId, $extension),
+                $resource
             );
 
             $progressBar?->advance();
         }
 
-        $progressBar?->finish();
-        $this->io->writeln('');
+        $progressBar?->clear();
+        $this->io->stopSection(sprintf(
+            'Successfully backed up <info>%d</info> files.',
+            $this->fileCount
+        ));
     }
 
     private function getNodePath(UuidInterface $nodeId): string
     {
-        $levels = (int) ceil(log($this->nodeCount, 256));
+        $levels = max(0, (int) ceil(log($this->nodeCount, 256)) - 1);
 
         return sprintf(
             '%s/node/%s.json',
@@ -304,12 +317,24 @@ class BackupCreateCommand extends Command
 
     private function getRelationPath(UuidInterface $relationId): string
     {
-        $levels = (int) ceil(log($this->relationCount, 256));
+        $levels = max(0, (int) ceil(log($this->relationCount, 256)) - 1);
 
         return sprintf(
             '%s/relation/%s.json',
             $this->backupName,
             $this->fileService->uuidToNestedFolderStructure($relationId, $levels)
+        );
+    }
+
+    private function getFilePath(UuidInterface $elementId, string $extension): string
+    {
+        $levels = max(0, (int) ceil(log($this->fileCount, 256)) - 1);
+
+        return sprintf(
+            '%s/file/%s.%s',
+            $this->backupName,
+            $this->fileService->uuidToNestedFolderStructure($elementId, $levels),
+            $extension
         );
     }
 
