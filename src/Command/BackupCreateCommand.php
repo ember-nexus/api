@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Type\S3\DownloadFileOperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementToRawService;
 use App\Service\FileService;
 use App\Style\EmberNexusStyle;
-use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
@@ -39,7 +39,7 @@ class BackupCreateCommand extends Command
     private string $backupName = '';
     private int $pageSize = 10;
     private bool $prettyPrint = false;
-    private bool $ndjson = false;
+    private bool $exportFiles = true;
 
     private EmberNexusStyle $io;
 
@@ -50,6 +50,8 @@ class BackupCreateCommand extends Command
         private ElementToRawService $elementToRawService,
         private ParameterBagInterface $bag,
         private FileService $fileService,
+        private S3Service $s3Service,
+        private DownloadFileOperationFactory $downloadFileOperationFactory,
         private Server500LogicExceptionFactory $server500LogicExceptionFactory,
     ) {
         parent::__construct();
@@ -71,12 +73,11 @@ class BackupCreateCommand extends Command
             false
         );
         $this->addOption(
-            'ndjson',
-            null,
-            InputOption::VALUE_NEGATABLE,
-            'Saves multiple JSON documents in a few .ndjson files.',
-            false
-        );
+        'no-files',
+        'f',
+        InputOption::VALUE_NEGATABLE,
+        'Disable file export.'
+    );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -85,10 +86,7 @@ class BackupCreateCommand extends Command
 
         $this->backupName = $this->checkBackupName($input->getArgument('name'));
         $this->prettyPrint = $input->getOption('pretty');
-        $this->ndjson = $input->getOption('ndjson');
-        if ($this->prettyPrint && $this->ndjson) {
-            throw new Exception('Pretty print and ndjson are mutually exclusive.');
-        }
+        $this->exportFiles = !$input->getOption('no-files');
         $this->io->title('Backup Create');
         $this->createBackupFolders();
         $this->initCount();
@@ -234,13 +232,63 @@ class BackupCreateCommand extends Command
     private function backupFiles(): void
     {
         $this->io->startSection('Step 3 of 3: Backing up Files');
-        $this->io->writeln('Currently not implemented.');
-        // todo: implement, and add flag to enable file backup (disabled by default?, incl. prominent warning?)
-        // if backup, then only storage bucket - elements in the upload bucket would time out anyways
-        $this->io->stopSection(sprintf(
-            'Successfully backed up <info>%d</info> files.',
+
+        $rawFileElements = $this->cypherEntityManager->getClient()->runStatement(
+            Statement::create(
+                'OPTIONAL MATCH (n) WHERE n.file IS NOT NULL ' .
+                'OPTIONAL MATCH ()-[r]->() WHERE r.file IS NOT NULL ' .
+                'WITH coalesce(n, r) AS element ' .
+                'WHERE element IS NOT NULL ' .
+                'RETURN element.id'
+            )
+        );
+
+        $fileElementIds = [];
+        foreach ($rawFileElements->toArray() as $row) {
+            $fileElementIds[] = $row->get('n.id');
+        }
+
+        $this->fileCount = count($fileElementIds);
+
+        $this->io->writeln(sprintf(
+            'Found <info>%d</info> elements with files.',
             $this->fileCount
         ));
+
+        $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->fileCount);
+        $progressBar?->display();
+
+        $levels = $this->fileCount > 0
+            ? (int) ceil(log($this->fileCount, 256))
+            : 0;
+
+        foreach ($fileElementIds as $rawId) {
+            $elementId = Uuid::fromString($rawId);
+            $element = $this->elementManager->getElement($elementId);
+
+            if (null === $element) {
+                $progressBar?->advance();
+                continue;
+            }
+
+            $downloadFileOperation = $this->downloadFileOperationFactory->createDownloadFileOperationFromElement(
+                $element,
+                $this->backupName,
+                $levels
+            );
+
+            $stream = $this->s3Service->downloadFileToStream($downloadFileOperation);
+
+            $this->backupStorage->writeStream(
+                $downloadFileOperation->getTargetPath(),
+                $stream
+            );
+
+            $progressBar?->advance();
+        }
+
+        $progressBar?->finish();
+        $this->io->writeln('');
     }
 
     private function getNodePath(UuidInterface $nodeId): string
@@ -269,16 +317,9 @@ class BackupCreateCommand extends Command
     {
         $backupName = trim($backupName);
 
-        if ('' === $backupName) {
-            throw new LogicException("Backup name can not be ''");
-        }
-
-        if ('.' === $backupName) {
-            throw new LogicException("Backup name can not be '.'");
-        }
-
-        if ('..' === $backupName) {
-            throw new LogicException("Backup name can not be '..'");
+        $forbiddenNames = ['', '.', '..'];
+        if (in_array($backupName, $forbiddenNames)) {
+            throw new LogicException(sprintf("Backup name can not be '%s'", $backupName));
         }
 
         if ($this->backupStorage->directoryExists($backupName)) {
@@ -290,6 +331,8 @@ class BackupCreateCommand extends Command
 
     private function createBackupFolders(): void
     {
+        $this->io->writeln(sprintf("Creating backup <info>%s</info> in folder <info>./var/backup</info>\n", $this->backupName));
+
         $this->backupStorage->createDirectory($this->backupName);
         $this->backupStorage->createDirectory($this->backupName.'/node');
         $this->backupStorage->createDirectory($this->backupName.'/relation');
