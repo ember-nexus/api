@@ -47,6 +47,7 @@ class GenericPropertyElementDefragmentizeEventListener
         } else {
             $element = $event->getRelationElement();
         }
+        $documentProperties = [];
         if ($documentFragment) {
             $documentProperties = $documentFragment->getProperties();
             $documentProperties = ReservedPropertyNameHelper::removeReservedPropertyNamesFromArray($documentProperties);
@@ -74,6 +75,12 @@ class GenericPropertyElementDefragmentizeEventListener
             }
             if ($value instanceof LaudisLocalTime) {
                 $cypherProperties[$key] = $value->toArray();
+            }
+            // remove placeholder values from neo4j for non-scalar properties
+            if (is_bool($value)) {
+                if (true === $value && array_key_exists($key, $documentProperties)) {
+                    unset($cypherProperties[$key]);
+                }
             }
         }
         $element->addProperties($cypherProperties);

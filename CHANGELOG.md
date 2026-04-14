@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add dependency to PHP library `cardinalby/content-disposition`.
 - Add 'reserved type' exception; nodes of type 'User', 'Token' and 'Upload' can not be manually created through generic
   API endpoints.
+- Store value `true` as placeholder for non-scalar properties in Neo4j. Does not change API responses, but is available
+  for Neo4j based queries, e.g. to check whether a non-scalar property exists on the element.
 
 ### Changed
 - Upgrade FrankenPHP to 1.12.1, related to #457 and #461.
