@@ -49,6 +49,34 @@ class FileServiceTest extends TestCase
         );
     }
 
+    public function testGetMimeTypeFromResource(): void
+    {
+        $resource = fopen('php://memory', 'r+');
+        fwrite($resource, 'Hello, World!');
+        rewind($resource);
+
+        $fileService = $this->buildFileService();
+        $mimeType = $fileService->getMimeTypeFromResource($resource);
+
+        self::assertSame('text/plain', $mimeType);
+
+        fclose($resource);
+    }
+
+    public function testGetMimeTypeFromResourceReturnsFallbackForUnknownContent(): void
+    {
+        $resource = fopen('php://memory', 'r+');
+        fwrite($resource, str_repeat("\x00", 16)); // null bytes → undetectable type
+        rewind($resource);
+
+        $fileService = $this->buildFileService();
+        $mimeType = $fileService->getMimeTypeFromResource($resource);
+
+        self::assertSame('application/octet-stream', $mimeType);
+
+        fclose($resource);
+    }
+
     public function testGetUploadBucketKeyThrowsOnNegativeIndex(): void
     {
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
@@ -250,5 +278,23 @@ class FileServiceTest extends TestCase
     {
         $fileUtilService = $this->buildFileService();
         $this->assertSame($output, $fileUtilService->removeReservedCharactersFromFileName($input));
+    }
+
+    public static function fileNameFromPartsProvider(): array
+    {
+        return [
+            ['name', 'ext', 'name.ext'],
+            ['name', 'extensionWhichIsWayLongerThanExpected', 'name.extensionWhichIs'],
+            ['name', 'ext    with          long      extension      and      whitespace ', 'name.extwithlongexten'],
+            ['name-----1---------2---------3---------4---------5---------6---------7---------8---------9---------a---------b---------c---------d---------e---------f---------g---------h---------i---------j---------k---------l---------m---------n---------o---------p---------q---------r---------s---------t---------u---------v', 'ext', 'name-----1---------2---------3---------4---------5---------6---------7---------8---------9---------a---------b---------c---------d---------e---------f---------g---------h---------i---------j---------k---------l---------m---------n---------o---------p-.ext'],
+            ['', 'env', '.env'],
+        ];
+    }
+
+    #[DataProvider('fileNameFromPartsProvider')]
+    public function testBuildFileNameFromParts(string $name, string $extension, string $result): void
+    {
+        $fileUtilService = $this->buildFileService();
+        $this->assertSame($result, $fileUtilService->buildFileNameFromParts($name, $extension));
     }
 }

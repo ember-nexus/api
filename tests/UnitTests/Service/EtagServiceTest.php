@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Service;
 
 use App\EventSystem\Etag\Event\ChildrenCollectionEtagEvent;
 use App\EventSystem\Etag\Event\ElementEtagEvent;
+use App\EventSystem\Etag\Event\FileEtagEvent;
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
 use App\EventSystem\Etag\Event\ParentsCollectionEtagEvent;
 use App\EventSystem\Etag\Event\RelatedCollectionEtagEvent;
@@ -38,6 +39,7 @@ class EtagServiceTest extends TestCase
              * @var ElementEtagEvent $event
              */
             $self->assertSame('224b322a-c2a1-4971-8b05-28af080d67f1', $event->getElementId()->toString());
+            $self->assertInstanceOf(ElementEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
         $authProvider = $this->prophesize(AuthProvider::class);
@@ -63,6 +65,7 @@ class EtagServiceTest extends TestCase
              * @var ChildrenCollectionEtagEvent $event
              */
             $self->assertSame('47d86985-68e0-4747-8921-33f3a9090549', $event->getParentId()->toString());
+            $self->assertInstanceOf(ChildrenCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
         $authProvider = $this->prophesize(AuthProvider::class);
@@ -88,6 +91,7 @@ class EtagServiceTest extends TestCase
              * @var ParentsCollectionEtagEvent $event
              */
             $self->assertSame('685b5a01-f2d2-4764-9c69-3fd87c45d5b0', $event->getChildId()->toString());
+            $self->assertInstanceOf(ParentsCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
         $authProvider = $this->prophesize(AuthProvider::class);
@@ -113,6 +117,7 @@ class EtagServiceTest extends TestCase
              * @var RelatedCollectionEtagEvent $event
              */
             $self->assertSame('adfd47a3-7d25-4bdb-b546-f5744382d488', $event->getCenterId()->toString());
+            $self->assertInstanceOf(RelatedCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
         $authProvider = $this->prophesize(AuthProvider::class);
@@ -128,6 +133,31 @@ class EtagServiceTest extends TestCase
         $this->assertSame('someEtag', $returnedEtag->getCurrentRequestEtag()->getEtag());
     }
 
+    public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeFile(): void
+    {
+        $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
+        $self = $this;
+        $eventDispatcher->dispatch(Argument::type(FileEtagEvent::class))->will(function ($args) use ($self) {
+            $event = $args[0];
+            /**
+             * @var FileEtagEvent $event
+             */
+            $self->assertSame('e70224a0-9dd6-4e57-a1c1-e90985834620', $event->getElementId()->toString());
+            $self->assertInstanceOf(FileEtagEvent::class, $event);
+            $event->setEtag(new Etag('someEtag'));
+        })->shouldBeCalledTimes(1);
+
+        $request = new Request(attributes: ['id' => 'e70224a0-9dd6-4e57-a1c1-e90985834620']);
+
+        $etagService = new EtagService(
+            $eventDispatcher->reveal(),
+            $this->prophesize(AuthProvider::class)->reveal()
+        );
+
+        $returnedEtag = $etagService->setCurrentRequestEtagFromRequestAndEtagType($request, EtagType::FILE);
+        $this->assertSame('someEtag', $returnedEtag->getCurrentRequestEtag()->getEtag());
+    }
+
     public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeIndexCollection(): void
     {
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
@@ -138,6 +168,7 @@ class EtagServiceTest extends TestCase
              * @var IndexCollectionEtagEvent $event
              */
             $self->assertSame('405599eb-f72b-4505-9ad6-fabe458e9607', $event->getUserId()->toString());
+            $self->assertInstanceOf(IndexCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
         $authProvider = $this->prophesize(AuthProvider::class);

@@ -9,6 +9,8 @@ use App\Factory\Type\S3\FileOperationFactory;
 use App\Service\ElementManager;
 use App\Service\EtagCalculatorService;
 use App\Service\S3Service;
+use App\Type\NodeElement;
+use App\Type\S3\FileOperation;
 use Beste\Psr\Log\TestLogger;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Contracts\ClientInterface;
@@ -1535,5 +1537,51 @@ class EtagCalculatorServiceTest extends TestCase
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));
+    }
+
+    public function testCalculateFileEtag(): void
+    {
+        // setup variables
+        $id = Uuid::fromString('544e0cf6-d351-435c-828f-7a0762240ce6');
+
+        $element = new NodeElement();
+        $element
+            ->addProperty('file', ['size' => 1024, 'mimetype' => 'image/png'])
+            ->addProperty('name', 'some name');
+
+        $fileOperation = new FileOperation('someBucket', 'someKey');
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
+
+        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
+        $fileOperationFactory->createFileOperationFromElement(Argument::is($element))->shouldBeCalledOnce()->willReturn($fileOperation);
+
+        $s3Service = $this->prophesize(S3Service::class);
+        $s3Service->getEtag(Argument::is($fileOperation))->shouldBeCalledOnce()->willReturn('some s3 etag');
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $this->prophesize(CypherEntityManager::class)->reveal(),
+            $elementManager->reveal(),
+            $s3Service->reveal(),
+            $fileOperationFactory->reveal(),
+            $logger,
+            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+        );
+
+        // run service method
+        $etag = $etagCalculatorService->calculateFileEtag($id);
+        $this->assertSame('dYDnWUfIMVL', (string) $etag);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for file.'));
     }
 }

@@ -65,7 +65,8 @@ class FileService
 
     public function buildFileNameFromParts(string $name, string $extension): string
     {
-        $extension = trim(substr(trim($extension), 0, self::MAX_EXTENSION_LENGTH));
+        /** @psalm-suppress PossiblyInvalidArgument */
+        $extension = substr(\Safe\preg_replace('/\s+/', '', $extension), 0, self::MAX_EXTENSION_LENGTH);
         $name = trim(substr(trim($name), 0, self::MAX_FILENAME_LENGTH - strlen($extension) - 1));
 
         return sprintf('%s.%s', $name, $extension);
