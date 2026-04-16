@@ -121,6 +121,30 @@ class EmberNexusOutputWrapperTest extends TestCase
         $this->assertSame(false, $emberNexusOutputWrapper->isQuiet());
     }
 
+    public function testIsSilentTrue(): void
+    {
+        $output = $this->prophesize(OutputInterface::class);
+        $output
+            ->isSilent()
+            ->shouldBeCalledOnce()
+            ->willReturn(true);
+
+        $emberNexusOutputWrapper = new EmberNexusOutputWrapper($output->reveal());
+        $this->assertSame(true, $emberNexusOutputWrapper->isSilent());
+    }
+
+    public function testIsSilentFalse(): void
+    {
+        $output = $this->prophesize(OutputInterface::class);
+        $output
+            ->isSilent()
+            ->shouldBeCalledOnce()
+            ->willReturn(false);
+
+        $emberNexusOutputWrapper = new EmberNexusOutputWrapper($output->reveal());
+        $this->assertSame(false, $emberNexusOutputWrapper->isSilent());
+    }
+
     public function testIsVerboseTrue(): void
     {
         $output = $this->prophesize(OutputInterface::class);

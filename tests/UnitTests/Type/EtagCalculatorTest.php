@@ -62,6 +62,19 @@ class EtagCalculatorTest extends TestCase
         $this->assertSame('D7h1i75muKb', (string) $etag);
     }
 
+    public function testAddStringChangesEtag(): void
+    {
+        $etagCalculator = new EtagCalculator('seed');
+        $etagCalculator->addString('some string');
+        $etag = $etagCalculator->getEtag();
+
+        $emptyEtagCalculator = new EtagCalculator('seed');
+        $emptyEtag = $emptyEtagCalculator->getEtag();
+
+        $this->assertNotSame((string) $emptyEtag, (string) $etag);
+        $this->assertSame('WjVTubjtlPd', (string) $etag);
+    }
+
     public function testCallingGetEtagMultipleTimesReturnsTheSameEtag(): void
     {
         $etagCalculator = new EtagCalculator('seed');
@@ -86,5 +99,14 @@ class EtagCalculatorTest extends TestCase
 
         $this->expectExceptionMessage('Etag is already finalized, no new data can be added.');
         $etagCalculator->addUuid(Uuid::fromString('67b1689e-e6c7-4463-a48a-74236fd5f08a'));
+    }
+
+    public function testAddStringAfterGettingEtagResultsInException(): void
+    {
+        $etagCalculator = new EtagCalculator('seed');
+        $etagCalculator->getEtag();
+
+        $this->expectExceptionMessage('Etag is already finalized, no new data can be added.');
+        $etagCalculator->addString('some string');
     }
 }
