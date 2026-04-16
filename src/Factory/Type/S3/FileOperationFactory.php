@@ -6,11 +6,11 @@ namespace App\Factory\Type\S3;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\Contract\UploadInterface;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Service\ElementService;
 use App\Service\FileService;
 use App\Type\S3\FileOperation;
-use App\Type\Upload;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 class FileOperationFactory
@@ -37,7 +37,7 @@ class FileOperationFactory
         );
     }
 
-    public function createFileOperationFromUpload(Upload $upload, int $chunk): FileOperation
+    public function createFileOperationFromUpload(UploadInterface $upload, int $chunk): FileOperation
     {
         return new FileOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),

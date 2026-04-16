@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Type;
 
+use App\Contract\UploadInterface;
 use DateTime;
 use Ramsey\Uuid\UuidInterface;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveParameterList")
  */
-final readonly class Upload
+final readonly class Upload implements UploadInterface
 {
     public function __construct(
         private UuidInterface $id,

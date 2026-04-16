@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Factory\Response;
 
+use App\Contract\UploadInterface;
 use App\Response\NoContentResponse;
-use App\Type\Upload;
 use DateTimeZone;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
@@ -26,7 +26,7 @@ class NoContentResponseFactory
         return $response;
     }
 
-    public function createNoContentResponseWithResumableUploadHeadersFromUpload(Upload $upload, ?string $location = null): NoContentResponse
+    public function createNoContentResponseWithResumableUploadHeadersFromUpload(UploadInterface $upload, ?string $location = null): NoContentResponse
     {
         $response = new NoContentResponse();
         $headers = $response->headers;

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Contract\NodeElementInterface;
+use App\Contract\UploadInterface;
 use App\Factory\Exception\Server500LogicExceptionFactory;
 use App\Type\NodeElement;
-use App\Type\Upload;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveParameterList")
@@ -20,7 +20,7 @@ class UploadService
     ) {
     }
 
-    public function mergeUploadElement(Upload $upload): void
+    public function mergeUploadElement(UploadInterface $upload): void
     {
         $element = $this->elementManager->getElement($upload->getId());
         if (null !== $element) {
@@ -48,7 +48,7 @@ class UploadService
         $this->elementManager->merge($element);
     }
 
-    public function deleteUpload(Upload $upload): void
+    public function deleteUpload(UploadInterface $upload): void
     {
         $element = $this->elementManager->getElementOrFail($upload->getId());
 

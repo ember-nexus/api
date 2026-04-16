@@ -6,6 +6,7 @@ namespace App\Factory\Type;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\Contract\UploadInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\FileService;
 use App\Type\Upload;
@@ -21,7 +22,7 @@ class UploadFactory
     ) {
     }
 
-    public function createUploadFromElement(NodeElementInterface|RelationElementInterface $element): Upload
+    public function createUploadFromElement(NodeElementInterface|RelationElementInterface $element): UploadInterface
     {
         if (!($element instanceof NodeElementInterface)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail('Upload element must be a node, not a relation.');
@@ -51,7 +52,7 @@ class UploadFactory
         );
     }
 
-    public function markUploadAsComplete(Upload $upload): Upload
+    public function markUploadAsComplete(UploadInterface $upload): UploadInterface
     {
         return new Upload(
             $upload->getId(),
@@ -66,7 +67,7 @@ class UploadFactory
         );
     }
 
-    public function addNewChunkToUpload(Upload $upload, int $chunkLength): Upload
+    public function addNewChunkToUpload(UploadInterface $upload, int $chunkLength): UploadInterface
     {
         return new Upload(
             $upload->getId(),

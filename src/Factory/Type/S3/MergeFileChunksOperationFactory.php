@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Factory\Type\S3;
 
+use App\Contract\UploadInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
 use App\Type\S3\MergeFileChunksOperation;
-use App\Type\Upload;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 class MergeFileChunksOperationFactory
@@ -23,7 +23,7 @@ class MergeFileChunksOperationFactory
     ) {
     }
 
-    public function createMergeFileOperationFromUpload(Upload $upload): MergeFileChunksOperation
+    public function createMergeFileOperationFromUpload(UploadInterface $upload): MergeFileChunksOperation
     {
         if (false === $upload->isUploadComplete()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("'MergeFileChunksOperation' requires 'Upload' to be complete.");

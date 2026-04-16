@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Upload;
 
+use App\Contract\UploadInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
@@ -21,7 +22,6 @@ use App\Service\ElementManager;
 use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\AccessType;
-use App\Type\Upload;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Safe\DateTime;
@@ -116,7 +116,7 @@ class PatchUploadController extends AbstractController
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }
 
-    public function createFile(Upload $upload): Response
+    public function createFile(UploadInterface $upload): Response
     {
         $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
         $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);

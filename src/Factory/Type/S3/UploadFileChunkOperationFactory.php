@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Factory\Type\S3;
 
+use App\Contract\UploadInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\FileService;
 use App\Type\Request\PartialUploadRequest;
 use App\Type\Request\ResumableUploadRequest;
 use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
-use App\Type\Upload;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
 
@@ -38,7 +38,7 @@ class UploadFileChunkOperationFactory
         );
     }
 
-    public function createUploadFileChunkOperationFromPartialUploadRequest(PartialUploadRequest $partialUploadRequest, Upload $upload): UploadFileChunkOperation
+    public function createUploadFileChunkOperationFromPartialUploadRequest(PartialUploadRequest $partialUploadRequest, UploadInterface $upload): UploadFileChunkOperation
     {
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
