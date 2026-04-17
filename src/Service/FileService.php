@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use finfo;
 use Ramsey\Uuid\UuidInterface;
@@ -20,7 +20,7 @@ class FileService
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private StringService $stringService,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -89,11 +89,11 @@ class FileService
     {
         $digits = $this->emberNexusConfiguration->getFileUploadChunkDigitsLength();
         if ($chunkIndex < 0) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Chunk index can not be less than 0.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Chunk index can not be less than 0.');
         }
         $maxIndex = (10 ** $digits) - 1;
         if ($chunkIndex > $maxIndex) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Chunk index can not be longer than %d digits, i.e. bigger than %d.', $digits, $maxIndex));
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Chunk index can not be longer than %d digits, i.e. bigger than %d.', $digits, $maxIndex));
         }
 
         return sprintf(
@@ -112,13 +112,13 @@ class FileService
     {
         $uuidAsHexString = $uuid->getHex()->toString();
         if ($levels < 0) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to generate nested folder structure from uuid with negative level argument.', ['levels' => $levels]);
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to generate nested folder structure from uuid with negative level argument.', ['levels' => $levels]);
         }
         if ($levelLength < 1) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to generate nested folder structure from uuid with level length less than 1.', ['levelLength' => $levelLength]);
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to generate nested folder structure from uuid with level length less than 1.', ['levelLength' => $levelLength]);
         }
         if ($levels * $levelLength >= strlen($uuidAsHexString)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to generate nested folder structure as long as product of levels and level length exceeds length of uuid without dashes.', ['levels' => $levels, 'levelLength' => $levelLength, 'product' => $levels * $levelLength, 'limit' => strlen($uuidAsHexString) - 1]);
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to generate nested folder structure as long as product of levels and level length exceeds length of uuid without dashes.', ['levels' => $levels, 'levelLength' => $levelLength, 'product' => $levels * $levelLength, 'limit' => strlen($uuidAsHexString) - 1]);
         }
 
         $parts = [];

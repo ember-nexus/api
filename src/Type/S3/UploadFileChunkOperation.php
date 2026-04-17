@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Type\S3;
 
-final readonly class UploadFileChunkOperation
+use App\Contract\S3\UploadFileChunkOperationInterface;
+
+final readonly class UploadFileChunkOperation implements UploadFileChunkOperationInterface
 {
     /**
      * @param resource $content

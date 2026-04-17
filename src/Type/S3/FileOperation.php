@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Type\S3;
 
-final readonly class FileOperation
+use App\Contract\S3\FileOperationInterface;
+
+final readonly class FileOperation implements FileOperationInterface
 {
     public function __construct(
         private string $bucket,

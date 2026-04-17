@@ -12,7 +12,7 @@ use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Service\SecurityUtilService;
@@ -51,7 +51,7 @@ class SecurityUtilServiceTest extends TestCase
         $urlGenerator->method('generate')->willReturn('url');
         $server500Bag = $this->createMock(ParameterBagInterface::class);
         $server500Bag->method('get')->willReturn('dev');
-        $server500LogicExceptionFactory = new Server500LogicExceptionFactory(
+        $server500LogicExceptionFactory = new Server500LogicErrorExceptionFactory(
             $urlGenerator,
             $server500Bag,
             $this->createMock(LoggerInterface::class)

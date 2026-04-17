@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\EventSystem\ElementFragmentize\EventListener;
 
 use App\EventSystem\ElementFragmentize\Event\NodeElementFragmentizeEvent;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class NodeElementFragmentizeEventListener
 {
     public function __construct(
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -22,13 +22,13 @@ class NodeElementFragmentizeEventListener
 
         $nodeElementIdentifier = $nodeElement->getId();
         if (null === $nodeElementIdentifier) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Node element fragmentize event listener requires node to contain valid UUID.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Node element fragmentize event listener requires node to contain valid UUID.');
         }
         $nodeElementIdentifier = $nodeElementIdentifier->toString();
 
         $nodeLabel = $nodeElement->getLabel();
         if (null === $nodeLabel) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Node element fragmentize event listener requires node to contain valid label.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Node element fragmentize event listener requires node to contain valid label.');
         }
 
         /**

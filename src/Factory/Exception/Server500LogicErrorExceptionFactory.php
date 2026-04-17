@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 
-class Server500LogicExceptionFactory
+class Server500LogicErrorExceptionFactory
 {
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,

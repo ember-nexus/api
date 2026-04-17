@@ -12,7 +12,7 @@ use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\UserPasswordHasher;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
@@ -33,7 +33,7 @@ class SecurityUtilService
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -70,7 +70,7 @@ class SecurityUtilService
     {
         $anonymousUserId = $this->bag->get('anonymousUserUUID');
         if (!is_string($anonymousUserId)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Environment variable "ANONYMOUS_USER_UUID" must be set to a valid UUID.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Environment variable "ANONYMOUS_USER_UUID" must be set to a valid UUID.');
         }
         $anonymousUserId = UuidV4::fromString($anonymousUserId);
         if ($userId->equals($anonymousUserId)) {
@@ -99,7 +99,7 @@ class SecurityUtilService
         }
         $rawUserId = $res->first()->get('id');
         if (!is_string($rawUserId)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawUserId)));
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawUserId)));
         }
         $userId = Uuid::fromString($rawUserId);
         $element = $this->elementManager->getElement($userId);
@@ -107,7 +107,7 @@ class SecurityUtilService
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
         if ($element instanceof RelationElementInterface) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Impossible situation, found relation by looking for user node.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Impossible situation, found relation by looking for user node.');
         }
 
         return $element;

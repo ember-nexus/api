@@ -31,4 +31,17 @@ class ResumableUploadRequestTest extends TestCase
         $this->assertSame(12, $resumableUploadRequest->getContentLength());
         $this->assertSame('bin', $resumableUploadRequest->getExtension());
     }
+
+    public function testResumableUploadRequestDefaults(): void
+    {
+        $resumableUploadRequest = new ResumableUploadRequest(
+            Uuid::fromString('d62f9b55-5577-4e2d-8884-d678d60fa7ba'),
+            'some content',
+        );
+
+        $this->assertFalse($resumableUploadRequest->isUploadComplete());
+        $this->assertNull($resumableUploadRequest->getUploadLength());
+        $this->assertNull($resumableUploadRequest->getContentLength());
+        $this->assertSame('bin', $resumableUploadRequest->getExtension());
+    }
 }

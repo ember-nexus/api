@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\RedisPrefixType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
@@ -20,11 +20,11 @@ class AuthProvider
     public function __construct(
         private ParameterBagInterface $bag,
         private TokenGenerator $tokenGenerator,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         $anonymousUserId = $this->bag->get('anonymousUserUUID');
         if (!is_string($anonymousUserId)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('anonymousUserUUID must be set to a valid UUID');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('anonymousUserUUID must be set to a valid UUID');
         }
         $this->userId = UuidV4::fromString($anonymousUserId);
         $this->isAnonymous = true;

@@ -11,7 +11,7 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Response\CreatedResponse;
 use App\Security\UserPasswordHasher;
 use App\Service\CreateElementFromRawDataService;
@@ -56,7 +56,7 @@ class PostRegisterControllerTest extends TestCase
         ?CreateElementFromRawDataService $createElementFromRawDataService = null,
         ?Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory = null,
         ?Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory = null,
-        ?Server500LogicExceptionFactory $server500LogicExceptionFactory = null,
+        ?Server500LogicErrorExceptionFactory $server500LogicExceptionFactory = null,
     ): PostRegisterController {
         return new PostRegisterController(
             $elementManager ?? $this->createMock(ElementManager::class),
@@ -68,7 +68,7 @@ class PostRegisterControllerTest extends TestCase
             $createElementFromRawDataService ?? $this->createMock(CreateElementFromRawDataService::class),
             $client400ReservedIdentifierExceptionFactory ?? $this->createMock(Client400ReservedIdentifierExceptionFactory::class),
             $client403ForbiddenExceptionFactory ?? $this->createMock(Client403ForbiddenExceptionFactory::class),
-            $server500LogicExceptionFactory ?? $this->createMock(Server500LogicExceptionFactory::class)
+            $server500LogicExceptionFactory ?? $this->createMock(Server500LogicErrorExceptionFactory::class)
         );
     }
 

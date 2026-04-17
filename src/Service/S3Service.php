@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Contract\S3\FileOperationInterface;
+use App\Contract\S3\MergeFileChunksOperationInterface;
+use App\Contract\S3\UploadFileChunkOperationInterface;
+use App\Contract\S3\UploadFileOperationInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Type\S3\FileOperation;
-use App\Type\S3\MergeFileChunksOperation;
-use App\Type\S3\UploadFileChunkOperation;
-use App\Type\S3\UploadFileOperation;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
 use finfo;
@@ -22,11 +23,11 @@ class S3Service
         private S3Client $s3Client,
         private UploadFileChunkOperationFactory $fileChunkOperationFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
-    public function getMimeTypeFromFile(FileOperation $fileOperation): string
+    public function getMimeTypeFromFile(FileOperationInterface $fileOperation): string
     {
         $headResult = $this->s3Client->headObject([
             'Bucket' => $fileOperation->getBucket(),
@@ -35,7 +36,7 @@ class S3Service
         $contentLength = $headResult->getContentLength();
 
         if (null === $contentLength) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of file.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to read content length of file.');
         }
 
         $result = $this->s3Client->getObject([
@@ -52,7 +53,7 @@ class S3Service
         return false === $mimeType ? FileService::DEFAULT_MIME_TYPE : $mimeType;
     }
 
-    public function getMimeTypeFromMergeFileChunksOperation(MergeFileChunksOperation $mergeFileChunksOperation): string
+    public function getMimeTypeFromMergeFileChunksOperation(MergeFileChunksOperationInterface $mergeFileChunksOperation): string
     {
         $uploadKeys = $mergeFileChunksOperation->getUploadKeys();
         if (0 === count($uploadKeys)) {
@@ -65,7 +66,7 @@ class S3Service
         ));
     }
 
-    public function mergeFileChunks(MergeFileChunksOperation $mergeFileChunksOperation): int
+    public function mergeFileChunks(MergeFileChunksOperationInterface $mergeFileChunksOperation): int
     {
         $createResult = $this->s3Client->createMultipartUpload([
             'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
@@ -76,7 +77,7 @@ class S3Service
         $multipartUploadId = $createResult->getUploadId();
 
         if (null === $multipartUploadId) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to create multipart upload.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to create multipart upload.');
         }
 
         $parts = [];
@@ -93,7 +94,7 @@ class S3Service
 
                 $copyPartResult = $copyResult->getCopyPartResult();
                 if (null === $copyPartResult) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read copy part result.');
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to read copy part result.');
                 }
 
                 $parts[] = [
@@ -117,7 +118,7 @@ class S3Service
                 'UploadId' => $multipartUploadId,
             ]);
 
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
         }
 
         $headResult = $this->s3Client->headObject([
@@ -128,15 +129,15 @@ class S3Service
         $mergedContentLength = $headResult->getContentLength();
 
         if (null === $mergedContentLength) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of merged data.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to read content length of merged data.');
         }
 
-        if (null !== $mergeFileChunksOperation->getPreviousStorageKey()
-            && $mergeFileChunksOperation->getPreviousStorageKey() !== $mergeFileChunksOperation->getStorageKey()) {
+        $previousStorageKey = $mergeFileChunksOperation->getPreviousStorageKey();
+        if (null !== $previousStorageKey && $previousStorageKey !== $mergeFileChunksOperation->getStorageKey()) {
             // delete previous uploaded element, if available
             $objectConfig = [
                 'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
-                'Key' => $mergeFileChunksOperation->getPreviousStorageKey(),
+                'Key' => $previousStorageKey,
             ];
             $status = $this->s3Client->objectExists($objectConfig);
 
@@ -148,7 +149,7 @@ class S3Service
         return $mergedContentLength;
     }
 
-    public function deleteFileChunks(MergeFileChunksOperation $mergeFileChunksOperation): void
+    public function deleteFileChunks(MergeFileChunksOperationInterface $mergeFileChunksOperation): void
     {
         foreach ($mergeFileChunksOperation->getUploadKeys() as $uploadKey) {
             $objectConfig = [
@@ -169,7 +170,7 @@ class S3Service
      * @throws \App\Exception\Client400BadContentException
      * @throws \App\Exception\Server500LogicErrorException
      */
-    public function uploadFileChunk(UploadFileChunkOperation $uploadFileChunkOperation): int
+    public function uploadFileChunk(UploadFileChunkOperationInterface $uploadFileChunkOperation): int
     {
         $this->s3Client->putObject([
             'Bucket' => $uploadFileChunkOperation->getUploadBucket(),
@@ -186,7 +187,7 @@ class S3Service
         $uploadContentLength = $headResult->getContentLength();
 
         if (null === $uploadContentLength) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to read content length of uploaded data.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to read content length of uploaded data.');
         }
 
         $providedContentLength = $uploadFileChunkOperation->getContentLength();
@@ -202,7 +203,7 @@ class S3Service
     /**
      * todo: optimize upload for larger files using multipart-upload?, handled by https://github.com/ember-nexus/api/issues/452.
      */
-    public function uploadFile(UploadFileOperation $uploadFileOperation): void
+    public function uploadFile(UploadFileOperationInterface $uploadFileOperation): void
     {
         // intermediate upload to "upload bucket"
         $uploadFileChunkOperation = $this->fileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
@@ -224,12 +225,12 @@ class S3Service
 
         try {
             $copyResult->resolve();
-            if (null !== $uploadFileOperation->getPreviousStorageKey()
-                && $uploadFileOperation->getPreviousStorageKey() !== $uploadFileOperation->getStorageKey()) {
+            $previousStorageKey = $uploadFileOperation->getPreviousStorageKey();
+            if (null !== $previousStorageKey && $previousStorageKey !== $uploadFileOperation->getStorageKey()) {
                 // delete previous uploaded element, if available
                 $objectConfig = [
                     'Bucket' => $uploadFileOperation->getStorageBucket(),
-                    'Key' => $uploadFileOperation->getPreviousStorageKey(),
+                    'Key' => $previousStorageKey,
                 ];
                 $status = $this->s3Client->objectExists($objectConfig);
 
@@ -246,11 +247,11 @@ class S3Service
             ]);
             $deleteResult->resolve();
         } catch (Throwable $e) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
         }
     }
 
-    public function deleteFile(FileOperation $fileOperation): void
+    public function deleteFile(FileOperationInterface $fileOperation): void
     {
         $objectConfig = [
             'Bucket' => $fileOperation->getBucket(),
@@ -264,11 +265,11 @@ class S3Service
 
         $status = $this->s3Client->objectExists($objectConfig);
         if ($status->isSuccess()) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to delete file.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.');
         }
     }
 
-    public function existsFile(FileOperation $fileOperation): bool
+    public function existsFile(FileOperationInterface $fileOperation): bool
     {
         $objectConfig = [
             'Bucket' => $fileOperation->getBucket(),
@@ -279,7 +280,7 @@ class S3Service
         return $status->isSuccess();
     }
 
-    public function getFile(FileOperation $fileOperation): GetObjectOutput
+    public function getFile(FileOperationInterface $fileOperation): GetObjectOutput
     {
         $objectConfig = [
             'Bucket' => $fileOperation->getBucket(),
@@ -292,7 +293,7 @@ class S3Service
     /**
      * @return resource
      */
-    public function getFileAsResource(FileOperation $fileOperation): mixed
+    public function getFileAsResource(FileOperationInterface $fileOperation): mixed
     {
         $objectConfig = [
             'Bucket' => $fileOperation->getBucket(),
@@ -304,7 +305,7 @@ class S3Service
         return $object->getBody()->getContentAsResource();
     }
 
-    public function getEtag(FileOperation $fileOperation): string
+    public function getEtag(FileOperationInterface $fileOperation): string
     {
         $headResult = $this->s3Client->headObject([
             'Bucket' => $fileOperation->getBucket(),
@@ -314,7 +315,7 @@ class S3Service
         $etag = $headResult->getETag();
 
         if (null === $etag) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to retrieve file.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to retrieve file.');
         }
 
         return $etag;

@@ -28,4 +28,16 @@ class PartialUploadRequestTest extends TestCase
         $this->assertTrue($partialUploadRequest->isUploadComplete());
         $this->assertNull($partialUploadRequest->getContentLength());
     }
+
+    public function testPartialUploadRequestDefaults(): void
+    {
+        $partialUploadRequest = new PartialUploadRequest(
+            'some content',
+            'application/partial-upload',
+            321,
+        );
+
+        $this->assertFalse($partialUploadRequest->isUploadComplete());
+        $this->assertNull($partialUploadRequest->getContentLength());
+    }
 }

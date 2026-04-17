@@ -9,7 +9,7 @@ use App\EventSystem\SearchStep\Event\SearchStepEvent;
 use App\EventSystem\SearchStep\EventListener\CypherPathSearchStepEventListener;
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Type\SearchStepType;
@@ -48,7 +48,7 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         ?AuthProvider $authProvider = null,
         ?Stopwatch $stopwatch = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
-        ?Server500LogicExceptionFactory $server500LogicExceptionFactory = null,
+        ?Server500LogicErrorExceptionFactory $server500LogicExceptionFactory = null,
     ): CypherPathSearchStepEventListener {
         $cypherPathSubsetGrammar = $cypherPathSubsetGrammar ?? self::prophesize(CypherPathSubsetGrammar::class)->reveal();
         $cypherEntityManager = $cypherEntityManager ?? self::prophesize(CypherEntityManager::class)->reveal();
@@ -56,7 +56,7 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $authProvider = $authProvider ?? self::prophesize(AuthProvider::class)->reveal();
         $stopwatch = $stopwatch ?? self::prophesize(Stopwatch::class)->reveal();
         $client400BadContentExceptionFactory = $client400BadContentExceptionFactory ?? self::prophesize(Client400BadContentExceptionFactory::class)->reveal();
-        $server500LogicExceptionFactory = $server500LogicExceptionFactory ?? self::prophesize(Server500LogicExceptionFactory::class)->reveal();
+        $server500LogicExceptionFactory = $server500LogicExceptionFactory ?? self::prophesize(Server500LogicErrorExceptionFactory::class)->reveal();
 
         return new CypherPathSearchStepEventListener(
             $cypherPathSubsetGrammar,

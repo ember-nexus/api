@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\EventSystem\Request\EventListener;
 
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use App\Type\TokenStateType;
@@ -32,7 +32,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         private RedisClient $redisClient,
         private AuthProvider $authProvider,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -85,12 +85,12 @@ class ApiKeyCheckOnKernelRequestEventListener
 
         $rawUserId = $res->first()->get('user.id');
         if (!is_string($rawUserId)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
         }
         $userId = Uuid::fromString($rawUserId);
         $rawTokenId = $res->first()->get('token.id');
         if (!is_string($rawTokenId)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property token.id as string, not %s.', get_debug_type($rawTokenId))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property token.id as string, not %s.', get_debug_type($rawTokenId))); // @codeCoverageIgnore
         }
         $tokenId = Uuid::fromString($rawTokenId);
 
@@ -99,7 +99,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         $rawTokenExpiration = $res->first()->get('token.expirationDate');
         if (null !== $rawTokenExpiration) {
             if (!($rawTokenExpiration instanceof LaudisDateTime) && !($rawTokenExpiration instanceof DateTimeZoneId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property token.expirationDate as LaudisDateTime|DateTimeZoneId, not %s.', get_debug_type($rawTokenExpiration))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property token.expirationDate as LaudisDateTime|DateTimeZoneId, not %s.', get_debug_type($rawTokenExpiration))); // @codeCoverageIgnore
             }
             $secondsUntilTokenExpires = $rawTokenExpiration->toDateTime()->getTimestamp() - (new DateTime())->getTimestamp();
             $tokenLifetimeInRedis = min($tokenLifetimeInRedis, $secondsUntilTokenExpires);

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Factory\Type\S3;
 
+use App\Contract\Request\PartialUploadRequestInterface;
+use App\Contract\Request\ResumableUploadRequestInterface;
+use App\Contract\S3\UploadFileChunkOperationInterface;
+use App\Contract\S3\UploadFileOperationInterface;
 use App\Contract\UploadInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\FileService;
-use App\Type\Request\PartialUploadRequest;
-use App\Type\Request\ResumableUploadRequest;
 use App\Type\S3\UploadFileChunkOperation;
-use App\Type\S3\UploadFileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
 
@@ -23,7 +24,7 @@ class UploadFileChunkOperationFactory
     ) {
     }
 
-    public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequest $resumableUploadRequest, UuidInterface $uploadId): UploadFileChunkOperation
+    public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequestInterface $resumableUploadRequest, UuidInterface $uploadId): UploadFileChunkOperationInterface
     {
         if (true === $resumableUploadRequest->isUploadComplete()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileChunkOperation' requires 'ResumableUploadRequest' to contain partial content, i.e. be a chunked upload request.");
@@ -38,7 +39,7 @@ class UploadFileChunkOperationFactory
         );
     }
 
-    public function createUploadFileChunkOperationFromPartialUploadRequest(PartialUploadRequest $partialUploadRequest, UploadInterface $upload): UploadFileChunkOperation
+    public function createUploadFileChunkOperationFromPartialUploadRequest(PartialUploadRequestInterface $partialUploadRequest, UploadInterface $upload): UploadFileChunkOperationInterface
     {
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
@@ -49,7 +50,7 @@ class UploadFileChunkOperationFactory
         );
     }
 
-    public function createUploadFileChunkOperationFromUploadFileOperation(UploadFileOperation $uploadFileOperation): UploadFileChunkOperation
+    public function createUploadFileChunkOperationFromUploadFileOperation(UploadFileOperationInterface $uploadFileOperation): UploadFileChunkOperationInterface
     {
         return new UploadFileChunkOperation(
             $uploadFileOperation->getUploadBucket(),

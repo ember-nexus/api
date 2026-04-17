@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Style\EmberNexusStyle;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -42,7 +42,7 @@ class HealthcheckCommand extends Command
         private AMQPStreamConnection $AMQPStreamConnection,
         private S3Client $s3Client,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -56,11 +56,11 @@ class HealthcheckCommand extends Command
         );
         $rawVersion = $cypherInfo->first()->get('version');
         if (!is_string($rawVersion)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property version as string, not %s.', get_debug_type($rawVersion))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property version as string, not %s.', get_debug_type($rawVersion))); // @codeCoverageIgnore
         }
         $rawEdition = $cypherInfo->first()->get('edition');
         if (!is_string($rawEdition)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property edition as string, not %s.', get_debug_type($rawEdition))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property edition as string, not %s.', get_debug_type($rawEdition))); // @codeCoverageIgnore
         }
 
         return sprintf(

@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\Contract\Request\ResumableUploadRequestInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Response\NoContentResponseFactory;
@@ -14,7 +15,6 @@ use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Response\CreatedResponse;
 use App\Security\AuthProvider;
-use App\Type\Request\ResumableUploadRequest;
 use App\Type\Upload;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -62,7 +62,7 @@ class UploadCreationService
 
     private function setOrReplaceElementFileDirectly(
         NodeElementInterface|RelationElementInterface $element,
-        ResumableUploadRequest $resumableUploadRequest,
+        ResumableUploadRequestInterface $resumableUploadRequest,
     ): Response {
         $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
         $this->s3Service->uploadFile($uploadFileOperation);
@@ -79,7 +79,7 @@ class UploadCreationService
         return new CreatedResponse();
     }
 
-    private function createNewResumableUpload(ResumableUploadRequest $resumableUploadRequest): Response
+    private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest): Response
     {
         $uploadId = Uuid::uuid4();
 

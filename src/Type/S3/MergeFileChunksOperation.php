@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Type\S3;
 
-final readonly class MergeFileChunksOperation
+use App\Contract\S3\MergeFileChunksOperationInterface;
+
+final readonly class MergeFileChunksOperation implements MergeFileChunksOperationInterface
 {
     /**
      * @param list<string> $uploadKeys

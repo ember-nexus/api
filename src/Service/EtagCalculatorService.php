@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\DateTimeHelper;
 use App\Type\Etag;
@@ -27,7 +27,7 @@ class EtagCalculatorService
         private S3Service $s3Service,
         private FileOperationFactory $fileOperationFactory,
         private LoggerInterface $logger,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -123,7 +123,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($parentId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -195,7 +195,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($childId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -266,7 +266,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($centerId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -337,7 +337,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($userId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));

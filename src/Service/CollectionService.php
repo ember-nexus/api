@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Response\CollectionResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
@@ -24,7 +24,7 @@ class CollectionService
         private ElementToRawService $elementToRawService,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -78,7 +78,7 @@ class CollectionService
     {
         $currentRequest = $this->requestStack->getCurrentRequest();
         if (null === $currentRequest) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Current request can not be null.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Current request can not be null.');
         }
         $basePath = $currentRequest->getPathInfo();
 

@@ -6,7 +6,7 @@ namespace App\Command;
 
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
 use App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Helper\Regex;
 use App\Service\AppStateService;
@@ -59,7 +59,7 @@ class BackupLoadCommand extends Command
         private ElasticEntityManager $elasticEntityManager,
         private S3Service $s3Service,
         private UploadFileOperationFactory $uploadFileOperationFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -256,7 +256,7 @@ class BackupLoadCommand extends Command
             foreach ($res as $row) {
                 $rawId = $row->get('n.id');
                 if (!is_string($rawId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
                 }
                 $id = UuidV4::fromString($rawId);
                 $element = $this->elementManager->getNode($id);
@@ -284,7 +284,7 @@ class BackupLoadCommand extends Command
             foreach ($res as $row) {
                 $rawId = $row->get('r.id');
                 if (!is_string($rawId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
                 }
                 $id = UuidV4::fromString($rawId);
                 $element = $this->elementManager->getRelation($id);

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\tests\UnitTests\Service;
 
 use App\Exception\Server500LogicErrorException;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\FileService;
 use App\Service\StringService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -35,7 +35,7 @@ class FileServiceTest extends TestCase
         $urlGenerator->method('generate')->willReturn('url');
         $server500Bag = $this->createMock(ParameterBagInterface::class);
         $server500Bag->method('get')->willReturn('dev');
-        $server500LogicExceptionFactory = new Server500LogicExceptionFactory(
+        $server500LogicExceptionFactory = new Server500LogicErrorExceptionFactory(
             $urlGenerator,
             $server500Bag,
             $this->createMock(LoggerInterface::class)

@@ -6,12 +6,13 @@ namespace App\Factory\Type\S3;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\Contract\Request\ResumableUploadRequestInterface;
+use App\Contract\S3\UploadFileOperationInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
-use App\Type\Request\ResumableUploadRequest;
 use App\Type\S3\UploadFileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
@@ -23,11 +24,11 @@ class UploadFileOperationFactory
         private ElementService $elementService,
         private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
-    public function createUploadFileOperationFromResumableUploadRequest(ResumableUploadRequest $resumableUploadRequest): UploadFileOperation
+    public function createUploadFileOperationFromResumableUploadRequest(ResumableUploadRequestInterface $resumableUploadRequest): UploadFileOperationInterface
     {
         if (false === $resumableUploadRequest->isUploadComplete()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileOperation' requires 'ResumableUploadRequest' to contain the whole content, i.e. be a non-chunked upload request.");
@@ -59,11 +60,11 @@ class UploadFileOperationFactory
     /**
      * @param resource $resource
      */
-    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, mixed $resource): UploadFileOperation
+    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, mixed $resource): UploadFileOperationInterface
     {
         $elementId = $element->getId();
         if (null === $elementId) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Expected element.id to not be null.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Expected element.id to not be null.');
         }
 
         $extension = $this->elementService->getFileNameExtension($element);

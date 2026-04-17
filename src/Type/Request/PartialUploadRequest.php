@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Type\Request;
 
-final readonly class PartialUploadRequest
+use App\Contract\Request\PartialUploadRequestInterface;
+
+final readonly class PartialUploadRequest implements PartialUploadRequestInterface
 {
     /**
      * @param resource $content

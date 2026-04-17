@@ -6,7 +6,7 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use Ramsey\Uuid\UuidInterface;
 
 class ElementService
@@ -14,7 +14,7 @@ class ElementService
     public function __construct(
         private FileService $fileService,
         private FilePropertyService $filePropertyService,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -22,7 +22,7 @@ class ElementService
     {
         $elementId = $element->getId();
         if (null === $elementId) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Expected element.id to not be null.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Expected element.id to not be null.');
         }
 
         return $elementId;

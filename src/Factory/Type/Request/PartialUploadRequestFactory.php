@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Factory\Type\Request;
 
+use App\Contract\Request\PartialUploadRequestInterface;
 use App\Service\HeaderParseService;
 use App\Type\Request\PartialUploadRequest;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,7 @@ class PartialUploadRequestFactory
     ) {
     }
 
-    public function createPartialUploadRequestFromRequest(Request $request): PartialUploadRequest
+    public function createPartialUploadRequestFromRequest(Request $request): PartialUploadRequestInterface
     {
         $headers = $request->headers;
 

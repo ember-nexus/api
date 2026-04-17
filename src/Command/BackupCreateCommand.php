@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\FileOperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
@@ -58,7 +58,7 @@ class BackupCreateCommand extends Command
         private FileService $fileService,
         private S3Service $s3Service,
         private FileOperationFactory $fileOperationFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -153,7 +153,7 @@ class BackupCreateCommand extends Command
             foreach ($rawNodeIds->toArray() as $rawNodeId) {
                 $rawNodeIdContent = $rawNodeId->get('n.id');
                 if (!is_string($rawNodeIdContent)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawNodeIdContent))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawNodeIdContent))); // @codeCoverageIgnore
                 }
                 $nodeIds[] = Uuid::fromString($rawNodeIdContent);
             }
@@ -208,7 +208,7 @@ class BackupCreateCommand extends Command
             foreach ($rawRelationIds->toArray() as $rawRelationId) {
                 $rawRelationIdContent = $rawRelationId->get('r.id');
                 if (!is_string($rawRelationIdContent)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawRelationIdContent))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawRelationIdContent))); // @codeCoverageIgnore
                 }
                 $relationIds[] = Uuid::fromString($rawRelationIdContent);
             }
@@ -278,7 +278,7 @@ class BackupCreateCommand extends Command
 
         foreach ($fileElementIds as $rawElementId) {
             if (!is_string($rawElementId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property element.id as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property element.id as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
             }
             $elementId = Uuid::fromString($rawElementId);
             $element = $this->elementManager->getElement($elementId);
@@ -373,14 +373,14 @@ class BackupCreateCommand extends Command
             Statement::create('MATCH (n) RETURN count(n) as count')
         )->first()->get('count');
         if (!is_int($rawNodeCount)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawNodeCount))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawNodeCount))); // @codeCoverageIgnore
         }
         $this->nodeCount = $rawNodeCount;
         $rawRelationCount = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create('MATCH ()-[r]->() RETURN count(r) as count')
         )->first()->get('count');
         if (!is_int($rawRelationCount)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawRelationCount))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawRelationCount))); // @codeCoverageIgnore
         }
         $this->relationCount = $rawRelationCount;
     }

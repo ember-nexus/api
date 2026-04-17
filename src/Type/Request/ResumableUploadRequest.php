@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Type\Request;
 
+use App\Contract\Request\ResumableUploadRequestInterface;
 use App\Service\FileService;
 use Ramsey\Uuid\UuidInterface;
 
-final readonly class ResumableUploadRequest
+final readonly class ResumableUploadRequest implements ResumableUploadRequestInterface
 {
     /**
      * @param resource $content

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Factory\Type\S3;
 
+use App\Contract\S3\MergeFileChunksOperationInterface;
 use App\Contract\UploadInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\ElementManager;
@@ -23,15 +24,17 @@ class MergeFileChunksOperationFactory
     ) {
     }
 
-    public function createMergeFileOperationFromUpload(UploadInterface $upload): MergeFileChunksOperation
+    public function createMergeFileOperationFromUpload(UploadInterface $upload): MergeFileChunksOperationInterface
     {
         if (false === $upload->isUploadComplete()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("'MergeFileChunksOperation' requires 'Upload' to be complete.");
         }
 
         $uploadKeys = [];
-        for ($i = 0; $i < $upload->getAlreadyUploadedChunks(); ++$i) {
-            $uploadKeys[] = $this->fileService->getUploadBucketKey($upload->getId(), $i + 1);
+        $uploadId = $upload->getId();
+        $alreadyUploadedChunks = $upload->getAlreadyUploadedChunks();
+        for ($i = 0; $i < $alreadyUploadedChunks; ++$i) {
+            $uploadKeys[] = $this->fileService->getUploadBucketKey($uploadId, $i + 1);
         }
 
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());

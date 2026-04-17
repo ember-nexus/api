@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Service;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\FileOperationFactory;
 use App\Service\ElementManager;
 use App\Service\EtagCalculatorService;
@@ -82,7 +82,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -149,7 +149,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -205,7 +205,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -251,7 +251,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -318,7 +318,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -398,7 +398,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -474,7 +474,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -529,7 +529,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -571,7 +571,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unexpected result.');
@@ -638,7 +638,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -718,7 +718,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -794,7 +794,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -849,7 +849,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -891,7 +891,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unexpected result.');
@@ -958,7 +958,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1037,7 +1037,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1112,7 +1112,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1167,7 +1167,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -1209,7 +1209,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unexpected result.');
@@ -1276,7 +1276,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1355,7 +1355,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1430,7 +1430,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method
@@ -1485,7 +1485,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unable to get DateTime from stdClass.');
@@ -1527,7 +1527,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionMessage('Unexpected result.');
@@ -1574,7 +1574,7 @@ class EtagCalculatorServiceTest extends TestCase
             $s3Service->reveal(),
             $fileOperationFactory->reveal(),
             $logger,
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         // run service method

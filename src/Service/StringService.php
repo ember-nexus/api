@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use Symfony\Component\Emoji\EmojiTransliterator;
 use Transliterator;
 
 class StringService
 {
     public function __construct(
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -19,7 +19,7 @@ class StringService
     {
         $string = \Safe\mb_convert_encoding($string, 'UTF-8', 'UTF-8');
         if (!is_string($string)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected mb_convert_encoding to return string, got %s.', get_debug_type($string))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected mb_convert_encoding to return string, got %s.', get_debug_type($string))); // @codeCoverageIgnore
         }
 
         return $string;
@@ -32,7 +32,7 @@ class StringService
          * @phpstan-ignore-next-line
          */
         if (!is_string($string)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected preg_replace to return string, got %s.', get_debug_type($string))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected preg_replace to return string, got %s.', get_debug_type($string))); // @codeCoverageIgnore
         }
 
         return $string;
@@ -51,11 +51,11 @@ class StringService
             'Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; Latin-ASCII'
         );
         if (null === $transliterator) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Unable to create Transliterator-object; is ext-intl installed?'); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to create Transliterator-object; is ext-intl installed?'); // @codeCoverageIgnore
         }
         $string = $transliterator->transliterate($string);
         if (!is_string($string)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected transliterate to return string, got %s.', get_debug_type($string))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected transliterate to return string, got %s.', get_debug_type($string))); // @codeCoverageIgnore
         }
 
         return $string;

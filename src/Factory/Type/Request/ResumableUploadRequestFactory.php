@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Factory\Type\Request;
 
+use App\Contract\Request\ResumableUploadRequestInterface;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\HeaderParseService;
 use App\Type\Request\ResumableUploadRequest;
@@ -18,7 +19,7 @@ class ResumableUploadRequestFactory
     ) {
     }
 
-    public function createResumableUploadRequestFromRequest(Request $request, UuidInterface $elementId): ResumableUploadRequest
+    public function createResumableUploadRequestFromRequest(Request $request, UuidInterface $elementId): ResumableUploadRequestInterface
     {
         $headers = $request->headers;
 

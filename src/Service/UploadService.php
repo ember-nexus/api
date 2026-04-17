@@ -6,7 +6,7 @@ namespace App\Service;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\UploadInterface;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\NodeElement;
 
 /**
@@ -16,7 +16,7 @@ class UploadService
 {
     public function __construct(
         private ElementManager $elementManager,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -25,10 +25,10 @@ class UploadService
         $element = $this->elementManager->getElement($upload->getId());
         if (null !== $element) {
             if (!($element instanceof NodeElementInterface)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected upload element to be a node, received %s.', get_debug_type($element)));
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected upload element to be a node, received %s.', get_debug_type($element)));
             }
             if ('Upload' !== $element->getLabel()) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf("Expected upload element to be of type 'Upload', not '%s'.", $element->getLabel() ?? 'null'));
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Expected upload element to be of type 'Upload', not '%s'.", $element->getLabel() ?? 'null'));
             }
         } else {
             $element = (new NodeElement())

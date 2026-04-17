@@ -7,7 +7,7 @@ namespace App\EventSystem\SearchStep\EventListener;
 use App\Antlr\CypherPathSubsetGrammar;
 use App\EventSystem\SearchStep\Event\SearchStepEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Type\SearchStepType;
@@ -34,7 +34,7 @@ class CypherPathSearchStepEventListener
         private AuthProvider $authProvider,
         private Stopwatch $stopwatch,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -52,11 +52,11 @@ class CypherPathSearchStepEventListener
              * @phpstan-ignore-next-line greater.alwaysTrue
              */
             if (!($rawNode instanceof Node)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.nodes as Node, not %s.', get_debug_type($rawNode))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.nodes as Node, not %s.', get_debug_type($rawNode))); // @codeCoverageIgnore
             }
             $rawId = $rawNode->getProperty('id');
             if (!is_string($rawId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.node.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.node.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
             }
             $nodeIds[] = UuidV4::fromString($rawId);
         }
@@ -65,11 +65,11 @@ class CypherPathSearchStepEventListener
              * @phpstan-ignore-next-line greater.alwaysTrue
              */
             if (!($rawRelation instanceof UnboundRelationship)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.relationships as UnboundRelationship, not %s.', get_debug_type($rawRelation))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.relationships as UnboundRelationship, not %s.', get_debug_type($rawRelation))); // @codeCoverageIgnore
             }
             $rawId = $rawRelation->getProperty('id');
             if (!is_string($rawId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.relationships.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.relationships.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
             }
             $relationIds[] = UuidV4::fromString($rawId);
         }

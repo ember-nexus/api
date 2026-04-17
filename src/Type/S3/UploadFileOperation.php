@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Type\S3;
 
-final readonly class UploadFileOperation
+use App\Contract\S3\UploadFileOperationInterface;
+
+final readonly class UploadFileOperation implements UploadFileOperationInterface
 {
     /**
      * @param resource $content
