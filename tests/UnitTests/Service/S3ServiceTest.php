@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Service;
 
 use App\Contract\S3\FileOperationInterface;
+use App\Contract\S3\MergeFileChunksOperationInterface;
+use App\Exception\Client400BadContentException;
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
@@ -219,6 +221,109 @@ class S3ServiceTest extends TestCase
         $this->assertSame('some content', $resource);
     }
 
+    public function testGetFileRangeAsResourceClipsResourceLengthToMaxContentLength(): void
+    {
+        $fileOperation = $this->prophesize(FileOperationInterface::class);
+        $fileOperation->getBucket()->shouldBeCalledTimes(2)->willReturn('storage-bucket');
+        $fileOperation->getKey()->shouldBeCalledTimes(2)->willReturn('storage-key.ext');
+        $fileOperation = $fileOperation->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(12345678);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+            'Range' => 'bytes=0-5000000',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput->reveal());
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal()
+        );
+
+        $resource = $s3Service->getFileRangeAsResource($fileOperation, 5000000);
+        $this->assertSame('some content', $resource);
+    }
+
+    public function testGetFileRangeAsResourceClipsResourceLengthToActualContentLengthWhenTooShort(): void
+    {
+        $fileOperation = $this->prophesize(FileOperationInterface::class);
+        $fileOperation->getBucket()->shouldBeCalledTimes(2)->willReturn('storage-bucket');
+        $fileOperation->getKey()->shouldBeCalledTimes(2)->willReturn('storage-key.ext');
+        $fileOperation = $fileOperation->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(4321);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+            'Range' => 'bytes=0-4321',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput->reveal());
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal()
+        );
+
+        $resource = $s3Service->getFileRangeAsResource($fileOperation, 5000000);
+        $this->assertSame('some content', $resource);
+    }
+
+    public function testGetFileRangeAsResourceThrowsWhenContentLengthIsNotDeterminable(): void
+    {
+        $fileOperation = $this->prophesize(FileOperationInterface::class);
+        $fileOperation->getBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $fileOperation->getKey()->shouldBeCalledOnce()->willReturn('storage-key.ext');
+        $fileOperation = $fileOperation->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(null);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+
+        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate('Unable to read content length of file.')->shouldBeCalledOnce()->willReturn($exception);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+
+        $s3Service->getFileRangeAsResource($fileOperation, 5000000);
+    }
+
     public function testGetEtag(): void
     {
         $fileOperation = $this->prophesize(FileOperationInterface::class);
@@ -272,5 +377,105 @@ class S3ServiceTest extends TestCase
         $this->expectException(Server500LogicErrorException::class);
 
         $s3Service->getEtag($fileOperation);
+    }
+
+    public function testGetMimeTypeFromFile(): void
+    {
+        $fileOperation = $this->prophesize(FileOperationInterface::class);
+        $fileOperation->getBucket()->shouldBeCalledTimes(2)->willReturn('storage-bucket');
+        $fileOperation->getKey()->shouldBeCalledTimes(2)->willReturn('storage-key.ext');
+        $fileOperation = $fileOperation->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(12345678);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+            'Range' => 'bytes=0-5242880',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput->reveal());
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            mimeTypeService: $mimeTypeService->reveal()
+        );
+
+        $mimeType = $s3Service->getMimeTypeFromFile($fileOperation);
+        $this->assertSame('text/plain', $mimeType);
+    }
+
+    public function testGetMimeTypeFromMergeFileChunksOperation(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn(['upload-key-0001.bin', 'upload-key-0002.bin']);
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(12345678);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001.bin',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001.bin',
+            'Range' => 'bytes=0-5242880',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput->reveal());
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            mimeTypeService: $mimeTypeService->reveal()
+        );
+
+        $mimeType = $s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
+        $this->assertSame('text/plain', $mimeType);
+    }
+
+    public function testGetMimeTypeFromMergeFileChunksOperationThrowsWhenMergeContainsNoUploadChunk(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getUploadBucket()->shouldNotBeCalled();
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn([]);
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $exception = $this->prophesize(Client400BadContentException::class)->reveal();
+
+        $client400BadContentExceptionFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
+        $client400BadContentExceptionFactory->createFromDetail(Argument::is('Creating a single file from multiple uploaded chunks requires at least one chunk to be present, got none.'))->shouldBeCalledOnce()->willReturn($exception);
+
+        $s3Service = $this->buildS3Service(
+            client400BadContentExceptionFactory: $client400BadContentExceptionFactory->reveal()
+        );
+
+        $this->expectException(Client400BadContentException::class);
+        $s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
     }
 }

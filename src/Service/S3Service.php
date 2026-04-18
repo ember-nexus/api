@@ -269,22 +269,6 @@ class S3Service
         return $object->getBody()->getContentAsResource();
     }
 
-    public function getEtag(FileOperationInterface $fileOperation): string
-    {
-        $headResult = $this->s3Client->headObject([
-            'Bucket' => $fileOperation->getBucket(),
-            'Key' => $fileOperation->getKey(),
-        ]);
-
-        $etag = $headResult->getETag();
-
-        if (null === $etag) {
-            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to retrieve file.');
-        }
-
-        return $etag;
-    }
-
     /**
      * @return resource
      */
@@ -307,6 +291,22 @@ class S3Service
         ]);
 
         return $result->getBody()->getContentAsResource();
+    }
+
+    public function getEtag(FileOperationInterface $fileOperation): string
+    {
+        $headResult = $this->s3Client->headObject([
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+        ]);
+
+        $etag = $headResult->getETag();
+
+        if (null === $etag) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to retrieve file.');
+        }
+
+        return $etag;
     }
 
     public function getMimeTypeFromFile(FileOperationInterface $fileOperation): string
