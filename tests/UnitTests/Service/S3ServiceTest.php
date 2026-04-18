@@ -15,6 +15,7 @@ use App\Service\MimeTypeService;
 use App\Service\S3Service;
 use App\Wrapper\S3ClientWrapper;
 use AsyncAws\Core\Stream\ResultStream;
+use AsyncAws\S3\Result\CreateMultipartUploadOutput;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\Result\HeadObjectOutput;
 use AsyncAws\S3\Result\ObjectExistsWaiter;
@@ -47,6 +48,113 @@ class S3ServiceTest extends TestCase
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
             $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
+    }
+
+    public function testCreateMultipartUploadFromMergeFileChunksOperation(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn(['upload-key-0001']);
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
+        $createMultipartUploadOutput->getUploadId()->shouldBeCalledOnce()->willReturn('some id');
+        $createMultipartUploadOutput = $createMultipartUploadOutput->reveal();
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(12);
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce()->willReturn($createMultipartUploadOutput);
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+            'Range' => 'bytes=0-12',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput->reveal());
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            mimeTypeService: $mimeTypeService->reveal()
+        );
+
+        $output = $s3Service->createMultipartUploadFromMergeFileChunksOperation($mergeFileChunksOperation);
+        $this->assertSame('some id', $output);
+    }
+
+    public function testCreateMultipartUploadFromMergeFileChunksOperationThrowsWhenUploadCouldNotBeCreated(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn(['upload-key-0001']);
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
+        $createMultipartUploadOutput->getUploadId()->shouldBeCalledOnce()->willReturn(null);
+        $createMultipartUploadOutput = $createMultipartUploadOutput->reveal();
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(12);
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce()->willReturn($createMultipartUploadOutput);
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+            'Range' => 'bytes=0-12',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput->reveal());
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+
+        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate('Unable to create multipart upload.')->shouldBeCalledOnce()->willReturn($exception);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            mimeTypeService: $mimeTypeService->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+
+        $s3Service->createMultipartUploadFromMergeFileChunksOperation($mergeFileChunksOperation);
     }
 
     public function testDeleteFileSkipsMissingFile(): void
