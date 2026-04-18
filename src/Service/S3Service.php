@@ -21,7 +21,7 @@ class S3Service
 {
     public function __construct(
         private S3Client $s3Client,
-        private UploadFileChunkOperationFactory $fileChunkOperationFactory,
+        private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
         private S3ClientWrapper $s3ClientWrapper,
         private MimeTypeService $mimeTypeService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
@@ -164,11 +164,11 @@ class S3Service
     /**
      * todo: optimize upload for larger files using multipart-upload?, handled by https://github.com/ember-nexus/api/issues/452.
      */
-    public function uploadFile(UploadFileOperationInterface $uploadFileOperation): void
+    public function uploadFile(UploadFileOperationInterface $uploadFileOperation): int
     {
         // intermediate upload to "upload bucket"
-        $uploadFileChunkOperation = $this->fileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
-        $this->uploadFileChunk($uploadFileChunkOperation);
+        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
+        $contentLength = $this->uploadFileChunk($uploadFileChunkOperation);
 
         // transfer uploaded element to "storage bucket"
         $copyResult = $this->s3Client->copyObject([
@@ -184,7 +184,7 @@ class S3Service
         ]);
 
         try {
-            $copyResult->resolve();
+            $this->s3ClientWrapper->resolveCopyObjectOutput($copyResult);
             $previousStorageKey = $uploadFileOperation->getPreviousStorageKey();
             if (null !== $previousStorageKey && $previousStorageKey !== $uploadFileOperation->getStorageKey()) {
                 // delete previous uploaded element, if available
@@ -202,6 +202,8 @@ class S3Service
         } catch (Throwable $e) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
         }
+
+        return $contentLength;
     }
 
     public function deleteFile(FileOperationInterface $fileOperation): void
