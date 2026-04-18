@@ -259,14 +259,15 @@ class S3Service
             'Bucket' => $fileOperation->getBucket(),
             'Key' => $fileOperation->getKey(),
         ];
-        $status = $this->s3Client->objectExists($objectConfig);
 
-        if ($status->isSuccess()) {
-            $this->s3Client->deleteObject($objectConfig);
+        $objectExistsWaiter = $this->s3Client->objectExists($objectConfig);
+        if (!$this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($objectExistsWaiter)) {
+            return;
         }
 
-        $status = $this->s3Client->objectExists($objectConfig);
-        if ($status->isSuccess()) {
+        $this->s3Client->deleteObject($objectConfig);
+        $objectExistsWaiter = $this->s3Client->objectExists($objectConfig);
+        if ($this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($objectExistsWaiter)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.');
         }
     }

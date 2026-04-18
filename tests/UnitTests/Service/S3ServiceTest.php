@@ -44,6 +44,101 @@ class S3ServiceTest extends TestCase
         );
     }
 
+    public function testDeleteFileSkipsMissingFile(): void
+    {
+        $fileOperation = $this->prophesize(FileOperationInterface::class);
+        $fileOperation->getBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $fileOperation->getKey()->shouldBeCalledOnce()->willReturn('storage-key.ext');
+        $fileOperation = $fileOperation->reveal();
+
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledOnce()->willReturn($objectExistsWaiter);
+        $s3Client->deleteObject(Argument::any())->shouldNotBeCalled();
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledOnce()->willReturn(false);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal()
+        );
+
+        $s3Service->deleteFile($fileOperation);
+    }
+
+    public function testDeleteFileDeletesExistingFile(): void
+    {
+        $fileOperation = $this->prophesize(FileOperationInterface::class);
+        $fileOperation->getBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $fileOperation->getKey()->shouldBeCalledOnce()->willReturn('storage-key.ext');
+        $fileOperation = $fileOperation->reveal();
+
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledOnce();
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, false);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal()
+        );
+
+        $s3Service->deleteFile($fileOperation);
+    }
+
+    public function testDeleteFileThrowsWhenDeletedFileWasNotDeleted(): void
+    {
+        $fileOperation = $this->prophesize(FileOperationInterface::class);
+        $fileOperation->getBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $fileOperation->getKey()->shouldBeCalledOnce()->willReturn('storage-key.ext');
+        $fileOperation = $fileOperation->reveal();
+
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledOnce();
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, true);
+
+        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.')->shouldBeCalledOnce()->willReturn($exception);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+
+        $s3Service->deleteFile($fileOperation);
+    }
+
     public function testExistsFile(): void
     {
         $fileOperation = $this->prophesize(FileOperationInterface::class);
