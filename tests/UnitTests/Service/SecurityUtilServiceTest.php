@@ -28,6 +28,8 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -40,6 +42,8 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 #[AllowMockObjectsWithoutExpectations]
 class SecurityUtilServiceTest extends TestCase
 {
+    use ProphecyTrait;
+
     private function getSecurityUtilService(
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
         ?CypherEntityManager $cypherEntityManager = null,
@@ -200,26 +204,23 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testChangeUserPassword(): void
     {
-        $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
-        $userPasswordHasher->method('hashPassword')->willReturn('someHash');
+        $userNode = $this->prophesize(NodeElementInterface::class);
+        $userNode->addProperty(Argument::is('_passwordHash'), Argument::is('newPasswordHash'))->shouldBeCalledOnce()->willReturn($this->prophesize(NodeElementInterface::class)->reveal());
+        $userNode = $userNode->reveal();
 
-        $elementManager = $this->createMock(ElementManager::class);
-        $elementManager->method('merge')
-            ->with(
-                $this->callback(function (NodeElementInterface $userNode) {
-                    return $userNode->hasProperty('_passwordHash')
-                        && 'someHash' === $userNode->getProperty('_passwordHash');
-                })
-            );
+        $userPasswordHasher = $this->prophesize(UserPasswordHasher::class);
+        $userPasswordHasher->hashPassword(Argument::is('newPassword'))->willReturn('newPasswordHash');
 
-        $userNode = new NodeElement();
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->merge(Argument::is($userNode))->shouldBeCalledOnce()->willReturn($this->prophesize(ElementManager::class)->reveal());
+        $elementManager->flush()->shouldBeCalledOnce()->willReturn($this->prophesize(ElementManager::class)->reveal());
 
         $securityUtilService = $this->getSecurityUtilService(
-            elementManager: $elementManager,
-            userPasswordHasher: $userPasswordHasher
+            elementManager: $elementManager->reveal(),
+            userPasswordHasher: $userPasswordHasher->reveal(),
         );
 
-        $securityUtilService->changeUserPassword($userNode, '1234');
+        $securityUtilService->changeUserPassword($userNode, 'newPassword');
     }
 
     public function testFindUserByUniqueUserIdentifierWithNoResults(): void
@@ -309,20 +310,19 @@ class SecurityUtilServiceTest extends TestCase
 
     public function testFindUserByUniqueUserIdentifierWithMissingNode(): void
     {
-        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getRegisterUniqueIdentifier()->willReturn('email');
 
         $expectedCypherQuery = 'MATCH (u:User {email: $uniqueUserIdentifier}) RETURN u.id AS id';
 
         $null = null;
-        $cypherClient = $this->createMock(ClientInterface::class);
-        $cypherClient->expects($this->once())
-            ->method('runStatement')
-            ->with(
-                $this->callback(function (Statement $statement) use ($expectedCypherQuery) {
-                    return $statement->getText() === $expectedCypherQuery;
-                })
-            )
+        $cypherClient = $this->prophesize(ClientInterface::class);
+        $cypherClient->runStatement(
+            Argument::that(function (Statement $statement) use ($expectedCypherQuery) {
+                return $statement->getText() === $expectedCypherQuery;
+            })
+        )
+            ->shouldBeCalledOnce()
             ->willReturn(new SummarizedResult(
                 $null,
                 [
@@ -331,32 +331,37 @@ class SecurityUtilServiceTest extends TestCase
                     ]),
                 ]
             ));
-        $cypherEntityManager = $this->createMock(CypherEntityManager::class);
-        $cypherEntityManager->method('getClient')->willReturn($cypherClient);
 
-        $elementManager = $this->createMock(ElementManager::class);
-        $elementManager->method('getElement')
-            ->with(
-                $this->callback(function (UuidInterface $elementId) {
-                    return 'd8defdd8-8e79-40af-84dd-169587bf2bcc' === $elementId->toString();
-                })
-            )
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->willReturn($cypherClient->reveal());
+
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElement(
+            Argument::that(function (UuidInterface $elementId) {
+                return 'd8defdd8-8e79-40af-84dd-169587bf2bcc' === $elementId->toString();
+            })
+        )
+            ->shouldBeCalledOnce()
             ->willReturn(null);
 
         $securityUtilService = $this->getSecurityUtilService(
-            emberNexusConfiguration: $emberNexusConfiguration,
-            cypherEntityManager: $cypherEntityManager,
-            elementManager: $elementManager
+            emberNexusConfiguration: $emberNexusConfiguration->reveal(),
+            cypherEntityManager: $cypherEntityManager->reveal(),
+            elementManager: $elementManager->reveal(),
         );
 
         try {
             $securityUtilService->findUserByUniqueUserIdentifier('test@localhost.dev');
+            $this->fail('Expected Client401UnauthorizedException to be thrown.');
         } catch (Exception $e) {
             $this->assertInstanceOf(Client401UnauthorizedException::class, $e);
             /**
              * @var Client401UnauthorizedException $e
              */
-            $this->assertSame("Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).", $e->getDetail());
+            $this->assertSame(
+                "Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted).",
+                $e->getDetail()
+            );
         }
     }
 
