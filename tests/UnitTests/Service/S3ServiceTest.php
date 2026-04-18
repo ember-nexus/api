@@ -22,12 +22,16 @@ use AsyncAws\S3\Result\ObjectExistsWaiter;
 use AsyncAws\S3\Result\UploadPartCopyOutput;
 use AsyncAws\S3\S3Client;
 use AsyncAws\S3\ValueObject\CopyPartResult;
+use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassLength)
+ */
 #[Small]
 #[CoversClass(S3Service::class)]
 class S3ServiceTest extends TestCase
@@ -295,6 +299,333 @@ class S3ServiceTest extends TestCase
         $this->expectException(Server500LogicErrorException::class);
 
         $s3Service->createUploadPartsFromMergeFileChunksOperation($mergeFileChunksOperation, 'upload-id');
+    }
+
+    public function testMergeFileChunks(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledTimes(6)->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(6)->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(4)->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledTimes(2)->willReturn(['upload-key-0001', 'upload-key-0002', 'upload-key-0003']);
+        $mergeFileChunksOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn(null);
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
+        $createMultipartUploadOutput->getUploadId()->shouldBeCalledOnce()->willReturn('upload-id');
+        $createMultipartUploadOutput = $createMultipartUploadOutput->reveal();
+
+        $copyPartResult1 = new CopyPartResult(['ETag' => 'etag-1']);
+        $uploadPartCopyOutput1 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput1->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult1);
+
+        $copyPartResult2 = new CopyPartResult(['ETag' => 'etag-2']);
+        $uploadPartCopyOutput2 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput2->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult2);
+
+        $copyPartResult3 = new CopyPartResult(['ETag' => 'etag-3']);
+        $uploadPartCopyOutput3 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput3->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult3);
+
+        $headObjectOutput1 = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput1->getContentLength()->shouldBeCalledOnce()->willReturn(12);
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput1 = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput1->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $headObjectOutput2 = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput2->getContentLength()->shouldBeCalledOnce()->willReturn(12345678);
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce()->willReturn($createMultipartUploadOutput);
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 1,
+            'CopySource' => 'upload-bucket/upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput1->reveal());
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 2,
+            'CopySource' => 'upload-bucket/upload-key-0002',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput2->reveal());
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 3,
+            'CopySource' => 'upload-bucket/upload-key-0003',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput3->reveal());
+        $s3Client->completeMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'MultipartUpload' => [
+                'Parts' => [
+                    [
+                        'PartNumber' => 1,
+                        'ETag' => 'etag-1',
+                    ],
+                    [
+                        'PartNumber' => 2,
+                        'ETag' => 'etag-2',
+                    ],
+                    [
+                        'PartNumber' => 3,
+                        'ETag' => 'etag-3',
+                    ],
+                ],
+            ],
+        ]))->shouldBeCalledOnce();
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput1->reveal());
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+            'Range' => 'bytes=0-12',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput1->reveal());
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput2->reveal());
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            mimeTypeService: $mimeTypeService->reveal()
+        );
+
+        $contentLength = $s3Service->mergeFileChunks($mergeFileChunksOperation);
+        $this->assertSame(12345678, $contentLength);
+    }
+
+    public function testMergeFileChunksAbortsUploadWhenExceptionIsThrownDuringUpload(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledTimes(6)->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(6)->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(4)->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledTimes(2)->willReturn(['upload-key-0001', 'upload-key-0002', 'upload-key-0003']);
+        $mergeFileChunksOperation->getPreviousStorageKey()->shouldNotBeCalled();
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
+        $createMultipartUploadOutput->getUploadId()->shouldBeCalledOnce()->willReturn('upload-id');
+        $createMultipartUploadOutput = $createMultipartUploadOutput->reveal();
+
+        $copyPartResult1 = new CopyPartResult(['ETag' => 'etag-1']);
+        $uploadPartCopyOutput1 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput1->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult1);
+
+        $copyPartResult2 = new CopyPartResult(['ETag' => 'etag-2']);
+        $uploadPartCopyOutput2 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput2->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult2);
+
+        $copyPartResult3 = new CopyPartResult(['ETag' => 'etag-3']);
+        $uploadPartCopyOutput3 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput3->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult3);
+
+        $headObjectOutput1 = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput1->getContentLength()->shouldBeCalledOnce()->willReturn(12);
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput1 = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput1->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $originalException = new Exception('some message');
+
+        $finalException = $this->prophesize(Server500LogicErrorException::class)->reveal();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate(Argument::is("Caught exception 'some message' during multipart upload."), Argument::is([]), Argument::is($originalException))->shouldBeCalledOnce()->willReturn($finalException);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce()->willReturn($createMultipartUploadOutput);
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 1,
+            'CopySource' => 'upload-bucket/upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput1->reveal());
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 2,
+            'CopySource' => 'upload-bucket/upload-key-0002',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput2->reveal());
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 3,
+            'CopySource' => 'upload-bucket/upload-key-0003',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput3->reveal());
+        $s3Client->completeMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'MultipartUpload' => [
+                'Parts' => [
+                    [
+                        'PartNumber' => 1,
+                        'ETag' => 'etag-1',
+                    ],
+                    [
+                        'PartNumber' => 2,
+                        'ETag' => 'etag-2',
+                    ],
+                    [
+                        'PartNumber' => 3,
+                        'ETag' => 'etag-3',
+                    ],
+                ],
+            ],
+        ]))->shouldBeCalledOnce()->willThrow($originalException);
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput1->reveal());
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+            'Range' => 'bytes=0-12',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput1->reveal());
+        $s3Client->abortMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+        ]))->shouldBeCalledOnce();
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            mimeTypeService: $mimeTypeService->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+
+        $s3Service->mergeFileChunks($mergeFileChunksOperation);
+    }
+
+    public function testMergeFileChunksDeletesPreviousFileIfAvailable(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledTimes(5)->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(5)->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledTimes(2)->willReturn(['upload-key-0001']);
+        $mergeFileChunksOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn('storage-key.prev');
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
+        $createMultipartUploadOutput->getUploadId()->shouldBeCalledOnce()->willReturn('upload-id');
+        $createMultipartUploadOutput = $createMultipartUploadOutput->reveal();
+
+        $copyPartResult1 = new CopyPartResult(['ETag' => 'etag-1']);
+        $uploadPartCopyOutput1 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput1->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult1);
+
+        $headObjectOutput1 = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput1->getContentLength()->shouldBeCalledOnce()->willReturn(12);
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput1 = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput1->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $headObjectOutput2 = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput2->getContentLength()->shouldBeCalledOnce()->willReturn(12345678);
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce()->willReturn($createMultipartUploadOutput);
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 1,
+            'CopySource' => 'upload-bucket/upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput1->reveal());
+        $s3Client->completeMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'MultipartUpload' => [
+                'Parts' => [
+                    [
+                        'PartNumber' => 1,
+                        'ETag' => 'etag-1',
+                    ],
+                ],
+            ],
+        ]))->shouldBeCalledOnce();
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput1->reveal());
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+            'Range' => 'bytes=0-12',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput1->reveal());
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput2->reveal());
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.prev',
+        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.prev',
+        ]))->shouldBeCalledOnce();
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, false);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            mimeTypeService: $mimeTypeService->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal()
+        );
+
+        $contentLength = $s3Service->mergeFileChunks($mergeFileChunksOperation);
+        $this->assertSame(12345678, $contentLength);
     }
 
     public function testDeleteFileSkipsMissingFile(): void
