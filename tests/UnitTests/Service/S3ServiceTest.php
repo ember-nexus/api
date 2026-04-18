@@ -19,7 +19,9 @@ use AsyncAws\S3\Result\CreateMultipartUploadOutput;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\Result\HeadObjectOutput;
 use AsyncAws\S3\Result\ObjectExistsWaiter;
+use AsyncAws\S3\Result\UploadPartCopyOutput;
 use AsyncAws\S3\S3Client;
+use AsyncAws\S3\ValueObject\CopyPartResult;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -155,6 +157,144 @@ class S3ServiceTest extends TestCase
         $this->expectException(Server500LogicErrorException::class);
 
         $s3Service->createMultipartUploadFromMergeFileChunksOperation($mergeFileChunksOperation);
+    }
+
+    public function testCreateUploadPartsFromMergeFileChunksOperation(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledTimes(3)->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(3)->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(3)->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn(['upload-key-0001', 'upload-key-0002', 'upload-key-0003']);
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $copyPartResult1 = new CopyPartResult(['ETag' => 'etag-1']);
+        $uploadPartCopyOutput1 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput1->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult1);
+
+        $copyPartResult2 = new CopyPartResult(['ETag' => 'etag-2']);
+        $uploadPartCopyOutput2 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput2->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult2);
+
+        $copyPartResult3 = new CopyPartResult(['ETag' => 'etag-3']);
+        $uploadPartCopyOutput3 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput3->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult3);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 1,
+            'CopySource' => 'upload-bucket/upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput1->reveal());
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 2,
+            'CopySource' => 'upload-bucket/upload-key-0002',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput2->reveal());
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 3,
+            'CopySource' => 'upload-bucket/upload-key-0003',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput3->reveal());
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+        );
+
+        $parts = $s3Service->createUploadPartsFromMergeFileChunksOperation($mergeFileChunksOperation, 'upload-id');
+        $this->assertSame([
+            [
+                'PartNumber' => 1,
+                'ETag' => 'etag-1',
+            ],
+            [
+                'PartNumber' => 2,
+                'ETag' => 'etag-2',
+            ],
+            [
+                'PartNumber' => 3,
+                'ETag' => 'etag-3',
+            ],
+        ], $parts);
+    }
+
+    public function testCreateUploadPartsFromMergeFileChunksOperationThrowsWhenCopyPartResultIsNull(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn(['upload-key-0001']);
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $uploadPartCopyOutput1 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput1->getCopyPartResult()->shouldBeCalledOnce()->willReturn(null);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 1,
+            'CopySource' => 'upload-bucket/upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput1->reveal());
+
+        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate('Unable to read copy part result.')->shouldBeCalledOnce()->willReturn($exception);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+
+        $s3Service->createUploadPartsFromMergeFileChunksOperation($mergeFileChunksOperation, 'upload-id');
+    }
+
+    public function testCreateUploadPartsFromMergeFileChunksOperationThrowsWhenEtagIsNull(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn(['upload-key-0001']);
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $copyPartResult1 = new CopyPartResult([]);
+        $uploadPartCopyOutput1 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput1->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult1);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 1,
+            'CopySource' => 'upload-bucket/upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput1->reveal());
+
+        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate('Unable to read etag of copy part result.')->shouldBeCalledOnce()->willReturn($exception);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+
+        $s3Service->createUploadPartsFromMergeFileChunksOperation($mergeFileChunksOperation, 'upload-id');
     }
 
     public function testDeleteFileSkipsMissingFile(): void

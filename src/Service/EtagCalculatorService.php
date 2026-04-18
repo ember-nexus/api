@@ -9,6 +9,7 @@ use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
+use AsyncAws\S3\Exception\NoSuchKeyException;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
@@ -368,7 +369,16 @@ class EtagCalculatorService
 
         $element = $this->elementManager->getElementOrFail($elementId);
         $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
-        $fileEtag = $this->s3Service->getEtag($fileOperation);
+        try {
+            $fileEtag = $this->s3Service->getEtag($fileOperation);
+        } catch (NoSuchKeyException $exception) {
+            $this->logger->error(sprintf(
+                'Unable to calculate Etag for file of element %s.',
+                (string) $elementId
+            ));
+
+            return null;
+        }
 
         $fileProperties = $element->getProperty('file');
         $fileProperties = \Safe\json_encode($fileProperties);
