@@ -12,6 +12,7 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Type\S3\FileOperation;
+use App\Wrapper\S3ClientWrapper;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
 use finfo;
@@ -22,6 +23,7 @@ class S3Service
     public function __construct(
         private S3Client $s3Client,
         private UploadFileChunkOperationFactory $fileChunkOperationFactory,
+        private S3ClientWrapper $s3ClientWrapper,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -275,9 +277,9 @@ class S3Service
             'Bucket' => $fileOperation->getBucket(),
             'Key' => $fileOperation->getKey(),
         ];
-        $status = $this->s3Client->objectExists($objectConfig);
+        $objectExistsWaiter = $this->s3Client->objectExists($objectConfig);
 
-        return $status->isSuccess();
+        return $this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($objectExistsWaiter);
     }
 
     public function getFile(FileOperationInterface $fileOperation): GetObjectOutput
