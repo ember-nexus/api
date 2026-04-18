@@ -14,6 +14,7 @@ use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
+use App\Service\MimeTypeService;
 use App\Type\S3\UploadFileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -34,6 +35,7 @@ class UploadFileOperationFactoryTest extends TestCase
         ?ElementManager $elementManager = null,
         ?ElementService $elementService = null,
         ?FileService $fileService = null,
+        ?MimeTypeService $mimeTypeService = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
         ?Server500LogicErrorExceptionFactory $server500LogicExceptionFactory = null,
     ): UploadFileOperationFactory {
@@ -42,6 +44,7 @@ class UploadFileOperationFactoryTest extends TestCase
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal(),
             $elementService ?? $this->prophesize(ElementService::class)->reveal(),
             $fileService ?? $this->prophesize(FileService::class)->reveal(),
+            $mimeTypeService ?? $this->prophesize(MimeTypeService::class)->reveal(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
             $server500LogicExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -72,12 +75,15 @@ class UploadFileOperationFactoryTest extends TestCase
         $fileService = $this->prophesize(FileService::class);
         $fileService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
         $fileService->getStorageBucketKey(Argument::is($elementId), Argument::is('txt'))->shouldBeCalledOnce()->willReturn('storage-key.txt');
-        $fileService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
 
         $uploadFileOperationFactory = $this->buildUploadFileOperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementManager: $elementManager->reveal(),
-            fileService: $fileService->reveal()
+            fileService: $fileService->reveal(),
+            mimeTypeService: $mimeTypeService->reveal()
         );
 
         $uploadFileOperation = $uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest->reveal());
@@ -119,7 +125,9 @@ class UploadFileOperationFactoryTest extends TestCase
         $fileService->getStorageBucketKey(Argument::is($elementId), Argument::is('prev'))->shouldBeCalledOnce()->willReturn('storage-key.prev');
         $fileService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
         $fileService->getStorageBucketKey(Argument::is($elementId), Argument::is('txt'))->shouldBeCalledOnce()->willReturn('storage-key.txt');
-        $fileService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
 
         $elementService = $this->prophesize(ElementService::class);
         $elementService->getFileNameExtension(Argument::is($element))->shouldBeCalledOnce()->willReturn('prev');
@@ -128,7 +136,8 @@ class UploadFileOperationFactoryTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementManager: $elementManager->reveal(),
             elementService: $elementService->reveal(),
-            fileService: $fileService->reveal()
+            fileService: $fileService->reveal(),
+            mimeTypeService: $mimeTypeService->reveal()
         );
 
         $uploadFileOperation = $uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest->reveal());
@@ -171,7 +180,9 @@ class UploadFileOperationFactoryTest extends TestCase
         $fileService = $this->prophesize(FileService::class);
         $fileService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
         $fileService->getStorageBucketKey(Argument::is($elementId), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('storage-key.ext');
-        $fileService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
 
         $elementService = $this->prophesize(ElementService::class);
         $elementService->getFileNameExtension(Argument::is($element))->shouldBeCalledOnce()->willReturn('ext');
@@ -179,7 +190,8 @@ class UploadFileOperationFactoryTest extends TestCase
         $uploadFileOperationFactory = $this->buildUploadFileOperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementService: $elementService->reveal(),
-            fileService: $fileService->reveal()
+            fileService: $fileService->reveal(),
+            mimeTypeService: $mimeTypeService->reveal()
         );
 
         $uploadFileOperation = $uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, 'some content');

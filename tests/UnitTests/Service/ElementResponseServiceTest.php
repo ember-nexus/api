@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Service;
+namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;

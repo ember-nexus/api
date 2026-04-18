@@ -15,7 +15,6 @@ use App\Type\S3\FileOperation;
 use App\Wrapper\S3ClientWrapper;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
-use finfo;
 use Throwable;
 
 class S3Service
@@ -24,48 +23,10 @@ class S3Service
         private S3Client $s3Client,
         private UploadFileChunkOperationFactory $fileChunkOperationFactory,
         private S3ClientWrapper $s3ClientWrapper,
+        private MimeTypeService $mimeTypeService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
-    }
-
-    public function getMimeTypeFromFile(FileOperationInterface $fileOperation): string
-    {
-        $headResult = $this->s3Client->headObject([
-            'Bucket' => $fileOperation->getBucket(),
-            'Key' => $fileOperation->getKey(),
-        ]);
-        $contentLength = $headResult->getContentLength();
-
-        if (null === $contentLength) {
-            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to read content length of file.');
-        }
-
-        $result = $this->s3Client->getObject([
-            'Bucket' => $fileOperation->getBucket(),
-            'Key' => $fileOperation->getKey(),
-            'Range' => sprintf('bytes=0-%d', min($contentLength, 5 * 1024 * 1024)), // get first 5 MiB of file for mime type detection
-        ]);
-
-        $resource = $result->getBody()->getContentAsString();
-
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->buffer($resource);
-
-        return false === $mimeType ? FileService::DEFAULT_MIME_TYPE : $mimeType;
-    }
-
-    public function getMimeTypeFromMergeFileChunksOperation(MergeFileChunksOperationInterface $mergeFileChunksOperation): string
-    {
-        $uploadKeys = $mergeFileChunksOperation->getUploadKeys();
-        if (0 === count($uploadKeys)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Creating a single file from multiple uploaded chunks requires at least one chunk to be present, got none.');
-        }
-
-        return $this->getMimeTypeFromFile(new FileOperation(
-            $mergeFileChunksOperation->getUploadBucket(),
-            $uploadKeys[0]
-        ));
     }
 
     public function mergeFileChunks(MergeFileChunksOperationInterface $mergeFileChunksOperation): int
@@ -296,7 +257,7 @@ class S3Service
     /**
      * @return resource
      */
-    public function getFileAsResource(FileOperationInterface $fileOperation): mixed
+    public function getFileAsResource(FileOperationInterface $fileOperation)
     {
         $objectConfig = [
             'Bucket' => $fileOperation->getBucket(),
@@ -322,5 +283,49 @@ class S3Service
         }
 
         return $etag;
+    }
+
+    /**
+     * @return resource
+     */
+    public function getFileRangeAsResource(FileOperationInterface $fileOperation, int $maxContentLength)
+    {
+        $headResult = $this->s3Client->headObject([
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+        ]);
+        $contentLength = $headResult->getContentLength();
+
+        if (null === $contentLength) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to read content length of file.');
+        }
+
+        $result = $this->s3Client->getObject([
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+            'Range' => sprintf('bytes=0-%d', min($contentLength, $maxContentLength)),
+        ]);
+
+        return $result->getBody()->getContentAsResource();
+    }
+
+    public function getMimeTypeFromFile(FileOperationInterface $fileOperation): string
+    {
+        $resource = $this->getFileRangeAsResource($fileOperation, MimeTypeService::NECESSARY_BYTES_FOR_MIME_TYPE_DETECTION);
+
+        return $this->mimeTypeService->getMimeTypeFromResource($resource);
+    }
+
+    public function getMimeTypeFromMergeFileChunksOperation(MergeFileChunksOperationInterface $mergeFileChunksOperation): string
+    {
+        $uploadKeys = $mergeFileChunksOperation->getUploadKeys();
+        if (0 === count($uploadKeys)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Creating a single file from multiple uploaded chunks requires at least one chunk to be present, got none.');
+        }
+
+        return $this->getMimeTypeFromFile(new FileOperation(
+            $mergeFileChunksOperation->getUploadBucket(),
+            $uploadKeys[0]
+        ));
     }
 }

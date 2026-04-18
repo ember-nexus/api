@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Service;
+namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
@@ -47,34 +47,6 @@ class FileServiceTest extends TestCase
             $stringService,
             $server500LogicExceptionFactory,
         );
-    }
-
-    public function testGetMimeTypeFromResource(): void
-    {
-        $resource = fopen('php://memory', 'r+');
-        fwrite($resource, 'Hello, World!');
-        rewind($resource);
-
-        $fileService = $this->buildFileService();
-        $mimeType = $fileService->getMimeTypeFromResource($resource);
-
-        self::assertSame('text/plain', $mimeType);
-
-        fclose($resource);
-    }
-
-    public function testGetMimeTypeFromResourceReturnsFallbackForUnknownContent(): void
-    {
-        $resource = fopen('php://memory', 'r+');
-        fwrite($resource, str_repeat("\x00", 16)); // null bytes → undetectable type
-        rewind($resource);
-
-        $fileService = $this->buildFileService();
-        $mimeType = $fileService->getMimeTypeFromResource($resource);
-
-        self::assertSame('application/octet-stream', $mimeType);
-
-        fclose($resource);
     }
 
     public function testGetUploadBucketKeyThrowsOnNegativeIndex(): void

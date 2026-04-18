@@ -6,7 +6,6 @@ namespace App\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
-use finfo;
 use Ramsey\Uuid\UuidInterface;
 
 class FileService
@@ -14,7 +13,6 @@ class FileService
     public const int MAX_FILENAME_LENGTH = 255;
     public const int MAX_EXTENSION_LENGTH = 16;
     public const string DEFAULT_EXTENSION = 'bin';
-    public const string DEFAULT_MIME_TYPE = 'application/octet-stream';
     public const string UPLOAD_EXTENSION = 'wip';
 
     public function __construct(
@@ -22,16 +20,6 @@ class FileService
         private StringService $stringService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
-    }
-
-    public function getMimeTypeFromResource(mixed $resource): string
-    {
-        $chunk = \Safe\stream_get_contents($resource, 8192, 0);
-        \Safe\rewind($resource);
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->buffer($chunk);
-
-        return false === $mimeType ? 'application/octet-stream' : $mimeType;
     }
 
     public function getAsciiSafeFileName(string $fileName): string

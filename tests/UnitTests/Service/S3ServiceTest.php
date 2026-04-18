@@ -9,6 +9,7 @@ use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
+use App\Service\MimeTypeService;
 use App\Service\S3Service;
 use App\Wrapper\S3ClientWrapper;
 use AsyncAws\Core\Stream\ResultStream;
@@ -32,6 +33,7 @@ class S3ServiceTest extends TestCase
         ?S3Client $s3Client = null,
         ?UploadFileChunkOperationFactory $fileChunkOperationFactory = null,
         ?S3ClientWrapper $s3ClientWrapper = null,
+        ?MimeTypeService $mimeTypeService = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
         ?Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory = null,
     ): S3Service {
@@ -39,6 +41,7 @@ class S3ServiceTest extends TestCase
             $s3Client ?? $this->prophesize(S3Client::class)->reveal(),
             $fileChunkOperationFactory ?? $this->prophesize(UploadFileChunkOperationFactory::class)->reveal(),
             $s3ClientWrapper ?? $this->prophesize(S3ClientWrapper::class)->reveal(),
+            $mimeTypeService ?? $this->prophesize(MimeTypeService::class)->reveal(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
             $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );

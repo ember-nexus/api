@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\EventSystem\SearchStep\Event;
+namespace App\Tests\UnitTests\EventSystem\SearchStep\Event;
 
 use App\EventSystem\SearchStep\Event\SearchStepEvent;
 use App\Type\SearchStepType;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Factory\Exception;
+namespace App\Tests\UnitTests\Factory\Exception;
 
 use App\Factory\Exception\Client400BadGrammarExceptionFactory;
 use Exception;

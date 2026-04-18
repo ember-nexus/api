@@ -13,7 +13,7 @@ interface ResumableUploadRequestInterface
     /**
      * @return resource
      */
-    public function getContent(): mixed;
+    public function getContent();
 
     public function isUploadComplete(): ?bool;
 

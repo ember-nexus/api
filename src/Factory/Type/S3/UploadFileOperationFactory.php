@@ -13,6 +13,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\FileService;
+use App\Service\MimeTypeService;
 use App\Type\S3\UploadFileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
@@ -23,6 +24,7 @@ class UploadFileOperationFactory
         private ElementManager $elementManager,
         private ElementService $elementService,
         private FileService $fileService,
+        private MimeTypeService $mimeTypeService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -53,14 +55,14 @@ class UploadFileOperationFactory
             $this->fileService->getStorageBucketKey($elementId, $resumableUploadRequest->getExtension()),
             $resource,
             $resumableUploadRequest->getContentLength(),
-            $this->fileService->getMimeTypeFromResource($resource)
+            $this->mimeTypeService->getMimeTypeFromResource($resource)
         );
     }
 
     /**
      * @param resource $resource
      */
-    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, mixed $resource): UploadFileOperationInterface
+    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, $resource): UploadFileOperationInterface
     {
         $elementId = $element->getId();
         if (null === $elementId) {
@@ -77,7 +79,7 @@ class UploadFileOperationFactory
             $this->fileService->getStorageBucketKey($elementId, $extension),
             $resource,
             null,
-            $this->fileService->getMimeTypeFromResource($resource)
+            $this->mimeTypeService->getMimeTypeFromResource($resource)
         );
     }
 }

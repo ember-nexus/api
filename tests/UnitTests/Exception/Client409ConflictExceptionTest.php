@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Exception;
+namespace App\Tests\UnitTests\Exception;
 
 use App\Exception\Client409ConflictException;
 use Exception;

@@ -31,7 +31,7 @@ final readonly class ResumableUploadRequest implements ResumableUploadRequestInt
     /**
      * @return resource
      */
-    public function getContent(): mixed
+    public function getContent()
     {
         return $this->content;
     }
