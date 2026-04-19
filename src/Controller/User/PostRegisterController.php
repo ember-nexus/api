@@ -71,7 +71,8 @@ class PostRegisterController extends AbstractController
         $userNode = $this->createElementFromRawDataService->createElementFromRawData(
             $userId,
             'User',
-            rawData: $rawData
+            rawData: $rawData,
+            skipReservedTypeCheck: true
         );
         $userNode->addProperty($uniqueIdentifier, $uniqueUserIdentifier);
         $userNode->addProperty('_passwordHash', $this->userPasswordHasher->hashPassword($password));

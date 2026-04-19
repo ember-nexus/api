@@ -41,6 +41,7 @@ class CreateElementFromRawDataService
         ?UuidInterface $startNodeId = null,
         ?UuidInterface $endNodeId = null,
         array $rawData = [],
+        bool $skipReservedTypeCheck = false,
     ): NodeElementInterface|RelationElementInterface {
         if (null !== $startNodeId && null === $endNodeId) {
             throw $this->client400IncompleteMutualDependencyExceptionFactory->createFromTemplate(['start', 'end'], ['start'], ['end']);
@@ -62,7 +63,7 @@ class CreateElementFromRawDataService
             $normalizedData[$rawPropertyName] = $rawValueToNormalizedValueEvent->getNormalizedValue();
         }
 
-        if (in_array($type, self::RESERVED_TYPES)) {
+        if (in_array($type, self::RESERVED_TYPES) && !$skipReservedTypeCheck) {
             throw $this->client400ReservedTypeExceptionFactory->createFromTemplate($type);
         }
 
