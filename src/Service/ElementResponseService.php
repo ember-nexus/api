@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Response\ElementResponse;
+use App\Type\Response\ElementResponse;
 use Ramsey\Uuid\UuidInterface;
 
 class ElementResponseService

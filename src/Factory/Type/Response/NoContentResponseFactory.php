@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Factory\Response;
+namespace App\Factory\Type\Response;
 
 use App\Contract\UploadInterface;
-use App\Response\NoContentResponse;
+use App\Type\Response\NoContentResponse;
 use DateTimeZone;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 

@@ -6,7 +6,7 @@ namespace App\EventSystem\Exception\EventListener;
 
 use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
-use App\Response\ProblemJsonResponse;
+use App\Type\Response\ProblemJsonResponse;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;

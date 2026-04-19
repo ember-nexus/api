@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Response;
+namespace App\Type\Response;
 
 use App\Contract\EtagCapableResponseInterface;
 use App\Type\Etag;

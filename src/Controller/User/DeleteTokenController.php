@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\User;
 
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Type\Response\NoContentResponse;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;

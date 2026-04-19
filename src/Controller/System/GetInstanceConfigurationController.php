@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\System;
 
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
-use App\Response\JsonResponse;
+use App\Type\Response\JsonResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;

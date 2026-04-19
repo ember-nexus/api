@@ -6,11 +6,11 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Response\ElementResponse;
 use App\Service\ElementManager;
 use App\Service\ElementResponseService;
 use App\Service\ElementToRawService;
 use App\Type\NodeElement;
+use App\Type\Response\ElementResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;

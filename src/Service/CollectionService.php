@@ -6,7 +6,7 @@ namespace App\Service;
 
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Response\CollectionResponse;
+use App\Type\Response\CollectionResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\HttpFoundation\InputBag;

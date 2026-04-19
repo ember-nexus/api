@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Upload;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Response\NoContentResponseFactory;
+use App\Factory\Type\Response\NoContentResponseFactory;
 use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Security\AuthProvider;

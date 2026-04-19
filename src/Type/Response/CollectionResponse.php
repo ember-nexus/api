@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Response;
+namespace App\Type\Response;
 
 use App\Contract\EtagCapableResponseInterface;
 use App\Type\Etag;
 
-class ElementResponse extends JsonResponse implements EtagCapableResponseInterface
+class CollectionResponse extends JsonResponse implements EtagCapableResponseInterface
 {
     public function setEtagFromEtagInstance(Etag $etag): static
     {

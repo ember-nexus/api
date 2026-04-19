@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\System;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Response\TextResponse;
+use App\Type\Response\TextResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;

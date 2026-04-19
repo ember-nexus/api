@@ -9,7 +9,7 @@ use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
-use App\Response\JsonResponse;
+use App\Type\Response\JsonResponse;
 use App\Type\SearchStepType;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

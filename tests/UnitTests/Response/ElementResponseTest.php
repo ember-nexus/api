@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Response;
 
-use App\Response\ElementResponse;
 use App\Type\Etag;
+use App\Type\Response\ElementResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
