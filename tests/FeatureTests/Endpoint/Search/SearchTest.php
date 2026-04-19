@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\Endpoint\Search;
+namespace App\Tests\FeatureTests\Endpoint\Search;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 

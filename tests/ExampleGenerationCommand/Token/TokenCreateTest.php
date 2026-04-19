@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationCommand\Token;
+namespace App\Tests\ExampleGenerationCommand\Token;
 
 use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationController;
+namespace App\Tests\ExampleGenerationController;
 
 use Psr\Http\Message\ResponseInterface;
 

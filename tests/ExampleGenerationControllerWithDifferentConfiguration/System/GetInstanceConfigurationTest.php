@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationControllerWithDifferentConfiguration\System;
+namespace App\Tests\ExampleGenerationControllerWithDifferentConfiguration\System;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 

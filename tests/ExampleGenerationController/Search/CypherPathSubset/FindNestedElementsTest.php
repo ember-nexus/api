@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationController\Search\CypherPathSubset;
+namespace App\Tests\ExampleGenerationController\Search\CypherPathSubset;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 

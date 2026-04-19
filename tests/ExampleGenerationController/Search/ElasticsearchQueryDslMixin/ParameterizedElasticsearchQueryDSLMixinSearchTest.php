@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationController\Search\ElasticsearchQueryDslMixin;
+namespace App\Tests\ExampleGenerationController\Search\ElasticsearchQueryDslMixin;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 

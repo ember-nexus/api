@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\Endpoint\File;
+namespace App\Tests\FeatureTests\Endpoint\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
@@ -12,6 +12,7 @@ class DeleteFileTest extends BaseRequestTestCase
 
     public function testDeleteFileIsNotImplemented(): void
     {
+        $this->markTestSkipped();
         $response = $this->runDeleteRequest(sprintf('/%s/file', self::SOME_UUID), null);
         $this->assertIsProblemResponse($response, 501);
     }

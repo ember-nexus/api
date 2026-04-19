@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\Security\Scenario02BasicPositiveTests;
+namespace App\Tests\FeatureTests\Security\Scenario02BasicPositiveTests;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 

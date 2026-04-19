@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\General\OwnershipModel;
+namespace App\Tests\FeatureTests\General\OwnershipModel;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 

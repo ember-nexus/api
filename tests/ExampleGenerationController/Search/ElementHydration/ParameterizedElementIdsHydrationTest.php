@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationController\Search\ElementHydration;
+namespace App\Tests\ExampleGenerationController\Search\ElementHydration;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 

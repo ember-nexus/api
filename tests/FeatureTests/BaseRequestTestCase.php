@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests;
+namespace App\Tests\FeatureTests;
 
 use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;

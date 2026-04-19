@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationController\Search\Polyglot;
+namespace App\Tests\ExampleGenerationController\Search\Polyglot;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 

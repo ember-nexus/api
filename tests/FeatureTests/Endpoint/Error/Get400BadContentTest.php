@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\Endpoint\Error;
+namespace App\Tests\FeatureTests\Endpoint\Error;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 

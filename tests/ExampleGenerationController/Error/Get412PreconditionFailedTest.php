@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationController\Error;
+namespace App\Tests\ExampleGenerationController\Error;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 

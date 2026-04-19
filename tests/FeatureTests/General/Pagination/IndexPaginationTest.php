@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\General\Pagination;
+namespace App\Tests\FeatureTests\General\Pagination;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 

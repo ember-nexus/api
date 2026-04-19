@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationCommand\Cache;
+namespace App\Tests\ExampleGenerationCommand\Cache;
 
 use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
 
