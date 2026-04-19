@@ -27,7 +27,7 @@ class PostFileInSingleRequestTest extends BaseRequestTestCase
         );
         $location = $node->getHeader('Location')[0];
 
-        $file = \Safe\fopen(__DIR__.'/Asset/cherry-blossoms.jpg', 'r');
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
 
         $response = $this->runUploadRequest(
             'POST',
@@ -54,7 +54,7 @@ class PostFileInSingleRequestTest extends BaseRequestTestCase
         $location = $node->getHeader('Location')[0];
 
         // request 1 - ok
-        $file = \Safe\fopen(__DIR__.'/Asset/cherry-blossoms.jpg', 'r');
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'POST',
             sprintf('%s/file', $location),
@@ -64,7 +64,7 @@ class PostFileInSingleRequestTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($response, false);
 
         // request 2 - fail
-        $file = \Safe\fopen(__DIR__.'/Asset/cherry-blossoms.jpg', 'r');
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'POST',
             sprintf('%s/file', $location),
@@ -115,7 +115,7 @@ class PostFileInSingleRequestTest extends BaseRequestTestCase
         );
         $relationId = substr($relation->getHeader('Location')[0], 1);
 
-        $file = \Safe\fopen(__DIR__.'/Asset/cherry-blossoms.jpg', 'r');
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
 
         $response = $this->runUploadRequest(
             'POST',
@@ -168,7 +168,7 @@ class PostFileInSingleRequestTest extends BaseRequestTestCase
         $relationId = substr($relation->getHeader('Location')[0], 1);
 
         // request 1 - ok
-        $file = \Safe\fopen(__DIR__.'/Asset/cherry-blossoms.jpg', 'r');
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'POST',
             sprintf('/%s/file', $relationId),
@@ -178,7 +178,7 @@ class PostFileInSingleRequestTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($response, false);
 
         // request 2 - fail
-        $file = \Safe\fopen(__DIR__.'/Asset/cherry-blossoms.jpg', 'r');
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'POST',
             sprintf('/%s/file', $relationId),

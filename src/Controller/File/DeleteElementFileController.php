@@ -60,7 +60,7 @@ class DeleteElementFileController extends AbstractController
         $deleteFileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
         $this->s3Service->deleteFile($deleteFileOperation);
 
-        $element->removeProperty('file');
+        $element->addProperty('file', null);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
 

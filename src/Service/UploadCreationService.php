@@ -72,6 +72,7 @@ class UploadCreationService
         $element->addProperty('file', [
             'contentLength' => $uploadFileOperation->getContentLength(),
             'extension' => $resumableUploadRequest->getExtension(),
+            'mimeType' => $uploadFileOperation->getMimeType(),
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();

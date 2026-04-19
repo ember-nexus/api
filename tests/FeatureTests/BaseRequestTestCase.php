@@ -403,4 +403,47 @@ abstract class BaseRequestTestCase extends TestCase
 
         return array_reverse(explode('/', $location))[0];
     }
+
+    public function generateDeterministicFile(int $seed, int $targetSize, string $outputPath): void
+    {
+        $lineWidth = 120;
+        $chunkLines = 4096;
+        $groupSize = 32;
+
+        $fh = \Safe\fopen($outputPath, 'wb');
+        mt_srand($seed);
+
+        $written = 0;
+        $state = (string) mt_rand(); // rolling state, re-seeded every $groupSize lines
+
+        for ($counter = 0; $written < $targetSize; ++$counter) {
+            // Re-seed state from mt_rand every $groupSize lines
+            if (0 === $counter % $groupSize) {
+                $state = hash('xxh128', (string) mt_rand().$counter);
+            }
+
+            // Roll state forward, build 4 × 32 = 128 hex chars, trim to 120
+            $a = hash('xxh128', $state.$counter);
+            $b = hash('xxh128', $a.$counter);
+            $c = hash('xxh128', $b.$counter);
+            $d = hash('xxh128', $c.$counter);
+            $state = $d; // carry forward into next line / next group seed
+
+            $line = substr($a.$b.$c.$d, 0, $lineWidth);
+
+            // Buffer into chunks for efficient fwrite
+            $chunk ??= '';
+            $chunk .= $line."\n";
+
+            if ($counter % $chunkLines === $chunkLines - 1 || $written + strlen($chunk) >= $targetSize) {
+                if ($written + strlen($chunk) > $targetSize) {
+                    $chunk = substr($chunk, 0, $targetSize - $written);
+                }
+                $written += fwrite($fh, $chunk);
+                $chunk = '';
+            }
+        }
+
+        \Safe\fclose($fh);
+    }
 }

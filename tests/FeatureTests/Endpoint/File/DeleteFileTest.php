@@ -28,7 +28,7 @@ class DeleteFileTest extends BaseRequestTestCase
         $location = $node->getHeader('Location')[0];
 
         // upload file
-        $file = \Safe\fopen(__DIR__.'/Asset/cherry-blossoms.jpg', 'r');
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'POST',
             sprintf('%s/file', $location),
@@ -101,7 +101,7 @@ class DeleteFileTest extends BaseRequestTestCase
         $location = $relation->getHeader('Location')[0];
 
         // upload file
-        $file = \Safe\fopen(__DIR__.'/Asset/cherry-blossoms.jpg', 'r');
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'PUT',
             sprintf('%s/file', $location),
@@ -127,6 +127,7 @@ class DeleteFileTest extends BaseRequestTestCase
             [
                 'contentLength' => 63933,
                 'extension' => 'bin',
+                'mimeType' => 'image/jpeg',
             ],
             $data['file']
         );
