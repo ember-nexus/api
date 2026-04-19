@@ -16,16 +16,6 @@ class NoContentResponseFactory
     ) {
     }
 
-    public function createNoContentResponseWithLocationHeader(string $location): NoContentResponse
-    {
-        $response = new NoContentResponse();
-        $headers = $response->headers;
-
-        $headers->set('Location', $location);
-
-        return $response;
-    }
-
     public function createNoContentResponseWithResumableUploadHeadersFromUpload(UploadInterface $upload, ?string $location = null): NoContentResponse
     {
         $response = new NoContentResponse();
@@ -54,7 +44,7 @@ class NoContentResponseFactory
             )
         );
         $headers->set('Expires', $upload->getExpires()->setTimezone(new DateTimeZone('UTC'))->format('D, d M Y H:i:s \\G\\M\\T'));
-        $headers->set('Cache-Control', 'no-store');
+        $headers->set('Cache-Control', 'no-store, private');
 
         return $response;
     }
