@@ -115,7 +115,7 @@
     "test:example-generation-command": "php bin/console cache:clear && ./bin/test-feature-command-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/ExampleGenerationCommand --exclude-group deprecated && php bin/console cache:clear",
     "test:coverage:xml": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --coverage-clover coverage.xml",
     "test:coverage:html": "export XDEBUG_MODE=coverage && php ./vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml.dist --coverage-html ./tmp",
-    "test:mutant": "export XDEBUG_MODE=coverage && php vendor/infection/infection/bin/infection --configuration=tests/infection.json5 --threads=4",
+    "test:mutant": "export XDEBUG_MODE=coverage && php vendor/infection/infection/bin/infection --configuration=tests/infection.json5 --threads=max",
     "cs:list": "php vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix --config=tests/.php-cs-fixer.dist.php --allow-risky=yes --dry-run",
     "cs:fix": "php vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix --config=tests/.php-cs-fixer.dist.php --allow-risky=yes",
     "psalm": "php vendor/bin/psalm --config=tests/psalm.xml --show-info=true --no-cache",

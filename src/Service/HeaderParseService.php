@@ -17,7 +17,7 @@ class HeaderParseService
     ) {
     }
 
-    public function getContentTypeFromHeaders(HeaderBag $headers, ?string $expectedContentType): string
+    public function getContentTypeFromHeaders(HeaderBag $headers, ?string $expectedContentType = null): string
     {
         $contentType = $headers->get('Content-Type');
         if (null === $contentType) {
@@ -30,7 +30,7 @@ class HeaderParseService
         if (null !== $expectedContentType) {
             $expectedContentType = strtolower($expectedContentType);
             if ($expectedContentType !== $contentType) {
-                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Expected content type '%s' for partial resumable uploads, got '%s'.", $expectedContentType, $contentType));
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Expected content type '%s', got '%s'.", $expectedContentType, $contentType));
             }
         }
 
@@ -71,12 +71,8 @@ class HeaderParseService
         if (!ctype_digit($uploadOffset)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Upload-Offset' requires a non-negative integer as its value, got '%s'.", $uploadOffset));
         }
-        $uploadOffset = (int) $uploadOffset;
-        if ($uploadOffset < 0) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail("Header 'Upload-Offset' must be a positive int.");
-        }
 
-        return $uploadOffset;
+        return (int) $uploadOffset;
     }
 
     public function isUploadCompleteFromHeaders(HeaderBag $headers): ?bool
@@ -106,12 +102,8 @@ class HeaderParseService
         if (!ctype_digit($contentLength)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Content-Length' requires a non-negative integer as its value, got '%s'.", $contentLength));
         }
-        $contentLength = (int) $contentLength;
-        if ($contentLength < 0) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Content-Length' requires a non-negative integer as its value, got '%d'.", $contentLength));
-        }
 
-        return $contentLength;
+        return (int) $contentLength;
     }
 
     public function getUploadLengthFromHeaders(HeaderBag $headers): ?int
@@ -123,11 +115,7 @@ class HeaderParseService
         if (!ctype_digit($uploadLength)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Upload-Length' requires a non-negative integer as its value, got '%s'.", $uploadLength));
         }
-        $uploadLength = (int) $uploadLength;
-        if ($uploadLength < 0) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Header 'Upload-Length' requires a non-negative integer as its value, got '%d'.", $uploadLength));
-        }
 
-        return $uploadLength;
+        return (int) $uploadLength;
     }
 }
