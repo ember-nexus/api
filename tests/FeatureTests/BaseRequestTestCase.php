@@ -8,6 +8,9 @@ use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ */
 abstract class BaseRequestTestCase extends TestCase
 {
     /**
@@ -118,6 +121,34 @@ abstract class BaseRequestTestCase extends TestCase
         if (null !== $data) {
             $options['headers']['Content-Type'] = 'application/json; charset=utf-8';
             $options['body'] = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        return $client->request(
+            $method,
+            $uri,
+            $options
+        );
+    }
+
+    /**
+     * @param resource $body
+     */
+    public function runUploadRequest(string $method, string $uri, $body, ?string $token = null, ?array $headers = []): ResponseInterface
+    {
+        $client = new Client([
+            'base_uri' => $_ENV['API_DOMAIN'],
+            'http_errors' => false,
+        ]);
+
+        $options = [
+            'headers' => $headers,
+            'body' => $body,
+        ];
+        if (null !== $token) {
+            $options['headers']['Authorization'] = sprintf(
+                'Bearer %s',
+                $token
+            );
         }
 
         return $client->request(
@@ -244,6 +275,21 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertIsArray($body['data']);
     }
 
+    public function assertIsBinaryStreamResponse(ResponseInterface $response, string $expectedMimeType): void
+    {
+        $this->assertSame(200, $response->getStatusCode());
+
+        $contentTypeHeaders = $response->getHeader('content-type');
+        if (1 !== count($contentTypeHeaders)) {
+            $this->fail(sprintf('Expected to find one content-type header in response, got %d.', count($contentTypeHeaders)));
+        }
+        $contentTypeHeader = $contentTypeHeaders[0];
+        $responseMimeType = strtolower(explode(';', $contentTypeHeader)[0]);
+
+        $this->assertSame(strtolower($expectedMimeType), $responseMimeType);
+        $this->assertCount(1, $response->getHeader('Content-Disposition'));
+    }
+
     public function assertIsProblemResponse(ResponseInterface $response, int $status): void
     {
         $this->assertSame($status, $response->getStatusCode());
@@ -273,11 +319,13 @@ abstract class BaseRequestTestCase extends TestCase
         );
     }
 
-    public function assertIsCreatedResponse(ResponseInterface $response): void
+    public function assertIsCreatedResponse(ResponseInterface $response, bool $requireLocation = true): void
     {
         $this->assertSame(201, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
-        $this->assertIsString($response->getHeader('Location')[0]);
+        if ($requireLocation) {
+            $this->assertIsString($response->getHeader('Location')[0]);
+        }
     }
 
     public function assertNoContentResponse(ResponseInterface $response): void

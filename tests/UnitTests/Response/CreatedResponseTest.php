@@ -18,7 +18,7 @@ class CreatedResponseTest extends TestCase
         $response = new CreatedResponse();
         $this->assertSame(201, $response->getStatusCode());
         $this->assertSame('', $response->getContent());
-        $this->assertSame('', $response->headers->get('Location'));
+        $this->assertNull($response->headers->get('Location'));
         $this->assertFalse($response->headers->has('Content-Type'));
     }
 

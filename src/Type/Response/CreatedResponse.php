@@ -12,12 +12,14 @@ class CreatedResponse extends Response
      * @param array<string, string> $headers
      */
     public function __construct(
-        ?string $location = '',
+        ?string $location = null,
         int $status = self::HTTP_CREATED,
         array $headers = [],
     ) {
         $this->charset = 'UTF-8';
-        $headers['Location'] = $location;
+        if (null !== $location) {
+            $headers['Location'] = $location;
+        }
         parent::__construct(null, $status, $headers);
     }
 }

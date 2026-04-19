@@ -21,6 +21,8 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
         $stream = $object->getBody()->getContentAsResource();
 
         $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
+
+        // todo: use file's actual mime type, if available. otherwise fall back to current mime type?
         $this->headers->set('Content-Type', 'application/octet-stream');
 
         $disposition = $this->headers->makeDisposition(
