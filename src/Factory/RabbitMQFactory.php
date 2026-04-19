@@ -9,6 +9,9 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 use function Safe\parse_url;
 
+/**
+ * @codeCoverageIgnore
+ */
 class RabbitMQFactory
 {
     public function __construct(
@@ -17,9 +20,6 @@ class RabbitMQFactory
     ) {
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function createRabbitMQ(): AMQPStreamConnection
     {
         $parsed = parse_url($this->rabbitMQAuth);

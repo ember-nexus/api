@@ -7,6 +7,9 @@ namespace App\Factory;
 use AsyncAws\Core\Configuration;
 use AsyncAws\S3\S3Client;
 
+/**
+ * @codeCoverageIgnore
+ */
 class S3ClientFactory
 {
     public function __construct(
