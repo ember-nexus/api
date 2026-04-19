@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use cardinalby\ContentDisposition\ContentDisposition;
+use App\Wrapper\ContentDispositionWrapper;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Throwable;
 
@@ -13,6 +13,7 @@ class HeaderParseService
 {
     public function __construct(
         private FileService $fileService,
+        private ContentDispositionWrapper $contentDispositionWrapper,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
@@ -44,11 +45,10 @@ class HeaderParseService
             return FileService::DEFAULT_EXTENSION;
         }
         try {
-            $parsedContentDisposition = ContentDisposition::parse($contentDisposition);
+            $fileName = $this->contentDispositionWrapper->parseContentDisposition($contentDisposition);
         } catch (Throwable $exception) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not parse 'Content-Disposition' header: '%s'.", $exception->getMessage()));
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not parse 'Content-Disposition' header: %s", $exception->getMessage()));
         }
-        $fileName = $parsedContentDisposition->getFilename();
         if (null === $fileName) {
             return FileService::DEFAULT_EXTENSION;
         }

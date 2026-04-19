@@ -8,6 +8,8 @@ use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\FileService;
 use App\Service\HeaderParseService;
+use App\Wrapper\ContentDispositionWrapper;
+use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
@@ -24,10 +26,12 @@ class HeaderParseServiceTest extends TestCase
 
     private function buildHeaderParseService(
         ?FileService $fileService = null,
+        ?ContentDispositionWrapper $contentDispositionWrapper = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
     ): HeaderParseService {
         return new HeaderParseService(
             $fileService ?? $this->prophesize(FileService::class)->reveal(),
+            $contentDispositionWrapper ?? $this->prophesize(ContentDispositionWrapper::class)->reveal(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
         );
     }
@@ -132,6 +136,105 @@ class HeaderParseServiceTest extends TestCase
         $this->expectException(Client400BadContentException::class);
 
         $headerParseService->getContentTypeFromHeaders($headerBag->reveal());
+    }
+
+    public function testGetExtensionFromHeaders(): void
+    {
+        $headerBag = $this->prophesize(HeaderBag::class);
+        $headerBag->get(Argument::is('Content-Disposition'))->shouldBeCalledOnce()->willReturn('inline; filename=Test.jpg');
+
+        $contentDispositionWrapper = $this->prophesize(ContentDispositionWrapper::class);
+        $contentDispositionWrapper->parseContentDisposition(Argument::is('inline; filename=Test.jpg'))->shouldBeCalledOnce()->willReturn('Test.jpg');
+
+        $fileService = $this->prophesize(FileService::class);
+        $fileService->removeReservedCharactersFromFileName(Argument::is('Test.jpg'))->shouldBeCalledOnce()->willReturn('Test.jpg');
+
+        $headerParseService = $this->buildHeaderParseService(
+            fileService: $fileService->reveal(),
+            contentDispositionWrapper: $contentDispositionWrapper->reveal()
+        );
+
+        $result = $headerParseService->getExtensionFromHeaders($headerBag->reveal());
+        $this->assertSame('jpg', $result);
+    }
+
+    public function testGetExtensionFromHeadersReturnsDefaultExtensionWhenHeaderIsMissing(): void
+    {
+        $headerBag = $this->prophesize(HeaderBag::class);
+        $headerBag->get(Argument::is('Content-Disposition'))->shouldBeCalledOnce()->willReturn(null);
+
+        $headerParseService = $this->buildHeaderParseService();
+
+        $result = $headerParseService->getExtensionFromHeaders($headerBag->reveal());
+        $this->assertSame('bin', $result);
+    }
+
+    public function testGetExtensionFromHeadersRethrowsExceptionDuringContentDispositionParsing(): void
+    {
+        $headerBag = $this->prophesize(HeaderBag::class);
+        $headerBag->get(Argument::is('Content-Disposition'))->shouldBeCalledOnce()->willReturn('inline; filename=Test.jpg');
+
+        $originalException = new Exception('some message');
+
+        $finalException = $this->prophesize(Client400BadContentException::class)->reveal();
+
+        $client400BadContentExceptionFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
+        $client400BadContentExceptionFactory->createFromDetail(Argument::is("Could not parse 'Content-Disposition' header: some message"))->shouldBeCalledOnce()->willReturn($finalException);
+
+        $contentDispositionWrapper = $this->prophesize(ContentDispositionWrapper::class);
+        $contentDispositionWrapper->parseContentDisposition(Argument::is('inline; filename=Test.jpg'))->shouldBeCalledOnce()->willThrow($originalException);
+
+        $headerParseService = $this->buildHeaderParseService(
+            contentDispositionWrapper: $contentDispositionWrapper->reveal(),
+            client400BadContentExceptionFactory: $client400BadContentExceptionFactory->reveal()
+        );
+
+        $this->expectException(Client400BadContentException::class);
+
+        $headerParseService->getExtensionFromHeaders($headerBag->reveal());
+    }
+
+    public function testGetExtensionFromHeadersReturnsDefaultExtensionWhenHeaderIsParsedAsNull(): void
+    {
+        $headerBag = $this->prophesize(HeaderBag::class);
+        $headerBag->get(Argument::is('Content-Disposition'))->shouldBeCalledOnce()->willReturn('inline; filename=Test.jpg');
+
+        $contentDispositionWrapper = $this->prophesize(ContentDispositionWrapper::class);
+        $contentDispositionWrapper->parseContentDisposition(Argument::is('inline; filename=Test.jpg'))->shouldBeCalledOnce()->willReturn(null);
+
+        $headerParseService = $this->buildHeaderParseService(
+            contentDispositionWrapper: $contentDispositionWrapper->reveal()
+        );
+
+        $result = $headerParseService->getExtensionFromHeaders($headerBag->reveal());
+        $this->assertSame('bin', $result);
+    }
+
+    public function testGetExtensionFromHeadersThrowsWhenFileNameDoesNotContainExtension(): void
+    {
+        $headerBag = $this->prophesize(HeaderBag::class);
+        $headerBag->get(Argument::is('Content-Disposition'))->shouldBeCalledOnce()->willReturn('inline; filename=Test');
+
+        $contentDispositionWrapper = $this->prophesize(ContentDispositionWrapper::class);
+        $contentDispositionWrapper->parseContentDisposition(Argument::is('inline; filename=Test'))->shouldBeCalledOnce()->willReturn('Test');
+
+        $fileService = $this->prophesize(FileService::class);
+        $fileService->removeReservedCharactersFromFileName(Argument::is('Test'))->shouldBeCalledOnce()->willReturn('Test');
+
+        $exception = $this->prophesize(Client400BadContentException::class)->reveal();
+
+        $client400BadContentExceptionFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
+        $client400BadContentExceptionFactory->createFromDetail(Argument::is("Could not parse a file extension from the filename in 'Content-Disposition': 'Test'."))->shouldBeCalledOnce()->willReturn($exception);
+
+        $headerParseService = $this->buildHeaderParseService(
+            fileService: $fileService->reveal(),
+            contentDispositionWrapper: $contentDispositionWrapper->reveal(),
+            client400BadContentExceptionFactory: $client400BadContentExceptionFactory->reveal()
+        );
+
+        $this->expectException(Client400BadContentException::class);
+
+        $headerParseService->getExtensionFromHeaders($headerBag->reveal());
     }
 
     public static function uploadOffset(): array
