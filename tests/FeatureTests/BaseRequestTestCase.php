@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests;
 
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -328,11 +329,11 @@ abstract class BaseRequestTestCase extends TestCase
         }
     }
 
-    public function assertNoContentResponse(ResponseInterface $response): void
+    public function assertNoContentResponse(ResponseInterface $response, bool $hasHeader = false): void
     {
         $this->assertSame(204, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
-        $this->assertFalse($response->hasHeader('Location'));
+        $this->assertSame($hasHeader, $response->hasHeader('Location'));
     }
 
     public function assertNotModifiedResponse(ResponseInterface $response): void
@@ -445,5 +446,48 @@ abstract class BaseRequestTestCase extends TestCase
         }
 
         \Safe\fclose($fh);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function splitFileToChunks(string $inputPath, int $chunkSize): array
+    {
+        if (!is_file($inputPath) || !is_readable($inputPath)) {
+            throw new InvalidArgumentException(sprintf('File not readable: %s', $inputPath));
+        }
+
+        $uid = bin2hex(random_bytes(8));
+        $handle = fopen($inputPath, 'rb');
+        $index = 0;
+        $paths = [];
+
+        while (!feof($handle)) {
+            $chunk = fread($handle, $chunkSize);
+            if (false === $chunk || 0 === strlen($chunk)) {
+                break;
+            }
+
+            $filename = sprintf('/tmp/upload-%s-%02d.part', $uid, $index);
+            file_put_contents($filename, $chunk);
+            $paths[] = $filename;
+            ++$index;
+        }
+
+        fclose($handle);
+
+        return $paths;
+    }
+
+    /**
+     * @param string[] $paths
+     */
+    public function cleanupChunks(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
     }
 }

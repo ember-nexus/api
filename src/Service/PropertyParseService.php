@@ -150,7 +150,7 @@ class PropertyParseService
             throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property expires to be present.');
         }
         $expires = $properties['expires'];
-        if ($expires instanceof DateTimeImmutable) {
+        if ($expires instanceof DateTimeImmutable || $expires instanceof \DateTimeImmutable) {
             $expires = DateTime::createFromImmutable($expires);
         }
         if (!($expires instanceof DateTime)) {

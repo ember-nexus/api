@@ -125,8 +125,7 @@ class UploadCreationService
             'head-upload',
             [
                 'id' => $uploadId->toString(),
-            ],
-            UrlGeneratorInterface::ABSOLUTE_URL
+            ]
         );
 
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload, $location);
