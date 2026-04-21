@@ -1,4 +1,5 @@
-# <span class="title-url"><span class="method-post">🚧 POST</span>` /<uuid>/file`</span><span class="title-human">Create Element File Endpoint</span>
+# <span class="title-url"><span class="method-post">POST</span>` /<uuid>/file`</span><span class="title-human">Create Element File Endpoint</span>
 
-!> **Currently not implemented.**  
-This feature is reserved for the version [0.2.0](https://github.com/ember-nexus/api/milestone/1).
+Used to upload a smaller file directly to an element, or to create a resumable upload.
+
+This endpoint requires that the element does not yet have a file associated to it.
