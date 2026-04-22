@@ -10,33 +10,6 @@
   - [Caching](/concepts/caching)
   - [Grammars](/concepts/grammars)
 
-- Search Steps
-  - [Elasticsearch Query DSL Mixin](/search/step/elasticsearch-query-dsl-mixin)
-  - [Cypher Path Subset](/search/step/cypher-path-subset)
-  - [Element Hydration](/search/step/element-hydration)
-
-- Search Examples
-  - Elasticsearch Query DSL Mixins
-    - [Simple Full Text Search](/search/example/elasticsearch-query-dsl-mixin/simple-full-text-search)
-    - [Advanced Full Text Search](/search/example/elasticsearch-query-dsl-mixin/advanced-full-text-search)
-    - [Keyword Search](/search/example/elasticsearch-query-dsl-mixin/keyword-search)
-    - [Text Prefix Search](/search/example/elasticsearch-query-dsl-mixin/text-prefix-search)
-    - [Wildcard Search](/search/example/elasticsearch-query-dsl-mixin/wildcard-search)
-    - [Query String Search](/search/example/elasticsearch-query-dsl-mixin/query-string-search)
-    - [Parameterized Search](/search/example/elasticsearch-query-dsl-mixin/parameterized-elasticsearch-query-dsl-mixin-search)
-  - Cypher Path Subset
-    - [Find Tagged Elements](/search/example/cypher-path-subset/find-tagged-elements)
-    - [Find Nested Elements](/search/example/cypher-path-subset/find-nested-elements)
-    - [Parameterized Cypher Search](/search/example/cypher-path-subset/parameterized-cypher-search)
-  - Element Hydration
-    - [Implicit Elements Hydration](/search/example/element-hydration/implicit-elements-hydration)
-    - [Implicit Paths Hydration](/search/example/element-hydration/implicit-paths-hydration)
-    - [Explicit ElementIds Hydration](/search/example/element-hydration/explicit-elementids-hydration)
-    - [Parameterized ElementIds Hydration](/search/example/element-hydration/parameterized-elementids-hydration)
-  - Polyglot
-    - [Elasticsearch -> Cypher -> Hydration](/search/example/polyglot/es-query-dsl-mixin-cypher-path-element-hydration)
-    - [Cypher -> Elasticsearch -> Hydration](/search/example/polyglot/cypher-path-es-query-dsl-mixin-element-hydration)
-
 - API Endpoints
 
   - **User Endpoints**
@@ -104,6 +77,33 @@
   - **Database Commands**
     - [`database:drop`](/commands/database/database-drop)
 
+- Search
+  - Search Step Types
+    - [Elasticsearch Query DSL Mixin](/search/step/elasticsearch-query-dsl-mixin)
+    - [Cypher Path Subset](/search/step/cypher-path-subset)
+    - [Element Hydration](/search/step/element-hydration)
+  - Search Examples
+    - Elasticsearch Query DSL Mixins
+      - [Simple Full Text Search](/search/example/elasticsearch-query-dsl-mixin/simple-full-text-search)
+      - [Advanced Full Text Search](/search/example/elasticsearch-query-dsl-mixin/advanced-full-text-search)
+      - [Keyword Search](/search/example/elasticsearch-query-dsl-mixin/keyword-search)
+      - [Text Prefix Search](/search/example/elasticsearch-query-dsl-mixin/text-prefix-search)
+      - [Wildcard Search](/search/example/elasticsearch-query-dsl-mixin/wildcard-search)
+      - [Query String Search](/search/example/elasticsearch-query-dsl-mixin/query-string-search)
+      - [Parameterized Search](/search/example/elasticsearch-query-dsl-mixin/parameterized-elasticsearch-query-dsl-mixin-search)
+    - Cypher Path Subset
+      - [Find Tagged Elements](/search/example/cypher-path-subset/find-tagged-elements)
+      - [Find Nested Elements](/search/example/cypher-path-subset/find-nested-elements)
+      - [Parameterized Cypher Search](/search/example/cypher-path-subset/parameterized-cypher-search)
+    - Element Hydration
+      - [Implicit Elements Hydration](/search/example/element-hydration/implicit-elements-hydration)
+      - [Implicit Paths Hydration](/search/example/element-hydration/implicit-paths-hydration)
+      - [Explicit ElementIds Hydration](/search/example/element-hydration/explicit-elementids-hydration)
+      - [Parameterized ElementIds Hydration](/search/example/element-hydration/parameterized-elementids-hydration)
+    - Polyglot
+      - [Elasticsearch -> Cypher -> Hydration](/search/example/polyglot/es-query-dsl-mixin-cypher-path-element-hydration)
+      - [Cypher -> Elasticsearch -> Hydration](/search/example/polyglot/cypher-path-es-query-dsl-mixin-element-hydration)
+
 - Security
   - [Ownership](/security/ownership)
   - [Access](/security/access)
@@ -112,7 +112,3 @@
   - [Predefined Data Types](/security/predefined-data-types)
   - [Passwords, Tokens and Hashing](/security/passwords-tokens-and-hashing)
   - [Security Tests](/security/test/general)
-
-- Development
-  - [Long Term Plans](/development/long-term-plans)
-  - [Best Practices](/development/best-practices)
