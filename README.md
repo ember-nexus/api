@@ -22,13 +22,13 @@ Ember Nexus is built on three principles:
 
 The "secret sauce" is the combination of databases Ember Nexus uses:
 
-- **Neo4j**: A graph database, which stores relationships core properties of your data elements.
+- **Neo4j**: A graph database, which stores relationships and core properties of your data elements.
 - **MongoDB**: A document database, stores more complex properties which Neo4j can not handle itself.
 - **Elasticsearch**: A search database, used for full text search, vector search and more.
 - **S3 compatible object store**: Used to store binary files, up to 1 TB by default.
 
 Instead of using multiple specialized databases yourself, simply use Ember Nexus, and benefit of the exposed features
-without having to worry about data consistency, security aspects and more.
+and without having to worry about data consistency, security aspects and more.
 
 It just works :D
 
