@@ -34,3 +34,7 @@ It just works :D
 - [Demo API](https://reference-dataset.ember-nexus.dev/): Instance which can be used for quick testing. Is being reset
   every day, and uses the [reference dataset](https://github.com/ember-nexus/reference-dataset) as its data, which
   includes eternal tokens.
+
+## Is there a graphical user interface (GUI)?
+
+It is currently being developed, but not yet ready to be used.
