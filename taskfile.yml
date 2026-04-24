@@ -17,3 +17,7 @@ tasks:
   dev:cli:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec api /bin/bash
+
+  generate:swagger:
+    cmds:
+      - ./tools/generate-swagger.sh
