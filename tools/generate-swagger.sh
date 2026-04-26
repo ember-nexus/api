@@ -19,6 +19,13 @@ EXAMPLES=$(
   done | jq -s 'add'
 )
 
+PARAMETERS=$(
+  for f in $(ls ../docs/open-api/parameters/*.json | sort); do
+    key=$(basename "$f" .json)
+    jq -n --arg key "$key" --slurpfile val "$f" '{ ($key): $val[0] }'
+  done | jq -s 'add'
+)
+
 PATHS=$(
   for f in $(find ../docs/open-api/paths -mindepth 2 -maxdepth 2 -name "*.json" | sort); do
     tag=$(basename "$(dirname "$f")")
@@ -34,10 +41,12 @@ PATHS=$(
 jq \
   --argjson schemas "$SCHEMAS" \
   --argjson examples "$EXAMPLES" \
+  --argjson parameters "$PARAMETERS" \
   --argjson paths "$PATHS" \
   '
     .components.schemas = $schemas |
     .components.examples = $examples |
+    .components.parameters = $parameters |
     .paths = $paths
   ' \
   "$TEMPLATE" > "$OUTPUT"

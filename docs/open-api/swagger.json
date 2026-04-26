@@ -87,6 +87,28 @@
           "detail": "Requested element was not found."
         }
       }
+    },
+    "parameters": {
+      "If-Match": {
+        "name": "If-Match",
+        "in": "header",
+        "required": false,
+        "example": "\"blub\"",
+        "description": "Makes the GET request conditional. See caching for details.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "If-None-Match": {
+        "name": "If-None-Match",
+        "in": "header",
+        "required": false,
+        "x-scalar-ignore": true,
+        "description": "Makes the GET request conditional. Returns 304 if ETag matches.",
+        "schema": {
+          "type": "string"
+        }
+      }
     }
   },
   "paths": {
@@ -106,24 +128,10 @@
             }
           },
           {
-            "name": "If-Match",
-            "in": "header",
-            "required": false,
-            "example": "\"blub\"",
-            "description": "Makes the GET request conditional. See caching for details.",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/If-Match"
           },
           {
-            "name": "If-None-Match",
-            "in": "header",
-            "required": false,
-            "x-scalar-ignore": true,
-            "description": "Makes the GET request conditional. Returns 304 if ETag matches.",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/If-None-Match"
           }
         ],
         "responses": {
