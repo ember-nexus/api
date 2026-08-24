@@ -3,8 +3,11 @@ Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROP
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
 Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
-Cache-Control: no-cache, private
-Content-Type: application/problem+json; charset=utf-8
-Date: Fri, 06 Oct 2023 20:22:32 GMT
-Transfer-Encoding: chunked
+Cache-Control: no-store, private
+Date: Mon, 24 Aug 2026 21:47:12 GMT
+Expires: Tue, 25 Aug 2026 00:47:12 GMT
+Location: /upload/ca02c95e-e93b-4759-96a1-f5e703ea802f
+Upload-Complete: ?0
+Upload-Limit: max-age=10800, max-size=10737418240, min-append-size=5242880, max-append-size=105906176
+Upload-Offset: 0
 X-Powered-By: Ember Nexus API

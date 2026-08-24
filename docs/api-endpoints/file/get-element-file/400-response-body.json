@@ -1,0 +1,6 @@
+{
+  "type": "http://api/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "detail": "Could not parse 'Range' header: 'bytes=not-a-valid-range'. Only a single range of the form 'bytes=<start>-<end>', 'bytes=<start>-' or 'bytes=-<suffixLength>' is supported."
+}

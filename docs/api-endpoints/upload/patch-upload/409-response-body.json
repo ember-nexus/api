@@ -1,0 +1,8 @@
+{
+  "type": "http://api/error/409/conflict",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "Offset from request does not match offset of resource.",
+  "expected-offset": 5242880,
+  "provided-offset": 5242881
+}

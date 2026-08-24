@@ -6,7 +6,8 @@ Access-Control-Expose-Headers: ETag, Location
 Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
 Cache-Control: no-cache, private
 Content-Disposition: attachment; filename=Rose.jpg
-Content-Length: 138937
+Content-Length: 100
+Content-Range: bytes 0-99/138937
 Content-Type: image/jpeg
 Date: Mon, 24 Aug 2026 21:39:11 GMT
 Etag: "XHImZOcVmUc"
