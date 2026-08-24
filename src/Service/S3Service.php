@@ -26,7 +26,9 @@ class S3Service
         private MimeTypeService $mimeTypeService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        S3TechnicalLimitsValidator $s3TechnicalLimitsValidator,
     ) {
+        $s3TechnicalLimitsValidator->validate();
     }
 
     /**
@@ -162,15 +164,16 @@ class S3Service
     }
 
     /**
-     * todo: optimize upload for larger files using multipart-upload?, handled by https://github.com/ember-nexus/api/issues/452.
+     * Writes the whole file with a single PUT, which caps it at S3's 5 GiB single-object-upload limit. Requests
+     * reaching this are already bounded well below that by `post_max_size`, but `BackupLoadCommand` is not: it
+     * restores files straight from a backup archive, so a backup holding a file larger than 5 GiB fails to load.
+     * Lifting that needs multipart, tracked in https://github.com/ember-nexus/api/issues/452.
      */
     public function uploadFile(UploadFileOperationInterface $uploadFileOperation): int
     {
-        // intermediate upload to "upload bucket"
         $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
         $contentLength = $this->uploadFileChunk($uploadFileChunkOperation);
 
-        // transfer uploaded element to "storage bucket"
         $copyResult = $this->s3Client->copyObject([
             'Bucket' => $uploadFileOperation->getStorageBucket(),
             'Key' => $uploadFileOperation->getStorageKey(),
@@ -187,14 +190,12 @@ class S3Service
             $this->s3ClientWrapper->resolveCopyObjectOutput($copyResult);
             $previousStorageKey = $uploadFileOperation->getPreviousStorageKey();
             if (null !== $previousStorageKey && $previousStorageKey !== $uploadFileOperation->getStorageKey()) {
-                // delete previous uploaded element, if available
                 $this->deleteFile(new FileOperation(
                     $uploadFileOperation->getStorageBucket(),
                     $previousStorageKey
                 ));
             }
 
-            // clean up upload bucket
             $this->deleteFile(new FileOperation(
                 $uploadFileOperation->getUploadBucket(),
                 $uploadFileOperation->getUploadKey()
@@ -247,6 +248,19 @@ class S3Service
     }
 
     /**
+     * Reads only the given inclusive byte range [$start, $end] from S3, via the `Range` request header, instead
+     * of downloading the whole file.
+     */
+    public function getFileByteRange(FileOperationInterface $fileOperation, int $start, int $end): GetObjectOutput
+    {
+        return $this->s3Client->getObject([
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+            'Range' => sprintf('bytes=%d-%d', $start, $end),
+        ]);
+    }
+
+    /**
      * @return resource
      */
     public function getFileAsResource(FileOperationInterface $fileOperation)
@@ -267,6 +281,11 @@ class S3Service
     public function getFileRangeAsResource(FileOperationInterface $fileOperation, int $maxContentLength)
     {
         $contentLength = $this->getContentLength($fileOperation);
+        if (0 === $contentLength) {
+            // a byte-range request against an empty object has no satisfiable range (S3 rejects it with a 416),
+            // and there is nothing to fetch either way - an empty resource is the correct result directly.
+            return \Safe\fopen('php://memory', 'r');
+        }
         $result = $this->s3Client->getObject([
             'Bucket' => $fileOperation->getBucket(),
             'Key' => $fileOperation->getKey(),
@@ -315,7 +334,6 @@ class S3Service
     }
 
     /**
-     * Returns the MimeType of a chunked merge file operation.
      * Assumes that the first chunk a) exists and is b) sufficiently long to correctly determine the MimeType. This is
      * currently the case, as S3's minimum chunk length is 5MB - sufficient for MimeType detection.
      */

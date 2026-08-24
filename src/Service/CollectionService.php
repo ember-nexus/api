@@ -147,17 +147,13 @@ class CollectionService
         foreach ($nodeIds as $nodeId) {
             $nodeElement = $this->elementManager->getNode($nodeId);
             if ($nodeElement) {
-                $nodeData[] = $this->elementToRawService->elementToRaw(
-                    $nodeElement
-                );
+                $nodeData[] = $this->elementToRawService->elementToRaw($nodeElement);
             }
         }
         foreach ($relationIds as $relationId) {
             $relationElement = $this->elementManager->getRelation($relationId);
             if ($relationElement) {
-                $relationData[] = $this->elementToRawService->elementToRaw(
-                    $relationElement
-                );
+                $relationData[] = $this->elementToRawService->elementToRaw($relationElement);
             }
         }
 
@@ -201,9 +197,7 @@ class CollectionService
         foreach ($elementIds as $elementId) {
             $element = $this->elementManager->getElement($elementId);
             if ($element) {
-                $elementData[] = $this->elementToRawService->elementToRaw(
-                    $element
-                );
+                $elementData[] = $this->elementToRawService->elementToRaw($element);
             }
         }
 

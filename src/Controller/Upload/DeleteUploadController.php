@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Controller\Upload;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\S3Service;
+use App\Service\UploadService;
 use App\Type\Response\NoContentResponse;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -24,9 +23,8 @@ class DeleteUploadController extends AbstractController
         private AuthProvider $authProvider,
         private ElementManager $elementManager,
         private LoggerInterface $logger,
-        private S3Service $s3Service,
-        private FileOperationFactory $fileOperationFactory,
         private UploadFactory $uploadFactory,
+        private UploadService $uploadService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -60,12 +58,7 @@ class DeleteUploadController extends AbstractController
             ]
         );
 
-        for ($i = 0; $i <= $upload->getAlreadyUploadedChunks(); ++$i) {
-            $deleteChunkOperation = $this->fileOperationFactory->createFileOperationFromUpload($upload, $i);
-            $this->s3Service->deleteFile($deleteChunkOperation);
-        }
-
-        $this->elementManager->delete($uploadElement);
+        $this->uploadService->deleteUploadAndChunks($upload);
         $this->elementManager->flush();
 
         return new NoContentResponse();

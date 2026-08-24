@@ -14,6 +14,17 @@ services:
     ports:
       - "80:80"
 
+  reference-dataset-server:
+    container_name: reference-dataset-server
+    image: caddy:latest
+    volumes:
+      - ../../reference-dataset-local-backup:/usr/share/caddy
+    ports:
+      - "8090:80"
+    # temporary, local-only static file server used to serve a locally modified copy of the
+    # reference-dataset backup to the `api` container, bypassing the GitHub release used by
+    # `bin/test-feature-prepare`. Not part of the regular dev stack.
+
   docs:
     container_name: docs
     image: sujaykumarh/docsify:latest

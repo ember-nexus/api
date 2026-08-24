@@ -15,8 +15,7 @@ class FragmentHelper
         return new FragmentGroup(
             $event->getCypherFragment(),
             $event->getMongoFragment(),
-            $event->getElasticFragment(),
-            $event->getFileFragment()
+            $event->getElasticFragment()
         );
     }
 }

@@ -112,6 +112,9 @@ class MultiPartUploadLifecycleTest extends BaseRequestTestCase
                 'contentLength' => 24117248,
                 'extension' => 'txt',
                 'mimeType' => 'text/plain',
+                'hash' => [
+                    'sha256' => hash_file('sha256', self::FILE_PATH),
+                ],
             ],
             $getNodeResponseData2['file']
         );
@@ -121,7 +124,7 @@ class MultiPartUploadLifecycleTest extends BaseRequestTestCase
             sprintf('/%s/file', $elementId),
             self::TOKEN
         );
-        $this->assertIsBinaryStreamResponse($getFileResponse2, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse2, 'text/plain');
 
         $this->cleanupChunks($chunks);
     }

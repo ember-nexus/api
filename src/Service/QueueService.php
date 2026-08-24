@@ -25,4 +25,28 @@ class QueueService
         $channel->basic_publish($message, '', $queue);
         $channel->close();
     }
+
+    /**
+     * Drains all messages currently waiting in the given queue, calling $handler for each decoded message.
+     * Messages are only acknowledged once $handler returns without throwing, so a failure leaves the message
+     * queued for the next run. Returns the number of successfully processed messages.
+     */
+    public function consumeQueue(RabbitMQQueueType $queueType, callable $handler): int
+    {
+        $channel = $this->AMQPStreamConnection->channel();
+        $queue = $queueType->value;
+        $channel->queue_declare($queue, false, false, false, false);
+
+        $processedMessages = 0;
+        while (null !== ($message = $channel->basic_get($queue))) {
+            $eventData = \Safe\json_decode($message->getBody(), true);
+            $handler($eventData);
+            $message->ack();
+            ++$processedMessages;
+        }
+
+        $channel->close();
+
+        return $processedMessages;
+    }
 }

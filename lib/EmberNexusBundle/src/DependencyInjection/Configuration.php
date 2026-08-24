@@ -20,6 +20,7 @@ class Configuration implements ConfigurationInterface
     public const int SIZE_OF_10GIB_IN_BYTES = 10 * 1024 * 1024 * 1024;
     public const int SIZE_OF_101MIB_IN_BYTES = 101 * 1024 * 1024;
     public const int SIZE_OF_5MIB_IN_BYTES = 5 * 1024 * 1024;
+    public const int ONE_HOUR_IN_SECONDS = 3600;
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -182,6 +183,11 @@ class Configuration implements ConfigurationInterface
                         ->info('Maximum size in bytes of uploaded chunks. Limited by the S3 provider, Caddy and the PHP configuration.')
                         ->min(1)
                         ->defaultValue(self::SIZE_OF_101MIB_IN_BYTES)
+                    ->end()
+                    ->integerNode(EmberNexusConfiguration::FILE_EXPIRED_UPLOAD_CAN_BE_DELETED_AFTER_EXPIRATION_IN_SECONDS)
+                        ->info('Grace period after an upload expires during which the cron:delete-expired-uploads command will not yet delete it. Gives clients a bit of leeway past the expiration date before their partial upload and its S3 chunks are removed.')
+                        ->min(0)
+                        ->defaultValue(self::ONE_HOUR_IN_SECONDS)
                     ->end()
                     ->scalarNode(EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET)
                         ->info('Name of the S3 bucket used for storage of files.')

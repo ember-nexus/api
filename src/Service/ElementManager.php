@@ -171,9 +171,8 @@ class ElementManager
             return null;
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($cypherFragment->getLabels()[0], $id->toString());
-        $fileFragment = null;
 
-        $node = $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment, $fileFragment);
+        $node = $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
         if (!($node instanceof NodeElementInterface)) {
             return null;
         }
@@ -217,9 +216,8 @@ class ElementManager
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to get relationship type.');
         }
         $documentFragment = $this->mongoEntityManager->getOneByIdentifier($type, $id->toString());
-        $fileFragment = null;
 
-        $relation = $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment, $fileFragment);
+        $relation = $this->elementDefragmentizeService->defragmentize($cypherFragment, $documentFragment);
         if (!($relation instanceof RelationElementInterface)) {
             return null;
         }

@@ -51,6 +51,7 @@ class EmberNexusConfiguration
     public const string FILE_UPLOAD_CHUNK_DIGITS_LENGTH = 'uploadChunkDigitsLength';
     public const string FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES = 'uploadMinChunkSizeInBytes';
     public const string FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES = 'uploadMaxChunkSizeInBytes';
+    public const string FILE_EXPIRED_UPLOAD_CAN_BE_DELETED_AFTER_EXPIRATION_IN_SECONDS = 'expiredUploadCanBeDeletedAfterExpirationInSeconds';
     public const string FILE_S3_STORAGE_BUCKET = 'S3StorageBucket';
     public const string FILE_S3_UPLOAD_BUCKET = 'S3UploadBucket';
     public const string FILE_S3_STORAGE_BUCKET_LEVELS = 'S3StorageBucketLevels';
@@ -82,6 +83,7 @@ class EmberNexusConfiguration
     private int $fileUploadChunkDigitsLength;
     private int $fileUploadMinChunkSizeInBytes;
     private int $fileUploadMaxChunkSizeInBytes;
+    private int $fileExpiredUploadCanBeDeletedAfterExpirationInSeconds;
     private string $fileS3StorageBucket;
     private string $fileS3UploadBucket;
     private int $fileS3StorageBucketLevels;
@@ -323,6 +325,15 @@ class EmberNexusConfiguration
         if ($emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes() < $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
             throw new Exception(sprintf('%s.%s can not be smaller than %s.%s.', self::FILE, self::FILE_MAX_FILE_SIZE_IN_BYTES, self::FILE, self::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES));
         }
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_EXPIRED_UPLOAD_CAN_BE_DELETED_AFTER_EXPIRATION_IN_SECONDS,
+            ]
+        );
+        $emberNexusConfiguration->setFileExpiredUploadCanBeDeletedAfterExpirationInSeconds($value);
 
         $value = (string) self::getValueFromConfig(
             $configuration,
@@ -662,6 +673,18 @@ class EmberNexusConfiguration
     public function setFileUploadMaxChunkSizeInBytes(int $fileUploadMaxChunkSizeInBytes): static
     {
         $this->fileUploadMaxChunkSizeInBytes = $fileUploadMaxChunkSizeInBytes;
+
+        return $this;
+    }
+
+    public function getFileExpiredUploadCanBeDeletedAfterExpirationInSeconds(): int
+    {
+        return $this->fileExpiredUploadCanBeDeletedAfterExpirationInSeconds;
+    }
+
+    public function setFileExpiredUploadCanBeDeletedAfterExpirationInSeconds(int $fileExpiredUploadCanBeDeletedAfterExpirationInSeconds): static
+    {
+        $this->fileExpiredUploadCanBeDeletedAfterExpirationInSeconds = $fileExpiredUploadCanBeDeletedAfterExpirationInSeconds;
 
         return $this;
     }

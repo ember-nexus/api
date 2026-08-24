@@ -52,6 +52,13 @@ class DatabaseDropCommand extends Command
             'If enabled, command will not ask for manual confirmation.',
             false
         );
+        $this->addOption(
+            'no-files',
+            null,
+            InputOption::VALUE_NEGATABLE,
+            'Disable deletion of object storage (S3) data, i.e. keep the storage and upload buckets untouched.',
+            false
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -78,7 +85,13 @@ class DatabaseDropCommand extends Command
 
         $this->deleteMongo();
 
-        $this->deleteObjectStorage();
+        if ($input->getOption('no-files')) {
+            $this->io->startSection('Task 3 of 6: Object Storage');
+            $this->io->writeln('Skipping object storage deletion (--no-files).');
+            $this->io->stopSection('Skipped object storage deletion.');
+        } else {
+            $this->deleteObjectStorage();
+        }
 
         $this->deleteElastic();
 
@@ -116,9 +129,16 @@ class DatabaseDropCommand extends Command
     {
         $this->io->startSection('Task 3 of 6: Object Storage');
         $this->io->writeln('Deleting Object data...');
+        $this->deleteAllObjectsFromBucket($this->emberNexusConfiguration->getFileS3StorageBucket());
+        $this->deleteAllObjectsFromBucket($this->emberNexusConfiguration->getFileS3UploadBucket());
+        $this->io->stopSection('Successfully deleted object storage.');
+    }
+
+    private function deleteAllObjectsFromBucket(string $bucket): void
+    {
         do {
             $objects = $this->s3Client->listObjectsV2([
-                'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
+                'Bucket' => $bucket,
             ]);
             $keyCount = $objects->getKeyCount();
             if ($keyCount > 0) {
@@ -129,14 +149,13 @@ class DatabaseDropCommand extends Command
                     ];
                 }
                 $this->s3Client->deleteObjects([
-                    'Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket(),
+                    'Bucket' => $bucket,
                     'Delete' => [
                         'Objects' => $objectsToBeDeleted,
                     ],
                 ]);
             }
         } while ($keyCount > 0);
-        $this->io->stopSection('Successfully deleted object storage.');
     }
 
     private function deleteElastic(): void

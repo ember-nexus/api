@@ -18,6 +18,12 @@ services:
       - '../src/DependencyInjection/'
       - '../src/Kernel.php'
 
+  # Only one storage backend/connection is supported today, so this is a plain alias to its one implementation.
+  # Once multiple connections with differing technical limits are supported, this alias is the extension point:
+  # replace it with a factory/registry service (still implementing S3TechnicalLimitsInterface) resolving the
+  # right implementation per connection, without any consumer of the interface needing to change.
+  App\Contract\S3\S3TechnicalLimitsInterface: '@App\Type\S3\S3TechnicalLimits'
+
   # library services
 
   monolog_json_formatter:

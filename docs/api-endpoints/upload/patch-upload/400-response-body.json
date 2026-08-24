@@ -1,0 +1,6 @@
+{
+  "type": "http://api/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "detail": "Could not verify upload: the declared digest does not match the uploaded file's actual content."
+}

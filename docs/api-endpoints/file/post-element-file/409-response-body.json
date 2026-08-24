@@ -1,0 +1,6 @@
+{
+  "type": "http://api/error/409/conflict",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "Element with id '6b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d5e' already has an associated file; can not create new file. Delete existing file first or replace it with PUT."
+}

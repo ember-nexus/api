@@ -23,6 +23,7 @@ final readonly class Upload implements UploadInterface
         private UuidInterface $uploadOwner,
         private string $extension,
         private DateTime $expires,
+        private ?string $hashState = null,
     ) {
     }
 
@@ -69,5 +70,10 @@ final readonly class Upload implements UploadInterface
     public function getExpires(): DateTime
     {
         return $this->expires;
+    }
+
+    public function getHashState(): ?string
+    {
+        return $this->hashState;
     }
 }

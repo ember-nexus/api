@@ -1,0 +1,8 @@
+{
+  "type": "http://api/error/416/range-not-satisfiable",
+  "title": "Range Not Satisfiable",
+  "status": 416,
+  "detail": "Requested range start (999999999) is beyond the end of the resource (138937 bytes long).",
+  "requested-start": 999999999,
+  "total-length": 138937
+}

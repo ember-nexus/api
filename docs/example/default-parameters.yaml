@@ -94,6 +94,9 @@ ember_nexus:
     # Maximum size in bytes of uploaded chunks. Limited by the S3 provider, Caddy and the PHP configuration.
     uploadMaxChunkSizeInBytes: 105906176
 
+    # Grace period after an upload expires during which the cron:delete-expired-uploads command will not yet delete it. Gives clients a bit of leeway past the expiration date before their partial upload and its S3 chunks are removed.
+    expiredUploadCanBeDeletedAfterExpirationInSeconds: 3600
+
     # Name of the S3 bucket used for storage of files.
     S3StorageBucket: api-storage
 

@@ -69,6 +69,9 @@ class SinglePartUploadLifecycleTest extends BaseRequestTestCase
                 'contentLength' => 63933,
                 'extension' => 'jpg',
                 'mimeType' => 'image/jpeg',
+                'hash' => [
+                    'sha256' => hash_file('sha256', __DIR__.'/../../Asset/cherry-blossoms.jpg'),
+                ],
             ],
             $getNodeResponseData2['file']
         );
@@ -78,7 +81,7 @@ class SinglePartUploadLifecycleTest extends BaseRequestTestCase
             sprintf('/%s/file', $elementId),
             self::TOKEN
         );
-        $this->assertIsBinaryStreamResponse($getFileResponse2, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse2, 'image/jpeg');
 
         // delete file -------------------------------------------------------------------------------------------------
         $deleteFileResponse = $this->runDeleteRequest(

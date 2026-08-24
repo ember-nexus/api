@@ -18,8 +18,7 @@ class RelationElementFragmentizeEventFactory
             $relationElement,
             new Relation(),
             new MongoDocument(),
-            new ElasticDocument(),
-            null
+            new ElasticDocument()
         );
     }
 }

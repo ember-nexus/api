@@ -8,8 +8,10 @@ use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
 use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
+use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Type\AccessType;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,6 +22,7 @@ class HeadUploadController extends AbstractController
 {
     public function __construct(
         private AuthProvider $authProvider,
+        private AccessChecker $accessChecker,
         private ElementManager $elementManager,
         private NoContentResponseFactory $noContentResponseFactory,
         private UploadFactory $uploadFactory,
@@ -44,7 +47,13 @@ class HeadUploadController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if ($upload->getUploadOwner()->toString() !== $this->authProvider->getUserId()->toString()) {
+        $userId = $this->authProvider->getUserId();
+        if ($upload->getUploadOwner()->toString() !== $userId->toString()) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+        // an upload whose target element is gone (e.g. deleted mid-upload) or no longer accessible can never be
+        // completed - report it the same way PATCH already would, instead of an upload that looks healthy
+        if (!$this->accessChecker->hasAccessToElement($userId, $upload->getUploadTarget(), AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 

@@ -81,7 +81,7 @@ class BackupFetchCommand extends Command
         if (null === $backupLocation) {
             throw new Exception('Unable to find the file summary.json in backup archive.');
         }
-        $this->io->writeln(sprintf('Found backup inside ZIP in folder <info>%s</info>.', $backupLocation));
+        $this->io->writeln(sprintf('Found backup inside ZIP in folder <info>%s</info>.', '' === $backupLocation ? '/' : $backupLocation));
         if (!$filesystem->directoryExists(sprintf('%s/node', $backupLocation))) {
             throw new Exception('ZIP archive does not contain required node folder.');
         }
@@ -175,14 +175,18 @@ class BackupFetchCommand extends Command
             'dest' => $destination,
         ]);
         $manager->createDirectory(sprintf('dest://%s', $destinationPath));
-        $listing = $manager->listContents('source://'.$sourcePath, true);
+        // Flysystem always normalizes stored paths to be free of leading slashes, regardless of whether the
+        // requested path had one; $normalizedSourcePath must match that normalized form to be strippable below.
+        $normalizedSourcePath = trim($sourcePath, '/');
+        $listing = $manager->listContents(sprintf('source://%s', $normalizedSourcePath), true);
         $progressBar = $this->io->createProgressBarInInteractiveTerminal();
         $progressBar?->start();
         /** @var \League\Flysystem\StorageAttributes $item */
         foreach ($listing as $item) {
             $itemPath = $item->path();
             $itemName = basename($itemPath);
-            $itemDir = str_replace(sprintf('source://%s', $sourcePath), '', dirname($itemPath));
+            $normalizedItemDir = ltrim(str_replace('source://', '', dirname($itemPath)), '/');
+            $itemDir = substr($normalizedItemDir, strlen($normalizedSourcePath));
 
             if ($item->isFile()) {
                 $manager->copy(
@@ -222,21 +226,29 @@ class BackupFetchCommand extends Command
     /**
      * @SuppressWarnings("PHPMD.CountInLoopExpression")
      */
+    /**
+     * A backup archive either contains the `node`/`relation` folders directly at its root (e.g. an archive built
+     * by `git archive` without a `--prefix`), or wrapped inside a single top level folder (e.g. GitHub's release
+     * archives, which always wrap their content in a `<repo>-<tag>/` folder). No deeper nesting is supported.
+     *
+     * The returned path never has a trailing slash; the root itself is represented as an empty string, so that
+     * appending `/node` etc. to it never produces a doubled leading slash.
+     */
     private function findBackupRootFolder(Filesystem $filesystem): ?string
     {
-        $stack = ['/'];
-        while (count($stack) > 0) {
-            $currentPath = array_shift($stack);
-            $listing = $filesystem->listContents($currentPath, false);
-            /** @var \League\Flysystem\StorageAttributes $item */
-            foreach ($listing as $item) {
-                if ($item->isFile() && str_ends_with($item->path(), 'summary.json')) {
-                    return $currentPath;
-                }
-                if ($item->isDir()) {
-                    array_push($stack, $item->path());
-                }
+        if ($filesystem->fileExists('summary.json')) {
+            return '';
+        }
+
+        $topLevelDirectories = [];
+        foreach ($filesystem->listContents('', false) as $item) {
+            if ($item->isDir()) {
+                $topLevelDirectories[] = $item->path();
             }
+        }
+
+        if (1 === count($topLevelDirectories) && $filesystem->fileExists(sprintf('%s/summary.json', $topLevelDirectories[0]))) {
+            return $topLevelDirectories[0];
         }
 
         return null;

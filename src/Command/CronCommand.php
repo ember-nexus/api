@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Command\Cron\DeleteExpiredUploadsCommand;
+use App\Command\Cron\ReindexFilesCommand;
 use App\Style\EmberNexusStyle;
 use LogicException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\OutputStyle;
@@ -23,6 +26,8 @@ class CronCommand extends Command
 
     public function __construct(
         private ParameterBagInterface $bag,
+        private DeleteExpiredUploadsCommand $deleteExpiredUploadsCommand,
+        private ReindexFilesCommand $reindexFilesCommand,
     ) {
         parent::__construct();
     }
@@ -33,9 +38,6 @@ class CronCommand extends Command
 
         $this->io->title('Cron');
 
-        $this->io->writeln('This command is currently a placeholder.');
-        $this->io->newLine();
-
         $isCronDisabled = $this->bag->get('isCronDisabled');
         if (!is_bool($isCronDisabled)) {
             throw new LogicException(sprintf('Expected "isCronDisabled" to be of type boolean, got %s.', get_debug_type($isCronDisabled)));
@@ -45,6 +47,12 @@ class CronCommand extends Command
 
             return Command::SUCCESS;
         }
+
+        // Note: cron:update-ownership is intentionally not dispatched here yet, see
+        // https://github.com/ember-nexus/api/issues/438.
+
+        $this->deleteExpiredUploadsCommand->run(new ArrayInput([]), $output);
+        $this->reindexFilesCommand->run(new ArrayInput([]), $output);
 
         $this->io->finalMessage('Finished.');
 
