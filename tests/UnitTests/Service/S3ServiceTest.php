@@ -1253,6 +1253,34 @@ class S3ServiceTest extends TestCase
         $this->assertSame('some content', $resource);
     }
 
+    public function testGetFileRangeAsResourceReturnsEmptyResourceWithoutCallingS3WhenContentLengthIsZero(): void
+    {
+        $fileOperation = $this->prophesize(FileOperationInterface::class);
+        $fileOperation->getBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $fileOperation->getKey()->shouldBeCalledOnce()->willReturn('storage-key.ext');
+        $fileOperation = $fileOperation->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(0);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key.ext',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+        // a byte-range request against an empty object is invalid (S3 rejects it with a 416), so getObject must
+        // not be called at all here
+        $s3Client->getObject(Argument::any())->shouldNotBeCalled();
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal()
+        );
+
+        $resource = $s3Service->getFileRangeAsResource($fileOperation, 5000000);
+        $this->assertIsResource($resource);
+        $this->assertSame('', \Safe\stream_get_contents($resource));
+    }
+
     public function testGetFileRangeAsResourceThrowsWhenContentLengthIsNotDeterminable(): void
     {
         $fileOperation = $this->prophesize(FileOperationInterface::class);

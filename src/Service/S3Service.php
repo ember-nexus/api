@@ -282,6 +282,11 @@ class S3Service
     public function getFileRangeAsResource(FileOperationInterface $fileOperation, int $maxContentLength)
     {
         $contentLength = $this->getContentLength($fileOperation);
+        if (0 === $contentLength) {
+            // a byte-range request against an empty object has no satisfiable range (S3 rejects it with a 416),
+            // and there is nothing to fetch either way - an empty resource is the correct result directly.
+            return \Safe\fopen('php://memory', 'r');
+        }
         $result = $this->s3Client->getObject([
             'Bucket' => $fileOperation->getBucket(),
             'Key' => $fileOperation->getKey(),

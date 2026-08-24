@@ -27,6 +27,7 @@ use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\AccessType;
 use App\Type\Response\JsonResponse;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Safe\DateTime;
@@ -47,6 +48,7 @@ class PatchUploadController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
+        private EmberNexusConfiguration $emberNexusConfiguration,
         private EventDispatcherInterface $eventDispatcher,
         private PartialUploadRequestFactory $partialUploadRequestFactory,
         private NoContentResponseFactory $noContentResponseFactory,
@@ -112,6 +114,18 @@ class PatchUploadController extends AbstractController
         $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
         if (is_resource($resource)) {
             \Safe\fclose($resource);
+        }
+
+        /**
+         * mirrors the same check for an upload's very first chunk (see UploadCreationService): a chunk has to be
+         * at least <min> bytes long, unless it is the chunk which completes the upload, which may be of any
+         * length - including zero, e.g. to just close out an upload that already has all its data.
+         */
+        if (false === $partialUploadRequest->isUploadComplete() && $chunkLength < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $chunkLength));
+        }
+        if ($chunkLength > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $chunkLength));
         }
 
         if (null !== $upload->getUploadLength()) {
