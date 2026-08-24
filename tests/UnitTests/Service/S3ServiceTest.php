@@ -15,6 +15,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Service\MimeTypeService;
 use App\Service\S3Service;
+use App\Service\S3TechnicalLimitsValidator;
 use App\Wrapper\S3ClientWrapper;
 use AsyncAws\Core\Stream\ResultStream;
 use AsyncAws\S3\Result\CopyObjectOutput;
@@ -48,7 +49,10 @@ class S3ServiceTest extends TestCase
         ?MimeTypeService $mimeTypeService = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
         ?Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory = null,
+        ?S3TechnicalLimitsValidator $s3TechnicalLimitsValidator = null,
     ): S3Service {
+        $s3TechnicalLimitsValidator ??= $this->prophesize(S3TechnicalLimitsValidator::class)->reveal();
+
         return new S3Service(
             $s3Client ?? $this->prophesize(S3Client::class)->reveal(),
             $fileChunkOperationFactory ?? $this->prophesize(UploadFileChunkOperationFactory::class)->reveal(),
@@ -56,6 +60,7 @@ class S3ServiceTest extends TestCase
             $mimeTypeService ?? $this->prophesize(MimeTypeService::class)->reveal(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
             $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            $s3TechnicalLimitsValidator,
         );
     }
 

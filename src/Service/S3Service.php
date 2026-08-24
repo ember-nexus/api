@@ -26,7 +26,9 @@ class S3Service
         private MimeTypeService $mimeTypeService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        S3TechnicalLimitsValidator $s3TechnicalLimitsValidator,
     ) {
+        $s3TechnicalLimitsValidator->validate();
     }
 
     /**
