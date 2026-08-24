@@ -30,6 +30,12 @@ class _03_01_GroupImmediateNodeOwnershipTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($response, 'Data');
     }
 
+    public function testGetAllowedNodeFile(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
+        $this->assertIsBinaryStreamResponse($response, 'application/octet-stream');
+    }
+
     public function testGetAllowedRelations(): void
     {
         $response = $this->runGetRequest(sprintf('/%s', self::IS_IN_GROUP), self::TOKEN);

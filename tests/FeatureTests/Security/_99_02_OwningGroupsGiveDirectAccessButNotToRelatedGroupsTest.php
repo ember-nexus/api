@@ -35,9 +35,21 @@ class _99_02_OwningGroupsGiveDirectAccessButNotToRelatedGroupsTest extends BaseR
         $this->assertIsNodeResponse($response, 'Data');
     }
 
+    public function testGetAllowedNodeFile(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/file', self::DATA_1), self::TOKEN);
+        $this->assertIsBinaryStreamResponse($response, 'application/octet-stream');
+    }
+
     public function testGetForbiddenNode(): void
     {
         $response = $this->runGetRequest(sprintf('/%s', self::DATA_3), self::TOKEN);
+        $this->assertIsProblemResponse($response, 404);
+    }
+
+    public function testGetForbiddenNodeFile(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/file', self::DATA_3), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
     }
 }

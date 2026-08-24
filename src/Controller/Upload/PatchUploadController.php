@@ -120,12 +120,14 @@ class PatchUploadController extends AbstractController
     {
         $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
         $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
+        $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
 
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
         $element->addProperty('file', [
             'contentLength' => $mergedContentLength,
             'extension' => $upload->getExtension(),
+            'mimeType' => $mergedMimeType,
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
