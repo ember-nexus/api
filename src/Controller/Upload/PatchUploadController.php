@@ -6,6 +6,8 @@ namespace App\Controller\Upload;
 
 use App\Contract\UploadInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
+use App\Exception\Client400BadContentException;
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Exception\Client410GoneExceptionFactory;
@@ -17,6 +19,7 @@ use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\DigestService;
 use App\Service\ElementManager;
 use App\Service\FileHashService;
 use App\Service\S3Service;
@@ -53,6 +56,8 @@ class PatchUploadController extends AbstractController
         private MergeFileChunksOperationFactory $mergeFileChunksOperationFactory,
         private S3Service $s3Service,
         private FileHashService $fileHashService,
+        private DigestService $digestService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private Client410GoneExceptionFactory $client410GoneExceptionFactory,
@@ -111,7 +116,8 @@ class PatchUploadController extends AbstractController
             // the final chunk was successfully uploaded -> we can create the file
             $upload = $this->uploadFactory->markUploadAsComplete($upload);
             $this->uploadService->mergeUploadElement($upload);
-            $this->createFile($upload);
+            $requestDigestHeaderValue = $request->headers->get('Repr-Digest') ?? $request->headers->get('Content-Digest');
+            $this->createFile($upload, $requestDigestHeaderValue);
         }
 
         $this->elementManager->flush();
@@ -119,20 +125,39 @@ class PatchUploadController extends AbstractController
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }
 
-    public function createFile(UploadInterface $upload): Response
+    public function createFile(UploadInterface $upload, ?string $requestDigestHeaderValue = null): Response
     {
+        $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
+        // captured before merging: if this element did not already have a file, and the digest check below
+        // rejects the upload, the just-merged (now orphaned) storage object can be safely cleaned up, since
+        // nothing else can be referencing it yet.
+        $isNewFile = !$element->hasProperty('file');
+
         $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
         $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
         $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
 
-        // the merged file's ETag is a hash of the parts' ETags (not a hash of its content), so the merged file has
-        // to be read once, in full, to compute a real content hash
-        $hash = $this->fileHashService->calculateHashFromResource($this->s3Service->getFileAsResource(new FileOperation(
+        $storageFileOperation = new FileOperation(
             $mergeFileChunksOperation->getStorageBucket(),
             $mergeFileChunksOperation->getStorageKey()
-        )));
+        );
 
-        $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
+        // the merged file's ETag is a hash of the parts' ETags (not a hash of its content), so the merged file has
+        // to be read once, in full, to compute a real content hash
+        $hash = $this->fileHashService->calculateHashFromResource($this->s3Service->getFileAsResource($storageFileOperation));
+
+        if (null !== $requestDigestHeaderValue) {
+            try {
+                $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
+            } catch (Client400BadContentException $exception) {
+                if ($isNewFile) {
+                    $this->s3Service->deleteFile($storageFileOperation);
+                }
+                $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
+
+                throw $exception;
+            }
+        }
 
         $element->addProperty('file', [
             'contentLength' => $mergedContentLength,
@@ -142,6 +167,7 @@ class PatchUploadController extends AbstractController
                 FileHashService::ALGORITHM => $hash,
             ],
         ]);
+        $element->addProperty('hasFile', true);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
 
@@ -154,5 +180,16 @@ class PatchUploadController extends AbstractController
         return new JsonResponse([
             'upload' => 'complete',
         ]);
+    }
+
+    private function verifyRequestDigest(string $requestDigestHeaderValue, string $actualHash): void
+    {
+        $expectedHash = $this->digestService->parseSha256HexFromHeaderValue($requestDigestHeaderValue);
+        if (null === $expectedHash) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not verify upload: 'Repr-Digest'/'Content-Digest' header '%s' does not declare a supported digest algorithm; only 'sha-256' is supported.", $requestDigestHeaderValue));
+        }
+        if ($expectedHash !== $actualHash) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Could not verify upload: the declared digest does not match the uploaded file\'s actual content.');
+        }
     }
 }

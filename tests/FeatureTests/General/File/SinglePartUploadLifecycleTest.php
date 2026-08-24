@@ -81,7 +81,7 @@ class SinglePartUploadLifecycleTest extends BaseRequestTestCase
             sprintf('/%s/file', $elementId),
             self::TOKEN
         );
-        $this->assertIsBinaryStreamResponse($getFileResponse2, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse2, 'image/jpeg');
 
         // delete file -------------------------------------------------------------------------------------------------
         $deleteFileResponse = $this->runDeleteRequest(

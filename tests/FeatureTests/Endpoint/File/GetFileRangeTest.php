@@ -21,7 +21,7 @@ class GetFileRangeTest extends BaseRequestTestCase
     private function getFullBody(): string
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($response, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($response, 'image/jpeg');
 
         return (string) $response->getBody();
     }

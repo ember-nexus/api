@@ -148,7 +148,8 @@ class CollectionService
             $nodeElement = $this->elementManager->getNode($nodeId);
             if ($nodeElement) {
                 $nodeData[] = $this->elementToRawService->elementToRaw(
-                    $nodeElement
+                    $nodeElement,
+                    includeFile: false
                 );
             }
         }
@@ -156,7 +157,8 @@ class CollectionService
             $relationElement = $this->elementManager->getRelation($relationId);
             if ($relationElement) {
                 $relationData[] = $this->elementToRawService->elementToRaw(
-                    $relationElement
+                    $relationElement,
+                    includeFile: false
                 );
             }
         }
@@ -202,7 +204,8 @@ class CollectionService
             $element = $this->elementManager->getElement($elementId);
             if ($element) {
                 $elementData[] = $this->elementToRawService->elementToRaw(
-                    $element
+                    $element,
+                    includeFile: false
                 );
             }
         }

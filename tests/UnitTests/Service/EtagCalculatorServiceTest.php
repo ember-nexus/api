@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
 use App\Service\ElementManager;
 use App\Service\EtagCalculatorService;
-use App\Service\S3Service;
 use App\Type\NodeElement;
-use App\Type\S3\FileOperation;
-use AsyncAws\Core\Exception\Http\ClientException;
 use Beste\Psr\Log\TestLogger;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Contracts\ClientInterface;
@@ -80,8 +76,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -147,8 +141,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -203,8 +195,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -249,8 +239,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -316,8 +304,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -396,8 +382,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -472,8 +456,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -527,8 +509,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -569,8 +549,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -636,8 +614,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -716,8 +692,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -792,8 +766,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -847,8 +819,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -889,8 +859,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -956,8 +924,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1035,8 +1001,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1110,8 +1074,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1165,8 +1127,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1207,8 +1167,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1274,8 +1232,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1353,8 +1309,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1428,8 +1382,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1483,8 +1435,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1525,8 +1475,6 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1540,17 +1488,22 @@ class EtagCalculatorServiceTest extends TestCase
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for index collection.'));
     }
 
-    public function testCalculateFileEtag(): void
+    public function testCalculateFileEtagUsesStoredSha256Hash(): void
     {
         // setup variables
         $id = Uuid::fromString('544e0cf6-d351-435c-828f-7a0762240ce6');
 
         $element = new NodeElement();
         $element
-            ->addProperty('file', ['size' => 1024, 'mimetype' => 'image/png'])
+            ->addProperty('file', [
+                'contentLength' => 1024,
+                'extension' => 'png',
+                'mimeType' => 'image/png',
+                'hash' => [
+                    'sha256' => str_repeat('a', 64),
+                ],
+            ])
             ->addProperty('name', 'some name');
-
-        $fileOperation = new FileOperation('someBucket', 'someKey');
 
         // setup service dependencies
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
@@ -1559,71 +1512,174 @@ class EtagCalculatorServiceTest extends TestCase
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
 
-        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
-        $fileOperationFactory->createFileOperationFromElement(Argument::is($element))->shouldBeCalledOnce()->willReturn($fileOperation);
-
-        $s3Service = $this->prophesize(S3Service::class);
-        $s3Service->getEtag(Argument::is($fileOperation))->shouldBeCalledOnce()->willReturn('some s3 etag');
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
 
         $logger = TestLogger::create();
 
         // setup service
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
-            $this->prophesize(CypherEntityManager::class)->reveal(),
+            $cypherEntityManager->reveal(),
             $elementManager->reveal(),
-            $s3Service->reveal(),
-            $fileOperationFactory->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method
+        // run service method; no Cypher query (i.e. no calculateElementEtag() fallback) should have happened at
+        // all, per the prophecy expectation above
         $etag = $etagCalculatorService->calculateFileEtag($id);
-        $this->assertSame('dYDnWUfIMVL', (string) $etag);
+        $this->assertSame('K6XEZuifVAv', (string) $etag);
 
         // assert logs
         $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for file.'));
     }
 
-    public function testCalculateFileEtagForElementWithoutNameProperty(): void
+    public function testCalculateFileEtagFallsBackToAlphabeticallyFirstHashWhenSha256Missing(): void
+    {
+        // setup variables
+        $id = Uuid::fromString('7f8e9d0c-1b2a-4c3d-9e8f-0a1b2c3d4e5f');
+
+        $element = new NodeElement();
+        $element
+            ->addProperty('file', [
+                'contentLength' => 1024,
+                'extension' => 'png',
+                'mimeType' => 'image/png',
+                'hash' => [
+                    'md5' => str_repeat('b', 32),
+                    'blake3' => str_repeat('c', 64),
+                ],
+            ])
+            ->addProperty('name', 'some name');
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $elementManager->reveal(),
+            $logger,
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+
+        // run service method; 'blake3' sorts before 'md5' alphanumerically, so it is used. The Cypher client
+        // prophecy above (shouldNotBeCalled) proves that a hash was actually picked here, rather than falling
+        // back to calculateElementEtag().
+        $etag = $etagCalculatorService->calculateFileEtag($id);
+        $this->assertNotNull($etag);
+    }
+
+    public function testCalculateFileEtagFallsBackToElementEtagWhenNoHashIsPresent(): void
     {
         // setup variables
         $id = Uuid::fromString('9c1a0c0e-6b8f-4b3d-9b1e-2b1a0c0e6b8f');
 
         $element = new NodeElement();
         $element
-            ->addProperty('file', ['size' => 1024, 'mimetype' => 'image/png']);
+            ->addProperty('file', ['contentLength' => 1024, 'extension' => 'png', 'mimeType' => 'image/png']);
 
-        $fileOperation = new FileOperation('someBucket', 'someKey');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                    'relation.updated' => null,
+                ]),
+            ]
+        );
 
         // setup service dependencies
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledTimes(2)->willReturn('seed');
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
 
-        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
-        $fileOperationFactory->createFileOperationFromElement(Argument::is($element))->shouldBeCalledOnce()->willReturn($fileOperation);
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
 
-        $s3Service = $this->prophesize(S3Service::class);
-        $s3Service->getEtag(Argument::is($fileOperation))->shouldBeCalledOnce()->willReturn('some s3 etag');
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
 
         $logger = TestLogger::create();
 
         // setup service
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
-            $this->prophesize(CypherEntityManager::class)->reveal(),
+            $cypherEntityManager->reveal(),
             $elementManager->reveal(),
-            $s3Service->reveal(),
-            $fileOperationFactory->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method; must not throw despite the element having no 'name' property
+        // run service method; falls back to calculateElementEtag(), i.e. a Cypher query, not an S3 call
+        $etag = $etagCalculatorService->calculateFileEtag($id);
+        $this->assertNotNull($etag);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for element.'));
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for file.'));
+    }
+
+    public function testCalculateFileEtagFallsBackToElementEtagWhenNoFilePropertyIsPresent(): void
+    {
+        // an S3 object can exist without the element ever having its 'file' property set, e.g. when an upload is
+        // rejected after the object was already written (a mismatched Content-Digest); this must not crash.
+
+        // setup variables
+        $id = Uuid::fromString('1a2b3c4d-5e6f-4a1b-8c9d-0e1f2a3b4c5d');
+
+        $element = new NodeElement();
+
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                    'relation.updated' => null,
+                ]),
+            ]
+        );
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledTimes(2)->willReturn('seed');
+
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
+
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $elementManager->reveal(),
+            $logger,
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+
+        // run service method; must not throw despite the element having no 'file' property
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertNotNull($etag);
 
@@ -1631,17 +1687,23 @@ class EtagCalculatorServiceTest extends TestCase
         $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for file.'));
     }
 
-    public function testCalculateFileEtagCapturesExceptionIfS3FileIsMissing(): void
+    public function testCalculateFileEtagReturnsNullWhenElementEtagFallbackAlsoReturnsNull(): void
     {
         // setup variables
         $id = Uuid::fromString('662a045f-7d90-4fa2-85f8-9f972f2bdbd3');
 
         $element = new NodeElement();
-        $element
-            ->addProperty('file', ['size' => 1024, 'mimetype' => 'image/png'])
-            ->addProperty('name', 'some name');
 
-        $fileOperation = new FileOperation('someBucket', 'someKey');
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'node.updated' => null,
+                    'relation.updated' => null,
+                ]),
+            ]
+        );
 
         // setup service dependencies
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
@@ -1649,32 +1711,25 @@ class EtagCalculatorServiceTest extends TestCase
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
 
-        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
-        $fileOperationFactory->createFileOperationFromElement(Argument::is($element))->shouldBeCalledOnce()->willReturn($fileOperation);
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
 
-        $exception = $this->prophesize(ClientException::class)->reveal();
-
-        $s3Service = $this->prophesize(S3Service::class);
-        $s3Service->getEtag(Argument::is($fileOperation))->shouldBeCalledOnce()->willThrow($exception);
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
 
         $logger = TestLogger::create();
 
         // setup service
         $etagCalculatorService = new EtagCalculatorService(
             $emberNexusConfiguration->reveal(),
-            $this->prophesize(CypherEntityManager::class)->reveal(),
+            $cypherEntityManager->reveal(),
             $elementManager->reveal(),
-            $s3Service->reveal(),
-            $fileOperationFactory->reveal(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method
+        // run service method; neither a hash nor an updated timestamp is available anywhere
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertNull($etag);
-
-        // assert logs
-        $this->assertTrue($logger->records->includeMessagesContaining('Unable to calculate Etag for file of element 662a045f-7d90-4fa2-85f8-9f972f2bdbd3.'));
     }
 }

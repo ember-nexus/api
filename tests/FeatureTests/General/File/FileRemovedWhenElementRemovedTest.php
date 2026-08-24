@@ -40,7 +40,7 @@ class FileRemovedWhenElementRemovedTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($postFileResponse, false);
 
         $getFileResponse1 = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($getFileResponse1, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse1, 'image/jpeg');
 
         $deleteElementResponse = $this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN);
         $this->assertIsDeletedResponse($deleteElementResponse);

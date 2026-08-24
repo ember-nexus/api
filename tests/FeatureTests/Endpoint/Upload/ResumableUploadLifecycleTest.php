@@ -84,7 +84,7 @@ class ResumableUploadLifecycleTest extends BaseRequestTestCase
 
         // verify the merged file is downloadable and matches what was uploaded
         $downloadResponse = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($downloadResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($downloadResponse, 'text/plain');
         $this->assertSame(self::FILE_SIZE, strlen((string) $downloadResponse->getBody()));
 
         $this->cleanupChunks($chunks);

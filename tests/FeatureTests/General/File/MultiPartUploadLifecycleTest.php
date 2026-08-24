@@ -124,7 +124,7 @@ class MultiPartUploadLifecycleTest extends BaseRequestTestCase
             sprintf('/%s/file', $elementId),
             self::TOKEN
         );
-        $this->assertIsBinaryStreamResponse($getFileResponse2, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse2, 'text/plain');
 
         $this->cleanupChunks($chunks);
     }

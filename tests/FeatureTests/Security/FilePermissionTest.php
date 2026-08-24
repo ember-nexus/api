@@ -24,7 +24,7 @@ class FilePermissionTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($elementResponse, 'Data');
 
         $fileResponse = $this->runGetRequest(sprintf('/%s/file', self::DATA_ID), self::TOKEN_USER_A);
-        $this->assertIsBinaryStreamResponse($fileResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($fileResponse, 'image/jpeg');
     }
 
     public function testUserWithoutAccessGetsNotFoundForElementAndFile(): void

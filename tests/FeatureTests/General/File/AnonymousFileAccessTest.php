@@ -23,6 +23,6 @@ class AnonymousFileAccessTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($elementResponse, 'Data');
 
         $fileResponse = $this->runGetRequest(sprintf('/%s/file', self::ANONYMOUS_DATA_ID), null);
-        $this->assertIsBinaryStreamResponse($fileResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($fileResponse, 'image/jpeg');
     }
 }

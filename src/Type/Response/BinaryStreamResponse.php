@@ -15,7 +15,7 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
 {
     public const int STREAM_CHUNK_SIZE = 8192;
 
-    public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback, ?ByteRange $range = null)
+    public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback, ?ByteRange $range = null, ?string $reprDigestHeaderValue = null, ?string $contentType = null)
     {
         parent::__construct();
         $this->content = '';
@@ -31,8 +31,16 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
             $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
         }
 
-        // todo: use file's actual mime type, if available. otherwise fall back to current mime type?
-        $this->headers->set('Content-Type', 'application/octet-stream');
+        if (null !== $reprDigestHeaderValue) {
+            // Repr-Digest describes the full underlying resource, regardless of Range, so it applies to both full
+            // and partial responses alike. Content-Digest is deliberately not set: for a full response it would
+            // always be identical to Repr-Digest (no extra information), and for a partial response it would
+            // require hashing just the returned range, which is not done, so it is correctly left out rather than
+            // set to a value describing the wrong bytes.
+            $this->headers->set('Repr-Digest', $reprDigestHeaderValue);
+        }
+
+        $this->headers->set('Content-Type', $contentType ?? 'application/octet-stream');
 
         $disposition = $this->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,

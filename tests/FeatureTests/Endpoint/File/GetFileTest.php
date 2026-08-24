@@ -17,7 +17,7 @@ class GetFileTest extends BaseRequestTestCase
     public function testGetFileOnNodeWithFile(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::NODE_WITH_FILE_UUID), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($response, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($response, 'image/jpeg');
     }
 
     public function testGetFileOnNodeWithoutFile(): void

@@ -46,7 +46,7 @@ class SimpleFileInteractivityTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($postFileResponse, false);
 
         $getFileResponse1 = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($getFileResponse1, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse1, 'image/jpeg');
         $this->assertSame(63933, strlen((string) $getFileResponse1->getBody()));
 
         // put replace file
@@ -66,7 +66,7 @@ class SimpleFileInteractivityTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($putFileResponse, false);
 
         $getFileResponse2 = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($getFileResponse2, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse2, 'text/plain');
         $this->assertNotSame(
             (string) $getFileResponse1->getBody(),
             (string) $getFileResponse2->getBody()

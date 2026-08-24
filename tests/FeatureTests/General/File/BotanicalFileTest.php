@@ -34,7 +34,7 @@ class BotanicalFileTest extends BaseRequestTestCase
     public function testDownloadedRoseImageHasCorrectHashAndLength(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($response, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($response, 'image/jpeg');
 
         // the element's 'name' property ("Rose") is used as the download's filename, with the stored file
         // extension ("jpg") appended; see ElementService::getFileName().
@@ -48,7 +48,7 @@ class BotanicalFileTest extends BaseRequestTestCase
     public function testDownloadedTulipImageHasCorrectHashAndLength(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::TULIP_ID), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($response, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($response, 'image/jpeg');
 
         $body = (string) $response->getBody();
         $this->assertSame(self::TULIP_CONTENT_LENGTH, strlen($body));
@@ -71,7 +71,7 @@ class BotanicalFileTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($replaceResponse, false);
 
         $downloadResponse = $this->runGetRequest(sprintf('/%s/file', self::ORCHID_ID), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($downloadResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($downloadResponse, 'image/jpeg');
         $this->assertSame(63933, strlen((string) $downloadResponse->getBody()));
     }
 
@@ -125,7 +125,7 @@ class BotanicalFileTest extends BaseRequestTestCase
         $this->assertSame('?1', $finishUploadResponse->getHeader('Upload-Complete')[0]);
 
         $downloadResponse = $this->runGetRequest(sprintf('/%s/file', self::AZALEA_ID), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($downloadResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($downloadResponse, 'text/plain');
         $this->assertSame($fileSize, strlen((string) $downloadResponse->getBody()));
 
         $this->cleanupChunks($chunks);
@@ -155,7 +155,7 @@ class BotanicalFileTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($replaceResponse, false);
 
         $downloadResponse = $this->runGetRequest(sprintf('/%s/file', self::CHERRY_BLOSSOM_ID), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($downloadResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($downloadResponse, 'text/plain');
         $downloadedBody = (string) $downloadResponse->getBody();
         $this->assertSame($fileSize, strlen($downloadedBody));
         $this->assertSame($expectedHash, hash('sha256', $downloadedBody));

@@ -51,7 +51,7 @@ class FileNameFallbackTest extends BaseRequestTestCase
         unlink($filePath);
 
         $downloadResponse = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($downloadResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($downloadResponse, 'text/plain');
         $this->assertStringContainsString(
             sprintf('filename=%s.bin', $elementId),
             $downloadResponse->getHeader('Content-Disposition')[0]
@@ -92,7 +92,7 @@ class FileNameFallbackTest extends BaseRequestTestCase
         unlink($filePath);
 
         $downloadResponse = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
-        $this->assertIsBinaryStreamResponse($downloadResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($downloadResponse, 'text/plain');
         $this->assertStringContainsString(
             'filename=someOtherFilename.bin',
             $downloadResponse->getHeader('Content-Disposition')[0]

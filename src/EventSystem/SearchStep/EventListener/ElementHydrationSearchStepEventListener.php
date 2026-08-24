@@ -256,7 +256,8 @@ class ElementHydrationSearchStepEventListener
             $element = $this->elementManager->getElement($elementId);
             if ($element) {
                 $elementData[] = $this->elementToRawService->elementToRaw(
-                    $element
+                    $element,
+                    includeFile: false
                 );
             }
         }

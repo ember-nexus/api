@@ -8,6 +8,7 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Contract\Request\ResumableUploadRequestInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
+use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
@@ -37,6 +38,7 @@ class UploadCreationService
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Service $s3Service,
         private FileHashService $fileHashService,
+        private DigestService $digestService,
         private ElementManager $elementManager,
         private UploadFileOperationFactory $uploadFileOperationFactory,
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
@@ -59,20 +61,40 @@ class UploadCreationService
             return $this->createNewResumableUpload($resumableUploadRequest);
         }
 
-        return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest);
+        $requestDigestHeaderValue = $request->headers->get('Repr-Digest') ?? $request->headers->get('Content-Digest');
+
+        return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest, $requestDigestHeaderValue);
     }
 
     private function setOrReplaceElementFileDirectly(
         NodeElementInterface|RelationElementInterface $element,
         ResumableUploadRequestInterface $resumableUploadRequest,
+        ?string $requestDigestHeaderValue,
     ): Response {
+        // captured before uploading: if this element did not already have a file, and the digest check below
+        // rejects the upload, the just-written (now orphaned) storage object can be safely cleaned up, since
+        // nothing else can be referencing it yet.
+        $isNewFile = !$element->hasProperty('file');
+
         $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
         $this->s3Service->uploadFile($uploadFileOperation);
 
-        $hash = $this->fileHashService->calculateHashFromResource($this->s3Service->getFileAsResource(new FileOperation(
+        $storageFileOperation = new FileOperation(
             $uploadFileOperation->getStorageBucket(),
             $uploadFileOperation->getStorageKey()
-        )));
+        );
+        $hash = $this->fileHashService->calculateHashFromResource($this->s3Service->getFileAsResource($storageFileOperation));
+
+        if (null !== $requestDigestHeaderValue) {
+            try {
+                $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
+            } catch (Client400BadContentException $exception) {
+                if ($isNewFile) {
+                    $this->s3Service->deleteFile($storageFileOperation);
+                }
+                throw $exception;
+            }
+        }
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
 
@@ -84,10 +106,22 @@ class UploadCreationService
                 FileHashService::ALGORITHM => $hash,
             ],
         ]);
+        $element->addProperty('hasFile', true);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
 
         return new CreatedResponse();
+    }
+
+    private function verifyRequestDigest(string $requestDigestHeaderValue, string $actualHash): void
+    {
+        $expectedHash = $this->digestService->parseSha256HexFromHeaderValue($requestDigestHeaderValue);
+        if (null === $expectedHash) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not verify upload: 'Repr-Digest'/'Content-Digest' header '%s' does not declare a supported digest algorithm; only 'sha-256' is supported.", $requestDigestHeaderValue));
+        }
+        if ($expectedHash !== $actualHash) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Could not verify upload: the declared digest does not match the uploaded file\'s actual content.');
+        }
     }
 
     private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest): Response

@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
 use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
-use AsyncAws\Core\Exception\Http\ClientException;
+use ArrayAccess;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
@@ -25,8 +24,6 @@ class EtagCalculatorService
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private ElementManager $elementManager,
-        private S3Service $s3Service,
-        private FileOperationFactory $fileOperationFactory,
         private LoggerInterface $logger,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -368,20 +365,20 @@ class EtagCalculatorService
         );
 
         $element = $this->elementManager->getElementOrFail($elementId);
-        $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
-        try {
-            $fileEtag = $this->s3Service->getEtag($fileOperation);
-        } catch (ClientException $exception) {
-            $this->logger->error(sprintf(
-                'Unable to calculate Etag for file of element %s.',
-                (string) $elementId
-            ));
+        $rawFileProperties = $element->hasProperty('file') ? $element->getProperty('file') : null;
+        $fileEtag = $this->extractPreferredHashFromFileProperties($rawFileProperties);
 
-            return null;
+        if (null === $fileEtag) {
+            // no stored hash at all (e.g. a pre-hash-rollout record): fall back to the element's own identity
+            // instead of an S3 round trip, since there is nothing file-specific left to distinguish it by anyway.
+            $fileEtag = $this->calculateElementEtag($elementId);
+            if (null === $fileEtag) {
+                return null;
+            }
+            $fileEtag = (string) $fileEtag;
         }
 
-        $fileProperties = $element->getProperty('file');
-        $fileProperties = \Safe\json_encode($fileProperties);
+        $fileProperties = \Safe\json_encode($rawFileProperties);
 
         $name = $element->hasProperty('name') ? $element->getProperty('name') : null;
         $name = \Safe\json_encode($name);
@@ -402,5 +399,39 @@ class EtagCalculatorService
         );
 
         return $etag;
+    }
+
+    /**
+     * Prefers {@see FileHashService::ALGORITHM}, since that is the algorithm this codebase actually writes; if it
+     * is missing but some other algorithm is present (e.g. a future 'blake3'), the alphanumerically first one is
+     * used instead, purely to pick deterministically among otherwise-equal options. Returns null if no usable
+     * hash is stored at all.
+     */
+    private function extractPreferredHashFromFileProperties(mixed $rawFileProperties): ?string
+    {
+        if (!is_array($rawFileProperties) && !($rawFileProperties instanceof ArrayAccess)) {
+            return null;
+        }
+        $hash = $rawFileProperties['hash'] ?? null;
+        if (is_object($hash) && method_exists($hash, 'getArrayCopy')) {
+            $hash = $hash->getArrayCopy();
+        }
+        if (!is_array($hash) || [] === $hash) {
+            return null;
+        }
+
+        $preferredValue = $hash[FileHashService::ALGORITHM] ?? null;
+        if (is_string($preferredValue) && '' !== $preferredValue) {
+            return $preferredValue;
+        }
+
+        ksort($hash);
+        foreach ($hash as $value) {
+            if (is_string($value) && '' !== $value) {
+                return $value;
+            }
+        }
+
+        return null;
     }
 }

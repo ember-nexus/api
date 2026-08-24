@@ -18,9 +18,14 @@ class ElementToRawService
     }
 
     /**
+     * @param bool $includeFile whether the (potentially expensive, MongoDB-backed) 'file' property is promoted to
+     *                          a top-level key. Collection/search listings pass false: 'hasFile' (a plain, cheap
+     *                          boolean already present in 'data') is sufficient there, the full 'file' metadata is
+     *                          only returned by the single-element endpoint.
+     *
      * @return array<string, mixed>
      */
-    public function elementToRaw(NodeElementInterface|RelationElementInterface $element): array
+    public function elementToRaw(NodeElementInterface|RelationElementInterface $element, bool $includeFile = true): array
     {
         $rawData = [
             'type' => null,
@@ -53,7 +58,11 @@ class ElementToRawService
         }
 
         if (array_key_exists('file', $rawData['data'])) {
-            $rawData['file'] = $rawData['data']['file'];
+            if ($includeFile) {
+                $rawData['file'] = $rawData['data']['file'];
+            } else {
+                unset($rawData['file']);
+            }
             unset($rawData['data']['file']);
         } else {
             unset($rawData['file']);

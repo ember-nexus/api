@@ -42,7 +42,7 @@ class DeleteFileTest extends BaseRequestTestCase
             sprintf('%s/file', $location),
             self::TOKEN
         );
-        $this->assertIsBinaryStreamResponse($getFileResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse, 'image/jpeg');
 
         // delete file
         $deleteFileResponse = $this->runDeleteRequest(
@@ -115,7 +115,7 @@ class DeleteFileTest extends BaseRequestTestCase
             sprintf('%s/file', $location),
             self::TOKEN
         );
-        $this->assertIsBinaryStreamResponse($getFileResponse, 'application/octet-stream');
+        $this->assertIsBinaryStreamResponse($getFileResponse, 'image/jpeg');
 
         // verify relation has file-property
         $getResponse = $this->runGetRequest(
