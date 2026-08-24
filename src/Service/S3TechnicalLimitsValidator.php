@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Contract\S3\S3TechnicalLimitsInterface;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
-use LogicException;
 
 /**
  * Validates the operator-configurable `file.*` upload/storage settings ({@see EmberNexusConfiguration}) against
@@ -19,6 +19,7 @@ class S3TechnicalLimitsValidator
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3TechnicalLimitsInterface $s3TechnicalLimits,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -35,7 +36,7 @@ class S3TechnicalLimitsValidator
         $technicalMinChunkSize = $this->s3TechnicalLimits->getMinChunkSizeInBytes();
 
         if ($configuredMinChunkSize < $technicalMinChunkSize) {
-            throw new LogicException(sprintf("Configured 'file.uploadMinChunkSizeInBytes' (%d) can not be smaller than the storage backend's technical minimum chunk size (%d).", $configuredMinChunkSize, $technicalMinChunkSize));
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Configured 'file.uploadMinChunkSizeInBytes' (%d) can not be smaller than the storage backend's technical minimum chunk size (%d).", $configuredMinChunkSize, $technicalMinChunkSize));
         }
     }
 
@@ -46,7 +47,7 @@ class S3TechnicalLimitsValidator
         $technicalMaxChunkCount = $this->s3TechnicalLimits->getMaxChunkCount();
 
         if ($configuredMaxChunkCount > $technicalMaxChunkCount) {
-            throw new LogicException(sprintf("Configured 'file.uploadChunkDigitsLength' (%d) allows up to %d chunks, which exceeds the storage backend's technical maximum of %d chunks.", $chunkDigitsLength, $configuredMaxChunkCount, $technicalMaxChunkCount));
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Configured 'file.uploadChunkDigitsLength' (%d) allows up to %d chunks, which exceeds the storage backend's technical maximum of %d chunks.", $chunkDigitsLength, $configuredMaxChunkCount, $technicalMaxChunkCount));
         }
     }
 
@@ -56,7 +57,7 @@ class S3TechnicalLimitsValidator
         $technicalMaxObjectSize = $this->s3TechnicalLimits->getMaxObjectSizeInBytes();
 
         if ($configuredMaxFileSize > $technicalMaxObjectSize) {
-            throw new LogicException(sprintf("Configured 'file.maxFileSizeInBytes' (%d) can not be larger than the storage backend's technical maximum object size (%d).", $configuredMaxFileSize, $technicalMaxObjectSize));
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Configured 'file.maxFileSizeInBytes' (%d) can not be larger than the storage backend's technical maximum object size (%d).", $configuredMaxFileSize, $technicalMaxObjectSize));
         }
     }
 }

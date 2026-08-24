@@ -144,6 +144,22 @@ class PropertyParseService
     /**
      * @param mixed[] $properties
      */
+    public function getHashStateFromProperties(mixed $properties): ?string
+    {
+        if (!array_key_exists('hashState', $properties)) {
+            return null;
+        }
+        $hashState = $properties['hashState'];
+        if (!is_string($hashState)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property hashState to be either string or to be absent.');
+        }
+
+        return $hashState;
+    }
+
+    /**
+     * @param mixed[] $properties
+     */
     public function getExpiresFromProperties(mixed $properties): DateTime
     {
         if (!array_key_exists('expires', $properties)) {

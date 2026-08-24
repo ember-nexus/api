@@ -45,7 +45,8 @@ class UploadFactory
             $this->propertyParseService->getAlreadyUploadedChunksFromProperties($properties),
             $this->propertyParseService->getUploadOwnerFromProperties($properties),
             $this->propertyParseService->getExtensionFromProperties($properties),
-            $this->propertyParseService->getExpiresFromProperties($properties)
+            $this->propertyParseService->getExpiresFromProperties($properties),
+            $this->propertyParseService->getHashStateFromProperties($properties)
         );
     }
 
@@ -60,11 +61,12 @@ class UploadFactory
             $upload->getAlreadyUploadedChunks(),
             $upload->getUploadOwner(),
             $upload->getExtension(),
-            $upload->getExpires()
+            $upload->getExpires(),
+            $upload->getHashState()
         );
     }
 
-    public function addNewChunkToUpload(UploadInterface $upload, int $chunkLength): UploadInterface
+    public function addNewChunkToUpload(UploadInterface $upload, int $chunkLength, ?string $hashState = null): UploadInterface
     {
         return new Upload(
             $upload->getId(),
@@ -75,7 +77,8 @@ class UploadFactory
             $upload->getAlreadyUploadedChunks() + 1,
             $upload->getUploadOwner(),
             $upload->getExtension(),
-            $upload->getExpires()
+            $upload->getExpires(),
+            $hashState ?? $upload->getHashState()
         );
     }
 }

@@ -39,33 +39,6 @@ The `file.hash` property is already stored as `{<algorithm>: <digest>}` (not a f
 `file.hash.blake3` later needs no data migration — existing `file.hash.sha256` values simply stay valid
 alongside it.
 
-## Digest mismatch can overwrite an existing file before rejecting the upload
-
-`UploadCreationService::setOrReplaceElementFileDirectly()` and `PatchUploadController::createFile()` currently
-write the new file to S3 (single-part: promote to the storage bucket; resumable: merge chunks into the storage
-bucket) *before* the hash is known and compared against a client-supplied `Repr-Digest`/`Content-Digest`. On a
-mismatch, the new (rejected) bytes are cleaned up when this was a brand new file, but a *replace* of an existing
-file reuses the same storage key, so a mismatch there can leave the element with no usable "original" to fall
-back to (the old object may already be gone, e.g. if the extension changed). Not fixed in this session; options,
-roughly in order of engineering cost:
-
-1. **Verify before promoting to storage.** Single-part: hash while the bytes are being written to the
-   intermediate S3 upload bucket (the step that already happens before the copy-to-storage step), so a mismatch
-   never touches the storage bucket at all — this also removes the extra post-upload S3 read entirely.
-   Resumable: at completion, hash each already-uploaded chunk by reading it back from the upload bucket (not the
-   merged result), *before* calling `mergeFileChunks()` — same S3-read cost as today, just moved before the
-   risky step instead of after, so a mismatch never touches the storage bucket. This is the most surgical fix
-   and needs no new infrastructure.
-2. **True streaming/incremental hash across chunks**, computed as each PATCH chunk arrives, with zero extra S3
-   reads ever (not even the reorder in option 1). PHP's `hash_*` API has no serializable incremental state, so
-   this needs either a small (SHA-256 state is compact and well-specified) custom incremental implementation, or
-   piggybacks on whatever native crypto path eventually gets set up for BLAKE3 (see above) — same class of work,
-   worth doing together.
-3. **Stage-and-swap.** Before a replace, keep the previous storage object under a temporary key until the new
-   upload's digest is verified; only delete the old object after a successful verification, otherwise discard
-   the new one and leave the old one untouched. Cleanest "atomic replace" semantics, composes with option 1 or
-   2, costs one extra S3 copy per replace.
-
 ## S3 upload bucket lifecycle policy
 
 `cron:delete-expired-uploads` (and its `file.expiredUploadCanBeDeletedAfterExpirationInSeconds` grace period)

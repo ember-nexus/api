@@ -228,4 +228,119 @@ class FileDigestTest extends BaseRequestTestCase
 
         $this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN);
     }
+
+    public function testReplacingFileWithMismatchedDigestLeavesOriginalFileIntact(): void
+    {
+        $elementId = $this->createElement('digest-replace-mismatch');
+
+        $originalFilePath = __DIR__.'/../../Asset/file-digest-replace-original.bin';
+        $this->generateDeterministicFile(11223344, 2048, $originalFilePath);
+        $originalContent = \Safe\file_get_contents($originalFilePath);
+
+        $originalFile = \Safe\fopen($originalFilePath, 'r');
+        $originalUploadResponse = $this->runUploadRequest(
+            'POST',
+            sprintf('/%s/file', $elementId),
+            $originalFile,
+            self::TOKEN,
+            ['Content-Type' => 'application/octet-stream']
+        );
+        $this->assertIsCreatedResponse($originalUploadResponse, false);
+        unlink($originalFilePath);
+
+        $replacementFilePath = __DIR__.'/../../Asset/file-digest-replace-replacement.bin';
+        $this->generateDeterministicFile(55667788, 2048, $replacementFilePath);
+        $bogusHash = str_repeat('00', 32);
+        $digestHeaderValue = sprintf('sha-256=:%s:', base64_encode(hex2bin($bogusHash)));
+
+        $replacementFile = \Safe\fopen($replacementFilePath, 'r');
+        $replacementResponse = $this->runUploadRequest(
+            'PUT',
+            sprintf('/%s/file', $elementId),
+            $replacementFile,
+            self::TOKEN,
+            [
+                'Content-Type' => 'application/octet-stream',
+                'Repr-Digest' => $digestHeaderValue,
+            ]
+        );
+        $this->assertIsProblemResponse($replacementResponse, 400);
+        unlink($replacementFilePath);
+
+        // the rejected replacement must not have overwritten the original file
+        $downloadResponse = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
+        $this->assertSame(200, $downloadResponse->getStatusCode());
+        $this->assertSame($originalContent, (string) $downloadResponse->getBody());
+
+        $this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN);
+    }
+
+    public function testResumableReplaceWithMismatchedDigestLeavesOriginalFileIntact(): void
+    {
+        $elementId = $this->createElement('digest-resumable-replace-mismatch');
+
+        $originalFilePath = __DIR__.'/../../Asset/file-digest-resumable-replace-original.bin';
+        $this->generateDeterministicFile(99001122, 2048, $originalFilePath);
+        $originalContent = \Safe\file_get_contents($originalFilePath);
+
+        $originalFile = \Safe\fopen($originalFilePath, 'r');
+        $originalUploadResponse = $this->runUploadRequest(
+            'POST',
+            sprintf('/%s/file', $elementId),
+            $originalFile,
+            self::TOKEN,
+            ['Content-Type' => 'application/octet-stream']
+        );
+        $this->assertIsCreatedResponse($originalUploadResponse, false);
+        unlink($originalFilePath);
+
+        $replacementFileSeed = 33445566;
+        $replacementFileSize = 6 * 1024 * 1024;
+        $chunkSize = 5 * 1024 * 1024;
+        $replacementFilePath = __DIR__.'/../../Asset/file-digest-resumable-replace-replacement.bin';
+
+        $this->generateDeterministicFile($replacementFileSeed, $replacementFileSize, $replacementFilePath);
+        $chunks = $this->splitFileToChunks($replacementFilePath, $chunkSize);
+        $bogusHash = str_repeat('00', 32);
+        $digestHeaderValue = sprintf('sha-256=:%s:', base64_encode(hex2bin($bogusHash)));
+
+        $firstChunk = \Safe\fopen($chunks[0], 'r');
+        $createUploadResponse = $this->runUploadRequest(
+            'PUT',
+            sprintf('/%s/file', $elementId),
+            $firstChunk,
+            self::TOKEN,
+            [
+                'Upload-Complete' => '?0',
+                'Content-Type' => 'application/octet-stream',
+            ]
+        );
+        $this->assertNoContentResponse($createUploadResponse, true);
+        $uploadId = $this->getUuidFromLocation($createUploadResponse);
+
+        $secondChunk = \Safe\fopen($chunks[1], 'r');
+        $finishUploadResponse = $this->runUploadRequest(
+            'PATCH',
+            sprintf('/upload/%s', $uploadId),
+            $secondChunk,
+            self::TOKEN,
+            [
+                'Upload-Complete' => '?1',
+                'Upload-Offset' => $chunkSize,
+                'Content-Type' => 'application/partial-upload',
+                'Repr-Digest' => $digestHeaderValue,
+            ]
+        );
+        $this->assertIsProblemResponse($finishUploadResponse, 400);
+
+        $this->cleanupChunks($chunks);
+        unlink($replacementFilePath);
+
+        // the rejected replacement must not have overwritten the original file
+        $downloadResponse = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
+        $this->assertSame(200, $downloadResponse->getStatusCode());
+        $this->assertSame($originalContent, (string) $downloadResponse->getBody());
+
+        $this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN);
+    }
 }

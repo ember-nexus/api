@@ -58,6 +58,7 @@ class UploadFactoryTest extends TestCase
         $propertyParseService->getUploadOwnerFromProperties(Argument::is($properties))->willReturn($uploadOwner);
         $propertyParseService->getExtensionFromProperties(Argument::is($properties))->willReturn('some-ext');
         $propertyParseService->getExpiresFromProperties(Argument::is($properties))->willReturn($expires);
+        $propertyParseService->getHashStateFromProperties(Argument::is($properties))->willReturn('some-hash-state');
 
         $uploadFactory = $this->buildUploadFactory(
             propertyParseService: $propertyParseService->reveal()
@@ -74,6 +75,7 @@ class UploadFactoryTest extends TestCase
         $this->assertSame($uploadOwner, $upload->getUploadOwner());
         $this->assertSame('some-ext', $upload->getExtension());
         $this->assertSame($expires, $upload->getExpires());
+        $this->assertSame('some-hash-state', $upload->getHashState());
     }
 
     public function testCreateUploadFromElementThrowsWhenElementIsNotANode(): void
@@ -150,6 +152,7 @@ class UploadFactoryTest extends TestCase
         $upload->getUploadOwner()->shouldBeCalledOnce()->willReturn($uploadOwner);
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
+        $upload->getHashState()->shouldBeCalledOnce()->willReturn('some-hash-state');
 
         $uploadFactory = $this->buildUploadFactory();
 
@@ -164,6 +167,7 @@ class UploadFactoryTest extends TestCase
         $this->assertSame($uploadOwner, $result->getUploadOwner());
         $this->assertSame('ext', $result->getExtension());
         $this->assertSame($expires, $result->getExpires());
+        $this->assertSame('some-hash-state', $result->getHashState());
     }
 
     public function testAddNewChunkToUpload(): void
@@ -183,6 +187,7 @@ class UploadFactoryTest extends TestCase
         $upload->getUploadOwner()->shouldBeCalledOnce()->willReturn($uploadOwner);
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
+        $upload->getHashState()->shouldBeCalledOnce()->willReturn('some-hash-state');
 
         $uploadFactory = $this->buildUploadFactory();
 
@@ -197,5 +202,32 @@ class UploadFactoryTest extends TestCase
         $this->assertSame($uploadOwner, $result->getUploadOwner());
         $this->assertSame('ext', $result->getExtension());
         $this->assertSame($expires, $result->getExpires());
+        $this->assertSame('some-hash-state', $result->getHashState());
+    }
+
+    public function testAddNewChunkToUploadUsesProvidedHashStateInsteadOfExistingUploadHashState(): void
+    {
+        $uploadId = Uuid::fromString('7f27bcda-3d08-4790-b6f0-a5727fbc2bde');
+        $uploadTarget = Uuid::fromString('f253379f-3533-4719-8337-871df7d336f6');
+        $uploadOwner = Uuid::fromString('2be74c20-89d7-4f61-9c5b-c47a7ae11b5e');
+        $expires = new DateTime();
+
+        $upload = $this->prophesize(UploadInterface::class);
+        $upload->getId()->shouldBeCalledOnce()->willReturn($uploadId);
+        $upload->getUploadLength()->shouldBeCalledOnce()->willReturn(20000);
+        $upload->getUploadOffset()->shouldBeCalledOnce()->willReturn(10000);
+        $upload->isUploadComplete()->shouldBeCalledOnce()->willReturn(false);
+        $upload->getUploadTarget()->shouldBeCalledOnce()->willReturn($uploadTarget);
+        $upload->getAlreadyUploadedChunks()->shouldBeCalledOnce()->willReturn(3);
+        $upload->getUploadOwner()->shouldBeCalledOnce()->willReturn($uploadOwner);
+        $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
+        $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
+        $upload->getHashState()->shouldNotBeCalled();
+
+        $uploadFactory = $this->buildUploadFactory();
+
+        $result = $uploadFactory->addNewChunkToUpload($upload->reveal(), 9999, 'new-hash-state');
+
+        $this->assertSame('new-hash-state', $result->getHashState());
     }
 }

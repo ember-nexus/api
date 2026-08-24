@@ -44,6 +44,7 @@ class UploadService
         $element->addProperty('uploadOwner', $upload->getUploadOwner()->toString());
         $element->addProperty('extension', $upload->getExtension());
         $element->addProperty('expires', $upload->getExpires());
+        $element->addProperty('hashState', $upload->getHashState());
 
         $this->elementManager->merge($element);
     }

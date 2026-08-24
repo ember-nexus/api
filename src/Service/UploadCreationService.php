@@ -8,7 +8,6 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Contract\Request\ResumableUploadRequestInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
-use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
@@ -16,7 +15,6 @@ use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Security\AuthProvider;
 use App\Type\Response\CreatedResponse;
-use App\Type\S3\FileOperation;
 use App\Type\Upload;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -37,7 +35,7 @@ class UploadCreationService
         private AuthProvider $authProvider,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Service $s3Service,
-        private FileHashService $fileHashService,
+        private IncrementalHashService $incrementalHashService,
         private DigestService $digestService,
         private ElementManager $elementManager,
         private UploadFileOperationFactory $uploadFileOperationFactory,
@@ -71,29 +69,26 @@ class UploadCreationService
         ResumableUploadRequestInterface $resumableUploadRequest,
         ?string $requestDigestHeaderValue,
     ): Response {
-        // captured before uploading: if this element did not already have a file, and the digest check below
-        // rejects the upload, the just-written (now orphaned) storage object can be safely cleaned up, since
-        // nothing else can be referencing it yet.
-        $isNewFile = !$element->hasProperty('file');
+        // the request body is hashed once, locally, then rewound, before anything else (including
+        // UploadFileOperationFactory's own mime type sniffing) reads it - see IncrementalHashService for why this
+        // is not done via a persistently-attached stream filter instead.
+        $resource = $resumableUploadRequest->getContent();
+        $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
+        $this->incrementalHashService->updateFromResource($hashContext, $resource);
+        $hash = $this->incrementalHashService->finalize($hashContext);
 
+        // building the operation only sniffs the mime type locally; it does not touch S3 - so the digest, now
+        // already known, can be verified before the storage bucket is ever written to. On a mismatch, this means
+        // an existing file at this element is never replaced/overwritten in the first place.
         $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
-        $this->s3Service->uploadFile($uploadFileOperation);
-
-        $storageFileOperation = new FileOperation(
-            $uploadFileOperation->getStorageBucket(),
-            $uploadFileOperation->getStorageKey()
-        );
-        $hash = $this->fileHashService->calculateHashFromResource($this->s3Service->getFileAsResource($storageFileOperation));
 
         if (null !== $requestDigestHeaderValue) {
-            try {
-                $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
-            } catch (Client400BadContentException $exception) {
-                if ($isNewFile) {
-                    $this->s3Service->deleteFile($storageFileOperation);
-                }
-                throw $exception;
-            }
+            $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
+        }
+
+        $this->s3Service->uploadFile($uploadFileOperation);
+        if (is_resource($resource)) {
+            \Safe\fclose($resource);
         }
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
@@ -130,9 +125,23 @@ class UploadCreationService
 
         $uploadOffset = 0;
         $alreadyUploadedChunks = 0;
+        $hashState = null;
         if (0 !== $resumableUploadRequest->getContentLength()) {
+            // the chunk is hashed once, locally, then rewound, before S3Service ever sees it; the running hash
+            // state is persisted on the Upload element for the next chunk to resume from, so the final hash never
+            // requires reading the file back from S3 at all.
+            $resource = $resumableUploadRequest->getContent();
+            $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
+            $this->incrementalHashService->updateFromResource($hashContext, $resource);
+
             $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
             $uploadOffset = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+            if (is_resource($resource)) {
+                \Safe\fclose($resource);
+            }
+
+            $hashState = $this->incrementalHashService->serializeContextForStorage($hashContext);
+
             $alreadyUploadedChunks = 1;
             if ($uploadOffset < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
                 /**
@@ -159,7 +168,8 @@ class UploadCreationService
             $alreadyUploadedChunks,
             $this->authProvider->getUserId(),
             $resumableUploadRequest->getExtension(),
-            $expires
+            $expires,
+            $hashState
         );
 
         $this->uploadService->mergeUploadElement($upload);

@@ -22,11 +22,11 @@ use App\Security\AuthProvider;
 use App\Service\DigestService;
 use App\Service\ElementManager;
 use App\Service\FileHashService;
+use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\AccessType;
 use App\Type\Response\JsonResponse;
-use App\Type\S3\FileOperation;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Safe\DateTime;
@@ -55,7 +55,7 @@ class PatchUploadController extends AbstractController
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
         private MergeFileChunksOperationFactory $mergeFileChunksOperationFactory,
         private S3Service $s3Service,
-        private FileHashService $fileHashService,
+        private IncrementalHashService $incrementalHashService,
         private DigestService $digestService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
@@ -100,8 +100,19 @@ class PatchUploadController extends AbstractController
             throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalDetails: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
         }
 
+        // the chunk's resource is hashed once, locally, then rewound, before S3Service ever sees it - see
+        // IncrementalHashService for why this is not done via a persistently-attached stream filter instead.
+        $resource = $partialUploadRequest->getContent();
+        $hashContext = null !== $upload->getHashState()
+            ? $this->incrementalHashService->unserializeContextFromStorage($upload->getHashState())
+            : $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
+        $this->incrementalHashService->updateFromResource($hashContext, $resource);
+
         $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload);
         $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+        if (is_resource($resource)) {
+            \Safe\fclose($resource);
+        }
 
         if (null !== $upload->getUploadLength()) {
             if ($upload->getUploadLength() < $upload->getUploadOffset() + $chunkLength) {
@@ -109,15 +120,19 @@ class PatchUploadController extends AbstractController
             }
         }
 
-        $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength);
-        $this->uploadService->mergeUploadElement($upload);
-
         if ($partialUploadRequest->isUploadComplete()) {
-            // the final chunk was successfully uploaded -> we can create the file
+            // the final chunk was successfully uploaded -> we can create the file. The hash is already complete
+            // at this point - no need to store its (now finalized, no longer resumable) state on the upload.
+            $finalHash = $this->incrementalHashService->finalize($hashContext);
+            $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength);
             $upload = $this->uploadFactory->markUploadAsComplete($upload);
             $this->uploadService->mergeUploadElement($upload);
             $requestDigestHeaderValue = $request->headers->get('Repr-Digest') ?? $request->headers->get('Content-Digest');
-            $this->createFile($upload, $requestDigestHeaderValue);
+            $this->createFile($upload, $finalHash, $requestDigestHeaderValue);
+        } else {
+            $hashState = $this->incrementalHashService->serializeContextForStorage($hashContext);
+            $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength, $hashState);
+            $this->uploadService->mergeUploadElement($upload);
         }
 
         $this->elementManager->flush();
@@ -125,39 +140,28 @@ class PatchUploadController extends AbstractController
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }
 
-    public function createFile(UploadInterface $upload, ?string $requestDigestHeaderValue = null): Response
+    public function createFile(UploadInterface $upload, string $hash, ?string $requestDigestHeaderValue = null): Response
     {
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
-        // captured before merging: if this element did not already have a file, and the digest check below
-        // rejects the upload, the just-merged (now orphaned) storage object can be safely cleaned up, since
-        // nothing else can be referencing it yet.
-        $isNewFile = !$element->hasProperty('file');
 
+        // building the operation only resolves storage keys, it does not touch S3 - so the hash, already known
+        // from the incremental chunk hashing above, can be verified before the chunks are merged into the
+        // storage bucket. On a mismatch, this means an existing file at this element is never
+        // replaced/overwritten in the first place; only the now-unneeded uploaded chunks need cleaning up.
         $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
-        $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
-        $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
-
-        $storageFileOperation = new FileOperation(
-            $mergeFileChunksOperation->getStorageBucket(),
-            $mergeFileChunksOperation->getStorageKey()
-        );
-
-        // the merged file's ETag is a hash of the parts' ETags (not a hash of its content), so the merged file has
-        // to be read once, in full, to compute a real content hash
-        $hash = $this->fileHashService->calculateHashFromResource($this->s3Service->getFileAsResource($storageFileOperation));
 
         if (null !== $requestDigestHeaderValue) {
             try {
                 $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
             } catch (Client400BadContentException $exception) {
-                if ($isNewFile) {
-                    $this->s3Service->deleteFile($storageFileOperation);
-                }
                 $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
 
                 throw $exception;
             }
         }
+
+        $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
+        $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
 
         $element->addProperty('file', [
             'contentLength' => $mergedContentLength,
