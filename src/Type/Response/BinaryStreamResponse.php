@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Type\Response;
 
 use App\Contract\EtagCapableResponseInterface;
+use App\Type\ByteRange;
 use App\Type\Etag;
 use AsyncAws\S3\Result\GetObjectOutput;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -14,13 +15,21 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
 {
     public const int STREAM_CHUNK_SIZE = 8192;
 
-    public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback)
+    public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback, ?ByteRange $range = null)
     {
         parent::__construct();
         $this->content = '';
         $stream = $object->getBody()->getContentAsResource();
 
-        $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
+        $this->headers->set('Accept-Ranges', 'bytes');
+
+        if (null !== $range) {
+            $this->setStatusCode(206);
+            $this->headers->set('Content-Length', (string) $range->getLength());
+            $this->headers->set('Content-Range', sprintf('bytes %d-%d/%d', $range->getStart(), $range->getEnd(), $range->getTotalLength()));
+        } else {
+            $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
+        }
 
         // todo: use file's actual mime type, if available. otherwise fall back to current mime type?
         $this->headers->set('Content-Type', 'application/octet-stream');

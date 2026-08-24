@@ -18,10 +18,12 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\FileHashService;
 use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\AccessType;
 use App\Type\Response\JsonResponse;
+use App\Type\S3\FileOperation;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Safe\DateTime;
@@ -50,6 +52,7 @@ class PatchUploadController extends AbstractController
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
         private MergeFileChunksOperationFactory $mergeFileChunksOperationFactory,
         private S3Service $s3Service,
+        private FileHashService $fileHashService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private Client410GoneExceptionFactory $client410GoneExceptionFactory,
@@ -122,12 +125,21 @@ class PatchUploadController extends AbstractController
         $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
         $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
 
+        // the merged file's ETag is a hash of the parts' ETags (not a hash of its content), so the merged file has
+        // to be read once, in full, to compute a real content hash
+        $hash = $this->fileHashService->calculateHashFromResource($this->s3Service->getFileAsResource(new FileOperation(
+            $mergeFileChunksOperation->getStorageBucket(),
+            $mergeFileChunksOperation->getStorageKey()
+        )));
+
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
         $element->addProperty('file', [
             'contentLength' => $mergedContentLength,
             'extension' => $upload->getExtension(),
             'mimeType' => $mergedMimeType,
+            'hashAlgorithm' => FileHashService::ALGORITHM,
+            'hash' => $hash,
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();

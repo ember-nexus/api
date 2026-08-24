@@ -247,6 +247,19 @@ class S3Service
     }
 
     /**
+     * Reads only the given inclusive byte range [$start, $end] from S3, via the `Range` request header, instead
+     * of downloading the whole file.
+     */
+    public function getFileByteRange(FileOperationInterface $fileOperation, int $start, int $end): GetObjectOutput
+    {
+        return $this->s3Client->getObject([
+            'Bucket' => $fileOperation->getBucket(),
+            'Key' => $fileOperation->getKey(),
+            'Range' => sprintf('bytes=%d-%d', $start, $end),
+        ]);
+    }
+
+    /**
      * @return resource
      */
     public function getFileAsResource(FileOperationInterface $fileOperation)

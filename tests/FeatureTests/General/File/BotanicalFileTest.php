@@ -36,6 +36,10 @@ class BotanicalFileTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN);
         $this->assertIsBinaryStreamResponse($response, 'application/octet-stream');
 
+        // the element's 'name' property ("Rose") is used as the download's filename, with the stored file
+        // extension ("jpg") appended; see ElementService::getFileName().
+        $this->assertStringContainsString('filename=Rose.jpg', $response->getHeader('Content-Disposition')[0]);
+
         $body = (string) $response->getBody();
         $this->assertSame(self::ROSE_CONTENT_LENGTH, strlen($body));
         $this->assertSame(self::ROSE_SHA256, hash('sha256', $body));

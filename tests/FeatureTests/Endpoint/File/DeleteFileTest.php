@@ -128,6 +128,8 @@ class DeleteFileTest extends BaseRequestTestCase
                 'contentLength' => 63933,
                 'extension' => 'bin',
                 'mimeType' => 'image/jpeg',
+                'hashAlgorithm' => 'sha256',
+                'hash' => hash_file('sha256', __DIR__.'/../../Asset/cherry-blossoms.jpg'),
             ],
             $data['file']
         );

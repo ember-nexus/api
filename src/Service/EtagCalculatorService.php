@@ -383,7 +383,7 @@ class EtagCalculatorService
         $fileProperties = $element->getProperty('file');
         $fileProperties = \Safe\json_encode($fileProperties);
 
-        $name = $element->getProperty('name');
+        $name = $element->hasProperty('name') ? $element->getProperty('name') : null;
         $name = \Safe\json_encode($name);
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());

@@ -14,7 +14,9 @@ use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\NodeElement;
 use App\Type\Upload;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Contracts\ClientInterface;
+use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
 use LogicException;
@@ -47,23 +49,32 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         ?UploadService $uploadService = null,
         ?FileOperationFactory $fileOperationFactory = null,
         ?S3Service $s3Service = null,
+        int $expiredUploadCanBeDeletedAfterExpirationInSeconds = 3600,
+        ?ClientInterface $client = null,
     ): DeleteExpiredUploadsCommand {
         $bag = $this->prophesize(ParameterBagInterface::class);
         $bag->get('isCronDisabled')->willReturn($isCronDisabled);
 
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileExpiredUploadCanBeDeletedAfterExpirationInSeconds()
+            ->willReturn($expiredUploadCanBeDeletedAfterExpirationInSeconds);
+
         $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
         if ($isCronDisabled) {
             $cypherEntityManager->getClient()->shouldNotBeCalled();
+        } elseif (null !== $client) {
+            $cypherEntityManager->getClient()->willReturn($client);
         } else {
-            $client = $this->prophesize(ClientInterface::class);
+            $clientProphecy = $this->prophesize(ClientInterface::class);
             $summaryReference = null;
             $rows = array_map(static fn (array $row) => new CypherMap($row), $expiredUploadRows);
-            $client->runStatement(Argument::any())->willReturn(new SummarizedResult($summaryReference, $rows));
-            $cypherEntityManager->getClient()->willReturn($client->reveal());
+            $clientProphecy->runStatement(Argument::any())->willReturn(new SummarizedResult($summaryReference, $rows));
+            $cypherEntityManager->getClient()->willReturn($clientProphecy->reveal());
         }
 
         return new DeleteExpiredUploadsCommand(
             $bag->reveal(),
+            $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal(),
             $uploadFactory ?? $this->prophesize(UploadFactory::class)->reveal(),
@@ -95,6 +106,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
         $command = new DeleteExpiredUploadsCommand(
             $bag->reveal(),
+            $this->prophesize(EmberNexusConfiguration::class)->reveal(),
             $this->prophesize(CypherEntityManager::class)->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
             $this->prophesize(UploadFactory::class)->reveal(),
@@ -210,6 +222,35 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
         $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
         $this->assertStringContainsString('Deleted 1 expired upload(s).', $commandTester->getDisplay());
+    }
+
+    public function testCommandAppliesGracePeriodToDeletionThreshold(): void
+    {
+        $gracePeriodInSeconds = 1800;
+        $summaryReference = null;
+
+        $client = $this->prophesize(ClientInterface::class);
+        $client->runStatement(Argument::that(function (Statement $statement) use ($gracePeriodInSeconds) {
+            $parameters = $statement->getParameters();
+            if (!isset($parameters['deletionThreshold']) || !$parameters['deletionThreshold'] instanceof DateTime) {
+                return false;
+            }
+            $expectedThreshold = (new DateTime())->modify(sprintf('-%d seconds', $gracePeriodInSeconds));
+            $actualThreshold = $parameters['deletionThreshold'];
+
+            // allow a small delta to account for test execution time
+            return abs($expectedThreshold->getTimestamp() - $actualThreshold->getTimestamp()) <= 2;
+        }))->shouldBeCalledOnce()->willReturn(new SummarizedResult($summaryReference, []));
+
+        $command = $this->buildCommand(
+            expiredUploadCanBeDeletedAfterExpirationInSeconds: $gracePeriodInSeconds,
+            client: $client->reveal()
+        );
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([]);
+
+        $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
     }
 
     public function testCommandDeletesMultipleExpiredUploads(): void

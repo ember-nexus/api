@@ -112,6 +112,8 @@ class MultiPartUploadLifecycleTest extends BaseRequestTestCase
                 'contentLength' => 24117248,
                 'extension' => 'txt',
                 'mimeType' => 'text/plain',
+                'hashAlgorithm' => 'sha256',
+                'hash' => hash_file('sha256', self::FILE_PATH),
             ],
             $getNodeResponseData2['file']
         );

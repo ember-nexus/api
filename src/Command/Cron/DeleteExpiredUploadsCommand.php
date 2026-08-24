@@ -11,6 +11,8 @@ use App\Service\ElementManager;
 use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Style\EmberNexusStyle;
+use DateInterval;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use LogicException;
 use Ramsey\Uuid\Uuid;
@@ -32,6 +34,7 @@ class DeleteExpiredUploadsCommand extends Command
 
     public function __construct(
         private ParameterBagInterface $bag,
+        private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private ElementManager $elementManager,
         private UploadFactory $uploadFactory,
@@ -89,10 +92,13 @@ class DeleteExpiredUploadsCommand extends Command
      */
     private function getExpiredUploadIds(): array
     {
+        $gracePeriodInSeconds = $this->emberNexusConfiguration->getFileExpiredUploadCanBeDeletedAfterExpirationInSeconds();
+        $deletionThreshold = (new DateTime())->sub(new DateInterval(sprintf('PT%sS', $gracePeriodInSeconds)));
+
         $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
-            'MATCH (u:Upload) WHERE u.expires < $now RETURN u.id',
+            'MATCH (u:Upload) WHERE u.expires < $deletionThreshold RETURN u.id',
             [
-                'now' => new DateTime(),
+                'deletionThreshold' => $deletionThreshold,
             ]
         ));
 

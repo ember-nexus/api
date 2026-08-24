@@ -15,6 +15,7 @@ use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Security\AuthProvider;
 use App\Type\Response\CreatedResponse;
+use App\Type\S3\FileOperation;
 use App\Type\Upload;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -35,6 +36,7 @@ class UploadCreationService
         private AuthProvider $authProvider,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private S3Service $s3Service,
+        private FileHashService $fileHashService,
         private ElementManager $elementManager,
         private UploadFileOperationFactory $uploadFileOperationFactory,
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
@@ -67,12 +69,19 @@ class UploadCreationService
         $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
         $this->s3Service->uploadFile($uploadFileOperation);
 
+        $hash = $this->fileHashService->calculateHashFromResource($this->s3Service->getFileAsResource(new FileOperation(
+            $uploadFileOperation->getStorageBucket(),
+            $uploadFileOperation->getStorageKey()
+        )));
+
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
 
         $element->addProperty('file', [
             'contentLength' => $uploadFileOperation->getContentLength(),
             'extension' => $resumableUploadRequest->getExtension(),
             'mimeType' => $uploadFileOperation->getMimeType(),
+            'hashAlgorithm' => FileHashService::ALGORITHM,
+            'hash' => $hash,
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();

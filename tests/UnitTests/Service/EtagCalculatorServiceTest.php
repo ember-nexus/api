@@ -1586,6 +1586,51 @@ class EtagCalculatorServiceTest extends TestCase
         $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for file.'));
     }
 
+    public function testCalculateFileEtagForElementWithoutNameProperty(): void
+    {
+        // setup variables
+        $id = Uuid::fromString('9c1a0c0e-6b8f-4b3d-9b1e-2b1a0c0e6b8f');
+
+        $element = new NodeElement();
+        $element
+            ->addProperty('file', ['size' => 1024, 'mimetype' => 'image/png']);
+
+        $fileOperation = new FileOperation('someBucket', 'someKey');
+
+        // setup service dependencies
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
+
+        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
+        $fileOperationFactory->createFileOperationFromElement(Argument::is($element))->shouldBeCalledOnce()->willReturn($fileOperation);
+
+        $s3Service = $this->prophesize(S3Service::class);
+        $s3Service->getEtag(Argument::is($fileOperation))->shouldBeCalledOnce()->willReturn('some s3 etag');
+
+        $logger = TestLogger::create();
+
+        // setup service
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $this->prophesize(CypherEntityManager::class)->reveal(),
+            $elementManager->reveal(),
+            $s3Service->reveal(),
+            $fileOperationFactory->reveal(),
+            $logger,
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+
+        // run service method; must not throw despite the element having no 'name' property
+        $etag = $etagCalculatorService->calculateFileEtag($id);
+        $this->assertNotNull($etag);
+
+        // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for file.'));
+    }
+
     public function testCalculateFileEtagCapturesExceptionIfS3FileIsMissing(): void
     {
         // setup variables

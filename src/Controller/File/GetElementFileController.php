@@ -12,6 +12,7 @@ use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\ElementService;
+use App\Service\FileRangeService;
 use App\Service\FileService;
 use App\Service\S3Service;
 use App\Type\AccessType;
@@ -19,6 +20,7 @@ use App\Type\EtagType;
 use App\Type\Response\BinaryStreamResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 class GetElementFileController extends AbstractController
@@ -31,6 +33,7 @@ class GetElementFileController extends AbstractController
         private FileService $fileService,
         private FileOperationFactory $fileOperationFactory,
         private S3Service $s3Service,
+        private FileRangeService $fileRangeService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -44,7 +47,7 @@ class GetElementFileController extends AbstractController
         methods: ['GET']
     )]
     #[EndpointSupportsEtag(EtagType::FILE)]
-    public function getElementFile(string $id): BinaryStreamResponse
+    public function getElementFile(string $id, Request $request): BinaryStreamResponse
     {
         $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();
@@ -63,6 +66,17 @@ class GetElementFileController extends AbstractController
         $doesFileExist = $this->s3Service->existsFile($fileOperation);
         if (false === $doesFileExist) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        $rangeHeader = $request->headers->get('Range');
+        if (null !== $rangeHeader) {
+            $totalContentLength = $this->s3Service->getContentLength($fileOperation);
+            $range = $this->fileRangeService->parseRangeHeader($rangeHeader, $totalContentLength);
+            if (null !== $range) {
+                $object = $this->s3Service->getFileByteRange($fileOperation, $range->getStart(), $range->getEnd());
+
+                return new BinaryStreamResponse($object, $fileName, $fileNameFallback, $range);
+            }
         }
 
         $object = $this->s3Service->getFile($fileOperation);
