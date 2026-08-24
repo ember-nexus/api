@@ -72,11 +72,9 @@ class GetElementFileController extends AbstractController
         if (null !== $rangeHeader) {
             $totalContentLength = $this->s3Service->getContentLength($fileOperation);
             $range = $this->fileRangeService->parseRangeHeader($rangeHeader, $totalContentLength);
-            if (null !== $range) {
-                $object = $this->s3Service->getFileByteRange($fileOperation, $range->getStart(), $range->getEnd());
+            $object = $this->s3Service->getFileByteRange($fileOperation, $range->getStart(), $range->getEnd());
 
-                return new BinaryStreamResponse($object, $fileName, $fileNameFallback, $range);
-            }
+            return new BinaryStreamResponse($object, $fileName, $fileNameFallback, $range);
         }
 
         $object = $this->s3Service->getFile($fileOperation);

@@ -117,7 +117,7 @@ class GetFileRangeTest extends BaseRequestTestCase
         $this->assertSame(self::ROSE_CONTENT_LENGTH, $body['total-length']);
     }
 
-    public function testMalformedRangeHeaderIsIgnoredAndFullFileIsServed(): void
+    public function testMalformedRangeHeaderReturnsBadContent(): void
     {
         $response = $this->runGetRequest(
             sprintf('/%s/file', self::ROSE_ID),
@@ -125,12 +125,10 @@ class GetFileRangeTest extends BaseRequestTestCase
             ['Range' => 'not-a-valid-range']
         );
 
-        $this->assertIsBinaryStreamResponse($response, 'application/octet-stream');
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame([(string) self::ROSE_CONTENT_LENGTH], $response->getHeader('Content-Length'));
+        $this->assertIsProblemResponse($response, 400);
     }
 
-    public function testMultipleRangesAreIgnoredAndFullFileIsServed(): void
+    public function testMultipleRangesReturnsBadContent(): void
     {
         $response = $this->runGetRequest(
             sprintf('/%s/file', self::ROSE_ID),
@@ -138,8 +136,7 @@ class GetFileRangeTest extends BaseRequestTestCase
             ['Range' => 'bytes=0-10,20-30']
         );
 
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame([(string) self::ROSE_CONTENT_LENGTH], $response->getHeader('Content-Length'));
+        $this->assertIsProblemResponse($response, 400);
     }
 
     public function testRequestWithoutRangeHeaderAdvertisesAcceptRanges(): void

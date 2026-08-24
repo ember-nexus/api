@@ -80,8 +80,9 @@ class UploadCreationService
             'contentLength' => $uploadFileOperation->getContentLength(),
             'extension' => $resumableUploadRequest->getExtension(),
             'mimeType' => $uploadFileOperation->getMimeType(),
-            'hashAlgorithm' => FileHashService::ALGORITHM,
-            'hash' => $hash,
+            'hash' => [
+                FileHashService::ALGORITHM => $hash,
+            ],
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();

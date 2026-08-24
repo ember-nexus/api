@@ -13,9 +13,14 @@ namespace App\Service;
  * is not collision-resistant regardless. There is therefore no way around reading the assembled file once, after
  * it was written to the storage bucket, to compute a real content hash.
  *
- * SHA-256 is used: it is cryptographically secure, and, backed by PHP's `hash` extension (which uses OpenSSL's
- * optimized, often hardware-accelerated implementation), comfortably exceeds the throughput of a 1 GiB/s uplink
- * on commodity hardware.
+ * SHA-256 is used for now: it is cryptographically secure, and, backed by PHP's `hash` extension (which uses
+ * OpenSSL's optimized, often hardware-accelerated implementation), comfortably exceeds the throughput of a
+ * 1 GiB/s uplink on commodity hardware. BLAKE3 is preferred long-term, but the only pure-PHP implementation
+ * available today is several orders of magnitude too slow to be usable; a high-performance BLAKE3 (native PHP
+ * extension or FFI binding to a native library) needs a Docker image change first, see `TODO.md`.
+ *
+ * The `file.hash` property is stored as `{<algorithm>: <hex digest>}` rather than a flat pair, specifically so a
+ * future algorithm can be added (or this one replaced) without a data migration.
  */
 class FileHashService
 {

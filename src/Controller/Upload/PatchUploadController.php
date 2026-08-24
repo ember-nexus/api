@@ -138,8 +138,9 @@ class PatchUploadController extends AbstractController
             'contentLength' => $mergedContentLength,
             'extension' => $upload->getExtension(),
             'mimeType' => $mergedMimeType,
-            'hashAlgorithm' => FileHashService::ALGORITHM,
-            'hash' => $hash,
+            'hash' => [
+                FileHashService::ALGORITHM => $hash,
+            ],
         ]);
         $this->elementManager->merge($element);
         $this->elementManager->flush();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client416RangeNotSatisfiableExceptionFactory;
 use App\Type\ByteRange;
 
@@ -11,39 +12,36 @@ use App\Type\ByteRange;
  * Parses the HTTP `Range` request header (RFC 9110, Section 14.1.2) for the single-range case.
  *
  * Only a single byte range is supported, as multiple ranges within one request ("multipart/byteranges") are not
- * implemented. The following forms are supported:
+ * implemented, and are not planned to be. The following forms are supported:
  *
  * - `bytes=<start>-<end>`: an explicit, inclusive range.
  * - `bytes=<start>-`: from `<start>` to the end of the resource.
  * - `bytes=-<suffixLength>`: the last `<suffixLength>` bytes of the resource.
  *
- * A syntactically invalid or unsupported (e.g. multi-range) header is ignored, per RFC 9110, in which case the
- * full resource should be served with a 200 response instead of a 206 partial one.
+ * A syntactically invalid `Range` header, or one requesting multiple ranges, results in a 400 Bad Request: the
+ * server does not understand what was asked for. A syntactically valid header which can not be satisfied against
+ * the resource (e.g. a `start` beyond the end of the file) results in a 416 Range Not Satisfiable instead.
  */
 class FileRangeService
 {
     public function __construct(
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client416RangeNotSatisfiableExceptionFactory $client416RangeNotSatisfiableExceptionFactory,
     ) {
     }
 
-    public function parseRangeHeader(?string $rangeHeader, int $totalContentLength): ?ByteRange
+    public function parseRangeHeader(string $rangeHeader, int $totalContentLength): ByteRange
     {
-        if (null === $rangeHeader) {
-            return null;
-        }
-
         if (1 !== \Safe\preg_match('/^bytes=(\d*)-(\d*)$/', trim($rangeHeader), $matches)) {
-            // syntactically invalid, or multiple ranges requested (unsupported) -> ignore, serve full content
-            return null;
+            // syntactically invalid, or multiple ranges requested (unsupported, and not planned to be)
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not parse 'Range' header: '%s'. Only a single range of the form 'bytes=<start>-<end>', 'bytes=<start>-' or 'bytes=-<suffixLength>' is supported.", $rangeHeader));
         }
 
         $rawStart = $matches[1] ?? '';
         $rawEnd = $matches[2] ?? '';
 
         if ('' === $rawStart && '' === $rawEnd) {
-            // "bytes=-" is not a valid range -> ignore, serve full content
-            return null;
+            throw $this->client400BadContentExceptionFactory->createFromDetail("Could not parse 'Range' header: 'bytes=-' does not specify a start or a suffix length.");
         }
 
         if ($totalContentLength <= 0) {
