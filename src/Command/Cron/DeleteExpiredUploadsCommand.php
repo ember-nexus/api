@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Command\Cron;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\ElementManager;
-use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Style\EmberNexusStyle;
 use DateInterval;
@@ -39,8 +37,6 @@ class DeleteExpiredUploadsCommand extends Command
         private ElementManager $elementManager,
         private UploadFactory $uploadFactory,
         private UploadService $uploadService,
-        private FileOperationFactory $fileOperationFactory,
-        private S3Service $s3Service,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
@@ -124,12 +120,7 @@ class DeleteExpiredUploadsCommand extends Command
 
         $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
 
-        for ($chunk = 0; $chunk <= $upload->getAlreadyUploadedChunks(); ++$chunk) {
-            $deleteChunkOperation = $this->fileOperationFactory->createFileOperationFromUpload($upload, $chunk);
-            $this->s3Service->deleteFile($deleteChunkOperation);
-        }
-
-        $this->uploadService->deleteUpload($upload);
+        $this->uploadService->deleteUploadAndChunks($upload);
         $this->elementManager->flush();
 
         $this->io->writeln(sprintf(

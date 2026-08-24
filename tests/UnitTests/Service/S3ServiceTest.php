@@ -636,6 +636,99 @@ class S3ServiceTest extends TestCase
         $this->assertSame(12345678, $contentLength);
     }
 
+    /**
+     * A replace which keeps the same extension reuses the same storage key for the new file as the previous one
+     * (see FileService::getStorageBucketKey()), so `getPreviousStorageKey()` equals `getStorageKey()` - deleting
+     * it would delete the file that was just written, not an orphan. Complements
+     * testMergeFileChunksDeletesPreviousFileIfAvailable() (different key: gets deleted) and testMergeFileChunks()
+     * (no previous key at all: nothing to delete).
+     */
+    public function testMergeFileChunksDoesNotDeletePreviousFileWhenItIsTheSameAsTheNewOne(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledTimes(4)->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(5)->willReturn('storage-key');
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledTimes(2)->willReturn(['upload-key-0001']);
+        $mergeFileChunksOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
+        $createMultipartUploadOutput->getUploadId()->shouldBeCalledOnce()->willReturn('upload-id');
+        $createMultipartUploadOutput = $createMultipartUploadOutput->reveal();
+
+        $copyPartResult1 = new CopyPartResult(['ETag' => 'etag-1']);
+        $uploadPartCopyOutput1 = $this->prophesize(UploadPartCopyOutput::class);
+        $uploadPartCopyOutput1->getCopyPartResult()->shouldBeCalledOnce()->willReturn($copyPartResult1);
+
+        $headObjectOutput1 = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput1->getContentLength()->shouldBeCalledOnce()->willReturn(12);
+
+        $resultStream = $this->prophesize(ResultStream::class);
+        $resultStream->getContentAsResource()->shouldBeCalledOnce()->willReturn('some content');
+
+        $getObjectOutput1 = $this->prophesize(GetObjectOutput::class);
+        $getObjectOutput1->getBody()->shouldBeCalledOnce()->willReturn($resultStream->reveal());
+
+        $headObjectOutput2 = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput2->getContentLength()->shouldBeCalledOnce()->willReturn(12345678);
+
+        $mimeTypeService = $this->prophesize(MimeTypeService::class);
+        $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce()->willReturn($createMultipartUploadOutput);
+        $s3Client->uploadPartCopy(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'PartNumber' => 1,
+            'CopySource' => 'upload-bucket/upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($uploadPartCopyOutput1->reveal());
+        $s3Client->completeMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'upload-id',
+            'MultipartUpload' => [
+                'Parts' => [
+                    [
+                        'PartNumber' => 1,
+                        'ETag' => 'etag-1',
+                    ],
+                ],
+            ],
+        ]))->shouldBeCalledOnce();
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput1->reveal());
+        $s3Client->getObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+            'Range' => 'bytes=0-12',
+        ]))->shouldBeCalledOnce()->willReturn($getObjectOutput1->reveal());
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput2->reveal());
+        // the just-written file must never be probed for existence or deleted just because it happens to equal
+        // the previous key
+        $s3Client->objectExists(Argument::any())->shouldNotBeCalled();
+        $s3Client->deleteObject(Argument::any())->shouldNotBeCalled();
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            mimeTypeService: $mimeTypeService->reveal()
+        );
+
+        $contentLength = $s3Service->mergeFileChunks($mergeFileChunksOperation);
+        $this->assertSame(12345678, $contentLength);
+    }
+
     public function testDeleteFileChunks(): void
     {
         $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
@@ -1020,6 +1113,94 @@ class S3ServiceTest extends TestCase
         $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
         $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter1))->shouldBeCalledTimes(2)->willReturn(true, false);
         $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter2))->shouldBeCalledTimes(2)->willReturn(true, false);
+        $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce();
+
+        $uploadFileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
+        $uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
+            ->shouldBeCalledOnce()->willReturn($uploadFileChunkOperation);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            fileChunkOperationFactory: $uploadFileChunkOperationFactory->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal()
+        );
+
+        $contentLength = $s3Service->uploadFile($uploadFileOperation);
+        $this->assertSame(1234, $contentLength);
+    }
+
+    /**
+     * A replace which keeps the same extension reuses the same storage key for the new file as the previous one
+     * (see FileService::getStorageBucketKey()), so `getPreviousStorageKey()` equals `getStorageKey()` - deleting
+     * it would delete the file that was just written, not an orphan. Complements
+     * testUploadFileDeletesPreviousFileIfItExists() (different key: gets deleted) and testUploadFile() (no
+     * previous key at all: nothing to delete). The intermediate upload-bucket object is still cleaned up
+     * regardless, since that cleanup is unconditional.
+     */
+    public function testUploadFileDoesNotDeletePreviousFileWhenItIsTheSameAsTheNewOne(): void
+    {
+        $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $uploadFileOperation->getStorageKey()->shouldBeCalledTimes(2)->willReturn('storage-key');
+        $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $uploadFileOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
+        $uploadFileOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
+        $uploadFileOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $uploadFileOperation = $uploadFileOperation->reveal();
+
+        $uploadFileChunkOperation = $this->prophesize(UploadFileChunkOperationInterface::class);
+        $uploadFileChunkOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $uploadFileChunkOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
+        $uploadFileChunkOperation->getContent()->shouldBeCalledOnce()->willReturn('some content');
+        $uploadFileChunkOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
+        $uploadFileChunkOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
+
+        $copyObjectOutput = $this->prophesize(CopyObjectOutput::class)->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(1234);
+
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->putObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+            'Body' => 'some content',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce();
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+        $s3Client->copyObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'CopySource' => 'upload-bucket/upload-key',
+            'ContentType' => 'text/plain',
+            'MetadataDirective' => 'REPLACE',
+        ]))->shouldBeCalledOnce()->willReturn($copyObjectOutput);
+        // only the intermediate upload-bucket object is ever probed/deleted - the just-written storage object
+        // must never be, just because it happens to equal the previous key
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledOnce();
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+        ]))->shouldNotBeCalled();
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+        ]))->shouldNotBeCalled();
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, false);
         $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce();
 
         $uploadFileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);

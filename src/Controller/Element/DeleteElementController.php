@@ -10,6 +10,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\UploadService;
 use App\Type\AccessType;
 use App\Type\EtagType;
 use App\Type\Response\NoContentResponse;
@@ -24,6 +25,7 @@ class DeleteElementController extends AbstractController
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private UploadService $uploadService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -47,6 +49,12 @@ class DeleteElementController extends AbstractController
         }
 
         $element = $this->elementManager->getElementOrFail($elementId);
+
+        // deleted, and flushed, as its own separate step before the element itself - see
+        // UploadService::deleteUploadsTargeting() for why this can not be done via an event listener instead
+        $this->uploadService->deleteUploadsTargeting($elementId);
+        $this->elementManager->flush();
+
         $this->elementManager->delete($element);
         $this->elementManager->flush();
 

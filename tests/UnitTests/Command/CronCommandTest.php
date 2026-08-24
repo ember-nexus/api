@@ -8,11 +8,9 @@ use App\Command\Cron\DeleteExpiredUploadsCommand;
 use App\Command\Cron\ReindexFilesCommand;
 use App\Command\CronCommand;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\ElementManager;
 use App\Service\QueueService;
-use App\Service\S3Service;
 use App\Service\UploadService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Contracts\ClientInterface;
@@ -57,8 +55,6 @@ class CronCommandTest extends TestCase
             $this->prophesize(ElementManager::class)->reveal(),
             $this->prophesize(UploadFactory::class)->reveal(),
             $this->prophesize(UploadService::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
     }

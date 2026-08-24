@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Command\Cron;
 
 use App\Command\Cron\DeleteExpiredUploadsCommand;
-use App\Contract\S3\FileOperationInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\ElementManager;
-use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\NodeElement;
 use App\Type\Upload;
@@ -47,8 +44,6 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         ?ElementManager $elementManager = null,
         ?UploadFactory $uploadFactory = null,
         ?UploadService $uploadService = null,
-        ?FileOperationFactory $fileOperationFactory = null,
-        ?S3Service $s3Service = null,
         int $expiredUploadCanBeDeletedAfterExpirationInSeconds = 3600,
         ?ClientInterface $client = null,
     ): DeleteExpiredUploadsCommand {
@@ -79,8 +74,6 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal(),
             $uploadFactory ?? $this->prophesize(UploadFactory::class)->reveal(),
             $uploadService ?? $this->prophesize(UploadService::class)->reveal(),
-            $fileOperationFactory ?? $this->prophesize(FileOperationFactory::class)->reveal(),
-            $s3Service ?? $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
     }
@@ -111,8 +104,6 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             $this->prophesize(ElementManager::class)->reveal(),
             $this->prophesize(UploadFactory::class)->reveal(),
             $this->prophesize(UploadService::class)->reveal(),
-            $this->prophesize(FileOperationFactory::class)->reveal(),
-            $this->prophesize(S3Service::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
@@ -125,7 +116,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(Argument::any())->shouldNotBeCalled();
         $uploadService = $this->prophesize(UploadService::class);
-        $uploadService->deleteUpload(Argument::any())->shouldNotBeCalled();
+        $uploadService->deleteUploadAndChunks(Argument::any())->shouldNotBeCalled();
 
         $command = $this->buildCommand(
             expiredUploadRows: [],
@@ -169,25 +160,14 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         $uploadFactory = $this->prophesize(UploadFactory::class);
         $uploadFactory->createUploadFromElement(Argument::is($uploadElement))->willReturn($upload);
 
-        $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
-        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
-        $fileOperationFactory->createFileOperationFromUpload(Argument::is($upload), Argument::any())
-            ->shouldBeCalledTimes(3) // chunks 0, 1 and 2 (alreadyUploadedChunks + 1)
-            ->willReturn($fileOperation);
-
-        $s3Service = $this->prophesize(S3Service::class);
-        $s3Service->deleteFile(Argument::is($fileOperation))->shouldBeCalledTimes(3);
-
         $uploadService = $this->prophesize(UploadService::class);
-        $uploadService->deleteUpload(Argument::is($upload))->shouldBeCalledOnce();
+        $uploadService->deleteUploadAndChunks(Argument::is($upload))->shouldBeCalledOnce();
 
         $command = $this->buildCommand(
             expiredUploadRows: [['u.id' => $uploadId->toString()]],
             elementManager: $elementManager->reveal(),
             uploadFactory: $uploadFactory->reveal(),
-            uploadService: $uploadService->reveal(),
-            fileOperationFactory: $fileOperationFactory->reveal(),
-            s3Service: $s3Service->reveal()
+            uploadService: $uploadService->reveal()
         );
 
         $commandTester = new CommandTester($command);
@@ -205,16 +185,12 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         $elementManager->getElement(Argument::any())->willReturn(null);
 
         $uploadService = $this->prophesize(UploadService::class);
-        $uploadService->deleteUpload(Argument::any())->shouldNotBeCalled();
-
-        $s3Service = $this->prophesize(S3Service::class);
-        $s3Service->deleteFile(Argument::any())->shouldNotBeCalled();
+        $uploadService->deleteUploadAndChunks(Argument::any())->shouldNotBeCalled();
 
         $command = $this->buildCommand(
             expiredUploadRows: [['u.id' => $uploadId->toString()]],
             elementManager: $elementManager->reveal(),
-            uploadService: $uploadService->reveal(),
-            s3Service: $s3Service->reveal()
+            uploadService: $uploadService->reveal()
         );
 
         $commandTester = new CommandTester($command);
@@ -272,15 +248,8 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         $uploadFactory->createUploadFromElement(Argument::is($uploadElement1))->willReturn($buildUpload($uploadId1));
         $uploadFactory->createUploadFromElement(Argument::is($uploadElement2))->willReturn($buildUpload($uploadId2));
 
-        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
-        $fileOperationFactory->createFileOperationFromUpload(Argument::any(), Argument::any())
-            ->willReturn($this->prophesize(FileOperationInterface::class)->reveal());
-
-        $s3Service = $this->prophesize(S3Service::class);
-        $s3Service->deleteFile(Argument::any())->shouldBeCalledTimes(2);
-
         $uploadService = $this->prophesize(UploadService::class);
-        $uploadService->deleteUpload(Argument::any())->shouldBeCalledTimes(2);
+        $uploadService->deleteUploadAndChunks(Argument::any())->shouldBeCalledTimes(2);
 
         $command = $this->buildCommand(
             expiredUploadRows: [
@@ -289,9 +258,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             ],
             elementManager: $elementManager->reveal(),
             uploadFactory: $uploadFactory->reveal(),
-            uploadService: $uploadService->reveal(),
-            fileOperationFactory: $fileOperationFactory->reveal(),
-            s3Service: $s3Service->reveal()
+            uploadService: $uploadService->reveal()
         );
 
         $commandTester = new CommandTester($command);
