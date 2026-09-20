@@ -1317,11 +1317,11 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $elementToRawService = $this->prophesize(ElementToRawService::class);
         $elementToRawService
-            ->elementToRaw(Argument::is($elementA), Argument::any())
+            ->elementToRaw(Argument::is($elementA))
             ->shouldBeCalledOnce()
             ->willReturn($rawElementA);
         $elementToRawService
-            ->elementToRaw(Argument::is($elementB), Argument::any())
+            ->elementToRaw(Argument::is($elementB))
             ->shouldBeCalledOnce()
             ->willReturn($rawElementB);
 

@@ -17,7 +17,7 @@ namespace App\Service;
  * OpenSSL's optimized, often hardware-accelerated implementation), comfortably exceeds the throughput of a
  * 1 GiB/s uplink on commodity hardware. BLAKE3 is preferred long-term, but the only pure-PHP implementation
  * available today is several orders of magnitude too slow to be usable; a high-performance BLAKE3 (native PHP
- * extension or FFI binding to a native library) needs a Docker image change first, see `TODO.md`.
+ * extension or FFI binding to a native library) needs a Docker image change first.
  *
  * The `file.hash` property is stored as `{<algorithm>: <hex digest>}` rather than a flat pair, specifically so a
  * future algorithm can be added (or this one replaced) without a data migration.

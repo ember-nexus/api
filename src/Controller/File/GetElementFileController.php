@@ -99,8 +99,7 @@ class GetElementFileController extends AbstractController
         if (!is_array($fileProperty) && !($fileProperty instanceof ArrayAccess)) {
             return null;
         }
-        // older records (predating the 'mimeType' rename) use 'mimetype' instead
-        $mimeType = $fileProperty['mimeType'] ?? $fileProperty['mimetype'] ?? null;
+        $mimeType = $fileProperty['mimeType'] ?? null;
         if (!is_string($mimeType) || '' === $mimeType) {
             return null;
         }

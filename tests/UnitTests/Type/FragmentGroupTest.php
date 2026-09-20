@@ -21,33 +21,27 @@ class FragmentGroupTest extends TestCase
         $cypherFragment1 = new Node();
         $mongoFragment1 = new MongoDocument();
         $elasticFragment1 = new ElasticDocument();
-        $fileFragment1 = null;
 
         $fragmentGroup = new FragmentGroup(
             $cypherFragment1,
             $mongoFragment1,
-            $elasticFragment1,
-            $fileFragment1
+            $elasticFragment1
         );
 
         $this->assertSame($cypherFragment1, $fragmentGroup->getCypherFragment());
         $this->assertSame($mongoFragment1, $fragmentGroup->getMongoFragment());
         $this->assertSame($elasticFragment1, $fragmentGroup->getElasticFragment());
-        $this->assertSame($fileFragment1, $fragmentGroup->getFileFragment());
 
         $cypherFragment2 = new Node();
         $mongoFragment2 = new MongoDocument();
         $elasticFragment2 = new ElasticDocument();
-        $fileFragment2 = 'somethingElse';
 
         $fragmentGroup->setCypherFragment($cypherFragment2);
         $fragmentGroup->setMongoFragment($mongoFragment2);
         $fragmentGroup->setElasticFragment($elasticFragment2);
-        $fragmentGroup->setFileFragment($fileFragment2);
 
         $this->assertSame($cypherFragment2, $fragmentGroup->getCypherFragment());
         $this->assertSame($mongoFragment2, $fragmentGroup->getMongoFragment());
         $this->assertSame($elasticFragment2, $fragmentGroup->getElasticFragment());
-        $this->assertSame($fileFragment2, $fragmentGroup->getFileFragment());
     }
 }

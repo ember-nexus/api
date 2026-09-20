@@ -87,7 +87,6 @@ class PatchUploadController extends AbstractController
         if ($upload->getUploadOwner()->toString() !== $userId->toString()) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
-        // verify that user has still update access to upload target
         if (!$this->accessChecker->hasAccessToElement($userId, $upload->getUploadTarget(), AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }

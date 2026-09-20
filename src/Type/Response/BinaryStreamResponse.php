@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BinaryStreamResponse extends StreamedResponse implements EtagCapableResponseInterface
 {
-    public const int STREAM_CHUNK_SIZE = 8192;
+    public const int STREAM_CHUNK_SIZE = 65536;
 
     public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback, ?ByteRange $range = null, ?string $reprDigestHeaderValue = null, ?string $contentType = null)
     {

@@ -10,9 +10,9 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 /**
  * Writes 'hasFile' to all three backing stores unconditionally, mirroring NamePropertyElementFragmentizeEventListener.
- * Unlike 'file' (a nested object, only stored in MongoDB), 'hasFile' is a plain boolean, cheap to keep on the
- * Cypher node/relation itself and in Elasticsearch, so collection/search listings can show whether an element
- * has a file without paying for the more expensive 'file' metadata lookup.
+ * Unlike 'file' (a nested object, only stored in MongoDB), 'hasFile' is a plain boolean, so it can live on the
+ * Cypher node/relation itself and in Elasticsearch - which is what lets search filter on, and listings display,
+ * whether an element has a file at all.
  */
 class HasFilePropertyElementFragmentizeEventListener
 {

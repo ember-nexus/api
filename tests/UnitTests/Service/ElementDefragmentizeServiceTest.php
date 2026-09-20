@@ -27,18 +27,16 @@ class ElementDefragmentizeServiceTest extends TestCase
     {
         $cypherFragment = new CypherNode();
         $documentFragment = new MongoDocument();
-        $fileFragment = null;
 
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
         $eventDispatcher
             ->dispatch(Argument::type(NodeElementDefragmentizeEvent::class))
             ->shouldBeCalledOnce()
-            ->will(function ($args) use ($cypherFragment, $documentFragment, $fileFragment) {
+            ->will(function ($args) use ($cypherFragment, $documentFragment) {
                 $event = $args[0];
                 /** @var NodeElementDefragmentizeEvent $event */
                 TestCase::assertSame($cypherFragment, $event->getCypherFragment());
                 TestCase::assertSame($documentFragment, $event->getDocumentFragment());
-                TestCase::assertSame($fileFragment, $event->getFileFragment());
 
                 $event->getNodeElement()->addProperty('key', 'value');
 
@@ -47,7 +45,7 @@ class ElementDefragmentizeServiceTest extends TestCase
 
         $elementFragmentizeService = new ElementDefragmentizeService($eventDispatcher->reveal());
 
-        $nodeElement = $elementFragmentizeService->defragmentize($cypherFragment, $documentFragment, $fileFragment);
+        $nodeElement = $elementFragmentizeService->defragmentize($cypherFragment, $documentFragment);
         $this->assertSame('value', $nodeElement->getProperty('key'));
     }
 
@@ -55,18 +53,16 @@ class ElementDefragmentizeServiceTest extends TestCase
     {
         $cypherFragment = new CypherRelation();
         $documentFragment = new MongoDocument();
-        $fileFragment = null;
 
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
         $eventDispatcher
             ->dispatch(Argument::type(RelationElementDefragmentizeEvent::class))
             ->shouldBeCalledOnce()
-            ->will(function ($args) use ($cypherFragment, $documentFragment, $fileFragment) {
+            ->will(function ($args) use ($cypherFragment, $documentFragment) {
                 $event = $args[0];
                 /** @var RelationElementDefragmentizeEvent $event */
                 TestCase::assertSame($cypherFragment, $event->getCypherFragment());
                 TestCase::assertSame($documentFragment, $event->getDocumentFragment());
-                TestCase::assertSame($fileFragment, $event->getFileFragment());
 
                 $event->getRelationElement()->addProperty('key', 'value');
 
@@ -75,7 +71,7 @@ class ElementDefragmentizeServiceTest extends TestCase
 
         $elementFragmentizeService = new ElementDefragmentizeService($eventDispatcher->reveal());
 
-        $relationElement = $elementFragmentizeService->defragmentize($cypherFragment, $documentFragment, $fileFragment);
+        $relationElement = $elementFragmentizeService->defragmentize($cypherFragment, $documentFragment);
         $this->assertSame('value', $relationElement->getProperty('key'));
     }
 }

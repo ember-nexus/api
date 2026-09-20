@@ -21,13 +21,11 @@ class RelationElementDefragmentizeEventTest extends TestCase
         $relationElement = new RelationElement();
         $cypherFragment = new Relation();
         $documentFragment = new Document();
-        $fileFragment = null;
-        $relationElementDefragmentizeEvent = new RelationElementDefragmentizeEvent($relationElement, $cypherFragment, $documentFragment, $fileFragment);
+        $relationElementDefragmentizeEvent = new RelationElementDefragmentizeEvent($relationElement, $cypherFragment, $documentFragment);
 
         $this->assertSame($relationElement, $relationElementDefragmentizeEvent->getRelationElement());
 
         $this->assertSame($cypherFragment, $relationElementDefragmentizeEvent->getCypherFragment());
         $this->assertSame($documentFragment, $relationElementDefragmentizeEvent->getDocumentFragment());
-        $this->assertSame($fileFragment, $relationElementDefragmentizeEvent->getFileFragment());
     }
 }

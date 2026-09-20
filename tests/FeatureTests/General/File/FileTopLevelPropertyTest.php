@@ -68,7 +68,7 @@ class FileTopLevelPropertyTest extends BaseRequestTestCase
         $this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN);
     }
 
-    public function testCollectionListingOmitsFileButKeepsHasFile(): void
+    public function testCollectionListingIncludesFileAndHasFile(): void
     {
         // a dedicated, freshly created parent is used (instead of e.g. the shared botanicExample user's
         // children) so the collection queried here is not shared with, and can not race against, any other
@@ -79,7 +79,7 @@ class FileTopLevelPropertyTest extends BaseRequestTestCase
             [
                 'type' => 'Data',
                 'data' => [
-                    'name' => 'collection-omits-file-parent',
+                    'name' => 'collection-includes-file-parent',
                 ],
             ]
         );
@@ -91,7 +91,7 @@ class FileTopLevelPropertyTest extends BaseRequestTestCase
             [
                 'type' => 'Data',
                 'data' => [
-                    'name' => 'collection-omits-file-child',
+                    'name' => 'collection-includes-file-child',
                 ],
             ]
         );
@@ -118,8 +118,13 @@ class FileTopLevelPropertyTest extends BaseRequestTestCase
         $this->assertCount(1, $childrenBody['nodes']);
         $foundElement = $childrenBody['nodes'][0];
         $this->assertSame($elementId, $foundElement['id']);
-        $this->assertArrayNotHasKey('file', $foundElement);
         $this->assertTrue($foundElement['data']['hasFile']);
+        $this->assertArrayHasKey('file', $foundElement);
+        $this->assertSame(128, $foundElement['file']['contentLength']);
+        $this->assertArrayHasKey('mimeType', $foundElement['file']);
+        $this->assertArrayHasKey('extension', $foundElement['file']);
+        $this->assertSame(64, strlen($foundElement['file']['hash']['sha256']));
+        $this->assertArrayNotHasKey('file', $foundElement['data']);
 
         $this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN);
         $this->runDeleteRequest(sprintf('/%s', $parentId), self::TOKEN);

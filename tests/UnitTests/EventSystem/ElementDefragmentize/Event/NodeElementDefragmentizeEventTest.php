@@ -21,13 +21,11 @@ class NodeElementDefragmentizeEventTest extends TestCase
         $nodeElement = new NodeElement();
         $cypherFragment = new Node();
         $documentFragment = new Document();
-        $fileFragment = null;
-        $nodeElementDefragmentizeEvent = new NodeElementDefragmentizeEvent($nodeElement, $cypherFragment, $documentFragment, $fileFragment);
+        $nodeElementDefragmentizeEvent = new NodeElementDefragmentizeEvent($nodeElement, $cypherFragment, $documentFragment);
 
         $this->assertSame($nodeElement, $nodeElementDefragmentizeEvent->getNodeElement());
 
         $this->assertSame($cypherFragment, $nodeElementDefragmentizeEvent->getCypherFragment());
         $this->assertSame($documentFragment, $nodeElementDefragmentizeEvent->getDocumentFragment());
-        $this->assertSame($fileFragment, $nodeElementDefragmentizeEvent->getFileFragment());
     }
 }
