@@ -15,9 +15,9 @@ class Client409ConflictExceptionFactory
     }
 
     /**
-     * @param array<string, mixed> $additionalDetails
+     * @param array<string, mixed> $additionalProperties
      */
-    public function createFromDetail(string $detail, array $additionalDetails = []): Client409ConflictException
+    public function createFromDetail(string $detail, array $additionalProperties = []): Client409ConflictException
     {
         return new Client409ConflictException(
             $this->urlGenerator->generate(
@@ -29,7 +29,7 @@ class Client409ConflictExceptionFactory
                 UrlGeneratorInterface::ABSOLUTE_URL
             ),
             detail: $detail,
-            additionalDetails: $additionalDetails
+            additionalProperties: $additionalProperties
         );
     }
 }

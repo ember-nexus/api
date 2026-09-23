@@ -8,7 +8,7 @@
 [![Discord](https://img.shields.io/discord/1135243882360221787?logo=discord&label=Discord&color=%235865f2)](https://discord.gg/qbQFBrJrRC)
 
 Ember Nexus is a knowledge graph API, which means that it is specialized in storing and retrieving your data.  
-It can be used as an alternative to Obsidian, Notion, your companies ERP or content management systems or as a blank
+It can be used as an alternative to Obsidian, Notion, your company's ERP or content management systems or as a blank
 database for your own projects. As long as you need to store data and are interested in easy to use cutting edge
 features - Ember Nexus will be useful for you! :D
 
@@ -23,12 +23,12 @@ Ember Nexus is built on three principles:
 The "secret sauce" is the combination of databases Ember Nexus uses:
 
 - **Neo4j**: A graph database, which stores relationships and core properties of your data elements.
-- **MongoDB**: A document database, stores more complex properties which Neo4j can not handle itself.
+- **MongoDB**: A document database, which stores more complex properties Neo4j can not handle itself.
 - **Elasticsearch**: A search database, used for full text search, vector search and more.
-- **S3 compatible object store**: Used to store binary files, up to 1 TB by default.
+- **S3 compatible object store**: Used to store binary files, up to 10 GiB by default.
 
-Instead of using multiple specialized databases yourself, simply use Ember Nexus, and benefit of the exposed features
-and without having to worry about data consistency, security aspects and more.
+Instead of using multiple specialized databases yourself, simply use Ember Nexus and benefit from their features
+without having to worry about data consistency, security aspects and more.
 
 It just works :D
 
@@ -38,8 +38,8 @@ It just works :D
 - [API Documentation](https://ember-nexus.github.io/api/#/): For everyone who wants to develop own apps on top of
   Ember Nexus.
 - [Docker Hub](https://hub.docker.com/r/embernexus/api): Ready to use container images for AMD and ARM architectures.
-- [Demo API](https://reference-dataset.ember-nexus.dev/): Instance which can be used for quick testing. Is being reset
-  every day, and uses the [reference dataset](https://github.com/ember-nexus/reference-dataset) as its data, which
+- [Demo API](https://reference-dataset.ember-nexus.dev/): Instance which can be used for quick testing. It is reset
+  every day and uses the [reference dataset](https://github.com/ember-nexus/reference-dataset) as its data, which
   includes eternal tokens.
 
 ## Is there a graphical user interface (GUI)?

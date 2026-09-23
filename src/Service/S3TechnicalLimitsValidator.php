@@ -9,10 +9,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 /**
- * Validates the operator-configurable `file.*` upload/storage settings ({@see EmberNexusConfiguration}) against
- * the hard technical limits of the underlying storage backend ({@see S3TechnicalLimitsInterface}). Configuration
- * may only be more restrictive than the technical limits, never less; a violation is a startup-time
- * configuration error, not a runtime one.
+ * Ensures that the `file.*` configuration does not exceed the technical limits of the storage backend.
  */
 class S3TechnicalLimitsValidator
 {
@@ -23,11 +20,12 @@ class S3TechnicalLimitsValidator
     ) {
     }
 
-    public function validate(): void
+    public function validate(int $multipartUploadThresholdInBytes = S3Service::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES): void
     {
         $this->validateMinChunkSize();
         $this->validateMaxChunkCount();
         $this->validateMaxObjectSize();
+        $this->validateMultipartUploadThreshold($multipartUploadThresholdInBytes);
     }
 
     private function validateMinChunkSize(): void
@@ -48,6 +46,15 @@ class S3TechnicalLimitsValidator
 
         if ($configuredMaxChunkCount > $technicalMaxChunkCount) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Configured 'file.uploadChunkDigitsLength' (%d) allows up to %d chunks, which exceeds the storage backend's technical maximum of %d chunks.", $chunkDigitsLength, $configuredMaxChunkCount, $technicalMaxChunkCount));
+        }
+    }
+
+    private function validateMultipartUploadThreshold(int $multipartUploadThreshold): void
+    {
+        $technicalMaxSinglePutSize = $this->s3TechnicalLimits->getMaxSinglePutSizeInBytes();
+
+        if ($multipartUploadThreshold > $technicalMaxSinglePutSize) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Multipart upload threshold (%d) can not be larger than the storage backend's technical maximum single PUT size (%d).", $multipartUploadThreshold, $technicalMaxSinglePutSize));
         }
     }
 

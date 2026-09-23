@@ -16,6 +16,7 @@ readonly class S3TechnicalLimits implements S3TechnicalLimitsInterface
     private const int MIN_CHUNK_SIZE_IN_BYTES = 5 * 1024 * 1024; // 5 MiB, does not apply to the last part of an upload
     private const int MAX_CHUNK_COUNT = 10_000;
     private const int MAX_OBJECT_SIZE_IN_BYTES = 5 * 1024 * 1024 * 1024 * 1024; // 5 TiB
+    private const int MAX_SINGLE_PUT_SIZE_IN_BYTES = 5 * 1024 * 1024 * 1024; // 5 GiB, also the limit of a single copyObject
 
     public function getMinChunkSizeInBytes(): int
     {
@@ -30,5 +31,10 @@ readonly class S3TechnicalLimits implements S3TechnicalLimitsInterface
     public function getMaxObjectSizeInBytes(): int
     {
         return self::MAX_OBJECT_SIZE_IN_BYTES;
+    }
+
+    public function getMaxSinglePutSizeInBytes(): int
+    {
+        return self::MAX_SINGLE_PUT_SIZE_IN_BYTES;
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\ElementToRawService;
@@ -24,6 +24,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
@@ -51,13 +52,14 @@ class BackupCreateCommand extends Command
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
+        #[Target('backup.storage')]
         private FilesystemOperator $backupStorage,
         private ElementToRawService $elementToRawService,
         private ElementService $elementService,
         private ParameterBagInterface $bag,
         private FileService $fileService,
         private S3Service $s3Service,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
@@ -96,6 +98,7 @@ class BackupCreateCommand extends Command
         $this->io->title('Backup Create');
         $this->createBackupFolders();
         $this->initCount();
+        $this->warnAboutUnfinishedUploads();
 
         $this->backupNodes();
         $this->backupRelations();
@@ -139,7 +142,7 @@ class BackupCreateCommand extends Command
         while ($nextPage) {
             $rawNodeIds = $this->cypherEntityManager->getClient()->runStatement(
                 Statement::create(
-                    'MATCH (n) RETURN n.id SKIP $skip LIMIT $limit',
+                    'MATCH (n) RETURN n.id ORDER BY n.id SKIP $skip LIMIT $limit',
                     [
                         'skip' => $currentPage * $this->pageSize,
                         'limit' => $this->pageSize,
@@ -163,7 +166,7 @@ class BackupCreateCommand extends Command
                 if (null === $node) {
                     throw new LogicException('Node can not be null');
                 }
-                $data = $this->elementToRawService->elementToRaw($node);
+                $data = $this->elementToRawService->elementToRaw($node, false);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
                 $path = $this->getNodePath($nodeId);
                 $this->backupStorage->write($path, $json);
@@ -194,7 +197,7 @@ class BackupCreateCommand extends Command
         while ($nextPage) {
             $rawRelationIds = $this->cypherEntityManager->getClient()->runStatement(
                 Statement::create(
-                    'MATCH ()-[r]-() RETURN r.id SKIP $skip LIMIT $limit',
+                    'MATCH ()-[r]->() RETURN r.id ORDER BY r.id SKIP $skip LIMIT $limit',
                     [
                         'skip' => $currentPage * $this->pageSize,
                         'limit' => $this->pageSize,
@@ -218,7 +221,7 @@ class BackupCreateCommand extends Command
                 if (null === $relation) {
                     throw new LogicException('Relation can not be null');
                 }
-                $data = $this->elementToRawService->elementToRaw($relation);
+                $data = $this->elementToRawService->elementToRaw($relation, false);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
                 $path = $this->getRelationPath($relationId);
                 $this->backupStorage->write($path, $json);
@@ -247,11 +250,9 @@ class BackupCreateCommand extends Command
 
         $rawFileElements = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                'OPTIONAL MATCH (n) WHERE n.file '.
-                'OPTIONAL MATCH ()-[r]->() WHERE r.file '.
-                'WITH coalesce(n, r) AS element '.
-                'WHERE element.file '.
-                'RETURN element.id'
+                'MATCH (n) WHERE n.hasFile = true RETURN n.id AS `element.id` '.
+                'UNION ALL '.
+                'MATCH ()-[r]->() WHERE r.hasFile = true RETURN r.id AS `element.id`'
             )
         );
 
@@ -288,7 +289,7 @@ class BackupCreateCommand extends Command
                 continue;
             }
 
-            $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+            $fileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
             $resource = $this->s3Service->getFileAsResource($fileOperation);
             $extension = $this->elementService->getFileNameExtension($element);
 
@@ -333,10 +334,12 @@ class BackupCreateCommand extends Command
     {
         $levels = max(0, (int) ceil(log($this->fileCount, 256)) - 1);
 
-        return sprintf(
-            '%s/file/%s.%s',
-            $this->backupName,
-            $this->fileService->uuidToNestedFolderStructure($elementId, $levels),
+        return $this->fileService->appendExtension(
+            sprintf(
+                '%s/file/%s',
+                $this->backupName,
+                $this->fileService->uuidToNestedFolderStructure($elementId, $levels)
+            ),
             $extension
         );
     }
@@ -365,6 +368,22 @@ class BackupCreateCommand extends Command
         $this->backupStorage->createDirectory($this->backupName.'/node');
         $this->backupStorage->createDirectory($this->backupName.'/relation');
         $this->backupStorage->createDirectory($this->backupName.'/file');
+    }
+
+    /**
+     * Independent of `--no-files`: chunks of unfinished uploads live in the upload bucket, which is never backed up.
+     */
+    private function warnAboutUnfinishedUploads(): void
+    {
+        $uploadCount = $this->cypherEntityManager->getClient()->runStatement(
+            Statement::create('MATCH (n:Upload) RETURN count(n) as count')
+        )->first()->get('count');
+        if (!is_int($uploadCount)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($uploadCount))); // @codeCoverageIgnore
+        }
+        if ($uploadCount > 0) {
+            $this->io->warning(sprintf('Found %d unfinished upload(s). Their already uploaded chunks are not part of the backup, so these uploads are abandoned and can not be resumed after loading the backup.', $uploadCount));
+        }
     }
 
     private function initCount(): void

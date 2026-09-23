@@ -14,17 +14,6 @@ services:
     ports:
       - "80:80"
 
-  reference-dataset-server:
-    container_name: reference-dataset-server
-    image: caddy:latest
-    volumes:
-      - ../../reference-dataset-local-backup:/usr/share/caddy
-    ports:
-      - "8090:80"
-    # temporary, local-only static file server used to serve a locally modified copy of the
-    # reference-dataset backup to the `api` container, bypassing the GitHub release used by
-    # `bin/test-feature-prepare`. Not part of the regular dev stack.
-
   docs:
     container_name: docs
     image: sujaykumarh/docsify:latest
@@ -51,7 +40,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongodb
       - MONGO_INITDB_ROOT_PASSWORD=password
-      - GLIBC_TUNABLES="glibc.cpu.hwcaps=-SHSTK" # see https://github.com/docker-library/mongo/discussions/748#discussioncomment-15927486
+      - GLIBC_TUNABLES=glibc.cpu.hwcaps=-SHSTK  # see https://github.com/docker-library/mongo/discussions/748#discussioncomment-15927486
 
   elasticsearch:
     container_name: elasticsearch
@@ -99,7 +88,7 @@ services:
 
   minio:
     container_name: minio
-    image: quay.io/minio/minio:latest
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -111,7 +100,7 @@ services:
     command: server /data --console-address ":9001"
 
   minio-init:
-    image: quay.io/minio/mc:latest
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
     depends_on:
       - minio
     entrypoint: >

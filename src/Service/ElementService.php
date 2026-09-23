@@ -18,6 +18,18 @@ class ElementService
     ) {
     }
 
+    /**
+     * Key of the stored file of the element in the storage bucket, or null if the element has no file.
+     */
+    public function getStorageKeyOfFile(NodeElementInterface|RelationElementInterface $element): ?string
+    {
+        if (!$this->hasFile($element)) {
+            return null;
+        }
+
+        return $this->fileService->getStorageBucketKey($this->getElementId($element), $this->getFileNameExtension($element));
+    }
+
     public function getElementId(NodeElementInterface|RelationElementInterface $element): UuidInterface
     {
         $elementId = $element->getId();
@@ -26,6 +38,14 @@ class ElementService
         }
 
         return $elementId;
+    }
+
+    /**
+     * Uses the 'hasFile' flag, which is managed by the file endpoints and always kept in sync with the file.
+     */
+    public function hasFile(NodeElementInterface|RelationElementInterface $element): bool
+    {
+        return $element->hasProperty('hasFile') && true === $element->getProperty('hasFile');
     }
 
     public function getFileName(NodeElementInterface|RelationElementInterface $element): string

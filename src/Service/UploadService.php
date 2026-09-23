@@ -7,7 +7,7 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\UploadInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Type\NodeElement;
 use Exception;
@@ -24,7 +24,7 @@ class UploadService
     public function __construct(
         private ElementManager $elementManager,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private UploadFactory $uploadFactory,
         private CypherEntityManager $cypherEntityManager,
@@ -51,13 +51,70 @@ class UploadService
         $element->addProperty('uploadOffset', $upload->getUploadOffset());
         $element->addProperty('uploadComplete', $upload->isUploadComplete());
         $element->addProperty('uploadTarget', $upload->getUploadTarget()->toString());
-        $element->addProperty('alreadyUploadedChunks', $upload->getAlreadyUploadedChunks());
+        // the list itself is stored in MongoDB, only the last id is a graph property, see appendChunkIfOffsetMatches()
+        $element->addProperty('chunkIds', $upload->getChunkIds());
+        $element->addProperty('lastChunkId', $upload->getLastChunkId());
         $element->addProperty('uploadOwner', $upload->getUploadOwner()->toString());
         $element->addProperty('extension', $upload->getExtension());
         $element->addProperty('expires', $upload->getExpires());
         $element->addProperty('hashState', $upload->getHashState());
+        $element->addProperty('targetHadFileAtCreation', $upload->targetHadFileAtCreation());
 
         $this->elementManager->merge($element);
+    }
+
+    /**
+     * Compare-and-set on `uploadOffset` and `lastChunkId`, the only graph properties of the chunk list (the list
+     * itself is stored in MongoDB, and an empty final chunk does not move the offset): appends the chunk of $next
+     * only if the stored upload is still incomplete and in the state of $expected, i.e. no other request appended
+     * a chunk in the meantime. Chunk ids are unique per attempt, so `lastChunkId` identifies the state exactly.
+     * The graph update is atomic, the list is written by the following merge, which is flushed. Returns false if the
+     * upload was modified concurrently.
+     */
+    public function appendChunkIfOffsetMatches(UploadInterface $expected, UploadInterface $next): bool
+    {
+        $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
+            'MATCH (u:Upload {id: $id}) WHERE u.uploadOffset = $expectedOffset AND coalesce(u.lastChunkId, "") = $expectedLastChunkId AND u.uploadComplete = false '.
+            'SET u.uploadOffset = $uploadOffset, u.uploadComplete = $uploadComplete, u.lastChunkId = $lastChunkId, u.hashState = $hashState '.
+            'RETURN u.id',
+            [
+                'id' => $expected->getId()->toString(),
+                'expectedOffset' => $expected->getUploadOffset(),
+                'expectedLastChunkId' => $expected->getLastChunkId() ?? '',
+                'uploadOffset' => $next->getUploadOffset(),
+                'uploadComplete' => $next->isUploadComplete(),
+                'lastChunkId' => $next->getLastChunkId(),
+                'hashState' => $next->getHashState(),
+            ]
+        ));
+        if (0 === $queryResult->count()) {
+            return false;
+        }
+
+        $this->mergeUploadElement($next);
+        $this->elementManager->flush();
+
+        return true;
+    }
+
+    /**
+     * Puts a completed upload back to incomplete, e.g. after its finalization failed, so that the client can complete
+     * it again. Only touches the graph, as nothing else is needed and the entity manager may hold state of the failed
+     * finalization. Returns false if the upload does not exist or is not complete.
+     */
+    public function markUploadAsUnfinalized(UploadInterface $upload, string $hashState): bool
+    {
+        $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
+            'MATCH (u:Upload {id: $id}) WHERE u.uploadComplete = true '.
+            'SET u.uploadComplete = false, u.hashState = $hashState '.
+            'RETURN u.id',
+            [
+                'id' => $upload->getId()->toString(),
+                'hashState' => $hashState,
+            ]
+        ));
+
+        return 0 !== $queryResult->count();
     }
 
     public function deleteUpload(UploadInterface $upload): void
@@ -68,13 +125,13 @@ class UploadService
     }
 
     /**
-     * Deletes an upload's already-uploaded chunks from S3, then the `Upload` element itself. Does not flush -
-     * that is left to the caller, matching {@see deleteUpload()}.
+     * Does not flush, same as {@see deleteUpload()}.
      */
     public function deleteUploadAndChunks(UploadInterface $upload): void
     {
-        for ($chunk = 0; $chunk <= $upload->getAlreadyUploadedChunks(); ++$chunk) {
-            $deleteChunkOperation = $this->fileOperationFactory->createFileOperationFromUpload($upload, $chunk);
+        // chunk keys start at 1; rejected chunk attempts are not part of the upload and are deleted by their request
+        foreach ($upload->getChunkIds() as $index => $chunkId) {
+            $deleteChunkOperation = $this->s3OperationFactory->createFileOperationFromUpload($upload, $index + 1, $chunkId);
             $this->s3Service->deleteFile($deleteChunkOperation);
         }
 
@@ -82,26 +139,17 @@ class UploadService
     }
 
     /**
-     * Deletes any in-progress resumable upload(s) still targeting `$elementId`, and their already-uploaded S3
-     * chunks - meant to be called (and flushed) *before* the target element itself is deleted. `uploadTarget`
-     * (see {@see mergeUploadElement()}) is a plain property, not a graph edge, so deleting an element does not
-     * take any upload(s) still targeting it along with it on its own; without this, they would linger - still
-     * HEAD-able, still occupying storage - until the `cron:delete-expired-uploads` grace period eventually
-     * catches up with them.
-     *
-     * Deliberately not wired up as an event listener on element deletion: an `Upload` element deleted by this
-     * method would itself re-enter `ElementManager::delete()`/`flush()` while the *original* deletion's own
-     * `flush()` for the target element is still on the call stack (event listeners fire from within `flush()`) -
-     * `ElementManager` and the underlying entity managers are not reentrant, and a nested `flush()` call
-     * corrupts the outer one's still-in-flight batch. Calling this as an explicit, separate, sequential step
-     * before the target's own delete+flush avoids that entirely.
+     * Deletes uploads targeting the element (for nodes also the ones targeting attached relations, as these are deleted
+     * together with the node), as `uploadTarget` is a plain property and not a relation. Must be
+     * called and flushed before the element itself is deleted; it is not an event listener because nested
+     * `flush()` calls are not supported.
      */
     public function deleteUploadsTargeting(UuidInterface $elementId): void
     {
         foreach ($this->getUploadIdsTargeting($elementId) as $uploadId) {
             $uploadElement = $this->elementManager->getElement(UuidV4::fromString($uploadId));
             if (null === $uploadElement) {
-                continue; // already gone (e.g. deleted or expired in the meantime), nothing left to do
+                continue;
             }
 
             try {
@@ -115,12 +163,22 @@ class UploadService
     }
 
     /**
+     * Whether an upload (e.g. a started resumable upload) currently targets the element.
+     */
+    public function hasUploadsTargeting(UuidInterface $elementId): bool
+    {
+        return [] !== $this->getUploadIdsTargeting($elementId);
+    }
+
+    /**
      * @return string[]
      */
     private function getUploadIdsTargeting(UuidInterface $elementId): array
     {
         $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
-            'MATCH (u:Upload) WHERE u.uploadTarget = $elementId RETURN u.id',
+            'MATCH (u:Upload) '.
+            'WHERE u.uploadTarget = $elementId OR u.uploadTarget IN [({id: $elementId})-[r]-() | r.id] '.
+            'RETURN DISTINCT u.id',
             [
                 'elementId' => $elementId->toString(),
             ]

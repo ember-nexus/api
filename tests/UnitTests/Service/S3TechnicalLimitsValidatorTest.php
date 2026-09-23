@@ -28,6 +28,7 @@ class S3TechnicalLimitsValidatorTest extends TestCase
         int $technicalMinChunkSize = 5 * 1024 * 1024,
         int $technicalMaxChunkCount = 10_000,
         int $technicalMaxObjectSize = 5 * 1024 * 1024 * 1024 * 1024,
+        int $technicalMaxSinglePutSize = 5 * 1024 * 1024 * 1024,
         ?Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory = null,
     ): S3TechnicalLimitsValidator {
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
@@ -39,6 +40,7 @@ class S3TechnicalLimitsValidatorTest extends TestCase
         $s3TechnicalLimits->getMinChunkSizeInBytes()->willReturn($technicalMinChunkSize);
         $s3TechnicalLimits->getMaxChunkCount()->willReturn($technicalMaxChunkCount);
         $s3TechnicalLimits->getMaxObjectSizeInBytes()->willReturn($technicalMaxObjectSize);
+        $s3TechnicalLimits->getMaxSinglePutSizeInBytes()->willReturn($technicalMaxSinglePutSize);
 
         return new S3TechnicalLimitsValidator(
             $emberNexusConfiguration->reveal(),

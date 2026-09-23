@@ -9,17 +9,10 @@ use App\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 /**
- * Writes 'hasFile' to all three backing stores unconditionally, mirroring NamePropertyElementFragmentizeEventListener.
- * Unlike 'file' (a nested object, only stored in MongoDB), 'hasFile' is a plain boolean, so it can live on the
- * Cypher node/relation itself and in Elasticsearch - which is what lets search filter on, and listings display,
- * whether an element has a file at all.
+ * Stores 'hasFile' in all three databases, so that Cypher and Elasticsearch queries can filter on it.
  */
 class HasFilePropertyElementFragmentizeEventListener
 {
-    public function __construct()
-    {
-    }
-
     #[AsEventListener]
     public function onNodeElementFragmentizeEvent(NodeElementFragmentizeEvent $event): void
     {

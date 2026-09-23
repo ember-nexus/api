@@ -8,13 +8,14 @@ use App\Attribute\EndpointSupportsEtag;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\DigestService;
 use App\Service\ElementManager;
 use App\Service\ElementService;
+use App\Service\EtagService;
 use App\Service\FileRangeService;
 use App\Service\FileService;
 use App\Service\S3Service;
@@ -27,6 +28,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+ */
 class GetElementFileController extends AbstractController
 {
     public function __construct(
@@ -35,10 +39,11 @@ class GetElementFileController extends AbstractController
         private ElementManager $elementManager,
         private ElementService $elementService,
         private FileService $fileService,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private FileRangeService $fileRangeService,
         private DigestService $digestService,
+        private EtagService $etagService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -62,11 +67,14 @@ class GetElementFileController extends AbstractController
         }
 
         $element = $this->elementManager->getElementOrFail($elementId);
+        if (!$this->elementService->hasFile($element)) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
 
         $fileName = $this->elementService->getFileName($element);
         $fileNameFallback = $this->fileService->getAsciiSafeFileName($fileName);
 
-        $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+        $fileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
 
         $doesFileExist = $this->s3Service->existsFile($fileOperation);
         if (false === $doesFileExist) {
@@ -77,7 +85,11 @@ class GetElementFileController extends AbstractController
         $contentType = $this->getStoredContentType($element);
 
         $rangeHeader = $request->headers->get('Range');
-        if (null !== $rangeHeader) {
+        // a failed `If-Range` precondition ignores the `Range` header and answers the full file
+        if (null !== $rangeHeader && $this->fileRangeService->isRangeConditionSatisfied(
+            $request->headers->get('If-Range'),
+            $this->etagService->getCurrentRequestEtag()?->getEtag()
+        )) {
             $totalContentLength = $this->s3Service->getContentLength($fileOperation);
             $range = $this->fileRangeService->parseRangeHeader($rangeHeader, $totalContentLength);
             $object = $this->s3Service->getFileByteRange($fileOperation, $range->getStart(), $range->getEnd());
@@ -113,8 +125,7 @@ class GetElementFileController extends AbstractController
             return null;
         }
         $fileProperty = $element->getProperty('file');
-        // 'file' is read back from MongoDB; nested values (like 'hash') may still be BSONDocument/ArrayAccess
-        // instances rather than plain arrays at this point, so array-offset access is used instead of is_array().
+        // nested values from MongoDB may still be BSONDocument instances instead of plain arrays
         if (!is_array($fileProperty) && !($fileProperty instanceof ArrayAccess)) {
             return null;
         }

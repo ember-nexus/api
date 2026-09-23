@@ -2,8 +2,8 @@ Access-Control-Allow-Headers: *
 Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: GET, HEAD, OPTIONS, POST
 Cache-Control: no-cache, private
-Date: Sun, 10 Mar 2024 13:46:31 GMT
-Etag: "TMfc6KdsY3a"
+Date: Sat, 26 Sep 2026 21:53:25 GMT
+Etag: "ZMJmRHQD9pB"
 X-Powered-By: Ember Nexus API

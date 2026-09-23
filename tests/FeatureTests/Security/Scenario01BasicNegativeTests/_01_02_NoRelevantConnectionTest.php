@@ -131,9 +131,8 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020220(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runGetRequest(sprintf('/%s/file', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -143,7 +142,6 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020221(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runPostRequest(
             sprintf('/%s/file', self::RELATION),
             self::TOKEN,
@@ -154,7 +152,7 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
                 ],
             ]
         );
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -164,9 +162,8 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020222(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runPutRequest(sprintf('/%s/file', self::RELATION), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -176,9 +173,8 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020223(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runPatchRequest(sprintf('/%s/file', self::RELATION), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 405);
     }
 
     /**
@@ -188,9 +184,8 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020224(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runDeleteRequest(sprintf('/%s/file', self::RELATION), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -200,7 +195,6 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020230(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runCopyRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -212,7 +206,6 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020231(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runLockRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -224,7 +217,6 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020232(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runUnlockRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -236,7 +228,6 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020233(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runMkcolRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -248,7 +239,6 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020234(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runMoveRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -260,7 +250,6 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020235(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runPropfindRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }
@@ -272,7 +261,6 @@ class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
      */
     public function test1020236(): void
     {
-        $this->markTestSkipped('WIP');
         $response = $this->runProppatchRequest(sprintf('/%s', self::RELATION), self::TOKEN);
         $this->assertIsProblemResponse($response, 501);
     }

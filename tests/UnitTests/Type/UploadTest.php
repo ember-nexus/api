@@ -24,10 +24,12 @@ class UploadTest extends TestCase
             321,
             false,
             Uuid::fromString('81fbe257-08e0-465b-aa32-8b002a7517c5'),
-            1,
+            ['0123456789abcdef'],
             Uuid::fromString('beb42bb3-3b3d-40d2-895b-e54ffb7816dd'),
             'bin',
-            $expires
+            $expires,
+            null,
+            true
         );
 
         $this->assertSame('93257437-6f77-4b2d-87a4-3eea785d13ae', (string) $upload->getId());
@@ -36,8 +38,27 @@ class UploadTest extends TestCase
         $this->assertSame(false, $upload->isUploadComplete());
         $this->assertSame('81fbe257-08e0-465b-aa32-8b002a7517c5', (string) $upload->getUploadTarget());
         $this->assertSame(1, $upload->getAlreadyUploadedChunks());
+        $this->assertSame(['0123456789abcdef'], $upload->getChunkIds());
         $this->assertSame('beb42bb3-3b3d-40d2-895b-e54ffb7816dd', (string) $upload->getUploadOwner());
         $this->assertSame('bin', $upload->getExtension());
         $this->assertSame($expires, $upload->getExpires());
+        $this->assertTrue($upload->targetHadFileAtCreation());
+    }
+
+    public function testTargetHadFileAtCreationDefaultsToFalse(): void
+    {
+        $upload = new Upload(
+            Uuid::uuid4(),
+            null,
+            0,
+            false,
+            Uuid::uuid4(),
+            [],
+            Uuid::uuid4(),
+            'bin',
+            new DateTime()
+        );
+
+        $this->assertFalse($upload->targetHadFileAtCreation());
     }
 }

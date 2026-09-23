@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
+use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
@@ -20,6 +21,15 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class ExpireEtagOnChangeEventListener
 {
+    /**
+     * Keys which have to be expired after an element was deleted, by element id. They are expired only after the
+     * delete, as a concurrent read before that would cache the ETag again. The related elements can not be looked up
+     * anymore after the delete, therefore the keys are collected before it and remembered here.
+     *
+     * @var array<string, RedisKey[]>
+     */
+    private array $redisEtagKeysToExpireAfterDelete = [];
+
     public function __construct(
         private Client $redisClient,
         private CypherEntityManager $cypherEntityManager,
@@ -46,6 +56,24 @@ class ExpireEtagOnChangeEventListener
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
+    public function onElementPostDeleteEvent(ElementPostDeleteEvent $event): void
+    {
+        $elementId = $event->getElement()->getId();
+        if (null === $elementId) {
+            return;
+        }
+        $key = $elementId->toString();
+        $redisEtagKeysToExpire = $this->redisEtagKeysToExpireAfterDelete[$key] ?? [
+            $this->redisKeyTypeFactory->getEtagElementRedisKey($elementId),
+            $this->redisKeyTypeFactory->getEtagFileRedisKey($elementId),
+        ];
+        unset($this->redisEtagKeysToExpireAfterDelete[$key]);
+        foreach ($redisEtagKeysToExpire as $redisEtagKeyToExpire) {
+            $this->redisClient->expire((string) $redisEtagKeyToExpire, 0);
+        }
+    }
+
     /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
@@ -62,6 +90,8 @@ class ExpireEtagOnChangeEventListener
          * @var RedisKey[] $redisEtagKeysToExpire
          */
         $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagElementRedisKey($elementId);
+        // the file ETag depends on the element's name, its file property and its ETag
+        $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagFileRedisKey($elementId);
 
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (node {id: \$elementId})\n".
@@ -149,6 +179,12 @@ class ExpireEtagOnChangeEventListener
                 $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey(Uuid::fromString($rawEndId));
                 $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey(Uuid::fromString($rawStartId));
             }
+        }
+
+        if ($event instanceof ElementPreDeleteEvent) {
+            $this->redisEtagKeysToExpireAfterDelete[$elementId->toString()] = $redisEtagKeysToExpire;
+
+            return;
         }
 
         foreach ($redisEtagKeysToExpire as $redisEtagKeyToExpire) {

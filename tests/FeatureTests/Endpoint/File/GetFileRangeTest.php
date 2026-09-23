@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Exercises the `Range` header on `GET /<id>/file` against the read-only "Rose" image from the
  * "general.botanicExample" reference dataset scenario (138937 bytes).
  */
-#[Group('test')]
 class GetFileRangeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
@@ -113,8 +111,8 @@ class GetFileRangeTest extends BaseRequestTestCase
 
         $this->assertIsProblemResponse($response, 416);
         $body = \Safe\json_decode((string) $response->getBody(), true);
-        $this->assertArrayHasKey('total-length', $body);
-        $this->assertSame(self::ROSE_CONTENT_LENGTH, $body['total-length']);
+        $this->assertArrayHasKey('totalLength', $body);
+        $this->assertSame(self::ROSE_CONTENT_LENGTH, $body['totalLength']);
     }
 
     public function testMalformedRangeHeaderReturnsBadContent(): void
@@ -145,5 +143,103 @@ class GetFileRangeTest extends BaseRequestTestCase
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(['bytes'], $response->getHeader('Accept-Ranges'));
+    }
+
+    public function testIfRangeWithCurrentEtagServesPartialContent(): void
+    {
+        $etag = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN)->getHeader('ETag')[0];
+
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99', 'If-Range' => $etag]
+        );
+
+        $this->assertSame(206, $response->getStatusCode());
+        $this->assertSame([sprintf('bytes 0-99/%d', self::ROSE_CONTENT_LENGTH)], $response->getHeader('Content-Range'));
+        $this->assertSame(100, strlen((string) $response->getBody()));
+    }
+
+    public function testIfRangeWithStaleEtagServesFullFile(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99', 'If-Range' => '"stale-etag"']
+        );
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame([], $response->getHeader('Content-Range'));
+        $this->assertSame(self::ROSE_CONTENT_LENGTH, strlen((string) $response->getBody()));
+    }
+
+    public function testIfRangeWithWeakEtagOrDateServesFullFile(): void
+    {
+        $etag = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN)->getHeader('ETag')[0];
+
+        foreach (['W/'.$etag, 'Wed, 21 Oct 2015 07:28:00 GMT'] as $ifRange) {
+            $response = $this->runGetRequest(
+                sprintf('/%s/file', self::ROSE_ID),
+                self::TOKEN,
+                ['Range' => 'bytes=0-99', 'If-Range' => $ifRange]
+            );
+
+            $this->assertSame(200, $response->getStatusCode());
+            $this->assertSame(self::ROSE_CONTENT_LENGTH, strlen((string) $response->getBody()));
+        }
+    }
+
+    public function testIfRangeWithoutRangeIsIgnored(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['If-Range' => '"stale-etag"']
+        );
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(self::ROSE_CONTENT_LENGTH, strlen((string) $response->getBody()));
+    }
+
+    public function testPartialContentResponseCarriesTheSameFileEtagAsTheFullResponse(): void
+    {
+        $fullResponse = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN);
+        $fullEtag = $fullResponse->getHeader('ETag')[0];
+
+        $rangeResponse = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99']
+        );
+
+        $this->assertSame(206, $rangeResponse->getStatusCode());
+        $this->assertCount(1, $rangeResponse->getHeader('ETag'));
+        $this->assertSame($fullEtag, $rangeResponse->getHeader('ETag')[0]);
+    }
+
+    public function testRangeRequestWithMatchingIfNoneMatchReturnsNotModifiedInsteadOfPartialContent(): void
+    {
+        $etag = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN)->getHeader('ETag')[0];
+
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99', 'If-None-Match' => $etag]
+        );
+
+        $this->assertNotModifiedResponse($response);
+        $this->assertSame([], $response->getHeader('Content-Range'));
+    }
+
+    public function testRangeRequestWithNonMatchingIfNoneMatchStillReturnsPartialContent(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99', 'If-None-Match' => '"staleEtagWhichNeverMatches"']
+        );
+
+        $this->assertSame(206, $response->getStatusCode());
+        $this->assertSame(100, strlen((string) $response->getBody()));
     }
 }

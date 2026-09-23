@@ -1,0 +1,124 @@
+# Stack for the server tests, see bin/test-server. Service names are used as host names, the containers have no fixed
+# names so that the stack can run next to the development stack.
+services:
+
+  api-dev:
+    image: api:dev-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
+    expose:
+      - "80"
+    volumes:
+      - ../../:/var/www/html
+      - ../FeatureTests/well-known-security.txt:/well-known-security.txt
+
+  # production image without mounted source code, i.e. as it is delivered; the limits are lowered by bin/test-server
+  api-prod:
+    image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
+    expose:
+      - "80"
+    volumes:
+      - ../FeatureTests/well-known-security.txt:/well-known-security.txt
+      - ./ini:/server-test-ini:ro
+    environment:
+      # additional php.ini directory, only used by scenarios which need a different PHP configuration
+      - PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:${SERVER_TEST_INI_DIR:-/server-test-ini/default}
+      - CYPHER_AUTH=bolt://neo4j:password@neo4j
+      - MONGO_AUTH=mongodb://mongodb:password@mongodb:27017
+      - ELASTIC_AUTH=elasticsearch:9200
+      - REDIS_AUTH=tcp://redis?password=redis-password
+      - RABBITMQ_AUTH=amqp://user:password@rabbitmq:5672
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY_ID=accessKey
+      - S3_SECRET_ACCESS_KEY=secretKey
+      - API_REQUEST_BODY_TIMEOUT=${API_REQUEST_BODY_TIMEOUT:-30s}
+      - API_UPLOAD_REQUEST_BODY_TIMEOUT=${API_UPLOAD_REQUEST_BODY_TIMEOUT:-15m}
+      - FRANKENPHP_MAX_WAIT_TIME=${FRANKENPHP_MAX_WAIT_TIME:-30s}
+      - FRANKENPHP_NUM_THREADS=${FRANKENPHP_NUM_THREADS:-16}
+      - FRANKENPHP_MAX_THREADS=${FRANKENPHP_MAX_THREADS:-64}
+
+  neo4j:
+    image: neo4j:5.25
+    expose:
+      - "7474"
+      - "7687"
+    environment:
+      - NEO4J_AUTH=neo4j/password
+
+  mongodb:
+    image: mongo:8
+    expose:
+      - "27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - GLIBC_TUNABLES=glibc.pthread.rseq=1
+
+  elasticsearch:
+    image: elasticsearch:8.17.2
+    expose:
+      - "9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=true
+
+  redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    expose:
+      - "5672"
+      - "15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+
+  minio:
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    expose:
+      - "9000"
+      - "9001"
+    environment:
+      - MINIO_ROOT_USER=ROOTNAME
+      - MINIO_ROOT_PASSWORD=CHANGEME123
+    command: server /data --console-address ":9001"
+
+  minio-init:
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set minio http://minio:9000 ROOTNAME CHANGEME123; do
+        echo 'Waiting for MinIO...';
+        sleep 1;
+      done;
+
+      mc mb --ignore-existing minio/api-storage;
+      mc mb --ignore-existing minio/api-upload;
+
+      mc anonymous set none minio/api-storage;
+      mc anonymous set none minio/api-upload;
+
+      mc admin user add minio accessKey secretKey || true;
+      mc admin policy attach minio readwrite --user accessKey;
+
+      echo 'MinIO buckets and user configured';
+      "

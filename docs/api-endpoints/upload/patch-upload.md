@@ -5,6 +5,14 @@ This endpoint is used to upload a new chunk to the resumable upload.
 The new chunk can be of zero length - acting similar to the `HEAD /upload/<uuid>` endpoint, but also enabling the user
 to complete an upload without transmitting additional chunks.
 
+## Access Control
+
+Only the user who created the upload may add chunks to it.
+
+Access to the upload's target element is re-checked on **every** chunk, not just when the upload is created. If
+that access is revoked mid-upload, further chunks are rejected and the upload can no longer be completed; it can
+still be cancelled with `DELETE /upload/<uuid>`.
+
 ## Request Example
 
 ```bash

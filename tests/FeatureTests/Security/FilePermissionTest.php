@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Security;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies the "security.filePermission" reference dataset scenario: User A created and owns a Data element
  * with a file, User B has no relation to it at all and must be unable to see the element or its file.
  */
-#[Group('test')]
 class FilePermissionTest extends BaseRequestTestCase
 {
     private const string TOKEN_USER_A = 'secret-token:V8m72O3ovtRU09JrdbJRnh';

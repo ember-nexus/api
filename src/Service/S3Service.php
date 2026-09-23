@@ -6,29 +6,50 @@ namespace App\Service;
 
 use App\Contract\S3\FileOperationInterface;
 use App\Contract\S3\MergeFileChunksOperationInterface;
+use App\Contract\S3\S3TechnicalLimitsInterface;
 use App\Contract\S3\UploadFileChunkOperationInterface;
 use App\Contract\S3\UploadFileOperationInterface;
+use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\UploadFileChunkOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Type\S3\FileOperation;
 use App\Wrapper\S3ClientWrapper;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
+/**
+ * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ */
 class S3Service
 {
+    /**
+     * Kept well below the backend's single PUT limit, as a failed single PUT has to be retried completely.
+     */
+    public const int MULTIPART_UPLOAD_THRESHOLD_IN_BYTES = 500 * 1024 * 1024;
+
+    /**
+     * Minimum part size, increased for large files to stay within the backend's maximum part count.
+     */
+    public const int MULTIPART_UPLOAD_PART_SIZE_IN_BYTES = 100 * 1024 * 1024;
+
     public function __construct(
         private S3Client $s3Client,
-        private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3ClientWrapper $s3ClientWrapper,
         private MimeTypeService $mimeTypeService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private S3TechnicalLimitsInterface $s3TechnicalLimits,
+        private LoggerInterface $logger,
         S3TechnicalLimitsValidator $s3TechnicalLimitsValidator,
+        private int $multipartUploadThresholdInBytes = self::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
+        private int $multipartUploadPartSizeInBytes = self::MULTIPART_UPLOAD_PART_SIZE_IN_BYTES,
     ) {
-        $s3TechnicalLimitsValidator->validate();
+        $s3TechnicalLimitsValidator->validate($this->multipartUploadThresholdInBytes);
     }
 
     /**
@@ -101,11 +122,7 @@ class S3Service
                 ],
             ]);
         } catch (Throwable $e) {
-            $this->s3Client->abortMultipartUpload([
-                'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
-                'Key' => $mergeFileChunksOperation->getStorageKey(),
-                'UploadId' => $multipartUploadId,
-            ]);
+            $this->tryAbortMultipartUpload($mergeFileChunksOperation->getStorageBucket(), $mergeFileChunksOperation->getStorageKey(), $multipartUploadId);
 
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
         }
@@ -115,15 +132,29 @@ class S3Service
             $mergeFileChunksOperation->getStorageKey()
         ));
 
-        $previousStorageKey = $mergeFileChunksOperation->getPreviousStorageKey();
-        if (null !== $previousStorageKey && $previousStorageKey !== $mergeFileChunksOperation->getStorageKey()) {
-            $this->deleteFile(new FileOperation(
-                $mergeFileChunksOperation->getStorageBucket(),
-                $previousStorageKey
-            ));
-        }
+        // the previous object (different extension) is deleted by the caller once the element points to the new one
 
         return $mergedContentLength;
+    }
+
+    /**
+     * Total size of all chunks which would be merged; null if a chunk is missing or unreadable.
+     */
+    public function getChunksContentLength(MergeFileChunksOperationInterface $mergeFileChunksOperation): ?int
+    {
+        $totalContentLength = 0;
+        foreach ($mergeFileChunksOperation->getUploadKeys() as $uploadKey) {
+            try {
+                $totalContentLength += $this->getContentLength(new FileOperation(
+                    $mergeFileChunksOperation->getUploadBucket(),
+                    $uploadKey
+                ));
+            } catch (Throwable) {
+                return null;
+            }
+        }
+
+        return $totalContentLength;
     }
 
     public function deleteFileChunks(MergeFileChunksOperationInterface $mergeFileChunksOperation): void
@@ -164,14 +195,17 @@ class S3Service
     }
 
     /**
-     * Writes the whole file with a single PUT, which caps it at S3's 5 GiB single-object-upload limit. Requests
-     * reaching this are already bounded well below that by `post_max_size`, but `BackupLoadCommand` is not: it
-     * restores files straight from a backup archive, so a backup holding a file larger than 5 GiB fails to load.
-     * Lifting that needs multipart, tracked in https://github.com/ember-nexus/api/issues/452.
+     * Files from {@see MULTIPART_UPLOAD_THRESHOLD_IN_BYTES} upwards are streamed directly into the storage bucket as
+     * a multipart upload, smaller ones are copied over from the upload bucket.
      */
     public function uploadFile(UploadFileOperationInterface $uploadFileOperation): int
     {
-        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
+        $contentLength = $uploadFileOperation->getContentLength();
+        if (null !== $contentLength && $contentLength >= $this->multipartUploadThresholdInBytes) {
+            return $this->uploadFileViaMultipartUpload($uploadFileOperation, $contentLength);
+        }
+
+        $uploadFileChunkOperation = $this->s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
         $contentLength = $this->uploadFileChunk($uploadFileChunkOperation);
 
         $copyResult = $this->s3Client->copyObject([
@@ -188,14 +222,7 @@ class S3Service
 
         try {
             $this->s3ClientWrapper->resolveCopyObjectOutput($copyResult);
-            $previousStorageKey = $uploadFileOperation->getPreviousStorageKey();
-            if (null !== $previousStorageKey && $previousStorageKey !== $uploadFileOperation->getStorageKey()) {
-                $this->deleteFile(new FileOperation(
-                    $uploadFileOperation->getStorageBucket(),
-                    $previousStorageKey
-                ));
-            }
-
+            // the previous object (different extension) is deleted by the caller once the element points to the new one
             $this->deleteFile(new FileOperation(
                 $uploadFileOperation->getUploadBucket(),
                 $uploadFileOperation->getUploadKey()
@@ -205,6 +232,117 @@ class S3Service
         }
 
         return $contentLength;
+    }
+
+    /**
+     * Skips the upload bucket, as `copyObject` has the same size limit as a single PUT. Only one part is held in
+     * memory at a time.
+     *
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     */
+    private function uploadFileViaMultipartUpload(UploadFileOperationInterface $uploadFileOperation, int $contentLength): int
+    {
+        $storageBucket = $uploadFileOperation->getStorageBucket();
+        $storageKey = $uploadFileOperation->getStorageKey();
+        $partSizeInBytes = $this->getMultipartUploadPartSizeInBytes($contentLength);
+
+        $multipartUploadId = $this->s3Client->createMultipartUpload([
+            'Bucket' => $storageBucket,
+            'Key' => $storageKey,
+            'ContentType' => $uploadFileOperation->getMimeType(),
+        ])->getUploadId();
+
+        if (null === $multipartUploadId) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to create multipart upload.');
+        }
+
+        $uploadedContentLength = 0;
+        try {
+            $parts = [];
+            $resource = $uploadFileOperation->getContent();
+            // mime type detection and hashing have already consumed part of the stream
+            \Safe\rewind($resource);
+            while (!feof($resource)) {
+                $body = \Safe\stream_get_contents($resource, $partSizeInBytes);
+                if ('' === $body) {
+                    break;
+                }
+
+                $partNumber = count($parts) + 1;
+                $etag = $this->s3Client->uploadPart([
+                    'Bucket' => $storageBucket,
+                    'Key' => $storageKey,
+                    'UploadId' => $multipartUploadId,
+                    'PartNumber' => $partNumber,
+                    'Body' => $body,
+                ])->getETag();
+
+                if (null === $etag) {
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Unable to read etag of uploaded part %d.', $partNumber));
+                }
+
+                $parts[] = [
+                    'PartNumber' => $partNumber,
+                    'ETag' => $etag,
+                ];
+                $uploadedContentLength += strlen($body);
+            }
+
+            // verified before completing, as a completed multipart upload would already replace the previous file
+            if ($uploadedContentLength !== $contentLength) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Inconsistent length values between provided content-length (%d) and actual content length (%d) detected.', $contentLength, $uploadedContentLength));
+            }
+
+            $this->s3Client->completeMultipartUpload([
+                'Bucket' => $storageBucket,
+                'Key' => $storageKey,
+                'UploadId' => $multipartUploadId,
+                'MultipartUpload' => [
+                    'Parts' => $parts,
+                ],
+            ]);
+        } catch (Throwable $e) {
+            $this->tryAbortMultipartUpload($storageBucket, $storageKey, $multipartUploadId);
+
+            if ($e instanceof Client400BadContentException) {
+                throw $e;
+            }
+
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
+        }
+
+        // the previous object (different extension) is deleted by the caller once the element points to the new one
+
+        return $uploadedContentLength;
+    }
+
+    /**
+     * Failures are only logged, so that they do not replace the original exception.
+     */
+    private function tryAbortMultipartUpload(string $bucket, string $key, string $multipartUploadId): void
+    {
+        try {
+            // AsyncAws requests are lazy; resolve() forces a failure to be thrown here instead of on destruction
+            $this->s3ClientWrapper->resolveAbortMultipartUploadOutput($this->s3Client->abortMultipartUpload([
+                'Bucket' => $bucket,
+                'Key' => $key,
+                'UploadId' => $multipartUploadId,
+            ]));
+        } catch (Throwable $e) {
+            $this->logger->warning('Unable to abort multipart upload.', [
+                'bucket' => $bucket,
+                'key' => $key,
+                'uploadId' => $multipartUploadId,
+                'exception' => $e,
+            ]);
+        }
+    }
+
+    private function getMultipartUploadPartSizeInBytes(int $contentLength): int
+    {
+        $partSizeRequiredByMaxChunkCount = (int) ceil($contentLength / $this->s3TechnicalLimits->getMaxChunkCount());
+
+        return max($this->multipartUploadPartSizeInBytes, $partSizeRequiredByMaxChunkCount);
     }
 
     public function deleteFile(FileOperationInterface $fileOperation): void
@@ -248,8 +386,7 @@ class S3Service
     }
 
     /**
-     * Reads only the given inclusive byte range [$start, $end] from S3, via the `Range` request header, instead
-     * of downloading the whole file.
+     * Reads the inclusive byte range [$start, $end].
      */
     public function getFileByteRange(FileOperationInterface $fileOperation, int $start, int $end): GetObjectOutput
     {
@@ -280,16 +417,19 @@ class S3Service
      */
     public function getFileRangeAsResource(FileOperationInterface $fileOperation, int $maxContentLength)
     {
+        if ($maxContentLength <= 0) {
+            return \Safe\fopen('php://memory', 'r');
+        }
         $contentLength = $this->getContentLength($fileOperation);
-        if (0 === $contentLength) {
-            // a byte-range request against an empty object has no satisfiable range (S3 rejects it with a 416),
-            // and there is nothing to fetch either way - an empty resource is the correct result directly.
+        $lengthToRead = min($contentLength, $maxContentLength);
+        if ($lengthToRead <= 0) {
+            // S3 rejects range requests against empty objects with a 416
             return \Safe\fopen('php://memory', 'r');
         }
         $result = $this->s3Client->getObject([
             'Bucket' => $fileOperation->getBucket(),
             'Key' => $fileOperation->getKey(),
-            'Range' => sprintf('bytes=0-%d', min($contentLength, $maxContentLength)),
+            'Range' => sprintf('bytes=0-%d', $lengthToRead - 1),
         ]);
 
         return $result->getBody()->getContentAsResource();
@@ -334,8 +474,7 @@ class S3Service
     }
 
     /**
-     * Assumes that the first chunk a) exists and is b) sufficiently long to correctly determine the MimeType. This is
-     * currently the case, as S3's minimum chunk length is 5MB - sufficient for MimeType detection.
+     * Only the first chunk is used for detection, which is sufficient due to the minimum chunk size of 5 MiB.
      */
     public function getMimeTypeFromMergeFileChunksOperation(MergeFileChunksOperationInterface $mergeFileChunksOperation): string
     {

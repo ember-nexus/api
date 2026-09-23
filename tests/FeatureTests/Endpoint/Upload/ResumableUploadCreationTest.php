@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * The resumable upload draft standard (the basis for this API's `POST`/`PATCH` upload endpoints) allows a
- * resumable upload to be created either with an initial chunk of data, or with none at all - an empty body
- * alongside `Upload-Complete: ?0`, which merely reserves the upload without transferring any bytes yet. This is
- * explicitly permitted unless a server opts out of it; this API does not, so both forms are covered here.
+ * Verifies that a resumable upload can be created both with an initial chunk and with an empty body
+ * (`Upload-Complete: ?0`), as permitted by the resumable upload draft standard.
  */
-#[Group('test')]
 class ResumableUploadCreationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
@@ -95,8 +91,7 @@ class ResumableUploadCreationTest extends BaseRequestTestCase
         $this->assertSame('?0', $headResponse->getHeader('Upload-Complete')[0]);
         $this->assertSame('0', $headResponse->getHeader('Upload-Offset')[0]);
 
-        // an empty-data creation is a genuinely usable upload session, not just an accepted-but-broken stub: the
-        // whole file can still be appended and completed from offset 0 via PATCH
+        // the whole file can still be appended from offset 0 and completed via PATCH
         $filePath = __DIR__.'/../../Asset/resumable-upload-creation-without-data.bin';
         $this->generateDeterministicFile(56473829, self::CHUNK_SIZE, $filePath);
         $file = \Safe\fopen($filePath, 'r');

@@ -11,8 +11,7 @@ use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
-use App\Factory\Type\S3\UploadFileChunkOperationFactory;
-use App\Factory\Type\S3\UploadFileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Security\AuthProvider;
 use App\Type\Response\CreatedResponse;
 use App\Type\Upload;
@@ -38,14 +37,19 @@ class UploadCreationService
         private IncrementalHashService $incrementalHashService,
         private DigestService $digestService,
         private ElementManager $elementManager,
-        private UploadFileOperationFactory $uploadFileOperationFactory,
-        private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private ResumableUploadRequestFactory $resumableUploadRequestFactory,
         private EventDispatcherInterface $eventDispatcher,
         private NoContentResponseFactory $noContentResponseFactory,
         private UrlGeneratorInterface $urlGenerator,
         private UploadService $uploadService,
+        private FileSizeLimitService $fileSizeLimitService,
+        private UploadBodyLimitService $uploadBodyLimitService,
+        private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private UploadChunkValidator $uploadChunkValidator,
+        private ElementFileDeletionService $elementFileDeletionService,
+        private ElementService $elementService,
     ) {
     }
 
@@ -56,45 +60,61 @@ class UploadCreationService
         $resumableUploadRequest = $this->resumableUploadRequestFactory->createResumableUploadRequestFromRequest($request, $elementId);
 
         if (false === $resumableUploadRequest->isUploadComplete()) {
-            return $this->createNewResumableUpload($resumableUploadRequest);
+            return $this->createNewResumableUpload($resumableUploadRequest, $this->elementService->hasFile($element));
         }
 
-        $requestDigestHeaderValue = $request->headers->get('Repr-Digest') ?? $request->headers->get('Content-Digest');
+        // the body of a single request is the whole file, so `Repr-Digest` and `Content-Digest` describe the same bytes
+        // and every supplied one has to match
+        $requestDigestHeaderValues = [];
+        foreach (['Repr-Digest', 'Content-Digest'] as $headerName) {
+            $headerValue = $request->headers->get($headerName);
+            if (null !== $headerValue) {
+                $requestDigestHeaderValues[$headerName] = $headerValue;
+            }
+        }
 
-        return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest, $requestDigestHeaderValue);
+        return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest, $requestDigestHeaderValues);
     }
 
+    /**
+     * @param array<string, string> $requestDigestHeaderValues digest header values by header name
+     */
     private function setOrReplaceElementFileDirectly(
         NodeElementInterface|RelationElementInterface $element,
         ResumableUploadRequestInterface $resumableUploadRequest,
-        ?string $requestDigestHeaderValue,
+        array $requestDigestHeaderValues,
     ): Response {
-        // the request body is hashed once, locally, then rewound, before anything else (including
-        // UploadFileOperationFactory's own mime type sniffing) reads it - see IncrementalHashService for why this
-        // is not done via a persistently-attached stream filter instead.
+        $contentLength = $resumableUploadRequest->getContentLength();
+        if (null !== $contentLength) {
+            $this->fileSizeLimitService->assertWithinMaxFileSize($contentLength);
+        }
+        // a single request is bound by the maximum chunk size; the content itself is bound in the request factory
+        $this->uploadBodyLimitService->assertDeclaredLengthWithinLimit($contentLength);
+
         $resource = $resumableUploadRequest->getContent();
+        // hashed before the upload, so that a digest mismatch never replaces an existing file
         $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
         $hash = $this->incrementalHashService->finalize($hashContext);
 
-        // building the operation only sniffs the mime type locally; it does not touch S3 - so the digest, now
-        // already known, can be verified before the storage bucket is ever written to. On a mismatch, this means
-        // an existing file at this element is never replaced/overwritten in the first place.
-        $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
+        $uploadFileOperation = $this->s3OperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
 
-        if (null !== $requestDigestHeaderValue) {
-            $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
+        foreach ($requestDigestHeaderValues as $headerName => $requestDigestHeaderValue) {
+            $this->verifyRequestDigest($headerName, $requestDigestHeaderValue, $hash);
         }
 
-        $this->s3Service->uploadFile($uploadFileOperation);
+        // authoritative length, the Content-Length header is optional (e.g. chunked transfer encoding)
+        $uploadedContentLength = $this->s3Service->uploadFile($uploadFileOperation);
+        // the S3 client may already have closed the resource while uploading it
+        /** @psalm-suppress RedundantConditionGivenDocblockType */
         if (is_resource($resource)) {
             \Safe\fclose($resource);
         }
 
-        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
-
+        // the new object is written first and the element is flushed before the previous object is deleted: a failing
+        // flush leaves the old file readable (an overwrite of the same key can not be rolled back)
         $element->addProperty('file', [
-            'contentLength' => $uploadFileOperation->getContentLength(),
+            'contentLength' => $uploadedContentLength,
             'extension' => $resumableUploadRequest->getExtension(),
             'mimeType' => $uploadFileOperation->getMimeType(),
             'hash' => [
@@ -105,57 +125,64 @@ class UploadCreationService
         $this->elementManager->merge($element);
         $this->elementManager->flush();
 
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace($uploadFileOperation);
+        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
+
         return new CreatedResponse();
     }
 
-    private function verifyRequestDigest(string $requestDigestHeaderValue, string $actualHash): void
+    private function verifyRequestDigest(string $headerName, string $requestDigestHeaderValue, string $actualHash): void
     {
         $expectedHash = $this->digestService->parseSha256HexFromHeaderValue($requestDigestHeaderValue);
         if (null === $expectedHash) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not verify upload: 'Repr-Digest'/'Content-Digest' header '%s' does not declare a supported digest algorithm; only 'sha-256' is supported.", $requestDigestHeaderValue));
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not verify upload: '%s' header '%s' does not declare a supported digest algorithm; only 'sha-256' is supported.", $headerName, $requestDigestHeaderValue));
         }
         if ($expectedHash !== $actualHash) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Could not verify upload: the declared digest does not match the uploaded file\'s actual content.');
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Could not verify upload: the digest declared in \'%s\' does not match the uploaded file\'s actual content.', $headerName));
         }
     }
 
-    private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest): Response
+    private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest, bool $targetHadFileAtCreation): Response
     {
+        $uploadLength = $resumableUploadRequest->getUploadLength();
+        if (null !== $uploadLength) {
+            $this->fileSizeLimitService->assertWithinMaxFileSize($uploadLength);
+        }
+
         $uploadId = Uuid::uuid4();
 
         $uploadOffset = 0;
-        $alreadyUploadedChunks = 0;
+        $chunkIds = [];
         $hashState = null;
-        if (0 !== $resumableUploadRequest->getContentLength()) {
-            // the chunk is hashed once, locally, then rewound, before S3Service ever sees it; the running hash
-            // state is persisted on the Upload element for the next chunk to resume from, so the final hash never
-            // requires reading the file back from S3 at all.
-            $resource = $resumableUploadRequest->getContent();
+        $resource = $resumableUploadRequest->getContent();
+        // the body is buffered by the request factory, so its size is known even without `Content-Length`
+        $contentLength = $resumableUploadRequest->getContentLength() ?? \Safe\fstat($resource)['size'];
+        if (0 === $contentLength) {
+            // an empty first chunk only creates the upload, S3 does not accept empty parts
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
+            if (is_resource($resource)) {
+                \Safe\fclose($resource);
+            }
+        } else {
+            // rejected before anything is sent to S3
+            $this->uploadChunkValidator->assertWithinDeclaredLength($contentLength, false, 0, $uploadLength);
             $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
             $this->incrementalHashService->updateFromResource($hashContext, $resource);
 
-            $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
+            $chunkId = $this->fileService->generateUploadChunkId();
+            $uploadFileChunkOperation = $this->s3OperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, $chunkId);
             $uploadOffset = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+            // the S3 client may already have closed the resource while uploading it
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
             if (is_resource($resource)) {
                 \Safe\fclose($resource);
             }
 
             $hashState = $this->incrementalHashService->serializeContextForStorage($hashContext);
 
-            $alreadyUploadedChunks = 1;
-            if ($uploadOffset < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
-                /**
-                 * file chunk has to be bigger than <min> length, unless:
-                 *   - it is the last file chunk, which can contain data of arbitrary length (max limit still applies)
-                 *   - it is of zero length -> no actual content / client just asks for upload limits & starts upload process
-                 */
-                if (false === $resumableUploadRequest->isUploadComplete()) {
-                    throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $uploadOffset));
-                }
-            }
-            if ($uploadOffset > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
-                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $uploadOffset));
-            }
+            $chunkIds = [$chunkId];
+            // a single request completes the upload, so this is never the final chunk
+            $this->uploadChunkValidator->assertChunkSize($uploadOffset, false, 0);
         }
 
         $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));
@@ -165,11 +192,12 @@ class UploadCreationService
             $uploadOffset,
             $resumableUploadRequest->isUploadComplete() ?? false,
             $resumableUploadRequest->getElementId(),
-            $alreadyUploadedChunks,
+            $chunkIds,
             $this->authProvider->getUserId(),
             $resumableUploadRequest->getExtension(),
             $expires,
-            $hashState
+            $hashState,
+            $targetHadFileAtCreation
         );
 
         $this->uploadService->mergeUploadElement($upload);

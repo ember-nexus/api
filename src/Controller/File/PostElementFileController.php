@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\ElementService;
+use App\Service\FileCreationLockService;
 use App\Service\UploadCreationService;
+use App\Service\UploadService;
 use App\Type\AccessType;
+use App\Type\EtagType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,8 +24,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * @todo add support for etags
- *
  * @SuppressWarnings("PHPMD.UnusedFormalParameter")
  */
 class PostElementFileController extends AbstractController
@@ -30,8 +33,11 @@ class PostElementFileController extends AbstractController
         private AccessChecker $accessChecker,
         private UploadCreationService $uploadCreationService,
         private ElementManager $elementManager,
+        private ElementService $elementService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
+        private FileCreationLockService $fileCreationLockService,
+        private UploadService $uploadService,
     ) {
     }
 
@@ -43,6 +49,7 @@ class PostElementFileController extends AbstractController
         ],
         methods: ['POST']
     )]
+    #[EndpointSupportsEtag(EtagType::FILE)]
     public function postElementFile(string $id, Request $request): Response
     {
         $elementId = UuidV4::fromString($id);
@@ -52,12 +59,25 @@ class PostElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElementOrFail($elementId);
-        $properties = $element->getProperties();
-        if (array_key_exists('file', $properties)) {
-            throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Element with id '%s' already has an associated file; can not create new file. Delete existing file first or replace it with PUT.", $element->getId()?->toString() ?? 'missing element id'));
+        // POST creates the file: only one creation per element at a time, the lock is released as soon as the request
+        // ends (also on errors), or expires on its own if the process dies
+        $lockToken = $this->fileCreationLockService->acquire($elementId);
+        if (null === $lockToken) {
+            throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Another request is currently creating the file of element with id '%s'.", $elementId->toString()));
         }
 
-        return $this->uploadCreationService->handleUploadCreationFromRequest($elementId, $request);
+        try {
+            $element = $this->elementManager->getElementOrFail($elementId);
+            if ($this->elementService->hasFile($element)) {
+                throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Element with id '%s' already has an associated file; can not create new file. Delete existing file first or replace it with PUT.", $element->getId()?->toString() ?? 'missing element id'));
+            }
+            if ($this->uploadService->hasUploadsTargeting($elementId)) {
+                throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("An upload for element with id '%s' is in progress; can not create new file. Finish or delete the upload first.", $elementId->toString()));
+            }
+
+            return $this->uploadCreationService->handleUploadCreationFromRequest($elementId, $request);
+        } finally {
+            $this->fileCreationLockService->release($elementId, $lockToken);
+        }
     }
 }

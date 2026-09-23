@@ -1,0 +1,107 @@
+{
+	auto_https off
+	admin off
+	servers {
+		protocols h1
+		timeouts {
+			# default for all endpoints, upload endpoints are extended below
+			read_body {$API_REQUEST_BODY_TIMEOUT:30s}
+		}
+	}
+	log {
+		output stdout
+		format json
+	}
+	frankenphp {
+		# upload requests hold a PHP thread while the client sends the request body, so more threads than the default
+		# (2x cores) may be started under load; both values are calculated by the entrypoint, the fallbacks are only used
+		# if it did not run. `num_threads` has to be set explicitly, as it drops to 1 as soon as `max_threads` is set.
+		num_threads {$FRANKENPHP_NUM_THREADS:16}
+		max_threads {$FRANKENPHP_MAX_THREADS:auto}
+		# do not queue requests forever if all threads are busy
+		max_wait_time {$FRANKENPHP_MAX_WAIT_TIME:30s}
+	}
+	# no `supervisor` block here, unlike the production Caddyfile: the dev image has no vendor/ installed by default
+	# (it's provided by the mounted source instead), so supercronic's scheduled `php bin/console cron` runs would fail
+	# with a missing symfony/runtime error until `composer install` is run manually
+}
+
+# headers of problem json responses which are created by the server instead of the application, they have to be
+# identical to the headers of the application's error responses, see public/index.php and ProblemJsonResponse;
+# errors of the web server have no route, therefore no `Allow` header
+(problem_json_headers) {
+	header {
+		Access-Control-Allow-Headers "*"
+		Access-Control-Allow-Methods "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+		Access-Control-Allow-Origin "*"
+		Access-Control-Expose-Headers "ETag, Location"
+		Cache-Control "no-cache, private"
+		Content-Type "application/problem+json; charset=utf-8"
+		X-Powered-By "Ember Nexus API"
+	}
+}
+
+:80 {
+	root * /var/www/html/public
+	encode zstd br gzip
+	header {
+		-Server
+		-Set-Cookie
+	}
+	# identifies the request in the access log below and, via the request header, in the logs of the application; it is
+	# not part of the response headers, but of the `instance` of every problem json response (`urn:uuid:<id>`); always
+	# set by the server, so that clients can not spoof it in the logs
+	request_header X-Request-Id "{http.request.uuid}"
+	log_append request_id {http.request.uuid}
+	request_body {
+		max_size 101MiB
+	}
+	# only endpoints which receive upload data from the client may take up to 15 minutes to receive it: single request
+	# uploads (POST/PUT /<id>/file) and resumable upload chunks (PATCH /upload/<id>); slow clients have to send
+	# smaller chunks
+	@uploadFile {
+		method POST PUT
+		path_regexp ^/[0-9a-fA-F-]{36}/file$
+	}
+	@uploadChunk {
+		method PATCH
+		path_regexp ^/upload/[0-9a-fA-F-]{36}$
+	}
+	request_body @uploadFile {
+		read_timeout {$API_UPLOAD_REQUEST_BODY_TIMEOUT:15m}
+	}
+	request_body @uploadChunk {
+		read_timeout {$API_UPLOAD_REQUEST_BODY_TIMEOUT:15m}
+	}
+	# server errors which do not come from the application as problem json still get a problem json body, in the same
+	# format as the application's errors (compact json, member order type, title, status, instance, detail, `type` links to the error page, but as relative reference
+	# without scheme and host, which clients resolve against the request URI, see RFC 9457):
+	# - PHP failures before the application handles them (e.g. PHP can not start the application at all) answer with
+	#   an empty body and the default html content type -> 500
+	# - FrankenPHP answers by itself, without content type, if it did not get a free PHP thread in time
+	#   (`max_wait_time`) -> 503; this is the only such case, other server errors are not rewritten
+	intercept {
+		@phpFailure {
+			status 5xx
+			header Content-Type text/html*
+		}
+		handle_response @phpFailure {
+			import problem_json_headers
+			respond `{"type":"/error/500/internal-server-error","title":"Internal server error","status":500,"instance":"urn:uuid:{http.request.uuid}","detail":"Internal server error, see log."}` 500
+		}
+		@noFreePhpThread {
+			status 503
+			header !Content-Type
+		}
+		handle_response @noFreePhpThread {
+			import problem_json_headers
+			respond `{"type":"/error/503/service-unavailable","title":"Service unavailable","status":503,"instance":"urn:uuid:{http.request.uuid}","detail":"The service itself or an internal component is currently unavailable."}` 503
+		}
+	}
+	log {
+	    no_hostname
+		output stdout
+		format json
+	}
+	php_server
+}

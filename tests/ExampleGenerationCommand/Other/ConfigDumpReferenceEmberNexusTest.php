@@ -10,7 +10,7 @@ class ConfigDumpReferenceEmberNexusTest extends BaseCommandTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
-    public function testUserCreateHelp(): void
+    public function testConfigDumpReferenceEmberNexusHelp(): void
     {
         $commandOutput = $this->runCommand(
             'APP_ENV=dev php bin/console config:dump-reference ember_nexus'

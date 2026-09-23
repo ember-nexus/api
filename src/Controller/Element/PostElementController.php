@@ -12,6 +12,7 @@ use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\RelationElement;
@@ -34,6 +35,7 @@ class PostElementController extends AbstractController
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -60,7 +62,7 @@ class PostElementController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         if (array_key_exists('start', $body)) {
             // owns-relation can only target nodes

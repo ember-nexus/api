@@ -5,18 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\General\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Covers:
- * - 'file' is exposed as a top-level property (sibling of id/type/data), 'hasFile' is a plain boolean inside
- *   'data', kept in sync automatically.
- * - 'file' is present, and 'hasFile' is omitted from top-level collection/parent listings ('hasFile' remains
- *   visible in 'data', 'file' is not).
- * - both 'file' and 'hasFile' are reserved: a client can not set them directly via POST/PUT/PATCH.
- * - a PUT (full data replace) does not wipe an element's file.
+ * Verifies that 'file' is a top-level property and 'hasFile' a boolean inside 'data', both for direct fetches and
+ * collection responses; that clients can not write either property via POST/PATCH; and that PUT keeps the file.
  */
-#[Group('test')]
 class FileTopLevelPropertyTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
@@ -70,9 +63,7 @@ class FileTopLevelPropertyTest extends BaseRequestTestCase
 
     public function testCollectionListingIncludesFileAndHasFile(): void
     {
-        // a dedicated, freshly created parent is used (instead of e.g. the shared botanicExample user's
-        // children) so the collection queried here is not shared with, and can not race against, any other
-        // (parallel) test.
+        // dedicated parent, so the collection can not race against other (parallel) tests
         $parentResponse = $this->runPostRequest(
             '/',
             self::TOKEN,

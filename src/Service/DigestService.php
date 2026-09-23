@@ -7,13 +7,8 @@ namespace App\Service;
 use Throwable;
 
 /**
- * Implements the parts of RFC 9530 ("Digest Fields") relevant to file integrity: formatting a `Repr-Digest` /
- * `Content-Digest` response header from a stored hash, and parsing a client-supplied `Repr-Digest` /
- * `Content-Digest` request header for verification against an uploaded file.
- *
- * Only the `sha-256` algorithm (RFC 9530's registered label for our stored `file.hash.sha256`) is supported.
- * Digest field values are RFC 8941 Dictionaries of `<algorithm>=:<base64 digest>:` members; only that single
- * member is looked for, other (unsupported) algorithm members in the same header are ignored.
+ * Formats and parses RFC 9530 `Repr-Digest` / `Content-Digest` header values. Only `sha-256` is supported, other
+ * algorithm members are ignored.
  */
 class DigestService
 {
@@ -25,8 +20,7 @@ class DigestService
     }
 
     /**
-     * Returns the hex-encoded sha-256 hash declared in the header value, or null if the header does not declare a
-     * usable sha-256 member (either only unsupported algorithms were offered, or the sha-256 value is malformed).
+     * Returns the hex-encoded sha-256 hash, or null if the header contains no valid sha-256 member.
      */
     public function parseSha256HexFromHeaderValue(string $headerValue): ?string
     {

@@ -101,7 +101,7 @@ class AccessChecker
             "      (\n".
             "        relation.onCreatedByUser IS NULL\n".
             "        OR\n".
-            "        (element)<-[:CREATED_BY*]-(user)\n".
+            "        (element)<-[:CREATED*]-(user)\n".
             "      )\n".
             "    )\n".
             "  )\n".
@@ -162,7 +162,7 @@ class AccessChecker
             "      (\n".
             "        relation.onCreatedByUser IS NULL\n".
             "        OR\n".
-            "        (element)<-[:CREATED_BY*]-(user)\n".
+            "        (element)<-[:CREATED*]-(user)\n".
             "      )\n".
             "    )\n".
             "  )\n".
@@ -225,7 +225,7 @@ class AccessChecker
             "        (\n".
             "          startRelation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (start)<-[:CREATED_BY*]-(user)\n".
+            "          (start)<-[:CREATED*]-(user)\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -265,7 +265,7 @@ class AccessChecker
             "        (\n".
             "          endRelation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (end)<-[:CREATED_BY*]-(user)\n".
+            "          (end)<-[:CREATED*]-(user)\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -337,7 +337,7 @@ class AccessChecker
             "        (\n".
             "          startRelation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (start)<-[:CREATED_BY*]-(user)\n".
+            "          (start)<-[:CREATED*]-(user)\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -377,7 +377,7 @@ class AccessChecker
             "        (\n".
             "          endRelation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (end)<-[:CREATED_BY*]-(user)\n".
+            "          (end)<-[:CREATED*]-(user)\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -677,7 +677,7 @@ class AccessChecker
             "        (\n".
             "          relation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (element)<-[:CREATED_BY*]-(user)\n".
+            "          (element)<-[:CREATED*]-(user)\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -688,7 +688,7 @@ class AccessChecker
             "      ANY(relation in relations WHERE\n".
             '        type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
             "        AND\n".
-            "        (element)<-[:CREATED_BY*]-(user)\n".
+            "        (element)<-[:CREATED*]-(user)\n".
             "      )\n".
             "    )\n".
             "  )\n".
@@ -758,7 +758,7 @@ class AccessChecker
             "          (\n".
             "            relation.onCreatedByUser IS NULL\n".
             "            OR\n".
-            "            (start)<-[:CREATED_BY*]-(startUser)\n".
+            "            (start)<-[:CREATED*]-(startUser)\n".
             "          )\n".
             "        )\n".
             "      )\n".
@@ -769,7 +769,7 @@ class AccessChecker
             "        ANY(relation in startRelations WHERE\n".
             '          type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
             "          AND\n".
-            "          (start)<-[:CREATED_BY*]-(startUser)\n".
+            "          (start)<-[:CREATED*]-(startUser)\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -810,7 +810,7 @@ class AccessChecker
             "          (\n".
             "            relation.onCreatedByUser IS NULL\n".
             "            OR\n".
-            "            (end)<-[:CREATED_BY*]-(endUser)\n".
+            "            (end)<-[:CREATED*]-(endUser)\n".
             "          )\n".
             "        )\n".
             "      )\n".
@@ -825,7 +825,7 @@ class AccessChecker
             '            type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
             "          )\n".
             "          AND\n".
-            "          (end)<-[:CREATED_BY*]-(endUser)\n".
+            "          (end)<-[:CREATED*]-(endUser)\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -978,7 +978,7 @@ WHERE
       AND
       (
         relation.onCreatedByUser IS NULL
-        OR (element)<-[:CREATED_BY*]-(user)
+        OR (element)<-[:CREATED*]-(user)
       )
     )
   )

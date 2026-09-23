@@ -5,18 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * A zero-length file can also be produced through the resumable upload flow, across two requests which both carry
- * no data at all: the creation request (`Upload-Complete: ?0`, empty body - see ResumableUploadCreationTest) is
- * immediately followed by a completing PATCH (`Upload-Complete: ?1`, `Upload-Offset: 0`, still an empty body).
- * This exercises `PatchUploadController::createFile()`'s merge path with a single zero-byte chunk, which is a
- * meaningfully different code path from the direct upload covered by ZeroByteFileUploadTest (real S3 multipart
- * upload machinery: `CreateMultipartUpload`/`UploadPartCopy`/`CompleteMultipartUpload`, rather than a single
- * `PutObject`).
+ * Verifies that a zero-length file can be created through the resumable upload flow: an empty creation request
+ * followed by an empty completing PATCH. Unlike ZeroByteFileUploadTest, this goes through the S3 multipart merge
+ * path of `PatchUploadController::createFile()`.
  */
-#[Group('test')]
 class ZeroByteResumableUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

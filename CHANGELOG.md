@@ -6,27 +6,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- Add file endpoints `GET`/`POST`/`PUT`/`DELETE /<uuid>/file` and resumable, chunked upload endpoints
+  `POST`/`PATCH`/`DELETE`/`HEAD /<uuid>/upload`, backed by S3 / object storage, closes #119.
+- Add `ETag`, `If-Match`, `If-None-Match` and `If-Range` support to file endpoints (not upload endpoints, decided as
+  final), related to #119.
+- Add byte-range (`Range`/`Content-Range`) support to `GET /<uuid>/file`, related to #119.
+- Add `cron:update-ownership` command, recalculating direct group/user access after `OWNS`, `HAS_SEARCH_ACCESS` and
+  `IS_IN_GROUP` relations change, closes #438.
 - Add taskfile.dev development environment into the API repository itself, closes #461.
 - Add S3 status check to healthcheck command, closes #200.
 - Add support to delete files in S3 / object storage through the `php bin/console database:drop` command, closes #309.
 - Add support to back up files in S3 / object storage through the `php bin/console backup:create` command, closes #308.
+- Verify file contents against the stored `file.hash.sha256` values during `php bin/console backup:load`; files with
+  mismatching or missing hashes are skipped with a warning. Verification can be disabled with `--skip-verify`, related
+  to #119.
 - Add support for `Content-Disposition` HTTP header, including transliteration of non-latin-characters, closes #447.
 - Add dependency to PHP library `cardinalby/content-disposition`.
 - Add 'reserved type' exception; nodes of type 'User', 'Token' and 'Upload' can not be manually created through generic
   API endpoints.
 - Store value `true` as placeholder for non-scalar properties in Neo4j. Does not change API responses, but is available
   for Neo4j based queries, e.g. to check whether a non-scalar property exists on the element.
+- Add mimetype detection for multipart / chunked uploads.
+- Add `dozzle` to the local development Docker setup for log viewing.
+- Add support for running cron jobs inside CI feature and example-generation containers, via a dedicated
+  `CronExecutionGateService`, related to #119.
 
 ### Changed
 - Upgrade FrankenPHP to 1.12.1, related to #457 and #461.
 - Upgrade PHP to 8.5.4, related to #457 and #461.
 - Upgrade PHP dependencies, related to #457 and #461.
+- Upgrade Symfony from 7.4 to 8.1, and `symfony/monolog-bundle` from 3 to 4; fix related deprecations.
+- Temporarily deactivate `composer mess` (phpmd) in CI and remove it from the dev dependencies, as its last release is
+  not compatible with current dependencies.
 - Upgrade GitHub Actions in CI/CD.
 - Increase max post limit from 2 MB (PHP default) to 101 MiB, related to #119.
 - Change header `Access-Control-Allow-Headers` to `*`, due to growing number of supported headers.
+- Change unsupported HTTP methods on existing routes to answer `405 Method Not Allowed` instead of `500`, and add a
+  per-endpoint `Allow` header (including on `405` responses), related to #119.
+- Add `instance` (`urn:uuid:<request id>`) to every `problem+json` response, matching the request id used in logs and
+  the Caddy `request_id`, related to #119.
+- Change `problem+json` extension members to camelCase (`expectedOffset`, `providedOffset`, `totalLength`,
+  `requestedStart`, `requestedEnd`), related to #119.
+- Add `X-Content-Type-Options: nosniff` header to file download responses, related to #119.
+- `DELETE /<uuid>/upload` answers `404` instead of `409`/`204` after access to the upload has been revoked, related to
+  #119.
+- `Upload-Complete` header is now mandatory on `PATCH /<uuid>/upload`, related to #119.
+- Reduce CLI command log output: only printed when attached to a real terminal, notice level and up by default
+  (`-v` for more).
+- Remove the version string from CLI output in development mode.
+- Rework the production Docker image so the compiled Symfony cache is no longer baked in at build time; it is
+  regenerated from whatever configuration is mounted at container start, fixing stale configuration when
+  `config/packages/ember_nexus.yaml` is overridden (`api-different-configuration`).
+- Pin MinIO Docker images used in CI and local development instead of tracking `latest`.
+- Pass required environment variables directly to unmounted API instances in CI / example-generation Docker Compose
+  files, instead of relying on a mounted `.env` file.
 
 ### Fixed
 - Fix bug with deserialization of MongoDB documents.
+- Fix priority race condition between the `If-Match` and `If-None-Match` event listeners: `If-Match` is now evaluated
+  before `If-None-Match` when both are sent together (RFC 9110 Section 13.2.2). A failing `If-Match` combined with a
+  matching `If-None-Match` used to incorrectly answer `304`/`412` from `If-None-Match` instead of the `412` that
+  `If-Match` should give, related to #119.
+- Fix missing exception guard when the underlying file is missing during ETag calculation.
+- Fix the `onCreatedByUser` access restriction (and the equivalent implicit rule used by `GET .../children`,
+  `.../parents` and `.../related`) never actually matching, because the checked relation type (`CREATED_BY`) did not
+  match the one actually created on element creation (`CREATED`).
+- Fix the exception log line always missing its `detail` (e.g. the received/announced byte counts of a `408` request
+  timeout), since it logged the always-empty `Exception::getMessage()` instead.
+
+### Removed
+- Remove `POST /token`, `POST /register` and `POST /change-password` v1 request-body compatibility support, and the
+  `featureFlag.280_OldUniqueUserIdentifierDisabled` feature flag used to toggle it. This is a breaking change: only
+  the current request body shape is accepted now.
+- Remove queue `REBUILD_SEARCH_DOCUMENT`, replaced by the durable, dead-letter-backed `ELASTICSEARCH_UPDATE_OWNERSHIP`
+  queue, related to #438.
 
 ## 0.1.31 - 2026-02-10
 ### Changed

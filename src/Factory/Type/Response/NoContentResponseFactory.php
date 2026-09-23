@@ -33,17 +33,19 @@ class NoContentResponseFactory
             $headers->set('Upload-Length', sprintf('%d', $uploadLength));
         }
 
+        $expires = $upload->getExpires();
         $headers->set(
             'Upload-Limit',
             sprintf(
                 'max-age=%d, max-size=%d, min-append-size=%d, max-append-size=%d',
-                $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest(),
+                // remaining lifetime, consistent with the `Expires` header below
+                max(0, $expires->getTimestamp() - time()),
                 $this->emberNexusConfiguration->getFileMaxFileSizeInBytes(),
                 $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(),
                 $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(),
             )
         );
-        $headers->set('Expires', $upload->getExpires()->setTimezone(new DateTimeZone('UTC'))->format('D, d M Y H:i:s \\G\\M\\T'));
+        $headers->set('Expires', $expires->setTimezone(new DateTimeZone('UTC'))->format('D, d M Y H:i:s \\G\\M\\T'));
         $headers->set('Cache-Control', 'no-store, private');
 
         return $response;

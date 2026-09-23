@@ -9,7 +9,7 @@ use Throwable;
 class Client416RangeNotSatisfiableException extends ProblemJsonException
 {
     /**
-     * @param array<string, mixed> $additionalDetails
+     * @param array<string, mixed> $additionalProperties
      */
     public function __construct(
         string $type,
@@ -18,8 +18,8 @@ class Client416RangeNotSatisfiableException extends ProblemJsonException
         string $detail = 'The requested range can not be satisfied for the target resource.',
         ?string $instance = null,
         ?Throwable $previous = null,
-        array $additionalDetails = [],
+        array $additionalProperties = [],
     ) {
-        parent::__construct($type, $title, $status, $detail, $instance, $previous, $additionalDetails);
+        parent::__construct($type, $title, $status, $detail, $instance, $previous, $additionalProperties);
     }
 }

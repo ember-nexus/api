@@ -1,0 +1,16 @@
+Accept-Ranges: bytes
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Cache-Control: no-cache, private
+Content-Disposition: attachment; filename=get-element-file-if-range-match.txt
+Content-Length: 5
+Content-Range: bytes 7-11/19
+Content-Type: text/plain; charset=UTF-8
+Date: Sat, 26 Sep 2026 21:53:32 GMT
+Etag: "cGOE2M88hV"
+Repr-Digest: sha-256=:n6JhFCAJB2SKrVzEZIBGHLJy7OJDYDEeTHh0rdG1hD4=:
+X-Content-Type-Options: nosniff
+X-Powered-By: Ember Nexus API

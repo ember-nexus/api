@@ -104,6 +104,82 @@ class FileServiceTest extends TestCase
         $this->assertSame('8b/a1/17/8ba117cf-8983-4f13-be93-415e175cb64d-1234.wip', $key);
     }
 
+    public function testGetUploadBucketKeyWithChunkId(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileUploadChunkDigitsLength()->willReturn(4);
+        $emberNexusConfiguration->getFileS3UploadBucketLevels()->willReturn(3);
+        $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->willReturn(2);
+
+        $storageService = $this->buildFileService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        $key = $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 12, '3mJr7AoUXx2Wqd9G');
+        $this->assertSame('8b/a1/17/8ba117cf-8983-4f13-be93-415e175cb64d-0012-3mJr7AoUXx2Wqd9G.wip', $key);
+    }
+
+    public function testGetUploadBucketKeyRejectsInvalidChunkId(): void
+    {
+        $storageService = $this->buildFileService();
+
+        $this->expectException(Server500LogicErrorException::class);
+        $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1, '../etc/passwd');
+    }
+
+    public function testGenerateUploadChunkIdIsRandomAndAcceptedInKeys(): void
+    {
+        $storageService = $this->buildFileService();
+
+        $first = $storageService->generateUploadChunkId();
+        $this->assertMatchesRegularExpression('/^[0-9A-Za-z]{1,64}$/', $first);
+        // base58 of 16 bytes has at most 22 characters
+        $this->assertLessThanOrEqual(22, strlen($first));
+        $this->assertGreaterThanOrEqual(16, strlen($first));
+        $this->assertNotSame($first, $storageService->generateUploadChunkId());
+    }
+
+    public function testGeneratedUploadChunkIdsAreUniqueAndAcceptedInKeys(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileUploadChunkDigitsLength()->willReturn(4);
+        $emberNexusConfiguration->getFileS3UploadBucketLevels()->willReturn(0);
+        $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->willReturn(2);
+        $storageService = $this->buildFileService(emberNexusConfiguration: $emberNexusConfiguration->reveal());
+
+        $ids = [];
+        for ($i = 0; $i < 200; ++$i) {
+            $ids[] = $storageService->generateUploadChunkId();
+        }
+        $this->assertCount(200, array_unique($ids));
+        $key = $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1, $ids[0]);
+        $this->assertStringContainsString('-0001-'.$ids[0].'.wip', $key);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function invalidChunkIdProvider(): array
+    {
+        return [
+            'dash' => ['abc-def'],
+            'dot' => ['abc.def'],
+            'plus' => ['abc+def'],
+            'slash' => ['ab/cd'],
+            'empty' => [''],
+            'too long' => [str_repeat('a', 65)],
+        ];
+    }
+
+    #[DataProvider('invalidChunkIdProvider')]
+    public function testGetUploadBucketKeyRejectsInvalidChunkIdCharactersAndLengths(string $chunkId): void
+    {
+        $storageService = $this->buildFileService();
+
+        $this->expectException(Server500LogicErrorException::class);
+        $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1, $chunkId);
+    }
+
     public function testGetStorageBucketKeySupportsOtherExtension(): void
     {
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
@@ -116,6 +192,27 @@ class FileServiceTest extends TestCase
 
         $key = $storageService->getStorageBucketKey(Uuid::fromString('5dbd948b-d9dc-4b6c-af1c-c12dc8120755'), 'png');
         $this->assertSame('5d/bd/94/5dbd948b-d9dc-4b6c-af1c-c12dc8120755.png', $key);
+    }
+
+    public function testGetStorageBucketKeyWithEmptyExtensionHasNoTrailingDot(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileS3StorageBucketLevels()->shouldBeCalledOnce()->willReturn(3);
+        $emberNexusConfiguration->getFileS3StorageBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
+
+        $storageService = $this->buildFileService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        $key = $storageService->getStorageBucketKey(Uuid::fromString('5dbd948b-d9dc-4b6c-af1c-c12dc8120755'), '');
+        $this->assertSame('5d/bd/94/5dbd948b-d9dc-4b6c-af1c-c12dc8120755', $key);
+    }
+
+    public function testAppendExtension(): void
+    {
+        $fileService = $this->buildFileService();
+        $this->assertSame('path/file.txt', $fileService->appendExtension('path/file', 'txt'));
+        $this->assertSame('path/file', $fileService->appendExtension('path/file', ''));
     }
 
     public function testUuidToNestedFolderStructure(): void
@@ -256,10 +353,13 @@ class FileServiceTest extends TestCase
     {
         return [
             ['name', 'ext', 'name.ext'],
-            ['name', 'extensionWhichIsWayLongerThanExpected', 'name.extensionWhichIs'],
-            ['name', 'ext    with          long      extension      and      whitespace ', 'name.extwithlongexten'],
+            ['name', str_repeat('e', 100), 'name.'.str_repeat('e', 64)],
+            ['name', 'ext    with          long      extension      and      whitespace ', 'name.extwithlongextensionandwhitespace'],
             ['name-----1---------2---------3---------4---------5---------6---------7---------8---------9---------a---------b---------c---------d---------e---------f---------g---------h---------i---------j---------k---------l---------m---------n---------o---------p---------q---------r---------s---------t---------u---------v', 'ext', 'name-----1---------2---------3---------4---------5---------6---------7---------8---------9---------a---------b---------c---------d---------e---------f---------g---------h---------i---------j---------k---------l---------m---------n---------o---------p-.ext'],
             ['', 'env', '.env'],
+            ['Makefile', '', 'Makefile'],
+            ['  Makefile ', '', 'Makefile'],
+            [str_repeat('n', 300), '', str_repeat('n', 255)],
         ];
     }
 

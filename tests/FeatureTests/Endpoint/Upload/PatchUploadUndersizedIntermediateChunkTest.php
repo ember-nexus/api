@@ -5,21 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * The resumable upload draft standard does not itself mandate a minimum chunk size - that is a storage-backend
- * concern (S3 requires every part of a multipart upload except the last to be at least 5 MiB). This API already
- * enforces its configured minimum on an upload's very first chunk (see UploadCreationService); the same has to
- * hold for every later chunk PATCHed onto an already-started upload, or a client could pad out an upload
- * indefinitely with tiny (including zero-length) chunks that never make progress, without limit.
- *
- * The one exception, both here and for the very first chunk, is the chunk which completes the upload
- * (`Upload-Complete: ?1`): S3's minimum part size rule is explicitly waived for the last part, and a client
- * legitimately needs to be able to close out an upload with no additional data (see ZeroByteResumableUploadTest,
- * ResumableUploadCreationTest) - so only intermediate (still-incomplete) chunks are size-checked here.
+ * Verifies that intermediate PATCH chunks below the minimum chunk size are rejected, as S3 requires every
+ * multipart part except the last to be at least 5 MiB. The completing chunk (`Upload-Complete: ?1`) is exempt, and so
+ * is a chunk of exactly 0 bytes, which is a no-op (see PatchUploadZeroLengthChunkTest).
  */
-#[Group('test')]
 class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
@@ -66,7 +57,7 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
         return [$this->getUuidFromLocation($response), (int) $response->getHeader('Upload-Offset')[0]];
     }
 
-    public function testZeroLengthIntermediateChunkIsRejected(): void
+    public function testZeroLengthIntermediateChunkIsAcceptedAsNoOp(): void
     {
         $elementId = $this->createElement('patch-upload-undersized-zero');
         [$uploadId, $offset] = $this->createResumableUploadWithOneChunk($elementId, 'patch-upload-undersized-zero.bin');
@@ -82,9 +73,10 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
                 'Content-Type' => 'application/partial-upload',
             ]
         );
-        $this->assertIsProblemResponse($response, 400);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame((string) $offset, $response->getHeader('Upload-Offset')[0]);
 
-        // the rejected chunk must not have advanced the upload's offset
+        // the empty chunk must not have advanced the upload's offset
         $headResponse = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
         $this->assertSame(204, $headResponse->getStatusCode());
         $this->assertSame((string) $offset, $headResponse->getHeader('Upload-Offset')[0]);
@@ -119,9 +111,7 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
     }
 
     /**
-     * Sanity check for the exemption itself: a zero-length chunk which *completes* the upload must still be
-     * accepted (already covered end-to-end by ZeroByteResumableUploadTest and ResumableUploadCreationTest, but
-     * checked directly against this validation here too).
+     * A zero-length chunk which completes the upload must still be accepted.
      */
     public function testZeroLengthFinalChunkIsStillAccepted(): void
     {

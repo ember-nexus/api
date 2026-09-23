@@ -100,7 +100,7 @@ class GetParentsController extends AbstractController
             "      (\n".
             "        relation.onCreatedByUser IS NULL\n".
             "        OR\n".
-            "        (parent)<-[:CREATED_BY*]-(user)\n".
+            "        (parent)<-[:CREATED*]-(user)\n".
             "      )\n".
             "    )\n".
             "  )\n".

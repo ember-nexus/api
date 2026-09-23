@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Contract\NodeElementInterface;
+use App\Contract\RelationElementInterface;
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
 use App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\UploadFileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Helper\Regex;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
+use App\Service\FileHashService;
+use App\Service\FileSizeLimitService;
 use App\Service\RawToElementService;
 use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
@@ -19,6 +23,7 @@ use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
 use Predis\Client;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -26,13 +31,18 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
+use Throwable;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[AsCommand(name: 'backup:load', description: 'Loads a local backup into the empty database.')]
 class BackupLoadCommand extends Command
@@ -42,6 +52,7 @@ class BackupLoadCommand extends Command
     private int $fileCount = 0;
     private int $nodeCount = 0;
     private int $pageSize = 250;
+    private bool $skipVerify = false;
 
     private EmberNexusStyle $io;
 
@@ -52,14 +63,18 @@ class BackupLoadCommand extends Command
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private Client $redisClient,
+        #[Target('backup.storage')]
         private FilesystemOperator $backupStorage,
         private RawToElementService $rawToElementService,
         private EventDispatcherInterface $eventDispatcher,
         private AppStateService $appStateService,
         private ElasticEntityManager $elasticEntityManager,
         private S3Service $s3Service,
-        private UploadFileOperationFactory $uploadFileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
+        private FileSizeLimitService $fileSizeLimitService,
+        private FileHashService $fileHashService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private LoggerInterface $logger,
     ) {
         parent::__construct();
     }
@@ -67,6 +82,7 @@ class BackupLoadCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('name', InputArgument::REQUIRED, 'Name of the backup');
+        $this->addOption('skip-verify', null, InputOption::VALUE_NONE, "Skip verifying file contents against their stored 'file.hash' values");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -83,6 +99,7 @@ class BackupLoadCommand extends Command
         }
 
         $this->backupName = $this->checkBackupName($input->getArgument('name'));
+        $this->skipVerify = (bool) $input->getOption('skip-verify');
 
         $this->loadSummary();
 
@@ -170,11 +187,11 @@ class BackupLoadCommand extends Command
         ));
     }
 
-    private function parseFilenameAsUuidFromPath(string $path): false|UuidInterface
+    private function parseFilenameAsUuidFromPath(string $path, bool $extensionIsOptional = false): false|UuidInterface
     {
         $filename = basename($path);
         $parts = explode('.', $filename, 2);
-        if (2 !== count($parts)) {
+        if (2 !== count($parts) && !$extensionIsOptional) {
             return false;
         }
         $name = $parts[0];
@@ -185,35 +202,128 @@ class BackupLoadCommand extends Command
         return Uuid::fromString($name);
     }
 
+    /**
+     * A skipped file leaves its element with hasFile=true but without S3 object, so it is reported as error on the
+     * console and in the logs.
+     */
+    private function reportFileError(string $message): void
+    {
+        $this->logger->error($message);
+        $this->io->error($message);
+    }
+
+    /**
+     * Problems with a single file are reported instead of thrown, so that one bad file does not abort the restore.
+     */
+    private function loadFile(string $path, UuidInterface $fileId): bool
+    {
+        $element = $this->elementManager->getElement($fileId);
+        if (null === $element) {
+            $this->reportFileError(sprintf(
+                'Found file in backup without corresponding element; can not import file: %s',
+                $path
+            ));
+
+            return false;
+        }
+
+        try {
+            $contentLength = $this->backupStorage->fileSize($path);
+            if ($this->fileSizeLimitService->exceedsMaxFileSize($contentLength)) {
+                $this->reportFileError(sprintf(
+                    "File is %d bytes, which exceeds the configured 'file.maxFileSizeInBytes' of %d; skipping file: %s",
+                    $contentLength,
+                    $this->fileSizeLimitService->getMaxFileSizeInBytes(),
+                    $path
+                ));
+
+                return false;
+            }
+
+            $hashError = $this->skipVerify ? null : $this->verifyFileHashes($element, $path);
+            if (null !== $hashError) {
+                $this->reportFileError(sprintf('%s; skipping file: %s', $hashError, $path));
+
+                return false;
+            }
+
+            $resource = $this->backupStorage->readStream($path);
+            $uploadFileOperation = $this->s3OperationFactory->createUploadFileOperationFromElementAndResource($element, $resource, $contentLength);
+            $this->s3Service->uploadFile($uploadFileOperation);
+        } catch (Throwable $e) {
+            $this->reportFileError(sprintf(
+                'Failed to upload file %s: %s',
+                $path,
+                $e->getMessage()
+            ));
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Verifies the backup file against the `file.hash.<algorithm>` values stored on its element.
+     *
+     * @return string|null error message, or null if all hashes match
+     */
+    private function verifyFileHashes(NodeElementInterface|RelationElementInterface $element, string $path): ?string
+    {
+        $expectedHashes = $this->fileHashService->getVerifiableHashesFromFileProperty(
+            $element->hasProperty('file') ? $element->getProperty('file') : null
+        );
+        if ([] === $expectedHashes) {
+            return "Element has no verifiable 'file.hash' property";
+        }
+
+        $resource = $this->backupStorage->readStream($path);
+        try {
+            $actualHashes = $this->fileHashService->calculateHashesFromResource($resource, array_keys($expectedHashes));
+        } finally {
+            \Safe\fclose($resource);
+        }
+
+        foreach ($expectedHashes as $algorithm => $expectedHash) {
+            if (!hash_equals($expectedHash, $actualHashes[$algorithm])) {
+                return sprintf(
+                    "File content does not match 'file.hash.%s' (expected %s, got %s)",
+                    $algorithm,
+                    $expectedHash,
+                    $actualHashes[$algorithm]
+                );
+            }
+        }
+
+        return null;
+    }
+
     private function loadFiles(): void
     {
         $this->io->startSection('Step 3 of 4: Loading Files');
+        if ($this->skipVerify) {
+            $this->io->warning("File hash verification is disabled (--skip-verify); file contents are not checked against 'file.hash'.");
+        }
         $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->fileCount);
         $progressBar?->display();
         $files = $this->backupStorage->listContents($this->backupName.'/file/', true);
         $pageCount = 0;
         $totalCount = 0;
+        $failedCount = 0;
         foreach ($files as $file) {
             if (!$file->isFile()) {
                 continue;
             }
             $path = $file->path();
-            $fileId = $this->parseFilenameAsUuidFromPath($path);
+            // files without extension are stored without a trailing dot
+            $fileId = $this->parseFilenameAsUuidFromPath($path, true);
             if (false === $fileId) {
                 continue;
             }
-            $element = $this->elementManager->getElement($fileId);
-            if (null === $element) {
-                $this->io->warning(sprintf(
-                    'Found file in backup without corresponding element; can not import file: %s',
-                    $path
-                ));
+            if (!$this->loadFile($path, $fileId)) {
+                ++$failedCount;
                 continue;
             }
-
-            $resource = $this->backupStorage->readStream($path);
-            $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, $resource);
-            $this->s3Service->uploadFile($uploadFileOperation);
 
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {
@@ -226,6 +336,15 @@ class BackupLoadCommand extends Command
         $progressBar?->advance($pageCount);
         $progressBar?->clear();
         $totalCount += $pageCount;
+        if ($failedCount > 0) {
+            $this->io->stopSection(sprintf(
+                'Loaded <info>%d</info> files, <comment>%d</comment> could not be loaded and their elements still reference a missing file (see errors above).',
+                $totalCount,
+                $failedCount
+            ));
+
+            return;
+        }
         $this->io->stopSection(sprintf(
             'Loaded <info>%d</info> files.',
             $totalCount

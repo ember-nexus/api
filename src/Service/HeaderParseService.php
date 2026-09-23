@@ -55,11 +55,13 @@ class HeaderParseService
         $fileName = basename($fileName);
         $fileName = $this->fileService->removeReservedCharactersFromFileName($fileName);
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-        if (empty($extension)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not parse a file extension from the filename in 'Content-Disposition': '%s'.", $fileName));
+        if ('' === $extension) {
+            // files without extension are valid (e.g. 'Makefile'); an empty extension is stored, and the file is
+            // stored and named on download without any extension
+            return '';
         }
 
-        return $extension;
+        return substr($extension, 0, FileService::MAX_EXTENSION_LENGTH);
     }
 
     public function getUploadOffsetFromHeaders(HeaderBag $headers): int

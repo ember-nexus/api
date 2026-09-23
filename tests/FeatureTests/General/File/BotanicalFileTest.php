@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\General\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Exercises file download, replace and delete behaviour against images seeded by the botanical reference
- * dataset scenario ("general.botanicExample"). Nodes touched by mutating tests (replace/delete) are picked
- * from the plants which are not referenced by any other test or documentation example, so this test can run
- * safely alongside the rest of the suite.
+ * Tests file download, replace and delete against images of the "general.botanicExample" reference dataset
+ * scenario. Mutating tests only use plants which are not referenced by any other test or documentation example.
  */
-#[Group('test')]
 class BotanicalFileTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
@@ -36,8 +32,7 @@ class BotanicalFileTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN);
         $this->assertIsBinaryStreamResponse($response, 'image/jpeg');
 
-        // the element's 'name' property ("Rose") is used as the download's filename, with the stored file
-        // extension ("jpg") appended; see ElementService::getFileName().
+        // filename is built from the element's 'name' property and the stored extension
         $this->assertStringContainsString('filename=Rose.jpg', $response->getHeader('Content-Disposition')[0]);
 
         $body = (string) $response->getBody();

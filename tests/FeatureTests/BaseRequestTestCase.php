@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\FeatureTests;
 
+use App\Factory\S3ClientFactory;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -403,6 +404,86 @@ abstract class BaseRequestTestCase extends TestCase
         $location = $response->getHeader('Location')[0];
 
         return array_reverse(explode('/', $location))[0];
+    }
+
+    /**
+     * Creates a relation of type 'Data' between two newly created 'Data' nodes, for tests which need a blank,
+     * short-lived relation. Remove it again with {@see deleteEphemeralRelation()}.
+     */
+    public function createEphemeralRelation(string $token, string $name): string
+    {
+        $startNodeId = $this->getUuidFromLocation($this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'data' => ['name' => $name.'-start'],
+        ]));
+        $endNodeId = $this->getUuidFromLocation($this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'data' => ['name' => $name.'-end'],
+        ]));
+        $relationResponse = $this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'start' => $startNodeId,
+            'end' => $endNodeId,
+            'data' => ['name' => $name],
+        ]);
+        $this->assertIsCreatedResponse($relationResponse);
+
+        return $this->getUuidFromLocation($relationResponse);
+    }
+
+    /**
+     * Removes a relation created by {@see createEphemeralRelation()}, including its start and end node.
+     */
+    public function deleteEphemeralRelation(string $token, string $relationId): void
+    {
+        $relation = $this->getBody($this->runGetRequest(sprintf('/%s', $relationId), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relationId), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relation['start']), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relation['end']), $token));
+    }
+
+    /**
+     * Checks the default storage bucket directly, as the file of an element which no longer exists can not be
+     * requested through the API.
+     */
+    public function assertFileExistsInStorage(string $elementId): void
+    {
+        $this->assertTrue($this->isFileInStorage($elementId), sprintf('Expected file of element %s to exist in storage bucket.', $elementId));
+    }
+
+    public function assertFileDoesNotExistInStorage(string $elementId): void
+    {
+        $this->assertFalse($this->isFileInStorage($elementId), sprintf('Expected file of element %s to be removed from storage bucket.', $elementId));
+    }
+
+    private function isFileInStorage(string $elementId): bool
+    {
+        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        // the object key ends with the element id, see FileService::getStorageBucketKey()
+        foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
+            if (str_contains((string) $object->getKey(), $elementId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Counts the chunk objects of an upload in the upload bucket, as chunks are not accessible through the API.
+     */
+    public function countUploadChunksInUploadBucket(string $uploadId): int
+    {
+        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        $count = 0;
+        // the object key contains the upload id, see FileService::getUploadBucketKey()
+        foreach ($s3Client->listObjectsV2(['Bucket' => 'api-upload']) as $object) {
+            if (str_contains((string) $object->getKey(), $uploadId)) {
+                ++$count;
+            }
+        }
+
+        return $count;
     }
 
     public function generateDeterministicFile(int $seed, int $targetSize, string $outputPath): void

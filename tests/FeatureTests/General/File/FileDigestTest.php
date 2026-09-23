@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\General\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Covers RFC 9530 ("Digest Fields") support: `Repr-Digest`/`Content-Digest` response headers on file downloads,
- * and client-supplied `Repr-Digest`/`Content-Digest` request headers being verified against the uploaded file.
+ * Covers RFC 9530 ("Digest Fields") support: the `Repr-Digest` response header on file downloads, and
+ * client-supplied `Repr-Digest` request headers being verified against the uploaded file.
  */
-#[Group('test')]
 class FileDigestTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
@@ -57,9 +55,7 @@ class FileDigestTest extends BaseRequestTestCase
         $downloadResponse = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
         $this->assertIsBinaryStreamResponse($downloadResponse, 'text/plain');
         $this->assertSame([$expectedHeaderValue], $downloadResponse->getHeader('Repr-Digest'));
-        // Content-Digest is deliberately not set at all: for a full response it would always equal Repr-Digest
-        // (no extra information), and it is never set on a partial response either (see below), so it never
-        // carries any information Repr-Digest doesn't already provide.
+        // Content-Digest is never set, as it would carry no information beyond Repr-Digest
         $this->assertSame([], $downloadResponse->getHeader('Content-Digest'));
 
         $this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN);

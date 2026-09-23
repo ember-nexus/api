@@ -9,7 +9,9 @@ use App\Exception\Client400BadContentException;
 use App\Exception\Client401UnauthorizedException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use App\Security\TokenGenerator;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
@@ -45,7 +47,8 @@ class PostTokenControllerTest extends TestCase
             new Client400BadContentExceptionFactory($urlGenerator),
             new Client401UnauthorizedExceptionFactory($urlGenerator),
             $requestUtilService ?? $this->createMock(RequestUtilService::class),
-            $securityUtilService ?? $this->createMock(SecurityUtilService::class)
+            $securityUtilService ?? $this->createMock(SecurityUtilService::class),
+            new RequestContentService(new Client408RequestTimeoutExceptionFactory($urlGenerator))
         );
     }
 

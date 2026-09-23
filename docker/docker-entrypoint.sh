@@ -9,6 +9,12 @@ set -e
 #  exit 1
 #fi
 
+# upload requests hold a PHP thread while the client is sending data, so start 2 (FrankenPHP's default) and allow up to
+# 8 threads per CPU core, see Caddyfile
+CPU_COUNT="$(nproc)"
+export FRANKENPHP_NUM_THREADS="${FRANKENPHP_NUM_THREADS:-$((CPU_COUNT * 2))}"
+export FRANKENPHP_MAX_THREADS="${FRANKENPHP_MAX_THREADS:-$((CPU_COUNT * 8))}"
+
 if [ -z "$@" ]; then
   frankenphp run --config /etc/frankenphp/Caddyfile
 else

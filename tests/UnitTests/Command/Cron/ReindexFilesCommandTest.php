@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Command\Cron;
 
 use App\Command\Cron\ReindexFilesCommand;
+use App\Service\CronExecutionGateService;
 use App\Service\ElementManager;
 use App\Service\QueueService;
 use App\Type\NodeElement;
@@ -18,7 +19,6 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[Small]
 #[CoversClass(ReindexFilesCommand::class)]
@@ -31,11 +31,11 @@ class ReindexFilesCommandTest extends TestCase
         ?QueueService $queueService = null,
         ?ElementManager $elementManager = null,
     ): ReindexFilesCommand {
-        $bag = $this->prophesize(ParameterBagInterface::class);
-        $bag->get('isCronDisabled')->willReturn($isCronDisabled);
+        $cronExecutionGateService = $this->prophesize(CronExecutionGateService::class);
+        $cronExecutionGateService->shouldSkipExecution()->willReturn($isCronDisabled);
 
         return new ReindexFilesCommand(
-            $bag->reveal(),
+            $cronExecutionGateService->reveal(),
             $queueService ?? $this->prophesize(QueueService::class)->reveal(),
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal()
         );
@@ -57,11 +57,13 @@ class ReindexFilesCommandTest extends TestCase
 
     public function testCommandThrowsIfCronDisabledParameterIsNotBoolean(): void
     {
-        $bag = $this->prophesize(ParameterBagInterface::class);
-        $bag->get('isCronDisabled')->willReturn('not-a-boolean');
+        $cronExecutionGateService = $this->prophesize(CronExecutionGateService::class);
+        $cronExecutionGateService->shouldSkipExecution()->willThrow(
+            new LogicException('Expected "isCronDisabled" to be of type boolean, got string.')
+        );
 
         $command = new ReindexFilesCommand(
-            $bag->reveal(),
+            $cronExecutionGateService->reveal(),
             $this->prophesize(QueueService::class)->reveal(),
             $this->prophesize(ElementManager::class)->reveal()
         );

@@ -31,10 +31,10 @@ class Client409ConflictExceptionFactoryTest extends TestCase
         )->shouldBeCalledOnce()->willReturn('https://mock.dev/123');
         $factory = new Client409ConflictExceptionFactory($urlGenerator->reveal());
 
-        $additionalDetails = [
+        $additionalProperties = [
             'a' => 'b',
         ];
-        $exception = $factory->createFromDetail('some detail', $additionalDetails);
+        $exception = $factory->createFromDetail('some detail', $additionalProperties);
 
         $this->assertSame(409, $exception->getStatus());
         $this->assertSame('Conflict', $exception->getTitle());
@@ -42,6 +42,6 @@ class Client409ConflictExceptionFactoryTest extends TestCase
         $this->assertSame('some detail', $exception->getDetail());
         $this->assertSame(null, $exception->getInstance());
         $this->assertSame('', $exception->getMessage());
-        $this->assertSame($additionalDetails, $exception->getAdditionalProperties());
+        $this->assertSame($additionalProperties, $exception->getAdditionalProperties());
     }
 }

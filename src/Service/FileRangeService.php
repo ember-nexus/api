@@ -9,18 +9,8 @@ use App\Factory\Exception\Client416RangeNotSatisfiableExceptionFactory;
 use App\Type\ByteRange;
 
 /**
- * Parses the HTTP `Range` request header (RFC 9110, Section 14.1.2) for the single-range case.
- *
- * Only a single byte range is supported, as multiple ranges within one request ("multipart/byteranges") are not
- * implemented, and are not planned to be. The following forms are supported:
- *
- * - `bytes=<start>-<end>`: an explicit, inclusive range.
- * - `bytes=<start>-`: from `<start>` to the end of the resource.
- * - `bytes=-<suffixLength>`: the last `<suffixLength>` bytes of the resource.
- *
- * A syntactically invalid `Range` header, or one requesting multiple ranges, results in a 400 Bad Request: the
- * server does not understand what was asked for. A syntactically valid header which can not be satisfied against
- * the resource (e.g. a `start` beyond the end of the file) results in a 416 Range Not Satisfiable instead.
+ * Parses the HTTP `Range` header (RFC 9110, Section 14.1.2). Only a single range is supported, multiple ranges
+ * result in a 400 Bad Request. Valid but unsatisfiable ranges result in a 416 Range Not Satisfiable.
  */
 class FileRangeService
 {
@@ -30,10 +20,32 @@ class FileRangeService
     ) {
     }
 
+    /**
+     * Evaluates the `If-Range` precondition (RFC 9110, Section 13.1.5) of a request which contains a `Range` header:
+     * the range is only served if the client still holds the current representation, otherwise the full file has to
+     * be answered with `200`. Only strong entity tags are compared, a weak tag never matches. HTTP dates never
+     * match, as no `Last-Modified` header is served for files, so the client can not have got one from this API.
+     */
+    public function isRangeConditionSatisfied(?string $ifRangeHeader, ?string $currentEtag): bool
+    {
+        if (null === $ifRangeHeader) {
+            return true;
+        }
+        $ifRangeHeader = trim($ifRangeHeader);
+        if (!str_starts_with($ifRangeHeader, '"') || null === $currentEtag) {
+            return false;
+        }
+
+        return trim($ifRangeHeader, '"') === $currentEtag;
+    }
+
+    /**
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     */
     public function parseRangeHeader(string $rangeHeader, int $totalContentLength): ByteRange
     {
         if (1 !== \Safe\preg_match('/^bytes=(\d*)-(\d*)$/', trim($rangeHeader), $matches)) {
-            // syntactically invalid, or multiple ranges requested (unsupported, and not planned to be)
+            // syntactically invalid, or multiple ranges requested
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not parse 'Range' header: '%s'. Only a single range of the form 'bytes=<start>-<end>', 'bytes=<start>-' or 'bytes=-<suffixLength>' is supported.", $rangeHeader));
         }
 
@@ -45,14 +57,14 @@ class FileRangeService
         }
 
         if ($totalContentLength <= 0) {
-            throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested range can not be satisfied, as the resource is empty.', ['total-length' => $totalContentLength]);
+            throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested range can not be satisfied, as the resource is empty.', ['totalLength' => $totalContentLength], $totalContentLength);
         }
 
         if ('' === $rawStart) {
             // suffix range: last <suffixLength> bytes
             $suffixLength = (int) $rawEnd;
             if ($suffixLength <= 0) {
-                throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested suffix range must request at least 1 byte.', ['total-length' => $totalContentLength]);
+                throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested suffix range must request at least 1 byte.', ['totalLength' => $totalContentLength], $totalContentLength);
             }
 
             $start = max(0, $totalContentLength - $suffixLength);
@@ -60,20 +72,20 @@ class FileRangeService
         } else {
             $start = (int) $rawStart;
             if ($start >= $totalContentLength) {
-                throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail(sprintf('Requested range start (%d) is beyond the end of the resource (%d bytes long).', $start, $totalContentLength), ['requested-start' => $start, 'total-length' => $totalContentLength]);
+                throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail(sprintf('Requested range start (%d) is beyond the end of the resource (%d bytes long).', $start, $totalContentLength), ['requestedStart' => $start, 'totalLength' => $totalContentLength], $totalContentLength);
             }
 
             if ('' === $rawEnd) {
-                // open range: from <start> to the end of the resource ("infinity")
+                // open range: from <start> to the end of the resource
                 $end = $totalContentLength - 1;
             } else {
-                // end can not exceed the resource's actual length, it is clamped instead of rejected
+                // clamped instead of rejected, see RFC 9110
                 $end = min((int) $rawEnd, $totalContentLength - 1);
             }
         }
 
         if ($end < $start) {
-            throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested range must span at least 1 byte.', ['requested-start' => $start, 'requested-end' => $end, 'total-length' => $totalContentLength]);
+            throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested range must span at least 1 byte.', ['requestedStart' => $start, 'requestedEnd' => $end, 'totalLength' => $totalContentLength], $totalContentLength);
         }
 
         return new ByteRange($start, $end, $totalContentLength);

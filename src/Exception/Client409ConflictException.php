@@ -9,7 +9,7 @@ use Throwable;
 class Client409ConflictException extends ProblemJsonException
 {
     /**
-     * @param array<string, mixed> $additionalDetails
+     * @param array<string, mixed> $additionalProperties
      */
     public function __construct(
         string $type,
@@ -18,8 +18,8 @@ class Client409ConflictException extends ProblemJsonException
         string $detail = 'Operation can not be performed due to some sort of conflict.',
         ?string $instance = null,
         ?Throwable $previous = null,
-        array $additionalDetails = [],
+        array $additionalProperties = [],
     ) {
-        parent::__construct($type, $title, $status, $detail, $instance, $previous, $additionalDetails);
+        parent::__construct($type, $title, $status, $detail, $instance, $previous, $additionalProperties);
     }
 }

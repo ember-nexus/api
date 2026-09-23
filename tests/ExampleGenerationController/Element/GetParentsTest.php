@@ -96,9 +96,16 @@ class GetParentsTest extends BaseRequestTestCase
         );
     }
 
+    public function testGetParentsFailure404WithIfMatch(): void
+    {
+        // without access to the element (here: it does not exist), conditional requests answer 404 instead of 412
+        $response = $this->runGetRequest(sprintf('/%s/parents', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
+        $this->assertIsProblemResponse($response, 404);
+    }
+
     public function testGetParentsFailure412(): void
     {
-        $response = $this->runGetRequest(sprintf('/%s/parents', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
+        $response = $this->runGetRequest(sprintf('/%s/parents', self::CHILD_UUID), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
         $this->assertIsProblemResponse($response, 412);
         $documentationHeadersPath = 'docs/api-endpoints/element/get-parents/412-response-header.txt';
         $documentationBodyPath = 'docs/api-endpoints/element/get-parents/412-response-body.json';

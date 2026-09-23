@@ -365,29 +365,26 @@ class EtagCalculatorService
         );
 
         $element = $this->elementManager->getElementOrFail($elementId);
-        $rawFileProperties = $element->hasProperty('file') ? $element->getProperty('file') : null;
-        $fileEtag = $this->extractPreferredHashFromFileProperties($rawFileProperties);
-
-        if (null === $fileEtag) {
-            // no stored hash at all (e.g. a pre-hash-rollout record): fall back to the element's own identity
-            // instead of an S3 round trip, since there is nothing file-specific left to distinguish it by anyway.
-            $fileEtag = $this->calculateElementEtag($elementId);
-            if (null === $fileEtag) {
-                return null;
-            }
-            $fileEtag = (string) $fileEtag;
+        if (!$element->hasProperty('hasFile') || true !== $element->getProperty('hasFile')) {
+            // an element without file has no file representation, so conditional requests on it are not evaluated
+            return null;
         }
 
-        $fileProperties = \Safe\json_encode($rawFileProperties);
+        $elementEtag = $this->calculateElementEtag($elementId);
+        if (null === $elementEtag) {
+            return null;
+        }
 
-        $name = $element->hasProperty('name') ? $element->getProperty('name') : null;
-        $name = \Safe\json_encode($name);
+        $rawFileProperties = $element->hasProperty('file') ? $element->getProperty('file') : null;
+        $fileHash = $this->extractPreferredHashFromFileProperties($rawFileProperties);
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
-        $etagCalculator->addUuid($elementId);
-        $etagCalculator->addString($fileEtag);
-        $etagCalculator->addString($fileProperties);
-        $etagCalculator->addString($name);
+        $etagCalculator->addString((string) $elementEtag);
+        if (null !== $fileHash) {
+            $etagCalculator->addString($fileHash);
+        }
+        // no stored hash, e.g. files uploaded before hashing was introduced: the element etag already captures
+        // identity and recency, so it is not folded into itself again as a fake hash component
         $etag = $etagCalculator->getEtag();
 
         $this->logger->debug(
@@ -402,10 +399,10 @@ class EtagCalculatorService
     }
 
     /**
-     * Prefers {@see FileHashService::ALGORITHM}, since that is the algorithm this codebase actually writes; if it
-     * is missing but some other algorithm is present (e.g. a future 'blake3'), the alphanumerically first one is
-     * used instead, purely to pick deterministically among otherwise-equal options. Returns null if no usable
-     * hash is stored at all.
+     * Prefers {@see FileHashService::ALGORITHM}, otherwise uses the alphabetically first algorithm for determinism.
+     *
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     private function extractPreferredHashFromFileProperties(mixed $rawFileProperties): ?string
     {

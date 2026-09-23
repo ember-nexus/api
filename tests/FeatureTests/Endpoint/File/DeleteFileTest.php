@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
-#[Group('test')]
 class DeleteFileTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
     public function testDeleteFileFromNode(): void
     {
-        // create new node for file upload
         $node = $this->runPostRequest(
             '/',
             self::TOKEN,
@@ -27,7 +24,6 @@ class DeleteFileTest extends BaseRequestTestCase
         );
         $location = $node->getHeader('Location')[0];
 
-        // upload file
         $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'POST',
@@ -44,7 +40,6 @@ class DeleteFileTest extends BaseRequestTestCase
         );
         $this->assertIsBinaryStreamResponse($getFileResponse, 'image/jpeg');
 
-        // delete file
         $deleteFileResponse = $this->runDeleteRequest(
             sprintf('%s/file', $location),
             self::TOKEN
@@ -57,6 +52,23 @@ class DeleteFileTest extends BaseRequestTestCase
             self::TOKEN
         );
         $this->assertIsProblemResponse($getFileResponse, 404);
+    }
+
+    public function testFileCanBeCreatedAgainAfterDeletion(): void
+    {
+        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
+            'type' => 'Data',
+            'data' => ['name' => 'file-can-be-created-again-after-deletion'],
+        ]));
+
+        $this->assertIsCreatedResponse($this->runUploadRequest('POST', sprintf('/%s/file', $elementId), 'first content', self::TOKEN), false);
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s/file', $elementId), self::TOKEN));
+
+        // the deleted file must not block a new POST with 409
+        $this->assertIsCreatedResponse($this->runUploadRequest('POST', sprintf('/%s/file', $elementId), 'second content', self::TOKEN), false);
+        $this->assertSame('second content', (string) $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN)->getBody());
+
+        $this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN);
     }
 
     public function testDeleteFileFromRelation(): void
@@ -100,7 +112,6 @@ class DeleteFileTest extends BaseRequestTestCase
         );
         $location = $relation->getHeader('Location')[0];
 
-        // upload file
         $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'PUT',
@@ -135,7 +146,6 @@ class DeleteFileTest extends BaseRequestTestCase
             $data['file']
         );
 
-        // delete file
         $deleteFileResponse = $this->runDeleteRequest(
             sprintf('%s/file', $location),
             self::TOKEN

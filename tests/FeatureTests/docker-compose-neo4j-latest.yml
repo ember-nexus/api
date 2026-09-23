@@ -1,10 +1,34 @@
+# The production image only contains the application, the connections to the other services are configured through its
+# environment (the repository is not mounted, so no `.env` file provides them).
+x-api-environment: &api-environment
+  CYPHER_AUTH: bolt://neo4j:password@neo4j
+  MONGO_AUTH: mongodb://mongodb:password@mongodb:27017
+  ELASTIC_AUTH: elasticsearch:9200
+  REDIS_AUTH: tcp://redis?password=redis-password
+  RABBITMQ_AUTH: amqp://user:password@rabbitmq:5672
+  S3_ENDPOINT: http://minio:9000
+  S3_ACCESS_KEY_ID: accessKey
+  S3_SECRET_ACCESS_KEY: secretKey
+  # cron commands would otherwise run whenever the scheduler triggers them during the test run; the tty-bypass
+  # rule still lets a manually-`docker exec -t`'d cron command run despite this
+  DISABLE_CRON: 'true'
+
 services:
 
   api-dev:
     container_name: api-dev
     image: api:dev-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
     expose:
       - "80"
+    environment:
+      DISABLE_CRON: 'true'
     volumes:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt
@@ -12,10 +36,18 @@ services:
   api-prod:
     container_name: api-prod
     image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
     expose:
       - "80"
+    environment: *api-environment
     volumes:
-      - ../../:/var/www/html
+      # the repository is deliberately not mounted: the production image is tested as it is shipped
       - ./well-known-security.txt:/well-known-security.txt
 
   neo4j:
@@ -35,6 +67,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongodb
       - MONGO_INITDB_ROOT_PASSWORD=password
+      - GLIBC_TUNABLES=glibc.pthread.rseq=1
 
   elasticsearch:
     container_name: elasticsearch
@@ -65,7 +98,7 @@ services:
 
   minio:
     container_name: minio
-    image: quay.io/minio/minio:latest
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     expose:
       - "9000"
       - "9001"
@@ -75,7 +108,7 @@ services:
     command: server /data --console-address ":9001"
 
   minio-init:
-    image: quay.io/minio/mc:latest
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
     depends_on:
       - minio
     entrypoint: >

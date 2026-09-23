@@ -1,0 +1,16 @@
+  _____           _                 _   _                          _    ____ ___
+ | ____|_ __ ___ | |__   ___ _ __  | \ | | _____  ___   _ ___     / \  |  _ \_ _|
+ |  _| | '_ ` _ \| '_ \ / _ \ '__| |  \| |/ _ \ \/ / | | / __|   / _ \ | |_) | |
+ | |___| | | | | | |_) |  __/ |    | |\  |  __/⟩  ⟨| |_| \__ \  / ___ \|  __/| |
+ |_____|_| |_| |_|_.__/ \___|_|    |_| \_|\___/_/\_\\__,_|___/ /_/   \_\_|  |___|
+
+
+ Error 503 - Service Unavailable
+
+ The HTTP 503 Service Unavailable server error response status code indicates that the server is not ready to handle
+ the request, e.g. because it is overloaded or because a component of the service is not reachable. Retry the request
+ after a short pause.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+
+ Link to http.dev's explanation of the 503 error code: https://http.dev/503

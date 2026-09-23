@@ -9,9 +9,7 @@ use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 /**
- * The 'file' property is only ever set by the file upload/delete endpoints, never directly by a client. Allowing
- * direct writes would let a client forge file metadata (contentLength, hash, ...) for a file which does not
- * actually exist, or does not match what was actually uploaded.
+ * 'file' is managed by the file endpoints only, clients must not be able to forge its metadata.
  */
 class FileElementPropertyChangeEventListener
 {

@@ -7,11 +7,12 @@ namespace App\Service;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
+use Tuupola\Base58;
 
 class FileService
 {
     public const int MAX_FILENAME_LENGTH = 255;
-    public const int MAX_EXTENSION_LENGTH = 16;
+    public const int MAX_EXTENSION_LENGTH = 64;
     public const string DEFAULT_EXTENSION = 'bin';
     public const string UPLOAD_EXTENSION = 'wip';
 
@@ -26,6 +27,8 @@ class FileService
     {
         $fileName = $this->stringService->getAsciiSafeString($fileName);
         $fileName = $this->removeReservedCharactersFromFileName($fileName);
+        // Symfony rejects '%' in Content-Disposition filename fallbacks
+        $fileName = str_replace('%', '', $fileName);
 
         $parts = explode('.', $fileName, 2);
         if (2 === count($parts)) {
@@ -51,19 +54,33 @@ class FileService
         ));
     }
 
+    /**
+     * An empty extension means that the file has no extension at all: the name is returned as it is, without a trailing dot.
+     */
     public function buildFileNameFromParts(string $name, string $extension): string
     {
         /** @psalm-suppress PossiblyInvalidArgument */
         $extension = substr(\Safe\preg_replace('/\s+/', '', $extension), 0, self::MAX_EXTENSION_LENGTH);
+        if ('' === $extension) {
+            return trim(substr(trim($name), 0, self::MAX_FILENAME_LENGTH));
+        }
         $name = trim(substr(trim($name), 0, self::MAX_FILENAME_LENGTH - strlen($extension) - 1));
 
         return sprintf('%s.%s', $name, $extension);
     }
 
+    /**
+     * Appends the extension to a path or key; an empty extension means that the file has no extension at all, so no
+     * trailing dot is added.
+     */
+    public function appendExtension(string $pathWithoutExtension, string $extension): string
+    {
+        return '' === $extension ? $pathWithoutExtension : sprintf('%s.%s', $pathWithoutExtension, $extension);
+    }
+
     public function getStorageBucketKey(UuidInterface $id, string $extension): string
     {
-        return sprintf(
-            '%s.%s',
+        return $this->appendExtension(
             $this->uuidToNestedFolderStructure(
                 $id,
                 $this->emberNexusConfiguration->getFileS3StorageBucketLevels(),
@@ -73,8 +90,23 @@ class FileService
         );
     }
 
-    public function getUploadBucketKey(UuidInterface $id, int $chunkIndex): string
+    /**
+     * Every attempt to upload a chunk generates its own id (base58 of 128 random bits, like tokens), so that concurrent attempts for the same chunk index can
+     * never overwrite each other's object; the id of the accepted attempt is stored on the `Upload` element.
+     */
+    public function generateUploadChunkId(): string
     {
+        return (new Base58())->encode(random_bytes(16));
+    }
+
+    /**
+     * @param string|null $chunkId null for uploads which consist of a single object and have no chunk attempts
+     */
+    public function getUploadBucketKey(UuidInterface $id, int $chunkIndex, ?string $chunkId = null): string
+    {
+        if (null !== $chunkId && 1 !== \Safe\preg_match('/^[0-9A-Za-z]{1,64}$/', $chunkId)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Chunk id has to be an alphanumeric string with at most 64 characters.');
+        }
         $digits = $this->emberNexusConfiguration->getFileUploadChunkDigitsLength();
         if ($chunkIndex < 0) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Chunk index can not be less than 0.');
@@ -85,13 +117,14 @@ class FileService
         }
 
         return sprintf(
-            '%s-%s.%s',
+            '%s-%s%s.%s',
             $this->uuidToNestedFolderStructure(
                 $id,
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevels(),
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevelLength(),
             ),
             str_pad((string) $chunkIndex, $digits, '0', STR_PAD_LEFT),
+            null === $chunkId ? '' : '-'.$chunkId,
             self::UPLOAD_EXTENSION
         );
     }

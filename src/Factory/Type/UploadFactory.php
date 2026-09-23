@@ -42,11 +42,12 @@ class UploadFactory
             $this->propertyParseService->getUploadOffsetFromProperties($properties),
             $this->propertyParseService->getIsUploadCompleteFromProperties($properties),
             $this->propertyParseService->getUploadTargetFromProperties($properties),
-            $this->propertyParseService->getAlreadyUploadedChunksFromProperties($properties),
+            $this->propertyParseService->getChunkIdsFromProperties($properties),
             $this->propertyParseService->getUploadOwnerFromProperties($properties),
             $this->propertyParseService->getExtensionFromProperties($properties),
             $this->propertyParseService->getExpiresFromProperties($properties),
-            $this->propertyParseService->getHashStateFromProperties($properties)
+            $this->propertyParseService->getHashStateFromProperties($properties),
+            $this->propertyParseService->getTargetHadFileAtCreationFromProperties($properties)
         );
     }
 
@@ -58,15 +59,16 @@ class UploadFactory
             $upload->getUploadOffset(),
             true,
             $upload->getUploadTarget(),
-            $upload->getAlreadyUploadedChunks(),
+            $upload->getChunkIds(),
             $upload->getUploadOwner(),
             $upload->getExtension(),
             $upload->getExpires(),
-            $upload->getHashState()
+            $upload->getHashState(),
+            $upload->targetHadFileAtCreation()
         );
     }
 
-    public function addNewChunkToUpload(UploadInterface $upload, int $chunkLength, ?string $hashState = null): UploadInterface
+    public function addNewChunkToUpload(UploadInterface $upload, int $chunkLength, string $chunkId, ?string $hashState = null): UploadInterface
     {
         return new Upload(
             $upload->getId(),
@@ -74,11 +76,12 @@ class UploadFactory
             $upload->getUploadOffset() + $chunkLength,
             $upload->isUploadComplete(),
             $upload->getUploadTarget(),
-            $upload->getAlreadyUploadedChunks() + 1,
+            [...$upload->getChunkIds(), $chunkId],
             $upload->getUploadOwner(),
             $upload->getExtension(),
             $upload->getExpires(),
-            $hashState ?? $upload->getHashState()
+            $hashState ?? $upload->getHashState(),
+            $upload->targetHadFileAtCreation()
         );
     }
 }

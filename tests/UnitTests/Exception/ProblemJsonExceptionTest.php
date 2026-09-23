@@ -78,4 +78,13 @@ class ProblemJsonExceptionTest extends TestCase
             $this->assertSame(0, $problemJsonException->getCode());
         }
     }
+
+    public function testHeaders(): void
+    {
+        $problemJsonException = new ProblemJsonException('type', 'title', 123, 'detail');
+        $this->assertSame([], $problemJsonException->getHeaders());
+
+        $this->assertSame($problemJsonException, $problemJsonException->setHeaders(['Allow' => 'GET']));
+        $this->assertSame(['Allow' => 'GET'], $problemJsonException->getHeaders());
+    }
 }

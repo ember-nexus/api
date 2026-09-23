@@ -12,6 +12,7 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use stdClass;
 
 #[Small]
 #[CoversClass(IncrementalHashService::class)]
@@ -109,6 +110,21 @@ class IncrementalHashServiceTest extends TestCase
         $this->expectException(Client409ConflictException::class);
 
         $service->unserializeContextFromStorage('this is not valid base64-encoded serialized data!!!');
+    }
+
+    public function testUnserializeContextFromStorageDoesNotInstantiateOtherClasses(): void
+    {
+        $exception = $this->prophesize(Client409ConflictException::class)->reveal();
+
+        $client409ConflictExceptionFactory = $this->prophesize(Client409ConflictExceptionFactory::class);
+        $client409ConflictExceptionFactory->createFromDetail(Argument::type('string'))->shouldBeCalledOnce()->willReturn($exception);
+
+        $service = $this->buildService($client409ConflictExceptionFactory->reveal());
+
+        // with allowed_classes the object becomes __PHP_Incomplete_Class, so no class code (e.g. __wakeup) is reached
+        $this->expectException(Client409ConflictException::class);
+
+        $service->unserializeContextFromStorage(base64_encode(serialize(new stdClass())));
     }
 
     public function testUnserializeContextFromStorageThrowsConflictExceptionWhenDecodedValueIsNotAHashContext(): void

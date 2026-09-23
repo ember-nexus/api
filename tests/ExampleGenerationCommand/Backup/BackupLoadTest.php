@@ -10,7 +10,7 @@ class BackupLoadTest extends BaseCommandTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
-    public function testBackupListHelp(): void
+    public function testBackupLoadHelp(): void
     {
         $commandOutput = $this->runCommand(sprintf(
             'APP_ENV=prod VERSION=%s php bin/console backup:load --ansi --help | aha -s --black --css "./cli-style.css"',
@@ -25,7 +25,7 @@ class BackupLoadTest extends BaseCommandTestCase
         );
     }
 
-    public function testBackupList(): void
+    public function testBackupLoad(): void
     {
         $this->runCommand('php bin/console database:drop -f');
         $commandOutput = $this->runCommand(sprintf(

@@ -6,6 +6,7 @@ namespace App\EventSystem\Exception\EventListener;
 
 use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
+use App\Service\RequestIdService;
 use App\Type\Response\ProblemJsonResponse;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -16,11 +17,17 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ExceptionEventListener
 {
+    /**
+     * Names of the members of every problem response; additional properties can not replace them.
+     */
+    private const array RESERVED_PROPERTY_NAMES = ['type', 'title', 'status', 'instance', 'detail', 'exception'];
+
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private KernelInterface $kernel,
         private LoggerInterface $logger,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
+        private RequestIdService $requestIdService,
     ) {
     }
 
@@ -51,18 +58,21 @@ class ExceptionEventListener
         } catch (Exception $e) {
         }
 
+        $additionalProperties = array_diff_key(
+            $extendedException->getAdditionalProperties(),
+            array_flip(self::RESERVED_PROPERTY_NAMES)
+        );
+
         $data = [
             'type' => $extendedException->getType(),
             'title' => $extendedException->getTitle(),
             'status' => $extendedException->getStatus(),
-            'instance' => $instanceLink,
+            // identifies this occurrence of the problem, the id is also part of the logs (`requestId` of the
+            // application, `request_id` of the web server); see docker/Caddyfile for the errors of the web server
+            'instance' => $instanceLink ?? sprintf('urn:uuid:%s', $this->requestIdService->getRequestId()->toString()),
             'detail' => $extendedException->getDetail(),
-            ...$extendedException->getAdditionalProperties(),
+            ...$additionalProperties,
         ];
-
-        if (null === $instanceLink) {
-            unset($data['instance']);
-        }
 
         if ('' === $data['detail']) {
             unset($data['detail']);
@@ -74,16 +84,19 @@ class ExceptionEventListener
                 'trace' => $originalException->getTrace(),
             ];
         }
+        // getMessage() is always empty (ProblemJsonException never forwards it to the parent Exception), getDetail()
+        // carries the actual explanation, e.g. the received/announced byte counts of a 408 request timeout
         $this->logger->error(sprintf(
             '%s %s: %s',
             $extendedException->getType(),
             $extendedException->getTitle(),
-            $extendedException->getMessage()
+            $extendedException->getDetail()
         ));
 
         $event->setResponse(new ProblemJsonResponse(
             $data,
-            $data['status']
+            $data['status'],
+            $extendedException->getHeaders()
         ));
         /**
          * @infection-ignore-all

@@ -10,7 +10,7 @@ class DatabaseDropTest extends BaseCommandTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
-    public function testUserCreateHelp(): void
+    public function testDatabaseDropHelp(): void
     {
         $commandOutput = $this->runCommand(sprintf(
             'APP_ENV=prod VERSION=%s php bin/console database:drop --ansi --help | aha -s --black --css "./cli-style.css"',
@@ -19,7 +19,7 @@ class DatabaseDropTest extends BaseCommandTestCase
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/commands/assets/database-drop-help.html', $commandOutput);
     }
 
-    public function testUserCreate(): void
+    public function testDatabaseDrop(): void
     {
         $commandOutput = $this->runCommand(sprintf(
             'APP_ENV=prod VERSION=%s php bin/console database:drop -f --ansi | aha -s --black --css "./cli-style.css"',

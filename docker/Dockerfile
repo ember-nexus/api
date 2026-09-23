@@ -101,10 +101,13 @@ COPY public /var/www/html/public
 COPY src /var/www/html/src
 COPY lib/EmberNexusBundle /var/www/html/lib/EmberNexusBundle
 COPY docker/.env.docker /var/www/html/.env
+COPY ./docker/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 COPY composer.json /var/www/html/composer.json
 COPY composer.lock /var/www/html/composer.lock
 COPY LICENSE /var/www/html/LICENSE
 RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-cache \
+    && rm -rf /var/www/html/var/cache \
+    && mkdir -p /var/www/html/var/cache \
     && rm -rf /usr/local/include/php \
     && mv /usr/local/lib/php/extensions /usr/local/lib/php_extensions \
     && rm -rf /usr/local/lib/php \
@@ -151,6 +154,11 @@ USER worker
 
 FROM php AS development
 
+# the dev image has no vendor/ installed by default (it's provided by the mounted source instead), so supercronic's
+# scheduled `php bin/console cron` runs would fail until `composer install` is run manually; the dev Caddyfile drops
+# the `supervisor` block so supercronic never starts
+COPY ./docker/Caddyfile.dev /etc/frankenphp/Caddyfile
+
 COPY ./docker/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers linux-headers \
@@ -174,5 +182,4 @@ USER worker
 
 ENV CLASSPATH=".:/usr/local/lib/antlr-4.13.2-complete.jar:/usr/local/lib/rrd-antlr4-0.1.2.jar:$CLASSPATH"
 
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD php bin/console healthcheck
+HEALTHCHECK NONE

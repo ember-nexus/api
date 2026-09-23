@@ -10,7 +10,7 @@ class CacheClearEtagTest extends BaseCommandTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
-    public function testUserCreateHelp(): void
+    public function testCacheClearEtagHelp(): void
     {
         $commandOutput = $this->runCommand(sprintf(
             'APP_ENV=prod VERSION=%s php bin/console cache:clear:etag --ansi --help | aha -s --black --css "./cli-style.css"',
@@ -19,7 +19,7 @@ class CacheClearEtagTest extends BaseCommandTestCase
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/commands/assets/cache-clear-etag-help.html', $commandOutput);
     }
 
-    public function testUserCreate(): void
+    public function testCacheClearEtag(): void
     {
         $commandOutput = $this->runCommand(sprintf(
             'APP_ENV=prod VERSION=%s php bin/console cache:clear:etag --ansi | aha -s --black --css "./cli-style.css"',

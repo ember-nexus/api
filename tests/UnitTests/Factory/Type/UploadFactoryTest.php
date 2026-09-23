@@ -54,11 +54,12 @@ class UploadFactoryTest extends TestCase
         $propertyParseService->getUploadOffsetFromProperties(Argument::is($properties))->willReturn(2222);
         $propertyParseService->getIsUploadCompleteFromProperties(Argument::is($properties))->willReturn(false);
         $propertyParseService->getUploadTargetFromProperties(Argument::is($properties))->willReturn($uploadTarget);
-        $propertyParseService->getAlreadyUploadedChunksFromProperties(Argument::is($properties))->willReturn(5);
+        $propertyParseService->getChunkIdsFromProperties(Argument::is($properties))->willReturn(['a', 'b', 'c', 'd', 'e']);
         $propertyParseService->getUploadOwnerFromProperties(Argument::is($properties))->willReturn($uploadOwner);
         $propertyParseService->getExtensionFromProperties(Argument::is($properties))->willReturn('some-ext');
         $propertyParseService->getExpiresFromProperties(Argument::is($properties))->willReturn($expires);
         $propertyParseService->getHashStateFromProperties(Argument::is($properties))->willReturn('some-hash-state');
+        $propertyParseService->getTargetHadFileAtCreationFromProperties(Argument::is($properties))->willReturn(true);
 
         $uploadFactory = $this->buildUploadFactory(
             propertyParseService: $propertyParseService->reveal()
@@ -72,10 +73,12 @@ class UploadFactoryTest extends TestCase
         $this->assertSame(false, $upload->isUploadComplete());
         $this->assertSame($uploadTarget, $upload->getUploadTarget());
         $this->assertSame(5, $upload->getAlreadyUploadedChunks());
+        $this->assertSame(['a', 'b', 'c', 'd', 'e'], $upload->getChunkIds());
         $this->assertSame($uploadOwner, $upload->getUploadOwner());
         $this->assertSame('some-ext', $upload->getExtension());
         $this->assertSame($expires, $upload->getExpires());
         $this->assertSame('some-hash-state', $upload->getHashState());
+        $this->assertTrue($upload->targetHadFileAtCreation());
     }
 
     public function testCreateUploadFromElementThrowsWhenElementIsNotANode(): void
@@ -148,11 +151,12 @@ class UploadFactoryTest extends TestCase
         $upload->getUploadOffset()->shouldBeCalledOnce()->willReturn(2222);
         $upload->isUploadComplete()->shouldNotBeCalled();
         $upload->getUploadTarget()->shouldBeCalledOnce()->willReturn($uploadTarget);
-        $upload->getAlreadyUploadedChunks()->shouldBeCalledOnce()->willReturn(3);
+        $upload->getChunkIds()->shouldBeCalledOnce()->willReturn(['a', 'b', 'c']);
         $upload->getUploadOwner()->shouldBeCalledOnce()->willReturn($uploadOwner);
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
         $upload->getHashState()->shouldBeCalledOnce()->willReturn('some-hash-state');
+        $upload->targetHadFileAtCreation()->shouldBeCalledOnce()->willReturn(true);
 
         $uploadFactory = $this->buildUploadFactory();
 
@@ -168,6 +172,7 @@ class UploadFactoryTest extends TestCase
         $this->assertSame('ext', $result->getExtension());
         $this->assertSame($expires, $result->getExpires());
         $this->assertSame('some-hash-state', $result->getHashState());
+        $this->assertTrue($result->targetHadFileAtCreation());
     }
 
     public function testAddNewChunkToUpload(): void
@@ -183,15 +188,16 @@ class UploadFactoryTest extends TestCase
         $upload->getUploadOffset()->shouldBeCalledOnce()->willReturn(10000);
         $upload->isUploadComplete()->shouldBeCalledOnce()->willReturn(false);
         $upload->getUploadTarget()->shouldBeCalledOnce()->willReturn($uploadTarget);
-        $upload->getAlreadyUploadedChunks()->shouldBeCalledOnce()->willReturn(3);
+        $upload->getChunkIds()->shouldBeCalledOnce()->willReturn(['a', 'b', 'c']);
         $upload->getUploadOwner()->shouldBeCalledOnce()->willReturn($uploadOwner);
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
         $upload->getHashState()->shouldBeCalledOnce()->willReturn('some-hash-state');
+        $upload->targetHadFileAtCreation()->shouldBeCalledOnce()->willReturn(true);
 
         $uploadFactory = $this->buildUploadFactory();
 
-        $result = $uploadFactory->addNewChunkToUpload($upload->reveal(), 9999);
+        $result = $uploadFactory->addNewChunkToUpload($upload->reveal(), 9999, 'd');
 
         $this->assertSame($uploadId, $result->getId());
         $this->assertSame(20000, $result->getUploadLength());
@@ -199,10 +205,12 @@ class UploadFactoryTest extends TestCase
         $this->assertSame(false, $result->isUploadComplete());
         $this->assertSame($uploadTarget, $result->getUploadTarget());
         $this->assertSame(4, $result->getAlreadyUploadedChunks());
+        $this->assertSame(['a', 'b', 'c', 'd'], $result->getChunkIds());
         $this->assertSame($uploadOwner, $result->getUploadOwner());
         $this->assertSame('ext', $result->getExtension());
         $this->assertSame($expires, $result->getExpires());
         $this->assertSame('some-hash-state', $result->getHashState());
+        $this->assertTrue($result->targetHadFileAtCreation());
     }
 
     public function testAddNewChunkToUploadUsesProvidedHashStateInsteadOfExistingUploadHashState(): void
@@ -218,15 +226,16 @@ class UploadFactoryTest extends TestCase
         $upload->getUploadOffset()->shouldBeCalledOnce()->willReturn(10000);
         $upload->isUploadComplete()->shouldBeCalledOnce()->willReturn(false);
         $upload->getUploadTarget()->shouldBeCalledOnce()->willReturn($uploadTarget);
-        $upload->getAlreadyUploadedChunks()->shouldBeCalledOnce()->willReturn(3);
+        $upload->getChunkIds()->shouldBeCalledOnce()->willReturn(['a', 'b', 'c']);
         $upload->getUploadOwner()->shouldBeCalledOnce()->willReturn($uploadOwner);
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
         $upload->getHashState()->shouldNotBeCalled();
+        $upload->targetHadFileAtCreation()->shouldBeCalledOnce()->willReturn(false);
 
         $uploadFactory = $this->buildUploadFactory();
 
-        $result = $uploadFactory->addNewChunkToUpload($upload->reveal(), 9999, 'new-hash-state');
+        $result = $uploadFactory->addNewChunkToUpload($upload->reveal(), 9999, 'd', 'new-hash-state');
 
         $this->assertSame('new-hash-state', $result->getHashState());
     }

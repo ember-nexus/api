@@ -7,12 +7,13 @@ namespace App\Controller\File;
 use App\Attribute\EndpointSupportsEtag;
 use App\EventSystem\ElementFileDelete\Event\ElementFileDeleteEvent;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
-use App\Service\S3Service;
+use App\Service\ElementService;
 use App\Type\AccessType;
 use App\Type\EtagType;
 use App\Type\Response\NoContentResponse;
@@ -30,10 +31,11 @@ class DeleteElementFileController extends AbstractController
     public function __construct(
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
-        private S3Service $s3Service,
+        private ElementFileDeletionService $elementFileDeletionService,
         private ElementManager $elementManager,
+        private ElementService $elementService,
         private EventDispatcherInterface $eventDispatcher,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -57,13 +59,19 @@ class DeleteElementFileController extends AbstractController
         }
 
         $element = $this->elementManager->getElementOrFail($elementId);
-        $deleteFileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
-        $this->s3Service->deleteFile($deleteFileOperation);
+        if (!$this->elementService->hasFile($element)) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
 
+        $deleteFileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
+
+        // graph first: a failed flush leaves the file untouched, a failed S3 delete only leaves an orphaned object
         $element->addProperty('file', null);
         $element->addProperty('hasFile', false);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
+
+        $this->elementFileDeletionService->deleteFile($deleteFileOperation);
 
         $this->eventDispatcher->dispatch(new ElementFileDeleteEvent($elementId));
 

@@ -15,6 +15,9 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
 {
     public const int STREAM_CHUNK_SIZE = 65536;
 
+    /**
+     * @psalm-suppress UninitializedProperty, PossiblyNullReference
+     */
     public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback, ?ByteRange $range = null, ?string $reprDigestHeaderValue = null, ?string $contentType = null)
     {
         parent::__construct();
@@ -22,6 +25,8 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
         $stream = $object->getBody()->getContentAsResource();
 
         $this->headers->set('Accept-Ranges', 'bytes');
+        // the content type was detected by the server, browsers must not second-guess it
+        $this->headers->set('X-Content-Type-Options', 'nosniff');
 
         if (null !== $range) {
             $this->setStatusCode(206);
@@ -32,11 +37,8 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
         }
 
         if (null !== $reprDigestHeaderValue) {
-            // Repr-Digest describes the full underlying resource, regardless of Range, so it applies to both full
-            // and partial responses alike. Content-Digest is deliberately not set: for a full response it would
-            // always be identical to Repr-Digest (no extra information), and for a partial response it would
-            // require hashing just the returned range, which is not done, so it is correctly left out rather than
-            // set to a value describing the wrong bytes.
+            // Repr-Digest describes the whole file, so it is valid for partial responses too. Content-Digest is
+            // omitted, as it would require hashing the returned range.
             $this->headers->set('Repr-Digest', $reprDigestHeaderValue);
         }
 

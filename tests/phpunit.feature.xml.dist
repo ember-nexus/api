@@ -22,6 +22,7 @@
   <source>
     <include>
       <directory suffix=".php">../src</directory>
+      <directory suffix=".php">../lib/EmberNexusBundle</directory>
     </include>
   </source>
 </phpunit>

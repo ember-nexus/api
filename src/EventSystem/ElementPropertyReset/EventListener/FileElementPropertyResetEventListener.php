@@ -8,8 +8,7 @@ use App\EventSystem\ElementPropertyReset\Event\ElementPropertyResetEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 /**
- * A PUT (full data replace) must not wipe an element's associated file; files are managed through the dedicated
- * file/upload endpoints, independently of an element's 'data'.
+ * PUT must not remove an element's file, files are managed by the file endpoints only.
  */
 class FileElementPropertyResetEventListener
 {

@@ -30,7 +30,7 @@ class NoContentResponseFactoryTest extends TestCase
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest()->shouldBeCalledOnce()->willReturn(666666);
+        $emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest()->shouldNotBeCalled();
         $emberNexusConfiguration->getFileMaxFileSizeInBytes()->shouldBeCalledOnce()->willReturn(555555);
         $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()->shouldBeCalledOnce()->willReturn(444444);
         $emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()->shouldBeCalledOnce()->willReturn(333333);
@@ -47,7 +47,7 @@ class NoContentResponseFactoryTest extends TestCase
         $this->assertSame('1234', $headers->get('Upload-Offset'));
         $this->assertNull($headers->get('Location'));
         $this->assertNull($headers->get('Upload-Length'));
-        $this->assertSame('max-age=666666, max-size=555555, min-append-size=444444, max-append-size=333333', $headers->get('Upload-Limit'));
+        $this->assertSame('max-age=0, max-size=555555, min-append-size=444444, max-append-size=333333', $headers->get('Upload-Limit'));
         $this->assertSame('Sun, 19 Apr 2026 13:34:00 GMT', $headers->get('Expires'));
         $this->assertSame('no-store, private', $headers->get('Cache-Control'));
     }
@@ -63,7 +63,7 @@ class NoContentResponseFactoryTest extends TestCase
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest()->shouldBeCalledOnce()->willReturn(666666);
+        $emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest()->shouldNotBeCalled();
         $emberNexusConfiguration->getFileMaxFileSizeInBytes()->shouldBeCalledOnce()->willReturn(555555);
         $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()->shouldBeCalledOnce()->willReturn(444444);
         $emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()->shouldBeCalledOnce()->willReturn(333333);
@@ -80,8 +80,56 @@ class NoContentResponseFactoryTest extends TestCase
         $this->assertSame('1234', $headers->get('Upload-Offset'));
         $this->assertSame('new-location', $headers->get('Location'));
         $this->assertSame('4567', $headers->get('Upload-Length'));
-        $this->assertSame('max-age=666666, max-size=555555, min-append-size=444444, max-append-size=333333', $headers->get('Upload-Limit'));
+        $this->assertSame('max-age=0, max-size=555555, min-append-size=444444, max-append-size=333333', $headers->get('Upload-Limit'));
         $this->assertSame('Mon, 20 Apr 2026 00:00:00 GMT', $headers->get('Expires'));
         $this->assertSame('no-store, private', $headers->get('Cache-Control'));
+    }
+
+    public function testUploadLimitMaxAgeIsRemainingLifetimeOfUpload(): void
+    {
+        $expires = new DateTime('+1000 seconds');
+
+        $upload = $this->prophesize(UploadInterface::class);
+        $upload->isUploadComplete()->willReturn(false);
+        $upload->getUploadOffset()->willReturn(0);
+        $upload->getUploadLength()->willReturn(null);
+        $upload->getExpires()->willReturn($expires);
+
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        // the full window must not leak into the header
+        $emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest()->willReturn(666666);
+        $emberNexusConfiguration->getFileMaxFileSizeInBytes()->willReturn(555555);
+        $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()->willReturn(444444);
+        $emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()->willReturn(333333);
+
+        $response = (new NoContentResponseFactory($emberNexusConfiguration->reveal()))
+            ->createNoContentResponseWithResumableUploadHeadersFromUpload($upload->reveal());
+
+        $this->assertSame(1, preg_match('/^max-age=(\d+), /', $response->headers->get('Upload-Limit') ?? '', $matches));
+        $this->assertGreaterThanOrEqual(998, (int) $matches[1]);
+        $this->assertLessThanOrEqual(1000, (int) $matches[1]);
+        $this->assertSame(
+            $expires->getTimestamp(),
+            (new DateTime($response->headers->get('Expires') ?? ''))->getTimestamp()
+        );
+    }
+
+    public function testUploadLimitMaxAgeIsNeverNegativeForExpiredUpload(): void
+    {
+        $upload = $this->prophesize(UploadInterface::class);
+        $upload->isUploadComplete()->willReturn(false);
+        $upload->getUploadOffset()->willReturn(0);
+        $upload->getUploadLength()->willReturn(null);
+        $upload->getExpires()->willReturn(new DateTime('-1000 seconds'));
+
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileMaxFileSizeInBytes()->willReturn(1);
+        $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()->willReturn(1);
+        $emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()->willReturn(1);
+
+        $response = (new NoContentResponseFactory($emberNexusConfiguration->reveal()))
+            ->createNoContentResponseWithResumableUploadHeadersFromUpload($upload->reveal());
+
+        $this->assertStringStartsWith('max-age=0, ', $response->headers->get('Upload-Limit') ?? '');
     }
 }

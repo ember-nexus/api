@@ -10,6 +10,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\UserPasswordHasher;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Type\Response\CreatedResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -39,6 +40,7 @@ class PostRegisterController extends AbstractController
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -53,20 +55,16 @@ class PostRegisterController extends AbstractController
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
 
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
         $rawData = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('User', $body);
         $userId = UuidV4::uuid4();
         $password = $this->requestUtilService->getStringFromBody('password', $body);
-        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $rawData);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
         $this->checkForDuplicateUniqueUserIdentifier($uniqueUserIdentifier);
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        if (array_key_exists($uniqueIdentifier, $rawData)) {
-            // remove unique identifier from data payload, was required in releases before 0.1.6
-            unset($rawData[$uniqueIdentifier]);
-        }
 
         $userNode = $this->createElementFromRawDataService->createElementFromRawData(
             $userId,

@@ -69,6 +69,25 @@ class PropertyParseService
     }
 
     /**
+     * Absent on an upload created before this property existed: defaults to `true` so the `hasFile` conflict checks
+     * are skipped rather than risk rejecting a legitimate, already-in-progress replace.
+     *
+     * @param mixed[] $properties
+     */
+    public function getTargetHadFileAtCreationFromProperties(mixed $properties): bool
+    {
+        if (!array_key_exists('targetHadFileAtCreation', $properties)) {
+            return true;
+        }
+        $targetHadFileAtCreation = $properties['targetHadFileAtCreation'];
+        if (!is_bool($targetHadFileAtCreation)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property targetHadFileAtCreation to be bool.');
+        }
+
+        return $targetHadFileAtCreation;
+    }
+
+    /**
      * @param mixed[] $properties
      */
     public function getUploadTargetFromProperties(mixed $properties): UuidInterface
@@ -89,21 +108,25 @@ class PropertyParseService
 
     /**
      * @param mixed[] $properties
+     *
+     * @return list<string>
      */
-    public function getAlreadyUploadedChunksFromProperties(mixed $properties): int
+    public function getChunkIdsFromProperties(mixed $properties): array
     {
-        if (!array_key_exists('alreadyUploadedChunks', $properties)) {
-            return 0;
+        if (!array_key_exists('chunkIds', $properties)) {
+            return [];
         }
-        $alreadyUploadedChunks = $properties['alreadyUploadedChunks'];
-        if (!is_int($alreadyUploadedChunks)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property alreadyUploadedChunks to be int.');
+        $chunkIds = $properties['chunkIds'];
+        if (!is_array($chunkIds) || !array_is_list($chunkIds)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property chunkIds to be a list of strings.');
         }
-        if ($alreadyUploadedChunks < 0) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property alreadyUploadedChunks to be positive int.');
+        foreach ($chunkIds as $chunkId) {
+            if (!is_string($chunkId)) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property chunkIds to be a list of strings.');
+            }
         }
 
-        return $alreadyUploadedChunks;
+        return $chunkIds;
     }
 
     /**
@@ -130,12 +153,10 @@ class PropertyParseService
      */
     public function getExtensionFromProperties(mixed $properties): string
     {
-        if (!array_key_exists('extension', $properties)) {
-            return FileService::DEFAULT_EXTENSION;
-        }
-        $extension = $properties['extension'];
+        // a missing, null or non-string extension falls back to the default; an empty string means no extension
+        $extension = $properties['extension'] ?? null;
         if (!is_string($extension)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property extension to be string.');
+            return FileService::DEFAULT_EXTENSION;
         }
 
         return $extension;
