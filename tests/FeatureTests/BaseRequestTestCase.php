@@ -405,6 +405,42 @@ abstract class BaseRequestTestCase extends TestCase
         return array_reverse(explode('/', $location))[0];
     }
 
+    /**
+     * Creates a relation of type 'Data' between two newly created 'Data' nodes, for tests which need a blank,
+     * short-lived relation. Remove it again with {@see deleteEphemeralRelation()}.
+     */
+    public function createEphemeralRelation(string $token, string $name): string
+    {
+        $startNodeId = $this->getUuidFromLocation($this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'data' => ['name' => $name.'-start'],
+        ]));
+        $endNodeId = $this->getUuidFromLocation($this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'data' => ['name' => $name.'-end'],
+        ]));
+        $relationResponse = $this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'start' => $startNodeId,
+            'end' => $endNodeId,
+            'data' => ['name' => $name],
+        ]);
+        $this->assertIsCreatedResponse($relationResponse);
+
+        return $this->getUuidFromLocation($relationResponse);
+    }
+
+    /**
+     * Removes a relation created by {@see createEphemeralRelation()}, including its start and end node.
+     */
+    public function deleteEphemeralRelation(string $token, string $relationId): void
+    {
+        $relation = $this->getBody($this->runGetRequest(sprintf('/%s', $relationId), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relationId), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relation['start']), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relation['end']), $token));
+    }
+
     public function generateDeterministicFile(int $seed, int $targetSize, string $outputPath): void
     {
         $lineWidth = 120;
