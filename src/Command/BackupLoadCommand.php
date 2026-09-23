@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Contract\NodeElementInterface;
+use App\Contract\RelationElementInterface;
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
 use App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
@@ -11,6 +13,7 @@ use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Helper\Regex;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
+use App\Service\FileHashService;
 use App\Service\FileSizeLimitService;
 use App\Service\RawToElementService;
 use App\Service\S3Service;
@@ -27,6 +30,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -46,6 +50,7 @@ class BackupLoadCommand extends Command
     private int $fileCount = 0;
     private int $nodeCount = 0;
     private int $pageSize = 250;
+    private bool $skipVerify = false;
 
     private EmberNexusStyle $io;
 
@@ -64,6 +69,7 @@ class BackupLoadCommand extends Command
         private S3Service $s3Service,
         private UploadFileOperationFactory $uploadFileOperationFactory,
         private FileSizeLimitService $fileSizeLimitService,
+        private FileHashService $fileHashService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
@@ -72,6 +78,7 @@ class BackupLoadCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('name', InputArgument::REQUIRED, 'Name of the backup');
+        $this->addOption('skip-verify', null, InputOption::VALUE_NONE, "Skip verifying file contents against their stored 'file.hash' values");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -88,6 +95,7 @@ class BackupLoadCommand extends Command
         }
 
         $this->backupName = $this->checkBackupName($input->getArgument('name'));
+        $this->skipVerify = (bool) $input->getOption('skip-verify');
 
         $this->loadSummary();
 
@@ -220,6 +228,13 @@ class BackupLoadCommand extends Command
                 return false;
             }
 
+            $hashError = $this->skipVerify ? null : $this->verifyFileHashes($element, $path);
+            if (null !== $hashError) {
+                $this->io->warning(sprintf('%s; skipping file: %s', $hashError, $path));
+
+                return false;
+            }
+
             $resource = $this->backupStorage->readStream($path);
             $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, $resource, $contentLength);
             $this->s3Service->uploadFile($uploadFileOperation);
@@ -236,9 +251,48 @@ class BackupLoadCommand extends Command
         return true;
     }
 
+    /**
+     * Verifies the backup file's content against every `file.hash.<algorithm>` value stored on its element, so that
+     * corrupted or modified backup files are not loaded. The file is read once for this, before the upload.
+     *
+     * @return string|null error message, or null if all hashes match
+     */
+    private function verifyFileHashes(NodeElementInterface|RelationElementInterface $element, string $path): ?string
+    {
+        $expectedHashes = $this->fileHashService->getVerifiableHashesFromFileProperty(
+            $element->hasProperty('file') ? $element->getProperty('file') : null
+        );
+        if ([] === $expectedHashes) {
+            return "Element has no verifiable 'file.hash' property";
+        }
+
+        $resource = $this->backupStorage->readStream($path);
+        try {
+            $actualHashes = $this->fileHashService->calculateHashesFromResource($resource, array_keys($expectedHashes));
+        } finally {
+            \Safe\fclose($resource);
+        }
+
+        foreach ($expectedHashes as $algorithm => $expectedHash) {
+            if (!hash_equals($expectedHash, $actualHashes[$algorithm])) {
+                return sprintf(
+                    "File content does not match 'file.hash.%s' (expected %s, got %s)",
+                    $algorithm,
+                    $expectedHash,
+                    $actualHashes[$algorithm]
+                );
+            }
+        }
+
+        return null;
+    }
+
     private function loadFiles(): void
     {
         $this->io->startSection('Step 3 of 4: Loading Files');
+        if ($this->skipVerify) {
+            $this->io->warning("File hash verification is disabled (--skip-verify); file contents are not checked against 'file.hash'.");
+        }
         $progressBar = $this->io->createProgressBarInInteractiveTerminal($this->fileCount);
         $progressBar?->display();
         $files = $this->backupStorage->listContents($this->backupName.'/file/', true);

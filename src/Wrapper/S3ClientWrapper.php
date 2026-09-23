@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Wrapper;
 
+use AsyncAws\S3\Result\AbortMultipartUploadOutput;
 use AsyncAws\S3\Result\CopyObjectOutput;
 use AsyncAws\S3\Result\ObjectExistsWaiter;
 
@@ -23,5 +24,10 @@ class S3ClientWrapper
     public function resolveCopyObjectOutput(CopyObjectOutput $copyObjectOutput): bool
     {
         return $copyObjectOutput->resolve();
+    }
+
+    public function resolveAbortMultipartUploadOutput(AbortMultipartUploadOutput $abortMultipartUploadOutput): bool
+    {
+        return $abortMultipartUploadOutput->resolve();
     }
 }

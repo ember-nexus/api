@@ -42,12 +42,13 @@ body         {color: white; background-color: black;}
   Loads a local backup into the empty database.
 
 <span class="yellow ">Usage:</span>
-  backup:load &lt;name&gt;
+  backup:load [options] [--] &lt;name&gt;
 
 <span class="yellow ">Arguments:</span>
   <span class="green ">name</span>                  Name of the backup
 
 <span class="yellow ">Options:</span>
+  <span class="green ">    --skip-verify</span>     Skip verifying file contents against their stored 'file.hash' values
   <span class="green ">-h, --help</span>            Display help for the given command. When no command is given display help for the <span class="green ">list</span> command
   <span class="green ">    --silent</span>          Do not output any message
   <span class="green ">-q, --quiet</span>           Only errors are displayed. All other output is suppressed

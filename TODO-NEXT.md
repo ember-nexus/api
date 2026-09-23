@@ -37,25 +37,6 @@ outside this repository.
 See the findings section below; the fix is an upstream change in `syndesi/mongo-entity-manager` and
 `syndesi/elastic-entity-manager`.
 
-### ETag support on the upload endpoints
-
-`POST`/`PUT`/`DELETE /{id}/file` all carry `#[EndpointSupportsEtag(EtagType::FILE)]` now, so `If-Match` /
-`If-None-Match` work across the whole file lifecycle, including the creation of a resumable upload.
-
-The three upload endpoints (`PATCH`/`HEAD`/`DELETE /upload/{id}`) deliberately do **not**, because the attribute
-alone would be wrong there: `EtagService::setCurrentRequestEtagFromRequestAndEtagType()` resolves the etag from
-the route's `id` attribute, which on those routes is the **upload** id, not the target element id. Adding
-`EtagType::FILE` there would compute (and compare) the etag of the wrong element.
-
-Making it work needs a deliberate design choice, not a one-line attribute:
-
-- resolve the target element from the upload before calculating a `FILE` etag, or
-- introduce an `EtagType::UPLOAD` with its own calculator, Redis key and invalidation path.
-
-Worth noting it may not be needed at all: the resumable protocol already has its own concurrency control via
-`Upload-Offset` (409 on mismatch), and the meaningful precondition point for the *file* is when the upload is
-created — which `POST /{id}/file` now covers.
-
 ## Decided and done
 
 Kept as a record of why these went the way they did; drop once folded into `docs/`.

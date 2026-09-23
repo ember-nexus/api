@@ -17,10 +17,12 @@ use App\Type\S3\FileOperation;
 use App\Wrapper\S3ClientWrapper;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class S3Service
 {
@@ -46,6 +48,7 @@ class S3Service
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private S3TechnicalLimitsInterface $s3TechnicalLimits,
+        private LoggerInterface $logger,
         S3TechnicalLimitsValidator $s3TechnicalLimitsValidator,
         private int $multipartUploadThresholdInBytes = self::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
         private int $multipartUploadPartSizeInBytes = self::MULTIPART_UPLOAD_PART_SIZE_IN_BYTES,
@@ -123,11 +126,7 @@ class S3Service
                 ],
             ]);
         } catch (Throwable $e) {
-            $this->s3Client->abortMultipartUpload([
-                'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
-                'Key' => $mergeFileChunksOperation->getStorageKey(),
-                'UploadId' => $multipartUploadId,
-            ]);
+            $this->tryAbortMultipartUpload($mergeFileChunksOperation->getStorageBucket(), $mergeFileChunksOperation->getStorageKey(), $multipartUploadId);
 
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
         }
@@ -305,11 +304,7 @@ class S3Service
                 ],
             ]);
         } catch (Throwable $e) {
-            $this->s3Client->abortMultipartUpload([
-                'Bucket' => $storageBucket,
-                'Key' => $storageKey,
-                'UploadId' => $multipartUploadId,
-            ]);
+            $this->tryAbortMultipartUpload($storageBucket, $storageKey, $multipartUploadId);
 
             if ($e instanceof Client400BadContentException) {
                 throw $e;
@@ -324,6 +319,30 @@ class S3Service
         }
 
         return $uploadedContentLength;
+    }
+
+    /**
+     * Aborts a failed multipart upload on a best-effort basis: a failing abort is only logged, so that it never
+     * replaces the exception which caused the abort in the first place. Parts of uploads which could not be aborted
+     * remain in the bucket until removed by its lifecycle policy (`AbortIncompleteMultipartUpload`).
+     */
+    private function tryAbortMultipartUpload(string $bucket, string $key, string $multipartUploadId): void
+    {
+        try {
+            // AsyncAws requests are lazy; resolve() forces a failure to be thrown here instead of on destruction
+            $this->s3ClientWrapper->resolveAbortMultipartUploadOutput($this->s3Client->abortMultipartUpload([
+                'Bucket' => $bucket,
+                'Key' => $key,
+                'UploadId' => $multipartUploadId,
+            ]));
+        } catch (Throwable $e) {
+            $this->logger->warning('Unable to abort multipart upload.', [
+                'bucket' => $bucket,
+                'key' => $key,
+                'uploadId' => $multipartUploadId,
+                'exception' => $e,
+            ]);
+        }
     }
 
     /**
@@ -410,8 +429,12 @@ class S3Service
      */
     public function getFileRangeAsResource(FileOperationInterface $fileOperation, int $maxContentLength)
     {
+        if ($maxContentLength <= 0) {
+            return \Safe\fopen('php://memory', 'r');
+        }
         $contentLength = $this->getContentLength($fileOperation);
-        if (0 === $contentLength) {
+        $lengthToRead = min($contentLength, $maxContentLength);
+        if ($lengthToRead <= 0) {
             // a byte-range request against an empty object has no satisfiable range (S3 rejects it with a 416),
             // and there is nothing to fetch either way - an empty resource is the correct result directly.
             return \Safe\fopen('php://memory', 'r');
@@ -419,7 +442,8 @@ class S3Service
         $result = $this->s3Client->getObject([
             'Bucket' => $fileOperation->getBucket(),
             'Key' => $fileOperation->getKey(),
-            'Range' => sprintf('bytes=0-%d', min($contentLength, $maxContentLength)),
+            // HTTP byte ranges are inclusive on both ends, hence the last byte's index is length - 1
+            'Range' => sprintf('bytes=0-%d', $lengthToRead - 1),
         ]);
 
         return $result->getBody()->getContentAsResource();
