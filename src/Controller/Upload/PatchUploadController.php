@@ -106,13 +106,16 @@ class PatchUploadController extends AbstractController
         // the chunk's resource is hashed once, locally, then rewound, before S3Service ever sees it - see
         // IncrementalHashService for why this is not done via a persistently-attached stream filter instead.
         $resource = $partialUploadRequest->getContent();
-        $hashContext = null !== $upload->getHashState()
-            ? $this->incrementalHashService->unserializeContextFromStorage($upload->getHashState())
+        $hashState = $upload->getHashState();
+        $hashContext = null !== $hashState
+            ? $this->incrementalHashService->unserializeContextFromStorage($hashState)
             : $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
 
         $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload);
         $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+        // the S3 client may already have closed the resource while uploading it
+        /** @psalm-suppress RedundantConditionGivenDocblockType */
         if (is_resource($resource)) {
             \Safe\fclose($resource);
         }

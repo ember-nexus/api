@@ -71,7 +71,8 @@ class CreateElementFromRawDataService
         $this->eventDispatcher->dispatch($elementPropertyChangeEvent);
         $verifiedData = $elementPropertyChangeEvent->getChangedProperties();
 
-        if ($startNodeId && $endNodeId) {
+        // start and end node ids are either both set or both null, see checks above
+        if (null !== $startNodeId) {
             $element = new RelationElement();
             $element->setStart($startNodeId);
             $element->setEnd($endNodeId);

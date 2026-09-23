@@ -93,6 +93,8 @@ class UploadCreationService
         }
 
         $this->s3Service->uploadFile($uploadFileOperation);
+        // the S3 client may already have closed the resource while uploading it
+        /** @psalm-suppress RedundantConditionGivenDocblockType */
         if (is_resource($resource)) {
             \Safe\fclose($resource);
         }
@@ -149,6 +151,8 @@ class UploadCreationService
 
             $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
             $uploadOffset = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+            // the S3 client may already have closed the resource while uploading it
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
             if (is_resource($resource)) {
                 \Safe\fclose($resource);
             }

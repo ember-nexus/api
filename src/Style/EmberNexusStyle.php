@@ -24,7 +24,7 @@ class EmberNexusStyle extends SymfonyStyle
     private bool $isInSection = false;
 
     public function __construct(
-        private InputInterface $input, /** @phpstan-ignore-line */
+        private InputInterface $input,
         private OutputInterface $output,
     ) {
         if ($output instanceof ConsoleOutput) {
