@@ -32,7 +32,7 @@ class IfMatchControllerEventListenerTest extends TestCase
         $event = new ControllerEvent(
             $this->prophesize(HttpKernelInterface::class)->reveal(),
             function () {},
-            $this->prophesize(Request::class)->reveal(),
+            new Request(),
             HttpKernelInterface::MAIN_REQUEST
         );
 
@@ -51,7 +51,7 @@ class IfMatchControllerEventListenerTest extends TestCase
         $event = new ControllerEvent(
             $this->prophesize(HttpKernelInterface::class)->reveal(),
             $closure,
-            $this->prophesize(Request::class)->reveal(),
+            new Request(),
             HttpKernelInterface::MAIN_REQUEST
         );
 

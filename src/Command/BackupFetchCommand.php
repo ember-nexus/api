@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
@@ -34,6 +35,7 @@ class BackupFetchCommand extends Command
     private EmberNexusStyle $io;
 
     public function __construct(
+        #[Target('backup.storage')]
         private FilesystemOperator $backupStorage,
     ) {
         parent::__construct();

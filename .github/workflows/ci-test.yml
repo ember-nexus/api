@@ -168,24 +168,26 @@ jobs:
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:mutant"
 
-  test-mess-detector:
-    runs-on: ubuntu-latest
-    name: 'Mess Detector'
-    timeout-minutes: 5
-    needs:
-      - build-docker-image
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v5
-      - run: mkdir -p /tmp/docker
-      - uses: actions/download-artifact@v8
-        with:
-          name: docker-image-api-dev-amd
-          path: /tmp/docker
-      - name: Mess Detector
-        run: |
-          docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
+  # phpmd is temporarily deactivated: it was removed from the dev dependencies, as its last release is too old for
+  # the current dependencies. Reactivate once a new phpmd release is available.
+#  test-mess-detector:
+#    runs-on: ubuntu-latest
+#    name: 'Mess Detector'
+#    timeout-minutes: 5
+#    needs:
+#      - build-docker-image
+#    continue-on-error: true
+#    steps:
+#      - uses: actions/checkout@v5
+#      - run: mkdir -p /tmp/docker
+#      - uses: actions/download-artifact@v8
+#        with:
+#          name: docker-image-api-dev-amd
+#          path: /tmp/docker
+#      - name: Mess Detector
+#        run: |
+#          docker load < /tmp/docker/api-dev-amd.tar.gz
+#          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
   test-feature:
     runs-on: ubuntu-latest
@@ -196,7 +198,7 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-      - test-mess-detector
+#      - test-mess-detector
     strategy:
       matrix:
         dockerCompose:
@@ -244,7 +246,7 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-      - test-mess-detector
+#      - test-mess-detector
     steps:
       - uses: actions/checkout@v5
       - run: mkdir -p /tmp/docker
@@ -287,7 +289,7 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-      - test-mess-detector
+#      - test-mess-detector
     steps:
       - uses: actions/checkout@v5
       - run: mkdir -p /tmp/docker

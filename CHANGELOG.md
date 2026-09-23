@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade FrankenPHP to 1.12.1, related to #457 and #461.
 - Upgrade PHP to 8.5.4, related to #457 and #461.
 - Upgrade PHP dependencies, related to #457 and #461.
+- Upgrade Symfony from 7.4 to 8.1, and `symfony/monolog-bundle` from 3 to 4; fix related deprecations.
+- Temporarily deactivate `composer mess` (phpmd) in CI and remove it from the dev dependencies, as its last release is
+  not compatible with current dependencies.
 - Upgrade GitHub Actions in CI/CD.
 - Increase max post limit from 2 MB (PHP default) to 101 MiB, related to #119.
 - Change header `Access-Control-Allow-Headers` to `*`, due to growing number of supported headers.

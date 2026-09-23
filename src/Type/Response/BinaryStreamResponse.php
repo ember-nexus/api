@@ -15,6 +15,9 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
 {
     public const int STREAM_CHUNK_SIZE = 65536;
 
+    /**
+     * @psalm-suppress UninitializedProperty, PossiblyNullReference
+     */
     public function __construct(GetObjectOutput $object, string $fileName, string $fileNameFallback, ?ByteRange $range = null, ?string $reprDigestHeaderValue = null, ?string $contentType = null)
     {
         parent::__construct();

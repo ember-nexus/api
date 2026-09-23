@@ -32,6 +32,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
@@ -61,6 +62,7 @@ class BackupLoadCommand extends Command
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private Client $redisClient,
+        #[Target('backup.storage')]
         private FilesystemOperator $backupStorage,
         private RawToElementService $rawToElementService,
         private EventDispatcherInterface $eventDispatcher,
