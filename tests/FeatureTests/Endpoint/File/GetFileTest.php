@@ -26,19 +26,100 @@ class GetFileTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 404);
     }
 
-    /**
-     * @todo
-     */
     public function testGetFileOnRelationWithFile(): void
     {
-        $this->markTestSkipped();
+        $startNode = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => 'get-file-on-relation-with-file-start',
+                ],
+            ]
+        );
+        $startNodeId = $this->getUuidFromLocation($startNode);
+
+        $endNode = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => 'get-file-on-relation-with-file-end',
+                ],
+            ]
+        );
+        $endNodeId = $this->getUuidFromLocation($endNode);
+
+        $relation = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'start' => $startNodeId,
+                'end' => $endNodeId,
+                'data' => [
+                    'name' => 'get-file-on-relation-with-file',
+                ],
+            ]
+        );
+        $relationId = $this->getUuidFromLocation($relation);
+
+        $file = \Safe\fopen(__DIR__.'/../../Asset/cherry-blossoms.jpg', 'r');
+        $uploadResponse = $this->runUploadRequest(
+            'POST',
+            sprintf('/%s/file', $relationId),
+            $file,
+            self::TOKEN
+        );
+        $this->assertIsCreatedResponse($uploadResponse, false);
+
+        $response = $this->runGetRequest(sprintf('/%s/file', $relationId), self::TOKEN);
+        $this->assertIsBinaryStreamResponse($response, 'image/jpeg');
     }
 
-    /**
-     * @todo
-     */
     public function testGetFileOnRelationWithoutFile(): void
     {
-        $this->markTestSkipped();
+        $startNode = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => 'get-file-on-relation-without-file-start',
+                ],
+            ]
+        );
+        $startNodeId = $this->getUuidFromLocation($startNode);
+
+        $endNode = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => 'get-file-on-relation-without-file-end',
+                ],
+            ]
+        );
+        $endNodeId = $this->getUuidFromLocation($endNode);
+
+        $relation = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'Data',
+                'start' => $startNodeId,
+                'end' => $endNodeId,
+                'data' => [
+                    'name' => 'get-file-on-relation-without-file',
+                ],
+            ]
+        );
+        $relationId = $this->getUuidFromLocation($relation);
+
+        $response = $this->runGetRequest(sprintf('/%s/file', $relationId), self::TOKEN);
+        $this->assertIsProblemResponse($response, 404);
     }
 }

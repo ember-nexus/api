@@ -6,8 +6,10 @@ namespace App\Service;
 
 use App\Contract\S3\FileOperationInterface;
 use App\Contract\S3\MergeFileChunksOperationInterface;
+use App\Contract\S3\S3TechnicalLimitsInterface;
 use App\Contract\S3\UploadFileChunkOperationInterface;
 use App\Contract\S3\UploadFileOperationInterface;
+use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
@@ -17,8 +19,25 @@ use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
 use Throwable;
 
+/**
+ * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+ */
 class S3Service
 {
+    /**
+     * Size from which a file is written as a multipart upload rather than a single PUT. Well below the backend's
+     * technical single-PUT ceiling ({@see S3TechnicalLimitsInterface::getMaxSinglePutSizeInBytes()}), which stays
+     * the hard limit used for configuration validation: a single PUT of several GiB is one long, unresumable
+     * request whose failure costs the whole transfer, so switching earlier is cheaper than riding the limit.
+     */
+    public const int MULTIPART_UPLOAD_THRESHOLD_IN_BYTES = 500 * 1024 * 1024;
+
+    /**
+     * Part size used when streaming a large file into a multipart upload. Scaled up when the file is big enough
+     * that a fixed part size would exceed the backend's maximum part count.
+     */
+    public const int MULTIPART_UPLOAD_PART_SIZE_IN_BYTES = 100 * 1024 * 1024;
+
     public function __construct(
         private S3Client $s3Client,
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
@@ -26,9 +45,12 @@ class S3Service
         private MimeTypeService $mimeTypeService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private S3TechnicalLimitsInterface $s3TechnicalLimits,
         S3TechnicalLimitsValidator $s3TechnicalLimitsValidator,
+        private int $multipartUploadThresholdInBytes = self::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
+        private int $multipartUploadPartSizeInBytes = self::MULTIPART_UPLOAD_PART_SIZE_IN_BYTES,
     ) {
-        $s3TechnicalLimitsValidator->validate();
+        $s3TechnicalLimitsValidator->validate($this->multipartUploadThresholdInBytes);
     }
 
     /**
@@ -164,13 +186,18 @@ class S3Service
     }
 
     /**
-     * Writes the whole file with a single PUT, which caps it at S3's 5 GiB single-object-upload limit. Requests
-     * reaching this are already bounded well below that by `post_max_size`, but `BackupLoadCommand` is not: it
-     * restores files straight from a backup archive, so a backup holding a file larger than 5 GiB fails to load.
-     * Lifting that needs multipart, tracked in https://github.com/ember-nexus/api/issues/452.
+     * Small files take the intermediate upload bucket route below; from
+     * {@see MULTIPART_UPLOAD_THRESHOLD_IN_BYTES} upwards they are streamed straight into the storage bucket as a
+     * multipart upload, since past the backend's single-PUT ceiling neither the PUT nor the `copyObject` this
+     * route relies on could handle them at all.
      */
     public function uploadFile(UploadFileOperationInterface $uploadFileOperation): int
     {
+        $contentLength = $uploadFileOperation->getContentLength();
+        if (null !== $contentLength && $contentLength >= $this->multipartUploadThresholdInBytes) {
+            return $this->uploadFileViaMultipartUpload($uploadFileOperation, $contentLength);
+        }
+
         $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
         $contentLength = $this->uploadFileChunk($uploadFileChunkOperation);
 
@@ -205,6 +232,109 @@ class S3Service
         }
 
         return $contentLength;
+    }
+
+    /**
+     * Streams $uploadFileOperation's resource into the storage bucket part by part. The intermediate upload
+     * bucket is skipped deliberately: a file this large could not be moved out of it afterwards, as a single
+     * `copyObject` has the same size ceiling as a single PUT.
+     *
+     * One part is held in memory at a time, so peak usage is roughly the part size rather than the file size.
+     *
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     */
+    private function uploadFileViaMultipartUpload(UploadFileOperationInterface $uploadFileOperation, int $contentLength): int
+    {
+        $storageBucket = $uploadFileOperation->getStorageBucket();
+        $storageKey = $uploadFileOperation->getStorageKey();
+        $partSizeInBytes = $this->getMultipartUploadPartSizeInBytes($contentLength);
+
+        $multipartUploadId = $this->s3Client->createMultipartUpload([
+            'Bucket' => $storageBucket,
+            'Key' => $storageKey,
+            'ContentType' => $uploadFileOperation->getMimeType(),
+        ])->getUploadId();
+
+        if (null === $multipartUploadId) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to create multipart upload.');
+        }
+
+        $uploadedContentLength = 0;
+        try {
+            $parts = [];
+            $resource = $uploadFileOperation->getContent();
+            while (!feof($resource)) {
+                $body = \Safe\stream_get_contents($resource, $partSizeInBytes);
+                if ('' === $body) {
+                    break;
+                }
+
+                $partNumber = count($parts) + 1;
+                $etag = $this->s3Client->uploadPart([
+                    'Bucket' => $storageBucket,
+                    'Key' => $storageKey,
+                    'UploadId' => $multipartUploadId,
+                    'PartNumber' => $partNumber,
+                    'Body' => $body,
+                ])->getETag();
+
+                if (null === $etag) {
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Unable to read etag of uploaded part %d.', $partNumber));
+                }
+
+                $parts[] = [
+                    'PartNumber' => $partNumber,
+                    'ETag' => $etag,
+                ];
+                $uploadedContentLength += strlen($body);
+            }
+
+            // verified before completing, not after: a completed multipart upload is immediately live at the
+            // final storage key, so finishing it first would leave a wrong-length object in place of the
+            // previous one while telling the client the request failed
+            if ($uploadedContentLength !== $contentLength) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Inconsistent length values between provided content-length (%d) and actual content length (%d) detected.', $contentLength, $uploadedContentLength));
+            }
+
+            $this->s3Client->completeMultipartUpload([
+                'Bucket' => $storageBucket,
+                'Key' => $storageKey,
+                'UploadId' => $multipartUploadId,
+                'MultipartUpload' => [
+                    'Parts' => $parts,
+                ],
+            ]);
+        } catch (Throwable $e) {
+            $this->s3Client->abortMultipartUpload([
+                'Bucket' => $storageBucket,
+                'Key' => $storageKey,
+                'UploadId' => $multipartUploadId,
+            ]);
+
+            if ($e instanceof Client400BadContentException) {
+                throw $e;
+            }
+
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
+        }
+
+        $previousStorageKey = $uploadFileOperation->getPreviousStorageKey();
+        if (null !== $previousStorageKey && $previousStorageKey !== $storageKey) {
+            $this->deleteFile(new FileOperation($storageBucket, $previousStorageKey));
+        }
+
+        return $uploadedContentLength;
+    }
+
+    /**
+     * A fixed part size would run past the backend's maximum part count once the file is large enough, so the
+     * part size grows with the file when it has to.
+     */
+    private function getMultipartUploadPartSizeInBytes(int $contentLength): int
+    {
+        $partSizeRequiredByMaxChunkCount = (int) ceil($contentLength / $this->s3TechnicalLimits->getMaxChunkCount());
+
+        return max($this->multipartUploadPartSizeInBytes, $partSizeRequiredByMaxChunkCount);
     }
 
     public function deleteFile(FileOperationInterface $fileOperation): void

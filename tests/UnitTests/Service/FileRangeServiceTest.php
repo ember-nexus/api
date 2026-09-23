@@ -141,4 +141,26 @@ class FileRangeServiceTest extends TestCase
         $this->expectException(Client416RangeNotSatisfiableException::class);
         $service->parseRangeHeader('bytes=-0', 1000);
     }
+
+    /**
+     * Syntactically valid, but logically inverted: the range spans no bytes at all.
+     */
+    public function testThrowsForInvertedRange(): void
+    {
+        $service = $this->buildService();
+
+        $this->expectException(Client416RangeNotSatisfiableException::class);
+        $service->parseRangeHeader('bytes=50-10', 1000);
+    }
+
+    /**
+     * An end which is clamped to the last byte can still end up below the start.
+     */
+    public function testThrowsForInvertedRangeAfterClampingEndToResourceSize(): void
+    {
+        $service = $this->buildService();
+
+        $this->expectException(Client416RangeNotSatisfiableException::class);
+        $service->parseRangeHeader('bytes=900-800', 1000);
+    }
 }

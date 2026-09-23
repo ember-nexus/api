@@ -45,6 +45,7 @@ class UploadCreationService
         private NoContentResponseFactory $noContentResponseFactory,
         private UrlGeneratorInterface $urlGenerator,
         private UploadService $uploadService,
+        private FileSizeLimitService $fileSizeLimitService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
@@ -72,6 +73,11 @@ class UploadCreationService
         // the request body is hashed once, locally, then rewound, before anything else (including
         // UploadFileOperationFactory's own mime type sniffing) reads it - see IncrementalHashService for why this
         // is not done via a persistently-attached stream filter instead.
+        $contentLength = $resumableUploadRequest->getContentLength();
+        if (null !== $contentLength) {
+            $this->fileSizeLimitService->assertWithinMaxFileSize($contentLength);
+        }
+
         $resource = $resumableUploadRequest->getContent();
         $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
@@ -121,6 +127,13 @@ class UploadCreationService
 
     private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest): Response
     {
+        // rejected up front, before a single byte reaches the upload bucket, whenever the client already declares
+        // a total larger than the limit
+        $uploadLength = $resumableUploadRequest->getUploadLength();
+        if (null !== $uploadLength) {
+            $this->fileSizeLimitService->assertWithinMaxFileSize($uploadLength);
+        }
+
         $uploadId = Uuid::uuid4();
 
         $uploadOffset = 0;
@@ -156,6 +169,7 @@ class UploadCreationService
             if ($uploadOffset > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
                 throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $uploadOffset));
             }
+            $this->fileSizeLimitService->assertWithinMaxFileSize($uploadOffset);
         }
 
         $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));

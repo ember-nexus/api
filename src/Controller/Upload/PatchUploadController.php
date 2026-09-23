@@ -22,6 +22,7 @@ use App\Security\AuthProvider;
 use App\Service\DigestService;
 use App\Service\ElementManager;
 use App\Service\FileHashService;
+use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadService;
@@ -59,6 +60,7 @@ class PatchUploadController extends AbstractController
         private S3Service $s3Service,
         private IncrementalHashService $incrementalHashService,
         private DigestService $digestService,
+        private FileSizeLimitService $fileSizeLimitService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
@@ -127,6 +129,10 @@ class PatchUploadController extends AbstractController
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $chunkLength));
         }
 
+        // an upload whose running total already exceeds the limit can never complete successfully, so it is
+        // rejected on the chunk which crosses it rather than only once the client declares the upload finished
+        $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset() + $chunkLength);
+
         if (null !== $upload->getUploadLength()) {
             if ($upload->getUploadLength() < $upload->getUploadOffset() + $chunkLength) {
                 throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
@@ -162,6 +168,14 @@ class PatchUploadController extends AbstractController
         // storage bucket. On a mismatch, this means an existing file at this element is never
         // replaced/overwritten in the first place; only the now-unneeded uploaded chunks need cleaning up.
         $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
+
+        try {
+            $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset());
+        } catch (Client400BadContentException $exception) {
+            $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
+
+            throw $exception;
+        }
 
         if (null !== $requestDigestHeaderValue) {
             try {

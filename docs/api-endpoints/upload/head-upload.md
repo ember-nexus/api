@@ -2,6 +2,14 @@
 
 Queries the current state of the resumable upload.
 
+## Access Control
+
+Only the user who created the upload may query it.
+
+As with `PATCH /upload/<uuid>`, access to the upload's target element is re-checked on every call, so an upload
+whose target became inaccessible is reported as if it did not exist rather than appearing healthy. It can still be
+cancelled with `DELETE /upload/<uuid>`.
+
 ## Request Example
 
 ```bash

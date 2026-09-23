@@ -25,4 +25,10 @@ interface S3TechnicalLimitsInterface
     public function getMaxChunkCount(): int;
 
     public function getMaxObjectSizeInBytes(): int;
+
+    /**
+     * Largest object which can be written with a single PUT. Anything above this has to go through a multipart
+     * upload, and can not be server-side copied between buckets in one call either.
+     */
+    public function getMaxSinglePutSizeInBytes(): int;
 }

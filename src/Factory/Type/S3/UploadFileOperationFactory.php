@@ -61,8 +61,11 @@ class UploadFileOperationFactory
 
     /**
      * @param resource $resource
+     * @param int|null $contentLength known size of $resource, where the caller has it. Passing it lets
+     *                                {@see \App\Service\S3Service::uploadFile()} pick a multipart upload for
+     *                                files too large for a single PUT.
      */
-    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, $resource): UploadFileOperationInterface
+    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, $resource, ?int $contentLength = null): UploadFileOperationInterface
     {
         $elementId = $element->getId();
         if (null === $elementId) {
@@ -78,7 +81,7 @@ class UploadFileOperationFactory
             null,
             $this->fileService->getStorageBucketKey($elementId, $extension),
             $resource,
-            null,
+            $contentLength,
             $this->mimeTypeService->getMimeTypeFromResource($resource)
         );
     }

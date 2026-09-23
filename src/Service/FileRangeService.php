@@ -30,6 +30,9 @@ class FileRangeService
     ) {
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     */
     public function parseRangeHeader(string $rangeHeader, int $totalContentLength): ByteRange
     {
         if (1 !== \Safe\preg_match('/^bytes=(\d*)-(\d*)$/', trim($rangeHeader), $matches)) {

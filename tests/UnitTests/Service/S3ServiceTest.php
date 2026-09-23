@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Contract\S3\FileOperationInterface;
 use App\Contract\S3\MergeFileChunksOperationInterface;
+use App\Contract\S3\S3TechnicalLimitsInterface;
 use App\Contract\S3\UploadFileChunkOperationInterface;
 use App\Contract\S3\UploadFileOperationInterface;
 use App\Exception\Client400BadContentException;
@@ -16,6 +17,7 @@ use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Service\MimeTypeService;
 use App\Service\S3Service;
 use App\Service\S3TechnicalLimitsValidator;
+use App\Type\S3\S3TechnicalLimits;
 use App\Wrapper\S3ClientWrapper;
 use AsyncAws\Core\Stream\ResultStream;
 use AsyncAws\S3\Result\CopyObjectOutput;
@@ -24,6 +26,7 @@ use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\Result\HeadObjectOutput;
 use AsyncAws\S3\Result\ObjectExistsWaiter;
 use AsyncAws\S3\Result\UploadPartCopyOutput;
+use AsyncAws\S3\Result\UploadPartOutput;
 use AsyncAws\S3\S3Client;
 use AsyncAws\S3\ValueObject\CopyPartResult;
 use Exception;
@@ -35,6 +38,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassLength)
+ * @SuppressWarnings("PHPMD.ExcessiveParameterList")
  */
 #[Small]
 #[CoversClass(S3Service::class)]
@@ -50,6 +54,9 @@ class S3ServiceTest extends TestCase
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
         ?Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory = null,
         ?S3TechnicalLimitsValidator $s3TechnicalLimitsValidator = null,
+        ?S3TechnicalLimitsInterface $s3TechnicalLimits = null,
+        ?int $multipartUploadThresholdInBytes = null,
+        ?int $multipartUploadPartSizeInBytes = null,
     ): S3Service {
         $s3TechnicalLimitsValidator ??= $this->prophesize(S3TechnicalLimitsValidator::class)->reveal();
 
@@ -60,7 +67,10 @@ class S3ServiceTest extends TestCase
             $mimeTypeService ?? $this->prophesize(MimeTypeService::class)->reveal(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
             $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            $s3TechnicalLimits ?? new S3TechnicalLimits(),
             $s3TechnicalLimitsValidator,
+            $multipartUploadThresholdInBytes ?? S3Service::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
+            $multipartUploadPartSizeInBytes ?? S3Service::MULTIPART_UPLOAD_PART_SIZE_IN_BYTES,
         );
     }
 
@@ -982,6 +992,7 @@ class S3ServiceTest extends TestCase
     public function testUploadFile(): void
     {
         $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
         $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
         $uploadFileOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
         $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
@@ -1052,6 +1063,7 @@ class S3ServiceTest extends TestCase
     public function testUploadFileDeletesPreviousFileIfItExists(): void
     {
         $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
         $uploadFileOperation->getStorageBucket()->shouldBeCalledTimes(2)->willReturn('storage-bucket');
         $uploadFileOperation->getStorageKey()->shouldBeCalledTimes(2)->willReturn('storage-key');
         $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
@@ -1140,6 +1152,7 @@ class S3ServiceTest extends TestCase
     public function testUploadFileDoesNotDeletePreviousFileWhenItIsTheSameAsTheNewOne(): void
     {
         $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
         $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
         $uploadFileOperation->getStorageKey()->shouldBeCalledTimes(2)->willReturn('storage-key');
         $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
@@ -1220,6 +1233,7 @@ class S3ServiceTest extends TestCase
     public function testUploadFileRethrowsExceptionDuringUpload(): void
     {
         $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
         $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
         $uploadFileOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
         $uploadFileOperation->getUploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
@@ -1701,5 +1715,275 @@ class S3ServiceTest extends TestCase
 
         $this->expectException(Client400BadContentException::class);
         $s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
+    }
+
+    /**
+     * @param resource $resource
+     */
+    private function buildMultipartUploadFileOperation($resource, int $contentLength, ?string $previousStorageKey = null): UploadFileOperationInterface
+    {
+        $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getContentLength()->willReturn($contentLength);
+        $uploadFileOperation->getStorageBucket()->willReturn('storage-bucket');
+        $uploadFileOperation->getStorageKey()->willReturn('storage-key');
+        $uploadFileOperation->getMimeType()->willReturn('text/plain');
+        $uploadFileOperation->getContent()->willReturn($resource);
+        $uploadFileOperation->getPreviousStorageKey()->willReturn($previousStorageKey);
+
+        return $uploadFileOperation->reveal();
+    }
+
+    private function buildUploadPartOutput(string $etag): UploadPartOutput
+    {
+        $uploadPartOutput = $this->prophesize(UploadPartOutput::class);
+        $uploadPartOutput->getETag()->willReturn($etag);
+
+        return $uploadPartOutput->reveal();
+    }
+
+    private function buildCreateMultipartUploadOutput(?string $uploadId): CreateMultipartUploadOutput
+    {
+        $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
+        $createMultipartUploadOutput->getUploadId()->willReturn($uploadId);
+
+        return $createMultipartUploadOutput->reveal();
+    }
+
+    public function testUploadFileUsesMultipartUploadAtOrAboveThreshold(): void
+    {
+        $content = str_repeat('a', 25);
+        $resource = \Safe\fopen('php://memory', 'r+');
+        \Safe\fwrite($resource, $content);
+        \Safe\rewind($resource);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce()->willReturn($this->buildCreateMultipartUploadOutput('multipart-upload-id'));
+        $s3Client->uploadPart(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'multipart-upload-id',
+            'PartNumber' => 1,
+            'Body' => substr($content, 0, 10),
+        ]))->shouldBeCalledOnce()->willReturn($this->buildUploadPartOutput('etag-1'));
+        $s3Client->uploadPart(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'multipart-upload-id',
+            'PartNumber' => 2,
+            'Body' => substr($content, 10, 10),
+        ]))->shouldBeCalledOnce()->willReturn($this->buildUploadPartOutput('etag-2'));
+        $s3Client->uploadPart(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'multipart-upload-id',
+            'PartNumber' => 3,
+            'Body' => substr($content, 20, 5),
+        ]))->shouldBeCalledOnce()->willReturn($this->buildUploadPartOutput('etag-3'));
+        $s3Client->completeMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'multipart-upload-id',
+            'MultipartUpload' => [
+                'Parts' => [
+                    ['PartNumber' => 1, 'ETag' => 'etag-1'],
+                    ['PartNumber' => 2, 'ETag' => 'etag-2'],
+                    ['PartNumber' => 3, 'ETag' => 'etag-3'],
+                ],
+            ],
+        ]))->shouldBeCalledOnce();
+        // the intermediate upload bucket is skipped entirely on this path
+        $s3Client->putObject(Argument::any())->shouldNotBeCalled();
+        $s3Client->copyObject(Argument::any())->shouldNotBeCalled();
+
+        $s3Service = $this->buildS3Service(s3Client: $s3Client->reveal(), multipartUploadThresholdInBytes: 20, multipartUploadPartSizeInBytes: 10);
+
+        $this->assertSame(25, $s3Service->uploadFile($this->buildMultipartUploadFileOperation($resource, 25)));
+    }
+
+    public function testUploadFileStaysOnSinglePutBelowThreshold(): void
+    {
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::any())->shouldNotBeCalled();
+
+        $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(19);
+        $uploadFileOperation->getStorageBucket()->willReturn('storage-bucket');
+        $uploadFileOperation->getStorageKey()->willReturn('storage-key');
+        $uploadFileOperation->getUploadBucket()->willReturn('upload-bucket');
+        $uploadFileOperation->getUploadKey()->willReturn('upload-key');
+        $uploadFileOperation->getMimeType()->willReturn('text/plain');
+        $uploadFileOperation->getPreviousStorageKey()->willReturn(null);
+
+        $fileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
+        $fileChunkOperationFactory
+            ->createUploadFileChunkOperationFromUploadFileOperation(Argument::any())
+            ->willThrow(new Exception('single-PUT path reached'));
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            fileChunkOperationFactory: $fileChunkOperationFactory->reveal(),
+            multipartUploadThresholdInBytes: 20
+        );
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('single-PUT path reached');
+        $s3Service->uploadFile($uploadFileOperation->reveal());
+    }
+
+    public function testUploadFileViaMultipartUploadDeletesPreviousFile(): void
+    {
+        $resource = \Safe\fopen('php://memory', 'r+');
+        \Safe\fwrite($resource, 'abcdefghij');
+        \Safe\rewind($resource);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::any())->willReturn($this->buildCreateMultipartUploadOutput('multipart-upload-id'));
+        $s3Client->uploadPart(Argument::any())->willReturn($this->buildUploadPartOutput('etag-1'));
+        $s3Client->completeMultipartUpload(Argument::any())->shouldBeCalledOnce();
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'previous-storage-key',
+        ]))->shouldBeCalledOnce();
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'previous-storage-key',
+        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($objectExistsWaiter)->willReturn(true, false);
+
+        $s3Service = $this->buildS3Service(s3Client: $s3Client->reveal(), s3ClientWrapper: $s3ClientWrapper->reveal(), multipartUploadThresholdInBytes: 5, multipartUploadPartSizeInBytes: 1000);
+
+        $this->assertSame(10, $s3Service->uploadFile($this->buildMultipartUploadFileOperation($resource, 10, 'previous-storage-key')));
+    }
+
+    public function testUploadFileViaMultipartUploadAbortsAndRethrowsOnFailure(): void
+    {
+        $resource = \Safe\fopen('php://memory', 'r+');
+        \Safe\fwrite($resource, 'abcdefghij');
+        \Safe\rewind($resource);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::any())->willReturn($this->buildCreateMultipartUploadOutput('multipart-upload-id'));
+        $partException = new Exception('part upload exploded');
+        $s3Client->uploadPart(Argument::any())->willThrow($partException);
+        $s3Client->abortMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'multipart-upload-id',
+        ]))->shouldBeCalledOnce();
+        $s3Client->completeMultipartUpload(Argument::any())->shouldNotBeCalled();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory
+            ->createFromTemplate(Argument::containingString('part upload exploded'), Argument::is([]), Argument::is($partException))
+            ->shouldBeCalledOnce()
+            ->willReturn($this->prophesize(Server500LogicErrorException::class)->reveal());
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal(),
+            multipartUploadThresholdInBytes: 5,
+            multipartUploadPartSizeInBytes: 1000
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+        $s3Service->uploadFile($this->buildMultipartUploadFileOperation($resource, 10));
+    }
+
+    public function testUploadFileViaMultipartUploadRejectsMismatchedContentLength(): void
+    {
+        $resource = \Safe\fopen('php://memory', 'r+');
+        \Safe\fwrite($resource, 'abcdefghij');
+        \Safe\rewind($resource);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::any())->willReturn($this->buildCreateMultipartUploadOutput('multipart-upload-id'));
+        $s3Client->uploadPart(Argument::any())->willReturn($this->buildUploadPartOutput('etag-1'));
+        // nothing may be published at the storage key when the length does not add up
+        $s3Client->completeMultipartUpload(Argument::any())->shouldNotBeCalled();
+        $s3Client->abortMultipartUpload(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'UploadId' => 'multipart-upload-id',
+        ]))->shouldBeCalledOnce();
+
+        $client400BadContentExceptionFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
+        $client400BadContentExceptionFactory
+            ->createFromDetail(Argument::containingString('Inconsistent length values'), Argument::cetera())
+            ->shouldBeCalledOnce()
+            ->willReturn($this->prophesize(Client400BadContentException::class)->reveal());
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            client400BadContentExceptionFactory: $client400BadContentExceptionFactory->reveal(),
+            multipartUploadThresholdInBytes: 5,
+            multipartUploadPartSizeInBytes: 1000
+        );
+
+        $this->expectException(Client400BadContentException::class);
+        $s3Service->uploadFile($this->buildMultipartUploadFileOperation($resource, 99));
+    }
+
+    public function testUploadFileViaMultipartUploadFailsWhenNoUploadIdIsReturned(): void
+    {
+        $resource = \Safe\fopen('php://memory', 'r+');
+        \Safe\rewind($resource);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::any())->willReturn($this->buildCreateMultipartUploadOutput(null));
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory
+            ->createFromTemplate(Argument::containingString('Unable to create multipart upload.'), Argument::cetera())
+            ->shouldBeCalledOnce()
+            ->willReturn($this->prophesize(Server500LogicErrorException::class)->reveal());
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal(),
+            multipartUploadThresholdInBytes: 5
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+        $s3Service->uploadFile($this->buildMultipartUploadFileOperation($resource, 10));
+    }
+
+    /**
+     * A fixed part size would exceed the backend's maximum part count for a large enough file, so the part size
+     * has to grow with the file instead.
+     */
+    public function testMultipartUploadPartSizeScalesWithMaxChunkCount(): void
+    {
+        $content = str_repeat('a', 20);
+        $resource = \Safe\fopen('php://memory', 'r+');
+        \Safe\fwrite($resource, $content);
+        \Safe\rewind($resource);
+
+        $s3TechnicalLimits = $this->prophesize(S3TechnicalLimitsInterface::class);
+        $s3TechnicalLimits->getMaxSinglePutSizeInBytes()->willReturn(5 * 1024 * 1024 * 1024);
+        // only 2 parts allowed for a 20 byte file -> part size has to become 10, not the configured 1
+        $s3TechnicalLimits->getMaxChunkCount()->willReturn(2);
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::any())->willReturn($this->buildCreateMultipartUploadOutput('multipart-upload-id'));
+        $s3Client->uploadPart(Argument::withEntry('PartNumber', 1))->shouldBeCalledOnce()->willReturn($this->buildUploadPartOutput('etag-1'));
+        $s3Client->uploadPart(Argument::withEntry('PartNumber', 2))->shouldBeCalledOnce()->willReturn($this->buildUploadPartOutput('etag-2'));
+        $s3Client->uploadPart(Argument::withEntry('PartNumber', 3))->shouldNotBeCalled();
+        $s3Client->completeMultipartUpload(Argument::any())->shouldBeCalledOnce();
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            s3TechnicalLimits: $s3TechnicalLimits->reveal(),
+            multipartUploadThresholdInBytes: 5,
+            multipartUploadPartSizeInBytes: 1
+        );
+
+        $this->assertSame(20, $s3Service->uploadFile($this->buildMultipartUploadFileOperation($resource, 20)));
     }
 }

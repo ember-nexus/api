@@ -406,6 +406,9 @@ class EtagCalculatorService
      * is missing but some other algorithm is present (e.g. a future 'blake3'), the alphanumerically first one is
      * used instead, purely to pick deterministically among otherwise-equal options. Returns null if no usable
      * hash is stored at all.
+     *
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     private function extractPreferredHashFromFileProperties(mixed $rawFileProperties): ?string
     {

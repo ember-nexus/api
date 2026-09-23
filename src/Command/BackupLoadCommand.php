@@ -11,6 +11,7 @@ use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Helper\Regex;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
+use App\Service\FileSizeLimitService;
 use App\Service\RawToElementService;
 use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
@@ -30,9 +31,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
+use Throwable;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[AsCommand(name: 'backup:load', description: 'Loads a local backup into the empty database.')]
 class BackupLoadCommand extends Command
@@ -59,6 +63,7 @@ class BackupLoadCommand extends Command
         private ElasticEntityManager $elasticEntityManager,
         private S3Service $s3Service,
         private UploadFileOperationFactory $uploadFileOperationFactory,
+        private FileSizeLimitService $fileSizeLimitService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
@@ -185,6 +190,52 @@ class BackupLoadCommand extends Command
         return Uuid::fromString($name);
     }
 
+    /**
+     * Restores a single backed up file into the storage bucket. Anything which makes one file unusable is
+     * reported rather than thrown: a restore may still have thousands of good files left to go, so one bad file
+     * must not abort it.
+     */
+    private function loadFile(string $path, UuidInterface $fileId): bool
+    {
+        $element = $this->elementManager->getElement($fileId);
+        if (null === $element) {
+            $this->io->warning(sprintf(
+                'Found file in backup without corresponding element; can not import file: %s',
+                $path
+            ));
+
+            return false;
+        }
+
+        try {
+            $contentLength = $this->backupStorage->fileSize($path);
+            if ($this->fileSizeLimitService->exceedsMaxFileSize($contentLength)) {
+                $this->io->warning(sprintf(
+                    "File is %d bytes, which exceeds the configured 'file.maxFileSizeInBytes' of %d; skipping file: %s",
+                    $contentLength,
+                    $this->fileSizeLimitService->getMaxFileSizeInBytes(),
+                    $path
+                ));
+
+                return false;
+            }
+
+            $resource = $this->backupStorage->readStream($path);
+            $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, $resource, $contentLength);
+            $this->s3Service->uploadFile($uploadFileOperation);
+        } catch (Throwable $e) {
+            $this->io->warning(sprintf(
+                'Failed to upload file %s: %s',
+                $path,
+                $e->getMessage()
+            ));
+
+            return false;
+        }
+
+        return true;
+    }
+
     private function loadFiles(): void
     {
         $this->io->startSection('Step 3 of 4: Loading Files');
@@ -193,6 +244,7 @@ class BackupLoadCommand extends Command
         $files = $this->backupStorage->listContents($this->backupName.'/file/', true);
         $pageCount = 0;
         $totalCount = 0;
+        $failedCount = 0;
         foreach ($files as $file) {
             if (!$file->isFile()) {
                 continue;
@@ -202,18 +254,10 @@ class BackupLoadCommand extends Command
             if (false === $fileId) {
                 continue;
             }
-            $element = $this->elementManager->getElement($fileId);
-            if (null === $element) {
-                $this->io->warning(sprintf(
-                    'Found file in backup without corresponding element; can not import file: %s',
-                    $path
-                ));
+            if (!$this->loadFile($path, $fileId)) {
+                ++$failedCount;
                 continue;
             }
-
-            $resource = $this->backupStorage->readStream($path);
-            $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, $resource);
-            $this->s3Service->uploadFile($uploadFileOperation);
 
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {
@@ -226,6 +270,15 @@ class BackupLoadCommand extends Command
         $progressBar?->advance($pageCount);
         $progressBar?->clear();
         $totalCount += $pageCount;
+        if ($failedCount > 0) {
+            $this->io->stopSection(sprintf(
+                'Loaded <info>%d</info> files, <comment>%d</comment> could not be loaded (see warnings above).',
+                $totalCount,
+                $failedCount
+            ));
+
+            return;
+        }
         $this->io->stopSection(sprintf(
             'Loaded <info>%d</info> files.',
             $totalCount

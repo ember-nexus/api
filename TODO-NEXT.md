@@ -1,21 +1,9 @@
 # TODO (next)
 
-Follow-up work surfaced while reviewing the file/upload branch, intentionally not addressed there. Same status as
-`TODO.md`: development notes, not permanent project documentation. Fold into `docs/` or into issues once actioned.
+Follow-up work surfaced while reviewing the file/upload branch. Development notes, not permanent project
+documentation — fold into `docs/` or into issues once actioned.
 
-## Carried over from `TODO.md` (still open)
-
-### Enforce `file.maxFileSizeInBytes` at upload completion
-
-`EmberNexusConfiguration::getFileMaxFileSizeInBytes()` is advertised to clients — via the `max-size` field of the
-`Upload-Limit` response header (`NoContentResponseFactory.php`) and via `/instance-configuration`
-(`GetInstanceConfigurationController.php`) — and is validated at startup against the storage backend's technical
-maximum object size (`S3TechnicalLimitsValidator.php`). But nothing enforces it at request time: neither a direct
-upload (`POST`/`PUT /<uuid>/file`) nor a completing resumable upload chunk (`PatchUploadController.php`) rejects a
-file whose size exceeds `maxFileSizeInBytes`. The public API docs (`/reference/upload`) already describe a
-completing upload that exceeds `max-size` as failing with `400 Bad Request`, so this needs a real check — most
-naturally in `UploadCreationService::setOrReplaceElementFileDirectly()` for direct uploads and in
-`PatchUploadController::createFile()` for resumable ones, before the file/merge is written.
+## Open
 
 ### High-performance BLAKE3 for file hashing
 
@@ -44,11 +32,58 @@ bucket should also carry an object lifecycle policy expiring objects after a sho
 cron job is disabled, not running, or falling behind. Infrastructure/ops concern — bucket provisioning lives
 outside this repository.
 
-## New
+### Null properties linger in MongoDB and Elasticsearch
 
-### `BackupLoadCommand` cannot restore files larger than 5 GiB
+See the findings section below; the fix is an upstream change in `syndesi/mongo-entity-manager` and
+`syndesi/elastic-entity-manager`.
 
-Moved to its own note: see `TODO-BACKUP-LARGE-FILES.md`.
+### ETag support on the upload endpoints
+
+`POST`/`PUT`/`DELETE /{id}/file` all carry `#[EndpointSupportsEtag(EtagType::FILE)]` now, so `If-Match` /
+`If-None-Match` work across the whole file lifecycle, including the creation of a resumable upload.
+
+The three upload endpoints (`PATCH`/`HEAD`/`DELETE /upload/{id}`) deliberately do **not**, because the attribute
+alone would be wrong there: `EtagService::setCurrentRequestEtagFromRequestAndEtagType()` resolves the etag from
+the route's `id` attribute, which on those routes is the **upload** id, not the target element id. Adding
+`EtagType::FILE` there would compute (and compare) the etag of the wrong element.
+
+Making it work needs a deliberate design choice, not a one-line attribute:
+
+- resolve the target element from the upload before calculating a `FILE` etag, or
+- introduce an `EtagType::UPLOAD` with its own calculator, Redis key and invalidation path.
+
+Worth noting it may not be needed at all: the resumable protocol already has its own concurrency control via
+`Upload-Offset` (409 on mismatch), and the meaningful precondition point for the *file* is when the upload is
+created — which `POST /{id}/file` now covers.
+
+## Decided and done
+
+Kept as a record of why these went the way they did; drop once folded into `docs/`.
+
+### `file.maxFileSizeInBytes` enforcement and large-file uploads — DONE
+
+`FileSizeLimitService` is now the single place which knows the configured limit, in both a throwing form (API
+paths, `400 Bad Request`) and a predicate form (`backup:load`, which reports and skips). Enforced at four points,
+each chosen so nothing oversized is ever written: the declared `Upload-Length` when a resumable upload is created,
+the running total on every chunk, the completing upload before its chunks are merged, and a direct
+`POST`/`PUT /<uuid>/file` before it reaches S3. The documented `400` for an upload exceeding `max-size` is now
+real rather than aspirational.
+
+`S3Service::uploadFile()` gained a multipart path for files above the backend's single-PUT limit (new
+`S3TechnicalLimitsInterface::getMaxSinglePutSizeInBytes()`, 5 GiB). It streams the resource into the storage
+bucket part by part, skipping the intermediate upload bucket, because a file that large could not be server-side
+copied out of it either — `copyObject` shares the 5 GiB ceiling. Part size defaults to 64 MiB and scales up when
+the file is large enough that a fixed size would exceed the 10,000 part maximum, so only one part is in memory at
+a time. `UploadFileOperationFactory::createUploadFileOperationFromElementAndResource()` now accepts the content
+length, which is what lets `backup:load` pick that path.
+
+`BackupLoadCommand::loadFiles()` no longer aborts the whole restore on one bad file: oversized files are reported
+and skipped, upload failures are caught per file and reported, and the section summary names how many could not be
+loaded.
+
+Left as is, deliberately: direct and resumable uploads keep their own logic, since one creates a temporary upload
+and the other writes an already-complete file. They share `S3Service::uploadFile()` and now also
+`FileSizeLimitService`, which is the part worth having in common.
 
 ### `file` properties in collection and search responses — DONE
 
@@ -72,7 +107,7 @@ Caching needed no change: both file-setting paths and the delete path call `merg
 `EtagCalculatorService.php:91`) and fires `ElementPostMergeEvent`, expiring the element plus all related collection
 etag keys in `ExpireEtagOnChangeEventListener`.
 
-### Null properties are removed from Neo4j but linger in MongoDB and Elasticsearch
+### Findings: null property handling across the three stores
 
 Found while checking whether `DeleteElementFileController.php:63` (`addProperty('file', null)`) removes the
 property. Verdict per store:

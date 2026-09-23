@@ -23,11 +23,12 @@ class S3TechnicalLimitsValidator
     ) {
     }
 
-    public function validate(): void
+    public function validate(int $multipartUploadThresholdInBytes = S3Service::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES): void
     {
         $this->validateMinChunkSize();
         $this->validateMaxChunkCount();
         $this->validateMaxObjectSize();
+        $this->validateMultipartUploadThreshold($multipartUploadThresholdInBytes);
     }
 
     private function validateMinChunkSize(): void
@@ -48,6 +49,19 @@ class S3TechnicalLimitsValidator
 
         if ($configuredMaxChunkCount > $technicalMaxChunkCount) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Configured 'file.uploadChunkDigitsLength' (%d) allows up to %d chunks, which exceeds the storage backend's technical maximum of %d chunks.", $chunkDigitsLength, $configuredMaxChunkCount, $technicalMaxChunkCount));
+        }
+    }
+
+    /**
+     * The point at which {@see S3Service::uploadFile()} switches to a multipart upload has to stay at or below
+     * what the backend still accepts as a single PUT; above that, the single-PUT branch could never succeed.
+     */
+    private function validateMultipartUploadThreshold(int $multipartUploadThreshold): void
+    {
+        $technicalMaxSinglePutSize = $this->s3TechnicalLimits->getMaxSinglePutSizeInBytes();
+
+        if ($multipartUploadThreshold > $technicalMaxSinglePutSize) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Multipart upload threshold (%d) can not be larger than the storage backend's technical maximum single PUT size (%d).", $multipartUploadThreshold, $technicalMaxSinglePutSize));
         }
     }
 

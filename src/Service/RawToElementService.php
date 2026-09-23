@@ -26,8 +26,6 @@ class RawToElementService
     }
 
     /**
-     * todo: make sure that $supportFile is never true in API calls. add feature tests.
-     *
      * @param array<string, mixed> $rawData
      */
     public function rawToElement(array $rawData, bool $supportFile = false): NodeElementInterface|RelationElementInterface

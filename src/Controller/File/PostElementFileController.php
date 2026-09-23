@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
+use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Helper\Regex;
@@ -12,6 +13,7 @@ use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\UploadCreationService;
 use App\Type\AccessType;
+use App\Type\EtagType;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,8 +21,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * @todo add support for etags
- *
  * @SuppressWarnings("PHPMD.UnusedFormalParameter")
  */
 class PostElementFileController extends AbstractController
@@ -43,6 +43,7 @@ class PostElementFileController extends AbstractController
         ],
         methods: ['POST']
     )]
+    #[EndpointSupportsEtag(EtagType::FILE)]
     public function postElementFile(string $id, Request $request): Response
     {
         $elementId = UuidV4::fromString($id);
