@@ -5,14 +5,6 @@ not permanent documentation: delete entries once they are done or moved into Git
 
 ## Before merging into `main`
 
-- **Controller example tests fail in CI.** `composer test:example-generation-controller` compares responses against
-  snapshots in `docs/`, and 15 of them are stale:
-  - 14 search examples (`docs/search/example/...`) still contain the footnote numbers which were removed in reference
-    dataset 0.0.29, and lack the `file`/`hasFile` properties which are now always returned.
-  - `System/GetGraphStructureTest` misses the `RELATED` relation type added in reference dataset 0.0.32.
-
-  As `docs/` is replaced in the next branch, either regenerate these snapshots or temporarily allow the job to fail.
-  (`GetWellKnownSecurityTxtTest` fails only locally, because of the local `volumes/well-known-security.txt`.)
 - **Verify CI on GitHub after pushing.** The feature jobs failed because `quay.io/minio/*` images were removed
   upstream; `tools/docker-compose.yml` and `tests/FeatureTests/docker-compose-neo4j-*.yml` now use the pinned
   `pgsty/minio` and `pgsty/mc` images (verified locally with the init script, not yet on GitHub). The feature jobs and
