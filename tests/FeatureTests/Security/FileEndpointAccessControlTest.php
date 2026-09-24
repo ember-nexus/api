@@ -5,19 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Security;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Verifies authorization on the `/{id}/file` endpoints (POST, PUT, DELETE, GET):
- * - POST, PUT and DELETE all require UPDATE access on the target element; a user without it is rejected with 404.
- * - GET requires only READ access; a user with READ but not UPDATE access can retrieve the element itself but is
- *   still rejected with 404 when trying to write to its file.
- *
- * Reuses the "security.filePermission" scenario (User A owns a Data element with a file, User B has no relation
- * to it at all) for the UPDATE checks, and the "security.limitedAccess.readAccess" scenario (a user with a direct
- * HAS_READ_ACCESS relation to a Data element it does not own) for the READ-only check.
+ * Verifies that POST, PUT and DELETE on `/{id}/file` require UPDATE access (404 otherwise), also for users with
+ * READ-only access. Uses the "security.filePermission" and "security.limitedAccess.readAccess" scenarios.
  */
-#[Group('test')]
 class FileEndpointAccessControlTest extends BaseRequestTestCase
 {
     private const string TOKEN_OWNER = 'secret-token:V8m72O3ovtRU09JrdbJRnh';
@@ -40,8 +32,7 @@ class FileEndpointAccessControlTest extends BaseRequestTestCase
 
     public function testUserWithoutAccessCannotPostFileToElement(): void
     {
-        // the target already has a file, but the access check happens before the "already has a file" check, so
-        // a denied user must see 404, not 409
+        // the access check runs before the "already has a file" check, so 404 instead of 409
         $file = \Safe\fopen(__DIR__.'/../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest(
             'POST',

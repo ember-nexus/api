@@ -43,7 +43,7 @@ class HeadUploadController extends AbstractController
         $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
         try {
             $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
-        } catch (Exception $e) {
+        } catch (Exception) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
@@ -51,8 +51,7 @@ class HeadUploadController extends AbstractController
         if ($upload->getUploadOwner()->toString() !== $userId->toString()) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
-        // an upload whose target element is gone (e.g. deleted mid-upload) or no longer accessible can never be
-        // completed - report it the same way PATCH already would, instead of an upload that looks healthy
+        // uploads whose target is gone or inaccessible can not be completed, same check as in PATCH
         if (!$this->accessChecker->hasAccessToElement($userId, $upload->getUploadTarget(), AccessType::UPDATE)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }

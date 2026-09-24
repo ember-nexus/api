@@ -6,7 +6,9 @@ namespace App\Tests\UnitTests\EventSystem\Exception\EventListener;
 
 use App\EventSystem\Exception\EventListener\NoRouteFoundExceptionEventListener;
 use App\Exception\Client404NotFoundException;
+use App\Exception\Client405MethodNotAllowedException;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Exception\Client405MethodNotAllowedExceptionFactory;
 use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -15,6 +17,7 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -44,7 +47,8 @@ class NoRouteFoundExceptionEventListenerTest extends TestCase
         $this->expectNotToPerformAssertions();
 
         $noRouteFoundExceptionEventListener = new NoRouteFoundExceptionEventListener(
-            $client404NotFoundExceptionFactory
+            $client404NotFoundExceptionFactory,
+            $this->prophesize(Client405MethodNotAllowedExceptionFactory::class)->reveal()
         );
 
         $noRouteFoundExceptionEventListener->onKernelException($event);
@@ -75,10 +79,39 @@ class NoRouteFoundExceptionEventListenerTest extends TestCase
         );
 
         $noRouteFoundExceptionEventListener = new NoRouteFoundExceptionEventListener(
-            $client404NotFoundExceptionFactory->reveal()
+            $client404NotFoundExceptionFactory->reveal(),
+            $this->prophesize(Client405MethodNotAllowedExceptionFactory::class)->reveal()
         );
 
         $this->expectExceptionObject($client404NotFoundException);
+
+        $noRouteFoundExceptionEventListener->onKernelException($event);
+    }
+
+    public function testWithMethodNotAllowedHttpException(): void
+    {
+        $throwable = new MethodNotAllowedHttpException(['GET']);
+        $client405MethodNotAllowedException = new Client405MethodNotAllowedException('some type');
+
+        $client405MethodNotAllowedExceptionFactory = $this->prophesize(Client405MethodNotAllowedExceptionFactory::class);
+        $client405MethodNotAllowedExceptionFactory
+            ->createFromTemplate()
+            ->shouldBeCalledOnce()
+            ->willReturn($client405MethodNotAllowedException);
+
+        $event = new ExceptionEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $this->prophesize(Request::class)->reveal(),
+            0,
+            $throwable
+        );
+
+        $noRouteFoundExceptionEventListener = new NoRouteFoundExceptionEventListener(
+            $this->prophesize(Client404NotFoundExceptionFactory::class)->reveal(),
+            $client405MethodNotAllowedExceptionFactory->reveal()
+        );
+
+        $this->expectExceptionObject($client405MethodNotAllowedException);
 
         $noRouteFoundExceptionEventListener->onKernelException($event);
     }

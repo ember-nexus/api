@@ -9,10 +9,8 @@ use PHPUnit\Framework\Attributes\Group;
 use ZipArchive;
 
 /**
- * `backup:fetch` supports two archive layouts: `node`/`relation`/`file`/`summary.json` directly at the root of
- * the ZIP (e.g. what `git archive` produces without a `--prefix`), or wrapped inside a single top level folder
- * (e.g. what GitHub's release archives produce). This verifies both layouts extract nested files to the correct
- * path, since a nested file's directory structure was previously being lost/corrupted during extraction.
+ * Verifies that `backup:fetch` extracts nested files to the correct path, both for archives with the backup
+ * content at the ZIP root and for archives wrapped in a single top level folder (e.g. GitHub release archives).
  */
 #[Group('command')]
 class BackupFetchFolderStructureTest extends BaseRequestTestCase
@@ -62,7 +60,7 @@ class BackupFetchFolderStructureTest extends BaseRequestTestCase
 
     /**
      * Builds a minimal fixture ZIP containing a `summary.json`, and `node`/`relation`/`file` folders, each with a
-     * file nested one directory deep, optionally wrapped inside a single top level folder.
+     * file nested two directories deep, optionally wrapped inside a single top level folder.
      */
     private function buildFixtureZip(?string $wrapperFolder): string
     {

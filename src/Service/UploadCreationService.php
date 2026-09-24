@@ -70,22 +70,17 @@ class UploadCreationService
         ResumableUploadRequestInterface $resumableUploadRequest,
         ?string $requestDigestHeaderValue,
     ): Response {
-        // the request body is hashed once, locally, then rewound, before anything else (including
-        // UploadFileOperationFactory's own mime type sniffing) reads it - see IncrementalHashService for why this
-        // is not done via a persistently-attached stream filter instead.
         $contentLength = $resumableUploadRequest->getContentLength();
         if (null !== $contentLength) {
             $this->fileSizeLimitService->assertWithinMaxFileSize($contentLength);
         }
 
         $resource = $resumableUploadRequest->getContent();
+        // hashed before the upload, so that a digest mismatch never replaces an existing file
         $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
         $hash = $this->incrementalHashService->finalize($hashContext);
 
-        // building the operation only sniffs the mime type locally; it does not touch S3 - so the digest, now
-        // already known, can be verified before the storage bucket is ever written to. On a mismatch, this means
-        // an existing file at this element is never replaced/overwritten in the first place.
         $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
 
         if (null !== $requestDigestHeaderValue) {
@@ -129,8 +124,6 @@ class UploadCreationService
 
     private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest): Response
     {
-        // rejected up front, before a single byte reaches the upload bucket, whenever the client already declares
-        // a total larger than the limit
         $uploadLength = $resumableUploadRequest->getUploadLength();
         if (null !== $uploadLength) {
             $this->fileSizeLimitService->assertWithinMaxFileSize($uploadLength);
@@ -142,9 +135,6 @@ class UploadCreationService
         $alreadyUploadedChunks = 0;
         $hashState = null;
         if (0 !== $resumableUploadRequest->getContentLength()) {
-            // the chunk is hashed once, locally, then rewound, before S3Service ever sees it; the running hash
-            // state is persisted on the Upload element for the next chunk to resume from, so the final hash never
-            // requires reading the file back from S3 at all.
             $resource = $resumableUploadRequest->getContent();
             $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
             $this->incrementalHashService->updateFromResource($hashContext, $resource);
@@ -161,11 +151,7 @@ class UploadCreationService
 
             $alreadyUploadedChunks = 1;
             if ($uploadOffset < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
-                /**
-                 * file chunk has to be bigger than <min> length, unless:
-                 *   - it is the last file chunk, which can contain data of arbitrary length (max limit still applies)
-                 *   - it is of zero length -> no actual content / client just asks for upload limits & starts upload process
-                 */
+                // only the last chunk may be smaller than the minimum chunk size
                 if (false === $resumableUploadRequest->isUploadComplete()) {
                     throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $uploadOffset));
                 }

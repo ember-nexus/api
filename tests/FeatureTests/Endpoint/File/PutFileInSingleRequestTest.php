@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
-#[Group('test')]
 class PutFileInSingleRequestTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
     public function testPutFileToNode(): void
     {
-        // create new node for file upload
         $node = $this->runPostRequest(
             '/',
             self::TOKEN,
@@ -40,7 +37,6 @@ class PutFileInSingleRequestTest extends BaseRequestTestCase
 
     public function testPutFileToNodeWithExistingFileWorks(): void
     {
-        // create new node for file upload
         $node = $this->runPostRequest(
             '/',
             self::TOKEN,

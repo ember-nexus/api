@@ -221,7 +221,7 @@ class UploadServiceTest extends TestCase
 
         [$service, $elementManager, , $fileOperationFactory, $s3Service] = $this->buildService();
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
-        $fileOperationFactory->createFileOperationFromUpload($upload->reveal(), 0)->willReturn($fileOperation)->shouldBeCalledOnce();
+        $fileOperationFactory->createFileOperationFromUpload($upload->reveal(), 1)->willReturn($fileOperation)->shouldBeCalledOnce();
         $s3Service->deleteFile($fileOperation)->shouldBeCalledOnce();
         $elementManager->getElementOrFail($id)->willReturn($element);
         $elementManager->delete($element)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
@@ -229,7 +229,7 @@ class UploadServiceTest extends TestCase
         $service->deleteUploadAndChunks($upload->reveal());
     }
 
-    public function testDeleteUploadAndChunksDeletesAllChunksInclusive(): void
+    public function testDeleteUploadAndChunksDeletesAllChunksIncludingPossiblyRejectedNextChunk(): void
     {
         $id = UuidV4::uuid4();
         $upload = $this->buildUpload(id: $id, alreadyUploadedChunks: 2);
@@ -237,7 +237,7 @@ class UploadServiceTest extends TestCase
 
         [$service, $elementManager, , $fileOperationFactory, $s3Service] = $this->buildService();
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
-        foreach ([0, 1, 2] as $chunk) {
+        foreach ([1, 2, 3] as $chunk) {
             $fileOperationFactory->createFileOperationFromUpload($upload->reveal(), $chunk)->willReturn($fileOperation)->shouldBeCalledOnce();
         }
         $s3Service->deleteFile($fileOperation)->shouldBeCalledTimes(3);

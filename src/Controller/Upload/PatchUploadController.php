@@ -27,7 +27,6 @@ use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\AccessType;
-use App\Type\Response\JsonResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -81,7 +80,7 @@ class PatchUploadController extends AbstractController
         $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
         try {
             $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
-        } catch (Exception $e) {
+        } catch (Exception) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
@@ -100,11 +99,10 @@ class PatchUploadController extends AbstractController
         $partialUploadRequest = $this->partialUploadRequestFactory->createPartialUploadRequestFromRequest($request);
 
         if ($partialUploadRequest->getUploadOffset() !== $upload->getUploadOffset()) {
-            throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalDetails: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
+            throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalProperties: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
         }
 
-        // the chunk's resource is hashed once, locally, then rewound, before S3Service ever sees it - see
-        // IncrementalHashService for why this is not done via a persistently-attached stream filter instead.
+        // hashed before the upload to S3, see IncrementalHashService
         $resource = $partialUploadRequest->getContent();
         $hashState = $upload->getHashState();
         $hashContext = null !== $hashState
@@ -120,11 +118,7 @@ class PatchUploadController extends AbstractController
             \Safe\fclose($resource);
         }
 
-        /**
-         * mirrors the same check for an upload's very first chunk (see UploadCreationService): a chunk has to be
-         * at least <min> bytes long, unless it is the chunk which completes the upload, which may be of any
-         * length - including zero, e.g. to just close out an upload that already has all its data.
-         */
+        // same as in UploadCreationService: only the final chunk may be shorter than the minimum, even empty
         if (false === $partialUploadRequest->isUploadComplete() && $chunkLength < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $chunkLength));
         }
@@ -132,8 +126,7 @@ class PatchUploadController extends AbstractController
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $chunkLength));
         }
 
-        // an upload whose running total already exceeds the limit can never complete successfully, so it is
-        // rejected on the chunk which crosses it rather than only once the client declares the upload finished
+        // reject as soon as the running total exceeds the limit, not only on completion
         $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset() + $chunkLength);
 
         if (null !== $upload->getUploadLength()) {
@@ -143,8 +136,6 @@ class PatchUploadController extends AbstractController
         }
 
         if ($partialUploadRequest->isUploadComplete()) {
-            // the final chunk was successfully uploaded -> we can create the file. The hash is already complete
-            // at this point - no need to store its (now finalized, no longer resumable) state on the upload.
             $finalHash = $this->incrementalHashService->finalize($hashContext);
             $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength);
             $upload = $this->uploadFactory->markUploadAsComplete($upload);
@@ -162,14 +153,11 @@ class PatchUploadController extends AbstractController
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }
 
-    public function createFile(UploadInterface $upload, string $hash, ?string $requestDigestHeaderValue = null): Response
+    private function createFile(UploadInterface $upload, string $hash, ?string $requestDigestHeaderValue = null): void
     {
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
-        // building the operation only resolves storage keys, it does not touch S3 - so the hash, already known
-        // from the incremental chunk hashing above, can be verified before the chunks are merged into the
-        // storage bucket. On a mismatch, this means an existing file at this element is never
-        // replaced/overwritten in the first place; only the now-unneeded uploaded chunks need cleaning up.
+        // size and digest are verified before merging, so an existing file is never overwritten on a mismatch
         $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
 
         try {
@@ -210,10 +198,6 @@ class PatchUploadController extends AbstractController
         $this->elementManager->flush();
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
-
-        return new JsonResponse([
-            'upload' => 'complete',
-        ]);
     }
 
     private function verifyRequestDigest(string $requestDigestHeaderValue, string $actualHash): void

@@ -5,20 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Security;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Verifies authorization on the `/upload/{id}` endpoints (PATCH, HEAD, DELETE):
- * - all three require the requesting user to be the upload's owner (`Upload::getUploadOwner()`); a different user
- *   is rejected with 404, exactly as if the upload did not exist.
- * - PATCH and HEAD additionally re-check UPDATE access on the upload's target element on every call, so an
- *   in-progress upload whose target became inaccessible to its own owner can no longer be continued or even
- *   inspected - DELETE performs no such re-check, so the owner can still cancel it.
- *
- * Reuses the "security.filePermission" scenario's two unrelated users (User A owns everything it creates, User B
- * has no relation to anything User A owns) for the ownership checks.
+ * Verifies that PATCH, HEAD and DELETE on `/upload/{id}` are restricted to the upload's owner (404 otherwise),
+ * using the two unrelated users of the "security.filePermission" scenario.
  */
-#[Group('test')]
 class UploadEndpointAccessControlTest extends BaseRequestTestCase
 {
     private const string TOKEN_OWNER = 'secret-token:V8m72O3ovtRU09JrdbJRnh';
@@ -73,7 +64,7 @@ class UploadEndpointAccessControlTest extends BaseRequestTestCase
         $deleteResponse = $this->runDeleteRequest(sprintf('/upload/%s', $uploadId), self::TOKEN_STRANGER);
         $this->assertIsProblemResponse($deleteResponse, 404);
 
-        // none of the denied attempts had any effect: the real owner still finds the upload exactly as it left it
+        // the denied attempts must not have changed the upload
         $headResponseAfter = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN_OWNER);
         $this->assertSame(204, $headResponseAfter->getStatusCode());
         $this->assertSame('?0', $headResponseAfter->getHeader('Upload-Complete')[0]);
@@ -84,10 +75,8 @@ class UploadEndpointAccessControlTest extends BaseRequestTestCase
     }
 
     /**
-     * PatchUploadController and HeadUploadController both re-check UPDATE access on the upload's target element
-     * on every call (see the comment in HeadUploadController::headUpload()): if the owner's access to the target
-     * is revoked while an upload is in progress, the upload can no longer be inspected or continued, even by its
-     * own owner. DeleteUploadController performs no such re-check, so cancelling the now-stuck upload still works.
+     * PATCH and HEAD re-check UPDATE access on the upload's target on every call, DELETE does not; so once the
+     * owner loses access to the target, the upload can only be cancelled.
      */
     public function testUploadCanNoLongerBeInspectedOrCompletedOnceOwnerLosesAccessToTarget(): void
     {
@@ -115,8 +104,7 @@ class UploadEndpointAccessControlTest extends BaseRequestTestCase
         );
         $this->assertIsProblemResponse($patchResponse, 404);
 
-        // DELETE only checks upload ownership, not target access, so the now permanently stuck upload can still
-        // be cancelled by its owner - the target element itself remains inaccessible/orphaned.
+        // DELETE only checks upload ownership; the target element itself remains orphaned
         $deleteResponse = $this->runDeleteRequest(sprintf('/upload/%s', $uploadId), self::TOKEN_OWNER);
         $this->assertIsDeletedResponse($deleteResponse);
     }

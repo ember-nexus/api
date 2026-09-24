@@ -5,18 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\General\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * The filename used in a file download's `Content-Disposition` header is decided by priority: the element's
- * 'name' property, if it exists and is a string, otherwise the element's id. In both cases, the extension is
- * taken from the file's stored extension, falling back to "bin" if none was determined during upload (e.g. the
- * client did not supply a `Content-Disposition` header with a filename during upload).
- *
- * Explicitly setting the filename to the element's id is likely to be disabled in a future feature upgrade
- * (not yet decided); until then, both cases must keep working.
+ * Verifies the download filename in `Content-Disposition`: the element's string 'name' property if set, otherwise
+ * the element's id, with the stored extension or "bin" as fallback (see ElementService::getFileName()).
  */
-#[Group('test')]
 class FileNameFallbackTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

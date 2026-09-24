@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Covers the full resumable upload lifecycle: create an element, create an upload, upload chunks while
  * checking the upload status through HEAD in between, and finish the upload.
  */
-#[Group('test')]
 class ResumableUploadLifecycleTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

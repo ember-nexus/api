@@ -8,12 +8,7 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 /**
- * Single point of truth for `file.maxFileSizeInBytes`, the operator-configured upper bound on a stored file.
- *
- * The limit is advertised to clients through the `max-size` field of the `Upload-Limit` response header and
- * through `/instance-configuration`, so every path which writes a file has to agree on it. API requests reject an
- * oversized file with `400 Bad Request`; `backup:load` reports it and moves on to the next file instead, which is
- * why both a throwing and a predicate form exist.
+ * Single point of truth for `file.maxFileSizeInBytes`, which is also advertised to clients.
  */
 class FileSizeLimitService
 {

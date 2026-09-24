@@ -27,16 +27,12 @@ use Throwable;
 class S3Service
 {
     /**
-     * Size from which a file is written as a multipart upload rather than a single PUT. Well below the backend's
-     * technical single-PUT ceiling ({@see S3TechnicalLimitsInterface::getMaxSinglePutSizeInBytes()}), which stays
-     * the hard limit used for configuration validation: a single PUT of several GiB is one long, unresumable
-     * request whose failure costs the whole transfer, so switching earlier is cheaper than riding the limit.
+     * Kept well below the backend's single PUT limit, as a failed single PUT has to be retried completely.
      */
     public const int MULTIPART_UPLOAD_THRESHOLD_IN_BYTES = 500 * 1024 * 1024;
 
     /**
-     * Part size used when streaming a large file into a multipart upload. Scaled up when the file is big enough
-     * that a fixed part size would exceed the backend's maximum part count.
+     * Minimum part size, increased for large files to stay within the backend's maximum part count.
      */
     public const int MULTIPART_UPLOAD_PART_SIZE_IN_BYTES = 100 * 1024 * 1024;
 
@@ -185,10 +181,8 @@ class S3Service
     }
 
     /**
-     * Small files take the intermediate upload bucket route below; from
-     * {@see MULTIPART_UPLOAD_THRESHOLD_IN_BYTES} upwards they are streamed straight into the storage bucket as a
-     * multipart upload, since past the backend's single-PUT ceiling neither the PUT nor the `copyObject` this
-     * route relies on could handle them at all.
+     * Files from {@see MULTIPART_UPLOAD_THRESHOLD_IN_BYTES} upwards are streamed directly into the storage bucket as
+     * a multipart upload, smaller ones are copied over from the upload bucket.
      */
     public function uploadFile(UploadFileOperationInterface $uploadFileOperation): int
     {
@@ -234,11 +228,8 @@ class S3Service
     }
 
     /**
-     * Streams $uploadFileOperation's resource into the storage bucket part by part. The intermediate upload
-     * bucket is skipped deliberately: a file this large could not be moved out of it afterwards, as a single
-     * `copyObject` has the same size ceiling as a single PUT.
-     *
-     * One part is held in memory at a time, so peak usage is roughly the part size rather than the file size.
+     * Skips the upload bucket, as `copyObject` has the same size limit as a single PUT. Only one part is held in
+     * memory at a time.
      *
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
@@ -288,9 +279,7 @@ class S3Service
                 $uploadedContentLength += strlen($body);
             }
 
-            // verified before completing, not after: a completed multipart upload is immediately live at the
-            // final storage key, so finishing it first would leave a wrong-length object in place of the
-            // previous one while telling the client the request failed
+            // verified before completing, as a completed multipart upload would already replace the previous file
             if ($uploadedContentLength !== $contentLength) {
                 throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Inconsistent length values between provided content-length (%d) and actual content length (%d) detected.', $contentLength, $uploadedContentLength));
             }
@@ -322,9 +311,7 @@ class S3Service
     }
 
     /**
-     * Aborts a failed multipart upload on a best-effort basis: a failing abort is only logged, so that it never
-     * replaces the exception which caused the abort in the first place. Parts of uploads which could not be aborted
-     * remain in the bucket until removed by its lifecycle policy (`AbortIncompleteMultipartUpload`).
+     * Failures are only logged, so that they do not replace the original exception.
      */
     private function tryAbortMultipartUpload(string $bucket, string $key, string $multipartUploadId): void
     {
@@ -345,10 +332,6 @@ class S3Service
         }
     }
 
-    /**
-     * A fixed part size would run past the backend's maximum part count once the file is large enough, so the
-     * part size grows with the file when it has to.
-     */
     private function getMultipartUploadPartSizeInBytes(int $contentLength): int
     {
         $partSizeRequiredByMaxChunkCount = (int) ceil($contentLength / $this->s3TechnicalLimits->getMaxChunkCount());
@@ -397,8 +380,7 @@ class S3Service
     }
 
     /**
-     * Reads only the given inclusive byte range [$start, $end] from S3, via the `Range` request header, instead
-     * of downloading the whole file.
+     * Reads the inclusive byte range [$start, $end].
      */
     public function getFileByteRange(FileOperationInterface $fileOperation, int $start, int $end): GetObjectOutput
     {
@@ -435,14 +417,12 @@ class S3Service
         $contentLength = $this->getContentLength($fileOperation);
         $lengthToRead = min($contentLength, $maxContentLength);
         if ($lengthToRead <= 0) {
-            // a byte-range request against an empty object has no satisfiable range (S3 rejects it with a 416),
-            // and there is nothing to fetch either way - an empty resource is the correct result directly.
+            // S3 rejects range requests against empty objects with a 416
             return \Safe\fopen('php://memory', 'r');
         }
         $result = $this->s3Client->getObject([
             'Bucket' => $fileOperation->getBucket(),
             'Key' => $fileOperation->getKey(),
-            // HTTP byte ranges are inclusive on both ends, hence the last byte's index is length - 1
             'Range' => sprintf('bytes=0-%d', $lengthToRead - 1),
         ]);
 
@@ -488,8 +468,7 @@ class S3Service
     }
 
     /**
-     * Assumes that the first chunk a) exists and is b) sufficiently long to correctly determine the MimeType. This is
-     * currently the case, as S3's minimum chunk length is 5MB - sufficient for MimeType detection.
+     * Only the first chunk is used for detection, which is sufficient due to the minimum chunk size of 5 MiB.
      */
     public function getMimeTypeFromMergeFileChunksOperation(MergeFileChunksOperationInterface $mergeFileChunksOperation): string
     {

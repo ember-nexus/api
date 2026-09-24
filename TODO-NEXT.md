@@ -1,123 +1,85 @@
 # TODO (next)
 
-Follow-up work surfaced while reviewing the file/upload branch. Development notes, not permanent project
-documentation — fold into `docs/` or into issues once actioned.
+Open work for the file/upload branch (`feature/gh-119-get-file-controller`) and its follow-ups. Development notes,
+not permanent documentation: delete entries once they are done or moved into GitHub issues.
 
-## Open
+## Before merging into `main`
 
-### High-performance BLAKE3 for file hashing
+- **Controller example tests fail in CI.** `composer test:example-generation-controller` compares responses against
+  snapshots in `docs/`, and 15 of them are stale:
+  - 14 search examples (`docs/search/example/...`) still contain the footnote numbers which were removed in reference
+    dataset 0.0.29, and lack the `file`/`hasFile` properties which are now always returned.
+  - `System/GetGraphStructureTest` misses the `RELATED` relation type added in reference dataset 0.0.32.
 
-`file.hash` (`src/Service/FileHashService.php`) uses SHA-256. BLAKE3 is preferred long-term, but the only real
-pure-PHP implementation (`tourze/blake3-php`) benchmarks at roughly 0.04 MB/s — about 3000x too slow for a 1 Gb/s
-uplink. Real BLAKE3 performance requires either:
+  As `docs/` is replaced in the next branch, either regenerate these snapshots or temporarily allow the job to fail.
+- **Verify CI on GitHub.** Everything passes locally (unit, feature, command example tests, phpstan, psalm, cs). The
+  controller example job is expected to fail, see above; nothing else has been run on GitHub yet.
+- **Rewrite `CHANGELOG.md`** for the branch.
+- **Squash-merge.** The branch has 127 commits, most of them named `wip`.
 
-- a Docker image change adding a build stage that compiles the official BLAKE3 C reference implementation into a
-  shared library, enabling the `ffi` PHP extension, and binding to it via FFI, or
-- a compiled native PHP extension (e.g. `cypherbits/php-blake3`) added to the image build — smaller effort, but
-  currently a low-adoption, single-maintainer project, a real supply-chain trust tradeoff for a crypto primitive
-  that would need vetting first.
+## Decisions needed
 
-`file.hash` is stored as `{<algorithm>: <digest>}` (not a flat pair), so adding or switching to `file.hash.blake3`
-later needs no data migration — existing `file.hash.sha256` values stay valid alongside it.
+- **`DELETE /<uuid>/file` on an element without a file** answers `204`, while `GET /<uuid>/file` answers `404`.
+  Keep it idempotent, or answer `404`?
+- **`If-None-Match: *` on `POST /<uuid>/file`** is compared as a literal ETag instead of meaning "only if no file
+  exists" (RFC 9110). `If-Match` on this endpoint can never succeed, as a file-less element has no obtainable file
+  ETag. Either document this or implement `*`.
+- **Chunk size checks in `PatchUploadController`** run after the chunk has been uploaded to S3. The rejected chunk is
+  removed together with the upload, but checking `Content-Length` before the upload would avoid the S3 round trip.
+- **`PartialUploadRequest::getContentType()`** is parsed but never checked. Validate `application/partial-upload` as
+  required by the resumable upload draft, or remove it.
+- **`HasFilePropertyElementFragmentizeEventListener`** might be redundant, as the generic fragmentize listener
+  already writes booleans to Neo4j. It additionally writes `hasFile` to MongoDB.
 
-Note: SHA-256 is *not* to be consolidated with the `sha3-256` used in `TokenGenerator.php`. Those are unrelated use
-cases with opposite constraints, and RFC 9530's digest registry (which `DigestService` implements) has no entry for
-SHA-3 — switching file hashing to SHA-3 would break `Repr-Digest`/`Content-Digest` interoperability.
+## Missing tests
 
-### S3 upload bucket lifecycle policy
+High value:
 
-`cron:delete-expired-uploads` (and its `file.expiredUploadCanBeDeletedAfterExpirationInSeconds` grace period) is an
-application-level cleanup of expired uploads and their S3 chunks. As defense in depth, the S3/MinIO **upload**
-bucket should also carry an object lifecycle policy expiring objects after a short time (e.g. 24-48h), in case the
-cron job is disabled, not running, or falling behind. Infrastructure/ops concern — bucket provisioning lives
-outside this repository.
+- `backup:load`: a file whose content does not match `file.hash.sha256` is skipped, an element without `file.hash`
+  is skipped, `--skip-verify` loads it anyway, an oversized file is skipped, and one failing file does not abort the
+  restore.
+- `backup:create` including files, ideally as a create → drop → load round trip.
+- Unit tests for `PropertyParseService` (many `400` branches) and `UploadCreationService` (unsupported or mismatching
+  digest, size limits on `Upload-Length` and direct uploads, chunk size limits on upload creation).
+- Feature tests for `file.maxFileSizeInBytes`, e.g. in `ExampleGenerationControllerWithDifferentConfiguration` with a
+  small limit: `POST`/`PUT /<uuid>/file`, an oversized `Upload-Length`, and a `PATCH` crossing the limit.
+- Creating elements of the reserved types `User`, `Token` and `Upload` via `POST /` and `POST /<uuid>` answers `400`.
 
-### Null properties linger in MongoDB and Elasticsearch
+Medium:
 
-See the findings section below; the fix is an upstream change in `syndesi/mongo-entity-manager` and
-`syndesi/elastic-entity-manager`.
+- File ETags: `GET /<uuid>/file` with `If-None-Match` → `304`, `PUT`/`DELETE /<uuid>/file` with a stale `If-Match`
+  → `412`, for nodes and relations.
+- `PATCH /upload/<uuid>`: `410` for an expired upload, `409` when the data exceeds `Upload-Length`, `409` when the
+  stored hash state can not be restored.
+- Unit tests for `MongoDBNormalizedValueToRawValueEventListener` (BSONDocument fix) and for the Neo4j `true`
+  placeholder of non-scalar properties in the generic (de)fragmentize listeners.
 
-## Decided and done
+Low:
 
-Kept as a record of why these went the way they did; drop once folded into `docs/`.
+- Redis-before-live priority of the ETag listeners, `ElementService`, `S3ClientFactory`, `ContentDispositionWrapper`.
+- Write access control tests for files and uploads on relations; only read access is tested on relations.
 
-### `file.maxFileSizeInBytes` enforcement and large-file uploads — DONE
+## Test hygiene
 
-`FileSizeLimitService` is now the single place which knows the configured limit, in both a throwing form (API
-paths, `400 Bad Request`) and a predicate form (`backup:load`, which reports and skips). Enforced at four points,
-each chosen so nothing oversized is ever written: the declared `Upload-Length` when a resumable upload is created,
-the running total on every chunk, the completing upload before its chunks are merged, and a direct
-`POST`/`PUT /<uuid>/file` before it reaches S3. The documented `400` for an upload exceeding `max-size` is now
-real rather than aspirational.
+- Several file and upload feature tests never delete the elements they create (e.g. `GetFileTest`,
+  `PostFileInSingleRequestTest`, `PutFileInSingleRequestTest`, `ResumableUploadLifecycleTest`).
+- Relation setup is written by hand in several tests (e.g. `FileDigestOnRelationTest`,
+  `FileTopLevelPropertyOnRelationTest`, `GetFileRangeOnRelationTest`), instead of using
+  `BaseRequestTestCase::createEphemeralRelation()`.
+- `BotanicalFileTest` permanently modifies reference dataset elements, so reruns need a dataset reload.
+- 12 tests in `Security/Scenario02BasicPositiveTests/_02_01_ImmediateNodeOwnershipTest.php` are skipped (already on
+  `main`). They cover owner access to the file and WebDAV endpoints and need to be rewritten.
+- The command example tests still fetch reference dataset 0.0.19 (`BackupFetchTest`).
 
-`S3Service::uploadFile()` gained a multipart path for files above the backend's single-PUT limit (new
-`S3TechnicalLimitsInterface::getMaxSinglePutSizeInBytes()`, 5 GiB). It streams the resource into the storage
-bucket part by part, skipping the intermediate upload bucket, because a file that large could not be server-side
-copied out of it either — `copyObject` shares the 5 GiB ceiling. Part size defaults to 64 MiB and scales up when
-the file is large enough that a fixed size would exceed the 10,000 part maximum, so only one part is in memory at
-a time. `UploadFileOperationFactory::createUploadFileOperationFromElementAndResource()` now accepts the content
-length, which is what lets `backup:load` pick that path.
+## Follow-up issues
 
-`BackupLoadCommand::loadFiles()` no longer aborts the whole restore on one bad file: oversized files are reported
-and skipped, upload failures are caught per file and reported, and the section summary names how many could not be
-loaded.
+- **`cron:update-ownership` is an empty stub** (see #438), and nothing in this repository consumes the
+  `ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE` RabbitMQ queue.
 
-Left as is, deliberately: direct and resumable uploads keep their own logic, since one creates a temporary upload
-and the other writes an already-complete file. They share `S3Service::uploadFile()` and now also
-`FileSizeLimitService`, which is the part worth having in common.
+## For the docs rewrite
 
-### `file` properties in collection and search responses — DONE
-
-`file` is now returned everywhere an element is serialised. `ElementToRawService::elementToRaw()` lost its
-`$includeFile` parameter, and the four call sites that passed `false` (`CollectionService` ×3,
-`ElementHydrationSearchStepEventListener`) now get the same shape as the single-element endpoint. This also
-resolves file properties in search results, with no new search step and no new query parameters.
-
-Rationale: `file` is an ordinary element property in the MongoDB document fragment, which
-`ElementManager::getNode()`/`getRelation()` fetch unconditionally — so `includeFile: false` never saved a database
-round trip, only ~160 bytes of payload per file-bearing element. The property is exactly four keys, written in only
-two places (`UploadCreationService.php:96`, `PatchUploadController.php:179`).
-
-Accepted constraint: `file` is now part of the collection contract, so it must stay a small, fixed summary.
-Thumbnails are expected to work like file downloads do today (implicit, link-free), further hash algorithms are
-cheap to add, and storage keys / version history are explicitly out of scope. Reduced-payload responses can be
-added later if the community asks.
-
-Caching needed no change: both file-setting paths and the delete path call `merge()` + `flush()`, which bumps
-`updated` via `UpdatedElementPreWriteEventListener` (collection etags hash `children.updated`,
-`EtagCalculatorService.php:91`) and fires `ElementPostMergeEvent`, expiring the element plus all related collection
-etag keys in `ExpireEtagOnChangeEventListener`.
-
-### Findings: null property handling across the three stores
-
-Found while checking whether `DeleteElementFileController.php:63` (`addProperty('file', null)`) removes the
-property. Verdict per store:
-
-| Store | Write | Null removed? |
-| --- | --- | --- |
-| Neo4j | `SET node += $properties` (`NodeMergeToStatementEventListener.php:48`) | **Yes** — Cypher's `+=` deletes keys set to null |
-| MongoDB | `$set` with the whole property array (`mongo-entity-manager/src/Type/EntityManager.php:110-119`) | **No** — stores an explicit `null`; would need `$unset` |
-| Elasticsearch | `update` with `doc` (`elastic-entity-manager/src/Type/EntityManager.php:113-117`) | **No** — `null` stays in `_source`, though it is not indexed |
-
-The API is nonetheless correct today: `GenericPropertyElementDefragmentizeEventListener` ends by stripping every
-null property from the element after defragmentizing, so a stored `file: null` never reaches `elementToRaw()` and
-`hasProperty('file')` is false. That is why the always-include-`file` change above needed no null guard.
-
-What remains is storage cruft, not an API bug: deleted properties linger as explicit nulls in the Mongo document
-and the ES `_source`. Fixing it properly means teaching `syndesi/mongo-entity-manager` to split null-valued
-properties into an `$unset` clause (and the ES equivalent), which is an upstream change in those libraries rather
-than something to work around here.
-
-### Dead `$fileFragment` plumbing — DONE
-
-Removed. `$fileFragment` was threaded through `FragmentGroup`, `FragmentHelper`, `ElementDefragmentizeService` and
-all four fragmentize/defragmentize events, and was never read or written: the event factories hardcoded `null`, no
-listener set it, `FragmentGroup::getFileFragment()` had no callers, `ElementManager::getNode()/getRelation()`
-hardcoded `$fileFragment = null`, and none of the three defragmentize listeners read it. It predated this branch
-(already present at the merge base).
-
-It looks like a placeholder for treating S3 as a fourth backing store alongside Cypher/Mongo/Elastic. The
-implementation went a different way: file metadata rides along as an ordinary `file` property in the Mongo
-document, and S3 I/O happens explicitly in `S3Service`/`UploadCreationService` *outside* merge/flush — deliberately
-so, per the reentrancy note in `UploadService::deleteUploadsTargeting()`. If S3 writes should ever join the flush
-batch, reintroduce the seam deliberately and with a real type rather than `mixed`.
+- File and upload endpoints: document access control (`UPDATE` for `POST`/`PUT`/`DELETE`, `READ` for `GET`, `404`
+  instead of `403`), where `file.maxFileSizeInBytes` is enforced, and add workflow diagrams like the element
+  endpoints have.
+- `backup:load` verifies file hashes, skips unusable files with a warning, and supports `--skip-verify`.
+- `405 Method Not Allowed` is now returned for existing routes called with an unsupported method (was `500`).

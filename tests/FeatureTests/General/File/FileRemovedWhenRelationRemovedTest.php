@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\General\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Mirrors FileRemovedWhenElementRemovedTest, but targets a relation: verifies that a file attached to a
- * relation is no longer accessible once the relation itself is deleted, even though the file was never
- * explicitly deleted through the file endpoint.
+ * Mirrors FileRemovedWhenElementRemovedTest, but targets a relation instead of a node.
  */
-#[Group('test')]
 class FileRemovedWhenRelationRemovedTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

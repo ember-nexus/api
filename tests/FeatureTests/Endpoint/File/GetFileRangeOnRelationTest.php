@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Mirrors GetFileRangeTest, but exercises the `Range` header on `GET /<id>/file` against a relation instead of
- * a node. Since the reference dataset does not seed any relation with a file, a relation and a deterministic
- * file are created fresh for this test.
+ * Mirrors GetFileRangeTest, but targets a relation instead of a node. The relation and its deterministic file
+ * are created once and shared by all tests of this class.
  */
-#[Group('test')]
 class GetFileRangeOnRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

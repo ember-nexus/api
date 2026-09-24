@@ -5,17 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * `Upload.uploadTarget` (see UploadService) is a plain property, not a graph edge, so deleting an element does
- * not automatically take any in-progress resumable upload(s) still targeting it along with it - without explicit
- * cleanup, they would linger, still HEAD-able, until the `cron:delete-expired-uploads` grace period eventually
- * catches up with them. `DeleteElementController` cleans these up immediately instead (see
- * UploadService::deleteUploadsTargeting()); this covers that end-to-end, for both an upload with no chunks
- * uploaded yet and one with an already-uploaded chunk.
+ * `Upload.uploadTarget` is a plain property, not a graph edge, so deleting an element does not remove uploads
+ * targeting it. Verifies that DeleteElementController cleans them up immediately (see
+ * UploadService::deleteUploadsTargeting()), both with and without already uploaded chunks.
  */
-#[Group('test')]
 class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
@@ -90,8 +85,7 @@ class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
         $headResponseAfterDelete = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
         $this->assertSame(404, $headResponseAfterDelete->getStatusCode());
 
-        // the upload resource is really gone, not just inaccessible - a further attempt to continue it must
-        // report the same "not found" a client would get for any other unknown upload id, not a crash
+        // continuing the removed upload must answer 404 like any unknown upload id
         $patchResponse = $this->runUploadRequest(
             'PATCH',
             sprintf('/upload/%s', $uploadId),

@@ -1526,8 +1526,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method; no Cypher query (i.e. no calculateElementEtag() fallback) should have happened at
-        // all, per the prophecy expectation above
+        // run service method; no calculateElementEtag() fallback, per the prophecy above
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertSame('K6XEZuifVAv', (string) $etag);
 
@@ -1574,9 +1573,8 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method; 'blake3' sorts before 'md5' alphanumerically, so it is used. The Cypher client
-        // prophecy above (shouldNotBeCalled) proves that a hash was actually picked here, rather than falling
-        // back to calculateElementEtag().
+        // run service method; 'blake3' sorts before 'md5', so it is used instead of the calculateElementEtag()
+        // fallback
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertNotNull($etag);
     }
@@ -1636,8 +1634,7 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateFileEtagFallsBackToElementEtagWhenNoFilePropertyIsPresent(): void
     {
-        // an S3 object can exist without the element ever having its 'file' property set, e.g. when an upload is
-        // rejected after the object was already written (a mismatched Content-Digest); this must not crash.
+        // an element can lack the 'file' property, e.g. after an upload was rejected due to a mismatched digest
 
         // setup variables
         $id = Uuid::fromString('1a2b3c4d-5e6f-4a1b-8c9d-0e1f2a3b4c5d');

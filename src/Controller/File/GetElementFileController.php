@@ -116,8 +116,7 @@ class GetElementFileController extends AbstractController
             return null;
         }
         $fileProperty = $element->getProperty('file');
-        // 'file' is read back from MongoDB; nested values (like 'hash') may still be BSONDocument/ArrayAccess
-        // instances rather than plain arrays at this point, so array-offset access is used instead of is_array().
+        // nested values from MongoDB may still be BSONDocument instances instead of plain arrays
         if (!is_array($fileProperty) && !($fileProperty instanceof ArrayAccess)) {
             return null;
         }

@@ -369,8 +369,7 @@ class EtagCalculatorService
         $fileEtag = $this->extractPreferredHashFromFileProperties($rawFileProperties);
 
         if (null === $fileEtag) {
-            // no stored hash at all (e.g. a pre-hash-rollout record): fall back to the element's own identity
-            // instead of an S3 round trip, since there is nothing file-specific left to distinguish it by anyway.
+            // no stored hash, e.g. files uploaded before hashing was introduced
             $fileEtag = $this->calculateElementEtag($elementId);
             if (null === $fileEtag) {
                 return null;
@@ -402,10 +401,7 @@ class EtagCalculatorService
     }
 
     /**
-     * Prefers {@see FileHashService::ALGORITHM}, since that is the algorithm this codebase actually writes; if it
-     * is missing but some other algorithm is present (e.g. a future 'blake3'), the alphanumerically first one is
-     * used instead, purely to pick deterministically among otherwise-equal options. Returns null if no usable
-     * hash is stored at all.
+     * Prefers {@see FileHashService::ALGORITHM}, otherwise uses the alphabetically first algorithm for determinism.
      *
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")

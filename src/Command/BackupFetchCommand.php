@@ -177,8 +177,7 @@ class BackupFetchCommand extends Command
             'dest' => $destination,
         ]);
         $manager->createDirectory(sprintf('dest://%s', $destinationPath));
-        // Flysystem always normalizes stored paths to be free of leading slashes, regardless of whether the
-        // requested path had one; $normalizedSourcePath must match that normalized form to be strippable below.
+        // Flysystem returns paths without leading slashes, so the source path has to match that form
         $normalizedSourcePath = trim($sourcePath, '/');
         $listing = $manager->listContents(sprintf('source://%s', $normalizedSourcePath), true);
         $progressBar = $this->io->createProgressBarInInteractiveTerminal();
@@ -226,15 +225,8 @@ class BackupFetchCommand extends Command
     }
 
     /**
-     * @SuppressWarnings("PHPMD.CountInLoopExpression")
-     */
-    /**
-     * A backup archive either contains the `node`/`relation` folders directly at its root (e.g. an archive built
-     * by `git archive` without a `--prefix`), or wrapped inside a single top level folder (e.g. GitHub's release
-     * archives, which always wrap their content in a `<repo>-<tag>/` folder). No deeper nesting is supported.
-     *
-     * The returned path never has a trailing slash; the root itself is represented as an empty string, so that
-     * appending `/node` etc. to it never produces a doubled leading slash.
+     * The backup is either located at the archive's root or inside a single top level folder (as in GitHub's
+     * release archives). Returns the folder without trailing slash, with the root being an empty string.
      */
     private function findBackupRootFolder(Filesystem $filesystem): ?string
     {

@@ -15,9 +15,9 @@ class Client416RangeNotSatisfiableExceptionFactory
     }
 
     /**
-     * @param array<string, mixed> $additionalDetails
+     * @param array<string, mixed> $additionalProperties
      */
-    public function createFromDetail(string $detail, array $additionalDetails = []): Client416RangeNotSatisfiableException
+    public function createFromDetail(string $detail, array $additionalProperties = []): Client416RangeNotSatisfiableException
     {
         return new Client416RangeNotSatisfiableException(
             $this->urlGenerator->generate(
@@ -29,7 +29,7 @@ class Client416RangeNotSatisfiableExceptionFactory
                 UrlGeneratorInterface::ABSOLUTE_URL
             ),
             detail: $detail,
-            additionalDetails: $additionalDetails
+            additionalProperties: $additionalProperties
         );
     }
 }

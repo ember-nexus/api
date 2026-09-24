@@ -7,11 +7,9 @@ namespace App\Tests\FeatureTests\Endpoint\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * `POST /<uuid>/file` carries #[EndpointSupportsEtag(EtagType::FILE)], so preconditions are evaluated instead of
- * silently ignored. Note the asymmetry with PUT/DELETE: POST only ever targets an element which has no file yet
- * (it answers 409 otherwise), and the FILE etag of a file-less element is not obtainable by a client, since
- * `GET /<uuid>/file` answers 404 and therefore carries no Etag header. `If-Match` on POST is consequently
- * fail-closed: it can be rejected but never satisfied.
+ * Verifies that `POST /<uuid>/file` evaluates ETag preconditions. Unlike PUT/DELETE, POST only targets elements
+ * without a file, whose file etag a client can not obtain (`GET /<uuid>/file` answers 404), so `If-Match` can be
+ * rejected but never satisfied.
  */
 class PostFileEtagTest extends BaseRequestTestCase
 {

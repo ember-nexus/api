@@ -9,18 +9,8 @@ use App\Factory\Exception\Client416RangeNotSatisfiableExceptionFactory;
 use App\Type\ByteRange;
 
 /**
- * Parses the HTTP `Range` request header (RFC 9110, Section 14.1.2) for the single-range case.
- *
- * Only a single byte range is supported, as multiple ranges within one request ("multipart/byteranges") are not
- * implemented, and are not planned to be. The following forms are supported:
- *
- * - `bytes=<start>-<end>`: an explicit, inclusive range.
- * - `bytes=<start>-`: from `<start>` to the end of the resource.
- * - `bytes=-<suffixLength>`: the last `<suffixLength>` bytes of the resource.
- *
- * A syntactically invalid `Range` header, or one requesting multiple ranges, results in a 400 Bad Request: the
- * server does not understand what was asked for. A syntactically valid header which can not be satisfied against
- * the resource (e.g. a `start` beyond the end of the file) results in a 416 Range Not Satisfiable instead.
+ * Parses the HTTP `Range` header (RFC 9110, Section 14.1.2). Only a single range is supported, multiple ranges
+ * result in a 400 Bad Request. Valid but unsatisfiable ranges result in a 416 Range Not Satisfiable.
  */
 class FileRangeService
 {
@@ -36,7 +26,7 @@ class FileRangeService
     public function parseRangeHeader(string $rangeHeader, int $totalContentLength): ByteRange
     {
         if (1 !== \Safe\preg_match('/^bytes=(\d*)-(\d*)$/', trim($rangeHeader), $matches)) {
-            // syntactically invalid, or multiple ranges requested (unsupported, and not planned to be)
+            // syntactically invalid, or multiple ranges requested
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not parse 'Range' header: '%s'. Only a single range of the form 'bytes=<start>-<end>', 'bytes=<start>-' or 'bytes=-<suffixLength>' is supported.", $rangeHeader));
         }
 
@@ -67,10 +57,10 @@ class FileRangeService
             }
 
             if ('' === $rawEnd) {
-                // open range: from <start> to the end of the resource ("infinity")
+                // open range: from <start> to the end of the resource
                 $end = $totalContentLength - 1;
             } else {
-                // end can not exceed the resource's actual length, it is clamped instead of rejected
+                // clamped instead of rejected, see RFC 9110
                 $end = min((int) $rawEnd, $totalContentLength - 1);
             }
         }

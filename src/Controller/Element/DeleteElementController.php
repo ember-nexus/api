@@ -50,8 +50,7 @@ class DeleteElementController extends AbstractController
 
         $element = $this->elementManager->getElementOrFail($elementId);
 
-        // deleted, and flushed, as its own separate step before the element itself - see
-        // UploadService::deleteUploadsTargeting() for why this can not be done via an event listener instead
+        // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
         $this->uploadService->deleteUploadsTargeting($elementId);
         $this->elementManager->flush();
 

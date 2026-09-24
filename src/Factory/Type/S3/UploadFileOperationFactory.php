@@ -61,9 +61,7 @@ class UploadFileOperationFactory
 
     /**
      * @param resource $resource
-     * @param int|null $contentLength known size of $resource, where the caller has it. Passing it lets
-     *                                {@see \App\Service\S3Service::uploadFile()} pick a multipart upload for
-     *                                files too large for a single PUT.
+     * @param int|null $contentLength enables multipart uploads for large files in {@see \App\Service\S3Service::uploadFile()}
      */
     public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, $resource, ?int $contentLength = null): UploadFileOperationInterface
     {

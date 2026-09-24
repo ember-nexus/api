@@ -46,7 +46,7 @@ class Client416RangeNotSatisfiableExceptionFactoryTest extends TestCase
         $this->assertSame([], $exception->getAdditionalProperties());
     }
 
-    public function testCreateFromDetailWithAdditionalDetails(): void
+    public function testCreateFromDetailWithAdditionalProperties(): void
     {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator

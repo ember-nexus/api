@@ -28,9 +28,8 @@ interface UploadInterface
     public function getExpires(): DateTime;
 
     /**
-     * Base64-encoded, serialized {@see \HashContext}: the running hash of every chunk uploaded for this upload
-     * so far, computed as each chunk was streamed to S3, resumed from here on the next chunk. Null until the
-     * first chunk with actual content has been uploaded.
+     * Base64-encoded, serialized {@see \HashContext} of all chunks uploaded so far; null until the first
+     * non-empty chunk.
      */
     public function getHashState(): ?string;
 }

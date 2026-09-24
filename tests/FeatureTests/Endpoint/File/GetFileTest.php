@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
-#[Group('test')]
 class GetFileTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

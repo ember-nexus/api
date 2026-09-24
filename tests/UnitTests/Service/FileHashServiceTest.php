@@ -14,30 +14,6 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(FileHashService::class)]
 class FileHashServiceTest extends TestCase
 {
-    public function testCalculatesSha256HashOfResourceContent(): void
-    {
-        $content = 'some deterministic content used to verify the calculated hash';
-        $resource = \Safe\fopen('php://memory', 'r+');
-        \Safe\fwrite($resource, $content);
-        rewind($resource);
-
-        $service = new FileHashService();
-        $hash = $service->calculateHashFromResource($resource);
-
-        $this->assertSame(hash('sha256', $content), $hash);
-        $this->assertSame(64, strlen($hash));
-    }
-
-    public function testCalculatesCorrectHashForEmptyResource(): void
-    {
-        $resource = \Safe\fopen('php://memory', 'r+');
-
-        $service = new FileHashService();
-        $hash = $service->calculateHashFromResource($resource);
-
-        $this->assertSame(hash('sha256', ''), $hash);
-    }
-
     public function testCalculatesHashesAcrossMultipleReadChunks(): void
     {
         // larger than the service's read chunk size, so the hash spans several reads
@@ -50,6 +26,15 @@ class FileHashServiceTest extends TestCase
         $hashes = $service->calculateHashesFromResource($resource, ['sha256']);
 
         $this->assertSame(['sha256' => hash('sha256', $content)], $hashes);
+    }
+
+    public function testCalculatesHashOfEmptyResource(): void
+    {
+        $resource = \Safe\fopen('php://memory', 'r+');
+
+        $service = new FileHashService();
+
+        $this->assertSame(['sha256' => hash('sha256', '')], $service->calculateHashesFromResource($resource, ['sha256']));
     }
 
     public function testCalculatesNoHashesForNoAlgorithms(): void

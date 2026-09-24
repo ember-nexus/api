@@ -9,10 +9,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 /**
- * Validates the operator-configurable `file.*` upload/storage settings ({@see EmberNexusConfiguration}) against
- * the hard technical limits of the underlying storage backend ({@see S3TechnicalLimitsInterface}). Configuration
- * may only be more restrictive than the technical limits, never less; a violation is a startup-time
- * configuration error, not a runtime one.
+ * Ensures that the `file.*` configuration does not exceed the technical limits of the storage backend.
  */
 class S3TechnicalLimitsValidator
 {
@@ -52,10 +49,6 @@ class S3TechnicalLimitsValidator
         }
     }
 
-    /**
-     * The point at which {@see S3Service::uploadFile()} switches to a multipart upload has to stay at or below
-     * what the backend still accepts as a single PUT; above that, the single-PUT branch could never succeed.
-     */
     private function validateMultipartUploadThreshold(int $multipartUploadThreshold): void
     {
         $technicalMaxSinglePutSize = $this->s3TechnicalLimits->getMaxSinglePutSizeInBytes();

@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\General\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Mirrors (a subset of) FileDigestTest, but targets a relation instead of a node: RFC 9530 ("Digest Fields")
- * support - `Repr-Digest` response header on file downloads (full and ranged), and a client-supplied
- * `Repr-Digest` request header being verified against the uploaded file on a relation.
+ * Mirrors a subset of FileDigestTest, but targets a relation instead of a node.
  */
-#[Group('test')]
 class FileDigestOnRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

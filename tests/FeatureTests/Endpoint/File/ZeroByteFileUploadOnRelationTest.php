@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Mirrors ZeroByteFileUploadTest, but targets a relation instead of a node.
  */
-#[Group('test')]
 class ZeroByteFileUploadOnRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

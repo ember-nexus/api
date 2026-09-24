@@ -5,18 +5,8 @@ declare(strict_types=1);
 namespace App\Contract\S3;
 
 /**
- * Hard technical limits imposed by an S3(-compatible) storage backend itself, as opposed to
- * {@see \EmberNexusBundle\Service\EmberNexusConfiguration}'s operator-configurable `file.*` settings.
- *
- * These values are not meant to be operator-configurable: they describe what the underlying storage protocol
- * actually allows, not what an operator wants to allow. Operator configuration may only be more restrictive than
- * these limits, never less; see {@see \App\Service\S3TechnicalLimitsValidator}.
- *
- * Only one implementation exists today ({@see \App\Type\S3\S3TechnicalLimits}, hardcoded to the standard AWS S3
- * multipart upload limits), as only a single S3 connection is supported. This interface exists so that, once
- * multiple storage backends/connections with differing technical limits are supported, additional
- * implementations can be introduced (and selected per connection) without changing any consumer of this
- * interface.
+ * Hard limits of the S3 storage backend itself. Operator configuration (`file.*`) may only be more restrictive,
+ * see {@see \App\Service\S3TechnicalLimitsValidator}.
  */
 interface S3TechnicalLimitsInterface
 {
@@ -27,8 +17,7 @@ interface S3TechnicalLimitsInterface
     public function getMaxObjectSizeInBytes(): int;
 
     /**
-     * Largest object which can be written with a single PUT. Anything above this has to go through a multipart
-     * upload, and can not be server-side copied between buckets in one call either.
+     * Also limits a single server-side copy; larger objects require a multipart upload.
      */
     public function getMaxSinglePutSizeInBytes(): int;
 }

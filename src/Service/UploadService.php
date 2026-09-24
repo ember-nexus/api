@@ -68,12 +68,12 @@ class UploadService
     }
 
     /**
-     * Deletes an upload's already-uploaded chunks from S3, then the `Upload` element itself. Does not flush -
-     * that is left to the caller, matching {@see deleteUpload()}.
+     * Does not flush, same as {@see deleteUpload()}.
      */
     public function deleteUploadAndChunks(UploadInterface $upload): void
     {
-        for ($chunk = 0; $chunk <= $upload->getAlreadyUploadedChunks(); ++$chunk) {
+        // chunk keys start at 1; the key after the last accepted chunk may hold a chunk which was rejected after upload
+        for ($chunk = 1; $chunk <= $upload->getAlreadyUploadedChunks() + 1; ++$chunk) {
             $deleteChunkOperation = $this->fileOperationFactory->createFileOperationFromUpload($upload, $chunk);
             $this->s3Service->deleteFile($deleteChunkOperation);
         }
@@ -82,26 +82,16 @@ class UploadService
     }
 
     /**
-     * Deletes any in-progress resumable upload(s) still targeting `$elementId`, and their already-uploaded S3
-     * chunks - meant to be called (and flushed) *before* the target element itself is deleted. `uploadTarget`
-     * (see {@see mergeUploadElement()}) is a plain property, not a graph edge, so deleting an element does not
-     * take any upload(s) still targeting it along with it on its own; without this, they would linger - still
-     * HEAD-able, still occupying storage - until the `cron:delete-expired-uploads` grace period eventually
-     * catches up with them.
-     *
-     * Deliberately not wired up as an event listener on element deletion: an `Upload` element deleted by this
-     * method would itself re-enter `ElementManager::delete()`/`flush()` while the *original* deletion's own
-     * `flush()` for the target element is still on the call stack (event listeners fire from within `flush()`) -
-     * `ElementManager` and the underlying entity managers are not reentrant, and a nested `flush()` call
-     * corrupts the outer one's still-in-flight batch. Calling this as an explicit, separate, sequential step
-     * before the target's own delete+flush avoids that entirely.
+     * Deletes uploads targeting the element, as `uploadTarget` is a plain property and not a relation. Must be
+     * called and flushed before the element itself is deleted; it is not an event listener because nested
+     * `flush()` calls are not supported.
      */
     public function deleteUploadsTargeting(UuidInterface $elementId): void
     {
         foreach ($this->getUploadIdsTargeting($elementId) as $uploadId) {
             $uploadElement = $this->elementManager->getElement(UuidV4::fromString($uploadId));
             if (null === $uploadElement) {
-                continue; // already gone (e.g. deleted or expired in the meantime), nothing left to do
+                continue;
             }
 
             try {

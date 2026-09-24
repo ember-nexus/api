@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that continuing a resumable upload with an Upload-Offset which does not match the upload's actual
  * offset results in the correct conflict error.
  */
-#[Group('test')]
 class PatchUploadIncorrectOffsetTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

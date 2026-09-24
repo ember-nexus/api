@@ -42,7 +42,7 @@ class DeleteUploadController extends AbstractController
         $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
         try {
             $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
-        } catch (Exception $e) {
+        } catch (Exception) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 

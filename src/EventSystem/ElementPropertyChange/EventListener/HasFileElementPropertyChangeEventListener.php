@@ -9,7 +9,7 @@ use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 /**
- * The 'hasFile' property is computed automatically alongside 'file', never set directly by a client.
+ * 'hasFile' is managed by the file endpoints only.
  */
 class HasFileElementPropertyChangeEventListener
 {

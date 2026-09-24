@@ -5,16 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * A zero-length file is a legitimate file (e.g. a placeholder, a "touch"ed marker, an intentionally emptied
- * document) - nothing in the upload/download path requires non-empty content, so this must be supported, not
- * rejected. In particular, MIME type sniffing (`MimeTypeService::getMimeTypeFromResource()`) must not crash on
- * empty content: `finfo::buffer('')` returns the well-defined 'application/x-empty' rather than failing, so no
- * special-cased "null mime type" is needed for this.
+ * Verifies that zero-length files can be uploaded and downloaded directly (non-resumable). MIME type sniffing
+ * returns 'application/x-empty' for empty content.
  */
-#[Group('test')]
 class ZeroByteFileUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

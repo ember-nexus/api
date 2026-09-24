@@ -201,9 +201,7 @@ class BackupLoadCommand extends Command
     }
 
     /**
-     * Restores a single backed up file into the storage bucket. Anything which makes one file unusable is
-     * reported rather than thrown: a restore may still have thousands of good files left to go, so one bad file
-     * must not abort it.
+     * Problems with a single file are reported instead of thrown, so that one bad file does not abort the restore.
      */
     private function loadFile(string $path, UuidInterface $fileId): bool
     {
@@ -254,8 +252,7 @@ class BackupLoadCommand extends Command
     }
 
     /**
-     * Verifies the backup file's content against every `file.hash.<algorithm>` value stored on its element, so that
-     * corrupted or modified backup files are not loaded. The file is read once for this, before the upload.
+     * Verifies the backup file against the `file.hash.<algorithm>` values stored on its element.
      *
      * @return string|null error message, or null if all hashes match
      */

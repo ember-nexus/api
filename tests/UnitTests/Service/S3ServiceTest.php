@@ -652,11 +652,8 @@ class S3ServiceTest extends TestCase
     }
 
     /**
-     * A replace which keeps the same extension reuses the same storage key for the new file as the previous one
-     * (see FileService::getStorageBucketKey()), so `getPreviousStorageKey()` equals `getStorageKey()` - deleting
-     * it would delete the file that was just written, not an orphan. Complements
-     * testMergeFileChunksDeletesPreviousFileIfAvailable() (different key: gets deleted) and testMergeFileChunks()
-     * (no previous key at all: nothing to delete).
+     * A same-extension replace reuses the storage key, so the "previous" file is the one just written and must
+     * not be deleted.
      */
     public function testMergeFileChunksDoesNotDeletePreviousFileWhenItIsTheSameAsTheNewOne(): void
     {
@@ -730,8 +727,6 @@ class S3ServiceTest extends TestCase
             'Bucket' => 'storage-bucket',
             'Key' => 'storage-key',
         ]))->shouldBeCalledOnce()->willReturn($headObjectOutput2->reveal());
-        // the just-written file must never be probed for existence or deleted just because it happens to equal
-        // the previous key
         $s3Client->objectExists(Argument::any())->shouldNotBeCalled();
         $s3Client->deleteObject(Argument::any())->shouldNotBeCalled();
 
@@ -1147,12 +1142,8 @@ class S3ServiceTest extends TestCase
     }
 
     /**
-     * A replace which keeps the same extension reuses the same storage key for the new file as the previous one
-     * (see FileService::getStorageBucketKey()), so `getPreviousStorageKey()` equals `getStorageKey()` - deleting
-     * it would delete the file that was just written, not an orphan. Complements
-     * testUploadFileDeletesPreviousFileIfItExists() (different key: gets deleted) and testUploadFile() (no
-     * previous key at all: nothing to delete). The intermediate upload-bucket object is still cleaned up
-     * regardless, since that cleanup is unconditional.
+     * A same-extension replace reuses the storage key, so the "previous" file is the one just written and must
+     * not be deleted. The intermediate upload-bucket object is still cleaned up.
      */
     public function testUploadFileDoesNotDeletePreviousFileWhenItIsTheSameAsTheNewOne(): void
     {
@@ -1198,8 +1189,7 @@ class S3ServiceTest extends TestCase
             'ContentType' => 'text/plain',
             'MetadataDirective' => 'REPLACE',
         ]))->shouldBeCalledOnce()->willReturn($copyObjectOutput);
-        // only the intermediate upload-bucket object is ever probed/deleted - the just-written storage object
-        // must never be, just because it happens to equal the previous key
+        // only the intermediate upload-bucket object is probed/deleted
         $s3Client->objectExists(Argument::is([
             'Bucket' => 'upload-bucket',
             'Key' => 'upload-key',
@@ -1468,8 +1458,7 @@ class S3ServiceTest extends TestCase
             'Bucket' => 'storage-bucket',
             'Key' => 'storage-key.ext',
         ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
-        // a byte-range request against an empty object is invalid (S3 rejects it with a 416), so getObject must
-        // not be called at all here
+        // S3 rejects byte-range requests against empty objects with 416
         $s3Client->getObject(Argument::any())->shouldNotBeCalled();
 
         $s3Service = $this->buildS3Service(

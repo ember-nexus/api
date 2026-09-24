@@ -5,16 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Complements PatchUploadUndersizedIntermediateChunkTest: unlike the minimum chunk size, which is waived for the
- * chunk that completes the upload, the maximum chunk size is not waived for anything - a single PATCH request is
- * still a single S3 multipart part, which has a hard upper size limit regardless of whether it happens to be the
- * last one. The configured limit is read from the `Upload-Limit` response header (`max-append-size`) rather than
- * hardcoded, so this stays correct if the configuration changes.
+ * Verifies that PATCH chunks above the maximum chunk size are rejected, including the completing chunk, since each
+ * chunk becomes one S3 multipart part. The limit is read from the `Upload-Limit` header (`max-append-size`).
  */
-#[Group('test')]
 class PatchUploadOversizedChunkTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

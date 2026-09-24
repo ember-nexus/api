@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\General\File;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Mirrors FileTopLevelPropertyTest, but targets relations: 'file' is exposed as a top-level property (sibling
- * of id/type/data/start/end) on a relation, 'hasFile' is a plain boolean inside 'data', and both show up on a
- * relation whether it is fetched directly or found inside a collection response (/related, /children,
- * /parents).
+ * Mirrors FileTopLevelPropertyTest, but targets relations, fetched directly and inside the /related, /children
+ * and /parents collections.
  */
-#[Group('test')]
 class FileTopLevelPropertyOnRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

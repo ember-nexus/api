@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Security;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies the relation with a file of the "security.filePermission" reference dataset scenario: User A owns both
  * nodes the relation connects, User B has no relation to either of them and must be unable to see the relation or
  * its file. Also verifies that a relation's file survives a backup load intact.
  */
-#[Group('test')]
 class FilePermissionOnRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN_USER_A = 'secret-token:V8m72O3ovtRU09JrdbJRnh';
