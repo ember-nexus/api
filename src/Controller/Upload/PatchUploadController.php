@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Upload;
 
+use App\Contract\Request\PartialUploadRequestInterface;
 use App\Contract\UploadInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Exception\Client400BadContentException;
@@ -102,6 +103,12 @@ class PatchUploadController extends AbstractController
             throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalProperties: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
         }
 
+        // reject obviously invalid chunks before anything is sent to S3
+        $declaredChunkLength = $partialUploadRequest->getContentLength();
+        if (null !== $declaredChunkLength) {
+            $this->assertValidChunkLength($partialUploadRequest, $upload, $declaredChunkLength);
+        }
+
         // hashed before the upload to S3, see IncrementalHashService
         $resource = $partialUploadRequest->getContent();
         $hashState = $upload->getHashState();
@@ -118,22 +125,8 @@ class PatchUploadController extends AbstractController
             \Safe\fclose($resource);
         }
 
-        // same as in UploadCreationService: only the final chunk may be shorter than the minimum, even empty
-        if (false === $partialUploadRequest->isUploadComplete() && $chunkLength < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $chunkLength));
-        }
-        if ($chunkLength > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $chunkLength));
-        }
-
-        // reject as soon as the running total exceeds the limit, not only on completion
-        $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset() + $chunkLength);
-
-        if (null !== $upload->getUploadLength()) {
-            if ($upload->getUploadLength() < $upload->getUploadOffset() + $chunkLength) {
-                throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
-            }
-        }
+        // the declared Content-Length was already checked before the upload, this is the authoritative check
+        $this->assertValidChunkLength($partialUploadRequest, $upload, $chunkLength);
 
         if ($partialUploadRequest->isUploadComplete()) {
             $finalHash = $this->incrementalHashService->finalize($hashContext);
@@ -151,6 +144,24 @@ class PatchUploadController extends AbstractController
         $this->elementManager->flush();
 
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
+    }
+
+    private function assertValidChunkLength(PartialUploadRequestInterface $partialUploadRequest, UploadInterface $upload, int $chunkLength): void
+    {
+        // same as in UploadCreationService: only the final chunk may be shorter than the minimum, even empty
+        if (false === $partialUploadRequest->isUploadComplete() && $chunkLength < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $chunkLength));
+        }
+        if ($chunkLength > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $chunkLength));
+        }
+
+        // reject as soon as the running total exceeds the limit, not only on completion
+        $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset() + $chunkLength);
+
+        if (null !== $upload->getUploadLength() && $upload->getUploadLength() < $upload->getUploadOffset() + $chunkLength) {
+            throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
+        }
     }
 
     private function createFile(UploadInterface $upload, string $hash, ?string $requestDigestHeaderValue = null): void

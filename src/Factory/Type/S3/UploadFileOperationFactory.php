@@ -40,7 +40,7 @@ class UploadFileOperationFactory
         $element = $this->elementManager->getElementOrFail($elementId);
 
         $previousStorageKey = null;
-        if ($element->hasProperty('file')) {
+        if ($this->elementService->hasFile($element)) {
             $previousExtension = $this->elementService->getFileNameExtension($element);
             $previousStorageKey = $this->fileService->getStorageBucketKey($elementId, $previousExtension);
         }

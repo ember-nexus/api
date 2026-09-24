@@ -13,7 +13,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
  */
 class PostFileEtagTest extends BaseRequestTestCase
 {
-    private const string TOKEN = 'secret-token:M3WHIDj4q62EY0XiZFMLnv';
+    private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
     private function createElement(string $name): string
     {

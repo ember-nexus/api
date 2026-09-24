@@ -1494,6 +1494,7 @@ class EtagCalculatorServiceTest extends TestCase
         $id = Uuid::fromString('544e0cf6-d351-435c-828f-7a0762240ce6');
 
         $element = new NodeElement();
+        $element->addProperty('hasFile', true);
         $element
             ->addProperty('file', [
                 'contentLength' => 1024,
@@ -1540,6 +1541,7 @@ class EtagCalculatorServiceTest extends TestCase
         $id = Uuid::fromString('7f8e9d0c-1b2a-4c3d-9e8f-0a1b2c3d4e5f');
 
         $element = new NodeElement();
+        $element->addProperty('hasFile', true);
         $element
             ->addProperty('file', [
                 'contentLength' => 1024,
@@ -1585,6 +1587,7 @@ class EtagCalculatorServiceTest extends TestCase
         $id = Uuid::fromString('9c1a0c0e-6b8f-4b3d-9b1e-2b1a0c0e6b8f');
 
         $element = new NodeElement();
+        $element->addProperty('hasFile', true);
         $element
             ->addProperty('file', ['contentLength' => 1024, 'extension' => 'png', 'mimeType' => 'image/png']);
 
@@ -1640,6 +1643,7 @@ class EtagCalculatorServiceTest extends TestCase
         $id = Uuid::fromString('1a2b3c4d-5e6f-4a1b-8c9d-0e1f2a3b4c5d');
 
         $element = new NodeElement();
+        $element->addProperty('hasFile', true);
 
         $null = null;
         $queryResult = new SummarizedResult(
@@ -1690,6 +1694,7 @@ class EtagCalculatorServiceTest extends TestCase
         $id = Uuid::fromString('662a045f-7d90-4fa2-85f8-9f972f2bdbd3');
 
         $element = new NodeElement();
+        $element->addProperty('hasFile', true);
 
         $null = null;
         $queryResult = new SummarizedResult(
@@ -1728,5 +1733,32 @@ class EtagCalculatorServiceTest extends TestCase
         // run service method; neither a hash nor an updated timestamp is available anywhere
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertNull($etag);
+    }
+
+    public function testCalculateFileEtagReturnsNullForElementWithoutFile(): void
+    {
+        $id = Uuid::fromString('544e0cf6-d351-435c-828f-7a0762240ce6');
+
+        $element = new NodeElement();
+        $element->addProperty('hasFile', false);
+
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldNotBeCalled();
+
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
+
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $elementManager->reveal(),
+            TestLogger::create(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+
+        $this->assertNull($etagCalculatorService->calculateFileEtag($id));
     }
 }

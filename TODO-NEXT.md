@@ -13,23 +13,11 @@ not permanent documentation: delete entries once they are done or moved into Git
 
   As `docs/` is replaced in the next branch, either regenerate these snapshots or temporarily allow the job to fail.
 - **Verify CI on GitHub.** Everything passes locally (unit, feature, command example tests, phpstan, psalm, cs). The
-  controller example job is expected to fail, see above; nothing else has been run on GitHub yet.
+  `YML lint` job most likely failed on the missing newline at the end of `taskfile.yml`, which is fixed, but yamllint
+  itself was not run locally, so other findings are possible. The controller example job is expected to fail, see
+  above; nothing else has been run on GitHub yet.
+  `test-feature` and the two jobs below it no longer wait for `test-mutant` in `ci-test.yml`, which still exists.
 - **Rewrite `CHANGELOG.md`** for the branch.
-- **Squash-merge.** The branch has 127 commits, most of them named `wip`.
-
-## Decisions needed
-
-- **`DELETE /<uuid>/file` on an element without a file** answers `204`, while `GET /<uuid>/file` answers `404`.
-  Keep it idempotent, or answer `404`?
-- **`If-None-Match: *` on `POST /<uuid>/file`** is compared as a literal ETag instead of meaning "only if no file
-  exists" (RFC 9110). `If-Match` on this endpoint can never succeed, as a file-less element has no obtainable file
-  ETag. Either document this or implement `*`.
-- **Chunk size checks in `PatchUploadController`** run after the chunk has been uploaded to S3. The rejected chunk is
-  removed together with the upload, but checking `Content-Length` before the upload would avoid the S3 round trip.
-- **`PartialUploadRequest::getContentType()`** is parsed but never checked. Validate `application/partial-upload` as
-  required by the resumable upload draft, or remove it.
-- **`HasFilePropertyElementFragmentizeEventListener`** might be redundant, as the generic fragmentize listener
-  already writes booleans to Neo4j. It additionally writes `hasFile` to MongoDB.
 
 ## Missing tests
 
@@ -47,8 +35,8 @@ High value:
 
 Medium:
 
-- File ETags: `GET /<uuid>/file` with `If-None-Match` → `304`, `PUT`/`DELETE /<uuid>/file` with a stale `If-Match`
-  → `412`, for nodes and relations.
+- File ETags: `GET /<uuid>/file` with a concrete `If-None-Match` → `304`, `PUT`/`DELETE /<uuid>/file` with a stale
+  `If-Match` → `412`, for nodes and relations (only the `*` variants and `POST` are covered).
 - `PATCH /upload/<uuid>`: `410` for an expired upload, `409` when the data exceeds `Upload-Length`, `409` when the
   stored hash state can not be restored.
 - Unit tests for `MongoDBNormalizedValueToRawValueEventListener` (BSONDocument fix) and for the Neo4j `true`
@@ -66,7 +54,9 @@ Low:
 - Relation setup is written by hand in several tests (e.g. `FileDigestOnRelationTest`,
   `FileTopLevelPropertyOnRelationTest`, `GetFileRangeOnRelationTest`), instead of using
   `BaseRequestTestCase::createEphemeralRelation()`.
-- `BotanicalFileTest` permanently modifies reference dataset elements, so reruns need a dataset reload.
+- `BotanicalFileTest` and many other tests permanently modify or delete reference dataset elements, so every run
+  needs a fresh dataset (`bin/test-feature-prepare`); a rerun without reload fails with dozens of ETag and security
+  tests.
 - 12 tests in `Security/Scenario02BasicPositiveTests/_02_01_ImmediateNodeOwnershipTest.php` are skipped (already on
   `main`). They cover owner access to the file and WebDAV endpoints and need to be rewritten.
 - The command example tests still fetch reference dataset 0.0.19 (`BackupFetchTest`).
@@ -83,3 +73,8 @@ Low:
   endpoints have.
 - `backup:load` verifies file hashes, skips unusable files with a warning, and supports `--skip-verify`.
 - `405 Method Not Allowed` is now returned for existing routes called with an unsupported method (was `500`).
+- ETags: `If-None-Match: *` and `If-Match: *` are supported on all ETag endpoints. An element without file has no file
+  ETag, so `If-Match` on its file endpoints answers `412`. Without the required access (`READ` for `GET`, `UPDATE` for
+  the file endpoints and `PATCH`/`PUT`, `DELETE` for `DELETE /<uuid>`) conditional requests answer `404`, exactly like
+  the endpoint itself.
+- `DELETE /<uuid>/file` answers `404` for an element without file, and `hasFile` decides whether an element has one.

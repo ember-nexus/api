@@ -28,6 +28,14 @@ class ElementService
         return $elementId;
     }
 
+    /**
+     * Uses the 'hasFile' flag, which is managed by the file endpoints and always kept in sync with the file.
+     */
+    public function hasFile(NodeElementInterface|RelationElementInterface $element): bool
+    {
+        return $element->hasProperty('hasFile') && true === $element->getProperty('hasFile');
+    }
+
     public function getFileName(NodeElementInterface|RelationElementInterface $element): string
     {
         $base = $this->getFileNameBase($element);

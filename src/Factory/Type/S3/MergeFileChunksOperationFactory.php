@@ -40,7 +40,7 @@ class MergeFileChunksOperationFactory
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
         $previousStorageKey = null;
-        if ($element->hasProperty('file')) {
+        if ($this->elementService->hasFile($element)) {
             $previousExtension = $this->elementService->getFileNameExtension($element);
             $previousStorageKey = $this->fileService->getStorageBucketKey($upload->getUploadTarget(), $previousExtension);
         }

@@ -365,6 +365,10 @@ class EtagCalculatorService
         );
 
         $element = $this->elementManager->getElementOrFail($elementId);
+        if (!$element->hasProperty('hasFile') || true !== $element->getProperty('hasFile')) {
+            // an element without file has no file representation, so conditional requests on it are not evaluated
+            return null;
+        }
         $rawFileProperties = $element->hasProperty('file') ? $element->getProperty('file') : null;
         $fileEtag = $this->extractPreferredHashFromFileProperties($rawFileProperties);
 

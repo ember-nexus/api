@@ -227,4 +227,94 @@ class IfMatchControllerEventListenerTest extends TestCase
 
         $eventListener->onKernelController($event);
     }
+
+    public function testWildcardIfMatchPassesWithCurrentEtag(): void
+    {
+        $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
+        fn () => true;
+
+        $request = new Request();
+        $request->headers->set('If-Match', '*');
+
+        $event = new ControllerEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $closure,
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $etagService = $this->prophesize(EtagService::class);
+        $etagService->getCurrentRequestEtag()->shouldBeCalledOnce()->willReturn(new Etag('someEtag'));
+
+        $client412PreconditionFailedExceptionFactory = $this->prophesize(Client412PreconditionFailedExceptionFactory::class);
+        $client412PreconditionFailedExceptionFactory->createFromTemplate()->shouldNotBeCalled();
+
+        $eventListener = new IfMatchControllerEventListener(
+            $etagService->reveal(),
+            $client412PreconditionFailedExceptionFactory->reveal()
+        );
+        $eventListener->onKernelController($event);
+
+        $this->assertSame($closure, $event->getController());
+    }
+
+    public function testIfMatchWithoutCurrentFileEtagReturns412(): void
+    {
+        $closure = #[EndpointSupportsEtag(EtagType::FILE)]
+        fn () => true;
+
+        $request = new Request();
+        $request->headers->set('If-Match', '*');
+
+        $event = new ControllerEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $closure,
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $etagService = $this->prophesize(EtagService::class);
+        $etagService->getCurrentRequestEtag()->shouldBeCalledOnce()->willReturn(null);
+
+        $client412PreconditionFailedExceptionFactory = $this->prophesize(Client412PreconditionFailedExceptionFactory::class);
+        $client412PreconditionFailedExceptionFactory->createFromTemplate()->willReturn(new Client412PreconditionFailedException('title'));
+
+        $eventListener = new IfMatchControllerEventListener(
+            $etagService->reveal(),
+            $client412PreconditionFailedExceptionFactory->reveal()
+        );
+
+        $this->expectException(Client412PreconditionFailedException::class);
+        $eventListener->onKernelController($event);
+    }
+
+    public function testIfMatchWithoutCurrentNonFileEtagIsIgnored(): void
+    {
+        $closure = #[EndpointSupportsEtag(EtagType::CHILDREN_COLLECTION)]
+        fn () => true;
+
+        $request = new Request();
+        $request->headers->set('If-Match', '"someEtag"');
+
+        $event = new ControllerEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $closure,
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $etagService = $this->prophesize(EtagService::class);
+        $etagService->getCurrentRequestEtag()->shouldBeCalledOnce()->willReturn(null);
+
+        $client412PreconditionFailedExceptionFactory = $this->prophesize(Client412PreconditionFailedExceptionFactory::class);
+        $client412PreconditionFailedExceptionFactory->createFromTemplate()->shouldNotBeCalled();
+
+        $eventListener = new IfMatchControllerEventListener(
+            $etagService->reveal(),
+            $client412PreconditionFailedExceptionFactory->reveal()
+        );
+        $eventListener->onKernelController($event);
+
+        $this->assertSame($closure, $event->getController());
+    }
 }

@@ -62,8 +62,10 @@ class UploadFileOperationFactoryTest extends TestCase
         $resumableUploadRequest->getContentLength()->shouldBeCalledOnce()->willReturn(12);
 
         $element = $this->prophesize(NodeElementInterface::class);
-        $element->hasProperty(Argument::is('file'))->shouldBeCalledOnce()->willReturn(false);
         $element = $element->reveal();
+
+        $elementService = $this->prophesize(ElementService::class);
+        $elementService->hasFile(Argument::any())->shouldBeCalledOnce()->willReturn(false);
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::is($elementId))->shouldBeCalledOnce()->willReturn($element);
@@ -80,6 +82,7 @@ class UploadFileOperationFactoryTest extends TestCase
         $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
 
         $uploadFileOperationFactory = $this->buildUploadFileOperationFactory(
+            elementService: $elementService->reveal(),
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementManager: $elementManager->reveal(),
             fileService: $fileService->reveal(),
@@ -111,7 +114,6 @@ class UploadFileOperationFactoryTest extends TestCase
         $resumableUploadRequest->getContentLength()->shouldBeCalledOnce()->willReturn(12);
 
         $element = $this->prophesize(NodeElementInterface::class);
-        $element->hasProperty(Argument::is('file'))->shouldBeCalledOnce()->willReturn(true);
         $element = $element->reveal();
 
         $elementManager = $this->prophesize(ElementManager::class);
@@ -130,6 +132,7 @@ class UploadFileOperationFactoryTest extends TestCase
         $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
 
         $elementService = $this->prophesize(ElementService::class);
+        $elementService->hasFile(Argument::any())->shouldBeCalledOnce()->willReturn(true);
         $elementService->getFileNameExtension(Argument::is($element))->shouldBeCalledOnce()->willReturn('prev');
 
         $uploadFileOperationFactory = $this->buildUploadFileOperationFactory(

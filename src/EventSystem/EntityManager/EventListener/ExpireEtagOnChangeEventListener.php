@@ -62,6 +62,8 @@ class ExpireEtagOnChangeEventListener
          * @var RedisKey[] $redisEtagKeysToExpire
          */
         $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagElementRedisKey($elementId);
+        // the file ETag depends on the element's name, its file property and its ETag
+        $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagFileRedisKey($elementId);
 
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (node {id: \$elementId})\n".

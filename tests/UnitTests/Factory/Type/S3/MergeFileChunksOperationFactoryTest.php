@@ -56,8 +56,10 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
 
         $element = $this->prophesize(NodeElementInterface::class);
-        $element->hasProperty(Argument::is('file'))->shouldBeCalledOnce()->willReturn(false);
         $element = $element->reveal();
+
+        $elementService = $this->prophesize(ElementService::class);
+        $elementService->hasFile(Argument::any())->shouldBeCalledOnce()->willReturn(false);
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
@@ -73,6 +75,7 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('target-key.ext');
 
         $mergeFileChunksOperationFactory = $this->buildMergeFileChunksOperationFactory(
+            elementService: $elementService->reveal(),
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementManager: $elementManager->reveal(),
             fileService: $fileService->reveal()
@@ -101,7 +104,6 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
 
         $element = $this->prophesize(NodeElementInterface::class);
-        $element->hasProperty(Argument::is('file'))->shouldBeCalledOnce()->willReturn(true);
         $element = $element->reveal();
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
@@ -118,6 +120,7 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('prev'))->shouldBeCalledOnce()->willReturn('target-key.prev');
 
         $elementService = $this->prophesize(ElementService::class);
+        $elementService->hasFile(Argument::any())->shouldBeCalledOnce()->willReturn(true);
         $elementService->getFileNameExtension(Argument::is($element))->shouldBeCalledOnce()->willReturn('prev');
 
         $mergeFileChunksOperationFactory = $this->buildMergeFileChunksOperationFactory(

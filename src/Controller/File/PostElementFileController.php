@@ -11,6 +11,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\ElementService;
 use App\Service\UploadCreationService;
 use App\Type\AccessType;
 use App\Type\EtagType;
@@ -30,6 +31,7 @@ class PostElementFileController extends AbstractController
         private AccessChecker $accessChecker,
         private UploadCreationService $uploadCreationService,
         private ElementManager $elementManager,
+        private ElementService $elementService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
     ) {
@@ -54,8 +56,7 @@ class PostElementFileController extends AbstractController
         }
 
         $element = $this->elementManager->getElementOrFail($elementId);
-        $properties = $element->getProperties();
-        if (array_key_exists('file', $properties)) {
+        if ($this->elementService->hasFile($element)) {
             throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Element with id '%s' already has an associated file; can not create new file. Delete existing file first or replace it with PUT.", $element->getId()?->toString() ?? 'missing element id'));
         }
 

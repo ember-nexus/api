@@ -12,6 +12,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\ElementService;
 use App\Service\S3Service;
 use App\Type\AccessType;
 use App\Type\EtagType;
@@ -32,6 +33,7 @@ class DeleteElementFileController extends AbstractController
         private AccessChecker $accessChecker,
         private S3Service $s3Service,
         private ElementManager $elementManager,
+        private ElementService $elementService,
         private EventDispatcherInterface $eventDispatcher,
         private FileOperationFactory $fileOperationFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
@@ -57,6 +59,10 @@ class DeleteElementFileController extends AbstractController
         }
 
         $element = $this->elementManager->getElementOrFail($elementId);
+        if (!$this->elementService->hasFile($element)) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
         $deleteFileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
         $this->s3Service->deleteFile($deleteFileOperation);
 
