@@ -3,6 +3,13 @@ services:
   api:
     container_name: api
     image: api:dev-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
     expose:
       - "80"
     volumes:

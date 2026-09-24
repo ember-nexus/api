@@ -3,6 +3,13 @@ services:
   api-dev:
     container_name: api-dev
     image: api:dev-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
     expose:
       - "80"
     volumes:
@@ -12,6 +19,13 @@ services:
   api:
     container_name: api
     image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
     expose:
       - "80"
     volumes:
