@@ -12,17 +12,13 @@ not permanent documentation: delete entries once they are done or moved into Git
   - `System/GetGraphStructureTest` misses the `RELATED` relation type added in reference dataset 0.0.32.
 
   As `docs/` is replaced in the next branch, either regenerate these snapshots or temporarily allow the job to fail.
-- **Verify CI on GitHub.** Everything passes locally (unit, feature, command example tests, phpstan, psalm, cs). The
-  `YML lint` job most likely failed on the missing newline at the end of `taskfile.yml`, which is fixed, but yamllint
-  itself was not run locally, so other findings are possible. The controller example job is expected to fail, see
-  above; nothing else has been run on GitHub yet.
+  (`GetWellKnownSecurityTxtTest` fails only locally, because of the local `volumes/well-known-security.txt`.)
+- **Verify CI on GitHub after pushing.** The feature jobs failed because `quay.io/minio/*` images were removed
+  upstream; `tools/docker-compose.yml` and `tests/FeatureTests/docker-compose-neo4j-*.yml` now use the pinned
+  `pgsty/minio` and `pgsty/mc` images (verified locally with the init script, not yet on GitHub). The feature jobs and
+  everything behind them have not run on GitHub yet.
   `test-feature` and the two jobs below it no longer wait for `test-mutant` in `ci-test.yml`, which still exists.
 - **Rewrite `CHANGELOG.md`** for the branch.
-
-## Missing tests
-
-- `tests/ExampleGenerationCommand/Backup/BackupFilesTest.php` (create -> drop -> load round trip with files, hash
-  mismatch skipped and `--skip-verify`) was written but never run; run `composer test:example-generation-command`.
 
 ## Test hygiene
 
@@ -34,12 +30,10 @@ not permanent documentation: delete entries once they are done or moved into Git
 - `BotanicalFileTest` and many other tests permanently modify or delete reference dataset elements, so every run
   needs a fresh dataset (`bin/test-feature-prepare`); a rerun without reload fails with dozens of ETag and security
   tests.
-- 12 tests in `Security/Scenario02BasicPositiveTests/_02_01_ImmediateNodeOwnershipTest.php` are skipped (already on
-  `main`). They cover owner access to the file and WebDAV endpoints and need to be rewritten.
-- The command example tests still fetch reference dataset 0.0.19 (`BackupFetchTest`).
 
 ## Follow-up issues
 
+- **Replace MinIO** as S3 server (upstream stopped publishing images); `pgsty/minio` is only a stopgap.
 - **`cron:update-ownership` is an empty stub** (see #438), and nothing in this repository consumes the
   `ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE` RabbitMQ queue.
 

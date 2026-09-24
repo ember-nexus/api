@@ -96,9 +96,16 @@ class GetChildrenTest extends BaseRequestTestCase
         );
     }
 
+    public function testGetChildrenFailure404WithIfMatch(): void
+    {
+        // without access to the element (here: it does not exist), conditional requests answer 404 instead of 412
+        $response = $this->runGetRequest(sprintf('/%s/children', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
+        $this->assertIsProblemResponse($response, 404);
+    }
+
     public function testGetChildrenFailure412(): void
     {
-        $response = $this->runGetRequest(sprintf('/%s/children', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
+        $response = $this->runGetRequest(sprintf('/%s/children', self::PARENT_UUID), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
         $this->assertIsProblemResponse($response, 412);
         $documentationHeadersPath = 'docs/api-endpoints/element/get-children/412-response-header.txt';
         $documentationBodyPath = 'docs/api-endpoints/element/get-children/412-response-body.json';

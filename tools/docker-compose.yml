@@ -88,7 +88,7 @@ services:
 
   minio:
     container_name: minio
-    image: quay.io/minio/minio:latest
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -100,7 +100,7 @@ services:
     command: server /data --console-address ":9001"
 
   minio-init:
-    image: quay.io/minio/mc:latest
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
     depends_on:
       - minio
     entrypoint: >
