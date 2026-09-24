@@ -3,3 +3,5 @@ ember_nexus:
     enabled: false
   instanceConfiguration:
     enabled: false
+  file:
+    maxFileSizeInBytes: 1024

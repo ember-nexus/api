@@ -21,31 +21,8 @@ not permanent documentation: delete entries once they are done or moved into Git
 
 ## Missing tests
 
-High value:
-
-- `backup:load`: a file whose content does not match `file.hash.sha256` is skipped, an element without `file.hash`
-  is skipped, `--skip-verify` loads it anyway, an oversized file is skipped, and one failing file does not abort the
-  restore.
-- `backup:create` including files, ideally as a create → drop → load round trip.
-- Unit tests for `PropertyParseService` (many `400` branches) and `UploadCreationService` (unsupported or mismatching
-  digest, size limits on `Upload-Length` and direct uploads, chunk size limits on upload creation).
-- Feature tests for `file.maxFileSizeInBytes`, e.g. in `ExampleGenerationControllerWithDifferentConfiguration` with a
-  small limit: `POST`/`PUT /<uuid>/file`, an oversized `Upload-Length`, and a `PATCH` crossing the limit.
-- Creating elements of the reserved types `User`, `Token` and `Upload` via `POST /` and `POST /<uuid>` answers `400`.
-
-Medium:
-
-- File ETags: `GET /<uuid>/file` with a concrete `If-None-Match` → `304`, `PUT`/`DELETE /<uuid>/file` with a stale
-  `If-Match` → `412`, for nodes and relations (only the `*` variants and `POST` are covered).
-- `PATCH /upload/<uuid>`: `410` for an expired upload, `409` when the data exceeds `Upload-Length`, `409` when the
-  stored hash state can not be restored.
-- Unit tests for `MongoDBNormalizedValueToRawValueEventListener` (BSONDocument fix) and for the Neo4j `true`
-  placeholder of non-scalar properties in the generic (de)fragmentize listeners.
-
-Low:
-
-- Redis-before-live priority of the ETag listeners, `ElementService`, `S3ClientFactory`, `ContentDispositionWrapper`.
-- Write access control tests for files and uploads on relations; only read access is tested on relations.
+- `tests/ExampleGenerationCommand/Backup/BackupFilesTest.php` (create -> drop -> load round trip with files, hash
+  mismatch skipped and `--skip-verify`) was written but never run; run `composer test:example-generation-command`.
 
 ## Test hygiene
 
