@@ -6,7 +6,7 @@ on:
 jobs:
 
   yml-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'YML lint'
     timeout-minutes: 3
     steps:
@@ -15,7 +15,7 @@ jobs:
       - run: docker run --rm -t -v $(pwd):/data cytopia/yamllint --config-file=tests/.yamllint .
 
   markdown-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'Markdown lint'
     timeout-minutes: 3
     steps:
@@ -78,7 +78,7 @@ jobs:
           retention-days: 7
 
   cs-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'CS Lint'
     timeout-minutes: 5
     needs:
@@ -96,7 +96,7 @@ jobs:
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && PHP_CS_FIXER_IGNORE_ENV=1 composer cs:list"
 
   psalm:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'Psalm'
     timeout-minutes: 5
     needs:
@@ -114,7 +114,7 @@ jobs:
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer psalm"
 
   phpstan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'Phpstan'
     timeout-minutes: 5
     needs:
@@ -132,7 +132,7 @@ jobs:
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer phpstan"
 
   test-unit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'Unit Test'
     timeout-minutes: 5
     needs:
@@ -150,7 +150,7 @@ jobs:
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
   test-mutant:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'Mutant Test'
     timeout-minutes: 5
     needs:
@@ -171,7 +171,7 @@ jobs:
   # phpmd is temporarily deactivated: it was removed from the dev dependencies, as its last release is too old for
   # the current dependencies. Reactivate once a new phpmd release is available.
 #  test-mess-detector:
-#    runs-on: ubuntu-latest
+#    runs-on: ubuntu-26.04
 #    name: 'Mess Detector'
 #    timeout-minutes: 5
 #    needs:
@@ -190,7 +190,7 @@ jobs:
 #          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
   test-feature:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'Feature Test'
     timeout-minutes: 15
     needs:
@@ -238,7 +238,7 @@ jobs:
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature && composer test:feature:deprecated"
 
   test-example-generation-controller:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'Controller Example Generation Test'
     timeout-minutes: 15
     needs:
@@ -281,7 +281,7 @@ jobs:
 
 
   test-example-generation-command:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: 'Command Example Generation Test'
     timeout-minutes: 15
     needs:
