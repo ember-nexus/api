@@ -101,6 +101,7 @@ COPY public /var/www/html/public
 COPY src /var/www/html/src
 COPY lib/EmberNexusBundle /var/www/html/lib/EmberNexusBundle
 COPY docker/.env.docker /var/www/html/.env
+COPY ./docker/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 COPY composer.json /var/www/html/composer.json
 COPY composer.lock /var/www/html/composer.lock
 COPY LICENSE /var/www/html/LICENSE

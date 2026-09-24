@@ -9,6 +9,7 @@ use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\UploadService;
 use App\Type\AccessType;
@@ -26,6 +27,7 @@ class DeleteElementController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private UploadService $uploadService,
+        private ElementFileDeletionService $elementFileDeletionService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -49,6 +51,7 @@ class DeleteElementController extends AbstractController
         }
 
         $element = $this->elementManager->getElementOrFail($elementId);
+        $fileOperations = $this->elementFileDeletionService->getFileOperationsForDeletionOfElement($element);
 
         // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
         $this->uploadService->deleteUploadsTargeting($elementId);
@@ -56,6 +59,8 @@ class DeleteElementController extends AbstractController
 
         $this->elementManager->delete($element);
         $this->elementManager->flush();
+
+        $this->elementFileDeletionService->deleteFiles($fileOperations);
 
         return new NoContentResponse();
     }

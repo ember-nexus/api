@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\FeatureTests;
 
+use App\Factory\S3ClientFactory;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -439,6 +440,33 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relationId), $token));
         $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relation['start']), $token));
         $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relation['end']), $token));
+    }
+
+    /**
+     * Checks the default storage bucket directly, as the file of an element which no longer exists can not be
+     * requested through the API.
+     */
+    public function assertFileExistsInStorage(string $elementId): void
+    {
+        $this->assertTrue($this->isFileInStorage($elementId), sprintf('Expected file of element %s to exist in storage bucket.', $elementId));
+    }
+
+    public function assertFileDoesNotExistInStorage(string $elementId): void
+    {
+        $this->assertFalse($this->isFileInStorage($elementId), sprintf('Expected file of element %s to be removed from storage bucket.', $elementId));
+    }
+
+    private function isFileInStorage(string $elementId): bool
+    {
+        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        // the object key ends with the element id, see FileService::getStorageBucketKey()
+        foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
+            if (str_contains((string) $object->getKey(), $elementId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function generateDeterministicFile(int $seed, int $targetSize, string $outputPath): void

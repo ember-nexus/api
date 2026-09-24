@@ -65,6 +65,8 @@ class FileRemovedWhenRelationRemovedTest extends BaseRequestTestCase
         $getFileResponse1 = $this->runGetRequest(sprintf('/%s/file', $relationId), self::TOKEN);
         $this->assertIsBinaryStreamResponse($getFileResponse1, 'image/jpeg');
 
+        $this->assertFileExistsInStorage($relationId);
+
         $deleteRelationResponse = $this->runDeleteRequest(sprintf('/%s', $relationId), self::TOKEN);
         $this->assertIsDeletedResponse($deleteRelationResponse);
 
@@ -73,5 +75,7 @@ class FileRemovedWhenRelationRemovedTest extends BaseRequestTestCase
 
         $getFileResponse2 = $this->runGetRequest(sprintf('/%s/file', $relationId), self::TOKEN);
         $this->assertIsProblemResponse($getFileResponse2, 404);
+
+        $this->assertFileDoesNotExistInStorage($relationId);
     }
 }
