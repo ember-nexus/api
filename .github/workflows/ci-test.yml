@@ -236,6 +236,26 @@ jobs:
       - name: Feature Test
         run: |
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature && composer test:feature:deprecated"
+      - name: Collect docker logs
+        if: always()
+        run: |
+          mkdir -p docker-logs
+          COMPOSE="docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml"
+          $COMPOSE ps -a > docker-logs/_ps.txt 2>&1 || true
+          for svc in $($COMPOSE config --services); do
+            $COMPOSE logs --no-color --timestamps "$svc" > "docker-logs/$svc.log" 2>&1 || true
+          done
+          # only name / exit code / OOM flag / error - never dump full inspect output (contains container env)
+          docker inspect $(docker ps -aq) --format '{{.Name}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} {{.State.Error}}' > docker-logs/_state.txt 2>&1 || true
+          uname -a > docker-logs/_host.txt
+      - name: Upload docker logs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: docker-logs-feature-${{ matrix.dockerCompose }}
+          path: docker-logs/
+          if-no-files-found: ignore
+          retention-days: 7
 
   test-example-generation-controller:
     runs-on: ubuntu-26.04
@@ -278,6 +298,26 @@ jobs:
       - name: Controller Example Generation Test
         run: |
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api\" && echo \$API_DOMAIN && composer test:example-generation-controller && composer test:example-generation-controller:with-different-configuration && composer test:example-generation-controller:deprecated"
+      - name: Collect docker logs
+        if: always()
+        run: |
+          mkdir -p docker-logs
+          COMPOSE="docker compose -f ./tests/ExampleGenerationController/docker-compose.yml"
+          $COMPOSE ps -a > docker-logs/_ps.txt 2>&1 || true
+          for svc in $($COMPOSE config --services); do
+            $COMPOSE logs --no-color --timestamps "$svc" > "docker-logs/$svc.log" 2>&1 || true
+          done
+          # only name / exit code / OOM flag / error - never dump full inspect output (contains container env)
+          docker inspect $(docker ps -aq) --format '{{.Name}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} {{.State.Error}}' > docker-logs/_state.txt 2>&1 || true
+          uname -a > docker-logs/_host.txt
+      - name: Upload docker logs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: docker-logs-example-generation-controller
+          path: docker-logs/
+          if-no-files-found: ignore
+          retention-days: 7
 
 
   test-example-generation-command:
@@ -316,3 +356,23 @@ jobs:
       - name: Command Example Generation Test
         run: |
           docker exec --user "$(id -u):$(id -g)" api bash -c "BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"
+      - name: Collect docker logs
+        if: always()
+        run: |
+          mkdir -p docker-logs
+          COMPOSE="docker compose -f ./tests/ExampleGenerationCommand/docker-compose.yml"
+          $COMPOSE ps -a > docker-logs/_ps.txt 2>&1 || true
+          for svc in $($COMPOSE config --services); do
+            $COMPOSE logs --no-color --timestamps "$svc" > "docker-logs/$svc.log" 2>&1 || true
+          done
+          # only name / exit code / OOM flag / error - never dump full inspect output (contains container env)
+          docker inspect $(docker ps -aq) --format '{{.Name}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} {{.State.Error}}' > docker-logs/_state.txt 2>&1 || true
+          uname -a > docker-logs/_host.txt
+      - name: Upload docker logs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: docker-logs-example-generation-command
+          path: docker-logs/
+          if-no-files-found: ignore
+          retention-days: 7
