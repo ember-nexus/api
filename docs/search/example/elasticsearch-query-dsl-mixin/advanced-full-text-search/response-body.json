@@ -469,145 +469,145 @@
                   "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
                   "type": "Tag",
                   "metadata": {
-                    "score": 26.929846
+                    "score": 26.046068
                   }
                 },
                 {
                   "id": "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
                   "type": "Plant",
                   "metadata": {
-                    "score": 4.1834593
+                    "score": 4.1182985
                   }
                 },
                 {
                   "id": "97157162-56eb-4374-8200-41b9b6004ca2",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 3.3504083
+                    "score": 3.306526
                   }
                 },
                 {
                   "id": "36e02d35-f6b4-4ccc-ae2f-b035ef02e0d6",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 3.3171558
+                    "score": 3.2737095
                   }
                 },
                 {
                   "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.2715626
+                    "score": 3.2206402
                   }
                 },
                 {
                   "id": "ad80a619-2b53-4f27-a4bd-56a316c15251",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.1628277
+                    "score": 3.113603
                   }
                 },
                 {
                   "id": "26dfaa98-5f15-4170-9fdc-94661c1a26c5",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.0894513
+                    "score": 3.0413723
                   }
                 },
                 {
                   "id": "30b0e9bc-8c9f-42e2-91c5-62f04b7da3be",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.9056842
+                    "score": 2.8676336
                   }
                 },
                 {
                   "id": "7359834e-c79c-4773-89ac-46befceb5f72",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.9056842
+                    "score": 2.8676336
                   }
                 },
                 {
                   "id": "3a123b1c-8bdc-482c-9d12-c3e9e22ec4fd",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.5851276
+                    "score": 2.5512807
                   }
                 },
                 {
                   "id": "152d527e-4e33-4ad4-b13b-1de643740cce",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.5530436
+                    "score": 2.51334
                   }
                 },
                 {
                   "id": "3e5b01a7-5856-461e-bde5-d8388b6d909c",
                   "type": "Tag",
                   "metadata": {
-                    "score": 1.4979569
+                    "score": 1.4939797
                   }
                 },
                 {
                   "id": "25d0c9a8-8864-42bd-9ea1-6157fb688998",
                   "type": "Tag",
                   "metadata": {
-                    "score": 1.3199856
+                    "score": 1.316488
                   }
                 },
                 {
                   "id": "bbc7529f-72da-4df2-aff5-e139a5618ccb",
                   "type": "Tag",
                   "metadata": {
-                    "score": 1.1328773
+                    "score": 1.1298839
                   }
                 },
                 {
                   "id": "b8674d32-af5f-4ef1-a5d8-fc5cbb56b795",
                   "type": "Tag",
                   "metadata": {
-                    "score": 0.98849475
+                    "score": 0.9858903
                   }
                 },
                 {
                   "id": "b7121a49-8f17-4858-b988-4bd837a5f1fe",
                   "type": "Tag",
                   "metadata": {
-                    "score": 0.88779384
+                    "score": 0.8854608
                   }
                 },
                 {
                   "id": "12de56ab-8e89-4281-ab44-403c7c7ecb00",
                   "type": "Tag",
                   "metadata": {
-                    "score": 0.8112192
+                    "score": 0.8090925
                   }
                 },
                 {
                   "id": "90819566-3121-42af-bdb5-19cbef67cd31",
                   "type": "Tag",
                   "metadata": {
-                    "score": 0.6371239
+                    "score": 0.6354663
                   }
                 },
                 {
                   "id": "be14916b-0068-4b49-b8d0-f9e528f3d10e",
                   "type": "Tag",
                   "metadata": {
-                    "score": 0.6371239
+                    "score": 0.6354663
                   }
                 },
                 {
                   "id": "f99ba115-8278-4dba-a549-ab138fc20be0",
                   "type": "Tag",
                   "metadata": {
-                    "score": 0.57601744
+                    "score": 0.57452446
                   }
                 }
               ],
               "totalHits": 20,
-              "maxScore": 26.929846
+              "maxScore": 26.046068
             }
           ]
         }

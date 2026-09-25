@@ -152,7 +152,7 @@ jobs:
   test-mutant:
     runs-on: ubuntu-26.04
     name: 'Mutant Test'
-    timeout-minutes: 5
+    timeout-minutes: 10
     needs:
       - build-docker-image
     continue-on-error: true

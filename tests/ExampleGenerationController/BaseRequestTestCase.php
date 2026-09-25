@@ -14,9 +14,33 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
     private const array IGNORED_HEADERS = ['Date', 'Etag', 'Location', 'Expires'];
 
     /**
+     * @var string[] ELASTICSEARCH_SCORE_KEYS
+     */
+    private const array ELASTICSEARCH_SCORE_KEYS = ['score', 'maxScore'];
+
+    /**
      * @var string[] REMOVED_HEADERS
      */
     private const array REMOVED_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link'];
+
+    /**
+     * If the environment variable FIX_CONTROLLER_OUTPUT is set, differing documentation files are updated
+     * automatically instead of failing the test.
+     */
+    private function isFixControllerOutputEnabled(): bool
+    {
+        return array_key_exists('FIX_CONTROLLER_OUTPUT', $_ENV);
+    }
+
+    private function fixDocumentationFile(string $pathToProjectRoot, string $pathToDocumentationFile, string $content): void
+    {
+        echo sprintf(
+            "\nAutomatically updated file %s.\n",
+            $pathToDocumentationFile
+        );
+        \Safe\file_put_contents($pathToProjectRoot.$pathToDocumentationFile, $content);
+        $this->assertTrue(true);
+    }
 
     public function getHeadersFromRequest(ResponseInterface $response): string
     {
@@ -66,8 +90,14 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
     {
         $headers = $this->getHeadersFromRequest($response);
         $documentationHeaders = file_get_contents($pathToProjectRoot.$pathToDocumentationFile);
+        $areHeadersIdentical = $this->checkHeadersAreIdentical($documentationHeaders, $headers);
+        if (!$areHeadersIdentical && $this->isFixControllerOutputEnabled()) {
+            $this->fixDocumentationFile($pathToProjectRoot, $pathToDocumentationFile, $headers);
+
+            return;
+        }
         $this->assertTrue(
-            $this->checkHeadersAreIdentical($documentationHeaders, $headers),
+            $areHeadersIdentical,
             sprintf(
                 "Content of file %s should be as following:\n\n%s\n",
                 $pathToDocumentationFile,
@@ -109,8 +139,14 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
             $filteredDocumentationBody[] = $line;
         }
 
+        $isBodyIdentical = $filteredDocumentationBody === $filteredBody;
+        if (!$isBodyIdentical && $this->isFixControllerOutputEnabled()) {
+            $this->fixDocumentationFile($pathToProjectRoot, $pathToDocumentationFile, $body);
+
+            return;
+        }
         $this->assertTrue(
-            $filteredDocumentationBody === $filteredBody,
+            $isBodyIdentical,
             sprintf(
                 "Content of file %s should be as following:\n\n%s\n",
                 $pathToDocumentationFile,
@@ -139,6 +175,80 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         return implode('-', $parts);
     }
 
+    /**
+     * Updates the documentation of a search result. If the documented result differs from the response (ignoring
+     * volatile values), the whole file is replaced. Otherwise, only the Elasticsearch scores are updated in place, so
+     * that unrelated values like timestamps are not changed.
+     */
+    private function fixSearchResultDocumentation(
+        string $pathToProjectRoot,
+        string $pathToDocumentationFile,
+        array $rawResponseData,
+        string $prettyPrintedRawResponse,
+        bool $isIdenticalIgnoringScores,
+    ): void {
+        if (!$isIdenticalIgnoringScores) {
+            $this->fixDocumentationFile($pathToProjectRoot, $pathToDocumentationFile, $prettyPrintedRawResponse);
+
+            return;
+        }
+
+        $scores = $this->collectElasticsearchScores($rawResponseData['debug'] ?? []);
+        $documentation = file_get_contents($pathToProjectRoot.$pathToDocumentationFile);
+        $replacedScores = 0;
+        $updatedDocumentation = preg_replace_callback(
+            '/("(?:score|maxScore)": )(-?[0-9.eE+-]+)/',
+            function (array $matches) use ($scores, &$replacedScores): string {
+                return $matches[1].json_encode($scores[$replacedScores++] ?? null);
+            },
+            $documentation
+        );
+        if ($replacedScores !== count($scores)) {
+            $this->fixDocumentationFile($pathToProjectRoot, $pathToDocumentationFile, $prettyPrintedRawResponse);
+
+            return;
+        }
+        if ($updatedDocumentation !== $documentation) {
+            $this->fixDocumentationFile($pathToProjectRoot, $pathToDocumentationFile, $updatedDocumentation);
+
+            return;
+        }
+        $this->assertTrue(true);
+    }
+
+    /**
+     * @return array<int, float|int>
+     */
+    public function collectElasticsearchScores(array $data): array
+    {
+        $scores = [];
+        foreach ($data as $key => $value) {
+            if (in_array($key, self::ELASTICSEARCH_SCORE_KEYS, true)) {
+                $scores[] = $value;
+            } elseif (is_array($value)) {
+                array_push($scores, ...$this->collectElasticsearchScores($value));
+            }
+        }
+
+        return $scores;
+    }
+
+    /**
+     * Elasticsearch scores are not stable between runs (e.g. they depend on shard statistics), therefore they are
+     * removed before comparing responses.
+     */
+    public function removeElasticsearchScores(array &$data): void
+    {
+        foreach (self::ELASTICSEARCH_SCORE_KEYS as $scoreKey) {
+            unset($data[$scoreKey]);
+        }
+        foreach ($data as &$value) {
+            if (is_array($value)) {
+                $this->removeElasticsearchScores($value);
+            }
+        }
+    }
+
     public function assertSearchResultInDocumentationIsIdenticalToSearchResultFromRequest(
         string $pathToProjectRoot,
         string $pathToDocumentationFile,
@@ -155,6 +265,7 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
             unset($debug['start']);
             unset($debug['end']);
             unset($debug['duration']);
+            $this->removeElasticsearchScores($debug);
             foreach ($debug['input']['parameters']['stepResults'] as &$stepResult) {
                 if (array_key_exists('paths', $stepResult)) {
                     usort($stepResult['paths'], function ($a, $b) {
@@ -174,6 +285,7 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
             unset($debug['start']);
             unset($debug['end']);
             unset($debug['duration']);
+            $this->removeElasticsearchScores($debug);
             foreach ($debug['input']['parameters']['stepResults'] as &$stepResult) {
                 if (array_key_exists('paths', $stepResult)) {
                     usort($stepResult['paths'], function ($a, $b) {
@@ -188,6 +300,18 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
         );
         $prettyPrintedRawResponse = str_replace('    ', '  ', $prettyPrintedRawResponse);
+
+        if ($this->isFixControllerOutputEnabled()) {
+            $this->fixSearchResultDocumentation(
+                $pathToProjectRoot,
+                $pathToDocumentationFile,
+                $rawResponseData,
+                $prettyPrintedRawResponse,
+                $responseData == $documentationData
+            );
+
+            return;
+        }
 
         $this->assertEquals(
             $responseData,
