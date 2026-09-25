@@ -102,7 +102,7 @@
     ],
     "test:unit": "php vendor/bin/paratest -p 6 --configuration tests/phpunit.xml.dist",
     "test:unit:test": "php vendor/bin/paratest -p 6 --configuration tests/phpunit.xml.dist --group test",
-    "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/bin/paratest -p 6 --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude-group command --exclude-group deprecated && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group command",
+    "test:feature": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/bin/paratest -p 6 --no-progress --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --exclude-group command --exclude-group deprecated && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group command",
     "test:feature:deprecated": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group deprecated",
     "test:feature:test": "php bin/console cache:clear && ./bin/test-feature-prepare && php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group test",
     "test:feature:test-fast": "php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.feature.xml.dist ./tests/FeatureTests --group test",

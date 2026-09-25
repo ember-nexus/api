@@ -111,7 +111,7 @@ jobs:
       - name: Psalm
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer psalm"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer psalm -- --no-progress"
 
   phpstan:
     runs-on: ubuntu-26.04
@@ -129,7 +129,7 @@ jobs:
       - name: Phpstan
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer phpstan"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer phpstan -- --no-progress"
 
   test-unit:
     runs-on: ubuntu-26.04
@@ -147,7 +147,7 @@ jobs:
       - name: Unit Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit -- --no-progress"
 
   test-mutant:
     runs-on: ubuntu-26.04
@@ -166,7 +166,7 @@ jobs:
       - name: Mutant Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:mutant"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && ./bin/with-heartbeat composer test:mutant -- --no-progress"
 
   # phpmd is temporarily deactivated: it was removed from the dev dependencies, as its last release is too old for
   # the current dependencies. Reactivate once a new phpmd release is available.
@@ -235,7 +235,7 @@ jobs:
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "php bin/console healthcheck"
       - name: Feature Test
         run: |
-          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature && composer test:feature:deprecated"
+          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && ./bin/with-heartbeat composer test:feature && ./bin/with-heartbeat composer test:feature:deprecated"
       - name: Collect docker logs
         if: always()
         run: |
