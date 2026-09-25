@@ -922,68 +922,68 @@
                   "id": "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.430843
+                    "score": 3.4491417
                   }
                 },
                 {
                   "id": "eb5373ef-50ae-462f-a07a-5ccf767bff21",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.26207
+                    "score": 3.2790928
                   }
                 },
                 {
                   "id": "731fd394-6e0d-4a43-9693-4a7a7d97731e",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.2009716
+                    "score": 3.2175324
                   }
                 },
                 {
                   "id": "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.8752043
+                    "score": 2.8893025
                   }
                 },
                 {
                   "id": "3f6be764-d780-44d0-a12f-15326abe091d",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.8127518
+                    "score": 2.826378
                   }
                 },
                 {
                   "id": "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.6649837
+                    "score": 2.6774929
                   }
                 },
                 {
                   "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.5691357
+                    "score": 2.5809202
                   }
                 },
                 {
                   "id": "0f3aced5-8484-49d4-9579-e3ec5facde95",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.523493
+                    "score": 2.5349326
                   }
                 },
                 {
                   "id": "c05a9e25-11bc-48db-8fea-6d1b885119b0",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.3168554
+                    "score": 2.3267329
                   }
                 }
               ],
               "totalHits": 9,
-              "maxScore": 3.430843
+              "maxScore": 3.4491417
             }
           ]
         }

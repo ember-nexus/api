@@ -9,13 +9,22 @@ use PHPUnit\Framework\TestCase;
 
 abstract class BaseCommandTestCase extends TestCase
 {
+    /**
+     * Runs the command and returns its stdout. Stderr is captured as well: it contains e.g. progress bars, which would
+     * otherwise end up in the test log without any context. It is only shown if the command fails.
+     */
     public function runCommand(string $command): string
     {
         $output = [];
         $resultCode = 0;
-        \Safe\exec($command, $output, $resultCode);
-        if (0 !== $resultCode) {
-            throw new Exception(sprintf('Result code of command should be 0, got %d.', $resultCode));
+        $stderrFile = \Safe\tempnam(sys_get_temp_dir(), 'ember-nexus-stderr-');
+        try {
+            \Safe\exec(sprintf('( %s ) 2>%s', $command, escapeshellarg($stderrFile)), $output, $resultCode);
+            if (0 !== $resultCode) {
+                throw new Exception(sprintf("Result code of command should be 0, got %d.\nCommand: %s\nStderr: %s", $resultCode, $command, substr(\Safe\file_get_contents($stderrFile), -2000)));
+            }
+        } finally {
+            @unlink($stderrFile);
         }
 
         return implode("\n", $output);

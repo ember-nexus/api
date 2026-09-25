@@ -355,7 +355,7 @@ jobs:
           docker exec --user "$(id -u):$(id -g)" api bash -c "php bin/console healthcheck"
       - name: Command Example Generation Test
         run: |
-          docker exec --user "$(id -u):$(id -g)" api bash -c "BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"
+          docker exec --user "$(id -u):$(id -g)" api bash -c "BACKUP_FOLDER_CAN_BE_RESET=1 ./bin/with-heartbeat composer test:example-generation-command"
       - name: Collect docker logs
         if: always()
         run: |

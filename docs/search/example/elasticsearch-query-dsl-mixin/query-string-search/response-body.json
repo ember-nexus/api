@@ -288,75 +288,75 @@
                   "id": "36e02d35-f6b4-4ccc-ae2f-b035ef02e0d6",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 3.2737095
+                    "score": 3.3171558
                   }
                 },
                 {
                   "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.2206402
+                    "score": 3.2715626
                   }
                 },
                 {
                   "id": "ad80a619-2b53-4f27-a4bd-56a316c15251",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.113603
+                    "score": 3.1628277
                   }
                 },
                 {
                   "id": "26dfaa98-5f15-4170-9fdc-94661c1a26c5",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.0413723
+                    "score": 3.0894513
                   }
                 },
                 {
                   "id": "7359834e-c79c-4773-89ac-46befceb5f72",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.8676336
+                    "score": 2.9056842
                   }
                 },
                 {
                   "id": "3a123b1c-8bdc-482c-9d12-c3e9e22ec4fd",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.5512807
+                    "score": 2.5851276
                   }
                 },
                 {
                   "id": "152d527e-4e33-4ad4-b13b-1de643740cce",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.51334
+                    "score": 2.5530436
                   }
                 },
                 {
                   "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
                   "type": "Tag",
                   "metadata": {
-                    "score": 1.5360191
+                    "score": 1.5401099
                   }
                 },
                 {
                   "id": "3e5b01a7-5856-461e-bde5-d8388b6d909c",
                   "type": "Tag",
                   "metadata": {
-                    "score": 1.4939797
+                    "score": 1.4979569
                   }
                 },
                 {
                   "id": "b7121a49-8f17-4858-b988-4bd837a5f1fe",
                   "type": "Tag",
                   "metadata": {
-                    "score": 0.8854608
+                    "score": 0.88779384
                   }
                 }
               ],
               "totalHits": 10,
-              "maxScore": 3.2737095
+              "maxScore": 3.3171558
             }
           ]
         }
