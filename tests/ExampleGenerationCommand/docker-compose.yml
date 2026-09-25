@@ -33,6 +33,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongodb
       - MONGO_INITDB_ROOT_PASSWORD=password
+      - GLIBC_TUNABLES=glibc.pthread.rseq=1
 
   elasticsearch:
     container_name: elasticsearch

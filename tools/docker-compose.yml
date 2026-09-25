@@ -40,7 +40,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongodb
       - MONGO_INITDB_ROOT_PASSWORD=password
-      - GLIBC_TUNABLES="glibc.cpu.hwcaps=-SHSTK"  # see https://github.com/docker-library/mongo/discussions/748#discussioncomment-15927486
+      - GLIBC_TUNABLES=glibc.cpu.hwcaps=-SHSTK  # see https://github.com/docker-library/mongo/discussions/748#discussioncomment-15927486
 
   elasticsearch:
     container_name: elasticsearch
