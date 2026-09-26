@@ -10,7 +10,7 @@ use Symfony\Component\Dotenv\Dotenv;
 class BackupFetchTest extends BaseCommandTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
-    private const string FALLBACK_REFERENCE_DATASET_VERSION = '0.0.32';
+    private const string FALLBACK_REFERENCE_DATASET_VERSION = '0.0.33';
 
     public function testBackupFetchHelp(): void
     {

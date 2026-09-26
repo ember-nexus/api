@@ -19,10 +19,10 @@ phpmd reactivation, replacing MinIO, `cron:update-ownership` stub (#438). No ETa
   `config/packages/ember_nexus.yaml`, first request builds the cache) used by
   `composer test:example-generation-controller:with-different-configuration` via
   `API_DOMAIN=http://api-different-configuration`; `docker/.env.docker` now has the reference dataset's anonymous user.
-- **Examples were regenerated locally** (`FIX_CONTROLLER_OUTPUT=1`, dev stack: 133 files changed, mostly the per-endpoint
-  `Allow` header plus rewritten `Date`/`Etag` lines, new `If-Range` files). Do not commit the local
-  `get-well-known-security-txt/200-response-body.txt` change (the local mount differs from CI). CI must confirm them, and
-  the server tests (not run in this session) must confirm the `Allow`-free `docs/server` files / Caddy snippet.
+- **Local test state (2026-09-27, dataset 0.0.33):** unit, phpstan, psalm, feature (604 + 8 command), example controller
+  (130), example command (28) and server tests (4 scenarios) passed locally; command examples and three `docs/server`
+  headers were regenerated. Do not commit a local `get-well-known-security-txt/200-response-body.txt` change if the
+  example run rewrites it (the local mount differs from CI). CI must still confirm everything on the prod images.
 - **Rewrite `CHANGELOG.md`** for the branch, with upgrade notes: reserved types `User`/`Token`/`Upload` rejected on
   `POST`; queue `REBUILD_SEARCH_DOCUMENT` replaced by `ELASTICSEARCH_UPDATE_OWNERSHIP`; legacy `file`/`hasFile` user
   properties get stuck after upgrading from main; `DELETE /upload` is `404` after access revocation;
@@ -84,9 +84,6 @@ the gap); queue rename acceptable?; external consumers of the queue?
 - Observed once during the extension-less backup test: after `backup:create` + `backup:load` the reference token
   returned `401` because `Token.hash` was NULL in Neo4j. `BackupCreateCommand` is unchanged for tokens on this branch, so
   it is probably older behaviour; check against `main` and whether tokens are meant to survive a backup round trip.
-- Extension-less reference dataset files (`general.extensionlessFile` scenario) exist only uncommitted in
-  `/home/syndesi/Projects/ember-nexus-dev-api/reference-dataset`; `BackupFilesTest` skips its new test until a dataset
-  release contains them (then bump `REFERENCE_DATASET_VERSION` and update counts in tests/docs if any).
 - Checked, not problems: repeated header lines, `If-Match` + `If-None-Match` ordering, `Uuid::fromString` in
   `PropertyParseService` (HTTP paths catch it), Elasticsearch/Mongo writes per chunk (negligible).
 - Done 2026-09-26 (for the changelog / docs): `HEAD /upload` `410` on expired uploads; consistency checks of
