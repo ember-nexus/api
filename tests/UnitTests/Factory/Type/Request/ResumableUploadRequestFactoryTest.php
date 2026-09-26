@@ -8,6 +8,8 @@ use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Service\HeaderParseService;
+use App\Service\UploadBodyLimitService;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -23,12 +25,35 @@ class ResumableUploadRequestFactoryTest extends TestCase
 {
     use ProphecyTrait;
 
+    private function buildUploadBodyLimitService(int $maxChunkSize = 100000): UploadBodyLimitService
+    {
+        $configuration = $this->prophesize(EmberNexusConfiguration::class);
+        $configuration->getFileUploadMaxChunkSizeInBytes()->willReturn($maxChunkSize);
+        $badContentFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
+        $badContentFactory->createFromDetail(Argument::any())->will(fn ($args) => new Client400BadContentException('type', detail: $args[0]));
+
+        return new UploadBodyLimitService($configuration->reveal(), $badContentFactory->reveal());
+    }
+
+    /**
+     * @return resource
+     */
+    private function contentResource(string $content = 'some content')
+    {
+        $resource = fopen('php://memory', 'r+');
+        fwrite($resource, $content);
+        rewind($resource);
+
+        return $resource;
+    }
+
     public function buildResumableUploadRequestFactory(
         ?HeaderParseService $headerParseService = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
     ): ResumableUploadRequestFactory {
         return new ResumableUploadRequestFactory(
             $headerParseService ?? $this->prophesize(HeaderParseService::class)->reveal(),
+            $this->buildUploadBodyLimitService(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
         );
     }
@@ -40,7 +65,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $headers = $this->prophesize(HeaderBag::class)->reveal();
 
         $request = $this->prophesize(Request::class);
-        $request->getContent(Argument::is(true))->shouldBeCalledOnce()->willReturn('some content');
+        $request->getContent(Argument::is(true))->shouldBeCalledOnce()->willReturn($this->contentResource());
         $request = $request->reveal();
         $request->headers = $headers;
 
@@ -58,7 +83,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $resumableUploadRequest = $resumableUploadRequestFactory->createResumableUploadRequestFromRequest($request, $elementId);
 
         $this->assertSame($elementId, $resumableUploadRequest->getElementId());
-        $this->assertSame('some content', $resumableUploadRequest->getContent());
+        $this->assertSame('some content', stream_get_contents($resumableUploadRequest->getContent()));
         $this->assertFalse($resumableUploadRequest->isUploadComplete());
         $this->assertSame(654321, $resumableUploadRequest->getUploadLength());
         $this->assertSame(4321, $resumableUploadRequest->getContentLength());
@@ -72,7 +97,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $headers = $this->prophesize(HeaderBag::class)->reveal();
 
         $request = $this->prophesize(Request::class);
-        $request->getContent(Argument::is(true))->shouldBeCalledOnce()->willReturn('some content');
+        $request->getContent(Argument::is(true))->shouldBeCalledOnce()->willReturn($this->contentResource());
         $request = $request->reveal();
         $request->headers = $headers;
 
@@ -105,7 +130,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $headers = $this->prophesize(HeaderBag::class)->reveal();
 
         $request = $this->prophesize(Request::class);
-        $request->getContent(Argument::is(true))->shouldBeCalledOnce()->willReturn('some content');
+        $request->getContent(Argument::is(true))->shouldBeCalledOnce()->willReturn($this->contentResource());
         $request = $request->reveal();
         $request->headers = $headers;
 
@@ -130,7 +155,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $headers = $this->prophesize(HeaderBag::class)->reveal();
 
         $request = $this->prophesize(Request::class);
-        $request->getContent(Argument::is(true))->shouldBeCalledOnce()->willReturn('some content');
+        $request->getContent(Argument::is(true))->shouldBeCalledOnce()->willReturn($this->contentResource());
         $request = $request->reveal();
         $request->headers = $headers;
 

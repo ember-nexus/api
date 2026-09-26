@@ -8,7 +8,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
  * Verifies that intermediate PATCH chunks below the minimum chunk size are rejected, as S3 requires every
- * multipart part except the last to be at least 5 MiB. The completing chunk (`Upload-Complete: ?1`) is exempt.
+ * multipart part except the last to be at least 5 MiB. The completing chunk (`Upload-Complete: ?1`) is exempt, and so
+ * is a chunk of exactly 0 bytes, which is a no-op (see PatchUploadZeroLengthChunkTest).
  */
 class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
 {
@@ -56,7 +57,7 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
         return [$this->getUuidFromLocation($response), (int) $response->getHeader('Upload-Offset')[0]];
     }
 
-    public function testZeroLengthIntermediateChunkIsRejected(): void
+    public function testZeroLengthIntermediateChunkIsAcceptedAsNoOp(): void
     {
         $elementId = $this->createElement('patch-upload-undersized-zero');
         [$uploadId, $offset] = $this->createResumableUploadWithOneChunk($elementId, 'patch-upload-undersized-zero.bin');
@@ -72,9 +73,10 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
                 'Content-Type' => 'application/partial-upload',
             ]
         );
-        $this->assertIsProblemResponse($response, 400);
+        $this->assertSame(204, $response->getStatusCode());
+        $this->assertSame((string) $offset, $response->getHeader('Upload-Offset')[0]);
 
-        // the rejected chunk must not have advanced the upload's offset
+        // the empty chunk must not have advanced the upload's offset
         $headResponse = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
         $this->assertSame(204, $headResponse->getStatusCode());
         $this->assertSame((string) $offset, $headResponse->getHeader('Upload-Offset')[0]);

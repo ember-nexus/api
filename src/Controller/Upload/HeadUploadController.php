@@ -11,6 +11,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\UploadCancellationService;
 use App\Type\AccessType;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -26,6 +27,7 @@ class HeadUploadController extends AbstractController
         private ElementManager $elementManager,
         private NoContentResponseFactory $noContentResponseFactory,
         private UploadFactory $uploadFactory,
+        private UploadCancellationService $uploadCancellationService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -53,6 +55,9 @@ class HeadUploadController extends AbstractController
         }
         // uploads whose target is gone or inaccessible can not be completed, same check as in PATCH
         if (!$this->accessChecker->hasAccessToElement($userId, $upload->getUploadTarget(), AccessType::UPDATE)) {
+            // the owner lost access to the target, so the upload is cancelled as well
+            $this->uploadCancellationService->cancelUpload($upload);
+
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 

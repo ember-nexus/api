@@ -9,6 +9,7 @@ use App\Contract\RelationElementInterface;
 use App\Contract\Request\ResumableUploadRequestInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
@@ -46,7 +47,9 @@ class UploadCreationService
         private UrlGeneratorInterface $urlGenerator,
         private UploadService $uploadService,
         private FileSizeLimitService $fileSizeLimitService,
+        private UploadBodyLimitService $uploadBodyLimitService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
     ) {
     }
 
@@ -74,6 +77,8 @@ class UploadCreationService
         if (null !== $contentLength) {
             $this->fileSizeLimitService->assertWithinMaxFileSize($contentLength);
         }
+        // a single request is bound by the maximum chunk size; the content itself is bound in the request factory
+        $this->uploadBodyLimitService->assertDeclaredLengthWithinLimit($contentLength);
 
         $resource = $resumableUploadRequest->getContent();
         // hashed before the upload, so that a digest mismatch never replaces an existing file
@@ -87,7 +92,8 @@ class UploadCreationService
             $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
         }
 
-        $this->s3Service->uploadFile($uploadFileOperation);
+        // authoritative length, the Content-Length header is optional (e.g. chunked transfer encoding)
+        $uploadedContentLength = $this->s3Service->uploadFile($uploadFileOperation);
         // the S3 client may already have closed the resource while uploading it
         /** @psalm-suppress RedundantConditionGivenDocblockType */
         if (is_resource($resource)) {
@@ -97,7 +103,7 @@ class UploadCreationService
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
 
         $element->addProperty('file', [
-            'contentLength' => $uploadFileOperation->getContentLength(),
+            'contentLength' => $uploadedContentLength,
             'extension' => $resumableUploadRequest->getExtension(),
             'mimeType' => $uploadFileOperation->getMimeType(),
             'hash' => [
@@ -134,8 +140,19 @@ class UploadCreationService
         $uploadOffset = 0;
         $alreadyUploadedChunks = 0;
         $hashState = null;
-        if (0 !== $resumableUploadRequest->getContentLength()) {
-            $resource = $resumableUploadRequest->getContent();
+        $resource = $resumableUploadRequest->getContent();
+        // the body is buffered by the request factory, so its size is known even without `Content-Length`
+        $contentLength = $resumableUploadRequest->getContentLength() ?? \Safe\fstat($resource)['size'];
+        if (0 === $contentLength) {
+            // an empty first chunk only creates the upload, S3 does not accept empty parts
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
+            if (is_resource($resource)) {
+                \Safe\fclose($resource);
+            }
+        } else {
+            if (null !== $uploadLength && $contentLength > $uploadLength) {
+                throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
+            }
             $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
             $this->incrementalHashService->updateFromResource($hashContext, $resource);
 

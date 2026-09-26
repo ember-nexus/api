@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Upload;
 
 use App\Contract\Request\PartialUploadRequestInterface;
+use App\Contract\S3\MergeFileChunksOperationInterface;
 use App\Contract\UploadInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Exception\Client400BadContentException;
@@ -26,6 +27,8 @@ use App\Service\FileHashService;
 use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
+use App\Service\UploadCancellationService;
+use App\Service\UploadLockService;
 use App\Service\UploadService;
 use App\Type\AccessType;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -55,6 +58,8 @@ class PatchUploadController extends AbstractController
         private NoContentResponseFactory $noContentResponseFactory,
         private UploadFactory $uploadFactory,
         private UploadService $uploadService,
+        private UploadCancellationService $uploadCancellationService,
+        private UploadLockService $uploadLockService,
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
         private MergeFileChunksOperationFactory $mergeFileChunksOperationFactory,
         private S3Service $s3Service,
@@ -78,6 +83,27 @@ class PatchUploadController extends AbstractController
     )]
     public function patchUpload(string $id, Request $request): Response
     {
+        // cheap checks first, so that only the owner of an upload can block it with the lock
+        $upload = $this->loadAuthorizedUpload($id);
+
+        // draft-ietf-httpbis-resumable-upload: concurrent appends must not corrupt the upload
+        $lockToken = $this->uploadLockService->acquire($upload->getId());
+        if (null === $lockToken) {
+            throw $this->client409ConflictExceptionFactory->createFromDetail('Another request is currently modifying this upload, please retry once it has finished.');
+        }
+
+        try {
+            // state may have changed while waiting for the lock, so the offset check needs fresh data
+            $upload = $this->loadAuthorizedUpload($id);
+
+            return $this->appendToUpload($upload, $request);
+        } finally {
+            $this->uploadLockService->release($upload->getId(), $lockToken);
+        }
+    }
+
+    private function loadAuthorizedUpload(string $id): UploadInterface
+    {
         $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
         try {
             $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
@@ -90,6 +116,9 @@ class PatchUploadController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
         if (!$this->accessChecker->hasAccessToElement($userId, $upload->getUploadTarget(), AccessType::UPDATE)) {
+            // the owner lost access to the target, so the upload is cancelled as well
+            $this->uploadCancellationService->cancelUpload($upload);
+
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
@@ -97,14 +126,31 @@ class PatchUploadController extends AbstractController
             throw $this->client410GoneExceptionFactory->createFromTemplate();
         }
 
+        return $upload;
+    }
+
+    private function appendToUpload(UploadInterface $upload, Request $request): Response
+    {
         $partialUploadRequest = $this->partialUploadRequestFactory->createPartialUploadRequestFromRequest($request);
 
         if ($partialUploadRequest->getUploadOffset() !== $upload->getUploadOffset()) {
             throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalProperties: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
         }
 
-        // reject obviously invalid chunks before anything is sent to S3
+        // an empty intermediate chunk is a no-op which just reports the current state, e.g. to check the offset; S3
+        // does not accept empty parts, so nothing is stored and neither offset nor hash state change
         $declaredChunkLength = $partialUploadRequest->getContentLength();
+        if (false === $partialUploadRequest->isUploadComplete() && 0 === ($declaredChunkLength ?? $this->getBufferedContentLength($partialUploadRequest))) {
+            $emptyResource = $partialUploadRequest->getContent();
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
+            if (is_resource($emptyResource)) {
+                \Safe\fclose($emptyResource);
+            }
+
+            return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
+        }
+
+        // reject obviously invalid chunks before anything is sent to S3
         if (null !== $declaredChunkLength) {
             $this->assertValidChunkLength($partialUploadRequest, $upload, $declaredChunkLength);
         }
@@ -146,9 +192,16 @@ class PatchUploadController extends AbstractController
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }
 
+    // the request body is buffered by the request factory, so its size is known even without `Content-Length`
+    private function getBufferedContentLength(PartialUploadRequestInterface $partialUploadRequest): int
+    {
+        return \Safe\fstat($partialUploadRequest->getContent())['size'];
+    }
+
     private function assertValidChunkLength(PartialUploadRequestInterface $partialUploadRequest, UploadInterface $upload, int $chunkLength): void
     {
-        // same as in UploadCreationService: only the final chunk may be shorter than the minimum, even empty
+        // same as in UploadCreationService: only the final chunk may be shorter than the minimum, even empty; empty
+        // intermediate chunks never get here, see appendToUpload()
         if (false === $partialUploadRequest->isUploadComplete() && $chunkLength < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $chunkLength));
         }
@@ -159,8 +212,23 @@ class PatchUploadController extends AbstractController
         // reject as soon as the running total exceeds the limit, not only on completion
         $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset() + $chunkLength);
 
-        if (null !== $upload->getUploadLength() && $upload->getUploadLength() < $upload->getUploadOffset() + $chunkLength) {
-            throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
+        $uploadLength = $upload->getUploadLength();
+        if (null !== $uploadLength) {
+            $totalLength = $upload->getUploadOffset() + $chunkLength;
+            $completesUpload = true === $partialUploadRequest->isUploadComplete();
+            $isTooLong = $uploadLength < $totalLength;
+            $isTooShort = $completesUpload && $uploadLength > $totalLength;
+            if ($completesUpload && ($isTooLong || $isTooShort)) {
+                // the completed upload can never match its declared length, so nothing is left to resume
+                $this->uploadService->deleteUploadAndChunks($upload);
+                $this->elementManager->flush();
+            }
+            if ($isTooLong) {
+                throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
+            }
+            if ($isTooShort) {
+                throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf('Completed upload has %d bytes, but the defined upload length is %d bytes.', $totalLength, $uploadLength));
+            }
         }
     }
 
@@ -174,7 +242,7 @@ class PatchUploadController extends AbstractController
         try {
             $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset());
         } catch (Client400BadContentException $exception) {
-            $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
+            $this->discardUpload($upload, $mergeFileChunksOperation);
 
             throw $exception;
         }
@@ -183,7 +251,7 @@ class PatchUploadController extends AbstractController
             try {
                 $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
             } catch (Client400BadContentException $exception) {
-                $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
+                $this->discardUpload($upload, $mergeFileChunksOperation);
 
                 throw $exception;
             }
@@ -209,6 +277,14 @@ class PatchUploadController extends AbstractController
         $this->elementManager->flush();
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
+    }
+
+    // a failed completion leaves nothing to resume, so chunks and upload node are removed together
+    private function discardUpload(UploadInterface $upload, MergeFileChunksOperationInterface $mergeFileChunksOperation): void
+    {
+        $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
+        $this->uploadService->deleteUpload($upload);
+        $this->elementManager->flush();
     }
 
     private function verifyRequestDigest(string $requestDigestHeaderValue, string $actualHash): void

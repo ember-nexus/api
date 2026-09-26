@@ -141,7 +141,7 @@ class BackupCreateCommand extends Command
         while ($nextPage) {
             $rawNodeIds = $this->cypherEntityManager->getClient()->runStatement(
                 Statement::create(
-                    'MATCH (n) RETURN n.id SKIP $skip LIMIT $limit',
+                    'MATCH (n) RETURN n.id ORDER BY n.id SKIP $skip LIMIT $limit',
                     [
                         'skip' => $currentPage * $this->pageSize,
                         'limit' => $this->pageSize,
@@ -196,7 +196,7 @@ class BackupCreateCommand extends Command
         while ($nextPage) {
             $rawRelationIds = $this->cypherEntityManager->getClient()->runStatement(
                 Statement::create(
-                    'MATCH ()-[r]-() RETURN r.id SKIP $skip LIMIT $limit',
+                    'MATCH ()-[r]->() RETURN r.id ORDER BY r.id SKIP $skip LIMIT $limit',
                     [
                         'skip' => $currentPage * $this->pageSize,
                         'limit' => $this->pageSize,
@@ -249,11 +249,9 @@ class BackupCreateCommand extends Command
 
         $rawFileElements = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                'OPTIONAL MATCH (n) WHERE n.file '.
-                'OPTIONAL MATCH ()-[r]->() WHERE r.file '.
-                'WITH coalesce(n, r) AS element '.
-                'WHERE element.file '.
-                'RETURN element.id'
+                'MATCH (n) WHERE n.hasFile = true RETURN n.id AS `element.id` '.
+                'UNION ALL '.
+                'MATCH ()-[r]->() WHERE r.hasFile = true RETURN r.id AS `element.id`'
             )
         );
 

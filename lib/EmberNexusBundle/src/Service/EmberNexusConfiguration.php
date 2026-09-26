@@ -323,7 +323,7 @@ class EmberNexusConfiguration
         $emberNexusConfiguration->setFileUploadMaxChunkSizeInBytes($value);
 
         if ($emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes() < $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
-            throw new Exception(sprintf('%s.%s can not be smaller than %s.%s.', self::FILE, self::FILE_MAX_FILE_SIZE_IN_BYTES, self::FILE, self::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES));
+            throw new Exception(sprintf('%s.%s can not be smaller than %s.%s.', self::FILE, self::FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES, self::FILE, self::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES));
         }
 
         $value = (int) self::getValueFromConfig(

@@ -136,10 +136,12 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 409);
         $this->assertStringContainsString('upload length', $this->getBody($response)['detail']);
 
-        $this->assertUploadStillAtOffset($uploadId, 0);
+        // the request tried to complete the upload, which can never match its declared length: the upload is discarded
+        $this->assertSame(404, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
+        $this->assertSame(0, $this->countUploadChunksInUploadBucket($uploadId));
         $this->assertIsProblemResponse($this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN), 404);
 
-        $this->cleanUp($uploadId, $elementId);
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
     }
 
     public function testPatchWithinUploadLengthSucceeds(): void

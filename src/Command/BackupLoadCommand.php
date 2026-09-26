@@ -23,6 +23,7 @@ use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
 use Predis\Client;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -73,6 +74,7 @@ class BackupLoadCommand extends Command
         private FileSizeLimitService $fileSizeLimitService,
         private FileHashService $fileHashService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private LoggerInterface $logger,
     ) {
         parent::__construct();
     }
@@ -201,13 +203,23 @@ class BackupLoadCommand extends Command
     }
 
     /**
+     * A skipped file leaves its element with hasFile=true but without S3 object, so it is reported as error on the
+     * console and in the logs.
+     */
+    private function reportFileError(string $message): void
+    {
+        $this->logger->error($message);
+        $this->io->error($message);
+    }
+
+    /**
      * Problems with a single file are reported instead of thrown, so that one bad file does not abort the restore.
      */
     private function loadFile(string $path, UuidInterface $fileId): bool
     {
         $element = $this->elementManager->getElement($fileId);
         if (null === $element) {
-            $this->io->warning(sprintf(
+            $this->reportFileError(sprintf(
                 'Found file in backup without corresponding element; can not import file: %s',
                 $path
             ));
@@ -218,7 +230,7 @@ class BackupLoadCommand extends Command
         try {
             $contentLength = $this->backupStorage->fileSize($path);
             if ($this->fileSizeLimitService->exceedsMaxFileSize($contentLength)) {
-                $this->io->warning(sprintf(
+                $this->reportFileError(sprintf(
                     "File is %d bytes, which exceeds the configured 'file.maxFileSizeInBytes' of %d; skipping file: %s",
                     $contentLength,
                     $this->fileSizeLimitService->getMaxFileSizeInBytes(),
@@ -230,7 +242,7 @@ class BackupLoadCommand extends Command
 
             $hashError = $this->skipVerify ? null : $this->verifyFileHashes($element, $path);
             if (null !== $hashError) {
-                $this->io->warning(sprintf('%s; skipping file: %s', $hashError, $path));
+                $this->reportFileError(sprintf('%s; skipping file: %s', $hashError, $path));
 
                 return false;
             }
@@ -239,7 +251,7 @@ class BackupLoadCommand extends Command
             $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, $resource, $contentLength);
             $this->s3Service->uploadFile($uploadFileOperation);
         } catch (Throwable $e) {
-            $this->io->warning(sprintf(
+            $this->reportFileError(sprintf(
                 'Failed to upload file %s: %s',
                 $path,
                 $e->getMessage()
@@ -325,7 +337,7 @@ class BackupLoadCommand extends Command
         $totalCount += $pageCount;
         if ($failedCount > 0) {
             $this->io->stopSection(sprintf(
-                'Loaded <info>%d</info> files, <comment>%d</comment> could not be loaded (see warnings above).',
+                'Loaded <info>%d</info> files, <comment>%d</comment> could not be loaded and their elements still reference a missing file (see errors above).',
                 $totalCount,
                 $failedCount
             ));

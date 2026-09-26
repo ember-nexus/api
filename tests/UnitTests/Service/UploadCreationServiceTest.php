@@ -9,6 +9,7 @@ use App\Contract\Request\ResumableUploadRequestInterface;
 use App\Contract\S3\UploadFileChunkOperationInterface;
 use App\Contract\S3\UploadFileOperationInterface;
 use App\Exception\Client400BadContentException;
+use App\Exception\Client409ConflictException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
@@ -21,6 +22,7 @@ use App\Service\ElementManager;
 use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
+use App\Service\UploadBodyLimitService;
 use App\Service\UploadCreationService;
 use App\Service\UploadService;
 use App\Type\Response\CreatedResponse;
@@ -62,6 +64,8 @@ class UploadCreationServiceTest extends TestCase
     /** @var ObjectProphecy<EventDispatcherInterface> */
     private ObjectProphecy $eventDispatcher;
     private UploadCreationService $service;
+    /** @var ObjectProphecy<Client409ConflictExceptionFactory> */
+    private ObjectProphecy $conflictFactory;
 
     protected function setUp(): void
     {
@@ -88,6 +92,11 @@ class UploadCreationServiceTest extends TestCase
         $configuration->getFileUploadMaxChunkSizeInBytes()->willReturn(self::MAX_CHUNK_SIZE);
         $configuration->getFileUploadExpiresInSecondsAfterFirstRequest()->willReturn(3600);
         $configuration = $configuration->reveal();
+
+        $this->conflictFactory = $this->prophesize(Client409ConflictExceptionFactory::class);
+        $this->conflictFactory
+            ->createFromDetail(Argument::cetera())
+            ->will(fn (array $args) => new Client409ConflictException('conflict', detail: $args[0]));
 
         $badContentFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
         $badContentFactory
@@ -134,7 +143,9 @@ class UploadCreationServiceTest extends TestCase
             $urlGenerator->reveal(),
             $this->uploadService->reveal(),
             new FileSizeLimitService($configuration, $badContentFactory),
+            new UploadBodyLimitService($configuration, $badContentFactory),
             $badContentFactory,
+            $this->conflictFactory->reveal(),
         );
     }
 
@@ -257,11 +268,32 @@ class UploadCreationServiceTest extends TestCase
         $this->assertBadContentContaining('at most 1000 bytes long', fn () => $this->handle());
     }
 
-    public function testDirectUploadExactlyAtMaxFileSizeIsAccepted(): void
+    public function testDirectUploadExactlyAtMaxChunkSizeIsAccepted(): void
     {
         $this->configureDirectUpload();
-        $this->resumableUploadRequest->getContentLength()->willReturn(self::MAX_FILE_SIZE);
-        $this->s3Service->uploadFile(Argument::any())->shouldBeCalledOnce()->willReturn(self::MAX_FILE_SIZE);
+        $this->resumableUploadRequest->getContentLength()->willReturn(self::MAX_CHUNK_SIZE);
+        $this->s3Service->uploadFile(Argument::any())->shouldBeCalledOnce()->willReturn(self::MAX_CHUNK_SIZE);
+        $this->element->addProperty(Argument::cetera())->shouldBeCalled()->willReturn($this->element->reveal());
+
+        $this->assertInstanceOf(CreatedResponse::class, $this->handle());
+    }
+
+    public function testDirectUploadAboveMaxChunkSizeIsRejectedBeforeReadingContent(): void
+    {
+        $this->resumableUploadRequest->isUploadComplete()->willReturn(true);
+        $this->resumableUploadRequest->getContentLength()->willReturn(self::MAX_CHUNK_SIZE + 1);
+        $this->resumableUploadRequest->getContent()->shouldNotBeCalled();
+        $this->s3Service->uploadFile(Argument::any())->shouldNotBeCalled();
+
+        $this->assertBadContentContaining('at most 100 bytes long, got 101', fn () => $this->handle());
+    }
+
+    public function testDirectUploadWithoutContentLengthIsAcceptedInService(): void
+    {
+        // the stream itself is bound in the request factory, the service only checks a declared length
+        $this->configureDirectUpload();
+        $this->resumableUploadRequest->getContentLength()->willReturn(null);
+        $this->s3Service->uploadFile(Argument::any())->shouldBeCalledOnce()->willReturn(5);
         $this->element->addProperty(Argument::cetera())->shouldBeCalled()->willReturn($this->element->reveal());
 
         $this->assertInstanceOf(CreatedResponse::class, $this->handle());
@@ -334,5 +366,40 @@ class UploadCreationServiceTest extends TestCase
 
             $this->assertSame((string) $size, $this->handle()->headers->get('Upload-Offset'));
         }
+    }
+
+    public function testResumableUploadWithEmptyBodyAndWithoutContentLengthCreatesEmptyUpload(): void
+    {
+        $this->resumableUploadRequest->isUploadComplete()->willReturn(false);
+        $this->resumableUploadRequest->getUploadLength()->willReturn(500);
+        $this->resumableUploadRequest->getContentLength()->willReturn(null);
+        $this->resumableUploadRequest->getContent()->willReturn($this->contentResource(''));
+        $this->s3Service->uploadFileChunk(Argument::any())->shouldNotBeCalled();
+        $this->uploadService->mergeUploadElement(Argument::that(
+            fn ($upload) => 0 === $upload->getUploadOffset()
+                && 0 === $upload->getAlreadyUploadedChunks()
+                && null === $upload->getHashState()
+        ))->shouldBeCalledOnce();
+
+        $this->assertSame('0', $this->handle()->headers->get('Upload-Offset'));
+    }
+
+    public function testFirstChunkExceedingUploadLengthIsRejectedBeforeS3(): void
+    {
+        $this->configureResumableUpload(40, 50);
+        $this->s3Service->uploadFileChunk(Argument::any())->shouldNotBeCalled();
+        $this->uploadService->mergeUploadElement(Argument::any())->shouldNotBeCalled();
+
+        $this->expectException(Client409ConflictException::class);
+        $this->handle();
+    }
+
+    public function testFirstChunkMatchingUploadLengthIsAccepted(): void
+    {
+        $this->configureResumableUpload(50, 50);
+        $this->s3Service->uploadFileChunk(Argument::any())->shouldBeCalledOnce()->willReturn(50);
+        $this->uploadService->mergeUploadElement(Argument::any())->shouldBeCalledOnce();
+
+        $this->assertSame('50', $this->handle()->headers->get('Upload-Offset'));
     }
 }

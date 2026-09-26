@@ -1899,6 +1899,27 @@ class S3ServiceTest extends TestCase
         $this->assertSame(25, $s3Service->uploadFile($this->buildMultipartUploadFileOperation($resource, 25)));
     }
 
+    public function testUploadFileViaMultipartUploadRewindsAlreadyConsumedStream(): void
+    {
+        $content = str_repeat('b', 15);
+        $resource = \Safe\fopen('php://memory', 'r+');
+        \Safe\fwrite($resource, $content);
+        // mime type detection and hashing leave the stream at its end
+        \Safe\rewind($resource);
+        \Safe\stream_get_contents($resource);
+        $this->assertTrue(feof($resource));
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->createMultipartUpload(Argument::any())->shouldBeCalledOnce()->willReturn($this->buildCreateMultipartUploadOutput('multipart-upload-id'));
+        $s3Client->uploadPart(Argument::withEntry('Body', substr($content, 0, 10)))->shouldBeCalledOnce()->willReturn($this->buildUploadPartOutput('etag-1'));
+        $s3Client->uploadPart(Argument::withEntry('Body', substr($content, 10, 5)))->shouldBeCalledOnce()->willReturn($this->buildUploadPartOutput('etag-2'));
+        $s3Client->completeMultipartUpload(Argument::any())->shouldBeCalledOnce();
+
+        $s3Service = $this->buildS3Service(s3Client: $s3Client->reveal(), multipartUploadThresholdInBytes: 10, multipartUploadPartSizeInBytes: 10);
+
+        $this->assertSame(15, $s3Service->uploadFile($this->buildMultipartUploadFileOperation($resource, 15)));
+    }
+
     public function testUploadFileStaysOnSinglePutBelowThreshold(): void
     {
         $s3Client = $this->prophesize(S3Client::class);

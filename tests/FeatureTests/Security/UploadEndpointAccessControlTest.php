@@ -75,8 +75,8 @@ class UploadEndpointAccessControlTest extends BaseRequestTestCase
     }
 
     /**
-     * PATCH and HEAD re-check UPDATE access on the upload's target on every call, DELETE does not; so once the
-     * owner loses access to the target, the upload can only be cancelled.
+     * PATCH and HEAD re-check UPDATE access on the upload's target on every call; once the owner loses access to the
+     * target, the upload is cancelled (see CancelUploadOnAccessLossTest), so there is nothing left to delete either.
      */
     public function testUploadCanNoLongerBeInspectedOrCompletedOnceOwnerLosesAccessToTarget(): void
     {
@@ -104,9 +104,9 @@ class UploadEndpointAccessControlTest extends BaseRequestTestCase
         );
         $this->assertIsProblemResponse($patchResponse, 404);
 
-        // DELETE only checks upload ownership; the target element itself remains orphaned
+        // the upload was cancelled when the access was revoked
         $deleteResponse = $this->runDeleteRequest(sprintf('/upload/%s', $uploadId), self::TOKEN_OWNER);
-        $this->assertIsDeletedResponse($deleteResponse);
+        $this->assertIsProblemResponse($deleteResponse, 404);
     }
 
     /**

@@ -253,6 +253,8 @@ class S3Service
         try {
             $parts = [];
             $resource = $uploadFileOperation->getContent();
+            // mime type detection and hashing have already consumed part of the stream
+            \Safe\rewind($resource);
             while (!feof($resource)) {
                 $body = \Safe\stream_get_contents($resource, $partSizeInBytes);
                 if ('' === $body) {

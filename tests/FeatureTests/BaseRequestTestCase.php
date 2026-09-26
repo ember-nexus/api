@@ -469,6 +469,23 @@ abstract class BaseRequestTestCase extends TestCase
         return false;
     }
 
+    /**
+     * Counts the chunk objects of an upload in the upload bucket, as chunks are not accessible through the API.
+     */
+    public function countUploadChunksInUploadBucket(string $uploadId): int
+    {
+        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        $count = 0;
+        // the object key contains the upload id, see FileService::getUploadBucketKey()
+        foreach ($s3Client->listObjectsV2(['Bucket' => 'api-upload']) as $object) {
+            if (str_contains((string) $object->getKey(), $uploadId)) {
+                ++$count;
+            }
+        }
+
+        return $count;
+    }
+
     public function generateDeterministicFile(int $seed, int $targetSize, string $outputPath): void
     {
         $lineWidth = 120;

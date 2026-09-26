@@ -26,6 +26,8 @@ class FileService
     {
         $fileName = $this->stringService->getAsciiSafeString($fileName);
         $fileName = $this->removeReservedCharactersFromFileName($fileName);
+        // Symfony rejects '%' in Content-Disposition filename fallbacks
+        $fileName = str_replace('%', '', $fileName);
 
         $parts = explode('.', $fileName, 2);
         if (2 === count($parts)) {
