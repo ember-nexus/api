@@ -21,6 +21,18 @@ interface UploadInterface
 
     public function getAlreadyUploadedChunks(): int;
 
+    /**
+     * Ids of the accepted chunk objects in upload order, see {@see \App\Service\FileService::getUploadBucketKey()}.
+     *
+     * @return list<string>
+     */
+    public function getChunkIds(): array;
+
+    /**
+     * Id of the chunk which was accepted last, null if there is none; unique per chunk attempt.
+     */
+    public function getLastChunkId(): ?string;
+
     public function getUploadOwner(): UuidInterface;
 
     public function getExtension(): string;

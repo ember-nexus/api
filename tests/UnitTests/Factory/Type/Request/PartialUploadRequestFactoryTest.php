@@ -124,7 +124,7 @@ class PartialUploadRequestFactoryTest extends TestCase
         $headerParseService->getContentTypeFromHeaders(Argument::is($headers), Argument::is('application/partial-upload'))->shouldBeCalledOnce()->willReturn('application/partial-upload');
         $headerParseService->getUploadOffsetFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(1234);
         $headerParseService->isUploadCompleteFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(false);
-        $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(4321);
+        $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(12);
 
         $partialUploadRequestFactory = new PartialUploadRequestFactory($headerParseService->reveal(), $this->buildLimitService(), $this->buildBadContentFactory());
 
@@ -134,6 +134,6 @@ class PartialUploadRequestFactoryTest extends TestCase
         $this->assertSame('application/partial-upload', $partialUploadRequest->getContentType());
         $this->assertSame(1234, $partialUploadRequest->getUploadOffset());
         $this->assertFalse($partialUploadRequest->isUploadComplete());
-        $this->assertSame(4321, $partialUploadRequest->getContentLength());
+        $this->assertSame(12, $partialUploadRequest->getContentLength());
     }
 }

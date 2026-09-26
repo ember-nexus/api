@@ -51,13 +51,49 @@ class UploadService
         $element->addProperty('uploadOffset', $upload->getUploadOffset());
         $element->addProperty('uploadComplete', $upload->isUploadComplete());
         $element->addProperty('uploadTarget', $upload->getUploadTarget()->toString());
-        $element->addProperty('alreadyUploadedChunks', $upload->getAlreadyUploadedChunks());
+        // the list itself is stored in MongoDB, only the last id is a graph property, see appendChunkIfOffsetMatches()
+        $element->addProperty('chunkIds', $upload->getChunkIds());
+        $element->addProperty('lastChunkId', $upload->getLastChunkId());
         $element->addProperty('uploadOwner', $upload->getUploadOwner()->toString());
         $element->addProperty('extension', $upload->getExtension());
         $element->addProperty('expires', $upload->getExpires());
         $element->addProperty('hashState', $upload->getHashState());
 
         $this->elementManager->merge($element);
+    }
+
+    /**
+     * Compare-and-set on `uploadOffset` and `lastChunkId`, the only graph properties of the chunk list (the list
+     * itself is stored in MongoDB, and an empty final chunk does not move the offset): appends the chunk of $next
+     * only if the stored upload is still incomplete and in the state of $expected, i.e. no other request appended
+     * a chunk in the meantime. Chunk ids are unique per attempt, so `lastChunkId` identifies the state exactly.
+     * The graph update is atomic, the list is written by the following merge, which is flushed. Returns false if the
+     * upload was modified concurrently.
+     */
+    public function appendChunkIfOffsetMatches(UploadInterface $expected, UploadInterface $next): bool
+    {
+        $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
+            'MATCH (u:Upload {id: $id}) WHERE u.uploadOffset = $expectedOffset AND coalesce(u.lastChunkId, "") = $expectedLastChunkId AND u.uploadComplete = false '.
+            'SET u.uploadOffset = $uploadOffset, u.uploadComplete = $uploadComplete, u.lastChunkId = $lastChunkId, u.hashState = $hashState '.
+            'RETURN u.id',
+            [
+                'id' => $expected->getId()->toString(),
+                'expectedOffset' => $expected->getUploadOffset(),
+                'expectedLastChunkId' => $expected->getLastChunkId() ?? '',
+                'uploadOffset' => $next->getUploadOffset(),
+                'uploadComplete' => $next->isUploadComplete(),
+                'lastChunkId' => $next->getLastChunkId(),
+                'hashState' => $next->getHashState(),
+            ]
+        ));
+        if (0 === $queryResult->count()) {
+            return false;
+        }
+
+        $this->mergeUploadElement($next);
+        $this->elementManager->flush();
+
+        return true;
     }
 
     public function deleteUpload(UploadInterface $upload): void
@@ -72,9 +108,9 @@ class UploadService
      */
     public function deleteUploadAndChunks(UploadInterface $upload): void
     {
-        // chunk keys start at 1; the key after the last accepted chunk may hold a chunk which was rejected after upload
-        for ($chunk = 1; $chunk <= $upload->getAlreadyUploadedChunks() + 1; ++$chunk) {
-            $deleteChunkOperation = $this->fileOperationFactory->createFileOperationFromUpload($upload, $chunk);
+        // chunk keys start at 1; rejected chunk attempts are not part of the upload and are deleted by their request
+        foreach ($upload->getChunkIds() as $index => $chunkId) {
+            $deleteChunkOperation = $this->fileOperationFactory->createFileOperationFromUpload($upload, $index + 1, $chunkId);
             $this->s3Service->deleteFile($deleteChunkOperation);
         }
 

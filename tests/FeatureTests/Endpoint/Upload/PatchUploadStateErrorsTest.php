@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
+use ArrayObject;
 use Laudis\Neo4j\ClientBuilder;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -165,6 +166,11 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
             'base64 of no serialized data' => [base64_encode('this is not serialized data')],
             'serialized object of wrong class' => [base64_encode(serialize(new stdClass()))],
             'serialized scalar' => [base64_encode(serialize('string'))],
+            // crafted states: unserialize() is restricted to HashContext (allowed_classes), so other classes are never
+            // instantiated, not even as harmless objects; they end up as __PHP_Incomplete_Class and are rejected
+            'serialized object of other class' => [base64_encode(serialize(new ArrayObject(['a' => 'b'])))],
+            'serialized object of unknown class' => [base64_encode('O:22:"Evil\\NotExistingClass":1:{s:1:"a";i:1;}')],
+            'serialized nested object of wrong class' => [base64_encode(serialize([new stdClass()]))],
         ];
     }
 

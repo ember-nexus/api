@@ -48,6 +48,7 @@ class UploadCreationService
         private UploadService $uploadService,
         private FileSizeLimitService $fileSizeLimitService,
         private UploadBodyLimitService $uploadBodyLimitService,
+        private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
     ) {
@@ -63,15 +64,26 @@ class UploadCreationService
             return $this->createNewResumableUpload($resumableUploadRequest);
         }
 
-        $requestDigestHeaderValue = $request->headers->get('Repr-Digest') ?? $request->headers->get('Content-Digest');
+        // the body of a single request is the whole file, so `Repr-Digest` and `Content-Digest` describe the same bytes
+        // and every supplied one has to match
+        $requestDigestHeaderValues = [];
+        foreach (['Repr-Digest', 'Content-Digest'] as $headerName) {
+            $headerValue = $request->headers->get($headerName);
+            if (null !== $headerValue) {
+                $requestDigestHeaderValues[$headerName] = $headerValue;
+            }
+        }
 
-        return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest, $requestDigestHeaderValue);
+        return $this->setOrReplaceElementFileDirectly($element, $resumableUploadRequest, $requestDigestHeaderValues);
     }
 
+    /**
+     * @param array<string, string> $requestDigestHeaderValues digest header values by header name
+     */
     private function setOrReplaceElementFileDirectly(
         NodeElementInterface|RelationElementInterface $element,
         ResumableUploadRequestInterface $resumableUploadRequest,
-        ?string $requestDigestHeaderValue,
+        array $requestDigestHeaderValues,
     ): Response {
         $contentLength = $resumableUploadRequest->getContentLength();
         if (null !== $contentLength) {
@@ -88,8 +100,8 @@ class UploadCreationService
 
         $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
 
-        if (null !== $requestDigestHeaderValue) {
-            $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
+        foreach ($requestDigestHeaderValues as $headerName => $requestDigestHeaderValue) {
+            $this->verifyRequestDigest($headerName, $requestDigestHeaderValue, $hash);
         }
 
         // authoritative length, the Content-Length header is optional (e.g. chunked transfer encoding)
@@ -117,14 +129,14 @@ class UploadCreationService
         return new CreatedResponse();
     }
 
-    private function verifyRequestDigest(string $requestDigestHeaderValue, string $actualHash): void
+    private function verifyRequestDigest(string $headerName, string $requestDigestHeaderValue, string $actualHash): void
     {
         $expectedHash = $this->digestService->parseSha256HexFromHeaderValue($requestDigestHeaderValue);
         if (null === $expectedHash) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not verify upload: 'Repr-Digest'/'Content-Digest' header '%s' does not declare a supported digest algorithm; only 'sha-256' is supported.", $requestDigestHeaderValue));
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not verify upload: '%s' header '%s' does not declare a supported digest algorithm; only 'sha-256' is supported.", $headerName, $requestDigestHeaderValue));
         }
         if ($expectedHash !== $actualHash) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Could not verify upload: the declared digest does not match the uploaded file\'s actual content.');
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Could not verify upload: the digest declared in \'%s\' does not match the uploaded file\'s actual content.', $headerName));
         }
     }
 
@@ -138,7 +150,7 @@ class UploadCreationService
         $uploadId = Uuid::uuid4();
 
         $uploadOffset = 0;
-        $alreadyUploadedChunks = 0;
+        $chunkIds = [];
         $hashState = null;
         $resource = $resumableUploadRequest->getContent();
         // the body is buffered by the request factory, so its size is known even without `Content-Length`
@@ -156,7 +168,8 @@ class UploadCreationService
             $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
             $this->incrementalHashService->updateFromResource($hashContext, $resource);
 
-            $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
+            $chunkId = $this->fileService->generateUploadChunkId();
+            $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, $chunkId);
             $uploadOffset = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
             // the S3 client may already have closed the resource while uploading it
             /** @psalm-suppress RedundantConditionGivenDocblockType */
@@ -166,7 +179,7 @@ class UploadCreationService
 
             $hashState = $this->incrementalHashService->serializeContextForStorage($hashContext);
 
-            $alreadyUploadedChunks = 1;
+            $chunkIds = [$chunkId];
             if ($uploadOffset < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
                 // only the last chunk may be smaller than the minimum chunk size
                 if (false === $resumableUploadRequest->isUploadComplete()) {
@@ -186,7 +199,7 @@ class UploadCreationService
             $uploadOffset,
             $resumableUploadRequest->isUploadComplete() ?? false,
             $resumableUploadRequest->getElementId(),
-            $alreadyUploadedChunks,
+            $chunkIds,
             $this->authProvider->getUserId(),
             $resumableUploadRequest->getExtension(),
             $expires,

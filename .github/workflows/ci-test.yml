@@ -376,3 +376,58 @@ jobs:
           path: docker-logs/
           if-no-files-found: ignore
           retention-days: 7
+
+  test-server:
+    runs-on: ubuntu-26.04
+    name: 'Server Test'
+    timeout-minutes: 20
+    needs:
+      - test-unit
+      - phpstan
+      - psalm
+      - cs-lint
+    steps:
+      - uses: actions/checkout@v5
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v8
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - uses: actions/download-artifact@v8
+        with:
+          name: docker-image-api-prod-amd
+          path: /tmp/docker
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Load Docker images
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker load < /tmp/docker/api-prod-amd.tar.gz
+      # the scenarios run one after another and restart the production container with lower limits, see bin/test-server
+      - name: Server Test
+        run: |
+          chmod +x ./bin/test-server
+          KEEP_STACK=1 ./bin/with-heartbeat ./bin/test-server
+      - name: Collect docker logs
+        if: always()
+        run: |
+          mkdir -p docker-logs
+          COMPOSE="docker compose -p enx-server-tests -f ./tests/ServerTests/docker-compose.yml"
+          $COMPOSE ps -a > docker-logs/_ps.txt 2>&1 || true
+          for svc in $($COMPOSE config --services); do
+            $COMPOSE logs --no-color --timestamps "$svc" > "docker-logs/$svc.log" 2>&1 || true
+          done
+          # only name / exit code / OOM flag / error - never dump full inspect output (contains container env)
+          docker inspect $(docker ps -aq) --format '{{.Name}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} {{.State.Error}}' > docker-logs/_state.txt 2>&1 || true
+          uname -a > docker-logs/_host.txt
+      - name: Upload docker logs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: docker-logs-server
+          path: docker-logs/
+          if-no-files-found: ignore
+          retention-days: 7

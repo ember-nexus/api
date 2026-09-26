@@ -143,7 +143,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             5 * 1024 * 1024,
             false,
             $uploadTarget,
-            2,
+            ['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2'],
             $uploadOwner,
             'bin',
             (new DateTime())->modify('-1 hour')
@@ -234,7 +234,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         $uploadId1 = Uuid::fromString('2d2c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d1');
         $uploadId2 = Uuid::fromString('3e3c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d2');
 
-        $buildUpload = fn ($id) => new Upload($id, null, 0, false, $id, 0, $id, 'bin', (new DateTime())->modify('-1 hour'));
+        $buildUpload = fn ($id) => new Upload($id, null, 0, false, $id, [], $id, 'bin', (new DateTime())->modify('-1 hour'));
 
         $uploadElement1 = (new NodeElement())->setId($uploadId1)->setLabel('Upload');
         $uploadElement2 = (new NodeElement())->setId($uploadId2)->setLabel('Upload');

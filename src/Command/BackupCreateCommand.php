@@ -98,6 +98,7 @@ class BackupCreateCommand extends Command
         $this->io->title('Backup Create');
         $this->createBackupFolders();
         $this->initCount();
+        $this->warnAboutUnfinishedUploads();
 
         $this->backupNodes();
         $this->backupRelations();
@@ -365,6 +366,22 @@ class BackupCreateCommand extends Command
         $this->backupStorage->createDirectory($this->backupName.'/node');
         $this->backupStorage->createDirectory($this->backupName.'/relation');
         $this->backupStorage->createDirectory($this->backupName.'/file');
+    }
+
+    /**
+     * Independent of `--no-files`: chunks of unfinished uploads live in the upload bucket, which is never backed up.
+     */
+    private function warnAboutUnfinishedUploads(): void
+    {
+        $uploadCount = $this->cypherEntityManager->getClient()->runStatement(
+            Statement::create('MATCH (n:Upload) RETURN count(n) as count')
+        )->first()->get('count');
+        if (!is_int($uploadCount)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($uploadCount))); // @codeCoverageIgnore
+        }
+        if ($uploadCount > 0) {
+            $this->io->warning(sprintf('Found %d unfinished upload(s). Their already uploaded chunks are not part of the backup, so these uploads are abandoned and can not be resumed after loading the backup.', $uploadCount));
+        }
     }
 
     private function initCount(): void

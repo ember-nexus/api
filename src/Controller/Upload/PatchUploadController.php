@@ -5,41 +5,40 @@ declare(strict_types=1);
 namespace App\Controller\Upload;
 
 use App\Contract\Request\PartialUploadRequestInterface;
-use App\Contract\S3\MergeFileChunksOperationInterface;
 use App\Contract\UploadInterface;
-use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
-use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Exception\Client410GoneExceptionFactory;
 use App\Factory\Type\Request\PartialUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
-use App\Factory\Type\S3\MergeFileChunksOperationFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
-use App\Service\DigestService;
 use App\Service\ElementManager;
 use App\Service\FileHashService;
+use App\Service\FileService;
 use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadCancellationService;
+use App\Service\UploadFinalizationService;
 use App\Service\UploadLockService;
 use App\Service\UploadService;
 use App\Type\AccessType;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
+use HashContext;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Safe\DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Throwable;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveParameterList")
@@ -53,19 +52,19 @@ class PatchUploadController extends AbstractController
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private EventDispatcherInterface $eventDispatcher,
         private PartialUploadRequestFactory $partialUploadRequestFactory,
         private NoContentResponseFactory $noContentResponseFactory,
         private UploadFactory $uploadFactory,
         private UploadService $uploadService,
+        private UploadFinalizationService $uploadFinalizationService,
         private UploadCancellationService $uploadCancellationService,
         private UploadLockService $uploadLockService,
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
-        private MergeFileChunksOperationFactory $mergeFileChunksOperationFactory,
+        private FileOperationFactory $fileOperationFactory,
         private S3Service $s3Service,
         private IncrementalHashService $incrementalHashService,
-        private DigestService $digestService,
         private FileSizeLimitService $fileSizeLimitService,
+        private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
@@ -163,7 +162,9 @@ class PatchUploadController extends AbstractController
             : $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
 
-        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload);
+        // every attempt writes its own object, so that a concurrent attempt for the same chunk can not overwrite it
+        $chunkId = $this->fileService->generateUploadChunkId();
+        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload, $chunkId);
         $chunkLength = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
         // the S3 client may already have closed the resource while uploading it
         /** @psalm-suppress RedundantConditionGivenDocblockType */
@@ -171,25 +172,44 @@ class PatchUploadController extends AbstractController
             \Safe\fclose($resource);
         }
 
-        // the declared Content-Length was already checked before the upload, this is the authoritative check
-        $this->assertValidChunkLength($partialUploadRequest, $upload, $chunkLength);
+        try {
+            // the declared Content-Length was already checked before the upload, this is the authoritative check
+            $this->assertValidChunkLength($partialUploadRequest, $upload, $chunkLength);
+            $nextUpload = $this->createNextUpload($partialUploadRequest, $upload, $chunkLength, $chunkId, $hashContext);
+            $this->assertOffsetUnchanged($upload, $nextUpload);
+        } catch (Throwable $throwable) {
+            // the chunk is not part of the upload, so nothing else references its object
+            $this->s3Service->deleteFile($this->fileOperationFactory->createFileOperationFromUpload($upload, $upload->getAlreadyUploadedChunks() + 1, $chunkId));
+
+            throw $throwable;
+        }
+        $upload = $nextUpload;
 
         if ($partialUploadRequest->isUploadComplete()) {
-            $finalHash = $this->incrementalHashService->finalize($hashContext);
-            $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength);
-            $upload = $this->uploadFactory->markUploadAsComplete($upload);
-            $this->uploadService->mergeUploadElement($upload);
-            $requestDigestHeaderValue = $request->headers->get('Repr-Digest') ?? $request->headers->get('Content-Digest');
-            $this->createFile($upload, $finalHash, $requestDigestHeaderValue);
-        } else {
-            $hashState = $this->incrementalHashService->serializeContextForStorage($hashContext);
-            $upload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength, $hashState);
-            $this->uploadService->mergeUploadElement($upload);
+            $this->uploadFinalizationService->finalize($upload, $this->incrementalHashService->finalize($hashContext), $request->headers->get('Repr-Digest'));
         }
 
-        $this->elementManager->flush();
-
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
+    }
+
+    private function createNextUpload(PartialUploadRequestInterface $partialUploadRequest, UploadInterface $upload, int $chunkLength, string $chunkId, HashContext $hashContext): UploadInterface
+    {
+        if ($partialUploadRequest->isUploadComplete()) {
+            // the hash state is not needed anymore, the finalization uses the final hash
+            $nextUpload = $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength, $chunkId);
+
+            return $this->uploadFactory->markUploadAsComplete($nextUpload);
+        }
+
+        return $this->uploadFactory->addNewChunkToUpload($upload, $chunkLength, $chunkId, $this->incrementalHashService->serializeContextForStorage($hashContext));
+    }
+
+    // defense in depth, the lock may have expired while this request was still uploading its chunk
+    private function assertOffsetUnchanged(UploadInterface $upload, UploadInterface $nextUpload): void
+    {
+        if (!$this->uploadService->appendChunkIfOffsetMatches($upload, $nextUpload)) {
+            throw $this->client409ConflictExceptionFactory->createFromDetail('Upload was modified by another request while this chunk was uploaded, please check the offset and retry.');
+        }
     }
 
     // the request body is buffered by the request factory, so its size is known even without `Content-Length`
@@ -229,72 +249,6 @@ class PatchUploadController extends AbstractController
             if ($isTooShort) {
                 throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf('Completed upload has %d bytes, but the defined upload length is %d bytes.', $totalLength, $uploadLength));
             }
-        }
-    }
-
-    private function createFile(UploadInterface $upload, string $hash, ?string $requestDigestHeaderValue = null): void
-    {
-        $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
-
-        // size and digest are verified before merging, so an existing file is never overwritten on a mismatch
-        $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
-
-        try {
-            $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset());
-        } catch (Client400BadContentException $exception) {
-            $this->discardUpload($upload, $mergeFileChunksOperation);
-
-            throw $exception;
-        }
-
-        if (null !== $requestDigestHeaderValue) {
-            try {
-                $this->verifyRequestDigest($requestDigestHeaderValue, $hash);
-            } catch (Client400BadContentException $exception) {
-                $this->discardUpload($upload, $mergeFileChunksOperation);
-
-                throw $exception;
-            }
-        }
-
-        $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
-        $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
-
-        $element->addProperty('file', [
-            'contentLength' => $mergedContentLength,
-            'extension' => $upload->getExtension(),
-            'mimeType' => $mergedMimeType,
-            'hash' => [
-                FileHashService::ALGORITHM => $hash,
-            ],
-        ]);
-        $element->addProperty('hasFile', true);
-        $this->elementManager->merge($element);
-        $this->elementManager->flush();
-
-        $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
-        $this->uploadService->deleteUpload($upload);
-        $this->elementManager->flush();
-
-        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
-    }
-
-    // a failed completion leaves nothing to resume, so chunks and upload node are removed together
-    private function discardUpload(UploadInterface $upload, MergeFileChunksOperationInterface $mergeFileChunksOperation): void
-    {
-        $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
-        $this->uploadService->deleteUpload($upload);
-        $this->elementManager->flush();
-    }
-
-    private function verifyRequestDigest(string $requestDigestHeaderValue, string $actualHash): void
-    {
-        $expectedHash = $this->digestService->parseSha256HexFromHeaderValue($requestDigestHeaderValue);
-        if (null === $expectedHash) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not verify upload: 'Repr-Digest'/'Content-Digest' header '%s' does not declare a supported digest algorithm; only 'sha-256' is supported.", $requestDigestHeaderValue));
-        }
-        if ($expectedHash !== $actualHash) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Could not verify upload: the declared digest does not match the uploaded file\'s actual content.');
         }
     }
 }

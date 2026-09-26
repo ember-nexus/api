@@ -13,13 +13,16 @@ use Ramsey\Uuid\UuidInterface;
  */
 final readonly class Upload implements UploadInterface
 {
+    /**
+     * @param list<string> $chunkIds
+     */
     public function __construct(
         private UuidInterface $id,
         private ?int $uploadLength,
         private int $uploadOffset,
         private bool $uploadComplete,
         private UuidInterface $uploadTarget,
-        private int $alreadyUploadedChunks,
+        private array $chunkIds,
         private UuidInterface $uploadOwner,
         private string $extension,
         private DateTime $expires,
@@ -54,7 +57,20 @@ final readonly class Upload implements UploadInterface
 
     public function getAlreadyUploadedChunks(): int
     {
-        return $this->alreadyUploadedChunks;
+        return count($this->chunkIds);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getChunkIds(): array
+    {
+        return $this->chunkIds;
+    }
+
+    public function getLastChunkId(): ?string
+    {
+        return [] === $this->chunkIds ? null : $this->chunkIds[array_key_last($this->chunkIds)];
     }
 
     public function getUploadOwner(): UuidInterface

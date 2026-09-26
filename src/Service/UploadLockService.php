@@ -17,7 +17,8 @@ use Ramsey\Uuid\UuidInterface;
 class UploadLockService
 {
     public const string KEY_PREFIX = 'upload-lock:';
-    public const int TTL_IN_MILLISECONDS = 900000;
+    // a request may take 15 minutes at most (`read_body` in the Caddyfile), plus time for S3 and finalization
+    public const int TTL_IN_MILLISECONDS = 1200000;
 
     private const string RELEASE_SCRIPT = 'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end';
 

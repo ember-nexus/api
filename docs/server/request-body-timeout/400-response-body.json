@@ -1,0 +1,6 @@
+{
+  "type": "http://api-prod/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "detail": "Unable to parse request as JSON. Control character error, possibly incorrectly encoded."
+}

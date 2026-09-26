@@ -50,7 +50,7 @@ class MergeFileChunksOperationFactoryTest extends TestCase
 
         $upload = $this->prophesize(UploadInterface::class);
         $upload->isUploadComplete()->shouldBeCalledOnce()->willReturn(true);
-        $upload->getAlreadyUploadedChunks()->shouldBeCalledOnce()->willReturn(3);
+        $upload->getChunkIds()->shouldBeCalledOnce()->willReturn(['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2', 'aaaaaaaaaaaaaaa3']);
         $upload->getId()->shouldBeCalledOnce()->willReturn($uploadId);
         $upload->getUploadTarget()->shouldBeCalledTimes(2)->willReturn($uploadTarget);
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
@@ -69,9 +69,9 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $elementManager->getElementOrFail(Argument::is($uploadTarget))->shouldBeCalledOnce()->willReturn($element);
 
         $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1))->shouldBeCalledOnce()->willReturn('upload-key-0001');
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2))->shouldBeCalledOnce()->willReturn('upload-key-0002');
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(3))->shouldBeCalledOnce()->willReturn('upload-key-0003');
+        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('aaaaaaaaaaaaaaa1'))->shouldBeCalledOnce()->willReturn('upload-key-0001');
+        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2), Argument::is('aaaaaaaaaaaaaaa2'))->shouldBeCalledOnce()->willReturn('upload-key-0002');
+        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(3), Argument::is('aaaaaaaaaaaaaaa3'))->shouldBeCalledOnce()->willReturn('upload-key-0003');
         $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('target-key.ext');
 
         $mergeFileChunksOperationFactory = $this->buildMergeFileChunksOperationFactory(
@@ -98,7 +98,7 @@ class MergeFileChunksOperationFactoryTest extends TestCase
 
         $upload = $this->prophesize(UploadInterface::class);
         $upload->isUploadComplete()->shouldBeCalledOnce()->willReturn(true);
-        $upload->getAlreadyUploadedChunks()->shouldBeCalledOnce()->willReturn(2);
+        $upload->getChunkIds()->shouldBeCalledOnce()->willReturn(['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2']);
         $upload->getId()->shouldBeCalledOnce()->willReturn($uploadId);
         $upload->getUploadTarget()->shouldBeCalledTimes(3)->willReturn($uploadTarget);
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
@@ -114,8 +114,8 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $elementManager->getElementOrFail(Argument::is($uploadTarget))->shouldBeCalledOnce()->willReturn($element);
 
         $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1))->shouldBeCalledOnce()->willReturn('upload-key-0001');
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2))->shouldBeCalledOnce()->willReturn('upload-key-0002');
+        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('aaaaaaaaaaaaaaa1'))->shouldBeCalledOnce()->willReturn('upload-key-0001');
+        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2), Argument::is('aaaaaaaaaaaaaaa2'))->shouldBeCalledOnce()->willReturn('upload-key-0002');
         $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('target-key.ext');
         $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('prev'))->shouldBeCalledOnce()->willReturn('target-key.prev');
 

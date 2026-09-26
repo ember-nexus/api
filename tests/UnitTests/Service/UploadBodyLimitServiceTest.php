@@ -86,4 +86,18 @@ class UploadBodyLimitServiceTest extends TestCase
             $this->assertSame('abc', stream_get_contents($resource));
         }
     }
+
+    public function testBoundContentAcceptsBodyMatchingDeclaredLength(): void
+    {
+        $bounded = $this->buildService()->boundContent($this->resource('0123456789'), 10);
+
+        $this->assertSame('0123456789', stream_get_contents($bounded));
+    }
+
+    public function testBoundContentRejectsBodyShorterThanDeclaredLength(): void
+    {
+        // e.g. a body which was cut off by the request timeout of the web server
+        $this->expectException(Client400BadContentException::class);
+        $this->buildService()->boundContent($this->resource('01234'), 10);
+    }
 }

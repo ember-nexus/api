@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Controller\Upload;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\Request\PartialUploadRequestInterface;
+use App\Contract\S3\FileOperationInterface;
 use App\Contract\S3\UploadFileChunkOperationInterface;
 use App\Contract\UploadInterface;
 use App\Controller\Upload\PatchUploadController;
@@ -19,17 +20,18 @@ use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Exception\Client410GoneExceptionFactory;
 use App\Factory\Type\Request\PartialUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
-use App\Factory\Type\S3\MergeFileChunksOperationFactory;
+use App\Factory\Type\S3\FileOperationFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
-use App\Service\DigestService;
 use App\Service\ElementManager;
+use App\Service\FileService;
 use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadCancellationService;
+use App\Service\UploadFinalizationService;
 use App\Service\UploadLockService;
 use App\Service\UploadService;
 use App\Type\AccessType;
@@ -45,7 +47,6 @@ use Prophecy\Prophecy\ObjectProphecy;
 use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Chunks which can be rejected from the declared `Content-Length` must be rejected before anything is sent to S3.
@@ -66,6 +67,8 @@ class PatchUploadControllerTest extends TestCase
     private ObjectProphecy $fileSizeLimitService;
     private ObjectProphecy $uploadLockService;
     private ObjectProphecy $uploadService;
+    private ObjectProphecy $uploadFinalizationService;
+    private ObjectProphecy $fileOperationFactory;
     private ObjectProphecy $uploadCancellationService;
     private ObjectProphecy $accessChecker;
     private ObjectProphecy $client404NotFoundExceptionFactory;
@@ -80,6 +83,7 @@ class PatchUploadControllerTest extends TestCase
         ?int $uploadLength = null,
         int $s3ChunkLength = 500,
         bool $hasAccess = true,
+        bool $offsetMatches = true,
     ): PatchUploadController {
         $userId = Uuid::fromString(self::USER_ID);
         $targetId = Uuid::fromString(self::TARGET_ID);
@@ -92,10 +96,13 @@ class PatchUploadControllerTest extends TestCase
         $upload->getUploadOffset()->willReturn($uploadOffset);
         $upload->getUploadLength()->willReturn($uploadLength);
         $upload->getHashState()->willReturn(null);
+        $upload->getChunkIds()->willReturn(['0123456789abcdef']);
+        $upload->getAlreadyUploadedChunks()->willReturn(1);
 
         $uploadFactory = $this->prophesize(UploadFactory::class);
         $uploadFactory->createUploadFromElement(Argument::any())->willReturn($upload->reveal());
         $uploadFactory->addNewChunkToUpload(Argument::cetera())->willReturn($upload->reveal());
+        $uploadFactory->markUploadAsComplete(Argument::any())->willReturn($upload->reveal());
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::any())->willReturn($this->prophesize(NodeElementInterface::class)->reveal());
@@ -126,6 +133,7 @@ class PatchUploadControllerTest extends TestCase
         // reaching S3 means the chunk was not rejected beforehand; the real length is only known afterwards
         $this->s3Service = $this->prophesize(S3Service::class);
         $this->s3Service->uploadFileChunk(Argument::any())->willReturn($s3ChunkLength);
+        $this->s3Service->deleteFile(Argument::any())->will(function () {});
 
         $uploadFileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
         $uploadFileChunkOperationFactory
@@ -136,6 +144,7 @@ class PatchUploadControllerTest extends TestCase
         $incrementalHashService->createContext(Argument::any())->willReturn(hash_init('sha256'));
         $incrementalHashService->updateFromResource(Argument::cetera())->will(function () {});
         $incrementalHashService->serializeContextForStorage(Argument::any())->willReturn('state');
+        $incrementalHashService->finalize(Argument::any())->willReturn('hash');
 
         $this->fileSizeLimitService = $this->prophesize(FileSizeLimitService::class);
         $this->uploadLockService = $this->prophesize(UploadLockService::class);
@@ -145,6 +154,12 @@ class PatchUploadControllerTest extends TestCase
         $noContentResponseFactory = $this->prophesize(NoContentResponseFactory::class);
         $noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload(Argument::cetera())->willReturn(new NoContentResponse());
         $this->uploadService = $this->prophesize(UploadService::class);
+        $this->uploadService->appendChunkIfOffsetMatches(Argument::cetera())->willReturn($offsetMatches);
+        $this->uploadFinalizationService = $this->prophesize(UploadFinalizationService::class);
+        $this->fileOperationFactory = $this->prophesize(FileOperationFactory::class);
+        $this->fileOperationFactory->createFileOperationFromUpload(Argument::cetera())->willReturn($this->prophesize(FileOperationInterface::class)->reveal());
+        $fileService = $this->prophesize(FileService::class);
+        $fileService->generateUploadChunkId()->willReturn('aaaaaaaaaaaaaaaa');
         $this->uploadCancellationService = $this->prophesize(UploadCancellationService::class);
         $this->client404NotFoundExceptionFactory = $this->prophesize(Client404NotFoundExceptionFactory::class);
         $this->client404NotFoundExceptionFactory->createFromTemplate(Argument::cetera())->will(
@@ -165,19 +180,19 @@ class PatchUploadControllerTest extends TestCase
             $this->accessChecker->reveal(),
             $elementManager->reveal(),
             $configuration->reveal(),
-            $this->prophesize(EventDispatcherInterface::class)->reveal(),
             $partialUploadRequestFactory->reveal(),
             $noContentResponseFactory->reveal(),
             $uploadFactory->reveal(),
             $this->uploadService->reveal(),
+            $this->uploadFinalizationService->reveal(),
             $this->uploadCancellationService->reveal(),
             $this->uploadLockService->reveal(),
             $uploadFileChunkOperationFactory->reveal(),
-            $this->prophesize(MergeFileChunksOperationFactory::class)->reveal(),
+            $this->fileOperationFactory->reveal(),
             $this->s3Service->reveal(),
             $incrementalHashService->reveal(),
-            $this->prophesize(DigestService::class)->reveal(),
             $this->fileSizeLimitService->reveal(),
+            $fileService->reveal(),
             $client400BadContentExceptionFactory->reveal(),
             $this->client404NotFoundExceptionFactory->reveal(),
             $client409ConflictExceptionFactory->reveal(),
@@ -185,9 +200,9 @@ class PatchUploadControllerTest extends TestCase
         );
     }
 
-    private function patch(PatchUploadController $controller): void
+    private function patch(PatchUploadController $controller, ?Request $request = null): void
     {
-        $controller->patchUpload(self::UPLOAD_ID, new Request());
+        $controller->patchUpload(self::UPLOAD_ID, $request ?? new Request());
     }
 
     /**
@@ -218,7 +233,7 @@ class PatchUploadControllerTest extends TestCase
     {
         $controller = $this->createController(0, uploadOffset: 200, s3ChunkLength: 0);
         $this->s3Service->uploadFileChunk(Argument::any())->shouldNotBeCalled();
-        $this->uploadService->mergeUploadElement(Argument::any())->shouldNotBeCalled();
+        $this->uploadService->appendChunkIfOffsetMatches(Argument::cetera())->shouldNotBeCalled();
         $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldNotBeCalled();
 
         $response = $controller->patchUpload(self::UPLOAD_ID, new Request());
@@ -230,7 +245,7 @@ class PatchUploadControllerTest extends TestCase
     {
         $controller = $this->createController(null, s3ChunkLength: 0);
         $this->s3Service->uploadFileChunk(Argument::any())->shouldNotBeCalled();
-        $this->uploadService->mergeUploadElement(Argument::any())->shouldNotBeCalled();
+        $this->uploadService->appendChunkIfOffsetMatches(Argument::cetera())->shouldNotBeCalled();
 
         $this->assertInstanceOf(NoContentResponse::class, $controller->patchUpload(self::UPLOAD_ID, new Request()));
     }
@@ -253,7 +268,7 @@ class PatchUploadControllerTest extends TestCase
         $controller = $this->createController($size, s3ChunkLength: $size);
         if ($isAccepted) {
             $this->s3Service->uploadFileChunk(Argument::any())->shouldBeCalledOnce()->willReturn($size);
-            $this->uploadService->mergeUploadElement(Argument::any())->shouldBeCalledOnce();
+            $this->uploadService->appendChunkIfOffsetMatches(Argument::cetera())->shouldBeCalledOnce()->willReturn(true);
             $this->assertInstanceOf(NoContentResponse::class, $this->runPatch($controller));
 
             return;
@@ -390,6 +405,63 @@ class PatchUploadControllerTest extends TestCase
         $this->uploadLockService->release(Argument::any(), 'token')->shouldBeCalledOnce();
 
         $this->expectException(Client400BadContentException::class);
+        $this->patch($controller);
+    }
+
+    public function testConcurrentModificationIsAnsweredWithConflictAndDeletesOwnChunk(): void
+    {
+        $controller = $this->createController(500, offsetMatches: false);
+        $this->s3Service->deleteFile(Argument::any())->shouldBeCalledOnce();
+        $this->fileOperationFactory->createFileOperationFromUpload(Argument::any(), 2, 'aaaaaaaaaaaaaaaa')->shouldBeCalledOnce();
+        $this->uploadFinalizationService->finalize(Argument::cetera())->shouldNotBeCalled();
+
+        $this->assertRejectedWithDetail($controller, Client409ConflictException::class, 'modified by another request');
+    }
+
+    public function testConcurrentModificationOfFinalChunkDoesNotFinalize(): void
+    {
+        $controller = $this->createController(500, isUploadComplete: true, offsetMatches: false);
+        $this->s3Service->deleteFile(Argument::any())->shouldBeCalledOnce();
+        $this->uploadFinalizationService->finalize(Argument::cetera())->shouldNotBeCalled();
+
+        $this->assertRejectedWithDetail($controller, Client409ConflictException::class, 'modified by another request');
+    }
+
+    public function testChunkRejectedAfterS3UploadDeletesOwnChunk(): void
+    {
+        $controller = $this->createController(null, s3ChunkLength: self::MAX_CHUNK_SIZE + 1);
+        $this->s3Service->deleteFile(Argument::any())->shouldBeCalledOnce();
+
+        $this->assertRejectedWithDetail($controller, Client400BadContentException::class, 'at most');
+    }
+
+    public function testFinalChunkIsFinalizedWithReprDigestOnly(): void
+    {
+        $controller = $this->createController(500, isUploadComplete: true);
+        $this->uploadFinalizationService->finalize(Argument::any(), Argument::type('string'), 'sha-256=:repr:')->shouldBeCalledOnce();
+
+        $request = new Request();
+        $request->headers->set('Repr-Digest', 'sha-256=:repr:');
+        $request->headers->set('Content-Digest', 'sha-256=:content:');
+        $this->patch($controller, $request);
+    }
+
+    public function testContentDigestIsIgnoredOnFinalChunk(): void
+    {
+        $controller = $this->createController(500, isUploadComplete: true);
+        $this->uploadFinalizationService->finalize(Argument::any(), Argument::type('string'), null)->shouldBeCalledOnce();
+
+        $request = new Request();
+        $request->headers->set('Content-Digest', 'sha-256=:content:');
+        $this->patch($controller, $request);
+    }
+
+    public function testIntermediateChunkIsNotFinalized(): void
+    {
+        $controller = $this->createController(500);
+        $this->uploadFinalizationService->finalize(Argument::cetera())->shouldNotBeCalled();
+        $this->s3Service->deleteFile(Argument::any())->shouldNotBeCalled();
+
         $this->patch($controller);
     }
 }

@@ -48,6 +48,12 @@ class UploadBodyLimitService
 
             throw $this->createTooLongException($maxLength, 'more');
         }
+        // e.g. a body which was cut off by a request timeout must not be stored as a shorter file
+        if (null !== $declaredContentLength && $copiedLength !== $declaredContentLength) {
+            \Safe\fclose($bounded);
+
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Request body has %d bytes, but header 'Content-Length' declares %d bytes.", $copiedLength, $declaredContentLength));
+        }
         \Safe\rewind($bounded);
 
         return $bounded;

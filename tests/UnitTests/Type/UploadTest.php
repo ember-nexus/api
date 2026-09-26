@@ -24,7 +24,7 @@ class UploadTest extends TestCase
             321,
             false,
             Uuid::fromString('81fbe257-08e0-465b-aa32-8b002a7517c5'),
-            1,
+            ['0123456789abcdef'],
             Uuid::fromString('beb42bb3-3b3d-40d2-895b-e54ffb7816dd'),
             'bin',
             $expires
@@ -36,6 +36,7 @@ class UploadTest extends TestCase
         $this->assertSame(false, $upload->isUploadComplete());
         $this->assertSame('81fbe257-08e0-465b-aa32-8b002a7517c5', (string) $upload->getUploadTarget());
         $this->assertSame(1, $upload->getAlreadyUploadedChunks());
+        $this->assertSame(['0123456789abcdef'], $upload->getChunkIds());
         $this->assertSame('beb42bb3-3b3d-40d2-895b-e54ffb7816dd', (string) $upload->getUploadOwner());
         $this->assertSame('bin', $upload->getExtension());
         $this->assertSame($expires, $upload->getExpires());

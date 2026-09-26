@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
+use Tuupola\Base58;
 
 class FileService
 {
@@ -75,8 +76,23 @@ class FileService
         );
     }
 
-    public function getUploadBucketKey(UuidInterface $id, int $chunkIndex): string
+    /**
+     * Every attempt to upload a chunk generates its own id (base58 of 128 random bits, like tokens), so that concurrent attempts for the same chunk index can
+     * never overwrite each other's object; the id of the accepted attempt is stored on the `Upload` element.
+     */
+    public function generateUploadChunkId(): string
     {
+        return (new Base58())->encode(random_bytes(16));
+    }
+
+    /**
+     * @param string|null $chunkId null for uploads which consist of a single object and have no chunk attempts
+     */
+    public function getUploadBucketKey(UuidInterface $id, int $chunkIndex, ?string $chunkId = null): string
+    {
+        if (null !== $chunkId && 1 !== \Safe\preg_match('/^[0-9A-Za-z]{1,64}$/', $chunkId)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Chunk id has to be an alphanumeric string with at most 64 characters.');
+        }
         $digits = $this->emberNexusConfiguration->getFileUploadChunkDigitsLength();
         if ($chunkIndex < 0) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Chunk index can not be less than 0.');
@@ -87,13 +103,14 @@ class FileService
         }
 
         return sprintf(
-            '%s-%s.%s',
+            '%s-%s%s.%s',
             $this->uuidToNestedFolderStructure(
                 $id,
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevels(),
                 $this->emberNexusConfiguration->getFileS3UploadBucketLevelLength(),
             ),
             str_pad((string) $chunkIndex, $digits, '0', STR_PAD_LEFT),
+            null === $chunkId ? '' : '-'.$chunkId,
             self::UPLOAD_EXTENSION
         );
     }

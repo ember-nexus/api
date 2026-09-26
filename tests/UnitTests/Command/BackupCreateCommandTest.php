@@ -63,8 +63,9 @@ class BackupCreateCommandTest extends TestCase
      * @param array<string, string> $fileContents      element id => content of its file in S3; ids missing from the
      *                                                 element manager can be added to $missingElementIds
      * @param string[]              $missingElementIds
+     * @param int                   $uploadCount       number of unfinished `Upload` nodes reported by the database
      */
-    private function runCommand(array $fileContents, array $input = [], array $missingElementIds = []): CommandTester
+    private function runCommand(array $fileContents, array $input = [], array $missingElementIds = [], int $uploadCount = 0): CommandTester
     {
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(Argument::any())->will(function (array $args) use ($missingElementIds) {
@@ -79,8 +80,11 @@ class BackupCreateCommandTest extends TestCase
 
         $summaryReference = null;
         $client = $this->prophesize(ClientInterface::class);
-        $client->runStatement(Argument::any())->will(function (array $args) use (&$summaryReference, $fileContents) {
+        $client->runStatement(Argument::any())->will(function (array $args) use (&$summaryReference, $fileContents, $uploadCount) {
             $text = $args[0]->getText();
+            if (str_contains($text, ':Upload')) {
+                return new SummarizedResult($summaryReference, [new CypherMap(['count' => $uploadCount])]);
+            }
             if (str_contains($text, 'count(')) {
                 return new SummarizedResult($summaryReference, [new CypherMap(['count' => 0])]);
             }
@@ -189,5 +193,28 @@ class BackupCreateCommandTest extends TestCase
 
         $this->assertTrue($this->backupStorage->fileExists(sprintf('%s/file/%s.bin', self::BACKUP_NAME, $present)));
         $this->assertFalse($this->backupStorage->fileExists(sprintf('%s/file/%s.bin', self::BACKUP_NAME, $vanished)));
+    }
+
+    public function testUnfinishedUploadsTriggerWarning(): void
+    {
+        $tester = $this->runCommand([], uploadCount: 3);
+
+        $this->assertStringContainsString('Found 3 unfinished upload(s)', $tester->getDisplay());
+        $this->assertStringContainsString('abandoned', $tester->getDisplay());
+    }
+
+    public function testUnfinishedUploadsWarningIsShownWithoutFileExportToo(): void
+    {
+        $tester = $this->runCommand([], ['--no-files' => true], uploadCount: 1);
+
+        $this->assertStringContainsString('Found 1 unfinished upload(s)', $tester->getDisplay());
+        $this->assertStringContainsString('File backup skipped.', $tester->getDisplay());
+    }
+
+    public function testNoWarningWithoutUnfinishedUploads(): void
+    {
+        $tester = $this->runCommand([]);
+
+        $this->assertStringNotContainsString('unfinished upload', $tester->getDisplay());
     }
 }

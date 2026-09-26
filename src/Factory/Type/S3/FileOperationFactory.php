@@ -24,11 +24,11 @@ class FileOperationFactory
     ) {
     }
 
-    public function createFileOperationFromUpload(UploadInterface $upload, int $chunk): FileOperationInterface
+    public function createFileOperationFromUpload(UploadInterface $upload, int $chunk, string $chunkId): FileOperationInterface
     {
         return new FileOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($upload->getId(), $chunk)
+            $this->fileService->getUploadBucketKey($upload->getId(), $chunk, $chunkId)
         );
     }
 

@@ -3,10 +3,23 @@
 	admin off
 	servers {
 		protocols h1
+		timeouts {
+			# default for all endpoints, upload endpoints are extended below
+			read_body {$API_REQUEST_BODY_TIMEOUT:30s}
+		}
 	}
 	log {
 		output stdout
 		format json
+	}
+	frankenphp {
+		# upload requests hold a PHP thread while the client sends the request body, so more threads than the default
+		# (2x cores) may be started under load; both values are calculated by the entrypoint, the fallbacks are only used
+		# if it did not run. `num_threads` has to be set explicitly, as it drops to 1 as soon as `max_threads` is set.
+		num_threads {$FRANKENPHP_NUM_THREADS:16}
+		max_threads {$FRANKENPHP_MAX_THREADS:auto}
+		# do not queue requests forever if all threads are busy
+		max_wait_time {$FRANKENPHP_MAX_WAIT_TIME:30s}
 	}
 	supervisor {
 		supercronic -json /etc/crontabs/supercronic
@@ -22,6 +35,44 @@
 	}
 	request_body {
 		max_size 101MiB
+	}
+	# only endpoints which receive upload data from the client may take up to 15 minutes to receive it: single request
+	# uploads (POST/PUT /<id>/file) and resumable upload chunks (PATCH /upload/<id>); slow clients have to send
+	# smaller chunks
+	@uploadFile {
+		method POST PUT
+		path_regexp ^/[0-9a-fA-F-]{36}/file$
+	}
+	@uploadChunk {
+		method PATCH
+		path_regexp ^/upload/[0-9a-fA-F-]{36}$
+	}
+	request_body @uploadFile {
+		read_timeout {$API_UPLOAD_REQUEST_BODY_TIMEOUT:15m}
+	}
+	request_body @uploadChunk {
+		read_timeout {$API_UPLOAD_REQUEST_BODY_TIMEOUT:15m}
+	}
+	# server errors which do not come from the application as problem json still get a problem json body:
+	# - PHP failures (e.g. fatal errors like exhausted memory) answer with an empty body and the default html type
+	# - FrankenPHP answers by itself, without content type, if it did not get a free PHP thread in time (`max_wait_time`)
+	intercept {
+		@phpFailure {
+			status 5xx
+			header Content-Type text/html*
+		}
+		handle_response @phpFailure {
+			header Content-Type application/problem+json
+			respond `{"type":"about:blank","title":"Internal Server Error","status":500,"detail":"Internal server error."}` 500
+		}
+		@serverFailure {
+			status 5xx
+			header !Content-Type
+		}
+		handle_response @serverFailure {
+			header Content-Type application/problem+json
+			respond `{"type":"about:blank","title":"Server Error","status":{http.intercept.status_code},"detail":"The server could not process the request, please retry later."}` {http.intercept.status_code}
+		}
 	}
 	log {
 	    no_hostname

@@ -24,7 +24,7 @@ class UploadFileChunkOperationFactory
     ) {
     }
 
-    public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequestInterface $resumableUploadRequest, UuidInterface $uploadId): UploadFileChunkOperationInterface
+    public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequestInterface $resumableUploadRequest, UuidInterface $uploadId, string $chunkId): UploadFileChunkOperationInterface
     {
         if (true === $resumableUploadRequest->isUploadComplete()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileChunkOperation' requires 'ResumableUploadRequest' to contain partial content, i.e. be a chunked upload request.");
@@ -32,18 +32,18 @@ class UploadFileChunkOperationFactory
 
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($uploadId, 1),
+            $this->fileService->getUploadBucketKey($uploadId, 1, $chunkId),
             $resumableUploadRequest->getContent(),
             $resumableUploadRequest->getContentLength(),
             'application/octet-stream'
         );
     }
 
-    public function createUploadFileChunkOperationFromPartialUploadRequest(PartialUploadRequestInterface $partialUploadRequest, UploadInterface $upload): UploadFileChunkOperationInterface
+    public function createUploadFileChunkOperationFromPartialUploadRequest(PartialUploadRequestInterface $partialUploadRequest, UploadInterface $upload, string $chunkId): UploadFileChunkOperationInterface
     {
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($upload->getId(), $upload->getAlreadyUploadedChunks() + 1),
+            $this->fileService->getUploadBucketKey($upload->getId(), $upload->getAlreadyUploadedChunks() + 1, $chunkId),
             $partialUploadRequest->getContent(),
             $partialUploadRequest->getContentLength(),
             'application/octet-stream'

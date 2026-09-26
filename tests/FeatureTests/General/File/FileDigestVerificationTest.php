@@ -131,6 +131,110 @@ class FileDigestVerificationTest extends BaseRequestTestCase
         $cleanup($id);
     }
 
+    /**
+     * @return array<string, array{0: bool, 1: string}>
+     */
+    public static function singleRequestMethodProvider(): array
+    {
+        $cases = [];
+        foreach (['node' => false, 'relation' => true] as $targetName => $onRelation) {
+            foreach (['POST', 'PUT'] as $method) {
+                $cases[sprintf('%s %s', $targetName, $method)] = [$onRelation, $method];
+            }
+        }
+
+        return $cases;
+    }
+
+    /**
+     * The body of a single request is the whole file, so `Repr-Digest` and `Content-Digest` are the same hash and
+     * both are accepted together.
+     */
+    #[DataProvider('singleRequestMethodProvider')]
+    public function testSingleRequestWithCorrectReprAndContentDigestStoresFile(bool $onRelation, string $method): void
+    {
+        [$id, $cleanup] = $this->createTarget($onRelation, 'digest-verification-both-correct');
+        $this->generateDeterministicFile(70010009, 4096, self::ASSET_PATH);
+        $digest = $this->digestHeaderValue(hash_file('sha256', self::ASSET_PATH));
+
+        $response = $this->upload($method, $id, self::ASSET_PATH, [
+            'Repr-Digest' => $digest,
+            'Content-Digest' => $digest,
+        ]);
+        $this->assertIsCreatedResponse($response, false);
+        $this->assertStoredFile($id, self::ASSET_PATH);
+
+        unlink(self::ASSET_PATH);
+        $cleanup($id);
+    }
+
+    /**
+     * @return array<string, array{0: bool, 1: string, 2: string}>
+     */
+    public static function singleRequestWrongHeaderProvider(): array
+    {
+        $cases = [];
+        foreach (['node' => false, 'relation' => true] as $targetName => $onRelation) {
+            foreach (['POST', 'PUT'] as $method) {
+                foreach (['Repr-Digest', 'Content-Digest'] as $wrongHeader) {
+                    $cases[sprintf('%s %s wrong %s', $targetName, $method, $wrongHeader)] = [$onRelation, $method, $wrongHeader];
+                }
+            }
+        }
+
+        return $cases;
+    }
+
+    /**
+     * Every supplied digest has to match, a correct one does not excuse a wrong one.
+     */
+    #[DataProvider('singleRequestWrongHeaderProvider')]
+    public function testSingleRequestWithOneCorrectAndOneWrongDigestLeavesElementWithoutFile(bool $onRelation, string $method, string $wrongHeader): void
+    {
+        [$id, $cleanup] = $this->createTarget($onRelation, 'digest-verification-one-wrong');
+        $this->generateDeterministicFile(70010010, 4096, self::ASSET_PATH);
+        $correctHeader = 'Repr-Digest' === $wrongHeader ? 'Content-Digest' : 'Repr-Digest';
+
+        $response = $this->upload($method, $id, self::ASSET_PATH, [
+            $correctHeader => $this->digestHeaderValue(hash_file('sha256', self::ASSET_PATH)),
+            $wrongHeader => $this->digestHeaderValue(str_repeat('ab', 32)),
+        ]);
+        $this->assertIsProblemResponse($response, 400);
+        $this->assertStringContainsString($wrongHeader, $this->getBody($response)['detail']);
+        unlink(self::ASSET_PATH);
+
+        $this->assertIsProblemResponse($this->runGetRequest(sprintf('/%s/file', $id), self::TOKEN), 404);
+        $this->assertArrayNotHasKey('file', $this->getBody($this->runGetRequest(sprintf('/%s', $id), self::TOKEN)));
+
+        $cleanup($id);
+    }
+
+    /**
+     * A replacement with one wrong digest keeps the old file, whichever header is wrong.
+     */
+    #[DataProvider('targetProvider')]
+    public function testPutWithOneWrongOfBothDigestsKeepsOldFile(bool $onRelation): void
+    {
+        [$id, $cleanup] = $this->createTarget($onRelation, 'digest-verification-replace-one-wrong');
+        $this->generateDeterministicFile(70010011, 4096, self::ASSET_PATH);
+        $this->assertIsCreatedResponse($this->upload('POST', $id, self::ASSET_PATH), false);
+        $oldEtag = $this->runGetRequest(sprintf('/%s/file', $id), self::TOKEN)->getHeader('ETag');
+
+        $replacementPath = __DIR__.'/../../Asset/file-digest-verification-replacement.bin';
+        $this->generateDeterministicFile(70010012, 8192, $replacementPath);
+        $correct = $this->digestHeaderValue(hash_file('sha256', $replacementPath));
+        $wrong = $this->digestHeaderValue(str_repeat('ab', 32));
+        foreach ([['Repr-Digest' => $correct, 'Content-Digest' => $wrong], ['Repr-Digest' => $wrong, 'Content-Digest' => $correct]] as $headers) {
+            $this->assertIsProblemResponse($this->upload('PUT', $id, $replacementPath, $headers), 400);
+            $this->assertStoredFile($id, self::ASSET_PATH);
+            $this->assertSame($oldEtag, $this->runGetRequest(sprintf('/%s/file', $id), self::TOKEN)->getHeader('ETag'));
+        }
+        unlink($replacementPath);
+
+        unlink(self::ASSET_PATH);
+        $cleanup($id);
+    }
+
     #[DataProvider('targetProvider')]
     public function testPutWithWrongDigestKeepsOldFileAndEtag(bool $onRelation): void
     {

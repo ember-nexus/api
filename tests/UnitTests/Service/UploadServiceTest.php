@@ -18,9 +18,11 @@ use App\Type\NodeElement;
 use DateTime;
 use Exception;
 use Laudis\Neo4j\Contracts\ClientInterface;
+use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -75,7 +77,7 @@ class UploadServiceTest extends TestCase
         int $uploadOffset = 0,
         bool $uploadComplete = false,
         ?UuidInterface $uploadTarget = null,
-        int $alreadyUploadedChunks = 0,
+        array $chunkIds = [],
         ?UuidInterface $uploadOwner = null,
         string $extension = 'bin',
         ?string $hashState = null,
@@ -86,7 +88,9 @@ class UploadServiceTest extends TestCase
         $upload->getUploadOffset()->willReturn($uploadOffset);
         $upload->isUploadComplete()->willReturn($uploadComplete);
         $upload->getUploadTarget()->willReturn($uploadTarget ?? UuidV4::uuid4());
-        $upload->getAlreadyUploadedChunks()->willReturn($alreadyUploadedChunks);
+        $upload->getAlreadyUploadedChunks()->willReturn(count($chunkIds));
+        $upload->getChunkIds()->willReturn($chunkIds);
+        $upload->getLastChunkId()->willReturn([] === $chunkIds ? null : $chunkIds[array_key_last($chunkIds)]);
         $upload->getUploadOwner()->willReturn($uploadOwner ?? UuidV4::uuid4());
         $upload->getExtension()->willReturn($extension);
         $upload->getExpires()->willReturn(new DateTime('2099-01-01'));
@@ -123,7 +127,8 @@ class UploadServiceTest extends TestCase
                 'uploadOffset' => 0,
                 'uploadComplete' => false,
                 'uploadTarget' => $uploadTarget->toString(),
-                'alreadyUploadedChunks' => 0,
+                'chunkIds' => [],
+                'lastChunkId' => null,
                 'uploadOwner' => $uploadOwner->toString(),
                 'extension' => 'png',
                 'expires' => $mergedElement->getProperty('expires'),
@@ -213,34 +218,34 @@ class UploadServiceTest extends TestCase
         $service->deleteUpload($upload->reveal());
     }
 
-    public function testDeleteUploadAndChunksDeletesOneChunkWhenNoneUploadedYet(): void
+    public function testDeleteUploadAndChunksDeletesOnlyUploadWhenNoChunkUploadedYet(): void
     {
         $id = UuidV4::uuid4();
-        $upload = $this->buildUpload(id: $id, alreadyUploadedChunks: 0);
+        $upload = $this->buildUpload(id: $id);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
 
         [$service, $elementManager, , $fileOperationFactory, $s3Service] = $this->buildService();
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
-        $fileOperationFactory->createFileOperationFromUpload($upload->reveal(), 1)->willReturn($fileOperation)->shouldBeCalledOnce();
-        $s3Service->deleteFile($fileOperation)->shouldBeCalledOnce();
+        $fileOperationFactory->createFileOperationFromUpload(Argument::cetera())->shouldNotBeCalled();
+        $s3Service->deleteFile(Argument::any())->shouldNotBeCalled();
         $elementManager->getElementOrFail($id)->willReturn($element);
         $elementManager->delete($element)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
 
         $service->deleteUploadAndChunks($upload->reveal());
     }
 
-    public function testDeleteUploadAndChunksDeletesAllChunksIncludingPossiblyRejectedNextChunk(): void
+    public function testDeleteUploadAndChunksDeletesAllChunks(): void
     {
         $id = UuidV4::uuid4();
-        $upload = $this->buildUpload(id: $id, alreadyUploadedChunks: 2);
+        $upload = $this->buildUpload(id: $id, chunkIds: ['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2']);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
 
         [$service, $elementManager, , $fileOperationFactory, $s3Service] = $this->buildService();
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
-        foreach ([1, 2, 3] as $chunk) {
-            $fileOperationFactory->createFileOperationFromUpload($upload->reveal(), $chunk)->willReturn($fileOperation)->shouldBeCalledOnce();
+        foreach ([1, 2] as $chunk) {
+            $fileOperationFactory->createFileOperationFromUpload($upload->reveal(), $chunk, 'aaaaaaaaaaaaaaa'.$chunk)->willReturn($fileOperation)->shouldBeCalledOnce();
         }
-        $s3Service->deleteFile($fileOperation)->shouldBeCalledTimes(3);
+        $s3Service->deleteFile($fileOperation)->shouldBeCalledTimes(2);
         $elementManager->getElementOrFail($id)->willReturn($element);
         $elementManager->delete($element)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
 
@@ -310,7 +315,7 @@ class UploadServiceTest extends TestCase
         $elementId = UuidV4::uuid4();
         $uploadId = UuidV4::uuid4();
         $uploadElement = (new NodeElement())->setId($uploadId)->setLabel('Upload');
-        $upload = $this->buildUpload(id: $uploadId, alreadyUploadedChunks: 1)->reveal();
+        $upload = $this->buildUpload(id: $uploadId, chunkIds: ['aaaaaaaaaaaaaaa1'])->reveal();
 
         [$service, $elementManager, , $fileOperationFactory, $s3Service, $uploadFactory, $cypherEntityManager] = $this->buildService();
         $client = $this->prophesize(ClientInterface::class);
@@ -321,12 +326,54 @@ class UploadServiceTest extends TestCase
         $uploadFactory->createUploadFromElement($uploadElement)->willReturn($upload);
 
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
-        $fileOperationFactory->createFileOperationFromUpload($upload, Argument::any())->willReturn($fileOperation);
-        $s3Service->deleteFile($fileOperation)->shouldBeCalledTimes(2);
+        $fileOperationFactory->createFileOperationFromUpload($upload, 1, 'aaaaaaaaaaaaaaa1')->willReturn($fileOperation);
+        $s3Service->deleteFile($fileOperation)->shouldBeCalledOnce();
 
         $elementManager->getElementOrFail($uploadId)->willReturn($uploadElement);
         $elementManager->delete($uploadElement)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
 
         $service->deleteUploadsTargeting($elementId);
+    }
+
+    /**
+     * @return array<string, array{bool, bool}>
+     */
+    public static function appendChunkResultProvider(): array
+    {
+        return ['offset matches' => [true, true], 'concurrently modified' => [false, false]];
+    }
+
+    #[DataProvider('appendChunkResultProvider')]
+    public function testAppendChunkIfOffsetMatchesReportsWhetherUploadWasUpdated(bool $rowReturned, bool $expected): void
+    {
+        $id = UuidV4::uuid4();
+        $expectedUpload = $this->buildUpload(id: $id, uploadOffset: 500, chunkIds: ['aaaaaaaaaaaaaaa1'])->reveal();
+        $nextUpload = $this->buildUpload(id: $id, uploadOffset: 1000, uploadComplete: true, chunkIds: ['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2'], hashState: 'state')->reveal();
+
+        [$service, $elementManager, , , , , $cypherEntityManager] = $this->buildService();
+        // the list is written by a flushed merge, but only if the compare-and-set succeeded
+        $elementManager->getElement($id)->willReturn(null);
+        $elementManager->merge(Argument::that(fn (NodeElement $element) => ['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2'] === $element->getProperty('chunkIds') && 'aaaaaaaaaaaaaaa2' === $element->getProperty('lastChunkId')))
+            ->shouldBeCalledTimes($rowReturned ? 1 : 0)->willReturn($elementManager->reveal());
+        $elementManager->flush()->shouldBeCalledTimes($rowReturned ? 1 : 0)->willReturn($elementManager->reveal());
+        $client = $this->prophesize(ClientInterface::class);
+        $client->runStatement(Argument::that(function (Statement $statement) use ($id) {
+            $parameters = $statement->getParameters();
+
+            return str_contains($statement->getText(), 'WHERE u.uploadOffset = $expectedOffset')
+                && str_contains($statement->getText(), 'coalesce(u.lastChunkId, "") = $expectedLastChunkId')
+                && $parameters['id'] === $id->toString()
+                && 500 === $parameters['expectedOffset']
+                && 'aaaaaaaaaaaaaaa1' === $parameters['expectedLastChunkId']
+                && 1000 === $parameters['uploadOffset']
+                && true === $parameters['uploadComplete']
+                && 'aaaaaaaaaaaaaaa2' === $parameters['lastChunkId']
+                && 'state' === $parameters['hashState'];
+        }))->shouldBeCalledOnce()->willReturn(
+            $rowReturned ? $this->buildSummarizedResultOf(new CypherMap(['u.id' => $id->toString()])) : $this->buildSummarizedResultOf()
+        );
+        $cypherEntityManager->getClient()->willReturn($client->reveal());
+
+        $this->assertSame($expected, $service->appendChunkIfOffsetMatches($expectedUpload, $nextUpload));
     }
 }

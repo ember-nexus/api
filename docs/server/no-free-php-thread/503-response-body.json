@@ -1,0 +1,6 @@
+{
+  "type": "about:blank",
+  "title": "Server Error",
+  "status": 503,
+  "detail": "The server could not process the request, please retry later."
+}

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Runs the server tests (tests/ServerTests) one scenario after another against the production image, which is
+# recreated with lower limits for every scenario, see docker/Caddyfile. Requires the images api:dev-amd and api:prod-amd.
+# Destructive: all databases of the started stack are reset, the stack is removed afterwards (KEEP_STACK=1 keeps it).
+# Update expected responses in docs/server with FIX_CONTROLLER_OUTPUT=1.
+
+set -u
+
+cd "$(dirname "$0")/.."
+
+COMPOSE="docker compose -p enx-server-tests -f ./tests/ServerTests/docker-compose.yml"
+EXEC_DEV="$COMPOSE exec -T --user $(id -u):$(id -g) api-dev"
+
+cleanup() {
+  if [ -z "${KEEP_STACK:-}" ]; then
+    $COMPOSE down -v --remove-orphans >/dev/null 2>&1
+  fi
+}
+trap cleanup EXIT
+
+wait_for() {
+  local description="$1" timeout="$2"
+  shift 2
+  local end=$((SECONDS + timeout))
+  until "$@" >/dev/null 2>&1; do
+    if [ "$SECONDS" -ge "$end" ]; then
+      echo "Timeout while waiting for: $description"
+      return 1
+    fi
+    sleep 2
+  done
+}
+
+echo "Starting stack"
+$COMPOSE up --quiet-pull -d || exit 1
+$EXEC_DEV bash -c "composer install --ignore-platform-req=php --quiet" || exit 1
+wait_for "databases" 240 $EXEC_DEV bash -c "php bin/console healthcheck" || exit 1
+
+echo "Preparing databases and test user"
+$EXEC_DEV bash -c "php bin/console database:drop -f" > /dev/null || exit 1
+$EXEC_DEV bash -c "php bin/console user:create server-test@localhost.dev 1234" > /dev/null || exit 1
+TOKEN=$($EXEC_DEV bash -c "php bin/console token:create server-test@localhost.dev 1234" | sed -n 's/.*\(secret-token:[A-Za-z0-9]*\).*/\1/p' | head -n 1)
+if [ -z "$TOKEN" ]; then
+  echo "Unable to create test token"
+  exit 1
+fi
+
+FAILED=0
+
+# name, group and environment variables of the production container
+run_scenario() {
+  local group="$1"
+  shift
+  echo
+  echo "=== Scenario $group ($*)"
+  env "$@" $COMPOSE up -d --force-recreate --no-deps api-prod || { FAILED=1; return; }
+  if ! wait_for "api-prod" 120 $COMPOSE exec -T api-prod curl -s -o /dev/null http://127.0.0.1/; then
+    FAILED=1
+    return
+  fi
+  $COMPOSE exec -T --user "$(id -u):$(id -g)" \
+    -e API_DOMAIN=http://api-prod -e SERVER_TEST_TOKEN="$TOKEN" ${FIX_CONTROLLER_OUTPUT:+-e FIX_CONTROLLER_OUTPUT=1} \
+    api-dev bash -c "composer test:server -- --group $group" || FAILED=1
+}
+
+run_scenario server-timeouts API_REQUEST_BODY_TIMEOUT=10s API_UPLOAD_REQUEST_BODY_TIMEOUT=20s
+run_scenario server-threads FRANKENPHP_NUM_THREADS=1 FRANKENPHP_MAX_THREADS=1 FRANKENPHP_MAX_WAIT_TIME=2s API_UPLOAD_REQUEST_BODY_TIMEOUT=20s
+run_scenario server-php-failure
+run_scenario server-php-boot-failure SERVER_TEST_INI_DIR=/server-test-ini/low-memory
+
+if [ "$FAILED" -ne 0 ]; then
+  echo
+  echo "Server tests failed."
+  exit 1
+fi
+echo
+echo "Server tests finished successfully."

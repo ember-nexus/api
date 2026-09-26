@@ -19,6 +19,7 @@ use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Security\AuthProvider;
 use App\Service\DigestService;
 use App\Service\ElementManager;
+use App\Service\FileService;
 use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
@@ -104,6 +105,9 @@ class UploadCreationServiceTest extends TestCase
             ->will(fn (array $args) => new Client400BadContentException('bad-content', detail: $args[0]));
         $badContentFactory = $badContentFactory->reveal();
 
+        $fileService = $this->prophesize(FileService::class);
+        $fileService->generateUploadChunkId()->willReturn('0123456789abcdef');
+
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider->getUserId()->willReturn(Uuid::uuid4());
 
@@ -144,6 +148,7 @@ class UploadCreationServiceTest extends TestCase
             $this->uploadService->reveal(),
             new FileSizeLimitService($configuration, $badContentFactory),
             new UploadBodyLimitService($configuration, $badContentFactory),
+            $fileService->reveal(),
             $badContentFactory,
             $this->conflictFactory->reveal(),
         );
@@ -175,11 +180,17 @@ class UploadCreationServiceTest extends TestCase
         $this->resumableUploadRequest->getContent()->willReturn($this->contentResource());
     }
 
-    private function handle(?string $digestHeader = null, string $headerName = 'Repr-Digest'): mixed
+    /**
+     * @param array<string, string> $additionalHeaders
+     */
+    private function handle(?string $digestHeader = null, string $headerName = 'Repr-Digest', array $additionalHeaders = []): mixed
     {
         $request = new Request();
         if (null !== $digestHeader) {
             $request->headers->set($headerName, $digestHeader);
+        }
+        foreach ($additionalHeaders as $name => $value) {
+            $request->headers->set($name, $value);
         }
 
         return $this->service->handleUploadCreationFromRequest($this->elementId, $request);
@@ -231,6 +242,55 @@ class UploadCreationServiceTest extends TestCase
         $digest = (new DigestService())->formatDigestHeaderValue(hash('sha256', 'hello'));
 
         $this->assertInstanceOf(CreatedResponse::class, $this->handle($digest, 'Content-Digest'));
+    }
+
+    public function testDirectUploadWithBothMatchingDigestHeadersSucceeds(): void
+    {
+        $this->configureDirectUpload();
+        $this->s3Service->uploadFile(Argument::any())->shouldBeCalledOnce()->willReturn(5);
+        $this->element->addProperty(Argument::cetera())->shouldBeCalled()->willReturn($this->element->reveal());
+        $digest = (new DigestService())->formatDigestHeaderValue(hash('sha256', 'hello'));
+
+        $this->assertInstanceOf(CreatedResponse::class, $this->handle($digest, 'Repr-Digest', ['Content-Digest' => $digest]));
+    }
+
+    public function testDirectUploadWithCorrectReprAndWrongContentDigestIsRejected(): void
+    {
+        $this->configureDirectUpload();
+        $this->s3Service->uploadFile(Argument::any())->shouldNotBeCalled();
+        $this->elementManager->merge(Argument::any())->shouldNotBeCalled();
+        $correct = (new DigestService())->formatDigestHeaderValue(hash('sha256', 'hello'));
+        $wrong = (new DigestService())->formatDigestHeaderValue(hash('sha256', 'something else'));
+
+        $this->assertBadContentContaining(
+            "'Content-Digest'",
+            fn () => $this->handle($correct, 'Repr-Digest', ['Content-Digest' => $wrong])
+        );
+    }
+
+    public function testDirectUploadWithCorrectContentAndWrongReprDigestIsRejected(): void
+    {
+        $this->configureDirectUpload();
+        $this->s3Service->uploadFile(Argument::any())->shouldNotBeCalled();
+        $this->elementManager->merge(Argument::any())->shouldNotBeCalled();
+        $correct = (new DigestService())->formatDigestHeaderValue(hash('sha256', 'hello'));
+        $wrong = (new DigestService())->formatDigestHeaderValue(hash('sha256', 'something else'));
+
+        $this->assertBadContentContaining(
+            "'Repr-Digest'",
+            fn () => $this->handle($wrong, 'Repr-Digest', ['Content-Digest' => $correct])
+        );
+    }
+
+    public function testDirectUploadWithUnsupportedContentDigestAlgorithmIsRejected(): void
+    {
+        $this->configureDirectUpload();
+        $this->s3Service->uploadFile(Argument::any())->shouldNotBeCalled();
+
+        $this->assertBadContentContaining(
+            "'Content-Digest' header",
+            fn () => $this->handle('md5=:1B2M2Y8AsgTpgAmY7PhCfg==:', 'Content-Digest')
+        );
     }
 
     public function testDirectUploadWithUnsupportedDigestAlgorithmIsRejected(): void
@@ -333,6 +393,7 @@ class UploadCreationServiceTest extends TestCase
         $this->uploadService->mergeUploadElement(Argument::that(
             fn ($upload) => 50 === $upload->getUploadOffset()
                 && 1 === $upload->getAlreadyUploadedChunks()
+                && ['0123456789abcdef'] === $upload->getChunkIds()
                 && null !== $upload->getHashState()
         ))->shouldBeCalledOnce();
 

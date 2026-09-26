@@ -147,29 +147,33 @@ class PropertyParseServiceTest extends TestCase
         $this->assertSame($uuid, $this->buildService()->getUploadTargetFromProperties(['uploadTarget' => $uuid]));
     }
 
-    public function testAlreadyUploadedChunksDefaultsToZero(): void
+    public function testChunkIdsDefaultToEmptyList(): void
     {
-        $this->assertSame(0, $this->buildService()->getAlreadyUploadedChunksFromProperties([]));
+        $this->assertSame([], $this->buildService()->getChunkIdsFromProperties([]));
     }
 
-    public function testAlreadyUploadedChunksIsReturned(): void
+    public function testChunkIdsAreReturned(): void
     {
-        $this->assertSame(3, $this->buildService()->getAlreadyUploadedChunksFromProperties(['alreadyUploadedChunks' => 3]));
+        $this->assertSame(['a', 'b'], $this->buildService()->getChunkIdsFromProperties(['chunkIds' => ['a', 'b']]));
     }
 
-    public function testAlreadyUploadedChunksMustBeInt(): void
+    public function testChunkIdsMustBeList(): void
     {
         $this->assertBadContent(
-            fn (PropertyParseService $service) => $service->getAlreadyUploadedChunksFromProperties(['alreadyUploadedChunks' => '3']),
-            'Upload expects property alreadyUploadedChunks to be int.'
+            fn (PropertyParseService $service) => $service->getChunkIdsFromProperties(['chunkIds' => 'a']),
+            'Upload expects property chunkIds to be a list of strings.'
+        );
+        $this->assertBadContent(
+            fn (PropertyParseService $service) => $service->getChunkIdsFromProperties(['chunkIds' => ['x' => 'a']]),
+            'Upload expects property chunkIds to be a list of strings.'
         );
     }
 
-    public function testAlreadyUploadedChunksMustNotBeNegative(): void
+    public function testChunkIdsMustContainStrings(): void
     {
         $this->assertBadContent(
-            fn (PropertyParseService $service) => $service->getAlreadyUploadedChunksFromProperties(['alreadyUploadedChunks' => -2]),
-            'Upload expects property alreadyUploadedChunks to be positive int.'
+            fn (PropertyParseService $service) => $service->getChunkIdsFromProperties(['chunkIds' => ['a', 3]]),
+            'Upload expects property chunkIds to be a list of strings.'
         );
     }
 

@@ -72,8 +72,8 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $headerParseService = $this->prophesize(HeaderParseService::class);
 
         $headerParseService->isUploadCompleteFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(false);
-        $headerParseService->getUploadLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(654321);
-        $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(4321);
+        $headerParseService->getUploadLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(6512);
+        $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(12);
         $headerParseService->getExtensionFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn('png');
 
         $resumableUploadRequestFactory = $this->buildResumableUploadRequestFactory(
@@ -85,8 +85,8 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $this->assertSame($elementId, $resumableUploadRequest->getElementId());
         $this->assertSame('some content', stream_get_contents($resumableUploadRequest->getContent()));
         $this->assertFalse($resumableUploadRequest->isUploadComplete());
-        $this->assertSame(654321, $resumableUploadRequest->getUploadLength());
-        $this->assertSame(4321, $resumableUploadRequest->getContentLength());
+        $this->assertSame(6512, $resumableUploadRequest->getUploadLength());
+        $this->assertSame(12, $resumableUploadRequest->getContentLength());
         $this->assertSame('png', $resumableUploadRequest->getExtension());
     }
 
@@ -104,8 +104,8 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $headerParseService = $this->prophesize(HeaderParseService::class);
 
         $headerParseService->isUploadCompleteFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(true);
-        $headerParseService->getUploadLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(654321);
-        $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(4321);
+        $headerParseService->getUploadLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(6512);
+        $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(12);
         $headerParseService->getExtensionFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn('png');
 
         $exception = $this->prophesize(Client400BadContentException::class)->reveal();
@@ -138,7 +138,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
 
         $headerParseService->isUploadCompleteFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(true);
         $headerParseService->getUploadLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(null);
-        $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(4321);
+        $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(12);
         $headerParseService->getExtensionFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn('png');
 
         $resumableUploadRequestFactory = $this->buildResumableUploadRequestFactory(
@@ -162,7 +162,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $headerParseService = $this->prophesize(HeaderParseService::class);
 
         $headerParseService->isUploadCompleteFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(true);
-        $headerParseService->getUploadLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(654321);
+        $headerParseService->getUploadLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(6512);
         $headerParseService->getContentLengthFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn(null);
         $headerParseService->getExtensionFromHeaders(Argument::is($headers))->shouldBeCalledOnce()->willReturn('png');
 

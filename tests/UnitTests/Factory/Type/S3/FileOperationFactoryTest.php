@@ -49,7 +49,7 @@ class FileOperationFactoryTest extends TestCase
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
 
         $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($id), Argument::is(3))->shouldBeCalledOnce()->willReturn('upload-key');
+        $fileService->getUploadBucketKey(Argument::is($id), Argument::is(3), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
 
         $factory = $this->buildFileOperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
@@ -59,7 +59,7 @@ class FileOperationFactoryTest extends TestCase
         $upload = $this->prophesize(UploadInterface::class);
         $upload->getId()->shouldBeCalledOnce()->willReturn($id);
 
-        $operation = $factory->createFileOperationFromUpload($upload->reveal(), 3);
+        $operation = $factory->createFileOperationFromUpload($upload->reveal(), 3, '0123456789abcdef');
 
         $this->assertInstanceOf(FileOperation::class, $operation);
         $this->assertSame('upload-bucket', $operation->getBucket());

@@ -54,14 +54,14 @@ class UploadFileChunkOperationFactoryTest extends TestCase
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
 
         $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1))->shouldBeCalledOnce()->willReturn('upload-key');
+        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
 
         $factory = $this->buildUploadFileChunkOperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             fileService: $fileService->reveal()
         );
 
-        $operation = $factory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
+        $operation = $factory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, '0123456789abcdef');
 
         $this->assertInstanceOf(UploadFileChunkOperation::class, $operation);
         $this->assertSame('upload-bucket', $operation->getUploadBucket());
@@ -90,7 +90,7 @@ class UploadFileChunkOperationFactoryTest extends TestCase
 
         $this->expectException(Client400BadContentException::class);
 
-        $factory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId);
+        $factory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, '0123456789abcdef');
     }
 
     public function testCreateUploadFileChunkOperationFromPartialUploadRequest(): void
@@ -109,14 +109,14 @@ class UploadFileChunkOperationFactoryTest extends TestCase
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
 
         $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(4))->shouldBeCalledOnce()->willReturn('upload-key');
+        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(4), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
 
         $factory = $this->buildUploadFileChunkOperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             fileService: $fileService->reveal()
         );
 
-        $operation = $factory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest->reveal(), $upload->reveal());
+        $operation = $factory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest->reveal(), $upload->reveal(), '0123456789abcdef');
 
         $this->assertInstanceOf(UploadFileChunkOperation::class, $operation);
         $this->assertSame('upload-bucket', $operation->getUploadBucket());

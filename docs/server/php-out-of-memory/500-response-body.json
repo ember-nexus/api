@@ -1,0 +1,6 @@
+{
+  "type": "http://api-prod/error/500/internal-server-error",
+  "title": "Internal server error",
+  "status": 500,
+  "detail": "Internal server error, see log."
+}

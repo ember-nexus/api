@@ -59,7 +59,7 @@ class IncrementalHashService
     {
         try {
             $binary = \Safe\base64_decode($serialized, true);
-            $context = \Safe\unserialize($binary);
+            $context = \Safe\unserialize($binary, ['allowed_classes' => [HashContext::class]]);
         } catch (Throwable) {
             $context = null;
         }

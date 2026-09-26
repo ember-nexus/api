@@ -89,21 +89,25 @@ class PropertyParseService
 
     /**
      * @param mixed[] $properties
+     *
+     * @return list<string>
      */
-    public function getAlreadyUploadedChunksFromProperties(mixed $properties): int
+    public function getChunkIdsFromProperties(mixed $properties): array
     {
-        if (!array_key_exists('alreadyUploadedChunks', $properties)) {
-            return 0;
+        if (!array_key_exists('chunkIds', $properties)) {
+            return [];
         }
-        $alreadyUploadedChunks = $properties['alreadyUploadedChunks'];
-        if (!is_int($alreadyUploadedChunks)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property alreadyUploadedChunks to be int.');
+        $chunkIds = $properties['chunkIds'];
+        if (!is_array($chunkIds) || !array_is_list($chunkIds)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property chunkIds to be a list of strings.');
         }
-        if ($alreadyUploadedChunks < 0) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property alreadyUploadedChunks to be positive int.');
+        foreach ($chunkIds as $chunkId) {
+            if (!is_string($chunkId)) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property chunkIds to be a list of strings.');
+            }
         }
 
-        return $alreadyUploadedChunks;
+        return $chunkIds;
     }
 
     /**

@@ -41,3 +41,17 @@ not permanent documentation: delete entries once they are done or moved into Git
   the file endpoints and `PATCH`/`PUT`, `DELETE` for `DELETE /<uuid>`) conditional requests answer `404`, exactly like
   the endpoint itself.
 - `DELETE /<uuid>/file` answers `404` for an element without file, and `hasFile` decides whether an element has one.
+- Uploads: every chunk attempt has its own object key (`<upload>-<index>-<chunkId>.wip`, ids stored in the `Upload`
+  element's `chunkIds`) and `PATCH /upload` appends with a compare-and-set on offset and last chunk id (graph property; the `chunkIds` list lives in MongoDB) (`409` if lost);
+  only `Repr-Digest` is verified on the completing chunk. Only a short note in `03-reference/08-upload.mdx`
+  ("Concurrency", "Verifying integrity") exists, "Chunk storage" and the `patch-upload-409` swagger text still need it.
+- `backup:create` warns (also with `--no-files`) about unfinished uploads: their chunks are not backed up, the `Upload`
+  nodes are, and can not be resumed after `backup:load`. `docs/` and the command docs (`backup-create.mdx`) do not
+  mention this yet. Single-request `POST`/`PUT` verify every supplied `Repr-Digest`/`Content-Digest` header (same bytes).
+- Operator docs: the production image runs with `memory_limit=256M`, OPcache with preload and no timestamp validation,
+  and FrankenPHP threads `num_threads = 2 x cores`, `max_threads = 8 x cores` (both overridable via the environment
+  variables `FRANKENPHP_NUM_THREADS` / `FRANKENPHP_MAX_THREADS`), `max_wait_time 30s`. Request body timeouts: 30s, 15 min
+  for the upload endpoints (`docker/Caddyfile`). Worst case memory is threads x `memory_limit`.
+- Server tests (`bin/test-server`, `tests/ServerTests`, CI job `test-server`): run the production image with lowered
+  limits (env variables of `docker/Caddyfile`) one scenario after another. `docs/server/` holds the expected special
+  server error responses (`503` no free PHP thread, `500` PHP failure outside of the application, cut-off bodies) for the docs.

@@ -32,9 +32,8 @@ class MergeFileChunksOperationFactory
 
         $uploadKeys = [];
         $uploadId = $upload->getId();
-        $alreadyUploadedChunks = $upload->getAlreadyUploadedChunks();
-        for ($i = 0; $i < $alreadyUploadedChunks; ++$i) {
-            $uploadKeys[] = $this->fileService->getUploadBucketKey($uploadId, $i + 1);
+        foreach ($upload->getChunkIds() as $index => $chunkId) {
+            $uploadKeys[] = $this->fileService->getUploadBucketKey($uploadId, $index + 1, $chunkId);
         }
 
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
