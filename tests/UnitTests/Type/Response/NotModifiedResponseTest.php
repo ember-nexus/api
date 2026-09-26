@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\UnitTests\Response;
+namespace App\Tests\UnitTests\Type\Response;
 
 use App\Type\Etag;
 use App\Type\Response\NotModifiedResponse;

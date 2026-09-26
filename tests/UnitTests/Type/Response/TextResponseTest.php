@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\UnitTests\Response;
+namespace App\Tests\UnitTests\Type\Response;
 
 use App\Type\Response\TextResponse;
 use PHPUnit\Framework\Attributes\CoversClass;

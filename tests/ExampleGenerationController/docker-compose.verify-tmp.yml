@@ -13,7 +13,6 @@ x-api-environment: &api-environment
 services:
 
   api-dev:
-    container_name: api-dev
     image: api:dev-amd
     depends_on:
       - neo4j
@@ -28,8 +27,7 @@ services:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt
 
-  api-prod:
-    container_name: api-prod
+  api:
     image: api:prod-amd
     depends_on:
       - neo4j
@@ -45,9 +43,26 @@ services:
       # the repository is deliberately not mounted: the production image is tested as it is shipped
       - ./well-known-security.txt:/well-known-security.txt
 
+  # second API instance, only differs in its configuration file; used by the tests of
+  # tests/ExampleGenerationControllerWithDifferentConfiguration via API_DOMAIN=http://api-different-configuration
+  api-different-configuration:
+    image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
+    expose:
+      - "80"
+    environment: *api-environment
+    volumes:
+      - ../ExampleGenerationControllerWithDifferentConfiguration/configuration.yml:/var/www/html/config/packages/ember_nexus.yaml:ro
+      - ./well-known-security.txt:/well-known-security.txt
+
   neo4j:
-    container_name: neo4j
-    image: neo4j:5.7
+    image: neo4j:5.11
     expose:
       - "7474"
       - "7687"
@@ -55,7 +70,6 @@ services:
       - NEO4J_AUTH=neo4j/password
 
   mongodb:
-    container_name: mongodb
     image: mongo:7
     expose:
       - "27017"
@@ -65,7 +79,6 @@ services:
       - GLIBC_TUNABLES=glibc.pthread.rseq=1
 
   elasticsearch:
-    container_name: elasticsearch
     image: elasticsearch:8.8.1
     expose:
       - "9200"
@@ -75,14 +88,12 @@ services:
       - xpack.security.enrollment.enabled=true
 
   redis:
-    container_name: redis
     image: redis:7-alpine
     expose:
       - "6379"
     command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
 
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:3-management
     expose:
       - "5672"
@@ -92,7 +103,6 @@ services:
       - RABBITMQ_DEFAULT_PASS=password
 
   minio:
-    container_name: minio
     image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     expose:
       - "9000"

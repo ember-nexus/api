@@ -62,6 +62,14 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         return implode("\n", $cleanedHeaders);
     }
 
+    private function removeFramingHeaders(string $headers): string
+    {
+        return implode("\n", array_filter(
+            explode("\n", $headers),
+            static fn (string $header): bool => !str_starts_with($header, 'Content-Length:') && !str_starts_with($header, 'Transfer-Encoding:')
+        ));
+    }
+
     public function checkHeadersAreIdentical(string $headers1, string $headers2): bool
     {
         // the remaining lifetime of an upload depends on the timing of the test run, allow a deviation of +-5 seconds
@@ -71,6 +79,13 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
             && abs((int) $matches1[1] - (int) $matches2[1]) <= 5
         ) {
             $headers2 = str_replace(sprintf('max-age=%s,', $matches2[1]), sprintf('max-age=%s,', $matches1[1]), $headers2);
+        }
+
+        // the development server streams responses (`Transfer-Encoding: chunked`), the production image answers with a
+        // `Content-Length`; the framing is not part of what the examples document, so it is not compared if it differs
+        if (str_contains($headers1, 'Transfer-Encoding: chunked') xor str_contains($headers2, 'Transfer-Encoding: chunked')) {
+            $headers1 = $this->removeFramingHeaders($headers1);
+            $headers2 = $this->removeFramingHeaders($headers2);
         }
 
         $headers1 = explode("\n", $headers1);

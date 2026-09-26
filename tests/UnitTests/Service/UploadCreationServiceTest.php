@@ -26,6 +26,7 @@ use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadBodyLimitService;
+use App\Service\UploadChunkValidator;
 use App\Service\UploadCreationService;
 use App\Service\UploadService;
 use App\Type\Response\CreatedResponse;
@@ -139,6 +140,7 @@ class UploadCreationServiceTest extends TestCase
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator->generate(Argument::cetera())->willReturn('/upload/x');
 
+        $fileSizeLimitService = new FileSizeLimitService($configuration, $badContentFactory);
         $this->service = new UploadCreationService(
             $authProvider->reveal(),
             $configuration,
@@ -153,11 +155,11 @@ class UploadCreationServiceTest extends TestCase
             new NoContentResponseFactory($configuration),
             $urlGenerator->reveal(),
             $this->uploadService->reveal(),
-            new FileSizeLimitService($configuration, $badContentFactory),
+            $fileSizeLimitService,
             new UploadBodyLimitService($configuration, $badContentFactory, new Client408RequestTimeoutExceptionFactory($urlGenerator->reveal())),
             $fileService->reveal(),
             $badContentFactory,
-            $this->conflictFactory->reveal(),
+            new UploadChunkValidator($configuration, $fileSizeLimitService, $badContentFactory, $this->conflictFactory->reveal()),
             $this->elementFileDeletionService->reveal(),
         );
     }

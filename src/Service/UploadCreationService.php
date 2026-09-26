@@ -9,7 +9,6 @@ use App\Contract\RelationElementInterface;
 use App\Contract\Request\ResumableUploadRequestInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
@@ -50,7 +49,7 @@ class UploadCreationService
         private UploadBodyLimitService $uploadBodyLimitService,
         private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
+        private UploadChunkValidator $uploadChunkValidator,
         private ElementFileDeletionService $elementFileDeletionService,
     ) {
     }
@@ -166,9 +165,8 @@ class UploadCreationService
                 \Safe\fclose($resource);
             }
         } else {
-            if (null !== $uploadLength && $contentLength > $uploadLength) {
-                throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
-            }
+            // rejected before anything is sent to S3
+            $this->uploadChunkValidator->assertWithinDeclaredLength($contentLength, false, 0, $uploadLength);
             $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
             $this->incrementalHashService->updateFromResource($hashContext, $resource);
 
@@ -184,16 +182,8 @@ class UploadCreationService
             $hashState = $this->incrementalHashService->serializeContextForStorage($hashContext);
 
             $chunkIds = [$chunkId];
-            if ($uploadOffset < $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()) {
-                // only the last chunk may be smaller than the minimum chunk size
-                if (false === $resumableUploadRequest->isUploadComplete()) {
-                    throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at least %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(), $uploadOffset));
-                }
-            }
-            if ($uploadOffset > $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()) {
-                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Uploaded chunk has to be at most %d bytes long, got %d.', $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(), $uploadOffset));
-            }
-            $this->fileSizeLimitService->assertWithinMaxFileSize($uploadOffset);
+            // a single request completes the upload, so this is never the final chunk
+            $this->uploadChunkValidator->assertChunkSize($uploadOffset, false, 0);
         }
 
         $expires = (new DateTime())->add(new DateInterval(sprintf('PT%sS', $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest())));

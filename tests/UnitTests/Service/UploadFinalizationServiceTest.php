@@ -17,6 +17,7 @@ use App\Service\DigestService;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\FileSizeLimitService;
+use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadFinalizationService;
 use App\Service\UploadService;
@@ -49,6 +50,8 @@ class UploadFinalizationServiceTest extends TestCase
     private ObjectProphecy $uploadService;
     private ObjectProphecy $fileSizeLimitService;
     private ObjectProphecy $elementFileDeletionService;
+    private ObjectProphecy $incrementalHashService;
+    private ObjectProphecy $logger;
     private UploadFinalizationService $service;
 
     protected function setUp(): void
@@ -78,6 +81,12 @@ class UploadFinalizationServiceTest extends TestCase
         $this->s3Service->deleteFileChunks(Argument::any())->will(function () {});
 
         $this->uploadService = $this->prophesize(UploadService::class);
+        $this->uploadService->deleteUpload(Argument::any())->will(function () {});
+        $this->uploadService->markUploadAsUnfinalized(Argument::cetera())->willReturn(true);
+        $this->incrementalHashService = $this->prophesize(IncrementalHashService::class);
+        $this->incrementalHashService->serializeContextForStorage(Argument::any())->willReturn('final-state');
+        $this->incrementalHashService->finalize(Argument::any())->willReturn(self::HASH);
+        $this->logger = $this->prophesize(LoggerInterface::class);
         $this->elementFileDeletionService = $this->prophesize(ElementFileDeletionService::class);
         $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->will(function () {});
         $this->fileSizeLimitService = $this->prophesize(FileSizeLimitService::class);
@@ -104,8 +113,9 @@ class UploadFinalizationServiceTest extends TestCase
             $this->fileSizeLimitService->reveal(),
             $badContentFactory->reveal(),
             $conflictFactory->reveal(),
-            $this->prophesize(LoggerInterface::class)->reveal(),
+            $this->logger->reveal(),
             $this->elementFileDeletionService->reveal(),
+            $this->incrementalHashService->reveal(),
         );
     }
 
@@ -142,7 +152,7 @@ class UploadFinalizationServiceTest extends TestCase
     {
         $this->expectFileToBeMerged();
 
-        $this->service->finalize($this->upload->reveal(), self::HASH);
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
     }
 
     public function testFinalizeDeletesPreviousFileOnlyAfterFlushOfTheElement(): void
@@ -166,7 +176,7 @@ class UploadFinalizationServiceTest extends TestCase
             $log[] = 'delete-chunks';
         });
 
-        $this->service->finalize($this->upload->reveal(), self::HASH);
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
 
         $this->assertSame(['merge-chunks', 'flush', 'delete-previous', 'delete-chunks', 'flush'], $log);
     }
@@ -179,14 +189,14 @@ class UploadFinalizationServiceTest extends TestCase
         $this->s3Service->deleteFileChunks(Argument::any())->shouldNotBeCalled();
 
         $this->expectException(RuntimeException::class);
-        $this->service->finalize($this->upload->reveal(), self::HASH);
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
     }
 
     public function testFinalizeWithMatchingReprDigestMergesChunks(): void
     {
         $this->expectFileToBeMerged();
 
-        $this->service->finalize($this->upload->reveal(), self::HASH, $this->digestHeader());
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'), $this->digestHeader());
     }
 
     public function testFinalizeWithMismatchingDigestDiscardsUpload(): void
@@ -194,7 +204,7 @@ class UploadFinalizationServiceTest extends TestCase
         $this->expectUploadToBeDiscarded();
 
         try {
-            $this->service->finalize($this->upload->reveal(), self::HASH, $this->digestHeader(hash('sha256', 'other')));
+            $this->service->finalize($this->upload->reveal(), hash_init('sha256'), $this->digestHeader(hash('sha256', 'other')));
             $this->fail('Expected digest mismatch to be rejected.');
         } catch (Client400BadContentException $exception) {
             $this->assertStringContainsString('does not match', $exception->getDetail());
@@ -206,7 +216,7 @@ class UploadFinalizationServiceTest extends TestCase
         $this->expectUploadToBeDiscarded();
 
         try {
-            $this->service->finalize($this->upload->reveal(), self::HASH, 'md5=:AAAA:');
+            $this->service->finalize($this->upload->reveal(), hash_init('sha256'), 'md5=:AAAA:');
             $this->fail('Expected unsupported digest algorithm to be rejected.');
         } catch (Client400BadContentException $exception) {
             $this->assertStringContainsString("'Repr-Digest' header", $exception->getDetail());
@@ -220,7 +230,7 @@ class UploadFinalizationServiceTest extends TestCase
         $this->expectUploadToBeDiscarded();
 
         $this->expectException(Client400BadContentException::class);
-        $this->service->finalize($this->upload->reveal(), self::HASH);
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
     }
 
     public function testFinalizeWithStoredChunksNotAddingUpToOffsetDiscardsUpload(): void
@@ -229,7 +239,7 @@ class UploadFinalizationServiceTest extends TestCase
         $this->expectUploadToBeDiscarded();
 
         try {
-            $this->service->finalize($this->upload->reveal(), self::HASH, $this->digestHeader());
+            $this->service->finalize($this->upload->reveal(), hash_init('sha256'), $this->digestHeader());
             $this->fail('Expected inconsistent upload to be rejected.');
         } catch (Client409ConflictException $exception) {
             $this->assertStringContainsString('restart the upload', $exception->getDetail());
@@ -242,6 +252,61 @@ class UploadFinalizationServiceTest extends TestCase
         $this->expectUploadToBeDiscarded();
 
         $this->expectException(Client409ConflictException::class);
-        $this->service->finalize($this->upload->reveal(), self::HASH);
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+    }
+
+    public function testFailedMergeOfTheChunksPutsTheUploadBackToUnfinalized(): void
+    {
+        $this->s3Service->mergeFileChunks(Argument::any())->willThrow(new RuntimeException('merge failed'));
+        $this->uploadService->markUploadAsUnfinalized($this->upload->reveal(), 'final-state')->willReturn(true)->shouldBeCalledOnce();
+        // all chunks stay, so that the client can complete the upload again
+        $this->s3Service->deleteFileChunks(Argument::any())->shouldNotBeCalled();
+        $this->uploadService->deleteUpload(Argument::any())->shouldNotBeCalled();
+        $this->eventDispatcher->dispatch(Argument::any())->shouldNotBeCalled();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('merge failed');
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+    }
+
+    public function testFailedFlushOfTheElementPutsTheUploadBackToUnfinalized(): void
+    {
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $this->elementManager->flush()->willThrow(new RuntimeException('flush failed'));
+        $this->uploadService->markUploadAsUnfinalized($this->upload->reveal(), 'final-state')->willReturn(true)->shouldBeCalledOnce();
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->shouldNotBeCalled();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('flush failed');
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+    }
+
+    public function testFailureWhilePuttingTheUploadBackIsLoggedAndTheOriginalFailureIsThrown(): void
+    {
+        $this->s3Service->mergeFileChunks(Argument::any())->willThrow(new RuntimeException('merge failed'));
+        $this->uploadService->markUploadAsUnfinalized(Argument::cetera())->willThrow(new RuntimeException('graph down'));
+        $this->logger->error(Argument::containingString('graph down'))->shouldBeCalledOnce();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('merge failed');
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+    }
+
+    public function testUploadWhichCanNotBePutBackIsLogged(): void
+    {
+        $this->s3Service->mergeFileChunks(Argument::any())->willThrow(new RuntimeException('merge failed'));
+        $this->uploadService->markUploadAsUnfinalized(Argument::cetera())->willReturn(false);
+        $this->logger->error(Argument::containingString('does not exist or is not complete anymore'))->shouldBeCalledOnce();
+
+        $this->expectException(RuntimeException::class);
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+    }
+
+    public function testVerdictsAboutTheWholeUploadDoNotPutItBack(): void
+    {
+        $this->uploadService->markUploadAsUnfinalized(Argument::cetera())->shouldNotBeCalled();
+
+        $this->expectException(Client400BadContentException::class);
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'), $this->digestHeader(hash('sha256', 'other')));
     }
 }

@@ -39,19 +39,13 @@ class UploadFileOperationFactory
         $elementId = $resumableUploadRequest->getElementId();
         $element = $this->elementManager->getElementOrFail($elementId);
 
-        $previousStorageKey = null;
-        if ($this->elementService->hasFile($element)) {
-            $previousExtension = $this->elementService->getFileNameExtension($element);
-            $previousStorageKey = $this->fileService->getStorageBucketKey($elementId, $previousExtension);
-        }
-
         $resource = $resumableUploadRequest->getContent();
 
         return new UploadFileOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
             $this->fileService->getUploadBucketKey($elementId, 0),
             $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            $previousStorageKey,
+            $this->elementService->getStorageKeyOfFile($element),
             $this->fileService->getStorageBucketKey($elementId, $resumableUploadRequest->getExtension()),
             $resource,
             $resumableUploadRequest->getContentLength(),

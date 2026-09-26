@@ -1,7 +1,8 @@
 {
   "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
   "type": "object",
-  "description": "RFC 7807 Problem Details object.",
+  "description": "RFC 9457 Problem Details object. Some problems carry additional camelCase members, e.g. `expectedOffset` and `providedOffset` (409 on a resumable upload) or `totalLength`, `requestedStart` and `requestedEnd` (416 on a file range request).",
+  "additionalProperties": true,
   "properties": {
     "type": {
       "type": "string",
@@ -15,6 +16,32 @@
     },
     "detail": {
       "type": "string"
+    },
+    "instance": {
+      "type": "string",
+      "format": "uri",
+      "description": "Identifies this occurrence of the problem. The id is the request id of the application log (`requestId`) and of the web server access log (`request_id`).",
+      "example": "urn:uuid:3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f"
+    },
+    "expectedOffset": {
+      "type": "integer",
+      "description": "409 on a resumable upload: the offset the upload is currently at."
+    },
+    "providedOffset": {
+      "type": "integer",
+      "description": "409 on a resumable upload: the offset which was sent with the request."
+    },
+    "totalLength": {
+      "type": "integer",
+      "description": "416 on a file range request: the length of the file in bytes."
+    },
+    "requestedStart": {
+      "type": "integer",
+      "description": "416 on a file range request: the requested first byte."
+    },
+    "requestedEnd": {
+      "type": "integer",
+      "description": "416 on a file range request: the requested last byte."
     }
   }
 }

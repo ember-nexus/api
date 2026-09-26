@@ -11,8 +11,10 @@ use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\S3\MergeFileChunksOperationFactory;
+use HashContext;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Throwable;
 
 /**
  * Turns a completed upload into the file of its target element: verifies size and digest, merges the chunks and
@@ -32,17 +34,29 @@ class UploadFinalizationService
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private LoggerInterface $logger,
         private ElementFileDeletionService $elementFileDeletionService,
+        private IncrementalHashService $incrementalHashService,
     ) {
     }
 
     /**
-     * @param string      $hash                  hash of the whole uploaded file
+     * A verdict about the upload as a whole (size limit, inconsistent state, digest) deletes the upload, as nothing is
+     * left to resume. Any other failure while merging the chunks and updating the element (e.g. S3 or a database not
+     * being reachable) is not the client's fault: the upload is put back to unfinalized in the graph (not complete,
+     * hash state including all chunks) and the exception is thrown as usual. All chunks are still stored, so the
+     * client completes the upload again with a `PATCH` without body, `Upload-Complete: ?1` and the offset reported by
+     * `HEAD`.
+     *
+     * @param HashContext $hashContext           hash of the whole uploaded file, including the completing chunk
      * @param string|null $reprDigestHeaderValue `Repr-Digest` header of the request which completed the upload; it
      *                                           describes the whole file, unlike `Content-Digest`, which only describes
      *                                           the body of the last request and is therefore not used here
      */
-    public function finalize(UploadInterface $upload, string $hash, ?string $reprDigestHeaderValue = null): void
+    public function finalize(UploadInterface $upload, HashContext $hashContext, ?string $reprDigestHeaderValue = null): void
     {
+        // serialized first, the final hash can not be continued
+        $hashState = $this->incrementalHashService->serializeContextForStorage($hashContext);
+        $hash = $this->incrementalHashService->finalize($hashContext);
+
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
         // size and digest are verified before merging, so an existing file is never overwritten on a mismatch
@@ -80,20 +94,26 @@ class UploadFinalizationService
             }
         }
 
-        $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
-        $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
+        try {
+            $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
+            $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
 
-        $element->addProperty('file', [
-            'contentLength' => $mergedContentLength,
-            'extension' => $upload->getExtension(),
-            'mimeType' => $mergedMimeType,
-            'hash' => [
-                FileHashService::ALGORITHM => $hash,
-            ],
-        ]);
-        $element->addProperty('hasFile', true);
-        $this->elementManager->merge($element);
-        $this->elementManager->flush();
+            $element->addProperty('file', [
+                'contentLength' => $mergedContentLength,
+                'extension' => $upload->getExtension(),
+                'mimeType' => $mergedMimeType,
+                'hash' => [
+                    FileHashService::ALGORITHM => $hash,
+                ],
+            ]);
+            $element->addProperty('hasFile', true);
+            $this->elementManager->merge($element);
+            $this->elementManager->flush();
+        } catch (Throwable $throwable) {
+            $this->markUploadAsUnfinalized($upload, $hashState);
+
+            throw $throwable;
+        }
 
         // only after the flush the element points to the merged object, so the previous one can go
         $this->elementFileDeletionService->deletePreviousFileAfterReplace($mergeFileChunksOperation);
@@ -102,6 +122,19 @@ class UploadFinalizationService
         $this->elementManager->flush();
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
+    }
+
+    // best effort, the failure which is being handled is the one which matters
+    private function markUploadAsUnfinalized(UploadInterface $upload, string $hashState): void
+    {
+        try {
+            $isUnfinalized = $this->uploadService->markUploadAsUnfinalized($upload, $hashState);
+            if (!$isUnfinalized) {
+                $this->logger->error(sprintf('Unable to put upload %s back to unfinalized after a failed finalization, it does not exist or is not complete anymore.', $upload->getId()->toString()));
+            }
+        } catch (Throwable $throwable) {
+            $this->logger->error(sprintf('Unable to put upload %s back to unfinalized after a failed finalization: %s', $upload->getId()->toString(), $throwable->getMessage()));
+        }
     }
 
     // a completed upload which is invalid as a whole (digest, size limit, inconsistent state) leaves nothing to resume,

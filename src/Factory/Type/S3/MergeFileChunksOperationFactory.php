@@ -38,17 +38,11 @@ class MergeFileChunksOperationFactory
 
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
-        $previousStorageKey = null;
-        if ($this->elementService->hasFile($element)) {
-            $previousExtension = $this->elementService->getFileNameExtension($element);
-            $previousStorageKey = $this->fileService->getStorageBucketKey($upload->getUploadTarget(), $previousExtension);
-        }
-
         return new MergeFileChunksOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
             $uploadKeys,
             $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            $previousStorageKey,
+            $this->elementService->getStorageKeyOfFile($element),
             $this->fileService->getStorageBucketKey($upload->getUploadTarget(), $upload->getExtension())
         );
     }

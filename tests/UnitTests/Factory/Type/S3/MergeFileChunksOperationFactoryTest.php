@@ -59,7 +59,7 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $element = $element->reveal();
 
         $elementService = $this->prophesize(ElementService::class);
-        $elementService->hasFile(Argument::any())->shouldBeCalledOnce()->willReturn(false);
+        $elementService->getStorageKeyOfFile(Argument::is($element))->shouldBeCalledOnce()->willReturn(null);
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
@@ -100,7 +100,7 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $upload->isUploadComplete()->shouldBeCalledOnce()->willReturn(true);
         $upload->getChunkIds()->shouldBeCalledOnce()->willReturn(['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2']);
         $upload->getId()->shouldBeCalledOnce()->willReturn($uploadId);
-        $upload->getUploadTarget()->shouldBeCalledTimes(3)->willReturn($uploadTarget);
+        $upload->getUploadTarget()->shouldBeCalledTimes(2)->willReturn($uploadTarget);
         $upload->getExtension()->shouldBeCalledOnce()->willReturn('ext');
 
         $element = $this->prophesize(NodeElementInterface::class);
@@ -117,11 +117,9 @@ class MergeFileChunksOperationFactoryTest extends TestCase
         $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('aaaaaaaaaaaaaaa1'))->shouldBeCalledOnce()->willReturn('upload-key-0001');
         $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2), Argument::is('aaaaaaaaaaaaaaa2'))->shouldBeCalledOnce()->willReturn('upload-key-0002');
         $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('target-key.ext');
-        $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('prev'))->shouldBeCalledOnce()->willReturn('target-key.prev');
 
         $elementService = $this->prophesize(ElementService::class);
-        $elementService->hasFile(Argument::any())->shouldBeCalledOnce()->willReturn(true);
-        $elementService->getFileNameExtension(Argument::is($element))->shouldBeCalledOnce()->willReturn('prev');
+        $elementService->getStorageKeyOfFile(Argument::is($element))->shouldBeCalledOnce()->willReturn('target-key.prev');
 
         $mergeFileChunksOperationFactory = $this->buildMergeFileChunksOperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),

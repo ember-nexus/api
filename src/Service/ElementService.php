@@ -18,6 +18,18 @@ class ElementService
     ) {
     }
 
+    /**
+     * Key of the stored file of the element in the storage bucket, or null if the element has no file.
+     */
+    public function getStorageKeyOfFile(NodeElementInterface|RelationElementInterface $element): ?string
+    {
+        if (!$this->hasFile($element)) {
+            return null;
+        }
+
+        return $this->fileService->getStorageBucketKey($this->getElementId($element), $this->getFileNameExtension($element));
+    }
+
     public function getElementId(NodeElementInterface|RelationElementInterface $element): UuidInterface
     {
         $elementId = $element->getId();

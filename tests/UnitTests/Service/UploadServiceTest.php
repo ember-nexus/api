@@ -396,4 +396,30 @@ class UploadServiceTest extends TestCase
 
         $this->assertSame($expected, $service->appendChunkIfOffsetMatches($expectedUpload, $nextUpload));
     }
+
+    #[DataProvider('appendChunkResultProvider')]
+    public function testMarkUploadAsUnfinalizedReportsWhetherUploadWasUpdated(bool $rowReturned, bool $expected): void
+    {
+        $id = UuidV4::uuid4();
+        $upload = $this->buildUpload(id: $id, uploadOffset: 500, uploadComplete: true, chunkIds: ['aaaaaaaaaaaaaaa1'])->reveal();
+
+        [$service, $elementManager, , , , , $cypherEntityManager] = $this->buildService();
+        // only the graph is touched, nothing of the entity manager
+        $elementManager->merge(Argument::any())->shouldNotBeCalled();
+        $elementManager->flush()->shouldNotBeCalled();
+        $client = $this->prophesize(ClientInterface::class);
+        $client->runStatement(Argument::that(function (Statement $statement) use ($id) {
+            $parameters = $statement->getParameters();
+
+            return str_contains($statement->getText(), 'WHERE u.uploadComplete = true')
+                && str_contains($statement->getText(), 'SET u.uploadComplete = false, u.hashState = $hashState')
+                && $parameters['id'] === $id->toString()
+                && 'final-state' === $parameters['hashState'];
+        }))->shouldBeCalledOnce()->willReturn(
+            $rowReturned ? $this->buildSummarizedResultOf(new CypherMap(['u.id' => $id->toString()])) : $this->buildSummarizedResultOf()
+        );
+        $cypherEntityManager->getClient()->willReturn($client->reveal());
+
+        $this->assertSame($expected, $service->markUploadAsUnfinalized($upload, 'final-state'));
+    }
 }

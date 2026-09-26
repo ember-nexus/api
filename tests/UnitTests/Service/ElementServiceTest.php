@@ -143,4 +143,26 @@ class ElementServiceTest extends TestCase
         $node->addProperty('file', ['extension' => 'txt']);
         $this->assertSame('txt', $this->buildService()->getFileNameExtension($node));
     }
+
+    public function testGetStorageKeyOfFileIsNullWithoutFile(): void
+    {
+        $this->assertNull($this->buildService()->getStorageKeyOfFile($this->buildNode()));
+    }
+
+    public function testGetStorageKeyOfFileUsesTheExtensionOfTheStoredFile(): void
+    {
+        $node = $this->buildNode();
+        $node->addProperty('hasFile', true);
+        $node->addProperty('file', ['extension' => 'txt']);
+
+        $errorFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal();
+        $fileService = $this->prophesize(FileService::class);
+        $fileService
+            ->getStorageBucketKey(Argument::that(fn ($id) => '9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11' === $id->toString()), 'txt')
+            ->shouldBeCalledOnce()
+            ->willReturn('9a/1a/5c/9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11.txt');
+        $service = new ElementService($fileService->reveal(), new FilePropertyService($errorFactory), $errorFactory);
+
+        $this->assertSame('9a/1a/5c/9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11.txt', $service->getStorageKeyOfFile($node));
+    }
 }

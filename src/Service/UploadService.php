@@ -96,6 +96,26 @@ class UploadService
         return true;
     }
 
+    /**
+     * Puts a completed upload back to incomplete, e.g. after its finalization failed, so that the client can complete
+     * it again. Only touches the graph, as nothing else is needed and the entity manager may hold state of the failed
+     * finalization. Returns false if the upload does not exist or is not complete.
+     */
+    public function markUploadAsUnfinalized(UploadInterface $upload, string $hashState): bool
+    {
+        $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
+            'MATCH (u:Upload {id: $id}) WHERE u.uploadComplete = true '.
+            'SET u.uploadComplete = false, u.hashState = $hashState '.
+            'RETURN u.id',
+            [
+                'id' => $upload->getId()->toString(),
+                'hashState' => $hashState,
+            ]
+        ));
+
+        return 0 !== $queryResult->count();
+    }
+
     public function deleteUpload(UploadInterface $upload): void
     {
         $element = $this->elementManager->getElementOrFail($upload->getId());

@@ -17,6 +17,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ExceptionEventListener
 {
+    /**
+     * Names of the members of every problem response; additional properties can not replace them.
+     */
+    private const array RESERVED_PROPERTY_NAMES = ['type', 'title', 'status', 'instance', 'detail', 'exception'];
+
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private KernelInterface $kernel,
@@ -53,6 +58,11 @@ class ExceptionEventListener
         } catch (Exception $e) {
         }
 
+        $additionalProperties = array_diff_key(
+            $extendedException->getAdditionalProperties(),
+            array_flip(self::RESERVED_PROPERTY_NAMES)
+        );
+
         $data = [
             'type' => $extendedException->getType(),
             'title' => $extendedException->getTitle(),
@@ -61,7 +71,7 @@ class ExceptionEventListener
             // application, `request_id` of the web server); see docker/Caddyfile for the errors of the web server
             'instance' => $instanceLink ?? sprintf('urn:uuid:%s', $this->requestIdService->getRequestId()->toString()),
             'detail' => $extendedException->getDetail(),
-            ...$extendedException->getAdditionalProperties(),
+            ...$additionalProperties,
         ];
 
         if ('' === $data['detail']) {

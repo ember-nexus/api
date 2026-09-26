@@ -1,3 +1,15 @@
+# The production image only contains the application, the connections to the other services are configured through its
+# environment (the repository is not mounted, so no `.env` file provides them).
+x-api-environment: &api-environment
+  CYPHER_AUTH: bolt://neo4j:password@neo4j
+  MONGO_AUTH: mongodb://mongodb:password@mongodb:27017
+  ELASTIC_AUTH: elasticsearch:9200
+  REDIS_AUTH: tcp://redis?password=redis-password
+  RABBITMQ_AUTH: amqp://user:password@rabbitmq:5672
+  S3_ENDPOINT: http://minio:9000
+  S3_ACCESS_KEY_ID: accessKey
+  S3_SECRET_ACCESS_KEY: secretKey
+
 services:
 
   api-dev:
@@ -28,6 +40,7 @@ services:
       - minio
     expose:
       - "80"
+    environment: *api-environment
     volumes:
       # the repository is deliberately not mounted: the production image is tested as it is shipped
       - ./well-known-security.txt:/well-known-security.txt

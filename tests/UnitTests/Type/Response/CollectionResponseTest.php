@@ -2,32 +2,42 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\UnitTests\Response;
+namespace App\Tests\UnitTests\Type\Response;
 
-use App\Type\Response\JsonResponse;
+use App\Type\Etag;
+use App\Type\Response\CollectionResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
 #[Small]
-#[CoversClass(JsonResponse::class)]
-class JsonResponseTest extends TestCase
+#[CoversClass(CollectionResponse::class)]
+class CollectionResponseTest extends TestCase
 {
-    public function testEmptyJsonResponse(): void
+    public function testEmptyCollectionResponse(): void
     {
-        $response = new JsonResponse();
+        $response = new CollectionResponse();
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('{}', $response->getContent());
         $this->assertSame('application/json; charset=utf-8', $response->headers->get('Content-Type'));
         $this->assertSame('UTF-8', $response->getCharset());
     }
 
-    public function testBasicJsonResponse(): void
+    public function testBasicCollectionResponse(): void
     {
-        $response = new JsonResponse(['some' => 'data']);
+        $response = new CollectionResponse(['some' => 'data']);
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('{"some":"data"}', $response->getContent());
         $this->assertSame('application/json; charset=utf-8', $response->headers->get('Content-Type'));
         $this->assertSame('UTF-8', $response->getCharset());
+    }
+
+    public function testSetEtagFromEtagInstance(): void
+    {
+        $response = new CollectionResponse();
+        $this->assertNull($response->getEtag());
+        $etag = new Etag('some etag');
+        $response->setEtagFromEtagInstance($etag);
+        $this->assertSame('"some etag"', $response->getEtag());
     }
 }

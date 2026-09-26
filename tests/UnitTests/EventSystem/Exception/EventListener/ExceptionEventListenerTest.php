@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\EventSystem\Exception\EventListener;
 
 use App\EventSystem\Exception\EventListener\ExceptionEventListener;
 use App\Exception\Client403ForbiddenException;
+use App\Exception\ProblemJsonException;
 use App\Exception\Server500InternalServerErrorException;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Service\RequestIdService;
@@ -361,5 +362,104 @@ class ExceptionEventListenerTest extends TestCase
         $this->assertSame(sprintf('urn:uuid:%s', $requestIdService->getRequestId()->toString()), $responseData['instance']);
         $this->assertMatchesRegularExpression('/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $responseData['instance']);
         $this->assertSame(['type', 'title', 'status', 'instance', 'detail'], array_keys($responseData));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function runListenerWithProblemJsonException(ProblemJsonException $exception, bool $debug = false): array
+    {
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::is('problem-unknown'))->willThrow(new RouteNotFoundException());
+        $kernel = $this->prophesize(KernelInterface::class);
+        $kernel->isDebug()->willReturn($debug);
+
+        $exceptionEventListener = new ExceptionEventListener(
+            $urlGenerator->reveal(),
+            $kernel->reveal(),
+            TestLogger::create(),
+            $this->prophesize(Server500InternalServerErrorExceptionFactory::class)->reveal(),
+            $this->createRequestIdService()
+        );
+        $exceptionEvent = new ExceptionEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $this->prophesize(Request::class)->reveal(),
+            0,
+            $exception
+        );
+
+        $exceptionEventListener->onKernelException($exceptionEvent);
+
+        $response = $exceptionEvent->getResponse();
+        $this->assertInstanceOf(ProblemJsonResponse::class, $response);
+
+        return json_decode((string) $response->getContent(), true);
+    }
+
+    public function testAdditionalPropertiesCanNotReplaceDefaultProperties(): void
+    {
+        $responseData = $this->runListenerWithProblemJsonException(new ProblemJsonException(
+            'the type',
+            'the title',
+            418,
+            'the detail',
+            null,
+            null,
+            [
+                'type' => 'other type',
+                'title' => 'other title',
+                'status' => 200,
+                'instance' => 'other instance',
+                'detail' => 'other detail',
+                'exception' => 'other exception',
+            ]
+        ));
+
+        $this->assertSame([
+            'type' => 'the type',
+            'title' => 'the title',
+            'status' => 418,
+            'instance' => 'urn:uuid:'.self::REQUEST_ID,
+            'detail' => 'the detail',
+        ], $responseData);
+    }
+
+    public function testOtherAdditionalPropertiesAreKept(): void
+    {
+        $responseData = $this->runListenerWithProblemJsonException(new ProblemJsonException(
+            'the type',
+            'the title',
+            409,
+            'the detail',
+            null,
+            null,
+            ['expectedOffset' => 5, 'status' => 200, 'providedOffset' => 6]
+        ));
+
+        $this->assertSame(['type', 'title', 'status', 'instance', 'detail', 'expectedOffset', 'providedOffset'], array_keys($responseData));
+        $this->assertSame(409, $responseData['status']);
+        $this->assertSame(5, $responseData['expectedOffset']);
+        $this->assertSame(6, $responseData['providedOffset']);
+    }
+
+    public function testDebugExceptionMemberIsNotReplacedByAdditionalProperty(): void
+    {
+        $responseData = $this->runListenerWithProblemJsonException(
+            new ProblemJsonException('the type', 'the title', 400, 'the detail', null, null, ['exception' => 'spoofed']),
+            true
+        );
+
+        $this->assertIsArray($responseData['exception']);
+        $this->assertArrayHasKey('message', $responseData['exception']);
+        $this->assertArrayHasKey('trace', $responseData['exception']);
+    }
+
+    public function testEmptyDetailIsRemovedAndAdditionalDetailDoesNotBringItBack(): void
+    {
+        $responseData = $this->runListenerWithProblemJsonException(
+            new ProblemJsonException('the type', 'the title', 400, '', null, null, ['detail' => 'spoofed', 'extra' => true])
+        );
+
+        $this->assertSame(['type', 'title', 'status', 'instance', 'extra'], array_keys($responseData));
     }
 }

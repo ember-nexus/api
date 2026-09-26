@@ -4,20 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller\Upload;
 
-use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Exception\Client410GoneExceptionFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
-use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
-use App\Security\AccessChecker;
-use App\Security\AuthProvider;
-use App\Service\ElementManager;
-use App\Service\UploadCancellationService;
-use App\Service\UploadConsistencyService;
-use App\Type\AccessType;
-use Exception;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Safe\DateTime;
+use App\Service\UploadAccessService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,15 +14,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class HeadUploadController extends AbstractController
 {
     public function __construct(
-        private AuthProvider $authProvider,
-        private AccessChecker $accessChecker,
-        private ElementManager $elementManager,
+        private UploadAccessService $uploadAccessService,
         private NoContentResponseFactory $noContentResponseFactory,
-        private UploadFactory $uploadFactory,
-        private UploadCancellationService $uploadCancellationService,
-        private UploadConsistencyService $uploadConsistencyService,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
-        private Client410GoneExceptionFactory $client410GoneExceptionFactory,
     ) {
     }
 
@@ -47,31 +29,8 @@ class HeadUploadController extends AbstractController
     )]
     public function headUpload(string $id): Response
     {
-        $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
-        try {
-            $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
-        } catch (Exception) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-
-        $userId = $this->authProvider->getUserId();
-        if ($upload->getUploadOwner()->toString() !== $userId->toString()) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-        // uploads whose target is gone or inaccessible can not be completed, same check as in PATCH
-        if (!$this->accessChecker->hasAccessToElement($userId, $upload->getUploadTarget(), AccessType::UPDATE)) {
-            // the owner lost access to the target, so the upload is cancelled as well
-            $this->uploadCancellationService->cancelUpload($upload);
-
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-
-        // same as in PATCH, an expired upload is gone even if the cron job did not remove it yet
-        if ($upload->getExpires() < new DateTime()) {
-            throw $this->client410GoneExceptionFactory->createFromTemplate();
-        }
-        $this->uploadConsistencyService->assertConsistent($uploadElement, $upload);
-
-        return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
+        return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload(
+            $this->uploadAccessService->loadAuthorizedUpload($id)
+        );
     }
 }
