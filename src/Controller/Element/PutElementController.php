@@ -10,6 +10,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Service\ResetElementPropertiesService;
 use App\Service\UpdateElementFromRawDataService;
 use App\Type\AccessType;
@@ -30,6 +31,7 @@ class PutElementController extends AbstractController
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private UpdateElementFromRawDataService $updateElementFromRawDataService,
         private ResetElementPropertiesService $resetElementPropertiesService,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -56,7 +58,7 @@ class PutElementController extends AbstractController
         /**
          * @var array<string, mixed> $rawData
          */
-        $rawData = \Safe\json_decode($request->getContent(), true);
+        $rawData = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         $element = $this->resetElementPropertiesService->resetElementProperties($element);
         $element = $this->updateElementFromRawDataService->updateElementFromRawData($element, $rawData);

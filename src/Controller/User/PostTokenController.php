@@ -8,6 +8,7 @@ use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\TokenGenerator;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\Response\JsonResponse;
@@ -24,6 +25,7 @@ class PostTokenController extends AbstractController
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private RequestUtilService $requestUtilService,
         private SecurityUtilService $securityUtilService,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -34,7 +36,7 @@ class PostTokenController extends AbstractController
     )]
     public function postToken(Request $request): Response
     {
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
         $data = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('Token', $body);

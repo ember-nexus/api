@@ -26,6 +26,21 @@
 	}
 }
 
+# headers of problem json responses which are created by the server instead of the application, they have to be
+# identical to the headers of the application's error responses, see public/index.php and ProblemJsonResponse
+(problem_json_headers) {
+	header {
+		Access-Control-Allow-Headers "*"
+		Access-Control-Allow-Methods "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+		Access-Control-Allow-Origin "*"
+		Access-Control-Expose-Headers "ETag, Location"
+		Allow "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+		Cache-Control "no-cache, private"
+		Content-Type "application/problem+json; charset=utf-8"
+		X-Powered-By "Ember Nexus API"
+	}
+}
+
 :80 {
 	root * /var/www/html/public
 	encode zstd br gzip
@@ -33,6 +48,11 @@
 		-Server
 		-Set-Cookie
 	}
+	# identifies the request in the access log below and, via the request header, in the logs of the application; it is
+	# not part of the response headers, but of the `instance` of every problem json response (`urn:uuid:<id>`); always
+	# set by the server, so that clients can not spoof it in the logs
+	request_header X-Request-Id "{http.request.uuid}"
+	log_append request_id {http.request.uuid}
 	request_body {
 		max_size 101MiB
 	}
@@ -53,25 +73,29 @@
 	request_body @uploadChunk {
 		read_timeout {$API_UPLOAD_REQUEST_BODY_TIMEOUT:15m}
 	}
-	# server errors which do not come from the application as problem json still get a problem json body:
-	# - PHP failures (e.g. fatal errors like exhausted memory) answer with an empty body and the default html type
-	# - FrankenPHP answers by itself, without content type, if it did not get a free PHP thread in time (`max_wait_time`)
+	# server errors which do not come from the application as problem json still get a problem json body, in the same
+	# format as the application's errors (compact json, member order type, title, status, instance, detail, `type` links to the error page, but as relative reference
+	# without scheme and host, which clients resolve against the request URI, see RFC 9457):
+	# - PHP failures before the application handles them (e.g. PHP can not start the application at all) answer with
+	#   an empty body and the default html content type -> 500
+	# - FrankenPHP answers by itself, without content type, if it did not get a free PHP thread in time
+	#   (`max_wait_time`) -> 503; this is the only such case, other server errors are not rewritten
 	intercept {
 		@phpFailure {
 			status 5xx
 			header Content-Type text/html*
 		}
 		handle_response @phpFailure {
-			header Content-Type application/problem+json
-			respond `{"type":"about:blank","title":"Internal Server Error","status":500,"detail":"Internal server error."}` 500
+			import problem_json_headers
+			respond `{"type":"/error/500/internal-server-error","title":"Internal server error","status":500,"instance":"urn:uuid:{http.request.uuid}","detail":"Internal server error, see log."}` 500
 		}
-		@serverFailure {
-			status 5xx
+		@noFreePhpThread {
+			status 503
 			header !Content-Type
 		}
-		handle_response @serverFailure {
-			header Content-Type application/problem+json
-			respond `{"type":"about:blank","title":"Server Error","status":{http.intercept.status_code},"detail":"The server could not process the request, please retry later."}` {http.intercept.status_code}
+		handle_response @noFreePhpThread {
+			import problem_json_headers
+			respond `{"type":"/error/503/service-unavailable","title":"Service unavailable","status":503,"instance":"urn:uuid:{http.request.uuid}","detail":"The service itself or an internal component is currently unavailable."}` 503
 		}
 	}
 	log {

@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 
 /**
@@ -18,6 +19,7 @@ class UploadBodyLimitService
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Client408RequestTimeoutExceptionFactory $client408RequestTimeoutExceptionFactory,
     ) {
     }
 
@@ -51,6 +53,9 @@ class UploadBodyLimitService
         // e.g. a body which was cut off by a request timeout must not be stored as a shorter file
         if (null !== $declaredContentLength && $copiedLength !== $declaredContentLength) {
             \Safe\fclose($bounded);
+            if ($copiedLength < $declaredContentLength) {
+                throw $this->client408RequestTimeoutExceptionFactory->createFromIncompleteBody($copiedLength, $declaredContentLength);
+            }
 
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Request body has %d bytes, but header 'Content-Length' declares %d bytes.", $copiedLength, $declaredContentLength));
         }

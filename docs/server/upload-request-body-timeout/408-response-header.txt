@@ -1,0 +1,11 @@
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Cache-Control: no-cache, private
+Connection: close
+Content-Length: 357
+Content-Type: application/problem+json; charset=utf-8
+Date: Sat, 26 Sep 2026 13:25:54 GMT
+X-Powered-By: Ember Nexus API

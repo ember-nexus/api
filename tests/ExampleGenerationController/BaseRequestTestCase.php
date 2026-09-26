@@ -106,6 +106,12 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         );
     }
 
+    private function isProblemJsonResponse(ResponseInterface $response): bool
+    {
+        return $response->getStatusCode() >= 400
+            && str_starts_with($response->getHeaderLine('Content-Type'), 'application/problem+json');
+    }
+
     public function assertBodyInDocumentationIsIdenticalToBodyFromRequest(
         string $pathToProjectRoot,
         string $pathToDocumentationFile,
@@ -116,6 +122,10 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         $body = (string) $response->getBody();
         if ($isJson) {
             $body = $this->getFormattedResponseBodyAsJsonString($response);
+        }
+        if ($this->isProblemJsonResponse($response)) {
+            // every problem json response identifies its request as `urn:uuid:<id>`, which differs per request
+            $ignoreLinesContainingString[] = '"instance": "urn:uuid:';
         }
         $documentationBody = file_get_contents($pathToProjectRoot.$pathToDocumentationFile);
 

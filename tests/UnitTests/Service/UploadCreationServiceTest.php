@@ -11,6 +11,7 @@ use App\Contract\S3\UploadFileOperationInterface;
 use App\Exception\Client400BadContentException;
 use App\Exception\Client409ConflictException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
@@ -147,7 +148,7 @@ class UploadCreationServiceTest extends TestCase
             $urlGenerator->reveal(),
             $this->uploadService->reveal(),
             new FileSizeLimitService($configuration, $badContentFactory),
-            new UploadBodyLimitService($configuration, $badContentFactory),
+            new UploadBodyLimitService($configuration, $badContentFactory, new Client408RequestTimeoutExceptionFactory($urlGenerator->reveal())),
             $fileService->reveal(),
             $badContentFactory,
             $this->conflictFactory->reveal(),

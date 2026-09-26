@@ -2,6 +2,7 @@
   "type": "http://api/error/416/range-not-satisfiable",
   "title": "Range Not Satisfiable",
   "status": 416,
+  "instance": "urn:uuid:3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f",
   "detail": "Requested range start (999999999) is beyond the end of the resource (138937 bytes long).",
   "requested-start": 999999999,
   "total-length": 138937

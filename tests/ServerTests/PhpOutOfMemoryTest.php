@@ -35,11 +35,14 @@ class PhpOutOfMemoryTest extends BaseServerTestCase
 
         $this->assertSame(500, $response->getStatusCode());
         $this->assertResponseMatchesDocumentation('php-out-of-memory', $response, true);
+        $instanceOfErrorResponse = $this->getInstanceOfProblemResponse($response);
         $responseBody = (string) $response->getBody();
         $this->assertStringNotContainsStringIgnoringCase('memory', $responseBody);
         $this->assertStringNotContainsStringIgnoringCase('fatal', $responseBody);
 
         // the server keeps working afterwards
-        $this->assertSame(200, $this->runGetRequest('/', $this->getToken())->getStatusCode());
+        $followUpResponse = $this->runGetRequest('/', $this->getToken());
+        $this->assertSame(200, $followUpResponse->getStatusCode());
+        $this->assertNotSame($instanceOfErrorResponse, $this->getInstanceOfProblemResponse($this->runNotFoundRequest()));
     }
 }

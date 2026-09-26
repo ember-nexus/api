@@ -9,6 +9,7 @@ use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
+use App\Service\RequestContentService;
 use App\Type\Response\JsonResponse;
 use App\Type\SearchStepType;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -25,6 +26,7 @@ class PostSearchController extends AbstractController
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -136,7 +138,7 @@ class PostSearchController extends AbstractController
     )]
     public function postSearch(Request $request): Response
     {
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         $debug = $this->getIsDebugFromBody($body);
         $globalParameters = $this->getGlobalParametersFromBody($body);

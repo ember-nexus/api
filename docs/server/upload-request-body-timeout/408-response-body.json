@@ -1,0 +1,7 @@
+{
+  "type": "http://api-prod/error/408/request-timeout",
+  "title": "Request timeout",
+  "status": 408,
+  "instance": "urn:uuid:3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f",
+  "detail": "The request body is incomplete, received 5 of 11 bytes announced by the Content-Length header. The connection was interrupted or the request body was not sent within the time limit of the server."
+}

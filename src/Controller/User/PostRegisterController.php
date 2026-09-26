@@ -10,6 +10,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\UserPasswordHasher;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Type\Response\CreatedResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -39,6 +40,7 @@ class PostRegisterController extends AbstractController
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -53,7 +55,7 @@ class PostRegisterController extends AbstractController
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
 
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
         $rawData = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('User', $body);

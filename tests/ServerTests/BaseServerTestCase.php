@@ -6,6 +6,7 @@ namespace App\Tests\ServerTests;
 
 use App\Tests\ExampleGenerationController\BaseRequestTestCase;
 use Psr\Http\Message\ResponseInterface;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Base for tests of the server behaviour (web server limits, PHP failures) against the production image, which is
@@ -107,8 +108,40 @@ abstract class BaseServerTestCase extends BaseRequestTestCase
         return json_encode(['type' => 'Data', 'data' => ['name' => 'slow server test']], JSON_THROW_ON_ERROR);
     }
 
+    /**
+     * Every problem json response, also the ones which are created by the web server, identifies its request as
+     * `instance` (`urn:uuid:<id>`); the id is also part of the logs (`requestId` of the application, `request_id` of
+     * the web server).
+     */
+    protected function getInstanceOfProblemResponse(ResponseInterface $response): string
+    {
+        $this->assertGreaterThanOrEqual(400, $response->getStatusCode());
+        $this->assertStringStartsWith('application/problem+json', $response->getHeaderLine('Content-Type'));
+        $body = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
+        $this->assertIsArray($body);
+        $this->assertArrayHasKey('instance', $body);
+        $this->assertIsString($body['instance']);
+        $this->assertMatchesRegularExpression('/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $body['instance']);
+        // the id is not part of the response headers
+        $this->assertFalse($response->hasHeader('X-Request-Id'));
+
+        return $body['instance'];
+    }
+
+    /**
+     * A cheap problem json response created by the application.
+     */
+    protected function runNotFoundRequest(): ResponseInterface
+    {
+        $response = $this->runGetRequest(sprintf('/%s', Uuid::uuid4()->toString()), $this->getToken());
+        $this->assertSame(404, $response->getStatusCode());
+
+        return $response;
+    }
+
     protected function assertResponseMatchesDocumentation(string $directory, ResponseInterface $response, bool $ignoreTypeLine = false, bool $ignoreDetailLine = false): void
     {
+        $this->getInstanceOfProblemResponse($response);
         $prefix = sprintf('docs/server/%s/%d-response-', $directory, $response->getStatusCode());
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,

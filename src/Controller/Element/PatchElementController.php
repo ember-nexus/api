@@ -10,6 +10,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Service\UpdateElementFromRawDataService;
 use App\Type\AccessType;
 use App\Type\EtagType;
@@ -28,6 +29,7 @@ class PatchElementController extends AbstractController
         private AccessChecker $accessChecker,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private UpdateElementFromRawDataService $updateElementFromRawDataService,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -54,7 +56,7 @@ class PatchElementController extends AbstractController
         /**
          * @var array<string, mixed> $rawData
          */
-        $rawData = \Safe\json_decode($request->getContent(), true);
+        $rawData = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         $element = $this->updateElementFromRawDataService->updateElementFromRawData($element, $rawData);
 

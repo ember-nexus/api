@@ -31,12 +31,16 @@ class PhpThreadExhaustionTest extends BaseServerTestCase
         $this->assertGreaterThan(1.5, $duration, 'The request should have waited for a free thread.');
         $this->assertLessThan(10, $duration);
         $this->assertResponseMatchesDocumentation('no-free-php-thread', $response);
+        $instanceOfServerResponse = $this->getInstanceOfProblemResponse($response);
 
         // the server recovers as soon as the thread is free again
         $slowRequest->sendBody(substr($body, 3));
         $slowResponse = $slowRequest->readResponse();
         $this->assertNotNull($slowResponse);
         $this->assertSame(204, $slowResponse->getStatusCode());
-        $this->assertSame(200, $this->runGetRequest('/', $this->getToken())->getStatusCode());
+        $recoveredResponse = $this->runGetRequest('/', $this->getToken());
+        $this->assertSame(200, $recoveredResponse->getStatusCode());
+        // the id belongs to the request, also if the answer is created by the web server, and differs between requests
+        $this->assertNotSame($instanceOfServerResponse, $this->getInstanceOfProblemResponse($this->runNotFoundRequest()));
     }
 }

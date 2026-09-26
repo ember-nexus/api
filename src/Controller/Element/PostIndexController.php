@@ -13,6 +13,7 @@ use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Type\AccessType;
 use App\Type\RelationElement;
 use App\Type\Response\CreatedResponse;
@@ -39,6 +40,7 @@ class PostIndexController extends AbstractController
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -58,7 +60,7 @@ class PostIndexController extends AbstractController
             }
         }
 
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         if (array_key_exists('id', $body)) {
             $elementId = UuidV4::fromString($body['id']);

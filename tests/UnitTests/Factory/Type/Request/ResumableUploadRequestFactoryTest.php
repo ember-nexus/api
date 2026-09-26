@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Factory\Type\Request;
 
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Service\HeaderParseService;
 use App\Service\UploadBodyLimitService;
@@ -18,6 +19,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
 #[CoversClass(ResumableUploadRequestFactory::class)]
@@ -32,7 +34,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
         $badContentFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
         $badContentFactory->createFromDetail(Argument::any())->will(fn ($args) => new Client400BadContentException('type', detail: $args[0]));
 
-        return new UploadBodyLimitService($configuration->reveal(), $badContentFactory->reveal());
+        return new UploadBodyLimitService($configuration->reveal(), $badContentFactory->reveal(), new Client408RequestTimeoutExceptionFactory($this->createStub(UrlGeneratorInterface::class)));
     }
 
     /**

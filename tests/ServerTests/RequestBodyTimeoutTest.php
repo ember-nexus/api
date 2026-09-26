@@ -36,8 +36,8 @@ class RequestBodyTimeoutTest extends BaseServerTestCase
         $response = $request->readResponse();
 
         $this->assertNotNull($response);
-        $this->assertSame(400, $response->getStatusCode());
-        $this->assertResponseMatchesDocumentation('request-body-timeout', $response, true, true);
+        $this->assertSame(408, $response->getStatusCode());
+        $this->assertResponseMatchesDocumentation('request-body-timeout', $response, true);
     }
 
     public function testSlowUploadChunkBeyondDefaultButWithinUploadTimeoutIsAccepted(): void
@@ -66,7 +66,7 @@ class RequestBodyTimeoutTest extends BaseServerTestCase
         $response = $request->readResponse();
 
         $this->assertNotNull($response);
-        $this->assertSame(400, $response->getStatusCode());
+        $this->assertSame(408, $response->getStatusCode());
         $this->assertResponseMatchesDocumentation('upload-request-body-timeout', $response, true);
 
         // the upload was not modified and can be cleaned up

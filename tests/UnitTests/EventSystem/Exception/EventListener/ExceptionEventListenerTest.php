@@ -8,6 +8,7 @@ use App\EventSystem\Exception\EventListener\ExceptionEventListener;
 use App\Exception\Client403ForbiddenException;
 use App\Exception\Server500InternalServerErrorException;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
+use App\Service\RequestIdService;
 use App\Tests\UnitTests\AssertLoggerTrait;
 use App\Type\Response\ProblemJsonResponse;
 use Beste\Psr\Log\TestLogger;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -30,6 +32,18 @@ class ExceptionEventListenerTest extends TestCase
 {
     use ProphecyTrait;
     use AssertLoggerTrait;
+
+    private const string REQUEST_ID = '3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f';
+
+    private function createRequestIdService(): RequestIdService
+    {
+        $request = new Request();
+        $request->headers->set('X-Request-Id', self::REQUEST_ID);
+        $requestStack = new RequestStack();
+        $requestStack->push($request);
+
+        return new RequestIdService($requestStack);
+    }
 
     public function testBuildResponseForNormalExceptionInProduction(): void
     {
@@ -68,7 +82,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal()
+            $server500InternalServerErrorExceptionFactory->reveal(),
+            $this->createRequestIdService()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -88,7 +103,7 @@ class ExceptionEventListenerTest extends TestCase
         /**
          * @var ProblemJsonResponse $response
          */
-        $this->assertSame('{"type":"someType","title":"Internal server error","status":500}', $response->getContent());
+        $this->assertSame('{"type":"someType","title":"Internal server error","status":500,"instance":"urn:uuid:3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f"}', $response->getContent());
         $this->assertSame(500, $response->getStatusCode());
         $this->assertTrue($exceptionEvent->isPropagationStopped());
     }
@@ -130,7 +145,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal()
+            $server500InternalServerErrorExceptionFactory->reveal(),
+            $this->createRequestIdService()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -185,7 +201,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal()
+            $server500InternalServerErrorExceptionFactory->reveal(),
+            $this->createRequestIdService()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -205,7 +222,7 @@ class ExceptionEventListenerTest extends TestCase
         /**
          * @var ProblemJsonResponse $response
          */
-        $this->assertSame('{"type":"Some extended exception","title":"Forbidden","status":403,"detail":"Requested endpoint, element or action is forbidden."}', $response->getContent());
+        $this->assertSame('{"type":"Some extended exception","title":"Forbidden","status":403,"instance":"urn:uuid:3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f","detail":"Requested endpoint, element or action is forbidden."}', $response->getContent());
         $this->assertSame(403, $response->getStatusCode());
         $this->assertTrue($exceptionEvent->isPropagationStopped());
     }
@@ -236,7 +253,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal()
+            $server500InternalServerErrorExceptionFactory->reveal(),
+            $this->createRequestIdService()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -287,7 +305,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal()
+            $server500InternalServerErrorExceptionFactory->reveal(),
+            $this->createRequestIdService()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -310,5 +329,37 @@ class ExceptionEventListenerTest extends TestCase
         $this->assertSame('{"type":"Some extended exception","title":"Forbidden","status":403,"instance":"https://some-link.example","detail":"Requested endpoint, element or action is forbidden."}', $response->getContent());
         $this->assertSame(403, $response->getStatusCode());
         $this->assertTrue($exceptionEvent->isPropagationStopped());
+    }
+
+    public function testInstanceIsGeneratedRequestIdWithoutRequestIdHeader(): void
+    {
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::is('problem-unknown'))->willThrow(new RouteNotFoundException());
+        $kernel = $this->prophesize(KernelInterface::class);
+        $kernel->isDebug()->willReturn(false);
+        $requestIdService = new RequestIdService(new RequestStack());
+
+        $exceptionEventListener = new ExceptionEventListener(
+            $urlGenerator->reveal(),
+            $kernel->reveal(),
+            TestLogger::create(),
+            $this->prophesize(Server500InternalServerErrorExceptionFactory::class)->reveal(),
+            $requestIdService
+        );
+        $exceptionEvent = new ExceptionEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $this->prophesize(Request::class)->reveal(),
+            0,
+            new Client403ForbiddenException('Some extended exception')
+        );
+
+        $exceptionEventListener->onKernelException($exceptionEvent);
+
+        $response = $exceptionEvent->getResponse();
+        $this->assertInstanceOf(ProblemJsonResponse::class, $response);
+        $responseData = json_decode((string) $response->getContent(), true);
+        $this->assertSame(sprintf('urn:uuid:%s', $requestIdService->getRequestId()->toString()), $responseData['instance']);
+        $this->assertMatchesRegularExpression('/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $responseData['instance']);
+        $this->assertSame(['type', 'title', 'status', 'instance', 'detail'], array_keys($responseData));
     }
 }

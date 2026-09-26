@@ -1,6 +1,0 @@
-{
-  "type": "http://api-prod/error/400/bad-content",
-  "title": "Bad content",
-  "status": 400,
-  "detail": "Request body has 5 bytes, but header 'Content-Length' declares 11 bytes."
-}

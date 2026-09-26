@@ -1,0 +1,16 @@
+  _____           _                 _   _                          _    ____ ___
+ | ____|_ __ ___ | |__   ___ _ __  | \ | | _____  ___   _ ___     / \  |  _ \_ _|
+ |  _| | '_ ` _ \| '_ \ / _ \ '__| |  \| |/ _ \ \/ / | | / __|   / _ \ | |_) | |
+ | |___| | | | | | |_) |  __/ |    | |\  |  __/⟩  ⟨| |_| \__ \  / ___ \|  __/| |
+ |_____|_| |_| |_|_.__/ \___|_|    |_| \_|\___/_/\_\\__,_|___/ /_/   \_\_|  |___|
+
+
+ Error 408 - Request Timeout
+
+ The HTTP 408 Request Timeout client error response status code indicates that the server did not receive the complete
+ request body, e.g. because the connection was interrupted or because the request body was not sent within the time
+ limit of the server. Retry the request, if necessary with a smaller request body, e.g. by uploading smaller chunks.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+
+ Link to http.dev's explanation of the 408 error code: https://http.dev/408

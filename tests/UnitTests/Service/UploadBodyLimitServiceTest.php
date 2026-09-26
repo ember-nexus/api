@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Client400BadContentException;
+use App\Exception\Client408RequestTimeoutException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use App\Service\UploadBodyLimitService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -27,7 +29,10 @@ class UploadBodyLimitServiceTest extends TestCase
         $factory = $this->prophesize(Client400BadContentExceptionFactory::class);
         $factory->createFromDetail(Argument::any())->will(fn ($args) => new Client400BadContentException('type', detail: $args[0]));
 
-        return new UploadBodyLimitService($configuration->reveal(), $factory->reveal());
+        $timeoutFactory = $this->prophesize(Client408RequestTimeoutExceptionFactory::class);
+        $timeoutFactory->createFromIncompleteBody(Argument::cetera())->will(fn ($args) => new Client408RequestTimeoutException('type', detail: sprintf('%d of %d', $args[0], $args[1])));
+
+        return new UploadBodyLimitService($configuration->reveal(), $factory->reveal(), $timeoutFactory->reveal());
     }
 
     /**
@@ -97,7 +102,17 @@ class UploadBodyLimitServiceTest extends TestCase
     public function testBoundContentRejectsBodyShorterThanDeclaredLength(): void
     {
         // e.g. a body which was cut off by the request timeout of the web server
+        try {
+            $this->buildService()->boundContent($this->resource('01234'), 10);
+            $this->fail('Expected request timeout.');
+        } catch (Client408RequestTimeoutException $exception) {
+            $this->assertSame('5 of 10', $exception->getDetail());
+        }
+    }
+
+    public function testBoundContentRejectsBodyLongerThanDeclaredLength(): void
+    {
         $this->expectException(Client400BadContentException::class);
-        $this->buildService()->boundContent($this->resource('01234'), 10);
+        $this->buildService()->boundContent($this->resource('0123456789'), 5);
     }
 }

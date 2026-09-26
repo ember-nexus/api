@@ -20,5 +20,10 @@ class PhpBootFailureTest extends BaseServerTestCase
         $this->assertSame(500, $response->getStatusCode());
         $this->assertResponseMatchesDocumentation('php-boot-failure', $response);
         $this->assertStringNotContainsStringIgnoringCase('memory', (string) $response->getBody());
+        // the response created by the web server identifies its request as well, see docker/Caddyfile
+        $this->assertNotSame(
+            $this->getInstanceOfProblemResponse($response),
+            $this->getInstanceOfProblemResponse($this->runGetRequest('/', $this->getToken()))
+        );
     }
 }

@@ -6,6 +6,7 @@ namespace App\EventSystem\Exception\EventListener;
 
 use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
+use App\Service\RequestIdService;
 use App\Type\Response\ProblemJsonResponse;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -21,6 +22,7 @@ class ExceptionEventListener
         private KernelInterface $kernel,
         private LoggerInterface $logger,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
+        private RequestIdService $requestIdService,
     ) {
     }
 
@@ -55,14 +57,12 @@ class ExceptionEventListener
             'type' => $extendedException->getType(),
             'title' => $extendedException->getTitle(),
             'status' => $extendedException->getStatus(),
-            'instance' => $instanceLink,
+            // identifies this occurrence of the problem, the id is also part of the logs (`requestId` of the
+            // application, `request_id` of the web server); see docker/Caddyfile for the errors of the web server
+            'instance' => $instanceLink ?? sprintf('urn:uuid:%s', $this->requestIdService->getRequestId()->toString()),
             'detail' => $extendedException->getDetail(),
             ...$extendedException->getAdditionalProperties(),
         ];
-
-        if (null === $instanceLink) {
-            unset($data['instance']);
-        }
 
         if ('' === $data['detail']) {
             unset($data['detail']);

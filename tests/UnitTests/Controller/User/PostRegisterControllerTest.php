@@ -11,10 +11,12 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\UserPasswordHasher;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Type\NodeElement;
 use App\Type\Response\CreatedResponse;
@@ -68,7 +70,8 @@ class PostRegisterControllerTest extends TestCase
             $createElementFromRawDataService ?? $this->createMock(CreateElementFromRawDataService::class),
             $client400ReservedIdentifierExceptionFactory ?? $this->createMock(Client400ReservedIdentifierExceptionFactory::class),
             $client403ForbiddenExceptionFactory ?? $this->createMock(Client403ForbiddenExceptionFactory::class),
-            $server500LogicExceptionFactory ?? $this->createMock(Server500LogicErrorExceptionFactory::class)
+            $server500LogicExceptionFactory ?? $this->createMock(Server500LogicErrorExceptionFactory::class),
+            new RequestContentService(new Client408RequestTimeoutExceptionFactory($this->createStub(UrlGeneratorInterface::class)))
         );
     }
 

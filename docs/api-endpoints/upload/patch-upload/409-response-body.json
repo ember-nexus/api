@@ -2,6 +2,7 @@
   "type": "http://api/error/409/conflict",
   "title": "Conflict",
   "status": 409,
+  "instance": "urn:uuid:3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f",
   "detail": "Offset from request does not match offset of resource.",
   "expected-offset": 5242880,
   "provided-offset": 5242881

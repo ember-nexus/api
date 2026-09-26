@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Factory\Type\Request;
 
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use App\Factory\Type\Request\PartialUploadRequestFactory;
 use App\Service\HeaderParseService;
 use App\Service\UploadBodyLimitService;
@@ -18,6 +19,7 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
 #[CoversClass(PartialUploadRequestFactory::class)]
@@ -30,7 +32,7 @@ class PartialUploadRequestFactoryTest extends TestCase
         $configuration = $this->prophesize(EmberNexusConfiguration::class);
         $configuration->getFileUploadMaxChunkSizeInBytes()->willReturn($maxChunkSize);
 
-        return new UploadBodyLimitService($configuration->reveal(), $this->buildBadContentFactory());
+        return new UploadBodyLimitService($configuration->reveal(), $this->buildBadContentFactory(), new Client408RequestTimeoutExceptionFactory($this->createStub(UrlGeneratorInterface::class)));
     }
 
     private function buildBadContentFactory(): Client400BadContentExceptionFactory
