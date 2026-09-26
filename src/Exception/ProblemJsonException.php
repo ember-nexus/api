@@ -19,6 +19,10 @@ class ProblemJsonException extends Exception implements ExceptionInterface
      * @var array<string, mixed>
      */
     protected array $additionalProperties;
+    /**
+     * @var array<string, string>
+     */
+    protected array $headers = [];
 
     /**
      * @param string               $type                 A URI reference [RFC3986] that identifies the
@@ -78,5 +82,23 @@ class ProblemJsonException extends Exception implements ExceptionInterface
     public function getAdditionalProperties(): array
     {
         return $this->additionalProperties;
+    }
+
+    /**
+     * @param array<string, string> $headers HTTP headers which will be added to the resulting Problem JSON response
+     */
+    public function setHeaders(array $headers): static
+    {
+        $this->headers = $headers;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 }

@@ -25,6 +25,8 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
         $stream = $object->getBody()->getContentAsResource();
 
         $this->headers->set('Accept-Ranges', 'bytes');
+        // the content type was detected by the server, browsers must not second-guess it
+        $this->headers->set('X-Content-Type-Options', 'nosniff');
 
         if (null !== $range) {
             $this->setStatusCode(206);

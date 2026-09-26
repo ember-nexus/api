@@ -9,11 +9,14 @@ use App\Type\RabbitMQQueueType;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Wire\AMQPTable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 #[Small]
 #[CoversClass(QueueService::class)]
@@ -35,7 +38,7 @@ class QueueServiceTest extends TestCase
         $connection = $this->prophesize(AMQPStreamConnection::class);
         $connection->channel()->willReturn($channel->reveal());
 
-        $queueService = new QueueService($connection->reveal());
+        $queueService = new QueueService($connection->reveal(), $this->prophesize(LoggerInterface::class)->reveal());
         $queueService->publishEvent(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE, ['elementId' => 'abc']);
     }
 
@@ -49,7 +52,7 @@ class QueueServiceTest extends TestCase
         $connection = $this->prophesize(AMQPStreamConnection::class);
         $connection->channel()->willReturn($channel->reveal());
 
-        $queueService = new QueueService($connection->reveal());
+        $queueService = new QueueService($connection->reveal(), $this->prophesize(LoggerInterface::class)->reveal());
         $processedMessages = $queueService->consumeQueue(
             RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
             function (): void {
@@ -79,7 +82,7 @@ class QueueServiceTest extends TestCase
 
         $handledElementIds = [];
 
-        $queueService = new QueueService($connection->reveal());
+        $queueService = new QueueService($connection->reveal(), $this->prophesize(LoggerInterface::class)->reveal());
         $processedMessages = $queueService->consumeQueue(
             RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
             function (array $eventData) use (&$handledElementIds): void {
@@ -89,5 +92,99 @@ class QueueServiceTest extends TestCase
 
         $this->assertSame(2, $processedMessages);
         $this->assertSame(['1', '2'], $handledElementIds);
+    }
+
+    public function testConsumeQueueRequeuesFailingMessageWithIncreasedTryCounterAfterDrainingQueue(): void
+    {
+        $failingMessage = new AMQPMessage('{"elementId":"bad"}');
+        $goodMessage = new AMQPMessage('{"elementId":"good"}');
+
+        $channel = $this->prophesize(AMQPChannel::class);
+        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, false, false, false)->shouldBeCalledOnce();
+        $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->shouldBeCalledTimes(3)->willReturn($failingMessage, $goodMessage, null);
+        $channel->basic_publish(
+            Argument::that(fn (AMQPMessage $message) => '{"elementId":"bad"}' === $message->getBody()
+                && 1 === $message->get('application_headers')->getNativeData()['x-try-count']),
+            '',
+            'ELASTICSEARCH_REINDEX_FILE'
+        )->shouldBeCalledOnce();
+        $channel->close()->shouldBeCalledOnce();
+        $failingMessage->setChannel($channel->reveal());
+        $goodMessage->setChannel($channel->reveal());
+        $channel->basic_ack(Argument::any(), Argument::any())->shouldBeCalledTimes(2);
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($channel->reveal());
+
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->error(Argument::containingString('try 1 of 3'))->shouldBeCalledOnce();
+
+        $queueService = new QueueService($connection->reveal(), $logger->reveal());
+        $processedMessages = $queueService->consumeQueue(
+            RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
+            function (array $eventData): void {
+                if ('bad' === $eventData['elementId']) {
+                    throw new RuntimeException('boom');
+                }
+            }
+        );
+
+        $this->assertSame(1, $processedMessages);
+    }
+
+    public function testConsumeQueueDropsMessageAfterThirdFailedTry(): void
+    {
+        $message = new AMQPMessage('{"elementId":"bad"}', [
+            'application_headers' => new AMQPTable(['x-try-count' => 2]),
+        ]);
+
+        $channel = $this->prophesize(AMQPChannel::class);
+        $channel->queue_declare(Argument::cetera())->shouldBeCalledOnce();
+        $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->willReturn($message, null);
+        $channel->basic_publish(Argument::cetera())->shouldNotBeCalled();
+        $channel->close()->shouldBeCalledOnce();
+        $message->setChannel($channel->reveal());
+        $channel->basic_ack(Argument::any(), Argument::any())->shouldBeCalledOnce();
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($channel->reveal());
+
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->error(Argument::containingString('Dropping message'))->shouldBeCalledOnce();
+
+        $queueService = new QueueService($connection->reveal(), $logger->reveal());
+        $this->assertSame(0, $queueService->consumeQueue(
+            RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
+            function (): void {
+                throw new RuntimeException('boom');
+            }
+        ));
+    }
+
+    public function testConsumeQueueTreatsMalformedJsonAsFailedMessage(): void
+    {
+        $message = new AMQPMessage('not json');
+
+        $channel = $this->prophesize(AMQPChannel::class);
+        $channel->queue_declare(Argument::cetera())->shouldBeCalledOnce();
+        $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->willReturn($message, null);
+        $channel->basic_publish(Argument::cetera())->shouldBeCalledOnce();
+        $channel->close()->shouldBeCalledOnce();
+        $message->setChannel($channel->reveal());
+        $channel->basic_ack(Argument::any(), Argument::any())->shouldBeCalledOnce();
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($channel->reveal());
+
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->error(Argument::any())->shouldBeCalledOnce();
+
+        $queueService = new QueueService($connection->reveal(), $logger->reveal());
+        $this->assertSame(0, $queueService->consumeQueue(
+            RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
+            function (): void {
+                $this->fail('Handler must not be called for undecodable messages.');
+            }
+        ));
     }
 }

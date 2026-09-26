@@ -19,6 +19,7 @@ use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\S3\UploadFileOperationFactory;
 use App\Security\AuthProvider;
 use App\Service\DigestService;
+use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\FileService;
 use App\Service\FileSizeLimitService;
@@ -38,6 +39,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -65,6 +67,8 @@ class UploadCreationServiceTest extends TestCase
     private ObjectProphecy $uploadService;
     /** @var ObjectProphecy<EventDispatcherInterface> */
     private ObjectProphecy $eventDispatcher;
+    /** @var ObjectProphecy<ElementFileDeletionService> */
+    private ObjectProphecy $elementFileDeletionService;
     private UploadCreationService $service;
     /** @var ObjectProphecy<Client409ConflictExceptionFactory> */
     private ObjectProphecy $conflictFactory;
@@ -85,6 +89,8 @@ class UploadCreationServiceTest extends TestCase
         $this->uploadService = $this->prophesize(UploadService::class);
         $this->elementManager->merge(Argument::any())->willReturn($this->elementManager->reveal());
         $this->elementManager->flush()->willReturn($this->elementManager->reveal());
+        $this->elementFileDeletionService = $this->prophesize(ElementFileDeletionService::class);
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->will(function () {});
         $this->eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
         $this->eventDispatcher->dispatch(Argument::any())->will(fn (array $args) => $args[0]);
 
@@ -152,6 +158,7 @@ class UploadCreationServiceTest extends TestCase
             $fileService->reveal(),
             $badContentFactory,
             $this->conflictFactory->reveal(),
+            $this->elementFileDeletionService->reveal(),
         );
     }
 
@@ -223,6 +230,53 @@ class UploadCreationServiceTest extends TestCase
         $this->elementManager->flush()->shouldBeCalledOnce()->willReturn($this->elementManager->reveal());
 
         $this->assertInstanceOf(CreatedResponse::class, $this->handle());
+    }
+
+    public function testDirectUploadDeletesPreviousFileOnlyAfterFlushAndDispatchesEventAfterwards(): void
+    {
+        $this->configureDirectUpload();
+        $log = [];
+        $this->s3Service->uploadFile(Argument::any())->will(function () use (&$log) {
+            $log[] = 'upload';
+
+            return 5;
+        });
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $this->elementManager->merge(Argument::any())->will(function () use (&$log) {
+            $log[] = 'merge';
+
+            return $this->reveal();
+        });
+        $this->elementManager->flush()->will(function () use (&$log) {
+            $log[] = 'flush';
+
+            return $this->reveal();
+        });
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->will(function () use (&$log) {
+            $log[] = 'delete-previous';
+        });
+        $this->eventDispatcher->dispatch(Argument::any())->will(function (array $args) use (&$log) {
+            $log[] = 'event';
+
+            return $args[0];
+        });
+
+        $this->handle();
+
+        $this->assertSame(['upload', 'merge', 'flush', 'delete-previous', 'event'], $log);
+    }
+
+    public function testDirectUploadWithFailingFlushDoesNotDeletePreviousFile(): void
+    {
+        $this->configureDirectUpload();
+        $this->s3Service->uploadFile(Argument::any())->willReturn(5);
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $this->elementManager->flush()->willThrow(new RuntimeException('flush failed'));
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->shouldNotBeCalled();
+        $this->eventDispatcher->dispatch(Argument::any())->shouldNotBeCalled();
+
+        $this->expectException(RuntimeException::class);
+        $this->handle();
     }
 
     public function testDirectUploadWithMatchingDigestSucceeds(): void

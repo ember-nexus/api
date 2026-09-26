@@ -25,6 +25,7 @@ use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadCancellationService;
+use App\Service\UploadConsistencyService;
 use App\Service\UploadFinalizationService;
 use App\Service\UploadLockService;
 use App\Service\UploadService;
@@ -59,6 +60,7 @@ class PatchUploadController extends AbstractController
         private UploadFinalizationService $uploadFinalizationService,
         private UploadCancellationService $uploadCancellationService,
         private UploadLockService $uploadLockService,
+        private UploadConsistencyService $uploadConsistencyService,
         private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
         private FileOperationFactory $fileOperationFactory,
         private S3Service $s3Service,
@@ -124,6 +126,7 @@ class PatchUploadController extends AbstractController
         if ($upload->getExpires() < new DateTime()) {
             throw $this->client410GoneExceptionFactory->createFromTemplate();
         }
+        $this->uploadConsistencyService->assertConsistent($uploadElement, $upload);
 
         return $upload;
     }
@@ -133,7 +136,7 @@ class PatchUploadController extends AbstractController
         $partialUploadRequest = $this->partialUploadRequestFactory->createPartialUploadRequestFromRequest($request);
 
         if ($partialUploadRequest->getUploadOffset() !== $upload->getUploadOffset()) {
-            throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalProperties: ['expected-offset' => $upload->getUploadOffset(), 'provided-offset' => $partialUploadRequest->getUploadOffset()]);
+            throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalProperties: ['expectedOffset' => $upload->getUploadOffset(), 'providedOffset' => $partialUploadRequest->getUploadOffset()]);
         }
 
         // an empty intermediate chunk is a no-op which just reports the current state, e.g. to check the offset; S3
@@ -238,11 +241,8 @@ class PatchUploadController extends AbstractController
             $completesUpload = true === $partialUploadRequest->isUploadComplete();
             $isTooLong = $uploadLength < $totalLength;
             $isTooShort = $completesUpload && $uploadLength > $totalLength;
-            if ($completesUpload && ($isTooLong || $isTooShort)) {
-                // the completed upload can never match its declared length, so nothing is left to resume
-                $this->uploadService->deleteUploadAndChunks($upload);
-                $this->elementManager->flush();
-            }
+            // the request does not match the declared length, so only this request is rejected (its chunk is deleted
+            // by the caller); the upload keeps its state and can be completed by a corrected request
             if ($isTooLong) {
                 throw $this->client409ConflictExceptionFactory->createFromDetail('Already uploaded data exceeds defined upload length.');
             }

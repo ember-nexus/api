@@ -3,12 +3,13 @@ Access-Control-Allow-Headers: *
 Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: DELETE, GET, HEAD, OPTIONS, POST, PUT
 Cache-Control: no-cache, private
 Content-Disposition: attachment; filename=Rose.jpg
 Content-Length: 138937
 Content-Type: image/jpeg
-Date: Mon, 24 Aug 2026 21:39:11 GMT
-Etag: "XHImZOcVmUc"
+Date: Sat, 26 Sep 2026 21:53:31 GMT
+Etag: "KlfY8H2vLTJ"
 Repr-Digest: sha-256=:cSS7oKhtzBDhtceO+Wi5Lh/mgcFtDy7J81sOhEjBpMA=:
+X-Content-Type-Options: nosniff
 X-Powered-By: Ember Nexus API

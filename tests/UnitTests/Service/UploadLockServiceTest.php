@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Service;
 
+use App\Factory\Type\RedisKeyFactory;
 use App\Service\UploadLockService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -31,7 +32,7 @@ class UploadLockServiceTest extends TestCase
             'NX'
         )->shouldBeCalledOnce()->willReturn('OK');
 
-        $token = (new UploadLockService($redis->reveal()))->acquire($uploadId);
+        $token = (new UploadLockService($redis->reveal(), new RedisKeyFactory()))->acquire($uploadId);
 
         $this->assertIsString($token);
     }
@@ -41,7 +42,7 @@ class UploadLockServiceTest extends TestCase
         $redis = $this->prophesize(Client::class);
         $redis->set(Argument::cetera())->willReturn(null);
 
-        $this->assertNull((new UploadLockService($redis->reveal()))->acquire(Uuid::uuid4()));
+        $this->assertNull((new UploadLockService($redis->reveal(), new RedisKeyFactory()))->acquire(Uuid::uuid4()));
     }
 
     public function testReleaseComparesTokenBeforeDeleting(): void
@@ -55,6 +56,6 @@ class UploadLockServiceTest extends TestCase
             'my-token'
         )->shouldBeCalledOnce()->willReturn(1);
 
-        (new UploadLockService($redis->reveal()))->release($uploadId, 'my-token');
+        (new UploadLockService($redis->reveal(), new RedisKeyFactory()))->release($uploadId, 'my-token');
     }
 }

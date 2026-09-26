@@ -64,6 +64,15 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
 
     public function checkHeadersAreIdentical(string $headers1, string $headers2): bool
     {
+        // the remaining lifetime of an upload depends on the timing of the test run, allow a deviation of +-5 seconds
+        if (
+            1 === preg_match('/^Upload-Limit: max-age=(\d+),/m', $headers1, $matches1)
+            && 1 === preg_match('/^Upload-Limit: max-age=(\d+),/m', $headers2, $matches2)
+            && abs((int) $matches1[1] - (int) $matches2[1]) <= 5
+        ) {
+            $headers2 = str_replace(sprintf('max-age=%s,', $matches2[1]), sprintf('max-age=%s,', $matches1[1]), $headers2);
+        }
+
         $headers1 = explode("\n", $headers1);
         $headers2 = explode("\n", $headers2);
 

@@ -125,4 +125,89 @@ class GetElementFileTest extends BaseRequestTestCase
             $response
         );
     }
+
+    /**
+     * Creates a small element with a short text file, to showcase `If-Range` with readable data.
+     *
+     * @return string the current file ETag
+     */
+    private function createElementWithShortTextFile(string $elementId, string $name): string
+    {
+        $response = $this->runPostRequest('/', self::TOKEN, [
+            'id' => $elementId,
+            'type' => 'Data',
+            'data' => ['name' => $name],
+        ]);
+        $this->assertIsCreatedResponse($response, false);
+
+        $response = $this->runUploadRequest(
+            'PUT',
+            sprintf('/%s/file', $elementId),
+            'Hello, Ember Nexus!',
+            self::TOKEN,
+            [
+                'Content-Type' => 'text/plain',
+                'Content-Disposition' => 'attachment; filename=hello.txt',
+            ]
+        );
+        $this->assertIsCreatedResponse($response, false);
+
+        $response = $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN);
+        $this->assertSame(200, $response->getStatusCode());
+
+        return $response->getHeader('ETag')[0];
+    }
+
+    public function testGetElementFileSuccess206WithMatchingIfRange(): void
+    {
+        $elementId = '3c4d5e6f-7a8b-4c9d-8e0f-2a3b4c5d6e7f';
+        $etag = $this->createElementWithShortTextFile($elementId, 'get-element-file-if-range-match');
+
+        // the ETag of the file still matches: the client resumes its download, the requested range is returned
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', $elementId),
+            self::TOKEN,
+            ['Range' => 'bytes=7-11', 'If-Range' => $etag]
+        );
+        $this->assertSame(206, $response->getStatusCode());
+        $this->assertSame('Ember', (string) $response->getBody());
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            'docs/api-endpoints/file/get-element-file/206-if-range-match-response-header.txt',
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            'docs/api-endpoints/file/get-element-file/206-if-range-match-response-body.txt',
+            $response,
+            false
+        );
+    }
+
+    public function testGetElementFileSuccess200WithNonMatchingIfRange(): void
+    {
+        $elementId = '4d5e6f7a-8b9c-4d0e-9f1a-3b4c5d6e7f8a';
+        $this->createElementWithShortTextFile($elementId, 'get-element-file-if-range-mismatch');
+
+        // the file changed since the client started its download: the Range header is ignored and the full file is
+        // returned, so the client never mixes parts of two different versions
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', $elementId),
+            self::TOKEN,
+            ['Range' => 'bytes=7-11', 'If-Range' => '"outdated-etag"']
+        );
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('Hello, Ember Nexus!', (string) $response->getBody());
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            'docs/api-endpoints/file/get-element-file/200-if-range-mismatch-response-header.txt',
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            'docs/api-endpoints/file/get-element-file/200-if-range-mismatch-response-body.txt',
+            $response,
+            false
+        );
+    }
 }

@@ -40,14 +40,10 @@ class FilePropertyService
      */
     protected function parseExtensionPropertyFromRawFileProperties(array $rawFileProperties, ?UuidInterface $elementId): string
     {
-        if (!array_key_exists('extension', $rawFileProperties)) {
-            return FileService::DEFAULT_EXTENSION;
-        }
-        $extensionProperty = $rawFileProperties['extension'];
+        // a missing, null or non-string extension falls back to the default; an empty string is valid and means that the
+        // file has no extension at all
+        $extensionProperty = $rawFileProperties['extension'] ?? null;
         if (!is_string($extensionProperty)) {
-            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Expected property 'file.extension' of element %s to be of type string, got %s.", $elementId?->toString() ?? 'null', get_debug_type($extensionProperty)));
-        }
-        if (0 === strlen($extensionProperty)) {
             return FileService::DEFAULT_EXTENSION;
         }
 

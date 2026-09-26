@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\ExampleGenerationCommand\Backup;
 
-use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
 use App\Factory\S3ClientFactory;
+use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -22,10 +22,19 @@ class BackupFilesTest extends BaseCommandTestCase
     private const string ROUND_TRIP_BACKUP = 'files-round-trip-test';
     private const string TAMPERED_BACKUP = 'files-tampered-test';
     private const string RELATION_WITH_FILE_ID = '5ed54a8f-b4d5-4e95-a7f3-d23c026c8afe';
+    private const string EXTENSIONLESS_ROUND_TRIP_BACKUP = 'files-extensionless-test';
+    /**
+     * Elements of the scenario `general.extensionlessFile` of the reference dataset, their `file.extension` is an
+     * empty string, so their files are stored without any extension (and without trailing dot).
+     */
+    private const array EXTENSIONLESS_FILE_IDS = [
+        '404db674-cc9a-4c76-9ecb-c804ce41f499', // node
+        '8cc130fd-fa1b-482d-9bea-adb3e4a36d34', // relation
+    ];
 
     protected function tearDown(): void
     {
-        foreach ([self::ROUND_TRIP_BACKUP, self::TAMPERED_BACKUP] as $name) {
+        foreach ([self::ROUND_TRIP_BACKUP, self::TAMPERED_BACKUP, self::EXTENSIONLESS_ROUND_TRIP_BACKUP] as $name) {
             $this->runCommand(sprintf('rm -rf %s', escapeshellarg(self::BACKUP_DIRECTORY.$name)));
         }
         // leave the database in the state other tests expect
@@ -64,6 +73,49 @@ class BackupFilesTest extends BaseCommandTestCase
             $this->isFileInStorage(self::RELATION_WITH_FILE_ID),
             'The file of a relation must be restored into the storage bucket by backup:load.'
         );
+    }
+
+    public function testBackupCreateAndLoadRoundTripIncludesFilesWithoutExtension(): void
+    {
+        foreach (self::EXTENSIONLESS_FILE_IDS as $fileId) {
+            if (!is_file(self::BACKUP_DIRECTORY.'reference-dataset/file/general/extensionlessFile/'.$fileId)) {
+                $this->markTestSkipped('The used reference dataset does not contain the scenario general.extensionlessFile yet.');
+            }
+        }
+
+        $this->runCommand('php bin/console database:drop -f');
+        $this->runCommand('php bin/console backup:load reference-dataset');
+        $createOutput = $this->runCommand(sprintf('php bin/console backup:create --no-ansi %s', self::EXTENSIONLESS_ROUND_TRIP_BACKUP));
+        $fileCount = $this->getFileCountFromCreateOutput($createOutput);
+
+        foreach (self::EXTENSIONLESS_FILE_IDS as $fileId) {
+            $this->assertFileExists(
+                self::BACKUP_DIRECTORY.self::EXTENSIONLESS_ROUND_TRIP_BACKUP.'/file/'.$fileId,
+                'Files without extension must be exported without trailing dot.'
+            );
+        }
+
+        $this->runCommand('php bin/console database:drop -f');
+        $loadOutput = $this->runCommand(sprintf('php bin/console backup:load --no-ansi %s', self::EXTENSIONLESS_ROUND_TRIP_BACKUP));
+        $this->assertStringContainsString(sprintf('Loaded %d files.', $fileCount), $loadOutput);
+        $this->assertStringNotContainsString('could not be loaded', $loadOutput);
+
+        foreach (self::EXTENSIONLESS_FILE_IDS as $fileId) {
+            $this->assertTrue($this->isFileInStorage($fileId), 'Files without extension must be restored into the storage bucket.');
+            $this->assertFalse($this->isFileInStorageWithTrailingDot($fileId), 'Storage keys of files without extension must not end with a dot.');
+        }
+    }
+
+    private function isFileInStorageWithTrailingDot(string $elementId): bool
+    {
+        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
+            if (str_contains((string) $object->getKey(), $elementId) && str_ends_with((string) $object->getKey(), '.')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function isFileInStorage(string $elementId): bool

@@ -37,6 +37,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassLength)
@@ -331,7 +332,7 @@ class S3ServiceTest extends TestCase
         $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(6)->willReturn('storage-key');
         $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(4)->willReturn('upload-bucket');
         $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledTimes(2)->willReturn(['upload-key-0001', 'upload-key-0002', 'upload-key-0003']);
-        $mergeFileChunksOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn(null);
+        $mergeFileChunksOperation->getPreviousStorageKey()->shouldNotBeCalled();
         $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
 
         $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
@@ -555,14 +556,14 @@ class S3ServiceTest extends TestCase
         $s3Service->mergeFileChunks($mergeFileChunksOperation);
     }
 
-    public function testMergeFileChunksDeletesPreviousFileIfAvailable(): void
+    public function testMergeFileChunksDoesNotDeleteThePreviousFile(): void
     {
         $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
-        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledTimes(5)->willReturn('storage-bucket');
-        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(5)->willReturn('storage-key');
+        $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledTimes(4)->willReturn('storage-bucket');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(4)->willReturn('storage-key');
         $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
         $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledTimes(2)->willReturn(['upload-key-0001']);
-        $mergeFileChunksOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn('storage-key.prev');
+        $mergeFileChunksOperation->getPreviousStorageKey()->shouldNotBeCalled();
         $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
 
         $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
@@ -587,8 +588,6 @@ class S3ServiceTest extends TestCase
 
         $mimeTypeService = $this->prophesize(MimeTypeService::class);
         $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
-
-        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
 
         $s3Client = $this->prophesize(S3Client::class);
         $s3Client->createMultipartUpload(Argument::is([
@@ -629,17 +628,11 @@ class S3ServiceTest extends TestCase
             'Bucket' => 'storage-bucket',
             'Key' => 'storage-key',
         ]))->shouldBeCalledOnce()->willReturn($headObjectOutput2->reveal());
-        $s3Client->objectExists(Argument::is([
-            'Bucket' => 'storage-bucket',
-            'Key' => 'storage-key.prev',
-        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
-        $s3Client->deleteObject(Argument::is([
-            'Bucket' => 'storage-bucket',
-            'Key' => 'storage-key.prev',
-        ]))->shouldBeCalledOnce();
+        // the previous file is deleted by the caller after the element was flushed
+        $s3Client->deleteObject(Argument::cetera())->shouldNotBeCalled();
 
         $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
-        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, false);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::any())->shouldNotBeCalled();
 
         $s3Service = $this->buildS3Service(
             s3Client: $s3Client->reveal(),
@@ -659,10 +652,10 @@ class S3ServiceTest extends TestCase
     {
         $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
         $mergeFileChunksOperation->getStorageBucket()->shouldBeCalledTimes(4)->willReturn('storage-bucket');
-        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(5)->willReturn('storage-key');
+        $mergeFileChunksOperation->getStorageKey()->shouldBeCalledTimes(4)->willReturn('storage-key');
         $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
         $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledTimes(2)->willReturn(['upload-key-0001']);
-        $mergeFileChunksOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $mergeFileChunksOperation->getPreviousStorageKey()->shouldNotBeCalled();
         $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
 
         $createMultipartUploadOutput = $this->prophesize(CreateMultipartUploadOutput::class);
@@ -737,6 +730,38 @@ class S3ServiceTest extends TestCase
 
         $contentLength = $s3Service->mergeFileChunks($mergeFileChunksOperation);
         $this->assertSame(12345678, $contentLength);
+    }
+
+    public function testGetChunksContentLengthSumsUpAllChunks(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getUploadKeys()->willReturn(['key-1', 'key-2']);
+        $mergeFileChunksOperation->getUploadBucket()->willReturn('upload-bucket');
+
+        $s3Client = $this->prophesize(S3Client::class);
+        foreach (['key-1' => 7, 'key-2' => 5] as $key => $length) {
+            $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+            $headObjectOutput->getContentLength()->willReturn($length);
+            $s3Client->headObject(Argument::is(['Bucket' => 'upload-bucket', 'Key' => $key]))->willReturn($headObjectOutput->reveal());
+        }
+
+        $s3Service = $this->buildS3Service(s3Client: $s3Client->reveal());
+
+        $this->assertSame(12, $s3Service->getChunksContentLength($mergeFileChunksOperation->reveal()));
+    }
+
+    public function testGetChunksContentLengthReturnsNullForMissingChunk(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getUploadKeys()->willReturn(['key-1']);
+        $mergeFileChunksOperation->getUploadBucket()->willReturn('upload-bucket');
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->headObject(Argument::any())->willThrow(new RuntimeException('not found'));
+
+        $s3Service = $this->buildS3Service(s3Client: $s3Client->reveal());
+
+        $this->assertNull($s3Service->getChunksContentLength($mergeFileChunksOperation->reveal()));
     }
 
     public function testDeleteFileChunks(): void
@@ -998,7 +1023,7 @@ class S3ServiceTest extends TestCase
         $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
         $uploadFileOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
         $uploadFileOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
-        $uploadFileOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn(null);
+        $uploadFileOperation->getPreviousStorageKey()->shouldNotBeCalled();
         $uploadFileOperation = $uploadFileOperation->reveal();
 
         $uploadFileChunkOperation = $this->prophesize(UploadFileChunkOperationInterface::class);
@@ -1060,16 +1085,16 @@ class S3ServiceTest extends TestCase
         $this->assertSame(1234, $contentLength);
     }
 
-    public function testUploadFileDeletesPreviousFileIfItExists(): void
+    public function testUploadFileDoesNotDeleteThePreviousFile(): void
     {
         $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
         $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
-        $uploadFileOperation->getStorageBucket()->shouldBeCalledTimes(2)->willReturn('storage-bucket');
-        $uploadFileOperation->getStorageKey()->shouldBeCalledTimes(2)->willReturn('storage-key');
+        $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $uploadFileOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
         $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
         $uploadFileOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
         $uploadFileOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
-        $uploadFileOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn('storage-key.prev');
+        $uploadFileOperation->getPreviousStorageKey()->shouldNotBeCalled();
         $uploadFileOperation = $uploadFileOperation->reveal();
 
         $uploadFileChunkOperation = $this->prophesize(UploadFileChunkOperationInterface::class);
@@ -1084,7 +1109,6 @@ class S3ServiceTest extends TestCase
         $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
         $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(1234);
 
-        $objectExistsWaiter1 = $this->prophesize(ObjectExistsWaiter::class)->reveal();
         $objectExistsWaiter2 = $this->prophesize(ObjectExistsWaiter::class)->reveal();
 
         $s3Client = $this->prophesize(S3Client::class);
@@ -1105,14 +1129,11 @@ class S3ServiceTest extends TestCase
             'ContentType' => 'text/plain',
             'MetadataDirective' => 'REPLACE',
         ]))->shouldBeCalledOnce()->willReturn($copyObjectOutput);
-        $s3Client->objectExists(Argument::is([
-            'Bucket' => 'storage-bucket',
-            'Key' => 'storage-key.prev',
-        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter1);
+        // the previous file is deleted by the caller after the element was flushed
         $s3Client->deleteObject(Argument::is([
             'Bucket' => 'storage-bucket',
             'Key' => 'storage-key.prev',
-        ]))->shouldBeCalledOnce();
+        ]))->shouldNotBeCalled();
         $s3Client->objectExists(Argument::is([
             'Bucket' => 'upload-bucket',
             'Key' => 'upload-key',
@@ -1123,7 +1144,6 @@ class S3ServiceTest extends TestCase
         ]))->shouldBeCalledOnce();
 
         $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
-        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter1))->shouldBeCalledTimes(2)->willReturn(true, false);
         $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter2))->shouldBeCalledTimes(2)->willReturn(true, false);
         $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce();
 
@@ -1150,11 +1170,11 @@ class S3ServiceTest extends TestCase
         $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
         $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
         $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
-        $uploadFileOperation->getStorageKey()->shouldBeCalledTimes(2)->willReturn('storage-key');
+        $uploadFileOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
         $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
         $uploadFileOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
         $uploadFileOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
-        $uploadFileOperation->getPreviousStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $uploadFileOperation->getPreviousStorageKey()->shouldNotBeCalled();
         $uploadFileOperation = $uploadFileOperation->reveal();
 
         $uploadFileChunkOperation = $this->prophesize(UploadFileChunkOperationInterface::class);
@@ -1950,7 +1970,7 @@ class S3ServiceTest extends TestCase
         $s3Service->uploadFile($uploadFileOperation->reveal());
     }
 
-    public function testUploadFileViaMultipartUploadDeletesPreviousFile(): void
+    public function testUploadFileViaMultipartUploadDoesNotDeleteThePreviousFile(): void
     {
         $resource = \Safe\fopen('php://memory', 'r+');
         \Safe\fwrite($resource, 'abcdefghij');
@@ -1960,18 +1980,10 @@ class S3ServiceTest extends TestCase
         $s3Client->createMultipartUpload(Argument::any())->willReturn($this->buildCreateMultipartUploadOutput('multipart-upload-id'));
         $s3Client->uploadPart(Argument::any())->willReturn($this->buildUploadPartOutput('etag-1'));
         $s3Client->completeMultipartUpload(Argument::any())->shouldBeCalledOnce();
-        $s3Client->deleteObject(Argument::is([
-            'Bucket' => 'storage-bucket',
-            'Key' => 'previous-storage-key',
-        ]))->shouldBeCalledOnce();
-        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
-        $s3Client->objectExists(Argument::is([
-            'Bucket' => 'storage-bucket',
-            'Key' => 'previous-storage-key',
-        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+        // the previous file is deleted by the caller after the element was flushed
+        $s3Client->deleteObject(Argument::any())->shouldNotBeCalled();
 
         $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
-        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($objectExistsWaiter)->willReturn(true, false);
 
         $s3Service = $this->buildS3Service(s3Client: $s3Client->reveal(), s3ClientWrapper: $s3ClientWrapper->reveal(), multipartUploadThresholdInBytes: 5, multipartUploadPartSizeInBytes: 1000);
 

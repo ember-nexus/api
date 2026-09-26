@@ -187,11 +187,11 @@ class BackupLoadCommand extends Command
         ));
     }
 
-    private function parseFilenameAsUuidFromPath(string $path): false|UuidInterface
+    private function parseFilenameAsUuidFromPath(string $path, bool $extensionIsOptional = false): false|UuidInterface
     {
         $filename = basename($path);
         $parts = explode('.', $filename, 2);
-        if (2 !== count($parts)) {
+        if (2 !== count($parts) && !$extensionIsOptional) {
             return false;
         }
         $name = $parts[0];
@@ -315,7 +315,8 @@ class BackupLoadCommand extends Command
                 continue;
             }
             $path = $file->path();
-            $fileId = $this->parseFilenameAsUuidFromPath($path);
+            // files without extension are stored without a trailing dot
+            $fileId = $this->parseFilenameAsUuidFromPath($path, true);
             if (false === $fileId) {
                 continue;
             }

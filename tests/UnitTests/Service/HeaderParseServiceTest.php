@@ -210,7 +210,7 @@ class HeaderParseServiceTest extends TestCase
         $this->assertSame('bin', $result);
     }
 
-    public function testGetExtensionFromHeadersThrowsWhenFileNameDoesNotContainExtension(): void
+    public function testGetExtensionFromHeadersReturnsEmptyExtensionWhenFileNameDoesNotContainExtension(): void
     {
         $headerBag = $this->prophesize(HeaderBag::class);
         $headerBag->get(Argument::is('Content-Disposition'))->shouldBeCalledOnce()->willReturn('inline; filename=Test');
@@ -221,20 +221,32 @@ class HeaderParseServiceTest extends TestCase
         $fileService = $this->prophesize(FileService::class);
         $fileService->removeReservedCharactersFromFileName(Argument::is('Test'))->shouldBeCalledOnce()->willReturn('Test');
 
-        $exception = $this->prophesize(Client400BadContentException::class)->reveal();
+        $headerParseService = $this->buildHeaderParseService(
+            fileService: $fileService->reveal(),
+            contentDispositionWrapper: $contentDispositionWrapper->reveal(),
+        );
 
-        $client400BadContentExceptionFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
-        $client400BadContentExceptionFactory->createFromDetail(Argument::is("Could not parse a file extension from the filename in 'Content-Disposition': 'Test'."))->shouldBeCalledOnce()->willReturn($exception);
+        $this->assertSame('', $headerParseService->getExtensionFromHeaders($headerBag->reveal()));
+    }
+
+    public function testGetExtensionFromHeadersTruncatesLongExtension(): void
+    {
+        $longExtension = str_repeat('a', 100);
+        $headerBag = $this->prophesize(HeaderBag::class);
+        $headerBag->get(Argument::is('Content-Disposition'))->shouldBeCalledOnce()->willReturn('inline');
+
+        $contentDispositionWrapper = $this->prophesize(ContentDispositionWrapper::class);
+        $contentDispositionWrapper->parseContentDisposition(Argument::is('inline'))->shouldBeCalledOnce()->willReturn('Test.'.$longExtension);
+
+        $fileService = $this->prophesize(FileService::class);
+        $fileService->removeReservedCharactersFromFileName(Argument::is('Test.'.$longExtension))->shouldBeCalledOnce()->willReturn('Test.'.$longExtension);
 
         $headerParseService = $this->buildHeaderParseService(
             fileService: $fileService->reveal(),
             contentDispositionWrapper: $contentDispositionWrapper->reveal(),
-            client400BadContentExceptionFactory: $client400BadContentExceptionFactory->reveal()
         );
 
-        $this->expectException(Client400BadContentException::class);
-
-        $headerParseService->getExtensionFromHeaders($headerBag->reveal());
+        $this->assertSame(str_repeat('a', 64), $headerParseService->getExtensionFromHeaders($headerBag->reveal()));
     }
 
     public static function uploadOffset(): array

@@ -29,7 +29,25 @@ services:
     expose:
       - "80"
     volumes:
-      - ../../:/var/www/html
+      # the repository is deliberately not mounted: the production image is tested as it is shipped
+      - ./well-known-security.txt:/well-known-security.txt
+
+  # second API instance, only differs in its configuration file; used by the tests of
+  # tests/ExampleGenerationControllerWithDifferentConfiguration via API_DOMAIN=http://api-different-configuration
+  api-different-configuration:
+    container_name: api-different-configuration
+    image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
+    expose:
+      - "80"
+    volumes:
+      - ../ExampleGenerationControllerWithDifferentConfiguration/configuration.yml:/var/www/html/config/packages/ember_nexus.yaml:ro
       - ./well-known-security.txt:/well-known-security.txt
 
   neo4j:

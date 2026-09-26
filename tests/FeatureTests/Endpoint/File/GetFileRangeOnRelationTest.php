@@ -158,8 +158,8 @@ class GetFileRangeOnRelationTest extends BaseRequestTestCase
 
         $this->assertIsProblemResponse($response, 416);
         $body = \Safe\json_decode((string) $response->getBody(), true);
-        $this->assertArrayHasKey('total-length', $body);
-        $this->assertSame(self::CONTENT_LENGTH, $body['total-length']);
+        $this->assertArrayHasKey('totalLength', $body);
+        $this->assertSame(self::CONTENT_LENGTH, $body['totalLength']);
     }
 
     public function testRequestWithoutRangeHeaderAdvertisesAcceptRanges(): void
@@ -168,5 +168,61 @@ class GetFileRangeOnRelationTest extends BaseRequestTestCase
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(['bytes'], $response->getHeader('Accept-Ranges'));
+    }
+
+    public function testIfRangeWithCurrentEtagServesPartialContent(): void
+    {
+        $etag = $this->runGetRequest(sprintf('/%s/file', $this->getRelationId()), self::TOKEN)->getHeader('ETag')[0];
+
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', $this->getRelationId()),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99', 'If-Range' => $etag]
+        );
+
+        $this->assertSame(206, $response->getStatusCode());
+        $this->assertSame([sprintf('bytes 0-99/%d', self::CONTENT_LENGTH)], $response->getHeader('Content-Range'));
+        $this->assertSame(100, strlen((string) $response->getBody()));
+    }
+
+    public function testIfRangeWithStaleEtagServesFullFile(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', $this->getRelationId()),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99', 'If-Range' => '"stale-etag"']
+        );
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame([], $response->getHeader('Content-Range'));
+        $this->assertSame(self::CONTENT_LENGTH, strlen((string) $response->getBody()));
+    }
+
+    public function testIfRangeWithWeakEtagOrDateServesFullFile(): void
+    {
+        $etag = $this->runGetRequest(sprintf('/%s/file', $this->getRelationId()), self::TOKEN)->getHeader('ETag')[0];
+
+        foreach (['W/'.$etag, 'Wed, 21 Oct 2015 07:28:00 GMT'] as $ifRange) {
+            $response = $this->runGetRequest(
+                sprintf('/%s/file', $this->getRelationId()),
+                self::TOKEN,
+                ['Range' => 'bytes=0-99', 'If-Range' => $ifRange]
+            );
+
+            $this->assertSame(200, $response->getStatusCode());
+            $this->assertSame(self::CONTENT_LENGTH, strlen((string) $response->getBody()));
+        }
+    }
+
+    public function testIfRangeWithoutRangeIsIgnored(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', $this->getRelationId()),
+            self::TOKEN,
+            ['If-Range' => '"stale-etag"']
+        );
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(self::CONTENT_LENGTH, strlen((string) $response->getBody()));
     }
 }

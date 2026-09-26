@@ -6,13 +6,17 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Contract\RelationElementInterface;
 use App\Contract\S3\FileOperationInterface;
+use App\Contract\S3\MergeFileChunksOperationInterface;
+use App\Contract\S3\UploadFileOperationInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\FileOperationFactory;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\S3Service;
+use App\Tests\UnitTests\AssertLoggerTrait;
 use App\Type\NodeElement;
+use Beste\Psr\Log\TestLogger;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
@@ -24,6 +28,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
+use RuntimeException;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[Small]
@@ -31,6 +36,7 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 class ElementFileDeletionServiceTest extends TestCase
 {
     use ProphecyTrait;
+    use AssertLoggerTrait;
 
     /**
      * @var ObjectProphecy<ElementManager>
@@ -52,6 +58,7 @@ class ElementFileDeletionServiceTest extends TestCase
      * @var ObjectProphecy<ClientInterface>
      */
     private ObjectProphecy $client;
+    private TestLogger $logger;
     private ElementFileDeletionService $service;
 
     protected function setUp(): void
@@ -60,6 +67,7 @@ class ElementFileDeletionServiceTest extends TestCase
         $this->elementService = $this->prophesize(ElementService::class);
         $this->fileOperationFactory = $this->prophesize(FileOperationFactory::class);
         $this->s3Service = $this->prophesize(S3Service::class);
+        $this->logger = TestLogger::create();
         $this->client = $this->prophesize(ClientInterface::class);
         $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
         $cypherEntityManager->getClient()->willReturn($this->client->reveal());
@@ -71,6 +79,7 @@ class ElementFileDeletionServiceTest extends TestCase
             $this->s3Service->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            $this->logger,
         );
     }
 
@@ -146,5 +155,86 @@ class ElementFileDeletionServiceTest extends TestCase
         $this->s3Service->deleteFile($second)->shouldBeCalledOnce();
 
         $this->service->deleteFiles([$first, $second]);
+    }
+
+    public function testDeleteFilesLogsFailuresAndContinues(): void
+    {
+        $failing = $this->prophesize(FileOperationInterface::class);
+        $failing->getKey()->willReturn('some-key.txt');
+        $failing->getBucket()->willReturn('some-bucket');
+        $failingOperation = $failing->reveal();
+        $second = $this->prophesize(FileOperationInterface::class)->reveal();
+
+        $this->s3Service->deleteFile($failingOperation)->willThrow(new RuntimeException('S3 is down'));
+        $this->s3Service->deleteFile($second)->shouldBeCalledOnce();
+
+        $this->service->deleteFiles([$failingOperation, $second]);
+
+        $this->assertLogHappened(
+            $this->logger,
+            'error',
+            "Unable to delete file 'some-key.txt' from bucket 'some-bucket'",
+            ['bucket' => 'some-bucket', 'key' => 'some-key.txt']
+        );
+    }
+
+    public function testDeleteFileDoesNotThrow(): void
+    {
+        $failing = $this->prophesize(FileOperationInterface::class);
+        $failing->getKey()->willReturn('k');
+        $failing->getBucket()->willReturn('b');
+        $operation = $failing->reveal();
+        $this->s3Service->deleteFile($operation)->willThrow(new RuntimeException('boom'));
+
+        $this->service->deleteFile($operation);
+
+        $this->assertCount(1, $this->logger->records->all());
+    }
+
+    public function testDeletePreviousFileAfterReplaceDeletesTheOldKey(): void
+    {
+        $operation = $this->prophesize(UploadFileOperationInterface::class);
+        $operation->getPreviousStorageKey()->willReturn('some-key.old');
+        $operation->getStorageKey()->willReturn('some-key.new');
+        $operation->getStorageBucket()->willReturn('some-bucket');
+
+        $this->s3Service->deleteFile(Argument::that(
+            fn (FileOperationInterface $fileOperation) => 'some-bucket' === $fileOperation->getBucket() && 'some-key.old' === $fileOperation->getKey()
+        ))->shouldBeCalledOnce();
+
+        $this->service->deletePreviousFileAfterReplace($operation->reveal());
+    }
+
+    public function testDeletePreviousFileAfterReplaceKeepsTheFileIfKeyIsUnchangedOrThereIsNoPreviousFile(): void
+    {
+        $sameKey = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $sameKey->getPreviousStorageKey()->willReturn('some-key');
+        $sameKey->getStorageKey()->willReturn('some-key');
+        $sameKey->getStorageBucket()->willReturn('some-bucket');
+        $noPrevious = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $noPrevious->getPreviousStorageKey()->willReturn(null);
+
+        $this->s3Service->deleteFile(Argument::any())->shouldNotBeCalled();
+
+        $this->service->deletePreviousFileAfterReplace($sameKey->reveal());
+        $this->service->deletePreviousFileAfterReplace($noPrevious->reveal());
+    }
+
+    public function testDeletePreviousFileAfterReplaceLogsFailureAndDoesNotThrow(): void
+    {
+        $operation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $operation->getPreviousStorageKey()->willReturn('some-key.old');
+        $operation->getStorageKey()->willReturn('some-key.new');
+        $operation->getStorageBucket()->willReturn('some-bucket');
+        $this->s3Service->deleteFile(Argument::any())->willThrow(new RuntimeException('S3 is down'));
+
+        $this->service->deletePreviousFileAfterReplace($operation->reveal());
+
+        $this->assertLogHappened(
+            $this->logger,
+            'error',
+            "Unable to delete file 'some-key.old' from bucket 'some-bucket'",
+            ['bucket' => 'some-bucket', 'key' => 'some-key.old']
+        );
     }
 }

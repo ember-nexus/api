@@ -132,15 +132,29 @@ class S3Service
             $mergeFileChunksOperation->getStorageKey()
         ));
 
-        $previousStorageKey = $mergeFileChunksOperation->getPreviousStorageKey();
-        if (null !== $previousStorageKey && $previousStorageKey !== $mergeFileChunksOperation->getStorageKey()) {
-            $this->deleteFile(new FileOperation(
-                $mergeFileChunksOperation->getStorageBucket(),
-                $previousStorageKey
-            ));
-        }
+        // the previous object (different extension) is deleted by the caller once the element points to the new one
 
         return $mergedContentLength;
+    }
+
+    /**
+     * Total size of all chunks which would be merged; null if a chunk is missing or unreadable.
+     */
+    public function getChunksContentLength(MergeFileChunksOperationInterface $mergeFileChunksOperation): ?int
+    {
+        $totalContentLength = 0;
+        foreach ($mergeFileChunksOperation->getUploadKeys() as $uploadKey) {
+            try {
+                $totalContentLength += $this->getContentLength(new FileOperation(
+                    $mergeFileChunksOperation->getUploadBucket(),
+                    $uploadKey
+                ));
+            } catch (Throwable) {
+                return null;
+            }
+        }
+
+        return $totalContentLength;
     }
 
     public function deleteFileChunks(MergeFileChunksOperationInterface $mergeFileChunksOperation): void
@@ -208,14 +222,7 @@ class S3Service
 
         try {
             $this->s3ClientWrapper->resolveCopyObjectOutput($copyResult);
-            $previousStorageKey = $uploadFileOperation->getPreviousStorageKey();
-            if (null !== $previousStorageKey && $previousStorageKey !== $uploadFileOperation->getStorageKey()) {
-                $this->deleteFile(new FileOperation(
-                    $uploadFileOperation->getStorageBucket(),
-                    $previousStorageKey
-                ));
-            }
-
+            // the previous object (different extension) is deleted by the caller once the element points to the new one
             $this->deleteFile(new FileOperation(
                 $uploadFileOperation->getUploadBucket(),
                 $uploadFileOperation->getUploadKey()
@@ -304,10 +311,7 @@ class S3Service
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Caught exception '%s' during multipart upload.", $e->getMessage()), previous: $e);
         }
 
-        $previousStorageKey = $uploadFileOperation->getPreviousStorageKey();
-        if (null !== $previousStorageKey && $previousStorageKey !== $storageKey) {
-            $this->deleteFile(new FileOperation($storageBucket, $previousStorageKey));
-        }
+        // the previous object (different extension) is deleted by the caller once the element points to the new one
 
         return $uploadedContentLength;
     }

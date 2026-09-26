@@ -53,6 +53,7 @@ class BinaryStreamResponseTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('11', $response->headers->get('Content-Length'));
         $this->assertSame('bytes', $response->headers->get('Accept-Ranges'));
+        $this->assertSame('nosniff', $response->headers->get('X-Content-Type-Options'));
         $this->assertFalse($response->headers->has('Content-Range'));
     }
 

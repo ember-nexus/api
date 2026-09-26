@@ -29,7 +29,7 @@ services:
     expose:
       - "80"
     volumes:
-      - ../../:/var/www/html
+      # the repository is deliberately not mounted: the production image is tested as it is shipped
       - ./well-known-security.txt:/well-known-security.txt
 
   neo4j:

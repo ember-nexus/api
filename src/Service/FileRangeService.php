@@ -21,6 +21,25 @@ class FileRangeService
     }
 
     /**
+     * Evaluates the `If-Range` precondition (RFC 9110, Section 13.1.5) of a request which contains a `Range` header:
+     * the range is only served if the client still holds the current representation, otherwise the full file has to
+     * be answered with `200`. Only strong entity tags are compared, a weak tag never matches. HTTP dates never
+     * match, as no `Last-Modified` header is served for files, so the client can not have got one from this API.
+     */
+    public function isRangeConditionSatisfied(?string $ifRangeHeader, ?string $currentEtag): bool
+    {
+        if (null === $ifRangeHeader) {
+            return true;
+        }
+        $ifRangeHeader = trim($ifRangeHeader);
+        if (!str_starts_with($ifRangeHeader, '"') || null === $currentEtag) {
+            return false;
+        }
+
+        return trim($ifRangeHeader, '"') === $currentEtag;
+    }
+
+    /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function parseRangeHeader(string $rangeHeader, int $totalContentLength): ByteRange
@@ -38,14 +57,14 @@ class FileRangeService
         }
 
         if ($totalContentLength <= 0) {
-            throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested range can not be satisfied, as the resource is empty.', ['total-length' => $totalContentLength]);
+            throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested range can not be satisfied, as the resource is empty.', ['totalLength' => $totalContentLength], $totalContentLength);
         }
 
         if ('' === $rawStart) {
             // suffix range: last <suffixLength> bytes
             $suffixLength = (int) $rawEnd;
             if ($suffixLength <= 0) {
-                throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested suffix range must request at least 1 byte.', ['total-length' => $totalContentLength]);
+                throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested suffix range must request at least 1 byte.', ['totalLength' => $totalContentLength], $totalContentLength);
             }
 
             $start = max(0, $totalContentLength - $suffixLength);
@@ -53,7 +72,7 @@ class FileRangeService
         } else {
             $start = (int) $rawStart;
             if ($start >= $totalContentLength) {
-                throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail(sprintf('Requested range start (%d) is beyond the end of the resource (%d bytes long).', $start, $totalContentLength), ['requested-start' => $start, 'total-length' => $totalContentLength]);
+                throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail(sprintf('Requested range start (%d) is beyond the end of the resource (%d bytes long).', $start, $totalContentLength), ['requestedStart' => $start, 'totalLength' => $totalContentLength], $totalContentLength);
             }
 
             if ('' === $rawEnd) {
@@ -66,7 +85,7 @@ class FileRangeService
         }
 
         if ($end < $start) {
-            throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested range must span at least 1 byte.', ['requested-start' => $start, 'requested-end' => $end, 'total-length' => $totalContentLength]);
+            throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested range must span at least 1 byte.', ['requestedStart' => $start, 'requestedEnd' => $end, 'totalLength' => $totalContentLength], $totalContentLength);
         }
 
         return new ByteRange($start, $end, $totalContentLength);

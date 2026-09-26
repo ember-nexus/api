@@ -215,12 +215,15 @@ class PropertyParseServiceTest extends TestCase
         $this->assertSame('png', $this->buildService()->getExtensionFromProperties(['extension' => 'png']));
     }
 
-    public function testExtensionMustBeString(): void
+    public function testExtensionDefaultsWhenNotAString(): void
     {
-        $this->assertBadContent(
-            fn (PropertyParseService $service) => $service->getExtensionFromProperties(['extension' => 5]),
-            'Upload expects property extension to be string.'
-        );
+        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => 5]));
+        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => null]));
+    }
+
+    public function testEmptyExtensionMeansNoExtension(): void
+    {
+        $this->assertSame('', $this->buildService()->getExtensionFromProperties(['extension' => '']));
     }
 
     public function testHashStateIsNullWhenAbsent(): void

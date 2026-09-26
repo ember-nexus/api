@@ -68,8 +68,8 @@ class PatchUploadIncorrectOffsetTest extends BaseRequestTestCase
         );
         $this->assertIsProblemResponse($patchResponse, 409);
         $body = $this->getBody($patchResponse);
-        $this->assertSame($actualOffset, $body['expected-offset']);
-        $this->assertSame($incorrectOffset, $body['provided-offset']);
+        $this->assertSame($actualOffset, $body['expectedOffset']);
+        $this->assertSame($incorrectOffset, $body['providedOffset']);
 
         $this->cleanupChunks($chunks);
         unlink(self::FILE_PATH);

@@ -51,6 +51,7 @@ class UploadCreationService
         private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
+        private ElementFileDeletionService $elementFileDeletionService,
     ) {
     }
 
@@ -112,8 +113,8 @@ class UploadCreationService
             \Safe\fclose($resource);
         }
 
-        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
-
+        // the new object is written first and the element is flushed before the previous object is deleted: a failing
+        // flush leaves the old file readable (an overwrite of the same key can not be rolled back)
         $element->addProperty('file', [
             'contentLength' => $uploadedContentLength,
             'extension' => $resumableUploadRequest->getExtension(),
@@ -125,6 +126,9 @@ class UploadCreationService
         $element->addProperty('hasFile', true);
         $this->elementManager->merge($element);
         $this->elementManager->flush();
+
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace($uploadFileOperation);
+        $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($resumableUploadRequest->getElementId()));
 
         return new CreatedResponse();
     }

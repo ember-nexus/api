@@ -27,14 +27,14 @@
 }
 
 # headers of problem json responses which are created by the server instead of the application, they have to be
-# identical to the headers of the application's error responses, see public/index.php and ProblemJsonResponse
+# identical to the headers of the application's error responses, see public/index.php and ProblemJsonResponse;
+# errors of the web server have no route, therefore no `Allow` header
 (problem_json_headers) {
 	header {
 		Access-Control-Allow-Headers "*"
 		Access-Control-Allow-Methods "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
 		Access-Control-Allow-Origin "*"
 		Access-Control-Expose-Headers "ETag, Location"
-		Allow "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
 		Cache-Control "no-cache, private"
 		Content-Type "application/problem+json; charset=utf-8"
 		X-Powered-By "Ember Nexus API"

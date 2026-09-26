@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Factory\Type\RedisKeyFactory;
 use Predis\Client as RedisClient;
 use Ramsey\Uuid\UuidInterface;
 
@@ -16,7 +17,6 @@ use Ramsey\Uuid\UuidInterface;
  */
 class UploadLockService
 {
-    public const string KEY_PREFIX = 'upload-lock:';
     // a request may take 15 minutes at most (`read_body` in the Caddyfile), plus time for S3 and finalization
     public const int TTL_IN_MILLISECONDS = 1200000;
 
@@ -24,6 +24,7 @@ class UploadLockService
 
     public function __construct(
         private RedisClient $redisClient,
+        private RedisKeyFactory $redisKeyFactory,
     ) {
     }
 
@@ -33,13 +34,13 @@ class UploadLockService
     public function acquire(UuidInterface $uploadId): ?string
     {
         $token = bin2hex(random_bytes(16));
-        $result = $this->redisClient->set(self::KEY_PREFIX.$uploadId->toString(), $token, 'PX', self::TTL_IN_MILLISECONDS, 'NX');
+        $result = $this->redisClient->set((string) $this->redisKeyFactory->getUploadLockRedisKey($uploadId), $token, 'PX', self::TTL_IN_MILLISECONDS, 'NX');
 
         return null === $result ? null : $token;
     }
 
     public function release(UuidInterface $uploadId, string $token): void
     {
-        $this->redisClient->eval(self::RELEASE_SCRIPT, 1, self::KEY_PREFIX.$uploadId->toString(), $token);
+        $this->redisClient->eval(self::RELEASE_SCRIPT, 1, (string) $this->redisKeyFactory->getUploadLockRedisKey($uploadId), $token);
     }
 }

@@ -17,9 +17,9 @@ class Client416RangeNotSatisfiableExceptionFactory
     /**
      * @param array<string, mixed> $additionalProperties
      */
-    public function createFromDetail(string $detail, array $additionalProperties = []): Client416RangeNotSatisfiableException
+    public function createFromDetail(string $detail, array $additionalProperties = [], ?int $totalLength = null): Client416RangeNotSatisfiableException
     {
-        return new Client416RangeNotSatisfiableException(
+        $exception = new Client416RangeNotSatisfiableException(
             $this->urlGenerator->generate(
                 'exception-detail',
                 [
@@ -31,5 +31,11 @@ class Client416RangeNotSatisfiableExceptionFactory
             detail: $detail,
             additionalProperties: $additionalProperties
         );
+        if (null !== $totalLength) {
+            // RFC 9110, 15.5.17: unsatisfied-range, tells the client the current length of the selected representation
+            $exception->setHeaders(['Content-Range' => sprintf('bytes */%d', $totalLength)]);
+        }
+
+        return $exception;
     }
 }

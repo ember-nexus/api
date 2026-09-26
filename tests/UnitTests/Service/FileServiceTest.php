@@ -194,6 +194,27 @@ class FileServiceTest extends TestCase
         $this->assertSame('5d/bd/94/5dbd948b-d9dc-4b6c-af1c-c12dc8120755.png', $key);
     }
 
+    public function testGetStorageBucketKeyWithEmptyExtensionHasNoTrailingDot(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileS3StorageBucketLevels()->shouldBeCalledOnce()->willReturn(3);
+        $emberNexusConfiguration->getFileS3StorageBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
+
+        $storageService = $this->buildFileService(
+            emberNexusConfiguration: $emberNexusConfiguration->reveal()
+        );
+
+        $key = $storageService->getStorageBucketKey(Uuid::fromString('5dbd948b-d9dc-4b6c-af1c-c12dc8120755'), '');
+        $this->assertSame('5d/bd/94/5dbd948b-d9dc-4b6c-af1c-c12dc8120755', $key);
+    }
+
+    public function testAppendExtension(): void
+    {
+        $fileService = $this->buildFileService();
+        $this->assertSame('path/file.txt', $fileService->appendExtension('path/file', 'txt'));
+        $this->assertSame('path/file', $fileService->appendExtension('path/file', ''));
+    }
+
     public function testUuidToNestedFolderStructure(): void
     {
         $storageService = $this->buildFileService();
@@ -332,10 +353,13 @@ class FileServiceTest extends TestCase
     {
         return [
             ['name', 'ext', 'name.ext'],
-            ['name', 'extensionWhichIsWayLongerThanExpected', 'name.extensionWhichIs'],
-            ['name', 'ext    with          long      extension      and      whitespace ', 'name.extwithlongexten'],
+            ['name', str_repeat('e', 100), 'name.'.str_repeat('e', 64)],
+            ['name', 'ext    with          long      extension      and      whitespace ', 'name.extwithlongextensionandwhitespace'],
             ['name-----1---------2---------3---------4---------5---------6---------7---------8---------9---------a---------b---------c---------d---------e---------f---------g---------h---------i---------j---------k---------l---------m---------n---------o---------p---------q---------r---------s---------t---------u---------v', 'ext', 'name-----1---------2---------3---------4---------5---------6---------7---------8---------9---------a---------b---------c---------d---------e---------f---------g---------h---------i---------j---------k---------l---------m---------n---------o---------p-.ext'],
             ['', 'env', '.env'],
+            ['Makefile', '', 'Makefile'],
+            ['  Makefile ', '', 'Makefile'],
+            [str_repeat('n', 300), '', str_repeat('n', 255)],
         ];
     }
 

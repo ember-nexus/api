@@ -11,6 +11,7 @@ use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use Predis\Client;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -29,6 +30,8 @@ use Throwable;
 #[AsCommand(name: 'database:drop', description: 'Resets all connected databases.')]
 class DatabaseDropCommand extends Command
 {
+    private const int MAX_S3_DELETE_ITERATIONS = 10000;
+
     private EmberNexusStyle $io;
 
     public function __construct(
@@ -136,26 +139,66 @@ class DatabaseDropCommand extends Command
 
     private function deleteAllObjectsFromBucket(string $bucket): void
     {
-        do {
+        $this->abortAllMultipartUploadsFromBucket($bucket);
+
+        for ($iteration = 0; $iteration < self::MAX_S3_DELETE_ITERATIONS; ++$iteration) {
             $objects = $this->s3Client->listObjectsV2([
                 'Bucket' => $bucket,
             ]);
-            $keyCount = $objects->getKeyCount();
-            if ($keyCount > 0) {
-                $objectsToBeDeleted = [];
-                foreach ($objects->getContents() as $object) {
-                    $objectsToBeDeleted[] = [
-                        'Key' => $object->getKey(),
-                    ];
-                }
-                $this->s3Client->deleteObjects([
+            $objectsToBeDeleted = [];
+            foreach ($objects->getContents() as $object) {
+                $objectsToBeDeleted[] = [
+                    'Key' => $object->getKey(),
+                ];
+            }
+            if (0 === count($objectsToBeDeleted)) {
+                return;
+            }
+            // S3 accepts at most 1000 keys per request
+            foreach (array_chunk($objectsToBeDeleted, 1000) as $objectsChunk) {
+                $result = $this->s3Client->deleteObjects([
                     'Bucket' => $bucket,
                     'Delete' => [
-                        'Objects' => $objectsToBeDeleted,
+                        'Objects' => $objectsChunk,
                     ],
                 ]);
+                $errors = $result->getErrors();
+                if (count($errors) > 0) {
+                    $messages = [];
+                    foreach ($errors as $error) {
+                        $messages[] = sprintf('%s (%s)', $error->getKey() ?? '?', $error->getMessage() ?? $error->getCode() ?? 'unknown error');
+                    }
+                    throw new RuntimeException(sprintf("Unable to delete objects from bucket '%s': %s", $bucket, join(', ', $messages)));
+                }
             }
-        } while ($keyCount > 0);
+        }
+
+        throw new RuntimeException(sprintf("Bucket '%s' is not empty after %d delete rounds, aborting.", $bucket, self::MAX_S3_DELETE_ITERATIONS));
+    }
+
+    private function abortAllMultipartUploadsFromBucket(string $bucket): void
+    {
+        for ($iteration = 0; $iteration < self::MAX_S3_DELETE_ITERATIONS; ++$iteration) {
+            $abortedUploads = 0;
+            foreach ($this->s3Client->listMultipartUploads(['Bucket' => $bucket])->getUploads() as $upload) {
+                $key = $upload->getKey();
+                $uploadId = $upload->getUploadId();
+                if (null === $key || null === $uploadId) {
+                    continue;
+                }
+                $this->s3Client->abortMultipartUpload([
+                    'Bucket' => $bucket,
+                    'Key' => $key,
+                    'UploadId' => $uploadId,
+                ]);
+                ++$abortedUploads;
+            }
+            if (0 === $abortedUploads) {
+                return;
+            }
+        }
+
+        throw new RuntimeException(sprintf("Unable to abort all unfinished multipart uploads of bucket '%s'.", $bucket));
     }
 
     private function deleteElastic(): void

@@ -99,4 +99,53 @@ class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
         );
         $this->assertIsProblemResponse($patchResponse, 404);
     }
+
+    /**
+     * The relation is removed together with the deleted node, uploads targeting it have to follow.
+     *
+     * @return array<string, array{0: string}>
+     */
+    public static function deletedRelationEndpointProvider(): array
+    {
+        return [
+            'start node deleted' => ['start'],
+            'end node deleted' => ['end'],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('deletedRelationEndpointProvider')]
+    public function testDeletingNodeRemovesUploadTargetingAttachedRelation(string $deletedEndpoint): void
+    {
+        $relationId = $this->createEphemeralRelation(self::TOKEN, sprintf('delete-node-cleans-up-relation-upload-%s', $deletedEndpoint));
+        $relation = $this->getBody($this->runGetRequest(sprintf('/%s', $relationId), self::TOKEN));
+        $deletedNodeId = $relation[$deletedEndpoint];
+        $remainingNodeId = $relation['start' === $deletedEndpoint ? 'end' : 'start'];
+
+        $filePath = __DIR__.'/../../Asset/delete-node-cleans-up-relation-upload.bin';
+        $this->generateDeterministicFile(65432199, 5 * 1024 * 1024, $filePath);
+        $file = \Safe\fopen($filePath, 'r');
+        $createUploadResponse = $this->runUploadRequest(
+            'POST',
+            sprintf('/%s/file', $relationId),
+            $file,
+            self::TOKEN,
+            [
+                'Upload-Complete' => '?0',
+                'Content-Type' => 'application/octet-stream',
+            ]
+        );
+        unlink($filePath);
+        $this->assertNoContentResponse($createUploadResponse, true);
+        $uploadId = $this->getUuidFromLocation($createUploadResponse);
+
+        $this->assertSame(204, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
+        $this->assertGreaterThan(0, $this->countUploadChunksInUploadBucket($uploadId));
+
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $deletedNodeId), self::TOKEN));
+
+        $this->assertSame(404, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
+        $this->assertSame(0, $this->countUploadChunksInUploadBucket($uploadId));
+
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $remainingNodeId), self::TOKEN));
+    }
 }

@@ -118,7 +118,8 @@ class UploadService
     }
 
     /**
-     * Deletes uploads targeting the element, as `uploadTarget` is a plain property and not a relation. Must be
+     * Deletes uploads targeting the element (for nodes also the ones targeting attached relations, as these are deleted
+     * together with the node), as `uploadTarget` is a plain property and not a relation. Must be
      * called and flushed before the element itself is deleted; it is not an event listener because nested
      * `flush()` calls are not supported.
      */
@@ -141,12 +142,22 @@ class UploadService
     }
 
     /**
+     * Whether an upload (e.g. a started resumable upload) currently targets the element.
+     */
+    public function hasUploadsTargeting(UuidInterface $elementId): bool
+    {
+        return [] !== $this->getUploadIdsTargeting($elementId);
+    }
+
+    /**
      * @return string[]
      */
     private function getUploadIdsTargeting(UuidInterface $elementId): array
     {
         $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
-            'MATCH (u:Upload) WHERE u.uploadTarget = $elementId RETURN u.id',
+            'MATCH (u:Upload) '.
+            'WHERE u.uploadTarget = $elementId OR u.uploadTarget IN [({id: $elementId})-[r]-() | r.id] '.
+            'RETURN DISTINCT u.id',
             [
                 'elementId' => $elementId->toString(),
             ]

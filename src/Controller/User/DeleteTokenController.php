@@ -6,7 +6,9 @@ namespace App\Controller\User;
 
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
+use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
+use App\Service\UploadService;
 use App\Type\Response\NoContentResponse;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +20,8 @@ class DeleteTokenController extends AbstractController
     public function __construct(
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
+        private UploadService $uploadService,
+        private ElementFileDeletionService $elementFileDeletionService,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
     ) {
     }
@@ -44,8 +48,16 @@ class DeleteTokenController extends AbstractController
         }
 
         $tokenElement = $this->elementManager->getElementOrFail($tokenId);
+        $fileOperations = $this->elementFileDeletionService->getFileOperationsForDeletionOfElement($tokenElement);
+
+        // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
+        $this->uploadService->deleteUploadsTargeting($tokenId);
+        $this->elementManager->flush();
+
         $this->elementManager->delete($tokenElement);
         $this->elementManager->flush();
+
+        $this->elementFileDeletionService->deleteFiles($fileOperations);
 
         return new NoContentResponse();
     }

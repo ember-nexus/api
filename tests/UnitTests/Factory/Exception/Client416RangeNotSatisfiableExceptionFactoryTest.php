@@ -44,6 +44,7 @@ class Client416RangeNotSatisfiableExceptionFactoryTest extends TestCase
         $this->assertSame('', $exception->getMessage());
         $this->assertNull($exception->getPrevious());
         $this->assertSame([], $exception->getAdditionalProperties());
+        $this->assertSame([], $exception->getHeaders());
     }
 
     public function testCreateFromDetailWithAdditionalProperties(): void
@@ -57,5 +58,18 @@ class Client416RangeNotSatisfiableExceptionFactoryTest extends TestCase
         $exception = $factory->createFromDetail('some detail', ['range' => 'bytes=0-10']);
 
         $this->assertSame(['range' => 'bytes=0-10'], $exception->getAdditionalProperties());
+    }
+
+    public function testCreateFromDetailWithTotalLengthSetsContentRangeHeader(): void
+    {
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator
+            ->generate(Argument::cetera())
+            ->willReturn('https://mock.dev/416');
+        $factory = new Client416RangeNotSatisfiableExceptionFactory($urlGenerator->reveal());
+
+        $exception = $factory->createFromDetail('some detail', [], 1234);
+
+        $this->assertSame(['Content-Range' => 'bytes */1234'], $exception->getHeaders());
     }
 }

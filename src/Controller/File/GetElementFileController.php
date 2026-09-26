@@ -15,6 +15,7 @@ use App\Security\AuthProvider;
 use App\Service\DigestService;
 use App\Service\ElementManager;
 use App\Service\ElementService;
+use App\Service\EtagService;
 use App\Service\FileRangeService;
 use App\Service\FileService;
 use App\Service\S3Service;
@@ -42,6 +43,7 @@ class GetElementFileController extends AbstractController
         private S3Service $s3Service,
         private FileRangeService $fileRangeService,
         private DigestService $digestService,
+        private EtagService $etagService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -83,7 +85,11 @@ class GetElementFileController extends AbstractController
         $contentType = $this->getStoredContentType($element);
 
         $rangeHeader = $request->headers->get('Range');
-        if (null !== $rangeHeader) {
+        // a failed `If-Range` precondition ignores the `Range` header and answers the full file
+        if (null !== $rangeHeader && $this->fileRangeService->isRangeConditionSatisfied(
+            $request->headers->get('If-Range'),
+            $this->etagService->getCurrentRequestEtag()?->getEtag()
+        )) {
             $totalContentLength = $this->s3Service->getContentLength($fileOperation);
             $range = $this->fileRangeService->parseRangeHeader($rangeHeader, $totalContentLength);
             $object = $this->s3Service->getFileByteRange($fileOperation, $range->getStart(), $range->getEnd());

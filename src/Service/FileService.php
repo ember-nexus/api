@@ -12,7 +12,7 @@ use Tuupola\Base58;
 class FileService
 {
     public const int MAX_FILENAME_LENGTH = 255;
-    public const int MAX_EXTENSION_LENGTH = 16;
+    public const int MAX_EXTENSION_LENGTH = 64;
     public const string DEFAULT_EXTENSION = 'bin';
     public const string UPLOAD_EXTENSION = 'wip';
 
@@ -54,19 +54,33 @@ class FileService
         ));
     }
 
+    /**
+     * An empty extension means that the file has no extension at all: the name is returned as it is, without a trailing dot.
+     */
     public function buildFileNameFromParts(string $name, string $extension): string
     {
         /** @psalm-suppress PossiblyInvalidArgument */
         $extension = substr(\Safe\preg_replace('/\s+/', '', $extension), 0, self::MAX_EXTENSION_LENGTH);
+        if ('' === $extension) {
+            return trim(substr(trim($name), 0, self::MAX_FILENAME_LENGTH));
+        }
         $name = trim(substr(trim($name), 0, self::MAX_FILENAME_LENGTH - strlen($extension) - 1));
 
         return sprintf('%s.%s', $name, $extension);
     }
 
+    /**
+     * Appends the extension to a path or key; an empty extension means that the file has no extension at all, so no
+     * trailing dot is added.
+     */
+    public function appendExtension(string $pathWithoutExtension, string $extension): string
+    {
+        return '' === $extension ? $pathWithoutExtension : sprintf('%s.%s', $pathWithoutExtension, $extension);
+    }
+
     public function getStorageBucketKey(UuidInterface $id, string $extension): string
     {
-        return sprintf(
-            '%s.%s',
+        return $this->appendExtension(
             $this->uuidToNestedFolderStructure(
                 $id,
                 $this->emberNexusConfiguration->getFileS3StorageBucketLevels(),

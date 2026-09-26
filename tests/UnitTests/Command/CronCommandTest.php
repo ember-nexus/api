@@ -10,6 +10,7 @@ use App\Command\CronCommand;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\ElementManager;
+use App\Service\ExpiredUploadDeletionAttemptService;
 use App\Service\QueueService;
 use App\Service\UploadService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -21,6 +22,8 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -55,7 +58,9 @@ class CronCommandTest extends TestCase
             $this->prophesize(ElementManager::class)->reveal(),
             $this->prophesize(UploadFactory::class)->reveal(),
             $this->prophesize(UploadService::class)->reveal(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            $this->prophesize(ExpiredUploadDeletionAttemptService::class)->reveal(),
+            $this->prophesize(LoggerInterface::class)->reveal(),
         );
     }
 
@@ -84,7 +89,8 @@ class CronCommandTest extends TestCase
         return new CronCommand(
             $bag->reveal(),
             $this->buildDeleteExpiredUploadsCommand($isCronDisabled),
-            $this->buildReindexFilesCommand($isCronDisabled)
+            $this->buildReindexFilesCommand($isCronDisabled),
+            $this->prophesize(LoggerInterface::class)->reveal()
         );
     }
 
@@ -107,7 +113,8 @@ class CronCommandTest extends TestCase
         $command = new CronCommand(
             $bag->reveal(),
             $this->buildDeleteExpiredUploadsCommand(true),
-            $this->buildReindexFilesCommand(true)
+            $this->buildReindexFilesCommand(true),
+            $this->prophesize(LoggerInterface::class)->reveal()
         );
 
         $this->expectException(LogicException::class);
@@ -126,5 +133,43 @@ class CronCommandTest extends TestCase
         $this->assertStringContainsString('No expired uploads found.', $display);
         $this->assertStringContainsString('Reindexed 0 element file(s).', $display);
         $this->assertStringContainsString('Finished.', $display);
+    }
+
+    public function testFailingSubCommandDoesNotPreventFollowingOnesAndFailsCron(): void
+    {
+        $bag = $this->prophesize(ParameterBagInterface::class);
+        $bag->get('isCronDisabled')->willReturn(false);
+
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->getFileExpiredUploadCanBeDeletedAfterExpirationInSeconds()->willReturn(3600);
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->willThrow(new RuntimeException('neo4j down'));
+        $deleteExpiredUploadsCommand = new DeleteExpiredUploadsCommand(
+            $bag->reveal(),
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $this->prophesize(ElementManager::class)->reveal(),
+            $this->prophesize(UploadFactory::class)->reveal(),
+            $this->prophesize(UploadService::class)->reveal(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            $this->prophesize(ExpiredUploadDeletionAttemptService::class)->reveal(),
+            $this->prophesize(LoggerInterface::class)->reveal(),
+        );
+
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->error(Argument::containingString('neo4j down'), Argument::any())->shouldBeCalledOnce();
+
+        $command = new CronCommand(
+            $bag->reveal(),
+            $deleteExpiredUploadsCommand,
+            $this->buildReindexFilesCommand(false),
+            $logger->reveal()
+        );
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([]);
+
+        $this->assertSame(Command::FAILURE, $commandTester->getStatusCode());
+        $this->assertStringContainsString('Reindexed 0 element file(s).', $commandTester->getDisplay());
     }
 }

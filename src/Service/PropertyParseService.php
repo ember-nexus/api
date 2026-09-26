@@ -134,12 +134,10 @@ class PropertyParseService
      */
     public function getExtensionFromProperties(mixed $properties): string
     {
-        if (!array_key_exists('extension', $properties)) {
-            return FileService::DEFAULT_EXTENSION;
-        }
-        $extension = $properties['extension'];
+        // a missing, null or non-string extension falls back to the default; an empty string means no extension
+        $extension = $properties['extension'] ?? null;
         if (!is_string($extension)) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property extension to be string.');
+            return FileService::DEFAULT_EXTENSION;
         }
 
         return $extension;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
+use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\EventSystem\EntityManager\EventListener\ExpireEtagOnChangeEventListener;
@@ -146,7 +147,7 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
         );
     }
 
-    public function testPreDeleteExpiresEtagsOfElementAndItsNeighbours(): void
+    public function testPreDeleteOnlyCollectsKeysAndExpiresNothing(): void
     {
         $event = new ElementPreDeleteEvent($this->createNode());
 
@@ -154,7 +155,35 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
             fn (ExpireEtagOnChangeEventListener $listener) => $listener->onElementPreDeleteEvent($event),
             $this->createNeighbours(),
             null,
+            []
+        );
+    }
+
+    public function testPostDeleteExpiresTheKeysCollectedByPreDeleteOnce(): void
+    {
+        $preEvent = new ElementPreDeleteEvent($this->createNode());
+        $postEvent = new ElementPostDeleteEvent($this->createNode());
+
+        $this->runListener(
+            function (ExpireEtagOnChangeEventListener $listener) use ($preEvent, $postEvent): void {
+                $listener->onElementPreDeleteEvent($preEvent);
+                $listener->onElementPostDeleteEvent($postEvent);
+            },
+            $this->createNeighbours(),
+            null,
             $this->getExpectedKeysOfNode()
+        );
+    }
+
+    public function testPostDeleteWithoutPreDeleteExpiresElementAndFileEtag(): void
+    {
+        $event = new ElementPostDeleteEvent($this->createNode());
+
+        $this->runListener(
+            fn (ExpireEtagOnChangeEventListener $listener) => $listener->onElementPostDeleteEvent($event),
+            null,
+            null,
+            ['etag:element:'.self::ELEMENT_ID, 'etag:file:'.self::ELEMENT_ID]
         );
     }
 

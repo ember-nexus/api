@@ -9,7 +9,9 @@ use App\Contract\UploadInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\S3\MergeFileChunksOperationFactory;
+use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -27,6 +29,9 @@ class UploadFinalizationService
         private DigestService $digestService,
         private FileSizeLimitService $fileSizeLimitService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
+        private LoggerInterface $logger,
+        private ElementFileDeletionService $elementFileDeletionService,
     ) {
     }
 
@@ -49,6 +54,20 @@ class UploadFinalizationService
             $this->discardUpload($upload, $mergeFileChunksOperation);
 
             throw $exception;
+        }
+
+        // the stored chunks must add up to the offset which was hashed, otherwise the merged file can not be the upload
+        $chunksContentLength = $this->s3Service->getChunksContentLength($mergeFileChunksOperation);
+        if ($chunksContentLength !== $upload->getUploadOffset()) {
+            $this->logger->error(sprintf(
+                'Upload %s is inconsistent: stored chunks have %s bytes, but the upload offset is %d bytes, deleting it.',
+                $upload->getId()->toString(),
+                $chunksContentLength ?? 'an unknown number of',
+                $upload->getUploadOffset()
+            ));
+            $this->discardUpload($upload, $mergeFileChunksOperation);
+
+            throw $this->client409ConflictExceptionFactory->createFromDetail('Upload state is inconsistent and was deleted, please restart the upload.');
         }
 
         if (null !== $reprDigestHeaderValue) {
@@ -76,6 +95,8 @@ class UploadFinalizationService
         $this->elementManager->merge($element);
         $this->elementManager->flush();
 
+        // only after the flush the element points to the merged object, so the previous one can go
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace($mergeFileChunksOperation);
         $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
         $this->uploadService->deleteUpload($upload);
         $this->elementManager->flush();
@@ -83,7 +104,8 @@ class UploadFinalizationService
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
     }
 
-    // a failed completion leaves nothing to resume, so chunks and upload node are removed together
+    // a completed upload which is invalid as a whole (digest, size limit, inconsistent state) leaves nothing to resume,
+    // so chunks and upload node are removed together
     private function discardUpload(UploadInterface $upload, MergeFileChunksOperationInterface $mergeFileChunksOperation): void
     {
         $this->s3Service->deleteFileChunks($mergeFileChunksOperation);

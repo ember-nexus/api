@@ -90,7 +90,7 @@ class NoRouteFoundExceptionEventListenerTest extends TestCase
 
     public function testWithMethodNotAllowedHttpException(): void
     {
-        $throwable = new MethodNotAllowedHttpException(['GET']);
+        $throwable = new MethodNotAllowedHttpException(['GET', 'POST']);
         $client405MethodNotAllowedException = new Client405MethodNotAllowedException('some type');
 
         $client405MethodNotAllowedExceptionFactory = $this->prophesize(Client405MethodNotAllowedExceptionFactory::class);
@@ -111,8 +111,12 @@ class NoRouteFoundExceptionEventListenerTest extends TestCase
             $client405MethodNotAllowedExceptionFactory->reveal()
         );
 
-        $this->expectExceptionObject($client405MethodNotAllowedException);
-
-        $noRouteFoundExceptionEventListener->onKernelException($event);
+        try {
+            $noRouteFoundExceptionEventListener->onKernelException($event);
+            $this->fail('Expected exception was not thrown.');
+        } catch (Client405MethodNotAllowedException $exception) {
+            $this->assertSame($client405MethodNotAllowedException, $exception);
+            $this->assertSame(['Allow' => 'GET, POST'], $exception->getHeaders());
+        }
     }
 }

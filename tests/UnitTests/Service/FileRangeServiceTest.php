@@ -163,4 +163,26 @@ class FileRangeServiceTest extends TestCase
         $this->expectException(Client416RangeNotSatisfiableException::class);
         $service->parseRangeHeader('bytes=900-800', 1000);
     }
+
+    public function testMissingIfRangeIsSatisfied(): void
+    {
+        $this->assertTrue($this->buildService()->isRangeConditionSatisfied(null, 'abc'));
+        $this->assertTrue($this->buildService()->isRangeConditionSatisfied(null, null));
+    }
+
+    public function testMatchingStrongEtagInIfRangeIsSatisfied(): void
+    {
+        $this->assertTrue($this->buildService()->isRangeConditionSatisfied('"abc"', 'abc'));
+        $this->assertTrue($this->buildService()->isRangeConditionSatisfied(' "abc" ', 'abc'));
+    }
+
+    public function testNonMatchingWeakOrDateIfRangeIsNotSatisfied(): void
+    {
+        $service = $this->buildService();
+
+        $this->assertFalse($service->isRangeConditionSatisfied('"other"', 'abc'));
+        $this->assertFalse($service->isRangeConditionSatisfied('W/"abc"', 'abc'));
+        $this->assertFalse($service->isRangeConditionSatisfied('Wed, 21 Oct 2015 07:28:00 GMT', 'abc'));
+        $this->assertFalse($service->isRangeConditionSatisfied('"abc"', null));
+    }
 }

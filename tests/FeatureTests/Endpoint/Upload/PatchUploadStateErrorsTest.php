@@ -12,8 +12,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
 
 /**
- * PATCH errors which depend on the state stored for an upload: expired uploads (410), data exceeding the declared
- * Upload-Length (409) and an unusable stored hash state (409).
+ * PATCH errors which depend on the state stored for an upload: expired uploads (410, also for HEAD), data exceeding
+ * the declared Upload-Length (409, the upload stays), an unusable stored hash state (409) and an inconsistent upload
+ * state (409, the upload is deleted).
  *
  * The state which can not be reached through the API (a passed expiration date, a corrupted hash state) is
  * manipulated directly in the graph database, as the upload node is the single source of truth for it.
@@ -113,6 +114,20 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
         $this->cleanUp($uploadId, $elementId);
     }
 
+    public function testHeadOfExpiredUploadReturns410(): void
+    {
+        $elementId = $this->createNode('head-upload-expired');
+        $uploadId = $this->createUpload($elementId, '');
+        $this->assertUploadStillAtOffset($uploadId, 0);
+
+        // expired, but not yet removed by the cron job: same answer as PATCH
+        $this->setUploadProperty($uploadId, "u.expires = datetime() - duration('PT1H')");
+
+        $this->assertSame(410, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode()); // HEAD responses have no body
+
+        $this->cleanUp($uploadId, $elementId);
+    }
+
     public function testPatchOfNotYetExpiredUploadSucceeds(): void
     {
         $elementId = $this->createNode('patch-upload-not-expired');
@@ -137,10 +152,12 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 409);
         $this->assertStringContainsString('upload length', $this->getBody($response)['detail']);
 
-        // the request tried to complete the upload, which can never match its declared length: the upload is discarded
-        $this->assertSame(404, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
-        $this->assertSame(0, $this->countUploadChunksInUploadBucket($uploadId));
+        // the request does not match the declared length, so only the request is rejected: the upload stays as it was
+        // and can be completed by a corrected request
+        $this->assertUploadStillAtOffset($uploadId, 0);
         $this->assertIsProblemResponse($this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN), 404);
+        $this->assertNoContentResponse($this->patchUpload($uploadId, 0, str_repeat('a', 10)));
+        $this->assertSame(str_repeat('a', 10), (string) $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN)->getBody());
 
         $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
     }
@@ -193,5 +210,44 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN), 404);
 
         $this->cleanUp($uploadId, $elementId);
+    }
+
+    /**
+     * Simulates a crash between the compare-and-set in the graph and the write of the chunk list to MongoDB: the graph
+     * knows a chunk which the list does not contain.
+     */
+    public function testPatchOfInconsistentUploadReturns409AndDeletesUpload(): void
+    {
+        $elementId = $this->createNode('patch-upload-inconsistent');
+        $uploadId = $this->createUpload($elementId, str_repeat('a', self::CHUNK_SIZE));
+        $this->assertUploadStillAtOffset($uploadId, self::CHUNK_SIZE);
+        $this->assertSame(1, $this->countUploadChunksInUploadBucket($uploadId));
+
+        $this->setUploadProperty($uploadId, "u.lastChunkId = 'ffffffffffffffff'");
+
+        $response = $this->patchUpload($uploadId, self::CHUNK_SIZE, 'final chunk');
+        $this->assertIsProblemResponse($response, 409);
+        $this->assertStringContainsString('restart the upload', $this->getBody($response)['detail']);
+
+        // the upload can never produce the file, so it and its chunks are gone
+        $this->assertSame(404, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
+        $this->assertSame(0, $this->countUploadChunksInUploadBucket($uploadId));
+        $this->assertIsProblemResponse($this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN), 404);
+
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
+    }
+
+    public function testHeadOfInconsistentUploadReturns409AndDeletesUpload(): void
+    {
+        $elementId = $this->createNode('head-upload-inconsistent');
+        $uploadId = $this->createUpload($elementId, str_repeat('a', self::CHUNK_SIZE));
+
+        $this->setUploadProperty($uploadId, "u.lastChunkId = 'ffffffffffffffff'");
+
+        $this->assertSame(409, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode()); // HEAD responses have no body
+        $this->assertSame(404, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
+        $this->assertSame(0, $this->countUploadChunksInUploadBucket($uploadId));
+
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
     }
 }

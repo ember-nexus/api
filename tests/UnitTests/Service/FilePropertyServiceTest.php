@@ -66,7 +66,7 @@ class FilePropertyServiceTest extends TestCase
         $this->assertSame(FileService::DEFAULT_EXTENSION, $result->getExtension());
     }
 
-    public function testDefaultsExtensionWhenEmptyString(): void
+    public function testKeepsEmptyExtensionWhichMeansNoExtension(): void
     {
         $element = $this->prophesize(NodeElementInterface::class);
         $element->hasProperty('file')->willReturn(true);
@@ -76,7 +76,7 @@ class FilePropertyServiceTest extends TestCase
         $result = $this->buildService()->parseFilePropertyFromElement($element->reveal());
 
         $this->assertNotNull($result);
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $result->getExtension());
+        $this->assertSame('', $result->getExtension());
     }
 
     public function testThrowsWhenFilePropertyIsNotAnArray(): void
@@ -98,23 +98,19 @@ class FilePropertyServiceTest extends TestCase
         $this->buildService($server500LogicErrorExceptionFactory->reveal())->parseFilePropertyFromElement($element->reveal());
     }
 
-    public function testThrowsWhenExtensionIsNotAString(): void
+    public function testDefaultsExtensionWhenNotAStringOrNull(): void
     {
-        $id = UuidV4::uuid4();
-        $element = $this->prophesize(NodeElementInterface::class);
-        $element->hasProperty('file')->willReturn(true);
-        $element->getProperty('file')->willReturn(['extension' => 123]);
-        $element->getId()->willReturn($id);
+        foreach ([123, null, ['png'], true] as $value) {
+            $element = $this->prophesize(NodeElementInterface::class);
+            $element->hasProperty('file')->willReturn(true);
+            $element->getProperty('file')->willReturn(['extension' => $value]);
+            $element->getId()->willReturn(UuidV4::uuid4());
 
-        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
-        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
-        $server500LogicErrorExceptionFactory
-            ->createFromTemplate(Argument::containingString("'file.extension'"))
-            ->shouldBeCalledOnce()
-            ->willReturn($exception);
+            $result = $this->buildService()->parseFilePropertyFromElement($element->reveal());
 
-        $this->expectException(Server500LogicErrorException::class);
-        $this->buildService($server500LogicErrorExceptionFactory->reveal())->parseFilePropertyFromElement($element->reveal());
+            $this->assertNotNull($result);
+            $this->assertSame(FileService::DEFAULT_EXTENSION, $result->getExtension());
+        }
     }
 
     public function testThrowsWithNullElementIdInMessageWhenIdIsNull(): void

@@ -84,11 +84,9 @@ class UploadLimitHeaderTest extends BaseRequestTestCase
             $this->assertEqualsWithDelta($maxAge, $this->getSecondsUntilExpiresHeader($response), 5);
         }
 
-        // expired, but not yet removed by the cron job: never negative
+        // expired, but not yet removed by the cron job: gone, no limits are reported anymore
         $this->setExpiresInSeconds($uploadId, -3600);
-        $expiredResponse = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
-        $this->assertSame(204, $expiredResponse->getStatusCode());
-        $this->assertSame(0, $this->getMaxAge($expiredResponse));
+        $this->assertSame(410, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode()); // HEAD responses have no body
 
         $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/upload/%s', $uploadId), self::TOKEN));
         if ($onRelation) {

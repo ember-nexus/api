@@ -334,10 +334,12 @@ class BackupCreateCommand extends Command
     {
         $levels = max(0, (int) ceil(log($this->fileCount, 256)) - 1);
 
-        return sprintf(
-            '%s/file/%s.%s',
-            $this->backupName,
-            $this->fileService->uuidToNestedFolderStructure($elementId, $levels),
+        return $this->fileService->appendExtension(
+            sprintf(
+                '%s/file/%s',
+                $this->backupName,
+                $this->fileService->uuidToNestedFolderStructure($elementId, $levels)
+            ),
             $extension
         );
     }

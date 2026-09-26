@@ -259,6 +259,26 @@ class UploadServiceTest extends TestCase
         return new SummarizedResult($summary, $maps);
     }
 
+    #[DataProvider('hasUploadsTargetingProvider')]
+    public function testHasUploadsTargeting(bool $uploadFound): void
+    {
+        [$service, , , , , , $cypherEntityManager] = $this->buildService();
+        $client = $this->prophesize(ClientInterface::class);
+        $maps = $uploadFound ? [new CypherMap(['u.id' => UuidV4::uuid4()->toString()])] : [];
+        $client->runStatement(Argument::any())->willReturn($this->buildSummarizedResultOf(...$maps));
+        $cypherEntityManager->getClient()->willReturn($client->reveal());
+
+        $this->assertSame($uploadFound, $service->hasUploadsTargeting(UuidV4::uuid4()));
+    }
+
+    /**
+     * @return array<string, array{0: bool}>
+     */
+    public static function hasUploadsTargetingProvider(): array
+    {
+        return ['upload found' => [true], 'no upload' => [false]];
+    }
+
     public function testDeleteUploadsTargetingDoesNothingWhenNoUploadsFound(): void
     {
         $elementId = UuidV4::uuid4();

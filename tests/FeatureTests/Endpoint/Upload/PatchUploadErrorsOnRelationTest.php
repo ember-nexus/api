@@ -77,8 +77,8 @@ class PatchUploadErrorsOnRelationTest extends BaseRequestTestCase
         unlink($chunkPath);
         $this->assertIsProblemResponse($response, 409);
         $body = $this->getBody($response);
-        $this->assertSame($offset, $body['expected-offset']);
-        $this->assertSame($incorrectOffset, $body['provided-offset']);
+        $this->assertSame($offset, $body['expectedOffset']);
+        $this->assertSame($incorrectOffset, $body['providedOffset']);
 
         $this->assertUploadOffset($uploadId, $offset);
         $this->assertIsProblemResponse($this->runGetRequest(sprintf('/%s/file', $relationId), self::TOKEN), 404);

@@ -83,7 +83,8 @@ class ExceptionEventListener
 
         $event->setResponse(new ProblemJsonResponse(
             $data,
-            $data['status']
+            $data['status'],
+            $extendedException->getHeaders()
         ));
         /**
          * @infection-ignore-all

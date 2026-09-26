@@ -31,6 +31,7 @@ use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadCancellationService;
+use App\Service\UploadConsistencyService;
 use App\Service\UploadFinalizationService;
 use App\Service\UploadLockService;
 use App\Service\UploadService;
@@ -187,6 +188,7 @@ class PatchUploadControllerTest extends TestCase
             $this->uploadFinalizationService->reveal(),
             $this->uploadCancellationService->reveal(),
             $this->uploadLockService->reveal(),
+            $this->prophesize(UploadConsistencyService::class)->reveal(),
             $uploadFileChunkOperationFactory->reveal(),
             $this->fileOperationFactory->reveal(),
             $this->s3Service->reveal(),
@@ -282,29 +284,31 @@ class PatchUploadControllerTest extends TestCase
         return $controller->patchUpload(self::UPLOAD_ID, new Request());
     }
 
-    public function testCompletingUploadShorterThanDeclaredLengthIsRejectedAndDiscarded(): void
+    public function testCompletingUploadShorterThanDeclaredLengthIsRejectedButKeepsUpload(): void
     {
         $controller = $this->createController(300, isUploadComplete: true, uploadOffset: 200, uploadLength: 600, s3ChunkLength: 300);
         $this->s3Service->uploadFileChunk(Argument::any())->shouldNotBeCalled();
-        $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldNotBeCalled();
 
         $this->assertRejectedWithDetail($controller, Client409ConflictException::class, 'defined upload length');
     }
 
-    public function testCompletingUploadLongerThanDeclaredLengthIsRejectedAndDiscarded(): void
+    public function testCompletingUploadLongerThanDeclaredLengthIsRejectedButKeepsUpload(): void
     {
         $controller = $this->createController(500, isUploadComplete: true, uploadOffset: 200, uploadLength: 600, s3ChunkLength: 500);
         $this->s3Service->uploadFileChunk(Argument::any())->shouldNotBeCalled();
-        $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldNotBeCalled();
 
         $this->assertRejectedWithDetail($controller, Client409ConflictException::class, 'exceeds defined upload length');
     }
 
-    public function testCompletingUploadWithoutDeclaredContentLengthLongerThanDeclaredLengthIsDiscardedAfterS3(): void
+    public function testCompletingUploadWithoutDeclaredContentLengthLongerThanDeclaredLengthKeepsUploadAndDeletesChunk(): void
     {
         $controller = $this->createController(null, isUploadComplete: true, uploadOffset: 200, uploadLength: 600, s3ChunkLength: 500);
         $this->s3Service->uploadFileChunk(Argument::any())->shouldBeCalledOnce()->willReturn(500);
-        $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldBeCalledOnce();
+        // only the rejected chunk is removed
+        $this->s3Service->deleteFile(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldNotBeCalled();
 
         $this->assertRejectedWithDetail($controller, Client409ConflictException::class, 'exceeds defined upload length');
     }

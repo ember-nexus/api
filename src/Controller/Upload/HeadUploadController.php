@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Upload;
 
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Exception\Client410GoneExceptionFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
 use App\Factory\Type\UploadFactory;
 use App\Helper\Regex;
@@ -12,9 +13,11 @@ use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\UploadCancellationService;
+use App\Service\UploadConsistencyService;
 use App\Type\AccessType;
 use Exception;
 use Ramsey\Uuid\Rfc4122\UuidV4;
+use Safe\DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,7 +31,9 @@ class HeadUploadController extends AbstractController
         private NoContentResponseFactory $noContentResponseFactory,
         private UploadFactory $uploadFactory,
         private UploadCancellationService $uploadCancellationService,
+        private UploadConsistencyService $uploadConsistencyService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
+        private Client410GoneExceptionFactory $client410GoneExceptionFactory,
     ) {
     }
 
@@ -60,6 +65,12 @@ class HeadUploadController extends AbstractController
 
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
+
+        // same as in PATCH, an expired upload is gone even if the cron job did not remove it yet
+        if ($upload->getExpires() < new DateTime()) {
+            throw $this->client410GoneExceptionFactory->createFromTemplate();
+        }
+        $this->uploadConsistencyService->assertConsistent($uploadElement, $upload);
 
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload($upload);
     }

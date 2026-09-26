@@ -9,9 +9,12 @@ use App\Contract\S3\MergeFileChunksOperationInterface;
 use App\Contract\UploadInterface;
 use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Exception\Client400BadContentException;
+use App\Exception\Client409ConflictException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\S3\MergeFileChunksOperationFactory;
 use App\Service\DigestService;
+use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\FileSizeLimitService;
 use App\Service\S3Service;
@@ -23,8 +26,10 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use RuntimeException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[Small]
@@ -43,6 +48,7 @@ class UploadFinalizationServiceTest extends TestCase
     private ObjectProphecy $s3Service;
     private ObjectProphecy $uploadService;
     private ObjectProphecy $fileSizeLimitService;
+    private ObjectProphecy $elementFileDeletionService;
     private UploadFinalizationService $service;
 
     protected function setUp(): void
@@ -50,6 +56,7 @@ class UploadFinalizationServiceTest extends TestCase
         $this->targetId = Uuid::uuid4();
         $this->upload = $this->prophesize(UploadInterface::class);
         $this->upload->getUploadTarget()->willReturn($this->targetId);
+        $this->upload->getId()->willReturn(Uuid::uuid4());
         $this->upload->getUploadOffset()->willReturn(5);
         $this->upload->getExtension()->willReturn('txt');
 
@@ -65,11 +72,14 @@ class UploadFinalizationServiceTest extends TestCase
         $mergeFactory->createMergeFileOperationFromUpload(Argument::any())->willReturn($mergeOperation);
 
         $this->s3Service = $this->prophesize(S3Service::class);
+        $this->s3Service->getChunksContentLength(Argument::any())->willReturn(5);
         $this->s3Service->mergeFileChunks(Argument::any())->willReturn(5);
         $this->s3Service->getMimeTypeFromMergeFileChunksOperation(Argument::any())->willReturn('text/plain');
         $this->s3Service->deleteFileChunks(Argument::any())->will(function () {});
 
         $this->uploadService = $this->prophesize(UploadService::class);
+        $this->elementFileDeletionService = $this->prophesize(ElementFileDeletionService::class);
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->will(function () {});
         $this->fileSizeLimitService = $this->prophesize(FileSizeLimitService::class);
         $this->eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
         $this->eventDispatcher->dispatch(Argument::any())->will(fn (array $args) => $args[0]);
@@ -77,6 +87,11 @@ class UploadFinalizationServiceTest extends TestCase
         $badContentFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
         $badContentFactory->createFromDetail(Argument::type('string'))->will(
             fn (array $args) => new Client400BadContentException('bad-content', detail: $args[0])
+        );
+
+        $conflictFactory = $this->prophesize(Client409ConflictExceptionFactory::class);
+        $conflictFactory->createFromDetail(Argument::type('string'))->will(
+            fn (array $args) => new Client409ConflictException('conflict', detail: $args[0])
         );
 
         $this->service = new UploadFinalizationService(
@@ -88,6 +103,9 @@ class UploadFinalizationServiceTest extends TestCase
             new DigestService(),
             $this->fileSizeLimitService->reveal(),
             $badContentFactory->reveal(),
+            $conflictFactory->reveal(),
+            $this->prophesize(LoggerInterface::class)->reveal(),
+            $this->elementFileDeletionService->reveal(),
         );
     }
 
@@ -124,6 +142,43 @@ class UploadFinalizationServiceTest extends TestCase
     {
         $this->expectFileToBeMerged();
 
+        $this->service->finalize($this->upload->reveal(), self::HASH);
+    }
+
+    public function testFinalizeDeletesPreviousFileOnlyAfterFlushOfTheElement(): void
+    {
+        $log = [];
+        $this->s3Service->mergeFileChunks(Argument::any())->will(function () use (&$log) {
+            $log[] = 'merge-chunks';
+
+            return 5;
+        });
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $this->elementManager->flush()->will(function () use (&$log) {
+            $log[] = 'flush';
+
+            return $this->reveal();
+        });
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->will(function () use (&$log) {
+            $log[] = 'delete-previous';
+        });
+        $this->s3Service->deleteFileChunks(Argument::any())->will(function () use (&$log) {
+            $log[] = 'delete-chunks';
+        });
+
+        $this->service->finalize($this->upload->reveal(), self::HASH);
+
+        $this->assertSame(['merge-chunks', 'flush', 'delete-previous', 'delete-chunks', 'flush'], $log);
+    }
+
+    public function testFinalizeWithFailingFlushDoesNotDeletePreviousFileOrChunks(): void
+    {
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $this->elementManager->flush()->willThrow(new RuntimeException('flush failed'));
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->shouldNotBeCalled();
+        $this->s3Service->deleteFileChunks(Argument::any())->shouldNotBeCalled();
+
+        $this->expectException(RuntimeException::class);
         $this->service->finalize($this->upload->reveal(), self::HASH);
     }
 
@@ -165,6 +220,28 @@ class UploadFinalizationServiceTest extends TestCase
         $this->expectUploadToBeDiscarded();
 
         $this->expectException(Client400BadContentException::class);
+        $this->service->finalize($this->upload->reveal(), self::HASH);
+    }
+
+    public function testFinalizeWithStoredChunksNotAddingUpToOffsetDiscardsUpload(): void
+    {
+        $this->s3Service->getChunksContentLength(Argument::any())->willReturn(4);
+        $this->expectUploadToBeDiscarded();
+
+        try {
+            $this->service->finalize($this->upload->reveal(), self::HASH, $this->digestHeader());
+            $this->fail('Expected inconsistent upload to be rejected.');
+        } catch (Client409ConflictException $exception) {
+            $this->assertStringContainsString('restart the upload', $exception->getDetail());
+        }
+    }
+
+    public function testFinalizeWithMissingChunkDiscardsUpload(): void
+    {
+        $this->s3Service->getChunksContentLength(Argument::any())->willReturn(null);
+        $this->expectUploadToBeDiscarded();
+
+        $this->expectException(Client409ConflictException::class);
         $this->service->finalize($this->upload->reveal(), self::HASH);
     }
 }
