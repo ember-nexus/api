@@ -154,7 +154,10 @@ USER worker
 
 FROM php AS development
 
-ENV DISABLE_CRON=true
+# the dev image has no vendor/ installed by default (it's provided by the mounted source instead), so supercronic's
+# scheduled `php bin/console cron` runs would fail until `composer install` is run manually; the dev Caddyfile drops
+# the `supervisor` block so supercronic never starts
+COPY ./docker/Caddyfile.dev /etc/frankenphp/Caddyfile
 
 COPY ./docker/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
