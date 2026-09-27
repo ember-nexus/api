@@ -147,7 +147,7 @@ jobs:
       - name: Unit Test
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit -- --no-progress"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
   test-mutant:
     runs-on: ubuntu-26.04
@@ -235,7 +235,7 @@ jobs:
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "php bin/console healthcheck"
       - name: Feature Test
         run: |
-          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && ./bin/with-heartbeat composer test:feature"
+          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature"
       - name: Run cron once manually
         # DISABLE_CRON=true is set on the containers so the scheduler never fires cron during the test run above;
         # this manually runs it once, in its own stage, after the main tests. A plain `docker exec` has no tty, so
@@ -362,7 +362,7 @@ jobs:
           docker exec --user "$(id -u):$(id -g)" api bash -c "php bin/console healthcheck"
       - name: Command Example Generation Test
         run: |
-          docker exec --user "$(id -u):$(id -g)" api bash -c "BACKUP_FOLDER_CAN_BE_RESET=1 ./bin/with-heartbeat composer test:example-generation-command"
+          docker exec --user "$(id -u):$(id -g)" api bash -c "BACKUP_FOLDER_CAN_BE_RESET=1 composer test:example-generation-command"
       - name: Collect docker logs
         if: always()
         run: |
@@ -417,7 +417,7 @@ jobs:
       - name: Server Test
         run: |
           chmod +x ./bin/test-server
-          KEEP_STACK=1 ./bin/with-heartbeat ./bin/test-server
+          KEEP_STACK=1 ./bin/test-server
       - name: Collect docker logs
         if: always()
         run: |

@@ -15,6 +15,12 @@ use RecursiveIteratorIterator;
  * output is not compared against documentation snapshots, so no files in `docs/` are needed.
  *
  * The details (skip decisions, size limit, error isolation) are covered by unit tests.
+ *
+ * The test methods rely on running in declaration order (PHPUnit's default) and each build on the database state
+ * the previous one left behind, instead of every method resetting back to a freshly loaded `reference-dataset`:
+ * only {@see testBackupCreateAndLoadRoundTripIncludesFiles} loads it, the round-trip backup every method restores
+ * afterwards is functionally equivalent to it (element ids survive the export/import). A full reload is expensive,
+ * it recreates every Elasticsearch index/mapping from scratch.
  */
 class BackupFilesTest extends BaseCommandTestCase
 {
@@ -37,9 +43,9 @@ class BackupFilesTest extends BaseCommandTestCase
         foreach ([self::ROUND_TRIP_BACKUP, self::TAMPERED_BACKUP, self::EXTENSIONLESS_ROUND_TRIP_BACKUP] as $name) {
             $this->runCommand(sprintf('rm -rf %s', escapeshellarg(self::BACKUP_DIRECTORY.$name)));
         }
-        // leave the database in the state other tests expect
-        $this->runCommand('php bin/console database:drop -f');
-        $this->runCommand('php bin/console backup:load reference-dataset');
+        // The database is intentionally left as-is (not dropped, not reloaded), see the class docblock: the next
+        // test method builds on it, and neither BackupListTest (runs next, does not touch the database) nor
+        // BackupLoadTest (runs last, drops and loads reference-dataset itself) needs it in any particular state.
     }
 
     private function getFileCountFromCreateOutput(string $output): int
@@ -83,8 +89,7 @@ class BackupFilesTest extends BaseCommandTestCase
             }
         }
 
-        $this->runCommand('php bin/console database:drop -f');
-        $this->runCommand('php bin/console backup:load reference-dataset');
+        // the database is already loaded, with data equivalent to reference-dataset, see the class docblock
         $createOutput = $this->runCommand(sprintf('php bin/console backup:create --no-ansi %s', self::EXTENSIONLESS_ROUND_TRIP_BACKUP));
         $fileCount = $this->getFileCountFromCreateOutput($createOutput);
 
@@ -132,8 +137,7 @@ class BackupFilesTest extends BaseCommandTestCase
 
     public function testBackupLoadSkipsFileWithMismatchingHashUnlessSkipVerify(): void
     {
-        $this->runCommand('php bin/console database:drop -f');
-        $this->runCommand('php bin/console backup:load reference-dataset');
+        // the database is already loaded, with data equivalent to reference-dataset, see the class docblock
         $createOutput = $this->runCommand(sprintf('php bin/console backup:create --no-ansi %s', self::TAMPERED_BACKUP));
         $fileCount = $this->getFileCountFromCreateOutput($createOutput);
         $this->assertGreaterThan(0, $fileCount);
