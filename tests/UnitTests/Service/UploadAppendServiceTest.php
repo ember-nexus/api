@@ -12,8 +12,7 @@ use App\Contract\UploadInterface;
 use App\Exception\Client400BadContentException;
 use App\Exception\Client409ConflictException;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
-use App\Factory\Type\S3\UploadFileChunkOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
@@ -47,7 +46,7 @@ class UploadAppendServiceTest extends TestCase
     private ObjectProphecy $uploadFinalizationService;
     private ObjectProphecy $uploadChunkValidator;
     private ObjectProphecy $s3Service;
-    private ObjectProphecy $fileOperationFactory;
+    private ObjectProphecy $s3OperationFactory;
     private ObjectProphecy $incrementalHashService;
     private ObjectProphecy $elementManager;
     private ObjectProphecy $elementService;
@@ -116,13 +115,12 @@ class UploadAppendServiceTest extends TestCase
         $this->s3Service = $this->prophesize(S3Service::class);
         $this->s3Service->uploadFileChunk(Argument::any())->willReturn($bodyLength);
         $this->s3Service->deleteFile(Argument::any())->will(function () {});
-        $uploadFileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
-        $uploadFileChunkOperationFactory
+        $this->s3OperationFactory = $this->prophesize(S3OperationFactory::class);
+        $this->s3OperationFactory
             ->createUploadFileChunkOperationFromPartialUploadRequest(Argument::cetera())
             ->willReturn($this->prophesize(UploadFileChunkOperationInterface::class)->reveal());
         $this->chunkFileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
-        $this->fileOperationFactory = $this->prophesize(FileOperationFactory::class);
-        $this->fileOperationFactory->createFileOperationFromUpload(Argument::cetera())->willReturn($this->chunkFileOperation);
+        $this->s3OperationFactory->createFileOperationFromUpload(Argument::cetera())->willReturn($this->chunkFileOperation);
 
         $this->incrementalHashService = $this->prophesize(IncrementalHashService::class);
         $this->incrementalHashService->createContext(Argument::any())->willReturn(hash_init('sha256'));
@@ -143,8 +141,7 @@ class UploadAppendServiceTest extends TestCase
             $this->uploadService->reveal(),
             $this->uploadFinalizationService->reveal(),
             $this->uploadChunkValidator->reveal(),
-            $uploadFileChunkOperationFactory->reveal(),
-            $this->fileOperationFactory->reveal(),
+            $this->s3OperationFactory->reveal(),
             $this->s3Service->reveal(),
             $this->incrementalHashService->reveal(),
             $fileService->reveal(),
@@ -287,7 +284,7 @@ class UploadAppendServiceTest extends TestCase
         $service = $this->createService(null, false, 500);
         // without declared length the chunk can only be validated once its real length is known
         $this->uploadChunkValidator->assertValidChunk(500, false, 200, 1000)->willThrow(new Client400BadContentException('type', detail: 'real length is invalid'))->shouldBeCalledOnce();
-        $this->fileOperationFactory->createFileOperationFromUpload($this->upload->reveal(), 2, 'aaaaaaaaaaaaaaaa')->willReturn($this->chunkFileOperation)->shouldBeCalledOnce();
+        $this->s3OperationFactory->createFileOperationFromUpload($this->upload->reveal(), 2, 'aaaaaaaaaaaaaaaa')->willReturn($this->chunkFileOperation)->shouldBeCalledOnce();
         $this->s3Service->deleteFile($this->chunkFileOperation)->shouldBeCalledOnce();
         $this->uploadService->appendChunkIfOffsetMatches(Argument::cetera())->shouldNotBeCalled();
 

@@ -8,7 +8,7 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Contract\UploadInterface;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,7 +23,7 @@ class UploadConsistencyService
         private ElementManager $elementManager,
         private UploadService $uploadService,
         private S3Service $s3Service,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private LoggerInterface $logger,
     ) {
@@ -57,7 +57,7 @@ class UploadConsistencyService
         ));
         // the chunk which was written last may be missing in the list, but its object exists
         if (is_string($storedLastChunkId) && !in_array($storedLastChunkId, $chunkIds, true)) {
-            $this->s3Service->deleteFile($this->fileOperationFactory->createFileOperationFromUpload($upload, count($chunkIds) + 1, $storedLastChunkId));
+            $this->s3Service->deleteFile($this->s3OperationFactory->createFileOperationFromUpload($upload, count($chunkIds) + 1, $storedLastChunkId));
         }
         $this->uploadService->deleteUploadAndChunks($upload);
         $this->elementManager->flush();

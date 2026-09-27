@@ -10,7 +10,7 @@ use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
-use App\Factory\Type\S3\MergeFileChunksOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use HashContext;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -25,7 +25,7 @@ class UploadFinalizationService
     public function __construct(
         private ElementManager $elementManager,
         private EventDispatcherInterface $eventDispatcher,
-        private MergeFileChunksOperationFactory $mergeFileChunksOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private UploadService $uploadService,
         private DigestService $digestService,
@@ -62,7 +62,7 @@ class UploadFinalizationService
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
 
         // size and digest are verified before merging, so an existing file is never overwritten on a mismatch
-        $mergeFileChunksOperation = $this->mergeFileChunksOperationFactory->createMergeFileOperationFromUpload($upload);
+        $mergeFileChunksOperation = $this->s3OperationFactory->createMergeFileOperationFromUpload($upload);
 
         try {
             $this->fileSizeLimitService->assertWithinMaxFileSize($upload->getUploadOffset());

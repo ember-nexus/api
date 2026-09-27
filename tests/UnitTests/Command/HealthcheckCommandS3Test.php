@@ -24,7 +24,8 @@ use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 
 /**
- * The S3 part of the healthcheck; the other checks need running services and are covered by the command example test.
+ * The S3 part of the healthcheck; see HealthcheckCommandVersionsTest for the other database checks and why the
+ * remaining ones stay covered only by the command example test.
  */
 #[Small]
 #[CoversClass(HealthcheckCommand::class)]

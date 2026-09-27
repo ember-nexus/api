@@ -7,7 +7,7 @@ namespace App\Controller\File;
 use App\Attribute\EndpointSupportsEtag;
 use App\EventSystem\ElementFileDelete\Event\ElementFileDeleteEvent;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
@@ -35,7 +35,7 @@ class DeleteElementFileController extends AbstractController
         private ElementManager $elementManager,
         private ElementService $elementService,
         private EventDispatcherInterface $eventDispatcher,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -63,7 +63,7 @@ class DeleteElementFileController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $deleteFileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+        $deleteFileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
 
         // graph first: a failed flush leaves the file untouched, a failed S3 delete only leaves an orphaned object
         $element->addProperty('file', null);

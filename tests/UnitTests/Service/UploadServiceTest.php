@@ -9,7 +9,7 @@ use App\Contract\S3\FileOperationInterface;
 use App\Contract\UploadInterface;
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\ElementManager;
 use App\Service\S3Service;
@@ -39,7 +39,7 @@ class UploadServiceTest extends TestCase
     use ProphecyTrait;
 
     /**
-     * @return array{0: UploadService, 1: ObjectProphecy<ElementManager>, 2: ObjectProphecy<Server500LogicErrorExceptionFactory>, 3: ObjectProphecy<FileOperationFactory>, 4: ObjectProphecy<S3Service>, 5: ObjectProphecy<UploadFactory>, 6: ObjectProphecy<CypherEntityManager>}
+     * @return array{0: UploadService, 1: ObjectProphecy<ElementManager>, 2: ObjectProphecy<Server500LogicErrorExceptionFactory>, 3: ObjectProphecy<S3OperationFactory>, 4: ObjectProphecy<S3Service>, 5: ObjectProphecy<UploadFactory>, 6: ObjectProphecy<CypherEntityManager>}
      */
     private function buildService(
         ?ObjectProphecy $elementManager = null,
@@ -51,7 +51,7 @@ class UploadServiceTest extends TestCase
     ): array {
         $elementManager ??= $this->prophesize(ElementManager::class);
         $server500LogicErrorExceptionFactory ??= $this->prophesize(Server500LogicErrorExceptionFactory::class);
-        $fileOperationFactory ??= $this->prophesize(FileOperationFactory::class);
+        $fileOperationFactory ??= $this->prophesize(S3OperationFactory::class);
         $s3Service ??= $this->prophesize(S3Service::class);
         $uploadFactory ??= $this->prophesize(UploadFactory::class);
         $cypherEntityManager ??= $this->prophesize(CypherEntityManager::class);

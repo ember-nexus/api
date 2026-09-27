@@ -7,8 +7,7 @@ namespace App\Service;
 use App\Contract\Request\PartialUploadRequestInterface;
 use App\Contract\UploadInterface;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
-use App\Factory\Type\S3\UploadFileChunkOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use HashContext;
 use Throwable;
@@ -24,8 +23,7 @@ class UploadAppendService
         private UploadService $uploadService,
         private UploadFinalizationService $uploadFinalizationService,
         private UploadChunkValidator $uploadChunkValidator,
-        private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private IncrementalHashService $incrementalHashService,
         private FileService $fileService,
@@ -90,7 +88,7 @@ class UploadAppendService
         } else {
             // every attempt writes its own object, so that a concurrent attempt for the same chunk can not overwrite it
             $chunkId = $this->fileService->generateUploadChunkId();
-            $chunkLength = $this->s3Service->uploadFileChunk($this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload, $chunkId));
+            $chunkLength = $this->s3Service->uploadFileChunk($this->s3OperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload, $chunkId));
             $this->closeResource($resource);
         }
 
@@ -102,7 +100,7 @@ class UploadAppendService
         } catch (Throwable $throwable) {
             // the chunk is not part of the upload, so nothing else references its object
             if (null !== $chunkId) {
-                $this->s3Service->deleteFile($this->fileOperationFactory->createFileOperationFromUpload($upload, $upload->getAlreadyUploadedChunks() + 1, $chunkId));
+                $this->s3Service->deleteFile($this->s3OperationFactory->createFileOperationFromUpload($upload, $upload->getAlreadyUploadedChunks() + 1, $chunkId));
             }
 
             throw $throwable;

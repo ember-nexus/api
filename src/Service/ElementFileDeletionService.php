@@ -10,7 +10,7 @@ use App\Contract\S3\FileOperationInterface;
 use App\Contract\S3\MergeFileChunksOperationInterface;
 use App\Contract\S3\UploadFileOperationInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Type\S3\FileOperation;
 use Laudis\Neo4j\Databags\Statement;
 use Psr\Log\LoggerInterface;
@@ -30,7 +30,7 @@ class ElementFileDeletionService
     public function __construct(
         private ElementManager $elementManager,
         private ElementService $elementService,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private CypherEntityManager $cypherEntityManager,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
@@ -55,7 +55,7 @@ class ElementFileDeletionService
         $fileOperations = [];
         foreach ($elements as $elementWithPossibleFile) {
             if ($this->elementService->hasFile($elementWithPossibleFile)) {
-                $fileOperations[] = $this->fileOperationFactory->createFileOperationFromElement($elementWithPossibleFile);
+                $fileOperations[] = $this->s3OperationFactory->createFileOperationFromElement($elementWithPossibleFile);
             }
         }
 

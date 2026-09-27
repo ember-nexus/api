@@ -8,7 +8,7 @@ use App\Attribute\EndpointSupportsEtag;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
@@ -39,7 +39,7 @@ class GetElementFileController extends AbstractController
         private ElementManager $elementManager,
         private ElementService $elementService,
         private FileService $fileService,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private FileRangeService $fileRangeService,
         private DigestService $digestService,
@@ -74,7 +74,7 @@ class GetElementFileController extends AbstractController
         $fileName = $this->elementService->getFileName($element);
         $fileNameFallback = $this->fileService->getAsciiSafeFileName($fileName);
 
-        $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+        $fileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
 
         $doesFileExist = $this->s3Service->existsFile($fileOperation);
         if (false === $doesFileExist) {

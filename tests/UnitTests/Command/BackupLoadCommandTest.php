@@ -7,7 +7,7 @@ namespace App\Tests\UnitTests\Command;
 use App\Command\BackupLoadCommand;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\UploadFileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
 use App\Service\FileHashService;
@@ -139,7 +139,7 @@ class BackupLoadCommandTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileMaxFileSizeInBytes()->willReturn($maxFileSizeInBytes);
 
-        $uploadFileOperationFactory = $this->prophesize(UploadFileOperationFactory::class);
+        $uploadFileOperationFactory = $this->prophesize(S3OperationFactory::class);
         $uploadFileOperationFactory->createUploadFileOperationFromElementAndResource(
             Argument::any(),
             Argument::any(),

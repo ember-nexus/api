@@ -12,7 +12,7 @@ use App\Contract\S3\UploadFileOperationInterface;
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\UploadFileChunkOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Type\S3\FileOperation;
 use App\Wrapper\S3ClientWrapper;
 use AsyncAws\S3\Result\GetObjectOutput;
@@ -38,7 +38,7 @@ class S3Service
 
     public function __construct(
         private S3Client $s3Client,
-        private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3ClientWrapper $s3ClientWrapper,
         private MimeTypeService $mimeTypeService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
@@ -205,7 +205,7 @@ class S3Service
             return $this->uploadFileViaMultipartUpload($uploadFileOperation, $contentLength);
         }
 
-        $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
+        $uploadFileChunkOperation = $this->s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation($uploadFileOperation);
         $contentLength = $this->uploadFileChunk($uploadFileChunkOperation);
 
         $copyResult = $this->s3Client->copyObject([

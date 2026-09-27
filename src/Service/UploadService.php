@@ -7,7 +7,7 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\UploadInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Type\NodeElement;
 use Exception;
@@ -24,7 +24,7 @@ class UploadService
     public function __construct(
         private ElementManager $elementManager,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private UploadFactory $uploadFactory,
         private CypherEntityManager $cypherEntityManager,
@@ -131,7 +131,7 @@ class UploadService
     {
         // chunk keys start at 1; rejected chunk attempts are not part of the upload and are deleted by their request
         foreach ($upload->getChunkIds() as $index => $chunkId) {
-            $deleteChunkOperation = $this->fileOperationFactory->createFileOperationFromUpload($upload, $index + 1, $chunkId);
+            $deleteChunkOperation = $this->s3OperationFactory->createFileOperationFromUpload($upload, $index + 1, $chunkId);
             $this->s3Service->deleteFile($deleteChunkOperation);
         }
 

@@ -9,7 +9,7 @@ use App\Contract\RelationElementInterface;
 use App\DependencyInjection\DeactivatableTraceableEventDispatcher;
 use App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\UploadFileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Helper\Regex;
 use App\Service\AppStateService;
 use App\Service\ElementManager;
@@ -70,7 +70,7 @@ class BackupLoadCommand extends Command
         private AppStateService $appStateService,
         private ElasticEntityManager $elasticEntityManager,
         private S3Service $s3Service,
-        private UploadFileOperationFactory $uploadFileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private FileSizeLimitService $fileSizeLimitService,
         private FileHashService $fileHashService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
@@ -248,7 +248,7 @@ class BackupLoadCommand extends Command
             }
 
             $resource = $this->backupStorage->readStream($path);
-            $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromElementAndResource($element, $resource, $contentLength);
+            $uploadFileOperation = $this->s3OperationFactory->createUploadFileOperationFromElementAndResource($element, $resource, $contentLength);
             $this->s3Service->uploadFile($uploadFileOperation);
         } catch (Throwable $e) {
             $this->reportFileError(sprintf(

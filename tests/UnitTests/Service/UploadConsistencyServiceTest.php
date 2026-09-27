@@ -9,7 +9,7 @@ use App\Contract\S3\FileOperationInterface;
 use App\Contract\UploadInterface;
 use App\Exception\Client409ConflictException;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\S3Service;
 use App\Service\UploadConsistencyService;
@@ -42,7 +42,7 @@ class UploadConsistencyServiceTest extends TestCase
         $this->s3Service = $this->prophesize(S3Service::class);
         $this->logger = $this->prophesize(LoggerInterface::class);
 
-        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
+        $fileOperationFactory = $this->prophesize(S3OperationFactory::class);
         $fileOperationFactory->createFileOperationFromUpload(Argument::cetera())->willReturn($this->prophesize(FileOperationInterface::class)->reveal());
         $conflictFactory = $this->prophesize(Client409ConflictExceptionFactory::class);
         $conflictFactory->createFromDetail(Argument::type('string'))->will(

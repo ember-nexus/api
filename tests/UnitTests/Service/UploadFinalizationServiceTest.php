@@ -12,7 +12,7 @@ use App\Exception\Client400BadContentException;
 use App\Exception\Client409ConflictException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
-use App\Factory\Type\S3\MergeFileChunksOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\DigestService;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
@@ -76,7 +76,7 @@ class UploadFinalizationServiceTest extends TestCase
         $this->elementManager->flush()->willReturn($this->elementManager->reveal());
 
         $mergeOperation = $this->prophesize(MergeFileChunksOperationInterface::class)->reveal();
-        $mergeFactory = $this->prophesize(MergeFileChunksOperationFactory::class);
+        $mergeFactory = $this->prophesize(S3OperationFactory::class);
         $mergeFactory->createMergeFileOperationFromUpload(Argument::any())->willReturn($mergeOperation);
 
         $this->s3Service = $this->prophesize(S3Service::class);

@@ -13,7 +13,7 @@ use App\Exception\Client400BadContentException;
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\UploadFileChunkOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\MimeTypeService;
 use App\Service\S3Service;
 use App\Service\S3TechnicalLimitsValidator;
@@ -52,7 +52,7 @@ class S3ServiceTest extends TestCase
 
     private function buildS3Service(
         ?S3Client $s3Client = null,
-        ?UploadFileChunkOperationFactory $fileChunkOperationFactory = null,
+        ?S3OperationFactory $s3OperationFactory = null,
         ?S3ClientWrapper $s3ClientWrapper = null,
         ?MimeTypeService $mimeTypeService = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
@@ -67,7 +67,7 @@ class S3ServiceTest extends TestCase
 
         return new S3Service(
             $s3Client ?? $this->prophesize(S3Client::class)->reveal(),
-            $fileChunkOperationFactory ?? $this->prophesize(UploadFileChunkOperationFactory::class)->reveal(),
+            $s3OperationFactory ?? $this->prophesize(S3OperationFactory::class)->reveal(),
             $s3ClientWrapper ?? $this->prophesize(S3ClientWrapper::class)->reveal(),
             $mimeTypeService ?? $this->prophesize(MimeTypeService::class)->reveal(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
@@ -1071,13 +1071,13 @@ class S3ServiceTest extends TestCase
         $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, false);
         $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce();
 
-        $uploadFileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
-        $uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
+        $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
+        $s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
             ->shouldBeCalledOnce()->willReturn($uploadFileChunkOperation);
 
         $s3Service = $this->buildS3Service(
             s3Client: $s3Client->reveal(),
-            fileChunkOperationFactory: $uploadFileChunkOperationFactory->reveal(),
+            s3OperationFactory: $s3OperationFactory->reveal(),
             s3ClientWrapper: $s3ClientWrapper->reveal()
         );
 
@@ -1147,13 +1147,13 @@ class S3ServiceTest extends TestCase
         $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter2))->shouldBeCalledTimes(2)->willReturn(true, false);
         $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce();
 
-        $uploadFileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
-        $uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
+        $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
+        $s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
             ->shouldBeCalledOnce()->willReturn($uploadFileChunkOperation);
 
         $s3Service = $this->buildS3Service(
             s3Client: $s3Client->reveal(),
-            fileChunkOperationFactory: $uploadFileChunkOperationFactory->reveal(),
+            s3OperationFactory: $s3OperationFactory->reveal(),
             s3ClientWrapper: $s3ClientWrapper->reveal()
         );
 
@@ -1231,13 +1231,13 @@ class S3ServiceTest extends TestCase
         $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, false);
         $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce();
 
-        $uploadFileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
-        $uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
+        $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
+        $s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
             ->shouldBeCalledOnce()->willReturn($uploadFileChunkOperation);
 
         $s3Service = $this->buildS3Service(
             s3Client: $s3Client->reveal(),
-            fileChunkOperationFactory: $uploadFileChunkOperationFactory->reveal(),
+            s3OperationFactory: $s3OperationFactory->reveal(),
             s3ClientWrapper: $s3ClientWrapper->reveal()
         );
 
@@ -1298,13 +1298,13 @@ class S3ServiceTest extends TestCase
         $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
         $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce()->willThrow($originalException);
 
-        $uploadFileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
-        $uploadFileChunkOperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
+        $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
+        $s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
             ->shouldBeCalledOnce()->willReturn($uploadFileChunkOperation);
 
         $s3Service = $this->buildS3Service(
             s3Client: $s3Client->reveal(),
-            fileChunkOperationFactory: $uploadFileChunkOperationFactory->reveal(),
+            s3OperationFactory: $s3OperationFactory->reveal(),
             s3ClientWrapper: $s3ClientWrapper->reveal(),
             server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
         );
@@ -1954,14 +1954,14 @@ class S3ServiceTest extends TestCase
         $uploadFileOperation->getMimeType()->willReturn('text/plain');
         $uploadFileOperation->getPreviousStorageKey()->willReturn(null);
 
-        $fileChunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
-        $fileChunkOperationFactory
+        $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
+        $s3OperationFactory
             ->createUploadFileChunkOperationFromUploadFileOperation(Argument::any())
             ->willThrow(new Exception('single-PUT path reached'));
 
         $s3Service = $this->buildS3Service(
             s3Client: $s3Client->reveal(),
-            fileChunkOperationFactory: $fileChunkOperationFactory->reveal(),
+            s3OperationFactory: $s3OperationFactory->reveal(),
             multipartUploadThresholdInBytes: 20
         );
 

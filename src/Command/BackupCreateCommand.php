@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\ElementToRawService;
@@ -59,7 +59,7 @@ class BackupCreateCommand extends Command
         private ParameterBagInterface $bag,
         private FileService $fileService,
         private S3Service $s3Service,
-        private FileOperationFactory $fileOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
@@ -289,7 +289,7 @@ class BackupCreateCommand extends Command
                 continue;
             }
 
-            $fileOperation = $this->fileOperationFactory->createFileOperationFromElement($element);
+            $fileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
             $resource = $this->s3Service->getFileAsResource($fileOperation);
             $extension = $this->elementService->getFileNameExtension($element);
 

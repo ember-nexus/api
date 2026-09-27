@@ -11,8 +11,7 @@ use App\EventSystem\ElementFileReplace\Event\ElementFileReplaceEvent;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
-use App\Factory\Type\S3\UploadFileChunkOperationFactory;
-use App\Factory\Type\S3\UploadFileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Security\AuthProvider;
 use App\Type\Response\CreatedResponse;
 use App\Type\Upload;
@@ -38,8 +37,7 @@ class UploadCreationService
         private IncrementalHashService $incrementalHashService,
         private DigestService $digestService,
         private ElementManager $elementManager,
-        private UploadFileOperationFactory $uploadFileOperationFactory,
-        private UploadFileChunkOperationFactory $uploadFileChunkOperationFactory,
+        private S3OperationFactory $s3OperationFactory,
         private ResumableUploadRequestFactory $resumableUploadRequestFactory,
         private EventDispatcherInterface $eventDispatcher,
         private NoContentResponseFactory $noContentResponseFactory,
@@ -99,7 +97,7 @@ class UploadCreationService
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
         $hash = $this->incrementalHashService->finalize($hashContext);
 
-        $uploadFileOperation = $this->uploadFileOperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
+        $uploadFileOperation = $this->s3OperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
 
         foreach ($requestDigestHeaderValues as $headerName => $requestDigestHeaderValue) {
             $this->verifyRequestDigest($headerName, $requestDigestHeaderValue, $hash);
@@ -172,7 +170,7 @@ class UploadCreationService
             $this->incrementalHashService->updateFromResource($hashContext, $resource);
 
             $chunkId = $this->fileService->generateUploadChunkId();
-            $uploadFileChunkOperation = $this->uploadFileChunkOperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, $chunkId);
+            $uploadFileChunkOperation = $this->s3OperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, $chunkId);
             $uploadOffset = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
             // the S3 client may already have closed the resource while uploading it
             /** @psalm-suppress RedundantConditionGivenDocblockType */

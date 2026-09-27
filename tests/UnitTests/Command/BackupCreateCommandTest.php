@@ -6,7 +6,7 @@ namespace App\Tests\UnitTests\Command;
 
 use App\Command\BackupCreateCommand;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\ElementToRawService;
@@ -103,7 +103,7 @@ class BackupCreateCommandTest extends TestCase
         $elementService = $this->prophesize(ElementService::class);
         $elementService->getFileNameExtension(Argument::any())->willReturn('bin');
 
-        $fileOperationFactory = $this->prophesize(FileOperationFactory::class);
+        $fileOperationFactory = $this->prophesize(S3OperationFactory::class);
         $fileOperationFactory->createFileOperationFromElement(Argument::any())->will(function (array $args) {
             return new FileOperation('storage', $args[0]->getId()->toString());
         });

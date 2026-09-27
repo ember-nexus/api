@@ -9,7 +9,7 @@ use App\Contract\S3\FileOperationInterface;
 use App\Contract\S3\MergeFileChunksOperationInterface;
 use App\Contract\S3\UploadFileOperationInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Factory\Type\S3\FileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\ElementService;
@@ -47,7 +47,7 @@ class ElementFileDeletionServiceTest extends TestCase
      */
     private ObjectProphecy $elementService;
     /**
-     * @var ObjectProphecy<FileOperationFactory>
+     * @var ObjectProphecy<S3OperationFactory>
      */
     private ObjectProphecy $fileOperationFactory;
     /**
@@ -65,7 +65,7 @@ class ElementFileDeletionServiceTest extends TestCase
     {
         $this->elementManager = $this->prophesize(ElementManager::class);
         $this->elementService = $this->prophesize(ElementService::class);
-        $this->fileOperationFactory = $this->prophesize(FileOperationFactory::class);
+        $this->fileOperationFactory = $this->prophesize(S3OperationFactory::class);
         $this->s3Service = $this->prophesize(S3Service::class);
         $this->logger = TestLogger::create();
         $this->client = $this->prophesize(ClientInterface::class);

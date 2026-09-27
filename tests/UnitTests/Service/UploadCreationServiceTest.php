@@ -15,8 +15,7 @@ use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
-use App\Factory\Type\S3\UploadFileChunkOperationFactory;
-use App\Factory\Type\S3\UploadFileOperationFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Security\AuthProvider;
 use App\Service\DigestService;
 use App\Service\ElementFileDeletionService;
@@ -129,16 +128,14 @@ class UploadCreationServiceTest extends TestCase
             ->createResumableUploadRequestFromRequest(Argument::any(), Argument::any())
             ->willReturn($this->resumableUploadRequest->reveal());
 
-        $uploadFileOperationFactory = $this->prophesize(UploadFileOperationFactory::class);
+        $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
         $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
         $uploadFileOperation->getContentLength()->willReturn(5);
         $uploadFileOperation->getMimeType()->willReturn('application/octet-stream');
-        $uploadFileOperationFactory
+        $s3OperationFactory
             ->createUploadFileOperationFromResumableUploadRequest(Argument::any())
             ->willReturn($uploadFileOperation->reveal());
-
-        $chunkOperationFactory = $this->prophesize(UploadFileChunkOperationFactory::class);
-        $chunkOperationFactory
+        $s3OperationFactory
             ->createUploadFileChunkOperationFromResumableUploadRequest(Argument::cetera())
             ->willReturn($this->prophesize(UploadFileChunkOperationInterface::class)->reveal());
 
@@ -153,8 +150,7 @@ class UploadCreationServiceTest extends TestCase
             new IncrementalHashService($this->prophesize(Client409ConflictExceptionFactory::class)->reveal()),
             new DigestService(),
             $this->elementManager->reveal(),
-            $uploadFileOperationFactory->reveal(),
-            $chunkOperationFactory->reveal(),
+            $s3OperationFactory->reveal(),
             $requestFactory->reveal(),
             $this->eventDispatcher->reveal(),
             new NoContentResponseFactory($configuration),
