@@ -136,7 +136,6 @@ class PostRegisterControllerTest extends TestCase
         $emberNexusConfiguration->method('isRegisterEnabled')->willReturn(true);
 
         $requestUtilService = new RequestUtilService(
-            $emberNexusConfiguration,
             $this->createMock(Client400BadContentExceptionFactory::class),
             $this->createMock(Client400MissingPropertyExceptionFactory::class),
         );

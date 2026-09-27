@@ -37,10 +37,9 @@ class PostTokenController extends AbstractController
     public function postToken(Request $request): Response
     {
         $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
-        $data = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('Token', $body);
-        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
 
         $userElement = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
         $userId = $userElement->getId();

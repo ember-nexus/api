@@ -42,9 +42,6 @@ class EmberNexusConfiguration
     public const string CACHE_ETAG_SEED = 'etagSeed';
     public const string CACHE_ETAG_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS = 'etagUpperLimitInCollectionEndpoints';
 
-    public const string FEATURE_FLAG = 'featureFlag';
-    public const string FEATURE_FLAG_280_OLD_UNIQUE_USER_IDENTIFIER_DISABLED = '280_OldUniqueUserIdentifierDisabled';
-
     public const string FILE = 'file';
     public const string FILE_MAX_FILE_SIZE_IN_BYTES = 'maxFileSizeInBytes';
     public const string FILE_UPLOAD_EXPIRES_IN_SECONDS_AFTER_FIRST_REQUEST = 'uploadExpiresInSecondsAfterFirstRequest';
@@ -76,7 +73,6 @@ class EmberNexusConfiguration
     private int|false $tokenDeleteExpiredTokensAutomaticallyInSeconds;
     private string $cacheEtagSeed;
     private int $cacheEtagUpperLimitInCollectionEndpoints;
-    private bool $featureFlag280OldUniqueUserIdentifierDisabled;
 
     private int $fileMaxFileSizeInBytes;
     private int $fileUploadExpiresInSecondsAfterFirstRequest;
@@ -267,15 +263,6 @@ class EmberNexusConfiguration
             ]
         );
         $emberNexusConfiguration->setCacheEtagUpperLimitInCollectionEndpoints($value);
-
-        $value = self::getValueFromConfig(
-            $configuration,
-            [
-                self::FEATURE_FLAG,
-                self::FEATURE_FLAG_280_OLD_UNIQUE_USER_IDENTIFIER_DISABLED,
-            ]
-        );
-        $emberNexusConfiguration->setFeatureFlag280OldUniqueUserIdentifierDisabled($value);
 
         $value = (int) self::getValueFromConfig(
             $configuration,
@@ -598,18 +585,6 @@ class EmberNexusConfiguration
     public function setCacheEtagUpperLimitInCollectionEndpoints(int $cacheEtagUpperLimitInCollectionEndpoints): static
     {
         $this->cacheEtagUpperLimitInCollectionEndpoints = $cacheEtagUpperLimitInCollectionEndpoints;
-
-        return $this;
-    }
-
-    public function isFeatureFlag280OldUniqueUserIdentifierDisabled(): bool
-    {
-        return $this->featureFlag280OldUniqueUserIdentifierDisabled;
-    }
-
-    public function setFeatureFlag280OldUniqueUserIdentifierDisabled(bool $featureFlag280OldUniqueUserIdentifierDisabled): static
-    {
-        $this->featureFlag280OldUniqueUserIdentifierDisabled = $featureFlag280OldUniqueUserIdentifierDisabled;
 
         return $this;
     }

@@ -106,6 +106,8 @@ COPY composer.json /var/www/html/composer.json
 COPY composer.lock /var/www/html/composer.lock
 COPY LICENSE /var/www/html/LICENSE
 RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-cache \
+    && rm -rf /var/www/html/var/cache \
+    && mkdir -p /var/www/html/var/cache \
     && rm -rf /usr/local/include/php \
     && mv /usr/local/lib/php/extensions /usr/local/lib/php_extensions \
     && rm -rf /usr/local/lib/php \

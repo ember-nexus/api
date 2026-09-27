@@ -1059,9 +1059,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         etagSeed?: scalar|Param|null, // Seed used to generate Etag values. Changing it invalidates all data cached by clients. // Default: ""
  *         etagUpperLimitInCollectionEndpoints?: scalar|Param|null, // Maximum number of items in a collection for which to generate Etags. Bigger collection do not contain Etags due to performance problems. // Default: 100
  *     },
- *     featureFlag?: array{ // Configures feature flags.
- *         280_OldUniqueUserIdentifierDisabled?: bool|Param, // If true, the original behavior of some user endpoints in versions before 0.1.6 will no longer be supported. Old behavior will be dropped with version 0.2.0. See GitHub issue #280. // Default: false
- *     },
  *     file?: array{ // Configures behavior related to files.
  *         maxFileSizeInBytes?: int|Param, // Maximum supported file size in bytes. Note: Upstream services like S3 have limits of their own (5TB). // Default: 10737418240
  *         uploadExpiresInSecondsAfterFirstRequest?: int|Param, // Number of seconds after which unfinished uploads are expired. // Default: 10800

@@ -61,14 +61,10 @@ class PostRegisterController extends AbstractController
         $this->requestUtilService->validateTypeFromBody('User', $body);
         $userId = UuidV4::uuid4();
         $password = $this->requestUtilService->getStringFromBody('password', $body);
-        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $rawData);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
         $this->checkForDuplicateUniqueUserIdentifier($uniqueUserIdentifier);
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        if (array_key_exists($uniqueIdentifier, $rawData)) {
-            // remove unique identifier from data payload, was required in releases before 0.1.6
-            unset($rawData[$uniqueIdentifier]);
-        }
 
         $userNode = $this->createElementFromRawDataService->createElementFromRawData(
             $userId,

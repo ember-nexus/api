@@ -34,7 +34,6 @@ class PostChangePasswordController extends AbstractController
     public function postChangePassword(Request $request): Response
     {
         $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
-        $data = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('ActionChangePassword', $body);
 
@@ -42,7 +41,7 @@ class PostChangePasswordController extends AbstractController
         $currentPassword = $this->requestUtilService->getStringFromBody('currentPassword', $body);
         $this->validateNewPasswordIsDifferentFromCurrentPassword($newPassword, $currentPassword);
 
-        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
 
         $userNode = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
         $userId = $userNode->getId();
