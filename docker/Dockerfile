@@ -154,6 +154,8 @@ USER worker
 
 FROM php AS development
 
+ENV DISABLE_CRON=true
+
 COPY ./docker/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers linux-headers \
