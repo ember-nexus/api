@@ -13,9 +13,6 @@ class IfMatchTest extends BaseRequestTestCase
     private const string ID_PARENT = 'e94ebb96-8cca-49eb-a214-ba73a72abba0';
     private const string ID_CHILD = 'ad966733-6cfb-427b-8661-8207a58bdc7f';
     private const string ID_RELATED = '1647af8f-2f6a-46de-ab8a-3f1a740761f3';
-    // dedicated write-capable token for tests below which mutate/delete their own elements, so the fixed reference
-    // dataset ids above stay readable by other tests (e.g. WildcardEtagTest) regardless of test execution order
-    private const string WRITE_TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
     private function testEtagOfElement(string $token, string $id, string $additionalPath, ?string $shouldEtag = null): string
     {
@@ -299,18 +296,18 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testEtagIfMatchWithPatchElement(): void
     {
-        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::WRITE_TOKEN, [
+        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
             'type' => 'Data',
             'data' => ['name' => 'if-match-patch-element'],
         ]));
 
-        $response = $this->runGetRequest($elementId, self::WRITE_TOKEN);
+        $response = $this->runGetRequest($elementId, self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
 
         $response = $this->runPatchRequest(
             $elementId,
-            self::WRITE_TOKEN,
+            self::TOKEN,
             [
                 'new' => 'data',
             ],
@@ -322,7 +319,7 @@ class IfMatchTest extends BaseRequestTestCase
 
         $response = $this->runPatchRequest(
             $elementId,
-            self::WRITE_TOKEN,
+            self::TOKEN,
             [
                 'new' => 'data',
             ],
@@ -334,30 +331,30 @@ class IfMatchTest extends BaseRequestTestCase
 
         $response = $this->runPatchRequest(
             $elementId,
-            self::WRITE_TOKEN,
+            self::TOKEN,
             [
                 'new' => 'data 2',
             ],
         );
         $this->assertNoContentResponse($response);
 
-        $this->assertIsDeletedResponse($this->runDeleteRequest($elementId, self::WRITE_TOKEN));
+        $this->assertIsDeletedResponse($this->runDeleteRequest($elementId, self::TOKEN));
     }
 
     public function testEtagIfMatchWithPutElement(): void
     {
-        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::WRITE_TOKEN, [
+        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
             'type' => 'Data',
             'data' => ['name' => 'if-match-put-element'],
         ]));
 
-        $response = $this->runGetRequest($elementId, self::WRITE_TOKEN);
+        $response = $this->runGetRequest($elementId, self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
 
         $response = $this->runPutRequest(
             $elementId,
-            self::WRITE_TOKEN,
+            self::TOKEN,
             [
                 'new' => 'data',
                 'scenario' => 'general.if-match',
@@ -371,7 +368,7 @@ class IfMatchTest extends BaseRequestTestCase
 
         $response = $this->runPutRequest(
             $elementId,
-            self::WRITE_TOKEN,
+            self::TOKEN,
             [
                 'new' => 'data',
                 'scenario' => 'general.if-match',
@@ -385,7 +382,7 @@ class IfMatchTest extends BaseRequestTestCase
 
         $response = $this->runPutRequest(
             $elementId,
-            self::WRITE_TOKEN,
+            self::TOKEN,
             [
                 'new' => 'data',
                 'scenario' => 'general.if-match',
@@ -394,23 +391,23 @@ class IfMatchTest extends BaseRequestTestCase
         );
         $this->assertNoContentResponse($response);
 
-        $this->assertIsDeletedResponse($this->runDeleteRequest($elementId, self::WRITE_TOKEN));
+        $this->assertIsDeletedResponse($this->runDeleteRequest($elementId, self::TOKEN));
     }
 
     public function testEtagIfMatchWithDeleteElement(): void
     {
-        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::WRITE_TOKEN, [
+        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
             'type' => 'Data',
             'data' => ['name' => 'if-match-delete-element'],
         ]));
 
-        $response = $this->runGetRequest($elementId, self::WRITE_TOKEN);
+        $response = $this->runGetRequest($elementId, self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
 
         $response = $this->runDeleteRequest(
             $elementId,
-            self::WRITE_TOKEN,
+            self::TOKEN,
             [
                 'If-Match' => '"wrongEtag"',
             ]
@@ -419,7 +416,7 @@ class IfMatchTest extends BaseRequestTestCase
 
         $response = $this->runDeleteRequest(
             $elementId,
-            self::WRITE_TOKEN,
+            self::TOKEN,
             [
                 'If-Match' => $etag,
             ]
