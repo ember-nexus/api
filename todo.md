@@ -50,13 +50,9 @@ coverage (WebDAV support will be reworked soon, not worth covering now).
   x length < 32, distinct buckets) is lazy and could move into the config tree.
 - Tests: `CronCommand` isolation (a failing sub-command must not stop the next) only has unit tests; the healthcheck
   parts other than S3 are untested in unit tests.
-- **Pre-existing test race (found while validating the ETag/cron changes, not caused by them):** `IfMatchTest` and
-  `IfNoneMatchTest` permanently PATCH/PUT/DELETE the same fixed reference-dataset ids (`ID_DATA`/`ID_PARENT`/etc.)
-  that `WildcardEtagTest` reads; when paratest schedules them so the mutating test runs first, `WildcardEtagTest`
-  gets `404`s instead of `304`/`200`. Reproduced with an unmodified checkout of these three files, both via the
-  official `composer test:feature` and by running the files together directly; passes cleanly whenever
-  `WildcardEtagTest` runs against a freshly loaded reference dataset. Needs its own fix (e.g. give the mutating
-  tests their own elements instead of the shared fixed ids).
+- **Pre-existing test race: fixed.** `IfMatchTest` and `IfNoneMatchTest`'s mutating tests (PATCH/PUT/DELETE) now
+  create and clean up their own elements via a dedicated write token instead of mutating the fixed reference-dataset
+  ids that `WildcardEtagTest` also reads.
 - **Cron in CI: implemented.** `DISABLE_CRON=true` is now set on every API container of the feature/example-generation
   compose files. `CronExecutionGateService` (+ `TtyDetectorService`) makes the four cron commands skip only when
   disabled AND not attached to a real terminal (`stream_isatty(STDIN)`, not Console's `isInteractive()`), so
@@ -66,10 +62,17 @@ coverage (WebDAV support will be reworked soon, not worth covering now).
   `BaseCommandTestCase::runCommand()` (doc example generation) both default `DISABLE_CRON=0` per invocation unless the
   caller overrides it, since they exec `php bin/console` without a tty and still need cron to actually run for their
   own assertions.
-- `If-Match` is not atomic with the write (accept and document).
-- Monolog: the `408` log line lacks byte counts, `503` only has Caddy's access line; chunked requests without
-  `Content-Length` can not be detected as `408` (accepted; doc note). Reminder (later): CLI logging oddities might be
-  related to the Monolog v4 upgrade, needs its own investigation later, not now.
+- `If-Match` is not atomic with the write: accepted, now documented (`docs/concepts/caching.md`).
+- Monolog: `408` log line now carries `detail` (fixed, was logging the always-empty `Exception::getMessage()` instead
+  of `getDetail()` - byte counts now show up); `503` only having Caddy's access line is expected (PHP itself crashed);
+  chunked requests without `Content-Length` can not be detected as `408` (accepted; doc note). Reminder (later): CLI
+  logging oddities might be related to the Monolog v4 upgrade, needs its own investigation later, not now.
+- **Found while adding the `IS_IN_GROUP` search-access feature test below: fixed.** `AccessChecker`'s
+  `onCreatedByUser` check (and the equivalent implicit rule in `GetChildrenController`/`GetParentsController`/
+  `GetRelatedController`) matched against a `CREATED_BY` relation type that nothing in the app ever created (node
+  creation only creates `OWNS` and `CREATED`) - the whole feature was dead code, untested until now. Renamed the
+  Cypher pattern to `CREATED` everywhere (including `docs/security/access.md`, which already showed `CREATED` in its
+  diagrams); no reference-dataset change needed.
 
 ## Ownership recalculation (`cron:update-ownership`, #438) — implemented
 
@@ -103,12 +106,16 @@ admin-owned element in one hop; the test grants the admin test account direct `O
 via a raw Cypher write used only as a test precondition (mirrors `BaseCronTestCase::setUploadProperty()`), while the
 relation actually under test is always created through the real HTTP endpoint.
 
-Open, in scope: the `IS_IN_GROUP` "member gains access to everything the group owns via a plain `OWNS` chain" outcome
-is deliberately **not** covered by a feature test — `AccessChecker::getDirectUsersWithAccessToNode()` only honors a
-group hop together with a `HAS_SEARCH_ACCESS` relation onto an element the user created themselves (see the existing
-`_99_01_IsInGroupAfterOwnsHaveNoEffectTest`, confirming a plain `IS_IN_GROUP` + `OWNS` chain grants nothing). The
-mechanism (relation queued, command drains it without error) is covered instead; outcome coverage of that narrow
-`HAS_SEARCH_ACCESS` + `CREATED_BY` combination is not done.
+Resolved (was "Open" here): outcome coverage for group-conferred search access is now done
+(`CronUpdateOwnershipTest::testGroupMemberGainsSearchAccessViaGroupHasSearchAccessWithoutOwningOrCreatingTheElement`).
+Turned out the original framing was wrong: group access to search does **not** go through
+`getDirectUsersWithAccessToNode()`'s per-user, creator-gated resolution at all (that one genuinely never resolves a
+plain group member in, matching `_99_01_IsInGroupAfterOwnsHaveNoEffectTest`) - it goes through the separate
+`getDirectGroupsWithAccessToNode()` populating `_groupsWithSearchAccess`, matched at query time against the
+searching user's own groups (`ElasticsearchQueryDslMixinSearchStepEventListener`). So a plain group member *does*
+gain search access to everything the group has `HAS_SEARCH_ACCESS` to, without owning or creating any of it
+themselves - confirmed and now covered by a feature test (no reference-dataset change needed, fully self-contained
+via dynamically registered users, like the other tests in this file).
 
 ## Separate tickets (document only, not started)
 

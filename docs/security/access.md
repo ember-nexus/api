@@ -101,7 +101,7 @@ WHERE
       (
         relation.onCreatedByUser IS NULL
         OR
-        (element)<-[:CREATED_BY*]-(user)
+        (element)<-[:CREATED*]-(user)
       )
     )
   )
@@ -145,7 +145,7 @@ WHERE
       (
         startRelation.onCreatedByUser IS NULL
         OR
-        (start)<-[:CREATED_BY*]-(user)
+        (start)<-[:CREATED*]-(user)
       )
     )
   )
@@ -177,7 +177,7 @@ WHERE
       (
         endRelation.onCreatedByUser IS NULL
         OR
-        (end)<-[:CREATED_BY*]-(user)
+        (end)<-[:CREATED*]-(user)
       )
     )
   )

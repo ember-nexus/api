@@ -246,13 +246,16 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     }
 
     /**
-     * `IS_IN_GROUP` is deliberately not tested for a full "member gains access to everything the group owns"
-     * outcome here: `AccessChecker::getDirectUsersWithAccessToNode()` only honors a group hop when the chain also
-     * contains a `HAS_SEARCH_ACCESS` relation onto an element the user created themselves (see the existing
-     * `_99_01_IsInGroupAfterOwnsHaveNoEffectTest`, which documents that a plain `IS_IN_GROUP` + `OWNS` chain does
-     * *not* grant access) - a pure `OWNS`-owned-by-the-group scenario, as this test's name would suggest, is not
-     * actually how this application's access model behaves. This test therefore covers the mechanism (the relation
-     * change is queued and the command drains it without error) rather than a specific search-access outcome.
+     * A pure `OWNS`-owned-by-the-group scenario, as this test's name would suggest, is not actually how this
+     * application's access model behaves for *direct* per-user access: `AccessChecker::getDirectUsersWithAccessToNode()`
+     * only honors a group hop for a *user's own* `_usersWithSearchAccess` entry when the querying user also created
+     * the element themselves (see the existing `_99_01_IsInGroupAfterOwnsHaveNoEffectTest`, which documents that a
+     * plain `IS_IN_GROUP` + `OWNS` chain grants no *direct, per-user* access this way). That is not how group access
+     * to search actually works though: `_groupsWithSearchAccess` is calculated (and matched at query time against
+     * the searching user's own groups) independently of any of that - see
+     * testGroupMemberGainsSearchAccessViaGroupHasSearchAccessWithoutOwningOrCreatingTheElement() below, which covers
+     * that actual outcome. This test therefore only covers the `IS_IN_GROUP` relation-change mechanism itself (queued
+     * and drained without error), not a search-access outcome.
      */
     public function testGroupMembershipChangeIsQueuedAndConsumedWithoutError(): void
     {
@@ -274,6 +277,57 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $this->assertSame(0, $this->getQueueMessageCount());
 
         $this->deleteNode($groupNodeId);
+        $this->deleteNode($memberUserId);
+        $this->drainQueue();
+    }
+
+    /**
+     * Covers the actual outcome of group-conferred search access: `AccessChecker::getDirectGroupsWithAccessToNode()`
+     * (unlike its per-user sibling `getDirectUsersWithAccessToNode()`) does *not* require the querying user to have
+     * created the element - a group's `HAS_SEARCH_ACCESS` relation is resolved once into `_groupsWithSearchAccess`,
+     * and `ElasticsearchQueryDslMixinSearchStepEventListener::buildCombinedQuery()` matches that field at query time
+     * against whichever groups the searching user is currently in (`AccessChecker::getUsersGroups()`). So a group
+     * member gains search access to everything the group has `HAS_SEARCH_ACCESS` to, even without ever having
+     * created or directly owned any of it themselves - unlike the (deliberately unresolved) direct, per-user
+     * `_usersWithSearchAccess` case covered by testGroupMembershipChangeIsQueuedAndConsumedWithoutError() above.
+     */
+    public function testGroupMemberGainsSearchAccessViaGroupHasSearchAccessWithoutOwningOrCreatingTheElement(): void
+    {
+        $this->drainQueue();
+
+        [$memberUserId, $memberUserToken] = $this->registerUserWithToken('group-search-access-member');
+        $this->grantAdminOwnershipOf($memberUserId);
+
+        // created by the admin, not by the member: the member has no OWNS/CREATED relation to it whatsoever
+        $elementId = $this->createNode('cron-update-ownership-group-search-access-target');
+        $this->assertSearchAccess($memberUserToken, $elementId, false);
+
+        $groupNodeId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
+            'type' => 'Group',
+            'data' => ['name' => 'cron-update-ownership-group-search-access-group'],
+        ]));
+        $this->createRelation('IS_IN_GROUP', $memberUserId, $groupNodeId);
+        $relationId = $this->createRelation('HAS_SEARCH_ACCESS', $groupNodeId, $elementId);
+        $this->assertGreaterThanOrEqual(1, $this->getQueueMessageCount());
+
+        [$exitCode, $output] = $this->runConsoleCommand('cron:update-ownership');
+        $this->assertSame(0, $exitCode, $output);
+        $this->assertSame(0, $this->getQueueMessageCount());
+
+        $this->assertSearchAccess($memberUserToken, $elementId, true);
+
+        // revoking the group's HAS_SEARCH_ACCESS relation removes the member's search access again
+        $this->deleteNode($relationId);
+        $this->assertGreaterThanOrEqual(1, $this->getQueueMessageCount());
+
+        [$exitCode, $output] = $this->runConsoleCommand('cron:update-ownership');
+        $this->assertSame(0, $exitCode, $output);
+
+        $this->assertSearchAccess($memberUserToken, $elementId, false);
+
+        $this->deleteNode($groupNodeId);
+        $this->deleteNode($elementId);
+        $this->drainQueue();
         $this->deleteNode($memberUserId);
         $this->drainQueue();
     }

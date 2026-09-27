@@ -100,7 +100,7 @@ class GetRelatedController extends AbstractController
             "      (\n".
             "        relation.onCreatedByUser IS NULL\n".
             "        OR\n".
-            "        (outer)<-[:CREATED_BY*]-(user)\n".
+            "        (outer)<-[:CREATED*]-(user)\n".
             "      )\n".
             "    )\n".
             "  )\n".

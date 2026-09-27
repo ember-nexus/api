@@ -227,8 +227,8 @@ jobs:
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker load < /tmp/docker/api-prod-amd.tar.gz
           docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml up --quiet-pull -d --wait
-          echo "giving containers a moment to settle (3s)"
-          sleep 3
+          echo "giving containers a moment to settle (10s)"
+          sleep 10
           echo "finished waiting"
           docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml ps
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "composer install --ignore-platform-req=php --quiet"
@@ -296,8 +296,8 @@ jobs:
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker load < /tmp/docker/api-prod-amd.tar.gz
           docker compose -f ./tests/ExampleGenerationController/docker-compose.yml up --quiet-pull -d --wait
-          echo "giving containers a moment to settle (3s)"
-          sleep 3
+          echo "giving containers a moment to settle (10s)"
+          sleep 10
           echo "finished waiting"
           docker compose -f ./tests/ExampleGenerationController/docker-compose.yml ps
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "composer install --ignore-platform-req=php --quiet"
@@ -354,8 +354,8 @@ jobs:
           chmod 777 ./bin/test-feature-command-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker compose -f ./tests/ExampleGenerationCommand/docker-compose.yml up --quiet-pull -d --wait
-          echo "giving containers a moment to settle (3s)"
-          sleep 3
+          echo "giving containers a moment to settle (10s)"
+          sleep 10
           echo "finished waiting"
           docker compose -f ./tests/ExampleGenerationCommand/docker-compose.yml ps
           docker exec --user "$(id -u):$(id -g)" api bash -c "composer install --ignore-platform-req=php --quiet"

@@ -84,11 +84,13 @@ class ExceptionEventListener
                 'trace' => $originalException->getTrace(),
             ];
         }
+        // getMessage() is always empty (ProblemJsonException never forwards it to the parent Exception), getDetail()
+        // carries the actual explanation, e.g. the received/announced byte counts of a 408 request timeout
         $this->logger->error(sprintf(
             '%s %s: %s',
             $extendedException->getType(),
             $extendedException->getTitle(),
-            $extendedException->getMessage()
+            $extendedException->getDetail()
         ));
 
         $event->setResponse(new ProblemJsonResponse(
