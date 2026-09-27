@@ -369,28 +369,22 @@ class EtagCalculatorService
             // an element without file has no file representation, so conditional requests on it are not evaluated
             return null;
         }
-        $rawFileProperties = $element->hasProperty('file') ? $element->getProperty('file') : null;
-        $fileEtag = $this->extractPreferredHashFromFileProperties($rawFileProperties);
 
-        if (null === $fileEtag) {
-            // no stored hash, e.g. files uploaded before hashing was introduced
-            $fileEtag = $this->calculateElementEtag($elementId);
-            if (null === $fileEtag) {
-                return null;
-            }
-            $fileEtag = (string) $fileEtag;
+        $elementEtag = $this->calculateElementEtag($elementId);
+        if (null === $elementEtag) {
+            return null;
         }
 
-        $fileProperties = \Safe\json_encode($rawFileProperties);
-
-        $name = $element->hasProperty('name') ? $element->getProperty('name') : null;
-        $name = \Safe\json_encode($name);
+        $rawFileProperties = $element->hasProperty('file') ? $element->getProperty('file') : null;
+        $fileHash = $this->extractPreferredHashFromFileProperties($rawFileProperties);
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
-        $etagCalculator->addUuid($elementId);
-        $etagCalculator->addString($fileEtag);
-        $etagCalculator->addString($fileProperties);
-        $etagCalculator->addString($name);
+        $etagCalculator->addString((string) $elementEtag);
+        if (null !== $fileHash) {
+            $etagCalculator->addString($fileHash);
+        }
+        // no stored hash, e.g. files uploaded before hashing was introduced: the element etag already captures
+        // identity and recency, so it is not folded into itself again as a fake hash component
         $etag = $etagCalculator->getEtag();
 
         $this->logger->debug(

@@ -95,6 +95,7 @@ class UploadServiceTest extends TestCase
         $upload->getExtension()->willReturn($extension);
         $upload->getExpires()->willReturn(new DateTime('2099-01-01'));
         $upload->getHashState()->willReturn($hashState);
+        $upload->targetHadFileAtCreation()->willReturn(false);
 
         return $upload;
     }
@@ -133,6 +134,7 @@ class UploadServiceTest extends TestCase
                 'extension' => 'png',
                 'expires' => $mergedElement->getProperty('expires'),
                 'hashState' => 'abc',
+                'targetHadFileAtCreation' => false,
             ],
             $mergedElement->getProperties()
         );

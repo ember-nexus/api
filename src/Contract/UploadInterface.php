@@ -44,4 +44,10 @@ interface UploadInterface
      * non-empty chunk.
      */
     public function getHashState(): ?string;
+
+    /**
+     * Whether the target already had a file when this upload was created (a resumable replace started through
+     * `PUT`).
+     */
+    public function targetHadFileAtCreation(): bool;
 }

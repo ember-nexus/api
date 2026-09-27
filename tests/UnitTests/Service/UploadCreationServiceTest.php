@@ -21,6 +21,7 @@ use App\Security\AuthProvider;
 use App\Service\DigestService;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
+use App\Service\ElementService;
 use App\Service\FileService;
 use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
@@ -70,6 +71,8 @@ class UploadCreationServiceTest extends TestCase
     private ObjectProphecy $eventDispatcher;
     /** @var ObjectProphecy<ElementFileDeletionService> */
     private ObjectProphecy $elementFileDeletionService;
+    /** @var ObjectProphecy<ElementService> */
+    private ObjectProphecy $elementService;
     private UploadCreationService $service;
     /** @var ObjectProphecy<Client409ConflictExceptionFactory> */
     private ObjectProphecy $conflictFactory;
@@ -92,6 +95,8 @@ class UploadCreationServiceTest extends TestCase
         $this->elementManager->flush()->willReturn($this->elementManager->reveal());
         $this->elementFileDeletionService = $this->prophesize(ElementFileDeletionService::class);
         $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->will(function () {});
+        $this->elementService = $this->prophesize(ElementService::class);
+        $this->elementService->hasFile(Argument::any())->willReturn(false);
         $this->eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
         $this->eventDispatcher->dispatch(Argument::any())->will(fn (array $args) => $args[0]);
 
@@ -161,6 +166,7 @@ class UploadCreationServiceTest extends TestCase
             $badContentFactory,
             new UploadChunkValidator($configuration, $fileSizeLimitService, $badContentFactory, $this->conflictFactory->reveal()),
             $this->elementFileDeletionService->reveal(),
+            $this->elementService->reveal(),
         );
     }
 
@@ -519,5 +525,17 @@ class UploadCreationServiceTest extends TestCase
         $this->uploadService->mergeUploadElement(Argument::any())->shouldBeCalledOnce();
 
         $this->assertSame('50', $this->handle()->headers->get('Upload-Offset'));
+    }
+
+    public function testResumableUploadRecordsWhetherTargetAlreadyHadAFile(): void
+    {
+        $this->configureResumableUpload(500, 50);
+        $this->elementService->hasFile($this->element->reveal())->willReturn(true);
+        $this->s3Service->uploadFileChunk(Argument::any())->willReturn(50);
+        $this->uploadService->mergeUploadElement(Argument::that(
+            fn ($upload) => true === $upload->targetHadFileAtCreation()
+        ))->shouldBeCalledOnce();
+
+        $this->handle();
     }
 }

@@ -4,10 +4,12 @@ Open work for `feature/gh-119-get-file-controller` and its follow-ups. Developme
 delete entries once done or moved into GitHub issues. Aggregated 2026-09-26, pruned 2026-09-27.
 
 Tracked as GitHub issues, not listed here: BLAKE3, S3 upload-bucket lifecycle, null properties in MongoDB/Elasticsearch,
-phpmd reactivation, replacing MinIO, `cron:update-ownership` stub (#438). No ETag on upload endpoints is a final decision.
+phpmd reactivation, replacing MinIO. `cron:update-ownership` (#438) is implemented, see below. No ETag on upload
+endpoints is a final decision.
 No legacy `file`/`hasFile` properties exist in the wild, no migration is needed. Not planned: 15 minute Caddy upload
 limit end-to-end test (fake configuration is enough), cleanup of `docs/open-api/swagger_old.*` (old docs are replaced),
-pinning `dozzle`, cleaning up elements created by file/upload feature tests.
+pinning `dozzle`, cleaning up elements created by file/upload feature tests, `COPY`/`MOVE`/WebDAV problem-response test
+coverage (WebDAV support will be reworked soon, not worth covering now).
 
 ## Before merging into `main`
 
@@ -30,17 +32,16 @@ pinning `dozzle`, cleaning up elements created by file/upload feature tests.
   access revocation; `Upload-Complete` mandatory on `PATCH /upload`; `405` instead of `500`; `instance` on all problem
   responses; camelCase problem keys; per-endpoint `Allow` header; `nosniff`; extension rules; new CLI logging rules;
   removal of the `POST /token`, `POST /register`, `POST /change-password` v1/old request-body compatibility support
-  (and its `featureFlag.280_OldUniqueUserIdentifierDisabled` flag) is also a breaking change to fold in.
+  (and its `featureFlag.280_OldUniqueUserIdentifierDisabled` flag) is also a breaking change to fold in; `IfMatchControllerEventListener`
+  and `IfNoneMatchControllerEventListener` priorities were swapped so `If-Match` is evaluated before `If-None-Match`
+  (RFC 9110 Section 13.2.2) when both are sent together: a failing `If-Match` combined with a matching
+  `If-None-Match` used to answer `304`/`412` from `If-None-Match` instead of the `412` `If-Match` should have given
+  first (found and fixed while adding feature tests for the combined-header case).
 - Do not commit a local `get-well-known-security-txt/200-response-body.txt` change if an example run rewrites it (the
   local mount differs from CI).
 
 ## Open, in scope
 
-- **Token hash after backup round trip:** after `backup:create` + `backup:load` the reference token returned `401`
-  because `Token.hash` was NULL in Neo4j once. Token hashes always worked before, so find the actual reason (backup
-  export/import of the `hash` property, or the manual dataset copy used in that test).
-- Resumable finalize does not re-check `hasFile` for uploads started by `POST` (another request may have created a file
-  meanwhile); `PUT` races are wanted.
 - Failure after the first flush of a finalization (deleting chunks, the upload node, second flush) leaves the upload
   complete until cron removes it. Orphan chunk objects remain if the process dies after the S3 chunk write but before
   the compare-and-set.
@@ -48,43 +49,66 @@ pinning `dozzle`, cleaning up elements created by file/upload feature tests.
   `MergeFileChunksOperation`) and their factories still overlap; config cross-validation (min<=max chunk, bucket levels
   x length < 32, distinct buckets) is lazy and could move into the config tree.
 - Tests: `CronCommand` isolation (a failing sub-command must not stop the next) only has unit tests; the healthcheck
-  parts other than S3 are untested in unit tests; `COPY`/`MOVE`/WebDAV routes are not covered by the problem-response
-  tests; feature test for the unfinalized upload state (needs a failing S3 merge).
-- Tests, details pending: ETag with `If-Match` and `If-None-Match` together, `206` responses carrying the file ETag and
-  `304` for range requests, file ETag changing after a `PATCH` of the element name.
-- **Cron in CI (discussion):** cron commands act on all data globally. Cron feature tests run in the `command` group
-  (sequential, after the parallel tests) and create their own expired data; `DISABLE_CRON` already exists in the
-  environment. Idea: disable cron in the prod images of the CI and run the cron commands once in a separate CI stage
-  after the main tests. The reference dataset must never contain expired data (currently only uploads can expire, none
-  are in the dataset; a test checks that a cron run leaves the dataset untouched). Expired/revoked tokens used by tests
-  must keep their timestamps far in the future/past as they are.
+  parts other than S3 are untested in unit tests.
+- **Pre-existing test race (found while validating the ETag/cron changes, not caused by them):** `IfMatchTest` and
+  `IfNoneMatchTest` permanently PATCH/PUT/DELETE the same fixed reference-dataset ids (`ID_DATA`/`ID_PARENT`/etc.)
+  that `WildcardEtagTest` reads; when paratest schedules them so the mutating test runs first, `WildcardEtagTest`
+  gets `404`s instead of `304`/`200`. Reproduced with an unmodified checkout of these three files, both via the
+  official `composer test:feature` and by running the files together directly; passes cleanly whenever
+  `WildcardEtagTest` runs against a freshly loaded reference dataset. Needs its own fix (e.g. give the mutating
+  tests their own elements instead of the shared fixed ids).
+- **Cron in CI: implemented.** `DISABLE_CRON=true` is now set on every API container of the feature/example-generation
+  compose files. `CronExecutionGateService` (+ `TtyDetectorService`) makes the four cron commands skip only when
+  disabled AND not attached to a real terminal (`stream_isatty(STDIN)`, not Console's `isInteractive()`), so
+  supercronic's automatic runs are suppressed but a deliberate `docker exec -t ... php bin/console cron` still
+  executes; the CI feature-test job now runs `docker exec -t api-prod php bin/console cron` once, in its own step,
+  after the main parallel+command test run. `BaseCronTestCase::runConsoleCommand()` (feature tests) and
+  `BaseCommandTestCase::runCommand()` (doc example generation) both default `DISABLE_CRON=0` per invocation unless the
+  caller overrides it, since they exec `php bin/console` without a tty and still need cron to actually run for their
+  own assertions.
 - `If-Match` is not atomic with the write (accept and document).
 - Monolog: the `408` log line lacks byte counts, `503` only has Caddy's access line; chunked requests without
-  `Content-Length` can not be detected as `408` (accepted; doc note).
+  `Content-Length` can not be detected as `408` (accepted; doc note). Reminder (later): CLI logging oddities might be
+  related to the Monolog v4 upgrade, needs its own investigation later, not now.
 
-## Ownership recalculation (`cron:update-ownership`, #438) — design agreed, not implemented
+## Ownership recalculation (`cron:update-ownership`, #438) — implemented
 
-Facts: ES documents hold `_groupsWithSearchAccess` / `_usersWithSearchAccess`, computed only on element create
-(`CalculateSearchAccessEventListener`, uses the `AccessChecker::getDirect*WithAccessTo*` methods) and after backup load;
-nothing recomputes when relations change later. Model for the consumer: `Cron/ReindexFilesCommand` + `QueueService`.
-Design: re-run the existing calculation for an element, compare with the previous result (the ES values), store if it
-changed and only then add the element's children to the queue (delta zero => stop, children are guaranteed unchanged).
-Only `OWNS`, `HAS_SEARCH_ACCESS` and `IS_IN_GROUP` changes enqueue; `HAS_*_ACCESS` in general, `CREATED`, property-based
-and implicit rules must not (cascade risk).
+`OwnershipChangeEventListener` fix landed (`in_array`, type list reduced to `OWNS`/`HAS_SEARCH_ACCESS`/`IS_IN_GROUP`,
+richer payload: relation id/type, start id, end id, event kind, an inert `tries` field, `LOADING_BACKUP` guard).
+Extracted `SearchAccessCalculatorService` so `CalculateSearchAccessEventListener` and `UpdateOwnershipCommand` share the
+same calculation. `QueueService` now declares `ELASTICSEARCH_UPDATE_OWNERSHIP` (+ its `.dead-letter` queue) durable with
+persistent messages and `x-max-length`; declaration is opt-in per queue type so `ELASTICSEARCH_REINDEX_FILE` is
+unchanged. A `PRECONDITION_FAILED` (406) from a pre-existing differently-shaped queue is caught and recovered by
+deleting + redeclaring on a fresh channel (verified for real against the dev RabbitMQ container). `UpdateOwnershipCommand`
+consumes the queue, keeps a work-list + visited set, recomputes direct groups/users, stores only on change, cascades to
+`OWNS` children only when the parent's own delta is non-zero, and has a 500-element-per-run batch cap (throwing once hit
+so the remaining queued messages are requeued via `QueueService`'s own try-counter rather than silently dropped).
+Registered in `CronCommand`. `IS_IN_GROUP` is special-cased: since it never changes the group's own direct accessors
+(joining a group doesn't grant access *to* the group node), its children are recalculated unconditionally rather than
+gated on the group's own delta.
 
-1. Fix `OwnershipChangeEventListener`: `in_array` instead of `array_key_exists`, type list reduced to the three types
-   above. Payload needs relation id, type, start id, end id, event kind, `tries` (deleted relations can not be loaded
-   later). Unit tests (none exist).
-2. Queue: durable + persistent messages, `x-max-length`/dead-letter; changing arguments of an existing queue fails with
-   `PRECONDITION_FAILED` (new name or delete on deploy).
-3. `UpdateOwnershipCommand`: consume via `QueueService` (retry counter exists), work-list with visited set (cycles),
-   recompute direct groups/users for the affected elements, compare as sets, store, enqueue children only on change,
-   skip deleted elements, batch cap; register in `CronCommand` (5 min).
-4. Tests: unit (delta zero, cycles, retries), feature (new `OWNS` edge -> search as new owner works, deleted edge removes
-   access, group membership change). Docs: eventual consistency window up to the cron interval.
+Resolved (were "Open" here): `LOADING_BACKUP` — guarded the same way as `CalculateSearchAccessEventListener`, since
+`ElementUpdateAfterBackupLoadEvent` recalculates everything after the load finishes anyway. Queue rename / external
+consumers — not a concern: nothing else in this repo consumes `ELASTICSEARCH_UPDATE_OWNERSHIP` today and this branch
+hasn't shipped yet.
 
-Open: behaviour during `LOADING_BACKUP` (create-time calculation is skipped, `ElementUpdateAfterBackupLoadEvent` fills
-the gap); queue rename acceptable?; external consumers of the queue?
+Tests: unit for the listener, `QueueService`'s durable/dead-letter declaration + PRECONDITION_FAILED recovery, and the
+command (delta zero stops recursion, cycles via the visited set, the `IS_IN_GROUP` cascade, the batch cap throwing).
+Feature test `CronUpdateOwnershipTest`: new `OWNS` edge grants search access and its deletion revokes it again (verified
+against a real Elasticsearch/RabbitMQ/Neo4j stack, including the actual `/search` endpoint with a second, independently
+registered user), disabled-cron/poison-message/malformed-JSON behaviour mirroring `CronReindexFilesTest`. Creating a
+relation via the HTTP endpoint requires CREATE access on `start` and READ access on `end`
+(`PostIndexController`), so an independently registered second user has no path to gain access to an existing
+admin-owned element in one hop; the test grants the admin test account direct `OWNS` access to that second user first,
+via a raw Cypher write used only as a test precondition (mirrors `BaseCronTestCase::setUploadProperty()`), while the
+relation actually under test is always created through the real HTTP endpoint.
+
+Open, in scope: the `IS_IN_GROUP` "member gains access to everything the group owns via a plain `OWNS` chain" outcome
+is deliberately **not** covered by a feature test — `AccessChecker::getDirectUsersWithAccessToNode()` only honors a
+group hop together with a `HAS_SEARCH_ACCESS` relation onto an element the user created themselves (see the existing
+`_99_01_IsInGroupAfterOwnsHaveNoEffectTest`, confirming a plain `IS_IN_GROUP` + `OWNS` chain grants nothing). The
+mechanism (relation queued, command drains it without error) is covered instead; outcome coverage of that narrow
+`HAS_SEARCH_ACCESS` + `CREATED_BY` combination is not done.
 
 ## Separate tickets (document only, not started)
 
@@ -127,6 +151,10 @@ the gap); queue rename acceptable?; external consumers of the queue?
   warning (`--skip-verify`); single-request `POST`/`PUT` verify every supplied digest header.
 - Token deletion removes the token's file and uploads; replaced files lose their old S3 object only after the graph
   flush (failure is logged); cron retry behaviour (1 h / 24 h backoff, gives up after 3, queue messages retry 3 times).
+- Resumable uploads record `Upload.targetHadFileAtCreation`: an upload created while its target had no file (`POST`)
+  is rejected with `409` if `hasFile` becomes true before it completes (append and finalize both re-check, finalize
+  also takes the `file:create:<uuid>` lock around its merge); an upload replacing an existing file (`PUT`) is exempt,
+  since racing it further is accepted (`PUT` races are wanted).
 - Operator docs: prod image `memory_limit=256M`, OPcache with preload, FrankenPHP `num_threads = 2 x cores`,
   `max_threads = 8 x cores` (`FRANKENPHP_NUM_THREADS` / `FRANKENPHP_MAX_THREADS`), `max_wait_time 30s` (worst case
   threads x `memory_limit`, ~16 GB at 64 threads accepted); body timeouts 30s, 15 min for upload routes

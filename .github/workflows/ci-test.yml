@@ -236,6 +236,13 @@ jobs:
       - name: Feature Test
         run: |
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && ./bin/with-heartbeat composer test:feature"
+      - name: Run cron once manually
+        # DISABLE_CRON=true is set on the containers so the scheduler never fires cron during the test run above;
+        # this manually runs it once, in its own stage, after the main tests. A plain `docker exec` has no tty, so
+        # under DISABLE_CRON=true it would just no-op ("Cron is disabled"); `-t` allocates one so the command
+        # actually executes despite DISABLE_CRON.
+        run: |
+          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron
       - name: Collect docker logs
         if: always()
         run: |

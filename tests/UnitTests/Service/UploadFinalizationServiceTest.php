@@ -16,6 +16,8 @@ use App\Factory\Type\S3\MergeFileChunksOperationFactory;
 use App\Service\DigestService;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
+use App\Service\ElementService;
+use App\Service\FileCreationLockService;
 use App\Service\FileSizeLimitService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
@@ -52,6 +54,8 @@ class UploadFinalizationServiceTest extends TestCase
     private ObjectProphecy $elementFileDeletionService;
     private ObjectProphecy $incrementalHashService;
     private ObjectProphecy $logger;
+    private ObjectProphecy $elementService;
+    private ObjectProphecy $fileCreationLockService;
     private UploadFinalizationService $service;
 
     protected function setUp(): void
@@ -59,6 +63,7 @@ class UploadFinalizationServiceTest extends TestCase
         $this->targetId = Uuid::uuid4();
         $this->upload = $this->prophesize(UploadInterface::class);
         $this->upload->getUploadTarget()->willReturn($this->targetId);
+        $this->upload->targetHadFileAtCreation()->willReturn(false);
         $this->upload->getId()->willReturn(Uuid::uuid4());
         $this->upload->getUploadOffset()->willReturn(5);
         $this->upload->getExtension()->willReturn('txt');
@@ -103,6 +108,13 @@ class UploadFinalizationServiceTest extends TestCase
             fn (array $args) => new Client409ConflictException('conflict', detail: $args[0])
         );
 
+        $this->elementService = $this->prophesize(ElementService::class);
+        $this->elementService->hasFile(Argument::any())->willReturn(false);
+
+        $this->fileCreationLockService = $this->prophesize(FileCreationLockService::class);
+        $this->fileCreationLockService->acquire(Argument::any())->willReturn('lock-token');
+        $this->fileCreationLockService->release(Argument::any(), Argument::any())->will(function () {});
+
         $this->service = new UploadFinalizationService(
             $this->elementManager->reveal(),
             $this->eventDispatcher->reveal(),
@@ -116,6 +128,8 @@ class UploadFinalizationServiceTest extends TestCase
             $this->logger->reveal(),
             $this->elementFileDeletionService->reveal(),
             $this->incrementalHashService->reveal(),
+            $this->elementService->reveal(),
+            $this->fileCreationLockService->reveal(),
         );
     }
 
@@ -300,6 +314,42 @@ class UploadFinalizationServiceTest extends TestCase
 
         $this->expectException(RuntimeException::class);
         $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+    }
+
+    public function testFinalizeWithHasFileAlreadyTrueDiscardsUpload(): void
+    {
+        $this->elementService->hasFile(Argument::any())->willReturn(true);
+        $this->expectUploadToBeDiscarded();
+
+        try {
+            $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+            $this->fail('Expected an already existing file to be rejected.');
+        } catch (Client409ConflictException $exception) {
+            $this->assertStringContainsString('already has an associated file', $exception->getDetail());
+        }
+    }
+
+    public function testFinalizeSucceedsWithHasFileTrueWhenTargetAlreadyHadAFileAtUploadCreation(): void
+    {
+        $this->upload->targetHadFileAtCreation()->willReturn(true);
+        $this->elementService->hasFile(Argument::any())->willReturn(true);
+        $this->expectFileToBeMerged();
+
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+    }
+
+    public function testFinalizeWithFailedLockAcquisitionDiscardsUpload(): void
+    {
+        $this->fileCreationLockService->acquire(Argument::any())->willReturn(null);
+        $this->fileCreationLockService->release(Argument::cetera())->shouldNotBeCalled();
+        $this->expectUploadToBeDiscarded();
+
+        try {
+            $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+            $this->fail('Expected a failed lock acquisition to be rejected.');
+        } catch (Client409ConflictException $exception) {
+            $this->assertStringContainsString('currently creating the file', $exception->getDetail());
+        }
     }
 
     public function testVerdictsAboutTheWholeUploadDoNotPutItBack(): void

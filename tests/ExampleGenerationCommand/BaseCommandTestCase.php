@@ -15,6 +15,12 @@ abstract class BaseCommandTestCase extends TestCase
      */
     public function runCommand(string $command): string
     {
+        if (!str_contains($command, 'DISABLE_CRON=')) {
+            // this runs without a tty; a container-wide DISABLE_CRON=true would otherwise make cron commands
+            // no-op instead of producing the documented example output
+            $command = 'DISABLE_CRON=0 '.$command;
+        }
+
         $output = [];
         $resultCode = 0;
         $stderrFile = \Safe\tempnam(sys_get_temp_dir(), 'ember-nexus-stderr-');

@@ -30,6 +30,8 @@ class UploadAppendService
         private IncrementalHashService $incrementalHashService,
         private FileService $fileService,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
+        private ElementManager $elementManager,
+        private ElementService $elementService,
     ) {
     }
 
@@ -42,6 +44,17 @@ class UploadAppendService
      */
     public function append(UploadInterface $upload, PartialUploadRequestInterface $partialUploadRequest, ?string $reprDigestHeaderValue): UploadInterface
     {
+        // an upload whose target had no file when it was created (i.e. started by POST) must still find none: if it
+        // does, something else (e.g. a concurrent PUT) created one while this upload was in progress, and it can no
+        // longer complete safely. An upload which already replaces an existing file (started by PUT) is expected to
+        // still find hasFile === true, so it is not checked here; racing it further is accepted (PUT races are wanted).
+        if (!$upload->targetHadFileAtCreation()) {
+            $targetElement = $this->elementManager->getElementOrFail($upload->getUploadTarget());
+            if ($this->elementService->hasFile($targetElement)) {
+                throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Element with id '%s' already has an associated file; this upload can no longer complete and should be discarded.", $upload->getUploadTarget()->toString()));
+            }
+        }
+
         if ($partialUploadRequest->getUploadOffset() !== $upload->getUploadOffset()) {
             throw $this->client409ConflictExceptionFactory->createFromDetail('Offset from request does not match offset of resource.', additionalProperties: ['expectedOffset' => $upload->getUploadOffset(), 'providedOffset' => $partialUploadRequest->getUploadOffset()]);
         }

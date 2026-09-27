@@ -27,6 +27,7 @@ final readonly class Upload implements UploadInterface
         private string $extension,
         private DateTime $expires,
         private ?string $hashState = null,
+        private bool $targetHadFileAtCreation = false,
     ) {
     }
 
@@ -91,5 +92,16 @@ final readonly class Upload implements UploadInterface
     public function getHashState(): ?string
     {
         return $this->hashState;
+    }
+
+    /**
+     * Whether the target already had a file when this upload was created (a resumable replace started through
+     * `PUT`). Such an upload is expected to still find `hasFile === true` right before it completes, so the
+     * `hasFile` conflict checks in {@see \App\Service\UploadAppendService} and
+     * {@see \App\Service\UploadFinalizationService} only apply when this is false.
+     */
+    public function targetHadFileAtCreation(): bool
+    {
+        return $this->targetHadFileAtCreation;
     }
 }

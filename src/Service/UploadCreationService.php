@@ -51,6 +51,7 @@ class UploadCreationService
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private UploadChunkValidator $uploadChunkValidator,
         private ElementFileDeletionService $elementFileDeletionService,
+        private ElementService $elementService,
     ) {
     }
 
@@ -61,7 +62,7 @@ class UploadCreationService
         $resumableUploadRequest = $this->resumableUploadRequestFactory->createResumableUploadRequestFromRequest($request, $elementId);
 
         if (false === $resumableUploadRequest->isUploadComplete()) {
-            return $this->createNewResumableUpload($resumableUploadRequest);
+            return $this->createNewResumableUpload($resumableUploadRequest, $this->elementService->hasFile($element));
         }
 
         // the body of a single request is the whole file, so `Repr-Digest` and `Content-Digest` describe the same bytes
@@ -143,7 +144,7 @@ class UploadCreationService
         }
     }
 
-    private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest): Response
+    private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest, bool $targetHadFileAtCreation): Response
     {
         $uploadLength = $resumableUploadRequest->getUploadLength();
         if (null !== $uploadLength) {
@@ -197,7 +198,8 @@ class UploadCreationService
             $this->authProvider->getUserId(),
             $resumableUploadRequest->getExtension(),
             $expires,
-            $hashState
+            $hashState,
+            $targetHadFileAtCreation
         );
 
         $this->uploadService->mergeUploadElement($upload);

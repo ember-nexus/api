@@ -166,7 +166,7 @@ class BackupCreateCommand extends Command
                 if (null === $node) {
                     throw new LogicException('Node can not be null');
                 }
-                $data = $this->elementToRawService->elementToRaw($node);
+                $data = $this->elementToRawService->elementToRaw($node, false);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
                 $path = $this->getNodePath($nodeId);
                 $this->backupStorage->write($path, $json);
@@ -221,7 +221,7 @@ class BackupCreateCommand extends Command
                 if (null === $relation) {
                     throw new LogicException('Relation can not be null');
                 }
-                $data = $this->elementToRawService->elementToRaw($relation);
+                $data = $this->elementToRawService->elementToRaw($relation, false);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
                 $path = $this->getRelationPath($relationId);
                 $this->backupStorage->write($path, $json);

@@ -35,6 +35,8 @@ class UploadFinalizationService
         private LoggerInterface $logger,
         private ElementFileDeletionService $elementFileDeletionService,
         private IncrementalHashService $incrementalHashService,
+        private ElementService $elementService,
+        private FileCreationLockService $fileCreationLockService,
     ) {
     }
 
@@ -94,25 +96,47 @@ class UploadFinalizationService
             }
         }
 
+        // the same lock POST /{id}/file uses, so the merge and property write below can not race a concurrent file
+        // creation for the same element; a PUT is not affected, its overwrite is intentionally lock-free
+        $lockToken = $this->fileCreationLockService->acquire($upload->getUploadTarget());
+        if (null === $lockToken) {
+            $this->discardUpload($upload, $mergeFileChunksOperation);
+
+            throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Another request is currently creating the file of element with id '%s'; upload was deleted, please restart it.", $upload->getUploadTarget()->toString()));
+        }
+
         try {
-            $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
-            $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
+            // re-checked as tightly as possible before the merge: something else may have created a file for the
+            // target while this upload's chunks were being appended. An upload which already replaces an existing
+            // file (started by PUT) is expected to still find hasFile === true, so it is not checked here.
+            if (!$upload->targetHadFileAtCreation() && $this->elementService->hasFile($element)) {
+                $this->discardUpload($upload, $mergeFileChunksOperation);
 
-            $element->addProperty('file', [
-                'contentLength' => $mergedContentLength,
-                'extension' => $upload->getExtension(),
-                'mimeType' => $mergedMimeType,
-                'hash' => [
-                    FileHashService::ALGORITHM => $hash,
-                ],
-            ]);
-            $element->addProperty('hasFile', true);
-            $this->elementManager->merge($element);
-            $this->elementManager->flush();
-        } catch (Throwable $throwable) {
-            $this->markUploadAsUnfinalized($upload, $hashState);
+                throw $this->client409ConflictExceptionFactory->createFromDetail(sprintf("Element with id '%s' already has an associated file; upload was deleted, please restart it.", $upload->getUploadTarget()->toString()));
+            }
 
-            throw $throwable;
+            try {
+                $mergedContentLength = $this->s3Service->mergeFileChunks($mergeFileChunksOperation);
+                $mergedMimeType = $this->s3Service->getMimeTypeFromMergeFileChunksOperation($mergeFileChunksOperation);
+
+                $element->addProperty('file', [
+                    'contentLength' => $mergedContentLength,
+                    'extension' => $upload->getExtension(),
+                    'mimeType' => $mergedMimeType,
+                    'hash' => [
+                        FileHashService::ALGORITHM => $hash,
+                    ],
+                ]);
+                $element->addProperty('hasFile', true);
+                $this->elementManager->merge($element);
+                $this->elementManager->flush();
+            } catch (Throwable $throwable) {
+                $this->markUploadAsUnfinalized($upload, $hashState);
+
+                throw $throwable;
+            }
+        } finally {
+            $this->fileCreationLockService->release($upload->getUploadTarget(), $lockToken);
         }
 
         // only after the flush the element points to the merged object, so the previous one can go

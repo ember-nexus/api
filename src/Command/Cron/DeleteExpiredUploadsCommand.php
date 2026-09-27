@@ -6,6 +6,7 @@ namespace App\Command\Cron;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\UploadFactory;
+use App\Service\CronExecutionGateService;
 use App\Service\ElementManager;
 use App\Service\ExpiredUploadDeletionAttemptService;
 use App\Service\UploadService;
@@ -13,7 +14,6 @@ use App\Style\EmberNexusStyle;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
-use LogicException;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
@@ -21,7 +21,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Throwable;
 
@@ -36,7 +35,7 @@ class DeleteExpiredUploadsCommand extends Command
     private EmberNexusStyle $io;
 
     public function __construct(
-        private ParameterBagInterface $bag,
+        private CronExecutionGateService $cronExecutionGateService,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private ElementManager $elementManager,
@@ -55,11 +54,7 @@ class DeleteExpiredUploadsCommand extends Command
 
         $this->io->title('Cron');
 
-        $isCronDisabled = $this->bag->get('isCronDisabled');
-        if (!is_bool($isCronDisabled)) {
-            throw new LogicException(sprintf('Expected "isCronDisabled" to be of type boolean, got %s.', get_debug_type($isCronDisabled)));
-        }
-        if ($isCronDisabled) {
+        if ($this->cronExecutionGateService->shouldSkipExecution()) {
             $this->io->finalMessage('Cron is disabled; this command terminates early.');
 
             return Command::SUCCESS;

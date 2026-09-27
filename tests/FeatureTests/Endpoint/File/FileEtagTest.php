@@ -93,4 +93,25 @@ class FileEtagTest extends BaseRequestTestCase
 
         $this->deleteEphemeralRelation(self::TOKEN, $relationId);
     }
+
+    /**
+     * `EtagCalculatorService::calculateFileEtag()` combines the element's own ETag (id + `updated` timestamp) with
+     * the file's hash. Any property write, including a name-only `PATCH`, changes the element's `updated`
+     * timestamp and therefore the file ETag too, even though the file's bytes are untouched. This pins that
+     * behaviour down: renaming the element changes the file ETag.
+     */
+    public function testFileEtagChangesWhenTheElementIsRenamedEvenThoughTheFileItselfIsUnchanged(): void
+    {
+        $elementId = $this->createNode('file-etag-rename-node');
+        $this->assertIsCreatedResponse($this->sendFile('POST', $elementId, 'unchanged file content'), false);
+        $etagBeforeRename = $this->getFileEtag($elementId);
+
+        $this->assertNoContentResponse($this->runPatchRequest(sprintf('/%s', $elementId), self::TOKEN, ['name' => 'renamed-file-etag-node']));
+
+        $etagAfterRename = $this->getFileEtag($elementId);
+        $this->assertNotSame($etagBeforeRename, $etagAfterRename);
+        $this->assertSame('unchanged file content', (string) $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN)->getBody());
+
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
+    }
 }

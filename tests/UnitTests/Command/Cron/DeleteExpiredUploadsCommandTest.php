@@ -7,6 +7,7 @@ namespace App\Tests\UnitTests\Command\Cron;
 use App\Command\Cron\DeleteExpiredUploadsCommand;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\UploadFactory;
+use App\Service\CronExecutionGateService;
 use App\Service\ElementManager;
 use App\Service\ExpiredUploadDeletionAttemptService;
 use App\Service\UploadService;
@@ -29,7 +30,6 @@ use RuntimeException;
 use Safe\DateTime;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[Small]
@@ -52,8 +52,8 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         ?ExpiredUploadDeletionAttemptService $attemptService = null,
         ?LoggerInterface $logger = null,
     ): DeleteExpiredUploadsCommand {
-        $bag = $this->prophesize(ParameterBagInterface::class);
-        $bag->get('isCronDisabled')->willReturn($isCronDisabled);
+        $cronExecutionGateService = $this->prophesize(CronExecutionGateService::class);
+        $cronExecutionGateService->shouldSkipExecution()->willReturn($isCronDisabled);
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileExpiredUploadCanBeDeletedAfterExpirationInSeconds()
@@ -80,7 +80,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         }
 
         return new DeleteExpiredUploadsCommand(
-            $bag->reveal(),
+            $cronExecutionGateService->reveal(),
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal(),
@@ -108,11 +108,13 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
     public function testCommandThrowsIfCronDisabledParameterIsNotBoolean(): void
     {
-        $bag = $this->prophesize(ParameterBagInterface::class);
-        $bag->get('isCronDisabled')->willReturn('not-a-boolean');
+        $cronExecutionGateService = $this->prophesize(CronExecutionGateService::class);
+        $cronExecutionGateService->shouldSkipExecution()->willThrow(
+            new LogicException('Expected "isCronDisabled" to be of type boolean, got string.')
+        );
 
         $command = new DeleteExpiredUploadsCommand(
-            $bag->reveal(),
+            $cronExecutionGateService->reveal(),
             $this->prophesize(EmberNexusConfiguration::class)->reveal(),
             $this->prophesize(CypherEntityManager::class)->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),

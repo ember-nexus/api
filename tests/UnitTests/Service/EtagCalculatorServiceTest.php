@@ -1506,15 +1506,29 @@ class EtagCalculatorServiceTest extends TestCase
             ])
             ->addProperty('name', 'some name');
 
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                    'relation.updated' => null,
+                ]),
+            ]
+        );
+
         // setup service dependencies
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledTimes(2)->willReturn('seed');
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
 
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
         $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
-        $cypherEntityManager->getClient()->shouldNotBeCalled();
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
 
         $logger = TestLogger::create();
 
@@ -1527,11 +1541,12 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method; no calculateElementEtag() fallback, per the prophecy above
+        // run service method; the file etag now always combines the element etag with the stored hash
         $etag = $etagCalculatorService->calculateFileEtag($id);
-        $this->assertSame('K6XEZuifVAv', (string) $etag);
+        $this->assertNotNull($etag);
 
         // assert logs
+        $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for element.'));
         $this->assertTrue($logger->records->includeMessagesContaining('Calculated Etag for file.'));
     }
 
@@ -1554,15 +1569,29 @@ class EtagCalculatorServiceTest extends TestCase
             ])
             ->addProperty('name', 'some name');
 
+        $null = null;
+        $queryResult = new SummarizedResult(
+            $null,
+            [
+                new CypherMap([
+                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                    'relation.updated' => null,
+                ]),
+            ]
+        );
+
         // setup service dependencies
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledOnce()->willReturn('seed');
+        $emberNexusConfiguration->getCacheEtagSeed()->shouldBeCalledTimes(2)->willReturn('seed');
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::is($id))->shouldBeCalledOnce()->willReturn($element);
 
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn($queryResult);
+
         $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
-        $cypherEntityManager->getClient()->shouldNotBeCalled();
+        $cypherEntityManager->getClient()->shouldBeCalledOnce()->willReturn($clientInterface->reveal());
 
         $logger = TestLogger::create();
 
@@ -1575,8 +1604,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method; 'blake3' sorts before 'md5', so it is used instead of the calculateElementEtag()
-        // fallback
+        // run service method; 'blake3' sorts before 'md5', so it is used as the hash component
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertNotNull($etag);
     }

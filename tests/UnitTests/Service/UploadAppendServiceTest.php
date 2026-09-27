@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Service;
 
+use App\Contract\NodeElementInterface;
 use App\Contract\Request\PartialUploadRequestInterface;
 use App\Contract\S3\FileOperationInterface;
 use App\Contract\S3\UploadFileChunkOperationInterface;
@@ -14,6 +15,8 @@ use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\S3\FileOperationFactory;
 use App\Factory\Type\S3\UploadFileChunkOperationFactory;
 use App\Factory\Type\UploadFactory;
+use App\Service\ElementManager;
+use App\Service\ElementService;
 use App\Service\FileService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
@@ -46,6 +49,9 @@ class UploadAppendServiceTest extends TestCase
     private ObjectProphecy $s3Service;
     private ObjectProphecy $fileOperationFactory;
     private ObjectProphecy $incrementalHashService;
+    private ObjectProphecy $elementManager;
+    private ObjectProphecy $elementService;
+    private ObjectProphecy $targetElement;
     private ObjectProphecy $upload;
     private ObjectProphecy $nextUpload;
     private ObjectProphecy $completedUpload;
@@ -65,7 +71,10 @@ class UploadAppendServiceTest extends TestCase
         array $chunkIds = ['0123456789abcdef'],
         ?string $hashState = 'stored-state',
         bool $offsetMatches = true,
+        bool $targetHasFile = false,
     ): UploadAppendService {
+        $targetId = Uuid::uuid4();
+
         $this->upload = $this->prophesize(UploadInterface::class);
         $this->upload->getId()->willReturn(Uuid::fromString(self::UPLOAD_ID));
         $this->upload->getUploadOffset()->willReturn(200);
@@ -73,6 +82,14 @@ class UploadAppendServiceTest extends TestCase
         $this->upload->getHashState()->willReturn($hashState);
         $this->upload->getChunkIds()->willReturn($chunkIds);
         $this->upload->getAlreadyUploadedChunks()->willReturn(count($chunkIds));
+        $this->upload->getUploadTarget()->willReturn($targetId);
+        $this->upload->targetHadFileAtCreation()->willReturn(false);
+
+        $this->targetElement = $this->prophesize(NodeElementInterface::class);
+        $this->elementManager = $this->prophesize(ElementManager::class);
+        $this->elementManager->getElementOrFail($targetId)->willReturn($this->targetElement->reveal());
+        $this->elementService = $this->prophesize(ElementService::class);
+        $this->elementService->hasFile($this->targetElement->reveal())->willReturn($targetHasFile);
 
         $this->nextUpload = $this->prophesize(UploadInterface::class);
         $this->completedUpload = $this->prophesize(UploadInterface::class);
@@ -132,7 +149,30 @@ class UploadAppendServiceTest extends TestCase
             $this->incrementalHashService->reveal(),
             $fileService->reveal(),
             $client409ConflictExceptionFactory->reveal(),
+            $this->elementManager->reveal(),
+            $this->elementService->reveal(),
         );
+    }
+
+    public function testChunkIsRejectedWhenTargetAlreadyHasAFile(): void
+    {
+        $service = $this->createService(500, false, 500, targetHasFile: true);
+        $this->s3Service->uploadFileChunk(Argument::any())->shouldNotBeCalled();
+
+        try {
+            $service->append($this->upload->reveal(), $this->partialUploadRequest->reveal(), null);
+            $this->fail('Expected exception was not thrown.');
+        } catch (Client409ConflictException $exception) {
+            $this->assertStringContainsString('already has an associated file', $exception->getDetail());
+        }
+    }
+
+    public function testChunkIsAcceptedWhenTargetAlreadyHadAFileAtUploadCreation(): void
+    {
+        $service = $this->createService(500, false, 500, targetHasFile: true);
+        $this->upload->targetHadFileAtCreation()->willReturn(true);
+
+        $this->assertSame($this->nextUpload->reveal(), $service->append($this->upload->reveal(), $this->partialUploadRequest->reveal(), null));
     }
 
     public function testOffsetOfRequestHasToMatchTheUpload(): void

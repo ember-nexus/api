@@ -12,6 +12,10 @@ services:
       - minio
     expose:
       - "80"
+    environment:
+      # cron commands would otherwise run whenever the scheduler triggers them during the test run;
+      # BaseCommandTestCase::runCommand() overrides this per invocation for the cron example commands themselves
+      DISABLE_CRON: 'true'
     volumes:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt

@@ -200,4 +200,46 @@ class GetFileRangeTest extends BaseRequestTestCase
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(self::ROSE_CONTENT_LENGTH, strlen((string) $response->getBody()));
     }
+
+    public function testPartialContentResponseCarriesTheSameFileEtagAsTheFullResponse(): void
+    {
+        $fullResponse = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN);
+        $fullEtag = $fullResponse->getHeader('ETag')[0];
+
+        $rangeResponse = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99']
+        );
+
+        $this->assertSame(206, $rangeResponse->getStatusCode());
+        $this->assertCount(1, $rangeResponse->getHeader('ETag'));
+        $this->assertSame($fullEtag, $rangeResponse->getHeader('ETag')[0]);
+    }
+
+    public function testRangeRequestWithMatchingIfNoneMatchReturnsNotModifiedInsteadOfPartialContent(): void
+    {
+        $etag = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN)->getHeader('ETag')[0];
+
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99', 'If-None-Match' => $etag]
+        );
+
+        $this->assertNotModifiedResponse($response);
+        $this->assertSame([], $response->getHeader('Content-Range'));
+    }
+
+    public function testRangeRequestWithNonMatchingIfNoneMatchStillReturnsPartialContent(): void
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s/file', self::ROSE_ID),
+            self::TOKEN,
+            ['Range' => 'bytes=0-99', 'If-None-Match' => '"staleEtagWhichNeverMatches"']
+        );
+
+        $this->assertSame(206, $response->getStatusCode());
+        $this->assertSame(100, strlen((string) $response->getBody()));
+    }
 }

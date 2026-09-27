@@ -69,6 +69,25 @@ class PropertyParseService
     }
 
     /**
+     * Absent on an upload created before this property existed: defaults to `true` so the `hasFile` conflict checks
+     * are skipped rather than risk rejecting a legitimate, already-in-progress replace.
+     *
+     * @param mixed[] $properties
+     */
+    public function getTargetHadFileAtCreationFromProperties(mixed $properties): bool
+    {
+        if (!array_key_exists('targetHadFileAtCreation', $properties)) {
+            return true;
+        }
+        $targetHadFileAtCreation = $properties['targetHadFileAtCreation'];
+        if (!is_bool($targetHadFileAtCreation)) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property targetHadFileAtCreation to be bool.');
+        }
+
+        return $targetHadFileAtCreation;
+    }
+
+    /**
      * @param mixed[] $properties
      */
     public function getUploadTargetFromProperties(mixed $properties): UuidInterface

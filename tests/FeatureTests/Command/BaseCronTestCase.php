@@ -38,6 +38,11 @@ abstract class BaseCronTestCase extends BaseRequestTestCase
      */
     protected function runConsoleCommand(string $command, array $environment = []): array
     {
+        // this spawns a subprocess without a tty, so under the tty-bypass rule a container-wide `DISABLE_CRON=true`
+        // would otherwise make these tests no-op; default it to disabled here unless a test explicitly wants to
+        // exercise the disabled path itself
+        $environment = ['DISABLE_CRON' => '0', ...$environment];
+
         $prefix = '';
         foreach ($environment as $name => $value) {
             $prefix .= sprintf('%s=%s ', $name, escapeshellarg($value));

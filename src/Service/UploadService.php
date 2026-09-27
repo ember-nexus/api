@@ -58,6 +58,7 @@ class UploadService
         $element->addProperty('extension', $upload->getExtension());
         $element->addProperty('expires', $upload->getExpires());
         $element->addProperty('hashState', $upload->getHashState());
+        $element->addProperty('targetHadFileAtCreation', $upload->targetHadFileAtCreation());
 
         $this->elementManager->merge($element);
     }

@@ -19,7 +19,9 @@ class IfNoneMatchControllerEventListener
     ) {
     }
 
-    #[AsEventListener(priority: 192)]
+    // RFC 9110, Section 13.2.2: If-Match is evaluated first, so this needs a lower priority than
+    // IfMatchControllerEventListener
+    #[AsEventListener(priority: 128)]
     public function onKernelController(ControllerEvent $event): void
     {
         $attributes = $event->getAttributes(EndpointSupportsEtag::class);

@@ -46,7 +46,8 @@ class UploadFactory
             $this->propertyParseService->getUploadOwnerFromProperties($properties),
             $this->propertyParseService->getExtensionFromProperties($properties),
             $this->propertyParseService->getExpiresFromProperties($properties),
-            $this->propertyParseService->getHashStateFromProperties($properties)
+            $this->propertyParseService->getHashStateFromProperties($properties),
+            $this->propertyParseService->getTargetHadFileAtCreationFromProperties($properties)
         );
     }
 
@@ -62,7 +63,8 @@ class UploadFactory
             $upload->getUploadOwner(),
             $upload->getExtension(),
             $upload->getExpires(),
-            $upload->getHashState()
+            $upload->getHashState(),
+            $upload->targetHadFileAtCreation()
         );
     }
 
@@ -78,7 +80,8 @@ class UploadFactory
             $upload->getUploadOwner(),
             $upload->getExtension(),
             $upload->getExpires(),
-            $hashState ?? $upload->getHashState()
+            $hashState ?? $upload->getHashState(),
+            $upload->targetHadFileAtCreation()
         );
     }
 }

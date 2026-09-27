@@ -6,8 +6,9 @@ namespace App\Command;
 
 use App\Command\Cron\DeleteExpiredUploadsCommand;
 use App\Command\Cron\ReindexFilesCommand;
+use App\Command\Cron\UpdateOwnershipCommand;
+use App\Service\CronExecutionGateService;
 use App\Style\EmberNexusStyle;
-use LogicException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -15,7 +16,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\OutputStyle;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Throwable;
 
 /**
@@ -27,9 +27,10 @@ class CronCommand extends Command
     private OutputStyle $io;
 
     public function __construct(
-        private ParameterBagInterface $bag,
+        private CronExecutionGateService $cronExecutionGateService,
         private DeleteExpiredUploadsCommand $deleteExpiredUploadsCommand,
         private ReindexFilesCommand $reindexFilesCommand,
+        private UpdateOwnershipCommand $updateOwnershipCommand,
         private LoggerInterface $logger,
     ) {
         parent::__construct();
@@ -41,22 +42,15 @@ class CronCommand extends Command
 
         $this->io->title('Cron');
 
-        $isCronDisabled = $this->bag->get('isCronDisabled');
-        if (!is_bool($isCronDisabled)) {
-            throw new LogicException(sprintf('Expected "isCronDisabled" to be of type boolean, got %s.', get_debug_type($isCronDisabled)));
-        }
-        if ($isCronDisabled) {
+        if ($this->cronExecutionGateService->shouldSkipExecution()) {
             $this->io->finalMessage('Cron is disabled; this command terminates early.');
 
             return Command::SUCCESS;
         }
 
-        // Note: cron:update-ownership is intentionally not dispatched here yet, see
-        // https://github.com/ember-nexus/api/issues/438.
-
         // a failing task must not prevent the following ones from running
         $hasFailedTask = false;
-        foreach ([$this->deleteExpiredUploadsCommand, $this->reindexFilesCommand] as $taskCommand) {
+        foreach ([$this->deleteExpiredUploadsCommand, $this->reindexFilesCommand, $this->updateOwnershipCommand] as $taskCommand) {
             try {
                 if (Command::SUCCESS !== $taskCommand->run(new ArrayInput([]), $output)) {
                     $hasFailedTask = true;
