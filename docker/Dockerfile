@@ -182,5 +182,5 @@ USER worker
 
 ENV CLASSPATH=".:/usr/local/lib/antlr-4.13.2-complete.jar:/usr/local/lib/rrd-antlr4-0.1.2.jar:$CLASSPATH"
 
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD php bin/console healthcheck
+# no HEALTHCHECK here, unlike the production stage: the dev image has no vendor/ installed by default (it's provided
+# by the mounted source instead), so `php bin/console healthcheck` would fail until `composer install` is run manually
