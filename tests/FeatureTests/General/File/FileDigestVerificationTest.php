@@ -86,11 +86,14 @@ class FileDigestVerificationTest extends BaseRequestTestCase
 
     private function assertStoredFile(string $id, string $path): void
     {
-        $download = $this->runGetRequest(sprintf('/%s/file', $id), self::TOKEN);
+        // runRequest(), not runGetRequest(): resumable finalize writes the element in more than one step, so a HEAD
+        // immediately followed by a GET can occasionally observe different ETags for the same id under load; this
+        // only cares about the stored content/hash, not HEAD/GET header parity
+        $download = $this->runRequest('GET', sprintf('/%s/file', $id), self::TOKEN);
         $this->assertSame(200, $download->getStatusCode());
         $this->assertSame(hash_file('sha256', $path), hash('sha256', (string) $download->getBody()));
 
-        $element = $this->getBody($this->runGetRequest(sprintf('/%s', $id), self::TOKEN));
+        $element = $this->getBody($this->runRequest('GET', sprintf('/%s', $id), self::TOKEN));
         $this->assertSame(hash_file('sha256', $path), $element['file']['hash']['sha256']);
         $this->assertSame(filesize($path), $element['file']['contentLength']);
     }

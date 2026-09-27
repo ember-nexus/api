@@ -41,7 +41,11 @@ class ProblemJsonInstanceTest extends BaseRequestTestCase
 
     public function testResponsesWhichAreNoProblemsHaveNoInstance(): void
     {
-        $response = $this->runGetRequest('/', self::TOKEN);
+        // runRequest(), not runGetRequest(): the latter also compares HEAD against GET headers (including ETag),
+        // which differ if another parallel test creates/deletes a root element under the same shared token in
+        // between the two requests; this test only cares about the body, see WildcardEtagTest's docblock for the
+        // same reasoning
+        $response = $this->runRequest('GET', '/', self::TOKEN);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertArrayNotHasKey('instance', json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR));
