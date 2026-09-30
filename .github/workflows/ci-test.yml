@@ -205,6 +205,7 @@ jobs:
           - "neo4j-5.7"
           - "neo4j-5.20"
           - "neo4j-latest"
+          - "s3-versitygw"
     steps:
       - uses: actions/checkout@v5
       - run: mkdir -p /tmp/docker
