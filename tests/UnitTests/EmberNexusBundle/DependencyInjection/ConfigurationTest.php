@@ -44,6 +44,7 @@ class ConfigurationTest extends TestCase
             EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET_LEVEL_LENGTH => 2,
             EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET_LEVELS => 2,
             EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET_LEVEL_LENGTH => 2,
+            EmberNexusConfiguration::FILE_S3_MAX_HOST_CONNECTIONS => 16,
         ], $config[EmberNexusConfiguration::FILE]);
     }
 
@@ -54,12 +55,14 @@ class ConfigurationTest extends TestCase
                 EmberNexusConfiguration::FILE_MAX_FILE_SIZE_IN_BYTES => 1024,
                 EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET => 'my-storage',
                 EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET => 'my-upload',
+                EmberNexusConfiguration::FILE_S3_MAX_HOST_CONNECTIONS => 32,
             ],
         ]);
 
         $this->assertSame(1024, $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_MAX_FILE_SIZE_IN_BYTES]);
         $this->assertSame('my-storage', $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET]);
         $this->assertSame('my-upload', $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET]);
+        $this->assertSame(32, $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_S3_MAX_HOST_CONNECTIONS]);
         // untouched options keep their default
         $this->assertSame(4, $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_UPLOAD_CHUNK_DIGITS_LENGTH]);
     }
@@ -80,6 +83,8 @@ class ConfigurationTest extends TestCase
             'storage bucket level length of 0' => [EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET_LEVEL_LENGTH, 0],
             'upload bucket without levels' => [EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET_LEVELS, 0],
             'upload bucket level length of 0' => [EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET_LEVEL_LENGTH, 0],
+            'max host connections of 0' => [EmberNexusConfiguration::FILE_S3_MAX_HOST_CONNECTIONS, 0],
+            'max host connections of 1' => [EmberNexusConfiguration::FILE_S3_MAX_HOST_CONNECTIONS, 1],
         ];
     }
 

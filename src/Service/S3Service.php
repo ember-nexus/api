@@ -18,6 +18,7 @@ use App\Wrapper\S3ClientWrapper;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\S3Client;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Throwable;
 
 /**
@@ -26,6 +27,9 @@ use Throwable;
  */
 class S3Service
 {
+    private const string PROFILER_MERGE_FILE_CHUNKS_CHUNK_MERGE = 'S3Service:mergeFileChunks:chunkMerge';
+    private const string PROFILER_MERGE_FILE_CHUNKS_TRANSFER = 'S3Service:mergeFileChunks:transfer';
+
     /**
      * Kept well below the backend's single PUT limit, as a failed single PUT has to be retried completely.
      */
@@ -46,6 +50,7 @@ class S3Service
         private S3TechnicalLimitsInterface $s3TechnicalLimits,
         private LoggerInterface $logger,
         S3TechnicalLimitsValidator $s3TechnicalLimitsValidator,
+        private Stopwatch $stopwatch,
         private int $multipartUploadThresholdInBytes = self::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
         private int $multipartUploadPartSizeInBytes = self::MULTIPART_UPLOAD_PART_SIZE_IN_BYTES,
     ) {
@@ -79,16 +84,22 @@ class S3Service
      */
     public function createUploadPartsFromMergeFileChunksOperation(MergeFileChunksOperationInterface $mergeFileChunksOperation, string $multipartUploadId): array
     {
-        $parts = [];
+        // `uploadPartCopy` is a server-side copy: AsyncAws results are lazy and only block on the first call to a
+        // getter. All copies are issued here, before any of them is read, so the underlying HTTP client can run them
+        // concurrently instead of waiting for each part to finish before starting the next.
+        $copyResults = [];
         foreach ($mergeFileChunksOperation->getUploadKeys() as $i => $uploadKey) {
-            $copyResult = $this->s3Client->uploadPartCopy([
+            $copyResults[$i] = $this->s3Client->uploadPartCopy([
                 'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
                 'Key' => $mergeFileChunksOperation->getStorageKey(),
                 'UploadId' => $multipartUploadId,
                 'PartNumber' => $i + 1,
                 'CopySource' => sprintf('%s/%s', $mergeFileChunksOperation->getUploadBucket(), $uploadKey),
             ]);
+        }
 
+        $parts = [];
+        foreach ($copyResults as $i => $copyResult) {
             $copyPartResult = $copyResult->getCopyPartResult();
             if (null === $copyPartResult) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to read copy part result.');
@@ -112,7 +123,11 @@ class S3Service
     {
         $multipartUploadId = $this->createMultipartUploadFromMergeFileChunksOperation($mergeFileChunksOperation);
         try {
+            $this->stopwatch->start(self::PROFILER_MERGE_FILE_CHUNKS_CHUNK_MERGE);
             $parts = $this->createUploadPartsFromMergeFileChunksOperation($mergeFileChunksOperation, $multipartUploadId);
+            $this->stopwatch->stop(self::PROFILER_MERGE_FILE_CHUNKS_CHUNK_MERGE);
+
+            $this->stopwatch->start(self::PROFILER_MERGE_FILE_CHUNKS_TRANSFER);
             $this->s3Client->completeMultipartUpload([
                 'Bucket' => $mergeFileChunksOperation->getStorageBucket(),
                 'Key' => $mergeFileChunksOperation->getStorageKey(),
@@ -121,6 +136,7 @@ class S3Service
                     'Parts' => $parts,
                 ],
             ]);
+            $this->stopwatch->stop(self::PROFILER_MERGE_FILE_CHUNKS_TRANSFER);
         } catch (Throwable $e) {
             $this->tryAbortMultipartUpload($mergeFileChunksOperation->getStorageBucket(), $mergeFileChunksOperation->getStorageKey(), $multipartUploadId);
 
@@ -159,11 +175,71 @@ class S3Service
 
     public function deleteFileChunks(MergeFileChunksOperationInterface $mergeFileChunksOperation): void
     {
+        $fileOperations = [];
         foreach ($mergeFileChunksOperation->getUploadKeys() as $uploadKey) {
-            $this->deleteFile(new FileOperation(
-                $mergeFileChunksOperation->getUploadBucket(),
-                $uploadKey
-            ));
+            $fileOperations[] = new FileOperation($mergeFileChunksOperation->getUploadBucket(), $uploadKey);
+        }
+
+        $this->deleteFiles($fileOperations);
+    }
+
+    /**
+     * Same steps as {@see deleteFile()} for each operation, but all S3 calls of a step are issued for every
+     * operation before any of them is read, so the underlying HTTP client can run them concurrently (bounded by
+     * {@see EmberNexusConfiguration::FILE_S3_MAX_HOST_CONNECTIONS}) instead of resolving one file fully before
+     * starting the next.
+     *
+     * @param FileOperationInterface[] $fileOperations
+     */
+    private function deleteFiles(array $fileOperations): void
+    {
+        if ([] === $fileOperations) {
+            return;
+        }
+
+        $objectConfigs = [];
+        foreach ($fileOperations as $i => $fileOperation) {
+            $objectConfigs[$i] = [
+                'Bucket' => $fileOperation->getBucket(),
+                'Key' => $fileOperation->getKey(),
+            ];
+        }
+
+        $existsWaiters = [];
+        foreach ($objectConfigs as $i => $objectConfig) {
+            $existsWaiters[$i] = $this->s3Client->objectExists($objectConfig);
+        }
+
+        $objectConfigsToDelete = [];
+        foreach ($existsWaiters as $i => $existsWaiter) {
+            if ($this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($existsWaiter)) {
+                $objectConfigsToDelete[$i] = $objectConfigs[$i];
+            }
+        }
+
+        if ([] === $objectConfigsToDelete) {
+            return;
+        }
+
+        $deleteResults = [];
+        foreach ($objectConfigsToDelete as $i => $objectConfig) {
+            $deleteResults[$i] = $this->s3Client->deleteObject($objectConfig);
+        }
+        // every delete must actually be applied before the objects are checked again below, so all deletes (which run
+        // concurrently among themselves) are resolved here, before any confirmation waiter is issued
+        foreach ($deleteResults as $deleteResult) {
+            $deleteResult->resolve();
+        }
+
+        $confirmationWaiters = [];
+        foreach ($objectConfigsToDelete as $i => $objectConfig) {
+            $confirmationWaiters[$i] = $this->s3Client->objectExists($objectConfig);
+        }
+
+        foreach ($confirmationWaiters as $confirmationWaiter) {
+            if ($this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($confirmationWaiter)) {
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.');
+            }
         }
     }
 

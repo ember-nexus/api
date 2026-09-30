@@ -23,6 +23,7 @@ use Safe\DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -30,6 +31,13 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 class UploadCreationService
 {
+    private const string PROFILER_DIRECT_UPLOAD_LENGTH_CHECK = 'UploadCreationService:directUpload:lengthCheck';
+    private const string PROFILER_DIRECT_UPLOAD_HASH_CALCULATION = 'UploadCreationService:directUpload:hashCalculation';
+    private const string PROFILER_DIRECT_UPLOAD_S3_UPLOAD = 'UploadCreationService:directUpload:s3Upload';
+    private const string PROFILER_CHUNK_UPLOAD_LENGTH_CHECK = 'UploadCreationService:chunkUpload:lengthCheck';
+    private const string PROFILER_CHUNK_UPLOAD_HASH_CALCULATION = 'UploadCreationService:chunkUpload:hashCalculation';
+    private const string PROFILER_CHUNK_UPLOAD_S3_UPLOAD = 'UploadCreationService:chunkUpload:s3Upload';
+
     public function __construct(
         private AuthProvider $authProvider,
         private EmberNexusConfiguration $emberNexusConfiguration,
@@ -50,6 +58,7 @@ class UploadCreationService
         private UploadChunkValidator $uploadChunkValidator,
         private ElementFileDeletionService $elementFileDeletionService,
         private ElementService $elementService,
+        private Stopwatch $stopwatch,
     ) {
     }
 
@@ -84,18 +93,22 @@ class UploadCreationService
         ResumableUploadRequestInterface $resumableUploadRequest,
         array $requestDigestHeaderValues,
     ): Response {
+        $this->stopwatch->start(self::PROFILER_DIRECT_UPLOAD_LENGTH_CHECK);
         $contentLength = $resumableUploadRequest->getContentLength();
         if (null !== $contentLength) {
             $this->fileSizeLimitService->assertWithinMaxFileSize($contentLength);
         }
         // a single request is bound by the maximum chunk size; the content itself is bound in the request factory
         $this->uploadBodyLimitService->assertDeclaredLengthWithinLimit($contentLength);
+        $this->stopwatch->stop(self::PROFILER_DIRECT_UPLOAD_LENGTH_CHECK);
 
         $resource = $resumableUploadRequest->getContent();
         // hashed before the upload, so that a digest mismatch never replaces an existing file
+        $this->stopwatch->start(self::PROFILER_DIRECT_UPLOAD_HASH_CALCULATION);
         $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
         $hash = $this->incrementalHashService->finalize($hashContext);
+        $this->stopwatch->stop(self::PROFILER_DIRECT_UPLOAD_HASH_CALCULATION);
 
         $uploadFileOperation = $this->s3OperationFactory->createUploadFileOperationFromResumableUploadRequest($resumableUploadRequest);
 
@@ -104,7 +117,9 @@ class UploadCreationService
         }
 
         // authoritative length, the Content-Length header is optional (e.g. chunked transfer encoding)
+        $this->stopwatch->start(self::PROFILER_DIRECT_UPLOAD_S3_UPLOAD);
         $uploadedContentLength = $this->s3Service->uploadFile($uploadFileOperation);
+        $this->stopwatch->stop(self::PROFILER_DIRECT_UPLOAD_S3_UPLOAD);
         // the S3 client may already have closed the resource while uploading it
         /** @psalm-suppress RedundantConditionGivenDocblockType */
         if (is_resource($resource)) {
@@ -165,13 +180,20 @@ class UploadCreationService
             }
         } else {
             // rejected before anything is sent to S3
+            $this->stopwatch->start(self::PROFILER_CHUNK_UPLOAD_LENGTH_CHECK);
             $this->uploadChunkValidator->assertWithinDeclaredLength($contentLength, false, 0, $uploadLength);
+            $this->stopwatch->stop(self::PROFILER_CHUNK_UPLOAD_LENGTH_CHECK);
+
+            $this->stopwatch->start(self::PROFILER_CHUNK_UPLOAD_HASH_CALCULATION);
             $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
             $this->incrementalHashService->updateFromResource($hashContext, $resource);
+            $this->stopwatch->stop(self::PROFILER_CHUNK_UPLOAD_HASH_CALCULATION);
 
             $chunkId = $this->fileService->generateUploadChunkId();
             $uploadFileChunkOperation = $this->s3OperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, $chunkId);
+            $this->stopwatch->start(self::PROFILER_CHUNK_UPLOAD_S3_UPLOAD);
             $uploadOffset = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
+            $this->stopwatch->stop(self::PROFILER_CHUNK_UPLOAD_S3_UPLOAD);
             // the S3 client may already have closed the resource while uploading it
             /** @psalm-suppress RedundantConditionGivenDocblockType */
             if (is_resource($resource)) {

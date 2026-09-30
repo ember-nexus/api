@@ -206,6 +206,11 @@ class Configuration implements ConfigurationInterface
                         ->min(1)
                         ->defaultValue(2)
                     ->end()
+                    ->integerNode(EmberNexusConfiguration::FILE_S3_MAX_HOST_CONNECTIONS)
+                        ->info('Maximum number of concurrent HTTP connections kept open to the S3 host. Used to parallelize otherwise sequential S3 operations, e.g. copying the parts of a large file during merge. Must be greater than 1.')
+                        ->min(2)
+                        ->defaultValue(16)
+                    ->end()
                 ->end()
             ->end()
 

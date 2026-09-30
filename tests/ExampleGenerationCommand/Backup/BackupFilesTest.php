@@ -6,7 +6,10 @@ namespace App\Tests\ExampleGenerationCommand\Backup;
 
 use App\Factory\S3ClientFactory;
 use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
+use AsyncAws\S3\S3Client;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use FilesystemIterator;
+use Psr\Log\NullLogger;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -111,9 +114,20 @@ class BackupFilesTest extends BaseCommandTestCase
         }
     }
 
+    private function createS3ClientForAssertions(): S3Client
+    {
+        return (new S3ClientFactory(
+            $_ENV['S3_ENDPOINT'],
+            $_ENV['S3_ACCESS_KEY_ID'],
+            $_ENV['S3_SECRET_ACCESS_KEY'],
+            new NullLogger(),
+            (new EmberNexusConfiguration())->setFileS3MaxHostConnections(16),
+        ))->createS3Client();
+    }
+
     private function isFileInStorageWithTrailingDot(string $elementId): bool
     {
-        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        $s3Client = $this->createS3ClientForAssertions();
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
             if (str_contains((string) $object->getKey(), $elementId) && str_ends_with((string) $object->getKey(), '.')) {
                 return true;
@@ -125,7 +139,7 @@ class BackupFilesTest extends BaseCommandTestCase
 
     private function isFileInStorage(string $elementId): bool
     {
-        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        $s3Client = $this->createS3ClientForAssertions();
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
             if (str_contains((string) $object->getKey(), $elementId)) {
                 return true;

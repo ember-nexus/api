@@ -10,6 +10,7 @@ use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use HashContext;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Throwable;
 
 /**
@@ -18,6 +19,10 @@ use Throwable;
  */
 class UploadAppendService
 {
+    private const string PROFILER_CHUNK_UPLOAD_LENGTH_CHECK = 'UploadAppendService:chunkUpload:lengthCheck';
+    private const string PROFILER_CHUNK_UPLOAD_HASH_CALCULATION = 'UploadAppendService:chunkUpload:hashCalculation';
+    private const string PROFILER_CHUNK_UPLOAD_S3_UPLOAD = 'UploadAppendService:chunkUpload:s3Upload';
+
     public function __construct(
         private UploadFactory $uploadFactory,
         private UploadService $uploadService,
@@ -30,6 +35,7 @@ class UploadAppendService
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private ElementManager $elementManager,
         private ElementService $elementService,
+        private Stopwatch $stopwatch,
     ) {
     }
 
@@ -70,16 +76,20 @@ class UploadAppendService
 
         // reject obviously invalid chunks before anything is sent to S3
         if (null !== $declaredChunkLength) {
+            $this->stopwatch->start(self::PROFILER_CHUNK_UPLOAD_LENGTH_CHECK);
             $this->uploadChunkValidator->assertValidChunk($declaredChunkLength, $isFinalChunk, $upload->getUploadOffset(), $upload->getUploadLength());
+            $this->stopwatch->stop(self::PROFILER_CHUNK_UPLOAD_LENGTH_CHECK);
         }
 
         // hashed before the upload to S3, see IncrementalHashService
         $resource = $partialUploadRequest->getContent();
         $hashState = $upload->getHashState();
+        $this->stopwatch->start(self::PROFILER_CHUNK_UPLOAD_HASH_CALCULATION);
         $hashContext = null !== $hashState
             ? $this->incrementalHashService->unserializeContextFromStorage($hashState)
             : $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
+        $this->stopwatch->stop(self::PROFILER_CHUNK_UPLOAD_HASH_CALCULATION);
 
         $chunkId = null;
         $chunkLength = 0;
@@ -88,7 +98,9 @@ class UploadAppendService
         } else {
             // every attempt writes its own object, so that a concurrent attempt for the same chunk can not overwrite it
             $chunkId = $this->fileService->generateUploadChunkId();
+            $this->stopwatch->start(self::PROFILER_CHUNK_UPLOAD_S3_UPLOAD);
             $chunkLength = $this->s3Service->uploadFileChunk($this->s3OperationFactory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest, $upload, $chunkId));
+            $this->stopwatch->stop(self::PROFILER_CHUNK_UPLOAD_S3_UPLOAD);
             $this->closeResource($resource);
         }
 

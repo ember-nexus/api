@@ -19,10 +19,12 @@ use App\Service\S3Service;
 use App\Service\S3TechnicalLimitsValidator;
 use App\Type\S3\S3TechnicalLimits;
 use App\Wrapper\S3ClientWrapper;
+use AsyncAws\Core\Response;
 use AsyncAws\Core\Stream\ResultStream;
 use AsyncAws\S3\Result\AbortMultipartUploadOutput;
 use AsyncAws\S3\Result\CopyObjectOutput;
 use AsyncAws\S3\Result\CreateMultipartUploadOutput;
+use AsyncAws\S3\Result\DeleteObjectOutput;
 use AsyncAws\S3\Result\GetObjectOutput;
 use AsyncAws\S3\Result\HeadObjectOutput;
 use AsyncAws\S3\Result\ObjectExistsWaiter;
@@ -38,6 +40,9 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Symfony\Component\Stopwatch\Stopwatch;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface as HttpClientResponseInterface;
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassLength)
@@ -75,6 +80,7 @@ class S3ServiceTest extends TestCase
             $s3TechnicalLimits ?? new S3TechnicalLimits(),
             $logger ?? $this->prophesize(LoggerInterface::class)->reveal(),
             $s3TechnicalLimitsValidator,
+            new Stopwatch(),
             $multipartUploadThresholdInBytes ?? S3Service::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
             $multipartUploadPartSizeInBytes ?? S3Service::MULTIPART_UPLOAD_PART_SIZE_IN_BYTES,
         );
@@ -764,6 +770,11 @@ class S3ServiceTest extends TestCase
         $this->assertNull($s3Service->getChunksContentLength($mergeFileChunksOperation->reveal()));
     }
 
+    /**
+     * Every S3 call of a given step (existence check, delete, confirmation check) is issued for all three chunks
+     * before any of them is read, so the underlying HTTP client can run them concurrently; hence `objectExists` and
+     * `deleteObject` are each expected exactly once per key rather than interleaved per chunk.
+     */
     public function testDeleteFileChunks(): void
     {
         $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
@@ -771,47 +782,112 @@ class S3ServiceTest extends TestCase
         $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(3)->willReturn('upload-bucket');
         $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
 
-        $objectExistsWaiter1 = $this->prophesize(ObjectExistsWaiter::class)->reveal();
-        $objectExistsWaiter2 = $this->prophesize(ObjectExistsWaiter::class)->reveal();
-        $objectExistsWaiter3 = $this->prophesize(ObjectExistsWaiter::class)->reveal();
-
+        $existsWaiters = [];
+        $confirmationWaiters = [];
         $s3Client = $this->prophesize(S3Client::class);
-        $s3Client->objectExists(Argument::is([
-            'Bucket' => 'upload-bucket',
-            'Key' => 'upload-key-0001',
-        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter1);
-        $s3Client->deleteObject(Argument::is([
-            'Bucket' => 'upload-bucket',
-            'Key' => 'upload-key-0001',
-        ]))->shouldBeCalledOnce();
+        foreach (['upload-key-0001', 'upload-key-0002', 'upload-key-0003'] as $uploadKey) {
+            $objectConfig = [
+                'Bucket' => 'upload-bucket',
+                'Key' => $uploadKey,
+            ];
 
-        $s3Client->objectExists(Argument::is([
-            'Bucket' => 'upload-bucket',
-            'Key' => 'upload-key-0002',
-        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter2);
-        $s3Client->deleteObject(Argument::is([
-            'Bucket' => 'upload-bucket',
-            'Key' => 'upload-key-0002',
-        ]))->shouldBeCalledOnce();
+            $existsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+            $confirmationWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+            $existsWaiters[] = $existsWaiter;
+            $confirmationWaiters[] = $confirmationWaiter;
 
-        $s3Client->objectExists(Argument::is([
-            'Bucket' => 'upload-bucket',
-            'Key' => 'upload-key-0003',
-        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter3);
-        $s3Client->deleteObject(Argument::is([
-            'Bucket' => 'upload-bucket',
-            'Key' => 'upload-key-0003',
-        ]))->shouldBeCalledOnce();
+            $s3Client->objectExists(Argument::is($objectConfig))
+                ->shouldBeCalledTimes(2)
+                ->willReturn($existsWaiter, $confirmationWaiter);
+
+            $s3Client->deleteObject(Argument::is($objectConfig))->shouldBeCalledOnce()->willReturn($this->buildDeleteObjectOutput());
+        }
 
         $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
-        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter1))->shouldBeCalledTimes(2)->willReturn(true, false);
-        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter2))->shouldBeCalledTimes(2)->willReturn(true, false);
-        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter3))->shouldBeCalledTimes(2)->willReturn(true, false);
+        foreach ($existsWaiters as $existsWaiter) {
+            $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($existsWaiter))->shouldBeCalledOnce()->willReturn(true);
+        }
+        foreach ($confirmationWaiters as $confirmationWaiter) {
+            $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($confirmationWaiter))->shouldBeCalledOnce()->willReturn(false);
+        }
 
         $s3Service = $this->buildS3Service(
             s3Client: $s3Client->reveal(),
             s3ClientWrapper: $s3ClientWrapper->reveal()
         );
+
+        $s3Service->deleteFileChunks($mergeFileChunksOperation);
+    }
+
+    public function testDeleteFileChunksSkipsMissingChunksAndDoesNotDeleteThem(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn(['upload-key-0001', 'upload-key-0002']);
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $existsWaiter1 = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+        $existsWaiter2 = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+        ]))->shouldBeCalledOnce()->willReturn($existsWaiter1);
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0002',
+        ]))->shouldBeCalledOnce()->willReturn($existsWaiter2);
+        $s3Client->deleteObject(Argument::any())->shouldNotBeCalled();
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($existsWaiter1))->shouldBeCalledOnce()->willReturn(false);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($existsWaiter2))->shouldBeCalledOnce()->willReturn(false);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal()
+        );
+
+        $s3Service->deleteFileChunks($mergeFileChunksOperation);
+    }
+
+    public function testDeleteFileChunksThrowsWhenAChunkWasNotActuallyDeleted(): void
+    {
+        $mergeFileChunksOperation = $this->prophesize(MergeFileChunksOperationInterface::class);
+        $mergeFileChunksOperation->getUploadKeys()->shouldBeCalledOnce()->willReturn(['upload-key-0001']);
+        $mergeFileChunksOperation->getUploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
+        $mergeFileChunksOperation = $mergeFileChunksOperation->reveal();
+
+        $existsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+        $confirmationWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $objectConfig = [
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key-0001',
+        ];
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->objectExists(Argument::is($objectConfig))->shouldBeCalledTimes(2)->willReturn($existsWaiter, $confirmationWaiter);
+        $s3Client->deleteObject(Argument::is($objectConfig))->shouldBeCalledOnce()->willReturn($this->buildDeleteObjectOutput());
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($existsWaiter))->shouldBeCalledOnce()->willReturn(true);
+        // the chunk still exists after the delete, which must be reported as a failure
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($confirmationWaiter))->shouldBeCalledOnce()->willReturn(true);
+
+        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.')->shouldBeCalledOnce()->willReturn($exception);
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
 
         $s3Service->deleteFileChunks($mergeFileChunksOperation);
     }
@@ -1846,6 +1922,25 @@ class S3ServiceTest extends TestCase
         $uploadFileOperation->getPreviousStorageKey()->willReturn($previousStorageKey);
 
         return $uploadFileOperation->reveal();
+    }
+
+    /**
+     * {@see Result::resolve()} is final and can therefore not be doubled with Prophecy; a real {@see DeleteObjectOutput}
+     * wrapping a stubbed HTTP response is built instead, so calling `resolve()` on it behaves like a real, already
+     * succeeded S3 call.
+     */
+    private function buildDeleteObjectOutput(): DeleteObjectOutput
+    {
+        $httpResponse = $this->prophesize(HttpClientResponseInterface::class);
+        $httpResponse->getStatusCode()->willReturn(204);
+
+        $response = new Response(
+            $httpResponse->reveal(),
+            $this->prophesize(HttpClientInterface::class)->reveal(),
+            $this->prophesize(LoggerInterface::class)->reveal(),
+        );
+
+        return new DeleteObjectOutput($response);
     }
 
     private function buildUploadPartOutput(string $etag): UploadPartOutput

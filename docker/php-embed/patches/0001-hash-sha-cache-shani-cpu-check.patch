@@ -1,0 +1,21 @@
+--- a/ext/hash/hash_sha.c
++++ b/ext/hash/hash_sha.c
+@@ -168,7 +168,17 @@
+ 	SHA256_Transform_shani(state, block);
+ 	return;
+ #elif defined(PHP_HASH_INTRIN_SHA_RESOLVER)
+-	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSSE3) && zend_cpu_supports(ZEND_CPU_FEATURE_SHA)) {
++	/* zend_cpu_supports() itself is cheap, but SHA256Transform() is called once per 64-byte block --
++	 * millions of times for a large upload chunk. Cache the resolved result instead of re-checking the
++	 * CPUID-derived feature flags on every block. Safe to cache process-wide: zend_cpu_supports() is a
++	 * pure function of the CPU feature bits zend_cpu_startup() reads once at process start, so every
++	 * thread computes the same value; a benign race on first use (concurrent threads computing it at the
++	 * same time) can only ever produce that same value. */
++	static int has_shani = -1;
++	if (has_shani < 0) {
++		has_shani = zend_cpu_supports(ZEND_CPU_FEATURE_SSSE3) && zend_cpu_supports(ZEND_CPU_FEATURE_SHA);
++	}
++	if (has_shani) {
+ 		SHA256_Transform_shani(state, block);
+ 		return;
+ 	}

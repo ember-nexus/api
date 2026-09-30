@@ -32,6 +32,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Ramsey\Uuid\Uuid;
 use RuntimeException;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 #[Small]
 #[CoversClass(UploadAppendService::class)]
@@ -148,6 +149,7 @@ class UploadAppendServiceTest extends TestCase
             $client409ConflictExceptionFactory->reveal(),
             $this->elementManager->reveal(),
             $this->elementService->reveal(),
+            new Stopwatch(),
         );
     }
 

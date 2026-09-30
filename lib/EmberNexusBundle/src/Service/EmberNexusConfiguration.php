@@ -55,6 +55,7 @@ class EmberNexusConfiguration
     public const string FILE_S3_STORAGE_BUCKET_LEVEL_LENGTH = 'S3StorageBucketLevelLength';
     public const string FILE_S3_UPLOAD_BUCKET_LEVELS = 'S3UploadBucketLevels';
     public const string FILE_S3_UPLOAD_BUCKET_LEVEL_LENGTH = 'S3UploadBucketLevelLength';
+    public const string FILE_S3_MAX_HOST_CONNECTIONS = 'S3MaxHostConnections';
 
     private int $pageSizeMin;
     private int $pageSizeDefault;
@@ -86,6 +87,7 @@ class EmberNexusConfiguration
     private int $fileS3StorageBucketLevelLength;
     private int $fileS3UploadBucketLevels;
     private int $fileS3UploadBucketLevelLength;
+    private int $fileS3MaxHostConnections;
 
     private static function getValueFromConfig(array $configuration, array $keyParts): mixed
     {
@@ -375,6 +377,15 @@ class EmberNexusConfiguration
             ]
         );
         $emberNexusConfiguration->setFileS3UploadBucketLevelLength($value);
+
+        $value = (int) self::getValueFromConfig(
+            $configuration,
+            [
+                self::FILE,
+                self::FILE_S3_MAX_HOST_CONNECTIONS,
+            ]
+        );
+        $emberNexusConfiguration->setFileS3MaxHostConnections($value);
 
         return $emberNexusConfiguration;
     }
@@ -732,6 +743,18 @@ class EmberNexusConfiguration
     public function setFileS3UploadBucketLevelLength(int $fileS3UploadBucketLevelLength): static
     {
         $this->fileS3UploadBucketLevelLength = $fileS3UploadBucketLevelLength;
+
+        return $this;
+    }
+
+    public function getFileS3MaxHostConnections(): int
+    {
+        return $this->fileS3MaxHostConnections;
+    }
+
+    public function setFileS3MaxHostConnections(int $fileS3MaxHostConnections): static
+    {
+        $this->fileS3MaxHostConnections = $fileS3MaxHostConnections;
 
         return $this;
     }

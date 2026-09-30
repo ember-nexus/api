@@ -1072,6 +1072,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         S3StorageBucketLevelLength?: int|Param, // Number of characters used for each level (folder) in the S3 storage bucket. // Default: 2
  *         S3UploadBucketLevels?: int|Param, // Number of levels (folders) used within the S3 upload bucket. // Default: 2
  *         S3UploadBucketLevelLength?: int|Param, // Number of characters used for each level (folder) in the S3 upload bucket. // Default: 2
+ *         S3MaxHostConnections?: int|Param, // Maximum number of concurrent HTTP connections kept open to the S3 host. Used to parallelize otherwise sequential S3 operations, e.g. copying the parts of a large file during merge. Must be greater than 1. // Default: 16
  *     },
  * }
  * @psalm-type ConfigType = array{

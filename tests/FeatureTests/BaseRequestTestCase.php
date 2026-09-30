@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests;
 
 use App\Factory\S3ClientFactory;
+use AsyncAws\S3\S3Client;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\NullLogger;
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
@@ -456,9 +459,20 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertFalse($this->isFileInStorage($elementId), sprintf('Expected file of element %s to be removed from storage bucket.', $elementId));
     }
 
+    private function createS3ClientForAssertions(): S3Client
+    {
+        return (new S3ClientFactory(
+            $_ENV['S3_ENDPOINT'],
+            $_ENV['S3_ACCESS_KEY_ID'],
+            $_ENV['S3_SECRET_ACCESS_KEY'],
+            new NullLogger(),
+            (new EmberNexusConfiguration())->setFileS3MaxHostConnections(16),
+        ))->createS3Client();
+    }
+
     private function isFileInStorage(string $elementId): bool
     {
-        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        $s3Client = $this->createS3ClientForAssertions();
         // the object key ends with the element id, see FileService::getStorageBucketKey()
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
             if (str_contains((string) $object->getKey(), $elementId)) {
@@ -474,7 +488,7 @@ abstract class BaseRequestTestCase extends TestCase
      */
     public function countUploadChunksInUploadBucket(string $uploadId): int
     {
-        $s3Client = (new S3ClientFactory($_ENV['S3_ENDPOINT'], $_ENV['S3_ACCESS_KEY_ID'], $_ENV['S3_SECRET_ACCESS_KEY']))->createS3Client();
+        $s3Client = $this->createS3ClientForAssertions();
         $count = 0;
         // the object key contains the upload id, see FileService::getUploadBucketKey()
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-upload']) as $object) {

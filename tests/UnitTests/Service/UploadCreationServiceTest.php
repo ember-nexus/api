@@ -43,6 +43,7 @@ use Ramsey\Uuid\UuidInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[Small]
@@ -163,6 +164,7 @@ class UploadCreationServiceTest extends TestCase
             new UploadChunkValidator($configuration, $fileSizeLimitService, $badContentFactory, $this->conflictFactory->reveal()),
             $this->elementFileDeletionService->reveal(),
             $this->elementService->reveal(),
+            new Stopwatch(),
         );
     }
 
