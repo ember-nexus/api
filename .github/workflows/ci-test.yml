@@ -26,7 +26,7 @@ jobs:
   build-docker-image:
     runs-on: gh-4vcpu-ubuntu-latest-amd
     name: 'Build Docker Image'
-    timeout-minutes: 20
+    timeout-minutes: 40
     needs:
       - yml-lint
       - markdown-lint
@@ -206,6 +206,7 @@ jobs:
           - "neo4j-5.20"
           - "neo4j-latest"
           - "s3-versitygw"
+          - "s3-seaweed-fs"
     steps:
       - uses: actions/checkout@v5
       - run: mkdir -p /tmp/docker
