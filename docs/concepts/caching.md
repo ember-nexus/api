@@ -41,8 +41,8 @@ The first `GET` request can be executed normally:
 
 ```bash
 curl \
-  -H "Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv" \
-  https://api.localhost/35cd3b18-0d0c-4e98-876e-898b930797f2
+  -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
+  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
 ```
 
 The response then contains the `Etag`-header.  
@@ -63,9 +63,9 @@ status code 304 not modified, which tells the client that the data returned by t
 
 ```bash
 curl \
-  -H "Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv" \
-  -H "If-None-Match: \"6JM8JahrCeu\"" \
-  https://api.localhost/35cd3b18-0d0c-4e98-876e-898b930797f2
+  -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
+  -H "If-None-Match: \"FdjM5IgJhIE\"" \
+  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
 ```
 
 Response:
@@ -83,9 +83,9 @@ and return up-to-date data for the endpoint:
 
 ```bash
 curl \
-  -H "Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv" \
+  -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
   -H "If-None-Match: \"invalid\"" \
-  https://api.localhost/35cd3b18-0d0c-4e98-876e-898b930797f2
+  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
 ```
 
 Response:

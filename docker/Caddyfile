@@ -4,8 +4,14 @@
 	servers {
 		protocols h1
 		timeouts {
-			# default for all endpoints, upload endpoints are extended below
-			read_body {$API_REQUEST_BODY_TIMEOUT:30s}
+			# default for all endpoints, upload endpoints are extended below via the per-route `timeouts`
+			# directive; `read_body_idle` (not the older, non-idle `read_body`) is used here deliberately: it's
+			# the same stall-detection mechanism the per-route override below uses (added together in Caddy
+			# 2.11.6), so the per-route value actually replaces this default for matched routes instead of
+			# racing a second, unrelated hard deadline that would otherwise still cut the connection at the
+			# global value regardless of the per-route override (verified: with plain `read_body` here, a
+			# slow-but-progressing upload chunk request was still killed at the global timeout)
+			read_body_idle {$API_REQUEST_BODY_TIMEOUT:30s}
 		}
 	}
 	log {
@@ -32,7 +38,7 @@
 (problem_json_headers) {
 	header {
 		Access-Control-Allow-Headers "*"
-		Access-Control-Allow-Methods "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+		Access-Control-Allow-Methods "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE"
 		Access-Control-Allow-Origin "*"
 		Access-Control-Expose-Headers "ETag, Location"
 		Cache-Control "no-cache, private"
@@ -67,10 +73,12 @@
 		method PATCH
 		path_regexp ^/upload/[0-9a-fA-F-]{36}$
 	}
-	request_body @uploadFile {
+	# Caddy 2.11.6 removed the read_timeout/write_timeout subdirectives from request_body; per-route read
+	# timeouts are now set via the timeouts directive instead (global default is set above in the servers block)
+	timeouts @uploadFile {
 		read_timeout {$API_UPLOAD_REQUEST_BODY_TIMEOUT:15m}
 	}
-	request_body @uploadChunk {
+	timeouts @uploadChunk {
 		read_timeout {$API_UPLOAD_REQUEST_BODY_TIMEOUT:15m}
 	}
 	# server errors which do not come from the application as problem json still get a problem json body, in the same

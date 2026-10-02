@@ -1,9 +1,5 @@
 # The production image only contains the application, the connections to the other services are configured through its
 # environment (the repository is not mounted, so no `.env` file provides them).
-#
-# Explicitly exercises versitygw as the S3 backend instead of minio, to demonstrate and verify compatibility
-# (gh-484). Otherwise same as docker-compose-neo4j-latest.yml. Buckets are just top-level directories under the
-# posix backend's root, so minio-init only has to create those directories - no bucket/user API calls needed.
 x-api-environment: &api-environment
   CYPHER_AUTH: bolt://neo4j:password@neo4j
   MONGO_AUTH: mongodb://mongodb:password@mongodb:27017

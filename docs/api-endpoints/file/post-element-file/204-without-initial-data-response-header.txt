@@ -1,12 +1,12 @@
 Access-Control-Allow-Headers: *
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, POST, PUT
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
 Allow: DELETE, GET, HEAD, OPTIONS, POST, PUT
 Cache-Control: no-store, private
-Date: Sat, 26 Sep 2026 21:53:33 GMT
-Expires: Sun, 27 Sep 2026 00:53:33 GMT
-Location: /upload/102615c0-dc59-4d14-982a-ec2963ae5103
+Date: Fri, 02 Oct 2026 22:38:01 GMT
+Expires: Sat, 03 Oct 2026 01:38:01 GMT
+Location: /upload/558b7515-d828-4d41-9132-bcea3a0610e1
 Upload-Complete: ?0
 Upload-Limit: max-age=10800, max-size=10737418240, min-append-size=5242880, max-append-size=105906176
 Upload-Offset: 0

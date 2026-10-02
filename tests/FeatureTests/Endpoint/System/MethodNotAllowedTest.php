@@ -47,9 +47,9 @@ class MethodNotAllowedTest extends BaseRequestTestCase
         $response = $this->runGetRequest('/b4117ae0-1241-479f-b363-45f290ec7fc7', self::TOKEN);
 
         $this->assertIsProblemResponse($response, 404);
-        // all controllers for `/{id}`, including POST (create child) and the WebDAV methods
+        // all controllers for `/{id}`, including POST (create child)
         $this->assertSame(
-            ['COPY, DELETE, GET, HEAD, LOCK, MKCOL, MOVE, OPTIONS, PATCH, POST, PROPFIND, PROPPATCH, PUT, UNLOCK'],
+            ['DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT'],
             $response->getHeader('Allow')
         );
     }

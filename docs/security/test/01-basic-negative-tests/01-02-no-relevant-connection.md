@@ -22,13 +22,6 @@ access. Relevant relations include `OWNS`, `HAS_X_ACCESS` and `CREATED`.
 | `1-02-02-22` | `User` | `🟠 PUT /<RELATION>/file`     | -       | ❌ 404  | yes        | ✔️ implemented |
 | `1-02-02-23` | `User` | `🟠 PATCH /<RELATION>/file`   | -       | ❌ 404  | yes        | ✔️ implemented |
 | `1-02-02-24` | `User` | `🔴 DELETE /<RELATION>/file`  | -       | ❌ 404  | yes        | ✔️ implemented |
-| `1-02-02-30` | `User` | `🟣 COPY /<RELATION>`         | -       | ❌ 404  | yes        | ✔️ implemented |
-| `1-02-02-31` | `User` | `🟣 LOCK /<RELATION>`         | -       | ❌ 404  | yes        | ✔️ implemented |
-| `1-02-02-32` | `User` | `🟣 UNLOCK /<RELATION>`       | -       | ❌ 404  | yes        | ✔️ implemented |
-| `1-02-02-33` | `User` | `🟣 MKCOL /<RELATION>`        | -       | ❌ 404  | yes        | ✔️ implemented |
-| `1-02-02-34` | `User` | `🟣 MOVE /<RELATION>`         | -       | ❌ 404  | yes        | ✔️ implemented |
-| `1-02-02-35` | `User` | `🟣 PROPFIND /<RELATION>`     | -       | ❌ 404  | yes        | ✔️ implemented |
-| `1-02-02-36` | `User` | `🟣 PROPPATCH /<RELATION>`    | -       | ❌ 404  | yes        | ✔️ implemented |
 | `1-02-03-01` | `User` | `🔵 GET /<Data>`              | -       | ❌ 404  | yes        | ✔️ implemented |
 
 <script>

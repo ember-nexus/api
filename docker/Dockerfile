@@ -15,10 +15,21 @@
 
 ARG ALPINE_VERSION='3.23'
 ARG PHP_VERSION='8.5.11'
-ARG FRANKENPHP_VERSION='1.12.1'
+# 1.12.7 is FrankenPHP's latest stable release as of 2026-10; bumped from 1.12.1 to pick up several
+# crash/stability fixes landed in 1.12.2-1.12.7 (fatal-shutdown prevention, an HTTP/2 crash-on-read-after-
+# finish fix, a path-splitting security fix, and output-handling-after-fastcgi_finish_request() fixes) --
+# see https://github.com/dunglas/frankenphp/releases
+ARG FRANKENPHP_VERSION='1.12.7'
 ARG WATCHER_VERSION='0.14.5'
-ARG GO_VERSION='1.26'
-ARG CADDY_BUILDER_VERSION='2.11'
+# pinned to a full patch version (not just "1.26") so `golang:${GO_VERSION}-alpine` resolves to the exact
+# same toolchain on every rebuild instead of silently floating to whatever the latest 1.26.x patch is;
+# matches the Go version FrankenPHP v1.12.7 itself builds with (see its go.mod)
+ARG GO_VERSION='1.26.8'
+# pinned to a full patch version of the xcaddy/caddy-builder image (FrankenPHP v1.12.7 itself depends on
+# the 2.11.x line of github.com/caddyserver/caddy/v2); this image only supplies the xcaddy build tool, not
+# the embedded Caddy core (that version comes from Go module resolution against frankenphp's go.mod), but
+# pinning it avoids floating to whatever "2.11" resolves to on a later rebuild
+ARG CADDY_BUILDER_VERSION='2.11.6'
 
 
 FROM caddy:${CADDY_BUILDER_VERSION}-builder-alpine AS caddy_builder
@@ -336,10 +347,13 @@ RUN CGO_ENABLED=1 \
         --with github.com/baldinof/caddy-supervisor \
     && setcap cap_net_bind_service=+ep /usr/local/bin/frankenphp \
     && /usr/local/bin/frankenphp version \
-    && /usr/local/bin/frankenphp build-info
+    && /usr/local/bin/frankenphp build-info \
+    && strip --strip-all /usr/local/bin/frankenphp \
+    && upx --best --lzma /usr/local/bin/frankenphp \
+    && /usr/local/bin/frankenphp version
 
 
-FROM golang:1.25-alpine AS go_builder
+FROM golang:${GO_VERSION}-alpine AS go_builder
 COPY ./lib/ExprCli /build
 RUN cd /build && \
     apk add upx && \
@@ -402,7 +416,8 @@ RUN ldconfig /usr/local/lib || true
 
 ENV GODEBUG=cgocheck=0 \
     XDG_CONFIG_HOME=/config \
-    XDG_DATA_HOME=/data
+    XDG_DATA_HOME=/data \
+    APP_ENV=prod
 
 COPY ./docker/Caddyfile /etc/frankenphp/Caddyfile
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/
@@ -450,7 +465,14 @@ RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize
     && rm -rf /usr/src \
     && rm /usr/local/bin/php-cgi \
     && rm /usr/local/bin/phpdbg \
+    && find /var/www/html/vendor/symfony/emoji/Resources/data -type f -name '*.php' ! -name 'emoji-en.php' -delete \
+    && php /var/www/html/vendor/symfony/emoji/Resources/bin/compress \
+    && rm -rf /var/cache/apk /var/log /lib/apk/db /root/.composer \
     && chown worker:worker -R /var/www/html
+
+RUN set -eux; \
+    emojiDataSizeInBytes="$(du -sb /var/www/html/vendor/symfony/emoji/Resources/data | cut -f1)"; \
+    [ "$emojiDataSizeInBytes" -le 102400 ]
 
 
 
@@ -468,6 +490,7 @@ ARG VERSION=dev
 ENV VERSION=${VERSION}
 ARG FRANKENPHP_VERSION
 ENV FRANKENPHP_VERSION=${FRANKENPHP_VERSION}
+ENV APP_ENV=prod
 
 COPY --from=production-build / /
 
@@ -486,6 +509,8 @@ USER worker
 
 
 FROM php AS development
+
+ENV APP_ENV=dev
 
 # the dev image has no vendor/ installed by default (it's provided by the mounted source instead), so supercronic's
 # scheduled `php bin/console cron` runs would fail until `composer install` is run manually; the dev Caddyfile drops

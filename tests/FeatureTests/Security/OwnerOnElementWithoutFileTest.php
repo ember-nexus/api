@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Security;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * Verifies how the file endpoints and the (not yet implemented) WebDAV endpoints behave for the owner of an element
- * which has no file. Successful file operations of owners are covered by {@see FileEndpointAccessControlTest}.
+ * Verifies how the file endpoints behave for the owner of an element which has no file. Successful file operations
+ * of owners are covered by {@see FileEndpointAccessControlTest}.
  */
 class OwnerOnElementWithoutFileTest extends BaseRequestTestCase
 {
@@ -55,28 +54,5 @@ class OwnerOnElementWithoutFileTest extends BaseRequestTestCase
     {
         $response = $this->runPatchRequest(sprintf('/%s/file', $this->elementId), self::TOKEN_OWNER, []);
         $this->assertIsProblemResponse($response, 405);
-    }
-
-    #[DataProvider('webDavMethodProvider')]
-    public function testOwnerGetsNotImplementedForWebDavMethods(string $method): void
-    {
-        $response = $this->runRequest($method, sprintf('/%s', $this->elementId), self::TOKEN_OWNER);
-        $this->assertSame(501, $response->getStatusCode());
-    }
-
-    /**
-     * @return array<string, array{string}>
-     */
-    public static function webDavMethodProvider(): array
-    {
-        return [
-            'COPY' => ['COPY'],
-            'LOCK' => ['LOCK'],
-            'MKCOL' => ['MKCOL'],
-            'MOVE' => ['MOVE'],
-            'PROPFIND' => ['PROPFIND'],
-            'PROPPATCH' => ['PROPPATCH'],
-            'UNLOCK' => ['UNLOCK'],
-        ];
     }
 }

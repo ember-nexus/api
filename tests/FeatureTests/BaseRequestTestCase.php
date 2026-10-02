@@ -71,41 +71,6 @@ abstract class BaseRequestTestCase extends TestCase
         return $this->runRequest('HEAD', $uri, $token, headers: $headers);
     }
 
-    public function runCopyRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('COPY', $uri, $token, headers: $headers);
-    }
-
-    public function runLockRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('LOCK', $uri, $token, headers: $headers);
-    }
-
-    public function runMkcolRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('MKCOL', $uri, $token, headers: $headers);
-    }
-
-    public function runMoveRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('MOVE', $uri, $token, headers: $headers);
-    }
-
-    public function runPropfindRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('PROPFIND', $uri, $token, headers: $headers);
-    }
-
-    public function runProppatchRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('PROPPATCH', $uri, $token, headers: $headers);
-    }
-
-    public function runUnlockRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('UNLOCK', $uri, $token, headers: $headers);
-    }
-
     public function runRequest(string $method, string $uri, ?string $token = null, ?array $data = null, ?array $headers = []): ResponseInterface
     {
         $client = new Client([

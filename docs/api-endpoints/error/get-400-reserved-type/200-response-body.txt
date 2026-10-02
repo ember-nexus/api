@@ -7,7 +7,7 @@
 
  Error 400 - Reserved Type
 
- The exception is thrown when a type is reserved.
+ The exception is thrown when a reserved type is used.
 
  Link to the documentation: https://ember-nexus.github.io/api
 

@@ -108,3 +108,6 @@ ember_nexus:
 
     # Number of characters used for each level (folder) in the S3 upload bucket.
     S3UploadBucketLevelLength: 2
+
+    # Maximum number of concurrent HTTP connections kept open to the S3 host. Used to parallelize otherwise sequential S3 operations, e.g. copying the parts of a large file during merge. Must be greater than 1.
+    S3MaxHostConnections: 16
