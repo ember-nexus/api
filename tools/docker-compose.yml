@@ -129,3 +129,16 @@ services:
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  k6:
+    container_name: k6
+    build:
+      context: ../tools/k6
+    volumes:
+      - ../tools/k6:/app
+      - ../volumes/k6-reports:/app/tmp
+    environment:
+      - API_BASE_URL=http://api
+      - API_TOKEN=secret-token:1nc1pFdBO2QLYRMMvULgtQ
+    depends_on:
+      - api

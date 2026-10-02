@@ -18,6 +18,14 @@ tasks:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec api /bin/bash
 
+  dev:k6:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml exec k6 pnpm demo
+
+  dev:k6:load:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml exec k6 pnpm load
+
   generate:swagger:
     cmds:
       - ./tools/generate-swagger.sh
