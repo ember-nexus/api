@@ -1,0 +1,61 @@
+--- a/ext/hash/php_hash_sha.h
++++ b/ext/hash/php_hash_sha.h
+@@ -67,6 +67,10 @@
+ void SHA256_Transform_shani(uint32_t state[PHP_STATIC_RESTRICT 8], const uint8_t block[PHP_STATIC_RESTRICT 64]);
+ #endif
+ 
++#if defined(PHP_HASH_INTRIN_SHA_RESOLVER)
++void php_hash_sha256_minit_shani(void);
++#endif
++
+ PHP_HASH_API void PHP_SHA256Final(unsigned char[32], PHP_SHA256_CTX *);
+ 
+ /* SHA384 context */
+--- a/ext/hash/hash_sha.c
++++ b/ext/hash/hash_sha.c
+@@ -159,6 +159,15 @@
+ }
+ /* }}} */
+ 
++#if defined(PHP_HASH_INTRIN_SHA_RESOLVER)
++static int php_hash_sha256_has_shani = 0;
++
++void php_hash_sha256_minit_shani(void)
++{
++	php_hash_sha256_has_shani = zend_cpu_supports(ZEND_CPU_FEATURE_SSSE3) && zend_cpu_supports(ZEND_CPU_FEATURE_SHA);
++}
++#endif
++
+ /* {{{ SHA256Transform
+  * SHA256 basic transformation. Transforms state based on block.
+  */
+@@ -168,7 +177,7 @@
+ 	SHA256_Transform_shani(state, block);
+ 	return;
+ #elif defined(PHP_HASH_INTRIN_SHA_RESOLVER)
+-	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSSE3) && zend_cpu_supports(ZEND_CPU_FEATURE_SHA)) {
++	if (php_hash_sha256_has_shani) {
+ 		SHA256_Transform_shani(state, block);
+ 		return;
+ 	}
+--- a/ext/hash/hash.c
++++ b/ext/hash/hash.c
+@@ -20,6 +20,7 @@
+ #endif
+ 
+ #include "php_hash.h"
++#include "php_hash_sha.h"
+ #include "ext/standard/info.h"
+ #include "ext/standard/file.h"
+ #include "ext/standard/php_var.h"
+@@ -1588,6 +1589,10 @@
+ /* {{{ PHP_MINIT_FUNCTION */
+ PHP_MINIT_FUNCTION(hash)
+ {
++#if defined(PHP_HASH_INTRIN_SHA_RESOLVER)
++	php_hash_sha256_minit_shani();
++#endif
++
+ 	zend_hash_init(&php_hash_hashtable, 35, NULL, NULL, 1);
+ 
+ 	php_hash_register_algo("md2",			&php_hash_md2_ops);

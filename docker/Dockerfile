@@ -154,20 +154,24 @@ RUN set -eux; \
 # ext/hash's hash_update_stream() (used by IncrementalHashService for upload chunk hashing) reads the
 # resource through php_stream_read() in a 1024-byte buffer, which for a large chunk means well over 100,000
 # small stream reads, each paying PHP's stream-wrapper dispatch overhead; that dominates once SHA-256 itself
-# is SHA-NI-accelerated (see -DHAVE_FUNC_ATTRIBUTE_TARGET=1 above). Bump it to 100KiB: large enough to cut
-# that call count by ~100x, small enough to be a total non-issue as a stack buffer. Only the buffer inside
-# PHP_FUNCTION(hash_update_stream) is touched (matched by the `toread = 1024` line immediately following the
-# declaration, which is unique to that function) -- hash()/hash_hmac()/hash_update_file()'s own `buf[1024]`
-# (used for e.g. hashing a filename/path directly, not this project's upload path) are deliberately left as-is.
-	sed -i '/char buf\[1024\];/{N;s/char buf\[1024\];\n\([ \t]*\)zend_long toread = 1024;/char buf[102400];\n\1zend_long toread = 102400;/}' ext/hash/hash.c; \
-	grep -q 'char buf\[102400\];' ext/hash/hash.c; \
-	grep -q 'zend_long toread = 102400;' ext/hash/hash.c; \
+# is SHA-NI-accelerated (see -DHAVE_FUNC_ATTRIBUTE_TARGET=1 above). Bump it to 16KiB: measured as the point
+# where throughput plateaus (larger buffers, up to 1MiB+, gave no further gain in benchmarking -- and large
+# buffers eventually regress due to allocation/copy overhead), while cutting the read-call count by ~16x and
+# staying a total non-issue as a stack buffer. Only the buffer inside PHP_FUNCTION(hash_update_stream) is
+# touched (matched by the `toread = 1024` line immediately following the declaration, which is unique to
+# that function) -- hash()/hash_hmac()/hash_update_file()'s own `buf[1024]` (used for e.g. hashing a
+# filename/path directly, not this project's upload path) are deliberately left as-is.
+	sed -i '/char buf\[1024\];/{N;s/char buf\[1024\];\n\([ \t]*\)zend_long toread = 1024;/char buf[16384];\n\1zend_long toread = 16384;/}' ext/hash/hash.c; \
+	grep -q 'char buf\[16384\];' ext/hash/hash.c; \
+	grep -q 'zend_long toread = 16384;' ext/hash/hash.c; \
 	[ "$(grep -c 'char buf\[1024\];' ext/hash/hash.c)" = 3 ]; \
 # SHA256Transform() (the SHA-NI dispatch used by the hash above) re-checks zend_cpu_supports() -- a CPUID
-# feature lookup -- on every single 64-byte block, i.e. over a million times for a large upload chunk. That
-# lookup is a pure function of CPU feature bits read once at process start, so it is safe to cache instead of
-# re-checking per block; see the patch file for the full reasoning kept next to the diff itself.
-	patch -p1 --forward < /usr/local/src/php-patches/0001-hash-sha-cache-shani-cpu-check.patch; \
+# feature lookup -- on every single 64-byte block, i.e. over a million times for a large upload chunk, unlike
+# every other SIMD-dispatched function in php-src (crc32_x86_simd_update(), php_base64_encode_ex(), etc.),
+# which resolve their CPU-feature check exactly once via an ifunc resolver or a PHP_MINIT_FUNCTION-cached
+# pointer. This patch brings SHA256Transform() in line with that existing convention: the check is resolved
+# once in PHP_MINIT_FUNCTION(hash) into a plain static int, instead of being repeated every block.
+	patch -p1 --forward < /usr/local/src/php-patches/0001-hash-sha-minit-shani-resolver.patch; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
 	test "$PHP_INI_DIR" != "${PHP_INI_DIR%/php}"; \
 	./configure \
