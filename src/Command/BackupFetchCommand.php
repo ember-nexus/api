@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
@@ -34,6 +35,7 @@ class BackupFetchCommand extends Command
     private EmberNexusStyle $io;
 
     public function __construct(
+        #[Target('backup.storage')]
         private FilesystemOperator $backupStorage,
     ) {
         parent::__construct();
@@ -81,7 +83,7 @@ class BackupFetchCommand extends Command
         if (null === $backupLocation) {
             throw new Exception('Unable to find the file summary.json in backup archive.');
         }
-        $this->io->writeln(sprintf('Found backup inside ZIP in folder <info>%s</info>.', $backupLocation));
+        $this->io->writeln(sprintf('Found backup inside ZIP in folder <info>%s</info>.', '' === $backupLocation ? '/' : $backupLocation));
         if (!$filesystem->directoryExists(sprintf('%s/node', $backupLocation))) {
             throw new Exception('ZIP archive does not contain required node folder.');
         }
@@ -175,14 +177,17 @@ class BackupFetchCommand extends Command
             'dest' => $destination,
         ]);
         $manager->createDirectory(sprintf('dest://%s', $destinationPath));
-        $listing = $manager->listContents('source://'.$sourcePath, true);
+        // Flysystem returns paths without leading slashes, so the source path has to match that form
+        $normalizedSourcePath = trim($sourcePath, '/');
+        $listing = $manager->listContents(sprintf('source://%s', $normalizedSourcePath), true);
         $progressBar = $this->io->createProgressBarInInteractiveTerminal();
         $progressBar?->start();
         /** @var \League\Flysystem\StorageAttributes $item */
         foreach ($listing as $item) {
             $itemPath = $item->path();
             $itemName = basename($itemPath);
-            $itemDir = str_replace(sprintf('source://%s', $sourcePath), '', dirname($itemPath));
+            $normalizedItemDir = ltrim(str_replace('source://', '', dirname($itemPath)), '/');
+            $itemDir = substr($normalizedItemDir, strlen($normalizedSourcePath));
 
             if ($item->isFile()) {
                 $manager->copy(
@@ -220,23 +225,24 @@ class BackupFetchCommand extends Command
     }
 
     /**
-     * @SuppressWarnings("PHPMD.CountInLoopExpression")
+     * The backup is either located at the archive's root or inside a single top level folder (as in GitHub's
+     * release archives). Returns the folder without trailing slash, with the root being an empty string.
      */
     private function findBackupRootFolder(Filesystem $filesystem): ?string
     {
-        $stack = ['/'];
-        while (count($stack) > 0) {
-            $currentPath = array_shift($stack);
-            $listing = $filesystem->listContents($currentPath, false);
-            /** @var \League\Flysystem\StorageAttributes $item */
-            foreach ($listing as $item) {
-                if ($item->isFile() && str_ends_with($item->path(), 'summary.json')) {
-                    return $currentPath;
-                }
-                if ($item->isDir()) {
-                    array_push($stack, $item->path());
-                }
+        if ($filesystem->fileExists('summary.json')) {
+            return '';
+        }
+
+        $topLevelDirectories = [];
+        foreach ($filesystem->listContents('', false) as $item) {
+            if ($item->isDir()) {
+                $topLevelDirectories[] = $item->path();
             }
+        }
+
+        if (1 === count($topLevelDirectories) && $filesystem->fileExists(sprintf('%s/summary.json', $topLevelDirectories[0]))) {
+            return $topLevelDirectories[0];
         }
 
         return null;

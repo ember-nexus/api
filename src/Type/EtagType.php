@@ -11,4 +11,5 @@ enum EtagType: string
     case CHILDREN_COLLECTION = 'children';
     case INDEX_COLLECTION = 'index';
     case RELATED_COLLECTION = 'related';
+    case FILE = 'file';
 }

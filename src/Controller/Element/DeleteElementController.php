@@ -7,12 +7,14 @@ namespace App\Controller\Element;
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
-use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
+use App\Service\UploadService;
 use App\Type\AccessType;
 use App\Type\EtagType;
+use App\Type\Response\NoContentResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +26,8 @@ class DeleteElementController extends AbstractController
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private UploadService $uploadService,
+        private ElementFileDeletionService $elementFileDeletionService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -46,12 +50,17 @@ class DeleteElementController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElement($elementId);
-        if (null === $element) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
+        $element = $this->elementManager->getElementOrFail($elementId);
+        $fileOperations = $this->elementFileDeletionService->getFileOperationsForDeletionOfElement($element);
+
+        // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
+        $this->uploadService->deleteUploadsTargeting($elementId);
+        $this->elementManager->flush();
+
         $this->elementManager->delete($element);
         $this->elementManager->flush();
+
+        $this->elementFileDeletionService->deleteFiles($fileOperations);
 
         return new NoContentResponse();
     }

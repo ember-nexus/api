@@ -1,11 +1,11 @@
-Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: GET, HEAD, OPTIONS, POST
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: GET, HEAD, OPTIONS, POST
 Cache-Control: no-cache, private
+Content-Length: 0
 Content-Type: text/html; charset=UTF-8
-Date: Mon, 09 Oct 2023 20:32:13 GMT
-Location: /455a89b9-4ec7-4b02-b023-bcfbcbba9a9f
-Transfer-Encoding: chunked
+Date: Fri, 02 Oct 2026 22:37:58 GMT
+Location: /5d7327d7-4a3b-45ff-bf6e-6600a1cea3be
 X-Powered-By: Ember Nexus API

@@ -1,0 +1,9 @@
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, HEAD, OPTIONS, PATCH
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, HEAD, OPTIONS, PATCH
+Cache-Control: no-cache, private
+Content-Type: application/problem+json; charset=utf-8
+Date: Fri, 02 Oct 2026 23:03:10 GMT
+X-Powered-By: Ember Nexus API

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\General;
+namespace App\Tests\FeatureTests\General;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
@@ -296,22 +296,17 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testEtagIfMatchWithPatchElement(): void
     {
-        $response = $this->runGetRequest(
-            sprintf(
-                '%s',
-                self::ID_DATA
-            ),
-            self::TOKEN
-        );
+        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
+            'type' => 'Data',
+            'data' => ['name' => 'if-match-patch-element'],
+        ]));
+
+        $response = $this->runGetRequest($elementId, self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
-        $this->assertSame('"6JM8JahrCeu"', $etag);
 
         $response = $this->runPatchRequest(
-            sprintf(
-                '%s',
-                self::ID_DATA
-            ),
+            $elementId,
             self::TOKEN,
             [
                 'new' => 'data',
@@ -323,56 +318,47 @@ class IfMatchTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 412);
 
         $response = $this->runPatchRequest(
-            sprintf(
-                '%s',
-                self::ID_DATA
-            ),
+            $elementId,
             self::TOKEN,
             [
                 'new' => 'data',
             ],
             [
-                'If-Match' => '"6JM8JahrCeu"',
+                'If-Match' => $etag,
             ]
         );
         $this->assertNoContentResponse($response);
 
         $response = $this->runPatchRequest(
-            sprintf(
-                '%s',
-                self::ID_DATA
-            ),
+            $elementId,
             self::TOKEN,
             [
                 'new' => 'data 2',
             ],
         );
         $this->assertNoContentResponse($response);
+
+        $this->assertIsDeletedResponse($this->runDeleteRequest($elementId, self::TOKEN));
     }
 
     public function testEtagIfMatchWithPutElement(): void
     {
-        $response = $this->runGetRequest(
-            sprintf(
-                '%s',
-                self::ID_CHILD
-            ),
-            self::TOKEN
-        );
+        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
+            'type' => 'Data',
+            'data' => ['name' => 'if-match-put-element'],
+        ]));
+
+        $response = $this->runGetRequest($elementId, self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
-        $this->assertSame('"aKq8GOPALf"', $etag);
 
         $response = $this->runPutRequest(
-            sprintf(
-                '%s',
-                self::ID_CHILD
-            ),
+            $elementId,
             self::TOKEN,
             [
                 'new' => 'data',
                 'scenario' => 'general.if-match',
-                'name' => 'Child',
+                'name' => 'if-match-put-element',
             ],
             [
                 'If-Match' => '"wrongEtag"',
@@ -381,55 +367,46 @@ class IfMatchTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 412);
 
         $response = $this->runPutRequest(
-            sprintf(
-                '%s',
-                self::ID_CHILD
-            ),
+            $elementId,
             self::TOKEN,
             [
                 'new' => 'data',
                 'scenario' => 'general.if-match',
-                'name' => 'Child',
+                'name' => 'if-match-put-element',
             ],
             [
-                'If-Match' => '"aKq8GOPALf"',
+                'If-Match' => $etag,
             ]
         );
         $this->assertNoContentResponse($response);
 
         $response = $this->runPutRequest(
-            sprintf(
-                '%s',
-                self::ID_CHILD
-            ),
+            $elementId,
             self::TOKEN,
             [
                 'new' => 'data',
                 'scenario' => 'general.if-match',
-                'name' => 'Child',
+                'name' => 'if-match-put-element',
             ],
         );
         $this->assertNoContentResponse($response);
+
+        $this->assertIsDeletedResponse($this->runDeleteRequest($elementId, self::TOKEN));
     }
 
     public function testEtagIfMatchWithDeleteElement(): void
     {
-        $response = $this->runGetRequest(
-            sprintf(
-                '%s',
-                self::ID_PARENT
-            ),
-            self::TOKEN
-        );
+        $elementId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
+            'type' => 'Data',
+            'data' => ['name' => 'if-match-delete-element'],
+        ]));
+
+        $response = $this->runGetRequest($elementId, self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
         $etag = $response->getHeader('ETag')[0];
-        $this->assertSame('"VaJ7FG60f3R"', $etag);
 
         $response = $this->runDeleteRequest(
-            sprintf(
-                '%s',
-                self::ID_PARENT
-            ),
+            $elementId,
             self::TOKEN,
             [
                 'If-Match' => '"wrongEtag"',
@@ -438,13 +415,10 @@ class IfMatchTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 412);
 
         $response = $this->runDeleteRequest(
-            sprintf(
-                '%s',
-                self::ID_PARENT
-            ),
+            $elementId,
             self::TOKEN,
             [
-                'If-Match' => '"VaJ7FG60f3R"',
+                'If-Match' => $etag,
             ]
         );
         $this->assertNoContentResponse($response);

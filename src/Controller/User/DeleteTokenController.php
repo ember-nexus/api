@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Controller\User;
 
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Response\NoContentResponse;
 use App\Security\AuthProvider;
+use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
+use App\Service\UploadService;
+use App\Type\Response\NoContentResponse;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,8 +20,9 @@ class DeleteTokenController extends AbstractController
     public function __construct(
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
+        private UploadService $uploadService,
+        private ElementFileDeletionService $elementFileDeletionService,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 
@@ -45,12 +47,17 @@ class DeleteTokenController extends AbstractController
             throw new LogicException('Token must be provided.');
         }
 
-        $tokenElement = $this->elementManager->getElement($tokenId);
-        if (null === $tokenElement) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
+        $tokenElement = $this->elementManager->getElementOrFail($tokenId);
+        $fileOperations = $this->elementFileDeletionService->getFileOperationsForDeletionOfElement($tokenElement);
+
+        // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
+        $this->uploadService->deleteUploadsTargeting($tokenId);
+        $this->elementManager->flush();
+
         $this->elementManager->delete($tokenElement);
         $this->elementManager->flush();
+
+        $this->elementFileDeletionService->deleteFiles($fileOperations);
 
         return new NoContentResponse();
     }

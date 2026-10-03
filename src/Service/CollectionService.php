@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Response\CollectionResponse;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Type\Response\CollectionResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\HttpFoundation\InputBag;
@@ -24,7 +24,7 @@ class CollectionService
         private ElementToRawService $elementToRawService,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -78,7 +78,7 @@ class CollectionService
     {
         $currentRequest = $this->requestStack->getCurrentRequest();
         if (null === $currentRequest) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Current request can not be null.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Current request can not be null.');
         }
         $basePath = $currentRequest->getPathInfo();
 
@@ -147,17 +147,13 @@ class CollectionService
         foreach ($nodeIds as $nodeId) {
             $nodeElement = $this->elementManager->getNode($nodeId);
             if ($nodeElement) {
-                $nodeData[] = $this->elementToRawService->elementToRaw(
-                    $nodeElement
-                );
+                $nodeData[] = $this->elementToRawService->elementToRaw($nodeElement);
             }
         }
         foreach ($relationIds as $relationId) {
             $relationElement = $this->elementManager->getRelation($relationId);
             if ($relationElement) {
-                $relationData[] = $this->elementToRawService->elementToRaw(
-                    $relationElement
-                );
+                $relationData[] = $this->elementToRawService->elementToRaw($relationElement);
             }
         }
 
@@ -201,9 +197,7 @@ class CollectionService
         foreach ($elementIds as $elementId) {
             $element = $this->elementManager->getElement($elementId);
             if ($element) {
-                $elementData[] = $this->elementToRawService->elementToRaw(
-                    $element
-                );
+                $elementData[] = $this->elementToRawService->elementToRaw($element);
             }
         }
 

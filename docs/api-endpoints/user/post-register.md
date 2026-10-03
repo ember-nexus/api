@@ -3,11 +3,6 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-> [!NOTE]
-> This endpoint's request body received a breaking change with version [0.1.6](https://github.com/ember-nexus/api/releases/tag/0.1.6).
-> The previous variant is deprecated and will be removed in version 0.2.0.
-> Link to the old documentation: [POST /register (old)](/api-endpoints/user/post-register-old.md).
-
 Endpoint for registering / creating new accounts.
 
 The endpoint can be disabled; see

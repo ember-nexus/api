@@ -4,20 +4,47 @@ declare(strict_types=1);
 
 namespace App\Controller\File;
 
-use App\Factory\Exception\Server501NotImplementedExceptionFactory;
+use App\Attribute\EndpointSupportsEtag;
+use App\Contract\NodeElementInterface;
+use App\Contract\RelationElementInterface;
+use App\Factory\Exception\Client404NotFoundExceptionFactory;
+use App\Factory\Type\S3\S3OperationFactory;
 use App\Helper\Regex;
+use App\Security\AccessChecker;
+use App\Security\AuthProvider;
+use App\Service\DigestService;
+use App\Service\ElementManager;
+use App\Service\ElementService;
+use App\Service\EtagService;
+use App\Service\FileRangeService;
+use App\Service\FileService;
+use App\Service\S3Service;
+use App\Type\AccessType;
+use App\Type\EtagType;
+use App\Type\Response\BinaryStreamResponse;
+use ArrayAccess;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+ * @SuppressWarnings("PHPMD.ExcessiveParameterList")
  */
 class GetElementFileController extends AbstractController
 {
     public function __construct(
-        private Server501NotImplementedExceptionFactory $server501NotImplementedExceptionFactory,
+        private AuthProvider $authProvider,
+        private AccessChecker $accessChecker,
+        private ElementManager $elementManager,
+        private ElementService $elementService,
+        private FileService $fileService,
+        private S3OperationFactory $s3OperationFactory,
+        private S3Service $s3Service,
+        private FileRangeService $fileRangeService,
+        private DigestService $digestService,
+        private EtagService $etagService,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 
@@ -29,8 +56,88 @@ class GetElementFileController extends AbstractController
         ],
         methods: ['GET']
     )]
-    public function getElementFile(string $id, Request $request): Response
+    #[EndpointSupportsEtag(EtagType::FILE)]
+    public function getElementFile(string $id, Request $request): BinaryStreamResponse
     {
-        throw $this->server501NotImplementedExceptionFactory->createFromTemplate();
+        $elementId = UuidV4::fromString($id);
+        $userId = $this->authProvider->getUserId();
+
+        if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::READ)) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        $element = $this->elementManager->getElementOrFail($elementId);
+        if (!$this->elementService->hasFile($element)) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        $fileName = $this->elementService->getFileName($element);
+        $fileNameFallback = $this->fileService->getAsciiSafeFileName($fileName);
+
+        $fileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
+
+        $doesFileExist = $this->s3Service->existsFile($fileOperation);
+        if (false === $doesFileExist) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
+        $reprDigestHeaderValue = $this->getReprDigestHeaderValue($element);
+        $contentType = $this->getStoredContentType($element);
+
+        $rangeHeader = $request->headers->get('Range');
+        // a failed `If-Range` precondition ignores the `Range` header and answers the full file
+        if (null !== $rangeHeader && $this->fileRangeService->isRangeConditionSatisfied(
+            $request->headers->get('If-Range'),
+            $this->etagService->getCurrentRequestEtag()?->getEtag()
+        )) {
+            $totalContentLength = $this->s3Service->getContentLength($fileOperation);
+            $range = $this->fileRangeService->parseRangeHeader($rangeHeader, $totalContentLength);
+            $object = $this->s3Service->getFileByteRange($fileOperation, $range->getStart(), $range->getEnd());
+
+            return new BinaryStreamResponse($object, $fileName, $fileNameFallback, $range, $reprDigestHeaderValue, $contentType);
+        }
+
+        $object = $this->s3Service->getFile($fileOperation);
+
+        return new BinaryStreamResponse($object, $fileName, $fileNameFallback, reprDigestHeaderValue: $reprDigestHeaderValue, contentType: $contentType);
+    }
+
+    private function getStoredContentType(NodeElementInterface|RelationElementInterface $element): ?string
+    {
+        if (!$element->hasProperty('file')) {
+            return null;
+        }
+        $fileProperty = $element->getProperty('file');
+        if (!is_array($fileProperty) && !($fileProperty instanceof ArrayAccess)) {
+            return null;
+        }
+        $mimeType = $fileProperty['mimeType'] ?? null;
+        if (!is_string($mimeType) || '' === $mimeType) {
+            return null;
+        }
+
+        return $mimeType;
+    }
+
+    private function getReprDigestHeaderValue(NodeElementInterface|RelationElementInterface $element): ?string
+    {
+        if (!$element->hasProperty('file')) {
+            return null;
+        }
+        $fileProperty = $element->getProperty('file');
+        // nested values from MongoDB may still be BSONDocument instances instead of plain arrays
+        if (!is_array($fileProperty) && !($fileProperty instanceof ArrayAccess)) {
+            return null;
+        }
+        $hash = $fileProperty['hash'] ?? null;
+        if (!is_array($hash) && !($hash instanceof ArrayAccess)) {
+            return null;
+        }
+        $sha256 = $hash['sha256'] ?? null;
+        if (!is_string($sha256) || 64 !== strlen($sha256)) {
+            return null;
+        }
+
+        return $this->digestService->formatDigestHeaderValue($sha256);
     }
 }

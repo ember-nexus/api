@@ -24,7 +24,7 @@ class EmberNexusStyle extends SymfonyStyle
     private bool $isInSection = false;
 
     public function __construct(
-        private InputInterface $input, /** @phpstan-ignore-line */
+        private InputInterface $input,
         private OutputInterface $output,
     ) {
         if ($output instanceof ConsoleOutput) {
@@ -46,32 +46,36 @@ class EmberNexusStyle extends SymfonyStyle
         parent::__construct($input, $output);
     }
 
+    private function getVersion(): ?string
+    {
+        $version = getenv('VERSION');
+        if (!is_string($version)) {
+            return null;
+        }
+        /** @psalm-suppress PossiblyInvalidArgument */
+        $version = trim(preg_replace('/[^0-9.]/', '', $version));
+        if ('' === $version) {
+            return null;
+        }
+
+        return 'v'.$version;
+    }
+
     public function title(string $message): void
     {
-        $versionString = 'development version';
         $appMode = 'production';
         if ('prod' !== getenv('APP_ENV')) {
             $appMode = 'development';
         }
-        $envVersion = getenv('VERSION');
-        if (is_string($envVersion)) {
-            if ($envVersion) {
-                $version = preg_replace('/[^0-9.]/', '', $envVersion);
-                // @phpstan-ignore-next-line
-                if (is_array($version)) {
-                    $version = implode('', $version);
-                }
-                $versionString = 'v'.$version;
-            }
-        }
+        $version = $this->getVersion();
         $this->newLine();
         $this->writeln(sprintf(
             "    <fg=gray>▄</>   \n".
             "  <fg=gray>▄<fg=gray;bg=bright-red>▀ ▀</>▄</>  <options=bold>Ember Nexus API</>\n".
-            "   <fg=bright-red>▀<fg=bright-white>█</>▀</>   %s, %s mode\n".
+            "   <fg=bright-red>▀<fg=bright-white>█</>▀</>   %s%s mode\n".
             "\n".
             "  <options=bold>%s</>\n",
-            $versionString,
+            null !== $version ? sprintf('%s, ', $version) : '',
             $appMode,
             $message
         ));
@@ -81,7 +85,7 @@ class EmberNexusStyle extends SymfonyStyle
     public function finalMessage(array|string $message): void
     {
         if ($this->isInSection) {
-            throw new Exception('Function success() should only be called at end of command, not within sections.');
+            throw new Exception('Function finalMessage() should only be called at end of command, not within sections.');
         }
         if (is_string($message)) {
             $message = [$message];
@@ -157,12 +161,16 @@ class EmberNexusStyle extends SymfonyStyle
         return $this->lineLength;
     }
 
+    /**
+     * Progress bars are written to stderr and are redrawn in place. This only works in an interactive terminal; in
+     * all other cases (e.g. ci, output redirected into a file) every redraw would end up as its own log line, without
+     * any context. Therefore, a progress bar is only returned if the error output is decorated, i.e. it is a terminal (or
+     * colors are forced through --ansi).
+     */
     public function createProgressBarInInteractiveTerminal(int $max = 0): ?ProgressBar
     {
-        /**
-         * @psalm-suppress RiskyTruthyFalsyComparison
-         */
-        if (getenv('TERM')) {
+        $errorOutput = $this->output instanceof ConsoleOutputInterface ? $this->output->getErrorOutput() : $this->output;
+        if (!$errorOutput->isDecorated()) {
             return null;
         }
 

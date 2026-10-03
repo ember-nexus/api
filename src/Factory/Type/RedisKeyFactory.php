@@ -68,4 +68,36 @@ class RedisKeyFactory
             $userId->toString()
         );
     }
+
+    public function getEtagFileRedisKey(UuidInterface $elementId): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::ETAG_FILE,
+            $elementId->toString()
+        );
+    }
+
+    public function getUploadLockRedisKey(UuidInterface $uploadId): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::UPLOAD_LOCK,
+            $uploadId->toString()
+        );
+    }
+
+    public function getFileCreationLockRedisKey(UuidInterface $elementId): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::FILE_CREATION_LOCK,
+            $elementId->toString()
+        );
+    }
+
+    public function getCronDeleteExpiredUploadRedisKey(string $uploadId): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::CRON_DELETE_EXPIRED_UPLOAD,
+            $uploadId
+        );
+    }
 }

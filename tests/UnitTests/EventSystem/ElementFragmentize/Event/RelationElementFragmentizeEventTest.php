@@ -23,20 +23,17 @@ class RelationElementFragmentizeEventTest extends TestCase
         $cypherFragment = new Relation();
         $mongoFragment = new MongoDocument();
         $elasticFragment = new ElasticDocument();
-        $fileFragment = null;
 
         $relationElementFragmentizeEvent = new RelationElementFragmentizeEvent(
             $relationElement,
             $cypherFragment,
             $mongoFragment,
-            $elasticFragment,
-            $fileFragment
+            $elasticFragment
         );
 
         $this->assertSame($relationElement, $relationElementFragmentizeEvent->getRelationElement());
         $this->assertSame($cypherFragment, $relationElementFragmentizeEvent->getCypherFragment());
         $this->assertSame($mongoFragment, $relationElementFragmentizeEvent->getMongoFragment());
         $this->assertSame($elasticFragment, $relationElementFragmentizeEvent->getElasticFragment());
-        $this->assertSame($fileFragment, $relationElementFragmentizeEvent->getFileFragment());
     }
 }

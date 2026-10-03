@@ -30,7 +30,7 @@ class EtagControllerEventListenerTest extends TestCase
         $event = new ControllerEvent(
             $this->prophesize(HttpKernelInterface::class)->reveal(),
             function () {},
-            $this->prophesize(Request::class)->reveal(),
+            new Request(),
             HttpKernelInterface::MAIN_REQUEST
         );
 
@@ -45,7 +45,7 @@ class EtagControllerEventListenerTest extends TestCase
         $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
         fn () => true;
 
-        $request = $this->prophesize(Request::class)->reveal();
+        $request = new Request();
 
         $event = new ControllerEvent(
             $this->prophesize(HttpKernelInterface::class)->reveal(),

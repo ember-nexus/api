@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\General\Exception;
+namespace App\Tests\FeatureTests\General\Exception;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 use GuzzleHttp\Client;

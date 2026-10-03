@@ -1,0 +1,112 @@
+services:
+
+  api:
+    container_name: api
+    image: __EMBER_NEXUS_API_IMAGE__
+    volumes:
+      - ./well-known-security.txt:/well-known-security.txt:ro
+      - ./volumes/api:/var/www/html/var
+    ports:
+      - "80:80"
+    environment:
+      - APP_ENV=prod
+      - CYPHER_AUTH=bolt://neo4j:password@neo4j
+      - MONGO_AUTH=mongodb://mongodb:password@mongodb:27017
+      - ELASTIC_AUTH=elasticsearch:9200
+      - REDIS_AUTH=tcp://redis?password=redis-password
+      - RABBITMQ_AUTH=amqp://user:password@rabbitmq:5672
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY_ID=ROOTNAME
+      - S3_SECRET_ACCESS_KEY=CHANGEME123
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio-init
+
+  neo4j:
+    container_name: neo4j
+    image: neo4j:5
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - ./volumes/neo4j/data:/data
+      - ./volumes/neo4j/logs:/logs
+    environment:
+      - NEO4J_AUTH=neo4j/password
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./volumes/mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      # see https://github.com/docker-library/mongo/discussions/748#discussioncomment-15927486
+      - GLIBC_TUNABLES=glibc.cpu.hwcaps=-SHSTK
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:8.19.17
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+
+  redis:
+    container_name: redis
+    image: redis:8
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./volumes/redis:/data
+    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:4-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./volumes/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+
+  minio:
+    container_name: minio
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./volumes/minio:/data
+    environment:
+      - MINIO_ROOT_USER=ROOTNAME
+      - MINIO_ROOT_PASSWORD=CHANGEME123
+    command: server /data --console-address ":9001"
+
+  # one-shot container that creates the two S3 buckets Ember Nexus expects (file.S3StorageBucket
+  # and file.S3UploadBucket, see the configuration reference) and then exits; minio does not create
+  # these on its own
+  minio-init:
+    container_name: minio-init
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ROOTNAME CHANGEME123; do sleep 1; done;
+      mc mb --ignore-existing local/api-storage;
+      mc mb --ignore-existing local/api-upload;
+      "

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\Security\Scenario01BasicNegativeTests;
+namespace App\Tests\FeatureTests\Security\Scenario01BasicNegativeTests;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
@@ -154,7 +154,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
     public function test1030420(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -174,7 +174,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
                 ],
             ]
         );
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -185,7 +185,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
     public function test1030422(): void
     {
         $response = $this->runPutRequest(sprintf('/%s/file', self::RELATION_1), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -196,7 +196,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
     public function test1030423(): void
     {
         $response = $this->runPatchRequest(sprintf('/%s/file', self::RELATION_1), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 405);
     }
 
     /**
@@ -207,84 +207,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
     public function test1030424(): void
     {
         $response = $this->runDeleteRequest(sprintf('/%s/file', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-04-30
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030430(): void
-    {
-        $response = $this->runCopyRequest(sprintf('/%s', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-04-31
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030431(): void
-    {
-        $response = $this->runLockRequest(sprintf('/%s', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-04-32
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030432(): void
-    {
-        $response = $this->runUnlockRequest(sprintf('/%s', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-04-33
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030433(): void
-    {
-        $response = $this->runMkcolRequest(sprintf('/%s', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-04-34
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030434(): void
-    {
-        $response = $this->runMoveRequest(sprintf('/%s', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-04-35
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030435(): void
-    {
-        $response = $this->runPropfindRequest(sprintf('/%s', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-04-36
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030436(): void
-    {
-        $response = $this->runProppatchRequest(sprintf('/%s', self::RELATION_1), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -397,7 +320,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
     public function test1030620(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -417,7 +340,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
                 ],
             ]
         );
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -428,7 +351,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
     public function test1030622(): void
     {
         $response = $this->runPutRequest(sprintf('/%s/file', self::RELATION_2), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -439,7 +362,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
     public function test1030623(): void
     {
         $response = $this->runPatchRequest(sprintf('/%s/file', self::RELATION_2), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 405);
     }
 
     /**
@@ -450,84 +373,7 @@ class _01_03_MissingAccessToEitherStartOrEndNodeOfRelationshipsTest extends Base
     public function test1030624(): void
     {
         $response = $this->runDeleteRequest(sprintf('/%s/file', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-06-30
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030630(): void
-    {
-        $response = $this->runCopyRequest(sprintf('/%s', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-06-31
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030631(): void
-    {
-        $response = $this->runLockRequest(sprintf('/%s', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-06-32
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030632(): void
-    {
-        $response = $this->runUnlockRequest(sprintf('/%s', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-06-33
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030633(): void
-    {
-        $response = $this->runMkcolRequest(sprintf('/%s', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-06-34
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030634(): void
-    {
-        $response = $this->runMoveRequest(sprintf('/%s', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-06-35
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030635(): void
-    {
-        $response = $this->runPropfindRequest(sprintf('/%s', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-03-06-36
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1030636(): void
-    {
-        $response = $this->runProppatchRequest(sprintf('/%s', self::RELATION_2), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**

@@ -1,0 +1,10 @@
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Cache-Control: no-cache, private
+Content-Length: 261
+Content-Type: application/problem+json; charset=utf-8
+Date: Fri, 02 Oct 2026 22:38:03 GMT
+X-Powered-By: Ember Nexus API

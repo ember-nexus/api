@@ -18,7 +18,6 @@ class NodeElementDefragmentizeEvent implements EventInterface
         private NodeElementInterface $nodeElement,
         private NodeInterface $cypherFragment,
         private ?DocumentInterface $documentFragment,
-        private mixed $fileFragment = null,
     ) {
     }
 
@@ -35,10 +34,5 @@ class NodeElementDefragmentizeEvent implements EventInterface
     public function getDocumentFragment(): ?DocumentInterface
     {
         return $this->documentFragment;
-    }
-
-    public function getFileFragment(): mixed
-    {
-        return $this->fileFragment;
     }
 }

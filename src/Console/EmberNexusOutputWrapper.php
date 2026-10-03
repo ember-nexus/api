@@ -49,6 +49,11 @@ class EmberNexusOutputWrapper implements OutputInterface
         return $this->output->isQuiet();
     }
 
+    public function isSilent(): bool
+    {
+        return $this->output->isSilent();
+    }
+
     public function isVerbose(): bool
     {
         return $this->output->isVerbose();

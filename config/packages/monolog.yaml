@@ -11,9 +11,10 @@ when@dev:
         level: debug
         channels: ["!event", "!request"]
         formatter: monolog_json_formatter
+      # only active for commands which run in a terminal, regular requests never use it
       console:
-        type: console
-        process_psr_3_messages: false
+        type: service
+        id: App\Logger\TerminalConsoleHandler
         channels: ["!event", "!doctrine", "!console"]
 
 when@test:
@@ -33,6 +34,12 @@ when@test:
 when@prod:
   monolog:
     handlers:
+      # declared first: for commands which run in a terminal it handles the records and stops them from also reaching
+      # the JSON handlers below; without a terminal (cron, CI) or for regular requests it is inactive
+      console:
+        type: service
+        id: App\Logger\TerminalConsoleHandler
+        channels: ["!event", "!doctrine", "!deprecation"]
       main:
         type: fingers_crossed
         action_level: error
@@ -44,11 +51,9 @@ when@prod:
         path: "php://stderr"
         level: debug
         formatter: monolog.formatter.json
-      console:
-        type: console
-        process_psr_3_messages: false
-        channels: ["!event", "!doctrine", "!deprecation"]
       deprecation:
         type: stream
         path: "php://stderr"
         level: error
+        # without the channel restriction every error would be written a second time in the line format
+        channels: ["deprecation"]

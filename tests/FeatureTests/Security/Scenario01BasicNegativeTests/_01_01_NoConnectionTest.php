@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\Security\Scenario01BasicNegativeTests;
+namespace App\Tests\FeatureTests\Security\Scenario01BasicNegativeTests;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
@@ -131,7 +131,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
     public function test1010220(): void
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -151,7 +151,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
                 ],
             ]
         );
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -162,7 +162,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
     public function test1010222(): void
     {
         $response = $this->runPutRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 
     /**
@@ -173,7 +173,7 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
     public function test1010223(): void
     {
         $response = $this->runPatchRequest(sprintf('/%s/file', self::DATA), self::TOKEN, []);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 405);
     }
 
     /**
@@ -184,83 +184,6 @@ class _01_01_NoConnectionTest extends BaseRequestTestCase
     public function test1010224(): void
     {
         $response = $this->runDeleteRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-01-02-30
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1010230(): void
-    {
-        $response = $this->runCopyRequest(sprintf('/%s', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-01-02-31
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1010231(): void
-    {
-        $response = $this->runLockRequest(sprintf('/%s', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-01-02-32
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1010232(): void
-    {
-        $response = $this->runUnlockRequest(sprintf('/%s', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-01-02-33
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1010233(): void
-    {
-        $response = $this->runMkcolRequest(sprintf('/%s', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-01-02-34
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1010234(): void
-    {
-        $response = $this->runMoveRequest(sprintf('/%s', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-01-02-35
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1010235(): void
-    {
-        $response = $this->runPropfindRequest(sprintf('/%s', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
-    }
-
-    /**
-     * @description test 1-01-02-36
-     *
-     * @todo refactor in v0.2.0 with actual request required
-     */
-    public function test1010236(): void
-    {
-        $response = $this->runProppatchRequest(sprintf('/%s', self::DATA), self::TOKEN);
-        $this->assertIsProblemResponse($response, 501);
+        $this->assertIsProblemResponse($response, 404);
     }
 }

@@ -2,12 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests;
+namespace App\Tests\FeatureTests;
 
+use App\Factory\S3ClientFactory;
+use AsyncAws\S3\S3Client;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\NullLogger;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ */
 abstract class BaseRequestTestCase extends TestCase
 {
     /**
@@ -63,41 +71,6 @@ abstract class BaseRequestTestCase extends TestCase
         return $this->runRequest('HEAD', $uri, $token, headers: $headers);
     }
 
-    public function runCopyRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('COPY', $uri, $token, headers: $headers);
-    }
-
-    public function runLockRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('LOCK', $uri, $token, headers: $headers);
-    }
-
-    public function runMkcolRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('MKCOL', $uri, $token, headers: $headers);
-    }
-
-    public function runMoveRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('MOVE', $uri, $token, headers: $headers);
-    }
-
-    public function runPropfindRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('PROPFIND', $uri, $token, headers: $headers);
-    }
-
-    public function runProppatchRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('PROPPATCH', $uri, $token, headers: $headers);
-    }
-
-    public function runUnlockRequest(string $uri, ?string $token, ?array $headers = []): ResponseInterface
-    {
-        return $this->runRequest('UNLOCK', $uri, $token, headers: $headers);
-    }
-
     public function runRequest(string $method, string $uri, ?string $token = null, ?array $data = null, ?array $headers = []): ResponseInterface
     {
         $client = new Client([
@@ -118,6 +91,34 @@ abstract class BaseRequestTestCase extends TestCase
         if (null !== $data) {
             $options['headers']['Content-Type'] = 'application/json; charset=utf-8';
             $options['body'] = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        return $client->request(
+            $method,
+            $uri,
+            $options
+        );
+    }
+
+    /**
+     * @param resource $body
+     */
+    public function runUploadRequest(string $method, string $uri, $body, ?string $token = null, ?array $headers = []): ResponseInterface
+    {
+        $client = new Client([
+            'base_uri' => $_ENV['API_DOMAIN'],
+            'http_errors' => false,
+        ]);
+
+        $options = [
+            'headers' => $headers,
+            'body' => $body,
+        ];
+        if (null !== $token) {
+            $options['headers']['Authorization'] = sprintf(
+                'Bearer %s',
+                $token
+            );
         }
 
         return $client->request(
@@ -244,6 +245,21 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertIsArray($body['data']);
     }
 
+    public function assertIsBinaryStreamResponse(ResponseInterface $response, string $expectedMimeType): void
+    {
+        $this->assertSame(200, $response->getStatusCode());
+
+        $contentTypeHeaders = $response->getHeader('content-type');
+        if (1 !== count($contentTypeHeaders)) {
+            $this->fail(sprintf('Expected to find one content-type header in response, got %d.', count($contentTypeHeaders)));
+        }
+        $contentTypeHeader = $contentTypeHeaders[0];
+        $responseMimeType = strtolower(explode(';', $contentTypeHeader)[0]);
+
+        $this->assertSame(strtolower($expectedMimeType), $responseMimeType);
+        $this->assertCount(1, $response->getHeader('Content-Disposition'));
+    }
+
     public function assertIsProblemResponse(ResponseInterface $response, int $status): void
     {
         $this->assertSame($status, $response->getStatusCode());
@@ -273,18 +289,20 @@ abstract class BaseRequestTestCase extends TestCase
         );
     }
 
-    public function assertIsCreatedResponse(ResponseInterface $response): void
+    public function assertIsCreatedResponse(ResponseInterface $response, bool $requireLocation = true): void
     {
         $this->assertSame(201, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
-        $this->assertIsString($response->getHeader('Location')[0]);
+        if ($requireLocation) {
+            $this->assertIsString($response->getHeader('Location')[0]);
+        }
     }
 
-    public function assertNoContentResponse(ResponseInterface $response): void
+    public function assertNoContentResponse(ResponseInterface $response, bool $hasHeader = false): void
     {
         $this->assertSame(204, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
-        $this->assertFalse($response->hasHeader('Location'));
+        $this->assertSame($hasHeader, $response->hasHeader('Location'));
     }
 
     public function assertNotModifiedResponse(ResponseInterface $response): void
@@ -354,5 +372,182 @@ abstract class BaseRequestTestCase extends TestCase
         $location = $response->getHeader('Location')[0];
 
         return array_reverse(explode('/', $location))[0];
+    }
+
+    /**
+     * Creates a relation of type 'Data' between two newly created 'Data' nodes, for tests which need a blank,
+     * short-lived relation. Remove it again with {@see deleteEphemeralRelation()}.
+     */
+    public function createEphemeralRelation(string $token, string $name): string
+    {
+        $startNodeId = $this->getUuidFromLocation($this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'data' => ['name' => $name.'-start'],
+        ]));
+        $endNodeId = $this->getUuidFromLocation($this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'data' => ['name' => $name.'-end'],
+        ]));
+        $relationResponse = $this->runPostRequest('/', $token, [
+            'type' => 'Data',
+            'start' => $startNodeId,
+            'end' => $endNodeId,
+            'data' => ['name' => $name],
+        ]);
+        $this->assertIsCreatedResponse($relationResponse);
+
+        return $this->getUuidFromLocation($relationResponse);
+    }
+
+    /**
+     * Removes a relation created by {@see createEphemeralRelation()}, including its start and end node.
+     */
+    public function deleteEphemeralRelation(string $token, string $relationId): void
+    {
+        $relation = $this->getBody($this->runGetRequest(sprintf('/%s', $relationId), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relationId), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relation['start']), $token));
+        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $relation['end']), $token));
+    }
+
+    /**
+     * Checks the default storage bucket directly, as the file of an element which no longer exists can not be
+     * requested through the API.
+     */
+    public function assertFileExistsInStorage(string $elementId): void
+    {
+        $this->assertTrue($this->isFileInStorage($elementId), sprintf('Expected file of element %s to exist in storage bucket.', $elementId));
+    }
+
+    public function assertFileDoesNotExistInStorage(string $elementId): void
+    {
+        $this->assertFalse($this->isFileInStorage($elementId), sprintf('Expected file of element %s to be removed from storage bucket.', $elementId));
+    }
+
+    private function createS3ClientForAssertions(): S3Client
+    {
+        return (new S3ClientFactory(
+            $_ENV['S3_ENDPOINT'],
+            $_ENV['S3_ACCESS_KEY_ID'],
+            $_ENV['S3_SECRET_ACCESS_KEY'],
+            new NullLogger(),
+            (new EmberNexusConfiguration())->setFileS3MaxHostConnections(16),
+        ))->createS3Client();
+    }
+
+    private function isFileInStorage(string $elementId): bool
+    {
+        $s3Client = $this->createS3ClientForAssertions();
+        // the object key ends with the element id, see FileService::getStorageBucketKey()
+        foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
+            if (str_contains((string) $object->getKey(), $elementId)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Counts the chunk objects of an upload in the upload bucket, as chunks are not accessible through the API.
+     */
+    public function countUploadChunksInUploadBucket(string $uploadId): int
+    {
+        $s3Client = $this->createS3ClientForAssertions();
+        $count = 0;
+        // the object key contains the upload id, see FileService::getUploadBucketKey()
+        foreach ($s3Client->listObjectsV2(['Bucket' => 'api-upload']) as $object) {
+            if (str_contains((string) $object->getKey(), $uploadId)) {
+                ++$count;
+            }
+        }
+
+        return $count;
+    }
+
+    public function generateDeterministicFile(int $seed, int $targetSize, string $outputPath): void
+    {
+        $lineWidth = 120;
+        $chunkLines = 4096;
+        $groupSize = 32;
+
+        $fh = \Safe\fopen($outputPath, 'wb');
+        mt_srand($seed);
+
+        $written = 0;
+        $state = (string) mt_rand(); // rolling state, re-seeded every $groupSize lines
+
+        for ($counter = 0; $written < $targetSize; ++$counter) {
+            // Re-seed state from mt_rand every $groupSize lines
+            if (0 === $counter % $groupSize) {
+                $state = hash('xxh128', (string) mt_rand().$counter);
+            }
+
+            // Roll state forward, build 4 × 32 = 128 hex chars, trim to 120
+            $a = hash('xxh128', $state.$counter);
+            $b = hash('xxh128', $a.$counter);
+            $c = hash('xxh128', $b.$counter);
+            $d = hash('xxh128', $c.$counter);
+            $state = $d; // carry forward into next line / next group seed
+
+            $line = substr($a.$b.$c.$d, 0, $lineWidth);
+
+            // Buffer into chunks for efficient fwrite
+            $chunk ??= '';
+            $chunk .= $line."\n";
+
+            if ($counter % $chunkLines === $chunkLines - 1 || $written + strlen($chunk) >= $targetSize) {
+                if ($written + strlen($chunk) > $targetSize) {
+                    $chunk = substr($chunk, 0, $targetSize - $written);
+                }
+                $written += fwrite($fh, $chunk);
+                $chunk = '';
+            }
+        }
+
+        \Safe\fclose($fh);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function splitFileToChunks(string $inputPath, int $chunkSize): array
+    {
+        if (!is_file($inputPath) || !is_readable($inputPath)) {
+            throw new InvalidArgumentException(sprintf('File not readable: %s', $inputPath));
+        }
+
+        $uid = bin2hex(random_bytes(8));
+        $handle = fopen($inputPath, 'rb');
+        $index = 0;
+        $paths = [];
+
+        while (!feof($handle)) {
+            $chunk = fread($handle, $chunkSize);
+            if (false === $chunk || 0 === strlen($chunk)) {
+                break;
+            }
+
+            $filename = sprintf('/tmp/upload-%s-%02d.part', $uid, $index);
+            file_put_contents($filename, $chunk);
+            $paths[] = $filename;
+            ++$index;
+        }
+
+        fclose($handle);
+
+        return $paths;
+    }
+
+    /**
+     * @param string[] $paths
+     */
+    public function cleanupChunks(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
     }
 }

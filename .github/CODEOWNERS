@@ -1,3 +1,4 @@
 /.github/ @ember-nexus/secops
 /docker/ @ember-nexus/secops
 *.env @ember-nexus/secops
+docker-compose*.yml @ember-nexus/secops

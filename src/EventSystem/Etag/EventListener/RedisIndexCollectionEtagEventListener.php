@@ -21,7 +21,7 @@ class RedisIndexCollectionEtagEventListener
     ) {
     }
 
-    #[AsEventListener]
+    #[AsEventListener(priority: 10)]
     public function onIndexCollectionEtagEvent(IndexCollectionEtagEvent $event): void
     {
         $redisKey = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey($event->getUserId());
