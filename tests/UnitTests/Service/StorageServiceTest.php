@@ -6,8 +6,7 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Service\FileService;
-use App\Service\StringService;
+use App\Service\StorageService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -22,15 +21,15 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
-#[CoversClass(FileService::class)]
+#[CoversClass(StorageService::class)]
 #[AllowMockObjectsWithoutExpectations]
-class FileServiceTest extends TestCase
+class StorageServiceTest extends TestCase
 {
     use ProphecyTrait;
 
-    private function buildFileService(
+    private function buildStorageService(
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
-    ): FileService {
+    ): StorageService {
         $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
         $urlGenerator->method('generate')->willReturn('url');
         $server500Bag = $this->createMock(ParameterBagInterface::class);
@@ -40,11 +39,9 @@ class FileServiceTest extends TestCase
             $server500Bag,
             $this->createMock(LoggerInterface::class)
         );
-        $stringService = new StringService($server500LogicExceptionFactory);
 
-        return new FileService(
+        return new StorageService(
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
-            $stringService,
             $server500LogicExceptionFactory,
         );
     }
@@ -54,7 +51,7 @@ class FileServiceTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
 
-        $storageService = $this->buildFileService(
+        $storageService = $this->buildStorageService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
@@ -74,7 +71,7 @@ class FileServiceTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileUploadChunkDigitsLength()->shouldBeCalledOnce()->willReturn(4);
 
-        $storageService = $this->buildFileService(
+        $storageService = $this->buildStorageService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
@@ -96,7 +93,7 @@ class FileServiceTest extends TestCase
         $emberNexusConfiguration->getFileS3UploadBucketLevels()->shouldBeCalledOnce()->willReturn(3);
         $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
 
-        $storageService = $this->buildFileService(
+        $storageService = $this->buildStorageService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
@@ -111,7 +108,7 @@ class FileServiceTest extends TestCase
         $emberNexusConfiguration->getFileS3UploadBucketLevels()->willReturn(3);
         $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->willReturn(2);
 
-        $storageService = $this->buildFileService(
+        $storageService = $this->buildStorageService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
@@ -121,39 +118,10 @@ class FileServiceTest extends TestCase
 
     public function testGetUploadBucketKeyRejectsInvalidChunkId(): void
     {
-        $storageService = $this->buildFileService();
+        $storageService = $this->buildStorageService();
 
         $this->expectException(Server500LogicErrorException::class);
         $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1, '../etc/passwd');
-    }
-
-    public function testGenerateUploadChunkIdIsRandomAndAcceptedInKeys(): void
-    {
-        $storageService = $this->buildFileService();
-
-        $first = $storageService->generateUploadChunkId();
-        $this->assertMatchesRegularExpression('/^[0-9A-Za-z]{1,64}$/', $first);
-        // base58 of 16 bytes has at most 22 characters
-        $this->assertLessThanOrEqual(22, strlen($first));
-        $this->assertGreaterThanOrEqual(16, strlen($first));
-        $this->assertNotSame($first, $storageService->generateUploadChunkId());
-    }
-
-    public function testGeneratedUploadChunkIdsAreUniqueAndAcceptedInKeys(): void
-    {
-        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getFileUploadChunkDigitsLength()->willReturn(4);
-        $emberNexusConfiguration->getFileS3UploadBucketLevels()->willReturn(0);
-        $emberNexusConfiguration->getFileS3UploadBucketLevelLength()->willReturn(2);
-        $storageService = $this->buildFileService(emberNexusConfiguration: $emberNexusConfiguration->reveal());
-
-        $ids = [];
-        for ($i = 0; $i < 200; ++$i) {
-            $ids[] = $storageService->generateUploadChunkId();
-        }
-        $this->assertCount(200, array_unique($ids));
-        $key = $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1, $ids[0]);
-        $this->assertStringContainsString('-0001-'.$ids[0].'.wip', $key);
     }
 
     /**
@@ -174,7 +142,7 @@ class FileServiceTest extends TestCase
     #[DataProvider('invalidChunkIdProvider')]
     public function testGetUploadBucketKeyRejectsInvalidChunkIdCharactersAndLengths(string $chunkId): void
     {
-        $storageService = $this->buildFileService();
+        $storageService = $this->buildStorageService();
 
         $this->expectException(Server500LogicErrorException::class);
         $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1, $chunkId);
@@ -186,7 +154,7 @@ class FileServiceTest extends TestCase
         $emberNexusConfiguration->getFileS3StorageBucketLevels()->shouldBeCalledOnce()->willReturn(3);
         $emberNexusConfiguration->getFileS3StorageBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
 
-        $storageService = $this->buildFileService(
+        $storageService = $this->buildStorageService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
@@ -200,7 +168,7 @@ class FileServiceTest extends TestCase
         $emberNexusConfiguration->getFileS3StorageBucketLevels()->shouldBeCalledOnce()->willReturn(3);
         $emberNexusConfiguration->getFileS3StorageBucketLevelLength()->shouldBeCalledOnce()->willReturn(2);
 
-        $storageService = $this->buildFileService(
+        $storageService = $this->buildStorageService(
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
@@ -210,14 +178,14 @@ class FileServiceTest extends TestCase
 
     public function testAppendExtension(): void
     {
-        $fileService = $this->buildFileService();
-        $this->assertSame('path/file.txt', $fileService->appendExtension('path/file', 'txt'));
-        $this->assertSame('path/file', $fileService->appendExtension('path/file', ''));
+        $storageService = $this->buildStorageService();
+        $this->assertSame('path/file.txt', $storageService->appendExtension('path/file', 'txt'));
+        $this->assertSame('path/file', $storageService->appendExtension('path/file', ''));
     }
 
     public function testUuidToNestedFolderStructure(): void
     {
-        $storageService = $this->buildFileService();
+        $storageService = $this->buildStorageService();
 
         $uuid = Uuid::fromString('3207d629-7199-4c2d-9b2a-b0fba10fe309');
 
@@ -281,92 +249,5 @@ class FileServiceTest extends TestCase
 
         $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 15, 2);
         $this->assertSame('32/07/d6/29/71/99/4c/2d/9b/2a/b0/fb/a1/0f/e3/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
-    }
-
-    public static function getAsciiSafeFileNameProvider(): array
-    {
-        return [
-            ['', ''],
-            ['abc', 'abc'],
-            [str_repeat('ooooooooo-', 30), 'ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooooooo-ooooo'],
-            ['abc.txt', 'abc.txt'],
-            ['AbC.txt', 'AbC.txt'],
-            ['aä-oö-uü.txt', 'aa-oo-uu.txt'],
-            ['0123.txt', '0123.txt'],
-            ['hello world.txt', 'hello world.txt'],
-            ['fichier été résumé.txt', 'fichier ete resume.txt'],
-            ['garçon.txt', 'garcon.txt'],
-            ['mañana.txt', 'manana.txt'],
-            ['📄 emoji.txt', 'page facing up emoji.txt'],
-            ['😃 emoji.txt', 'grinning face with big eyes emoji.txt'],
-            ['✅ emoji.txt', 'check mark button emoji.txt'],
-            ['😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃😃.txt', 'grinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning face with big eyesgrinning.txt'],
-            ['서울.txt', 'seoul.txt'],
-            ['한국어.txt', 'hangug-eo.txt'],
-            ['हिन्दी.txt', 'hindi.txt'],
-            ['தமிழ்.txt', 'tamil.txt'],
-            ['বাংলা.txt', 'banla.txt'],
-            ['日本語.txt', 'ri ben yu.txt'],
-        ];
-    }
-
-    #[DataProvider('getAsciiSafeFileNameProvider')]
-    public function testGetAsciiSafeFileName(string $input, string $output): void
-    {
-        $fileUtilService = $this->buildFileService();
-        $this->assertSame($output, $fileUtilService->getAsciiSafeFileName($input));
-    }
-
-    public static function removeReservedCharactersFromFileNameProvider(): array
-    {
-        return [
-            ['', ''],
-            ['    ', ''],
-            ['hello', 'hello'],
-            ['Hello', 'Hello'],
-            ['HelLo', 'HelLo'],
-            ['  prefix trim', 'prefix trim'],
-            ['suffix trim  ', 'suffix trim'],
-            ['multi word name', 'multi word name'],
-            ['"quoted string"', 'quoted string'],
-            ['wild card *', 'wild card'],
-            [' * prefix sanitized trim', 'prefix sanitized trim'],
-            ['suffix sanitized trim * ', 'suffix sanitized trim'],
-            ['slash /', 'slash'],
-            ['colon :', 'colon'],
-            ['less <', 'less'],
-            ['greater >', 'greater'],
-            ['question ?', 'question'],
-            ['reverse slash \\', 'reverse slash'],
-            ['pipe |', 'pipe'],
-        ];
-    }
-
-    #[DataProvider('removeReservedCharactersFromFileNameProvider')]
-    public function testRemoveReservedCharactersFromFileName(string $input, string $output): void
-    {
-        $fileUtilService = $this->buildFileService();
-        $this->assertSame($output, $fileUtilService->removeReservedCharactersFromFileName($input));
-    }
-
-    public static function fileNameFromPartsProvider(): array
-    {
-        return [
-            ['name', 'ext', 'name.ext'],
-            ['name', str_repeat('e', 100), 'name.'.str_repeat('e', 64)],
-            ['name', 'ext    with          long      extension      and      whitespace ', 'name.extwithlongextensionandwhitespace'],
-            ['name-----1---------2---------3---------4---------5---------6---------7---------8---------9---------a---------b---------c---------d---------e---------f---------g---------h---------i---------j---------k---------l---------m---------n---------o---------p---------q---------r---------s---------t---------u---------v', 'ext', 'name-----1---------2---------3---------4---------5---------6---------7---------8---------9---------a---------b---------c---------d---------e---------f---------g---------h---------i---------j---------k---------l---------m---------n---------o---------p-.ext'],
-            ['', 'env', '.env'],
-            ['Makefile', '', 'Makefile'],
-            ['  Makefile ', '', 'Makefile'],
-            [str_repeat('n', 300), '', str_repeat('n', 255)],
-        ];
-    }
-
-    #[DataProvider('fileNameFromPartsProvider')]
-    public function testBuildFileNameFromParts(string $name, string $extension, string $result): void
-    {
-        $fileUtilService = $this->buildFileService();
-        $this->assertSame($result, $fileUtilService->buildFileNameFromParts($name, $extension));
     }
 }

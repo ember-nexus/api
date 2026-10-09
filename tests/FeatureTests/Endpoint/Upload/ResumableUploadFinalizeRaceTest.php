@@ -16,14 +16,6 @@ class ResumableUploadFinalizeRaceTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private function createElement(): string
-    {
-        return $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
-            'type' => 'Data',
-            'data' => ['name' => 'resumable-upload-finalize-race'],
-        ]));
-    }
-
     private function createOpenUpload(string $elementId): string
     {
         $response = $this->runUploadRequest(
@@ -43,7 +35,7 @@ class ResumableUploadFinalizeRaceTest extends BaseRequestTestCase
 
     public function testChunkIsRejectedAfterAConcurrentPutCreatedTheFile(): void
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createElement(self::TOKEN, 'resumable-upload-finalize-race');
         $uploadId = $this->createOpenUpload($elementId);
 
         // a concurrent PUT is allowed to race the still-open upload and creates the file directly

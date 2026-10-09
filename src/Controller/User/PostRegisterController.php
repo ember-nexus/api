@@ -26,9 +26,6 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class PostRegisterController extends AbstractController
 {
-    /**
-     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
-     */
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,

@@ -28,9 +28,10 @@ class QueueServiceTest extends TestCase
     public function testPublishEventPublishesJsonEncodedMessageAndClosesChannel(): void
     {
         $channel = $this->prophesize(AMQPChannel::class);
-        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, false, false, false)->shouldBeCalledOnce();
+        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, true, false, false, false, Argument::type(AMQPTable::class))->shouldBeCalledOnce();
         $channel->basic_publish(
-            Argument::that(fn (AMQPMessage $message) => '{"elementId":"abc"}' === $message->getBody()),
+            Argument::that(fn (AMQPMessage $message) => '{"elementId":"abc"}' === $message->getBody()
+                && AMQPMessage::DELIVERY_MODE_PERSISTENT === $message->get('delivery_mode')),
             '',
             'ELASTICSEARCH_REINDEX_FILE'
         )->shouldBeCalledOnce();
@@ -46,7 +47,7 @@ class QueueServiceTest extends TestCase
     public function testConsumeQueueReturnsZeroForEmptyQueueWithoutCallingHandler(): void
     {
         $channel = $this->prophesize(AMQPChannel::class);
-        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, false, false, false)->shouldBeCalledOnce();
+        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, true, false, false, false, Argument::type(AMQPTable::class))->shouldBeCalledOnce();
         $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->shouldBeCalledOnce()->willReturn(null);
         $channel->close()->shouldBeCalledOnce();
 
@@ -70,7 +71,7 @@ class QueueServiceTest extends TestCase
         $message2 = new AMQPMessage('{"elementId":"2"}');
 
         $channel = $this->prophesize(AMQPChannel::class);
-        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, false, false, false)->shouldBeCalledOnce();
+        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, true, false, false, false, Argument::type(AMQPTable::class))->shouldBeCalledOnce();
         $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->willReturn($message1, $message2, null);
         $channel->close()->shouldBeCalledOnce();
 
@@ -101,7 +102,7 @@ class QueueServiceTest extends TestCase
         $goodMessage = new AMQPMessage('{"elementId":"good"}');
 
         $channel = $this->prophesize(AMQPChannel::class);
-        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, false, false, false)->shouldBeCalledOnce();
+        $channel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, true, false, false, false, Argument::type(AMQPTable::class))->shouldBeCalledOnce();
         $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->shouldBeCalledTimes(3)->willReturn($failingMessage, $goodMessage, null);
         $channel->basic_publish(
             Argument::that(fn (AMQPMessage $message) => '{"elementId":"bad"}' === $message->getBody()
@@ -162,7 +163,7 @@ class QueueServiceTest extends TestCase
         ));
     }
 
-    public function testPublishEventDeclaresDurableQueueWithArgumentsAndPersistentMessageForOwnershipQueue(): void
+    public function testPublishEventDeclaresBoundedLengthQueueWithDeadLetterArgumentsForOwnershipQueue(): void
     {
         $channel = $this->prophesize(AMQPChannel::class);
         $channel->queue_declare('ELASTICSEARCH_UPDATE_OWNERSHIP.dead-letter', false, true, false, false, false, Argument::type(AMQPTable::class))->shouldBeCalledOnce();
@@ -189,7 +190,7 @@ class QueueServiceTest extends TestCase
         $queueService->publishEvent(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE, ['relationId' => 'abc']);
     }
 
-    public function testDeclareQueueRecoversFromPreconditionFailedByRedeclaringOnAFreshChannel(): void
+    public function testDeclareQueueRecoversFromPreconditionFailedForBoundedLengthQueueByRedeclaringOnAFreshChannel(): void
     {
         $failingChannel = $this->prophesize(AMQPChannel::class);
         $failingChannel->queue_declare('ELASTICSEARCH_UPDATE_OWNERSHIP.dead-letter', false, true, false, false, false, Argument::type(AMQPTable::class))
@@ -211,6 +212,151 @@ class QueueServiceTest extends TestCase
 
         $queueService = new QueueService($connection->reveal(), $logger->reveal());
         $queueService->publishEvent(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE, ['relationId' => 'abc']);
+    }
+
+    public function testDeclareQueueRecoversFromPreconditionFailedForUnboundedQueueByRedeclaringOnAFreshChannel(): void
+    {
+        $failingChannel = $this->prophesize(AMQPChannel::class);
+        $failingChannel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, true, false, false, false, Argument::type(AMQPTable::class))
+            ->willThrow(new AMQPProtocolChannelException(406, 'PRECONDITION_FAILED', [10, 50]));
+
+        $freshChannel = $this->prophesize(AMQPChannel::class);
+        $freshChannel->queue_delete('ELASTICSEARCH_REINDEX_FILE')->shouldBeCalledOnce();
+        $freshChannel->queue_declare('ELASTICSEARCH_REINDEX_FILE', false, true, false, false, false, Argument::type(AMQPTable::class))->shouldBeCalledOnce();
+        $freshChannel->basic_publish(Argument::cetera())->shouldBeCalledOnce();
+        $freshChannel->close()->shouldBeCalledOnce();
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($failingChannel->reveal(), $freshChannel->reveal());
+
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->warning(Argument::containingString('ELASTICSEARCH_REINDEX_FILE'))->shouldBeCalledOnce();
+
+        $queueService = new QueueService($connection->reveal(), $logger->reveal());
+        $queueService->publishEvent(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE, ['elementId' => 'abc']);
+    }
+
+    public function testPublishEventSetsTimestampProperty(): void
+    {
+        $channel = $this->prophesize(AMQPChannel::class);
+        $channel->queue_declare(Argument::cetera())->shouldBeCalledOnce();
+        $channel->basic_publish(
+            Argument::that(fn (AMQPMessage $message) => $message->has('timestamp') && is_int($message->get('timestamp'))),
+            '',
+            'ELASTICSEARCH_REINDEX_FILE'
+        )->shouldBeCalledOnce();
+        $channel->close()->shouldBeCalledOnce();
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($channel->reveal());
+
+        $queueService = new QueueService($connection->reveal(), $this->prophesize(LoggerInterface::class)->reveal());
+        $queueService->publishEvent(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE, ['elementId' => 'abc']);
+    }
+
+    public function testConsumeQueueStopsBeforeFetchingOnceDeadlineHasPassed(): void
+    {
+        $channel = $this->prophesize(AMQPChannel::class);
+        $channel->queue_declare(Argument::cetera())->shouldBeCalledOnce();
+        $channel->basic_get(Argument::cetera())->shouldNotBeCalled();
+        $channel->close()->shouldBeCalledOnce();
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($channel->reveal());
+
+        $queueService = new QueueService($connection->reveal(), $this->prophesize(LoggerInterface::class)->reveal());
+        $processedMessages = $queueService->consumeQueue(
+            RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
+            function (): void {
+                $this->fail('Handler should not be called once the deadline has already passed.');
+            },
+            time() - 1
+        );
+
+        $this->assertSame(0, $processedMessages);
+    }
+
+    public function testConsumeQueueGivesBackMessagePublishedAfterThisRunStartedWithoutTouchingTryCount(): void
+    {
+        $futureMessage = new AMQPMessage('{"elementId":"future"}', ['timestamp' => time() + 3600]);
+
+        $channel = $this->prophesize(AMQPChannel::class);
+        $channel->queue_declare(Argument::cetera())->shouldBeCalledOnce();
+        $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->shouldBeCalledOnce()->willReturn($futureMessage);
+        $channel->basic_nack(Argument::any(), false, true)->shouldBeCalledOnce();
+        $channel->basic_ack(Argument::cetera())->shouldNotBeCalled();
+        $channel->basic_publish(Argument::cetera())->shouldNotBeCalled();
+        $channel->close()->shouldBeCalledOnce();
+        $futureMessage->setChannel($channel->reveal());
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($channel->reveal());
+
+        $queueService = new QueueService($connection->reveal(), $this->prophesize(LoggerInterface::class)->reveal());
+        $processedMessages = $queueService->consumeQueue(
+            RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
+            function (): void {
+                $this->fail('Handler should not be called for a message published after this run started.');
+            }
+        );
+
+        $this->assertSame(0, $processedMessages);
+    }
+
+    public function testConsumeQueueProcessesMessageWithMissingTimestampAsOldEnough(): void
+    {
+        $message = new AMQPMessage('{"elementId":"1"}');
+
+        $channel = $this->prophesize(AMQPChannel::class);
+        $channel->queue_declare(Argument::cetera())->shouldBeCalledOnce();
+        $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->willReturn($message, null);
+        $channel->basic_nack(Argument::cetera())->shouldNotBeCalled();
+        $channel->close()->shouldBeCalledOnce();
+        $message->setChannel($channel->reveal());
+        $channel->basic_ack(Argument::any(), Argument::any())->shouldBeCalledOnce();
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($channel->reveal());
+
+        $handled = false;
+        $queueService = new QueueService($connection->reveal(), $this->prophesize(LoggerInterface::class)->reveal());
+        $processedMessages = $queueService->consumeQueue(
+            RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
+            function () use (&$handled): void {
+                $handled = true;
+            }
+        );
+
+        $this->assertTrue($handled);
+        $this->assertSame(1, $processedMessages);
+    }
+
+    public function testConsumeQueueRetryRepublishAlsoCarriesAFreshTimestamp(): void
+    {
+        $failingMessage = new AMQPMessage('{"elementId":"bad"}', ['timestamp' => time() - 3600]);
+
+        $channel = $this->prophesize(AMQPChannel::class);
+        $channel->queue_declare(Argument::cetera())->shouldBeCalledOnce();
+        $channel->basic_get('ELASTICSEARCH_REINDEX_FILE')->willReturn($failingMessage, null);
+        $channel->basic_publish(
+            Argument::that(fn (AMQPMessage $message) => $message->has('timestamp') && $message->get('timestamp') >= time() - 1),
+            '',
+            'ELASTICSEARCH_REINDEX_FILE'
+        )->shouldBeCalledOnce();
+        $channel->close()->shouldBeCalledOnce();
+        $failingMessage->setChannel($channel->reveal());
+        $channel->basic_ack(Argument::any(), Argument::any())->shouldBeCalledOnce();
+
+        $connection = $this->prophesize(AMQPStreamConnection::class);
+        $connection->channel()->willReturn($channel->reveal());
+
+        $queueService = new QueueService($connection->reveal(), $this->prophesize(LoggerInterface::class)->reveal());
+        $queueService->consumeQueue(
+            RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE,
+            function (): void {
+                throw new RuntimeException('boom');
+            }
+        );
     }
 
     public function testConsumeQueueTreatsMalformedJsonAsFailedMessage(): void

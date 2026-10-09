@@ -26,7 +26,7 @@ class UploadElementPropertyChangeEventListener
             return;
         }
         foreach (array_keys($event->getChangedProperties()) as $propertyName) {
-            throw $this->client400ForbiddenPropertyExceptionFactory->createFromTemplate((string) $propertyName);
+            throw $this->client400ForbiddenPropertyExceptionFactory->createFromTemplate($propertyName);
         }
     }
 }

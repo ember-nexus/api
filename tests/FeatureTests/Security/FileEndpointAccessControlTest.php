@@ -21,7 +21,7 @@ class FileEndpointAccessControlTest extends BaseRequestTestCase
 
     public function testOwnerCanPostFileToNewElement(): void
     {
-        $elementId = $this->createElement(self::TOKEN_OWNER);
+        $elementId = $this->createElement(self::TOKEN_OWNER, 'file-access-control-test');
 
         $file = \Safe\fopen(__DIR__.'/../Asset/cherry-blossoms.jpg', 'r');
         $response = $this->runUploadRequest('POST', sprintf('/%s/file', $elementId), $file, self::TOKEN_OWNER);
@@ -45,7 +45,7 @@ class FileEndpointAccessControlTest extends BaseRequestTestCase
 
     public function testOwnerCanPutFileToReplaceExisting(): void
     {
-        $elementId = $this->createElement(self::TOKEN_OWNER);
+        $elementId = $this->createElement(self::TOKEN_OWNER, 'file-access-control-test');
 
         $file = \Safe\fopen(__DIR__.'/../Asset/cherry-blossoms.jpg', 'r');
         $createResponse = $this->runUploadRequest('POST', sprintf('/%s/file', $elementId), $file, self::TOKEN_OWNER);
@@ -76,7 +76,7 @@ class FileEndpointAccessControlTest extends BaseRequestTestCase
 
     public function testOwnerCanDeleteFile(): void
     {
-        $elementId = $this->createElement(self::TOKEN_OWNER);
+        $elementId = $this->createElement(self::TOKEN_OWNER, 'file-access-control-test');
 
         $file = \Safe\fopen(__DIR__.'/../Asset/cherry-blossoms.jpg', 'r');
         $createResponse = $this->runUploadRequest('POST', sprintf('/%s/file', $elementId), $file, self::TOKEN_OWNER);
@@ -116,21 +116,5 @@ class FileEndpointAccessControlTest extends BaseRequestTestCase
 
         $deleteResponse = $this->runDeleteRequest(sprintf('/%s/file', self::READ_ONLY_DATA_ID), self::TOKEN_READ_ONLY);
         $this->assertIsProblemResponse($deleteResponse, 404);
-    }
-
-    private function createElement(string $token): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            $token,
-            [
-                'type' => 'Data',
-                'data' => [
-                    'name' => 'file-access-control-test',
-                ],
-            ]
-        );
-
-        return $this->getUuidFromLocation($response);
     }
 }

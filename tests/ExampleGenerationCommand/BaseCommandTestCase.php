@@ -12,6 +12,8 @@ abstract class BaseCommandTestCase extends TestCase
     /**
      * Runs the command and returns its stdout. Stderr is captured as well: it contains e.g. progress bars, which would
      * otherwise end up in the test log without any context. It is only shown if the command fails.
+     *
+     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function runCommand(string $command): string
     {

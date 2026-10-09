@@ -121,7 +121,7 @@ class UploadFinalizationServiceTest extends TestCase
             $mergeFactory->reveal(),
             $this->s3Service->reveal(),
             $this->uploadService->reveal(),
-            new DigestService(),
+            new DigestService($badContentFactory->reveal()),
             $this->fileSizeLimitService->reveal(),
             $badContentFactory->reveal(),
             $conflictFactory->reveal(),
@@ -204,6 +204,98 @@ class UploadFinalizationServiceTest extends TestCase
 
         $this->expectException(RuntimeException::class);
         $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+    }
+
+    /**
+     * The merge already succeeded, so a failure to delete the previous file afterward must not be reported as an
+     * upload failure, and must not skip the other, independent cleanup steps.
+     */
+    public function testDeletePreviousFileFailureDuringCleanupIsLoggedButOtherStepsStillRun(): void
+    {
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->willThrow(new RuntimeException('delete previous file failed'));
+        $this->s3Service->deleteFileChunks(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->deleteUpload(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->markUploadAsUnfinalized(Argument::cetera())->shouldNotBeCalled();
+        $this->eventDispatcher->dispatch(Argument::that(fn ($event) => $event instanceof ElementFileReplaceEvent))->shouldBeCalledOnce();
+        $uploadId = $this->upload->reveal()->getId()->toString();
+        $this->logger->error(Argument::that(
+            fn (string $message) => str_contains($message, $uploadId) && str_contains($message, 'delete previous file failed')
+        ))->shouldBeCalledOnce();
+
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+        $this->addToAssertionCount(1);
+    }
+
+    /**
+     * Same as above, but for the chunk deletion step.
+     */
+    public function testDeleteFileChunksFailureDuringCleanupIsLoggedButOtherStepsStillRun(): void
+    {
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $this->s3Service->deleteFileChunks(Argument::any())->willThrow(new RuntimeException('delete chunks failed'));
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->deleteUpload(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->markUploadAsUnfinalized(Argument::cetera())->shouldNotBeCalled();
+        $this->eventDispatcher->dispatch(Argument::that(fn ($event) => $event instanceof ElementFileReplaceEvent))->shouldBeCalledOnce();
+        $uploadId = $this->upload->reveal()->getId()->toString();
+        $this->logger->error(Argument::that(
+            fn (string $message) => str_contains($message, $uploadId) && str_contains($message, 'delete chunks failed')
+        ))->shouldBeCalledOnce();
+
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+        $this->addToAssertionCount(1);
+    }
+
+    /**
+     * Same as above, but for deleting the upload node itself; the upload is already finalized, so this leaves a
+     * stale upload node behind instead of failing the request.
+     */
+    public function testDeleteUploadFailureDuringCleanupIsLoggedButOtherStepsStillRun(): void
+    {
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $this->uploadService->deleteUpload(Argument::any())->willThrow(new RuntimeException('delete upload failed'));
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->shouldBeCalledOnce();
+        $this->s3Service->deleteFileChunks(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->markUploadAsUnfinalized(Argument::cetera())->shouldNotBeCalled();
+        $this->eventDispatcher->dispatch(Argument::that(fn ($event) => $event instanceof ElementFileReplaceEvent))->shouldBeCalledOnce();
+        $uploadId = $this->upload->reveal()->getId()->toString();
+        $this->logger->error(Argument::that(
+            fn (string $message) => str_contains($message, $uploadId) && str_contains($message, 'delete upload failed')
+        ))->shouldBeCalledOnce();
+
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+        $this->addToAssertionCount(1);
+    }
+
+    /**
+     * The trailing flush (which commits the upload node's deletion) is also a best-effort cleanup step, distinct
+     * from the earlier flush of the new file, which still has its own rollback via `markUploadAsUnfinalized`.
+     */
+    public function testFinalFlushFailureDuringCleanupIsLoggedAndDoesNotThrow(): void
+    {
+        $this->element->addProperty(Argument::cetera())->willReturn($this->element->reveal());
+        $flushCallCount = 0;
+        $this->elementManager->flush()->will(function () use (&$flushCallCount) {
+            ++$flushCallCount;
+            if (2 === $flushCallCount) {
+                throw new RuntimeException('final flush failed');
+            }
+
+            return $this->reveal();
+        });
+        $this->elementFileDeletionService->deletePreviousFileAfterReplace(Argument::any())->shouldBeCalledOnce();
+        $this->s3Service->deleteFileChunks(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->deleteUpload(Argument::any())->shouldBeCalledOnce();
+        $this->uploadService->markUploadAsUnfinalized(Argument::cetera())->shouldNotBeCalled();
+        $this->eventDispatcher->dispatch(Argument::that(fn ($event) => $event instanceof ElementFileReplaceEvent))->shouldBeCalledOnce();
+        $uploadId = $this->upload->reveal()->getId()->toString();
+        $this->logger->error(Argument::that(
+            fn (string $message) => str_contains($message, $uploadId) && str_contains($message, 'final flush failed')
+        ))->shouldBeCalledOnce();
+
+        $this->service->finalize($this->upload->reveal(), hash_init('sha256'));
+        $this->assertSame(2, $flushCallCount);
     }
 
     public function testFinalizeWithMatchingReprDigestMergesChunks(): void

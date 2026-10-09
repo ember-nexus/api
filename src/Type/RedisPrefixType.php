@@ -16,7 +16,8 @@ enum RedisPrefixType: string
     case ETAG_INDEX_COLLECTION = 'etag:index:';
     case ETAG_FILE = 'etag:file:';
 
-    case UPLOAD_LOCK = 'upload-lock:';
-    case FILE_CREATION_LOCK = 'file:create:';
+    case LOCK_UPLOAD = 'lock:upload:';
+    case LOCK_FILE_CREATION = 'lock:file-creation:';
+    case LOCK_ELEMENT_REQUEST = 'lock:element-request:';
     case CRON_DELETE_EXPIRED_UPLOAD = 'cron:delete-expired-upload:';
 }

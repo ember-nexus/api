@@ -30,7 +30,7 @@ class NoContentResponseFactoryTest extends TestCase
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest()->shouldNotBeCalled();
+        $emberNexusConfiguration->getFileUploadExpiresAfterFirstRequestInSeconds()->shouldNotBeCalled();
         $emberNexusConfiguration->getFileMaxFileSizeInBytes()->shouldBeCalledOnce()->willReturn(555555);
         $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()->shouldBeCalledOnce()->willReturn(444444);
         $emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()->shouldBeCalledOnce()->willReturn(333333);
@@ -63,7 +63,7 @@ class NoContentResponseFactoryTest extends TestCase
         $upload->getExpires()->shouldBeCalledOnce()->willReturn($expires);
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest()->shouldNotBeCalled();
+        $emberNexusConfiguration->getFileUploadExpiresAfterFirstRequestInSeconds()->shouldNotBeCalled();
         $emberNexusConfiguration->getFileMaxFileSizeInBytes()->shouldBeCalledOnce()->willReturn(555555);
         $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()->shouldBeCalledOnce()->willReturn(444444);
         $emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()->shouldBeCalledOnce()->willReturn(333333);
@@ -97,7 +97,7 @@ class NoContentResponseFactoryTest extends TestCase
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         // the full window must not leak into the header
-        $emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest()->willReturn(666666);
+        $emberNexusConfiguration->getFileUploadExpiresAfterFirstRequestInSeconds()->willReturn(666666);
         $emberNexusConfiguration->getFileMaxFileSizeInBytes()->willReturn(555555);
         $emberNexusConfiguration->getFileUploadMinChunkSizeInBytes()->willReturn(444444);
         $emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes()->willReturn(333333);

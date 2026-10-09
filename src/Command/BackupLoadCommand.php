@@ -56,9 +56,6 @@ class BackupLoadCommand extends Command
 
     private EmberNexusStyle $io;
 
-    /**
-     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
-     */
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,

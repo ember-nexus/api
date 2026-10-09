@@ -40,14 +40,14 @@ class UploadFactory
             $id,
             $this->propertyParseService->getUploadLengthFromProperties($properties),
             $this->propertyParseService->getUploadOffsetFromProperties($properties),
-            $this->propertyParseService->getIsUploadCompleteFromProperties($properties),
+            $this->propertyParseService->isUploadCompleteFromProperties($properties),
             $this->propertyParseService->getUploadTargetFromProperties($properties),
             $this->propertyParseService->getChunkIdsFromProperties($properties),
             $this->propertyParseService->getUploadOwnerFromProperties($properties),
             $this->propertyParseService->getExtensionFromProperties($properties),
             $this->propertyParseService->getExpiresFromProperties($properties),
             $this->propertyParseService->getHashStateFromProperties($properties),
-            $this->propertyParseService->getTargetHadFileAtCreationFromProperties($properties)
+            $this->propertyParseService->targetHadFileAtCreationFromProperties($properties)
         );
     }
 

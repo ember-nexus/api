@@ -35,8 +35,16 @@ class RequestIdService
 
     private function getRequestIdFromHeader(): ?UuidInterface
     {
-        $headerValue = $this->requestStack->getMainRequest()?->headers->get(self::HEADER_NAME);
-        if (null === $headerValue || !Uuid::isValid($headerValue)) {
+        $request = $this->requestStack->getMainRequest();
+        if (null === $request) {
+            return null;
+        }
+
+        $headerValue = $request->headers->get(self::HEADER_NAME);
+        if (!is_string($headerValue)) {
+            return null;
+        }
+        if (!Uuid::isValid($headerValue)) {
             return null;
         }
 

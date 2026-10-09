@@ -10,9 +10,8 @@ use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\ElementToRawService;
-use App\Service\FileService;
 use App\Service\S3Service;
-use App\Service\StringService;
+use App\Service\StorageService;
 use App\Type\NodeElement;
 use App\Type\S3\FileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -53,6 +52,9 @@ class BackupCreateCommandTest extends TestCase
         $this->backupStorage = new Filesystem(new LocalFilesystemAdapter($this->storageRoot));
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.ErrorControlOperator)
+     */
     protected function tearDown(): void
     {
         $this->backupStorage->deleteDirectory('');
@@ -64,6 +66,9 @@ class BackupCreateCommandTest extends TestCase
      *                                                 element manager can be added to $missingElementIds
      * @param string[]              $missingElementIds
      * @param int                   $uploadCount       number of unfinished `Upload` nodes reported by the database
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     private function runCommand(array $fileContents, array $input = [], array $missingElementIds = [], int $uploadCount = 0): CommandTester
     {
@@ -127,9 +132,8 @@ class BackupCreateCommandTest extends TestCase
             $this->prophesize(ElementToRawService::class)->reveal(),
             $elementService->reveal(),
             $bag->reveal(),
-            new FileService(
+            new StorageService(
                 $this->prophesize(EmberNexusConfiguration::class)->reveal(),
-                new StringService($this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()),
                 $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
             ),
             $s3Service->reveal(),

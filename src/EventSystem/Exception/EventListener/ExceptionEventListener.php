@@ -10,6 +10,7 @@ use App\Service\RequestIdService;
 use App\Type\Response\ProblemJsonResponse;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -81,12 +82,20 @@ class ExceptionEventListener
         if ($this->kernel->isDebug()) {
             $data['exception'] = [
                 'message' => $originalException->getMessage(),
-                'trace' => $originalException->getTrace(),
+                // getTrace() exposes the live call arguments of every frame, any of which (e.g. a non-backed enum
+                // instance) can make json_encode() throw and take down the error response itself; the string
+                // form carries the same debugging value (file/line/function per frame) without that risk
+                'trace' => $originalException->getTraceAsString(),
             ];
         }
         // getMessage() is always empty (ProblemJsonException never forwards it to the parent Exception), getDetail()
         // carries the actual explanation, e.g. the received/announced byte counts of a 408 request timeout
-        $this->logger->error(sprintf(
+        //
+        // a 4xx is the correct, expected response to a bad request, not a server fault, so it is logged at `info`;
+        // only a 5xx (an actual server-side failure) is logged at `error`
+        $status = $extendedException->getStatus();
+        $logLevel = ($status >= 400 && $status < 500) ? LogLevel::INFO : LogLevel::ERROR;
+        $this->logger->log($logLevel, sprintf(
             '%s %s: %s',
             $extendedException->getType(),
             $extendedException->getTitle(),

@@ -216,7 +216,7 @@ class ExceptionEventListenerTest extends TestCase
 
         $exceptionEventListener->onKernelException($exceptionEvent);
 
-        $this->assertLogHappened($logger, 'error', 'Some extended exception Forbidden:');
+        $this->assertLogHappened($logger, 'info', 'Some extended exception Forbidden:');
 
         $response = $exceptionEvent->getResponse();
         $this->assertInstanceOf(ProblemJsonResponse::class, $response);
@@ -268,7 +268,7 @@ class ExceptionEventListenerTest extends TestCase
 
         $exceptionEventListener->onKernelException($exceptionEvent);
 
-        $this->assertLogHappened($logger, 'error', 'Some extended exception Forbidden:');
+        $this->assertLogHappened($logger, 'info', 'Some extended exception Forbidden:');
 
         $response = $exceptionEvent->getResponse();
         $this->assertInstanceOf(ProblemJsonResponse::class, $response);
@@ -320,7 +320,7 @@ class ExceptionEventListenerTest extends TestCase
 
         $exceptionEventListener->onKernelException($exceptionEvent);
 
-        $this->assertLogHappened($logger, 'error', 'Some extended exception Forbidden:');
+        $this->assertLogHappened($logger, 'info', 'Some extended exception Forbidden:');
 
         $response = $exceptionEvent->getResponse();
         $this->assertInstanceOf(ProblemJsonResponse::class, $response);

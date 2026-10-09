@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Command\Cron;
 
 use App\Command\Cron\UpdateOwnershipCommand;
 use App\Service\CronExecutionGateService;
+use App\Service\CronTimeBudgetService;
 use App\Service\ElementManager;
 use App\Service\QueueService;
 use App\Service\SearchAccessCalculatorService;
@@ -21,7 +22,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Uuid;
-use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -41,12 +41,20 @@ class UpdateOwnershipCommandTest extends TestCase
         ?SearchAccessCalculatorService $searchAccessCalculatorService = null,
         ?ElasticEntityManager $elasticEntityManager = null,
         ?CypherEntityManager $cypherEntityManager = null,
+        ?CronTimeBudgetService $cronTimeBudgetService = null,
     ): UpdateOwnershipCommand {
         $cronExecutionGateService = $this->prophesize(CronExecutionGateService::class);
         $cronExecutionGateService->shouldSkipExecution()->willReturn($isCronDisabled);
 
+        if (null === $cronTimeBudgetService) {
+            $cronTimeBudgetServiceProphecy = $this->prophesize(CronTimeBudgetService::class);
+            $cronTimeBudgetServiceProphecy->getDeadline()->willReturn(null);
+            $cronTimeBudgetService = $cronTimeBudgetServiceProphecy->reveal();
+        }
+
         return new UpdateOwnershipCommand(
             $cronExecutionGateService->reveal(),
+            $cronTimeBudgetService,
             $queueService ?? $this->prophesize(QueueService::class)->reveal(),
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal(),
             $searchAccessCalculatorService ?? $this->prophesize(SearchAccessCalculatorService::class)->reveal(),
@@ -83,7 +91,7 @@ class UpdateOwnershipCommandTest extends TestCase
     public function testCommandFinishesWhenCronIsEnabledAndQueueIsEmpty(): void
     {
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'))
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), null)
             ->shouldBeCalledOnce()
             ->willReturn(0);
 
@@ -93,7 +101,27 @@ class UpdateOwnershipCommandTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
+        $this->assertStringContainsString('Running interactively; no time limit applied.', $commandTester->getDisplay());
         $this->assertStringContainsString('Processed 0 queue message(s), updated search access of 0 element(s).', $commandTester->getDisplay());
+    }
+
+    public function testCommandForwardsNonNullDeadlineToQueueService(): void
+    {
+        $cronTimeBudgetService = $this->prophesize(CronTimeBudgetService::class);
+        $cronTimeBudgetService->getDeadline()->willReturn(1_700_000_000);
+
+        $queueService = $this->prophesize(QueueService::class);
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), 1_700_000_000)
+            ->shouldBeCalledOnce()
+            ->willReturn(0);
+
+        $command = $this->buildCommand(queueService: $queueService->reveal(), cronTimeBudgetService: $cronTimeBudgetService->reveal());
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([]);
+
+        $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
+        $this->assertStringNotContainsString('Running interactively', $commandTester->getDisplay());
     }
 
     public function testCommandThrowsIfCronDisabledParameterIsNotBoolean(): void
@@ -103,8 +131,12 @@ class UpdateOwnershipCommandTest extends TestCase
             new LogicException('Expected "isCronDisabled" to be of type boolean, got string.')
         );
 
+        $cronTimeBudgetService = $this->prophesize(CronTimeBudgetService::class);
+        $cronTimeBudgetService->getDeadline()->willReturn(null);
+
         $command = new UpdateOwnershipCommand(
             $cronExecutionGateService->reveal(),
+            $cronTimeBudgetService->reveal(),
             $this->prophesize(QueueService::class)->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
             $this->prophesize(SearchAccessCalculatorService::class)->reveal(),
@@ -127,7 +159,7 @@ class UpdateOwnershipCommandTest extends TestCase
         $searchAccessCalculatorService->calculateSearchAccess(Argument::any())->shouldNotBeCalled();
 
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'))
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), Argument::any())
             ->will(function ($args) use ($elementId) {
                 /** @var callable $handler */
                 $handler = $args[1];
@@ -135,6 +167,7 @@ class UpdateOwnershipCommandTest extends TestCase
 
                 return 1;
             });
+        $queueService->publishEvent(Argument::cetera())->shouldNotBeCalled();
 
         $command = $this->buildCommand(
             queueService: $queueService->reveal(),
@@ -183,7 +216,7 @@ class UpdateOwnershipCommandTest extends TestCase
         $cypherEntityManager->getClient()->shouldNotBeCalled();
 
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'))
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), Argument::any())
             ->will(function ($args) use ($elementId) {
                 /** @var callable $handler */
                 $handler = $args[1];
@@ -191,6 +224,7 @@ class UpdateOwnershipCommandTest extends TestCase
 
                 return 1;
             });
+        $queueService->publishEvent(Argument::cetera())->shouldNotBeCalled();
 
         $command = $this->buildCommand(
             queueService: $queueService->reveal(),
@@ -207,45 +241,48 @@ class UpdateOwnershipCommandTest extends TestCase
         $this->assertStringContainsString('updated search access of 0 element(s)', $commandTester->getDisplay());
     }
 
-    public function testCommandStoresAndEnqueuesChildrenWhenDeltaIsNonZero(): void
+    /**
+     * The parent's child is never fetched or recalculated within this same handler call - it is only queued as a
+     * brand new, standalone message (see {@see UpdateOwnershipCommand::recalculateElementAndQueueChildren()}), to
+     * be recalculated whenever that message is drained, possibly in a later run.
+     */
+    public function testCommandQueuesChildrenAsNewMessagesInsteadOfRecalculatingThemInProcess(): void
     {
         $parentId = Uuid::fromString('4f4c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d4');
         $childId = Uuid::fromString('11111111-1111-1111-1111-111111111111');
         $parent = (new NodeElement())->setId($parentId)->setLabel('Data');
-        $child = (new NodeElement())->setId($childId)->setLabel('Data');
 
         $elementManager = $this->prophesize(ElementManager::class);
-        $elementManager->getElement(Argument::that(fn ($id) => $id->toString() === $parentId->toString()))->willReturn($parent);
-        $elementManager->getElement(Argument::that(fn ($id) => $id->toString() === $childId->toString()))->willReturn($child);
+        $elementManager->getElement(Argument::that(fn ($id) => $id->toString() === $parentId->toString()))
+            ->shouldBeCalledTimes(1)
+            ->willReturn($parent);
+        $elementManager->getElement(Argument::that(fn ($id) => $id->toString() === $childId->toString()))
+            ->shouldNotBeCalled();
 
         $searchAccessCalculatorService = $this->prophesize(SearchAccessCalculatorService::class);
         $searchAccessCalculatorService->getIndexForElement($parent)->willReturn('node_data');
-        $searchAccessCalculatorService->getIndexForElement($child)->willReturn('node_data');
         $searchAccessCalculatorService->calculateSearchAccess($parent)->willReturn([
             'groups' => [],
             'users' => ['new-user'],
         ]);
-        $searchAccessCalculatorService->calculateSearchAccess($child)->willReturn([
-            'groups' => [],
-            'users' => [],
-        ]);
 
         $elasticEntityManager = $this->prophesize(ElasticEntityManager::class);
         $elasticEntityManager->getOneByIdentifier('node_data', $parentId->toString())->willReturn(null);
-        $elasticEntityManager->getOneByIdentifier('node_data', $childId->toString())->willReturn(null);
         $elasticEntityManager->merge(Argument::any())->shouldBeCalledTimes(1)->willReturn($elasticEntityManager->reveal());
         $elasticEntityManager->flush()->shouldBeCalledTimes(1)->willReturn($elasticEntityManager->reveal());
 
         $noSummary = null;
         $client = $this->prophesize(ClientInterface::class);
-        $client->runStatement(Argument::any())->willReturn(new SummarizedResult($noSummary, [
-            new CypherMap(['id' => $childId->toString()]),
-        ]));
+        $client->runStatement(Argument::any())
+            ->shouldBeCalledTimes(1)
+            ->willReturn(new SummarizedResult($noSummary, [
+                new CypherMap(['id' => $childId->toString()]),
+            ]));
         $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'))
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), Argument::any())
             ->will(function ($args) use ($parentId) {
                 /** @var callable $handler */
                 $handler = $args[1];
@@ -253,6 +290,10 @@ class UpdateOwnershipCommandTest extends TestCase
 
                 return 1;
             });
+        $queueService->publishEvent(
+            RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE,
+            ['elementId' => $childId->toString()]
+        )->shouldBeCalledTimes(1);
 
         $command = $this->buildCommand(
             queueService: $queueService->reveal(),
@@ -266,7 +307,49 @@ class UpdateOwnershipCommandTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
-        // only the parent changed (its own delta was non-zero, but the child's delta was zero once recomputed)
+        $this->assertStringContainsString('updated search access of 1 element(s)', $commandTester->getDisplay());
+    }
+
+    public function testCommandHandlesAQueuedChildMessageJustLikeAnyOtherElement(): void
+    {
+        $childId = Uuid::fromString('11111111-1111-1111-1111-111111111111');
+        $child = (new NodeElement())->setId($childId)->setLabel('Data');
+
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElement(Argument::that(fn ($id) => $id->toString() === $childId->toString()))
+            ->willReturn($child);
+
+        $searchAccessCalculatorService = $this->prophesize(SearchAccessCalculatorService::class);
+        $searchAccessCalculatorService->getIndexForElement($child)->willReturn('node_data');
+        $searchAccessCalculatorService->calculateSearchAccess($child)->willReturn(['groups' => [], 'users' => ['some-user']]);
+
+        $elasticEntityManager = $this->prophesize(ElasticEntityManager::class);
+        $elasticEntityManager->getOneByIdentifier('node_data', $childId->toString())->willReturn(null);
+        $elasticEntityManager->merge(Argument::any())->shouldBeCalledTimes(1)->willReturn($elasticEntityManager->reveal());
+        $elasticEntityManager->flush()->shouldBeCalledTimes(1)->willReturn($elasticEntityManager->reveal());
+
+        $queueService = $this->prophesize(QueueService::class);
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), Argument::any())
+            ->will(function ($args) use ($childId) {
+                /** @var callable $handler */
+                $handler = $args[1];
+                $handler(['elementId' => $childId->toString()]);
+
+                return 1;
+            });
+
+        $command = $this->buildCommand(
+            queueService: $queueService->reveal(),
+            elementManager: $elementManager->reveal(),
+            searchAccessCalculatorService: $searchAccessCalculatorService->reveal(),
+            elasticEntityManager: $elasticEntityManager->reveal(),
+            cypherEntityManager: $this->noChildrenCypherEntityManager(),
+        );
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([]);
+
+        $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
         $this->assertStringContainsString('updated search access of 1 element(s)', $commandTester->getDisplay());
     }
 
@@ -306,14 +389,16 @@ class UpdateOwnershipCommandTest extends TestCase
 
         $noSummary = null;
         $client = $this->prophesize(ClientInterface::class);
-        $client->runStatement(Argument::any())->willReturn(new SummarizedResult($noSummary, [
-            new CypherMap(['id' => $childId->toString()]),
-        ]));
+        $client->runStatement(Argument::any())
+            ->will(fn ($args) => new SummarizedResult($noSummary, $groupId->toString() === $args[0]->getParameters()['parentId']
+                ? [new CypherMap(['id' => $childId->toString()])]
+                : []));
         $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'))
+        $queueService->publishEvent(Argument::cetera())->shouldNotBeCalled();
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), Argument::any())
             ->will(function ($args) use ($groupId, $memberId) {
                 /** @var callable $handler */
                 $handler = $args[1];
@@ -342,10 +427,10 @@ class UpdateOwnershipCommandTest extends TestCase
         $this->assertStringContainsString('updated search access of 1 element(s)', $commandTester->getDisplay());
     }
 
-    public function testCommandDeduplicatesIdsViaVisitedSetToHandleCycles(): void
+    public function testCommandDeduplicatesIdsOfTheSameMessagePointingAtTheSameElement(): void
     {
-        // relationId, startId and endId of the same message all point at the same element; the graph could also
-        // cycle back to an already visited element through its children - either way it must be recomputed once
+        // relationId, startId and endId of the same message all point at the same element: it must be recomputed
+        // only once per message, not three times
         $elementId = Uuid::fromString('22222222-2222-2222-2222-222222222222');
         $element = (new NodeElement())->setId($elementId)->setLabel('Data');
 
@@ -364,7 +449,7 @@ class UpdateOwnershipCommandTest extends TestCase
         $elasticEntityManager->getOneByIdentifier('node_data', $elementId->toString())->willReturn(null);
 
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'))
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), Argument::any())
             ->will(function ($args) use ($elementId) {
                 /** @var callable $handler */
                 $handler = $args[1];
@@ -389,68 +474,5 @@ class UpdateOwnershipCommandTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
-    }
-
-    public function testCommandThrowsOnceBatchCapIsReachedSoQueueServiceRequeuesRemainingWork(): void
-    {
-        $ids = [];
-        for ($i = 0; $i < 501; ++$i) {
-            $ids[] = Uuid::uuid4();
-        }
-        $idStrings = array_map(fn ($id) => $id->toString(), $ids);
-        $elementsById = [];
-        foreach ($ids as $id) {
-            $elementsById[$id->toString()] = (new NodeElement())->setId($id)->setLabel('Data');
-        }
-
-        // a single Argument::any() matcher per method, dispatching via an id => value map, keeps this fast: giving
-        // each of the 501 ids its own Argument::that() matcher makes Prophecy's per-call matching quadratic
-        $elementManager = $this->prophesize(ElementManager::class);
-        $elementManager->getElement(Argument::any())
-            ->will(fn ($args) => $elementsById[$args[0]->toString()] ?? null);
-
-        $searchAccessCalculatorService = $this->prophesize(SearchAccessCalculatorService::class);
-        $searchAccessCalculatorService->getIndexForElement(Argument::any())->willReturn('node_data');
-        $searchAccessCalculatorService->calculateSearchAccess(Argument::any())
-            ->will(fn ($args) => ['groups' => [], 'users' => [$args[0]->getId()->toString()]]);
-
-        $elasticEntityManager = $this->prophesize(ElasticEntityManager::class);
-        $elasticEntityManager->getOneByIdentifier(Argument::any(), Argument::any())->willReturn(null);
-        $elasticEntityManager->merge(Argument::any())->willReturn($elasticEntityManager->reveal());
-        $elasticEntityManager->flush()->willReturn($elasticEntityManager->reveal());
-
-        // one child each, chained: id[0] -> id[1] -> ... -> id[500], so the work-list keeps growing past the cap
-        $noSummary = null;
-        $childrenByParent = [];
-        foreach ($idStrings as $index => $idString) {
-            $childrenByParent[$idString] = isset($ids[$index + 1]) ? [new CypherMap(['id' => $idStrings[$index + 1]])] : [];
-        }
-        $client = $this->prophesize(ClientInterface::class);
-        $client->runStatement(Argument::any())
-            ->will(fn ($args) => new SummarizedResult($noSummary, $childrenByParent[$args[0]->getParameters()['parentId']] ?? []));
-        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
-        $cypherEntityManager->getClient()->willReturn($client->reveal());
-
-        $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'))
-            ->will(function ($args) use ($ids) {
-                /** @var callable $handler */
-                $handler = $args[1];
-                $handler(['relationId' => null, 'startId' => $ids[0]->toString(), 'endId' => null]);
-
-                return 1;
-            });
-
-        $command = $this->buildCommand(
-            queueService: $queueService->reveal(),
-            elementManager: $elementManager->reveal(),
-            searchAccessCalculatorService: $searchAccessCalculatorService->reveal(),
-            elasticEntityManager: $elasticEntityManager->reveal(),
-            cypherEntityManager: $cypherEntityManager->reveal(),
-        );
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessageMatches('/[Bb]atch cap/');
-        (new CommandTester($command))->execute([]);
     }
 }

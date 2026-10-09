@@ -76,7 +76,8 @@ class UploadEndpointAccessControlTest extends BaseRequestTestCase
 
     /**
      * PATCH and HEAD re-check UPDATE access on the upload's target on every call; once the owner loses access to the
-     * target, the upload is cancelled (see CancelUploadOnAccessLossTest), so there is nothing left to delete either.
+     * target, the next HEAD cancels the upload (see CancelUploadOnAccessLossTest), so there is nothing left to
+     * delete either.
      */
     public function testUploadCanNoLongerBeInspectedOrCompletedOnceOwnerLosesAccessToTarget(): void
     {

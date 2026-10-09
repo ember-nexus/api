@@ -7,12 +7,12 @@ namespace App\Tests\UnitTests\Service;
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\ElementService;
+use App\Service\FileNameService;
 use App\Service\FilePropertyService;
-use App\Service\FileService;
+use App\Service\StorageService;
 use App\Service\StringService;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -35,12 +35,11 @@ class ElementServiceTest extends TestCase
         $errorFactory = $errorFactory->reveal();
 
         return new ElementService(
-            new FileService(
-                $this->prophesize(EmberNexusConfiguration::class)->reveal(),
+            new FileNameService(
                 $this->prophesize(StringService::class)->reveal(),
-                $errorFactory,
             ),
             new FilePropertyService($errorFactory),
+            $this->prophesize(StorageService::class)->reveal(),
             $errorFactory,
         );
     }
@@ -95,7 +94,7 @@ class ElementServiceTest extends TestCase
     public function testFileNameFallsBackToIdAndDefaultExtension(): void
     {
         $this->assertSame(
-            sprintf('9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11.%s', FileService::DEFAULT_EXTENSION),
+            sprintf('9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11.%s', FileNameService::DEFAULT_EXTENSION),
             $this->buildService()->getFileName($this->buildNode())
         );
     }
@@ -115,7 +114,7 @@ class ElementServiceTest extends TestCase
         $node->addProperty('name', 'a/b:c*"d');
 
         $this->assertSame(
-            sprintf('abcd.%s', FileService::DEFAULT_EXTENSION),
+            sprintf('abcd.%s', FileNameService::DEFAULT_EXTENSION),
             $this->buildService()->getFileName($node)
         );
     }
@@ -123,7 +122,7 @@ class ElementServiceTest extends TestCase
     public function testFileNameFallsBackToIdIfNameBecomesEmptyOrIsNotAString(): void
     {
         $node = $this->buildNode();
-        $expected = sprintf('9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11.%s', FileService::DEFAULT_EXTENSION);
+        $expected = sprintf('9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11.%s', FileNameService::DEFAULT_EXTENSION);
 
         $node->addProperty('name', '/:*');
         $this->assertSame($expected, $this->buildService()->getFileName($node));
@@ -134,7 +133,7 @@ class ElementServiceTest extends TestCase
 
     public function testGetFileNameExtensionDefaultsWithoutFileProperty(): void
     {
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getFileNameExtension($this->buildNode()));
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $this->buildService()->getFileNameExtension($this->buildNode()));
     }
 
     public function testGetFileNameExtensionReadsFileProperty(): void
@@ -156,12 +155,17 @@ class ElementServiceTest extends TestCase
         $node->addProperty('file', ['extension' => 'txt']);
 
         $errorFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal();
-        $fileService = $this->prophesize(FileService::class);
-        $fileService
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService
             ->getStorageBucketKey(Argument::that(fn ($id) => '9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11' === $id->toString()), 'txt')
             ->shouldBeCalledOnce()
             ->willReturn('9a/1a/5c/9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11.txt');
-        $service = new ElementService($fileService->reveal(), new FilePropertyService($errorFactory), $errorFactory);
+        $service = new ElementService(
+            new FileNameService($this->prophesize(StringService::class)->reveal()),
+            new FilePropertyService($errorFactory),
+            $storageService->reveal(),
+            $errorFactory
+        );
 
         $this->assertSame('9a/1a/5c/9a1a5c5e-3f5c-4a0f-9d0e-2a3f3a3b8a11.txt', $service->getStorageKeyOfFile($node));
     }

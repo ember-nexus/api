@@ -30,7 +30,7 @@ class MaxFileSizeTest extends BaseRequestTestCase
     /**
      * @param array<string, string|int> $headers
      */
-    private function sendFile(string $method, string $elementId, int $size, array $headers = []): mixed
+    private function sendFileOfSize(string $method, string $elementId, int $size, array $headers = []): mixed
     {
         return $this->runUploadRequest(
             $method,
@@ -50,13 +50,13 @@ class MaxFileSizeTest extends BaseRequestTestCase
     {
         $elementId = $this->createNode('max-file-size-post');
 
-        $response = $this->sendFile('POST', $elementId, self::MAX_FILE_SIZE + 1);
+        $response = $this->sendFileOfSize('POST', $elementId, self::MAX_FILE_SIZE + 1);
         $this->assertIsProblemResponse($response, 400);
         $this->assertStringContainsString((string) self::MAX_FILE_SIZE, $this->getBody($response)['detail']);
         $this->assertHasNoFile($elementId);
 
         // exactly the limit is fine
-        $this->assertIsCreatedResponse($this->sendFile('POST', $elementId, self::MAX_FILE_SIZE), false);
+        $this->assertIsCreatedResponse($this->sendFileOfSize('POST', $elementId, self::MAX_FILE_SIZE), false);
         $this->assertSame(self::MAX_FILE_SIZE, strlen((string) $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN)->getBody()));
 
         $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
@@ -65,14 +65,14 @@ class MaxFileSizeTest extends BaseRequestTestCase
     public function testPutOversizedFileIsRejectedAndKeepsExistingFile(): void
     {
         $elementId = $this->createNode('max-file-size-put');
-        $this->assertIsCreatedResponse($this->sendFile('POST', $elementId, 10), false);
+        $this->assertIsCreatedResponse($this->sendFileOfSize('POST', $elementId, 10), false);
 
-        $response = $this->sendFile('PUT', $elementId, self::MAX_FILE_SIZE + 1);
+        $response = $this->sendFileOfSize('PUT', $elementId, self::MAX_FILE_SIZE + 1);
         $this->assertIsProblemResponse($response, 400);
         $this->assertStringContainsString((string) self::MAX_FILE_SIZE, $this->getBody($response)['detail']);
         $this->assertSame(10, strlen((string) $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN)->getBody()));
 
-        $this->assertIsCreatedResponse($this->sendFile('PUT', $elementId, self::MAX_FILE_SIZE), false);
+        $this->assertIsCreatedResponse($this->sendFileOfSize('PUT', $elementId, self::MAX_FILE_SIZE), false);
         $this->assertSame(self::MAX_FILE_SIZE, strlen((string) $this->runGetRequest(sprintf('/%s/file', $elementId), self::TOKEN)->getBody()));
 
         $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
@@ -82,10 +82,10 @@ class MaxFileSizeTest extends BaseRequestTestCase
     {
         $relationId = $this->createEphemeralRelation(self::TOKEN, 'max-file-size-relation');
 
-        $this->assertIsProblemResponse($this->sendFile('POST', $relationId, self::MAX_FILE_SIZE + 1), 400);
-        $this->assertIsProblemResponse($this->sendFile('PUT', $relationId, self::MAX_FILE_SIZE + 1), 400);
+        $this->assertIsProblemResponse($this->sendFileOfSize('POST', $relationId, self::MAX_FILE_SIZE + 1), 400);
+        $this->assertIsProblemResponse($this->sendFileOfSize('PUT', $relationId, self::MAX_FILE_SIZE + 1), 400);
         $this->assertHasNoFile($relationId);
-        $this->assertIsCreatedResponse($this->sendFile('POST', $relationId, self::MAX_FILE_SIZE), false);
+        $this->assertIsCreatedResponse($this->sendFileOfSize('POST', $relationId, self::MAX_FILE_SIZE), false);
 
         $this->deleteEphemeralRelation(self::TOKEN, $relationId);
     }
@@ -94,7 +94,7 @@ class MaxFileSizeTest extends BaseRequestTestCase
     {
         $elementId = $this->createNode('max-file-size-upload-length');
 
-        $response = $this->sendFile('POST', $elementId, 0, [
+        $response = $this->sendFileOfSize('POST', $elementId, 0, [
             'Upload-Complete' => '?0',
             'Upload-Length' => self::MAX_FILE_SIZE + 1,
         ]);
@@ -105,7 +105,7 @@ class MaxFileSizeTest extends BaseRequestTestCase
         $this->assertHasNoFile($elementId);
 
         // exactly the limit is fine
-        $response = $this->sendFile('POST', $elementId, 0, [
+        $response = $this->sendFileOfSize('POST', $elementId, 0, [
             'Upload-Complete' => '?0',
             'Upload-Length' => self::MAX_FILE_SIZE,
         ]);
@@ -118,7 +118,7 @@ class MaxFileSizeTest extends BaseRequestTestCase
     public function testPatchCrossingTheLimitIsRejected(): void
     {
         $elementId = $this->createNode('max-file-size-patch');
-        $createResponse = $this->sendFile('POST', $elementId, 0, ['Upload-Complete' => '?0']);
+        $createResponse = $this->sendFileOfSize('POST', $elementId, 0, ['Upload-Complete' => '?0']);
         $this->assertNoContentResponse($createResponse, true);
         $uploadUrl = sprintf('/upload/%s', $this->getUuidFromLocation($createResponse));
 

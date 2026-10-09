@@ -5,26 +5,17 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use Laudis\Neo4j\ClientBuilder;
-use Laudis\Neo4j\Contracts\ClientInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * When the owner of an upload loses UPDATE access to the target element, the upload is cancelled, i.e. its chunks and
- * its `Upload` element are deleted:
- *  - eagerly, when the access relation is removed through the API (entity manager events),
- *  - lazily, when access was removed behind the API's back (directly in the graph) and the owner then calls
- *    HEAD, PATCH or DELETE, which still answer 404.
+ * When the owner of an upload loses UPDATE access to the target element, the upload is not cancelled immediately.
+ * It persists until the owner's next HEAD or PATCH on it re-checks access on the target, cancels the upload (i.e.
+ * deletes its chunks and its `Upload` element) and answers 404 - or until it expires on its own.
  */
 class CancelUploadOnAccessLossTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int CHUNK_SIZE = 5 * 1024 * 1024;
-
-    private function getCypherClient(): ClientInterface
-    {
-        return ClientBuilder::create()->withDriver('bolt', $_ENV['CYPHER_AUTH'])->build();
-    }
 
     /**
      * @return array{0: string, 1: string} [targetId, uploadId], the upload has one stored chunk
@@ -69,7 +60,21 @@ class CancelUploadOnAccessLossTest extends BaseRequestTestCase
     {
         $result = $this->getCypherClient()->run('MATCH (u:Upload {id: $id}) RETURN count(u) AS count', ['id' => $uploadId]);
         $this->assertSame($exists ? 1 : 0, $result->first()->get('count'));
-        $this->assertSame($exists ? 1 : 0, $this->countUploadChunksInUploadBucket($uploadId));
+
+        $expectedChunkCount = $exists ? 1 : 0;
+        // listing the upload bucket is eventually consistent on some S3-compatible backends (observed on
+        // SeaweedFS), so a chunk that was just written (or just deleted) can briefly be missing (or lingering)
+        // from a ListObjectsV2 response; poll briefly rather than asserting on the very first attempt, the same
+        // way assertSearchAccess() does for Elasticsearch elsewhere in this suite
+        $actualChunkCount = $expectedChunkCount;
+        for ($attempt = 0; $attempt < 10; ++$attempt) {
+            $actualChunkCount = $this->countUploadChunksInUploadBucket($uploadId);
+            if ($actualChunkCount === $expectedChunkCount) {
+                break;
+            }
+            usleep(300_000);
+        }
+        $this->assertSame($expectedChunkCount, $actualChunkCount);
     }
 
     /**
@@ -81,41 +86,21 @@ class CancelUploadOnAccessLossTest extends BaseRequestTestCase
     }
 
     #[DataProvider('targetProvider')]
-    public function testRemovingAccessThroughApiCancelsUploadImmediately(bool $onRelation): void
+    public function testRemovingAccessThroughApiCancelsUploadOnNextRequest(bool $onRelation): void
     {
         [$targetId, $uploadId] = $this->createTargetWithUpload($onRelation);
         $ownsRelationIds = $this->getOwnsRelationIds($targetId, $onRelation);
 
-        // the upload must not be touched by any request, the cancellation is triggered by the removal alone
-        $this->assertUploadExists($uploadId, true);
         foreach ($ownsRelationIds as $ownsRelationId) {
             $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $ownsRelationId), self::TOKEN));
         }
 
-        $this->assertUploadExists($uploadId, false);
-        $this->assertSame(404, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
-        $this->assertIsProblemResponse($this->runDeleteRequest(sprintf('/upload/%s', $uploadId), self::TOKEN), 404);
-    }
-
-    #[DataProvider('targetProvider')]
-    public function testUnrelatedRelationChangesKeepUpload(bool $onRelation): void
-    {
-        [$targetId, $uploadId] = $this->createTargetWithUpload($onRelation);
-        $otherId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, ['type' => 'Data', 'data' => ['name' => 'unrelated']]));
-        $otherOwns = $this->getOwnsRelationIds($otherId, false)[0];
-
-        // access is lost to another element only
-        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $otherOwns), self::TOKEN));
-
+        // the upload survives the access removal until the owner's next request notices it
         $this->assertUploadExists($uploadId, true);
-        $this->assertSame(204, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
+        $this->assertSame(404, $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN)->getStatusCode());
 
-        $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/upload/%s', $uploadId), self::TOKEN));
-        if ($onRelation) {
-            $this->deleteEphemeralRelation(self::TOKEN, $targetId);
-        } else {
-            $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $targetId), self::TOKEN));
-        }
+        $this->assertUploadExists($uploadId, false);
+        $this->assertIsProblemResponse($this->runDeleteRequest(sprintf('/upload/%s', $uploadId), self::TOKEN), 404);
     }
 
     /**

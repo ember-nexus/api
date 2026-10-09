@@ -19,6 +19,16 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+/**
+ * A node's `DETACH DELETE` is a single Cypher statement (see `vendor/syndesi/cypher-entity-manager`'s
+ * `NodeDeleteToStatementEventListener`) that never dispatches `ElementPreDeleteEvent`/`ElementPostDeleteEvent` for
+ * the relations it cascades away, so a delete path that bypasses {@see \App\Service\DeletionService} would never
+ * expire the ETag cache keys of the elements on the other end of those relations via this listener. As of now,
+ * every node/relation delete path (the only one being {@see \App\Controller\Element\DeleteElementController}) goes
+ * through {@see \App\Service\DeletionService}, which avoids this gap by deleting each touching relation
+ * individually before the node itself - so this is a latent hazard for a future bypass, not a currently reachable
+ * one.
+ */
 class ExpireEtagOnChangeEventListener
 {
     /**

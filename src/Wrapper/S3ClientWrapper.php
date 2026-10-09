@@ -16,7 +16,7 @@ use AsyncAws\S3\Result\ObjectExistsWaiter;
  */
 class S3ClientWrapper
 {
-    public function getIsSuccessFromObjectExistsWaiter(ObjectExistsWaiter $objectExistsWaiter): bool
+    public function isSuccessFromObjectExistsWaiter(ObjectExistsWaiter $objectExistsWaiter): bool
     {
         return $objectExistsWaiter->isSuccess();
     }

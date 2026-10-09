@@ -44,7 +44,7 @@ class EmberNexusConfiguration
 
     public const string FILE = 'file';
     public const string FILE_MAX_FILE_SIZE_IN_BYTES = 'maxFileSizeInBytes';
-    public const string FILE_UPLOAD_EXPIRES_IN_SECONDS_AFTER_FIRST_REQUEST = 'uploadExpiresInSecondsAfterFirstRequest';
+    public const string FILE_UPLOAD_EXPIRES_AFTER_FIRST_REQUEST_IN_SECONDS = 'uploadExpiresAfterFirstRequestInSeconds';
     public const string FILE_UPLOAD_CHUNK_DIGITS_LENGTH = 'uploadChunkDigitsLength';
     public const string FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES = 'uploadMinChunkSizeInBytes';
     public const string FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES = 'uploadMaxChunkSizeInBytes';
@@ -76,7 +76,7 @@ class EmberNexusConfiguration
     private int $cacheEtagUpperLimitInCollectionEndpoints;
 
     private int $fileMaxFileSizeInBytes;
-    private int $fileUploadExpiresInSecondsAfterFirstRequest;
+    private int $fileUploadExpiresAfterFirstRequestInSeconds;
     private int $fileUploadChunkDigitsLength;
     private int $fileUploadMinChunkSizeInBytes;
     private int $fileUploadMaxChunkSizeInBytes;
@@ -279,10 +279,10 @@ class EmberNexusConfiguration
             $configuration,
             [
                 self::FILE,
-                self::FILE_UPLOAD_EXPIRES_IN_SECONDS_AFTER_FIRST_REQUEST,
+                self::FILE_UPLOAD_EXPIRES_AFTER_FIRST_REQUEST_IN_SECONDS,
             ]
         );
-        $emberNexusConfiguration->setFileUploadExpiresInSecondsAfterFirstRequest($value);
+        $emberNexusConfiguration->setFileUploadExpiresAfterFirstRequestInSeconds($value);
 
         $value = (int) self::getValueFromConfig(
             $configuration,
@@ -612,14 +612,14 @@ class EmberNexusConfiguration
         return $this;
     }
 
-    public function getFileUploadExpiresInSecondsAfterFirstRequest(): int
+    public function getFileUploadExpiresAfterFirstRequestInSeconds(): int
     {
-        return $this->fileUploadExpiresInSecondsAfterFirstRequest;
+        return $this->fileUploadExpiresAfterFirstRequestInSeconds;
     }
 
-    public function setFileUploadExpiresInSecondsAfterFirstRequest(int $fileUploadExpiresInSecondsAfterFirstRequest): static
+    public function setFileUploadExpiresAfterFirstRequestInSeconds(int $fileUploadExpiresAfterFirstRequestInSeconds): static
     {
-        $this->fileUploadExpiresInSecondsAfterFirstRequest = $fileUploadExpiresInSecondsAfterFirstRequest;
+        $this->fileUploadExpiresAfterFirstRequestInSeconds = $fileUploadExpiresAfterFirstRequestInSeconds;
 
         return $this;
     }

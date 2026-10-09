@@ -111,7 +111,7 @@ class MultiPartUploadLifecycleTest extends BaseRequestTestCase
                 'extension' => 'txt',
                 'mimeType' => 'text/plain',
                 'hash' => [
-                    'sha256' => hash_file('sha256', self::FILE_PATH),
+                    'sha256' => $this->computeSha256UsingCliTool(self::FILE_PATH),
                 ],
             ],
             $getNodeResponseData2['file']

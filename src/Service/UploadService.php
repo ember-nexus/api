@@ -15,10 +15,8 @@ use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
+use Tuupola\Base58;
 
-/**
- * @SuppressWarnings("PHPMD.ExcessiveParameterList")
- */
 class UploadService
 {
     public function __construct(
@@ -28,7 +26,17 @@ class UploadService
         private S3Service $s3Service,
         private UploadFactory $uploadFactory,
         private CypherEntityManager $cypherEntityManager,
+        private DeletionService $deletionService,
     ) {
+    }
+
+    /**
+     * Every attempt to upload a chunk generates its own id (base58 of 128 random bits, like tokens), so that concurrent attempts for the same chunk index can
+     * never overwrite each other's object; the id of the accepted attempt is stored on the `Upload` element.
+     */
+    public function generateUploadChunkId(): string
+    {
+        return (new Base58())->encode(random_bytes(16));
     }
 
     public function mergeUploadElement(UploadInterface $upload): void
@@ -117,15 +125,19 @@ class UploadService
         return 0 !== $queryResult->count();
     }
 
+    /**
+     * Goes through {@see DeletionService} (uploads have no relations today, so this is a no-op safety net for now),
+     * and therefore also flushes, unlike most of this class's other methods.
+     */
     public function deleteUpload(UploadInterface $upload): void
     {
         $element = $this->elementManager->getElementOrFail($upload->getId());
 
-        $this->elementManager->delete($element);
+        $this->deletionService->delete($element);
     }
 
     /**
-     * Does not flush, same as {@see deleteUpload()}.
+     * Flushes, see {@see deleteUpload()}.
      */
     public function deleteUploadAndChunks(UploadInterface $upload): void
     {
@@ -141,8 +153,9 @@ class UploadService
     /**
      * Deletes uploads targeting the element (for nodes also the ones targeting attached relations, as these are deleted
      * together with the node), as `uploadTarget` is a plain property and not a relation. Must be
-     * called and flushed before the element itself is deleted; it is not an event listener because nested
-     * `flush()` calls are not supported.
+     * called before the element itself is deleted; it is not an event listener because nested
+     * `flush()` calls are not supported. Each matched upload is flushed individually (see {@see deleteUpload()}),
+     * so callers no longer need (but may keep) a flush of their own right after this call.
      */
     public function deleteUploadsTargeting(UuidInterface $elementId): void
     {

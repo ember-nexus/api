@@ -46,8 +46,9 @@ class ElementFileDeletionService
     public function getFileOperationsForDeletionOfElement(NodeElementInterface|RelationElementInterface $element): array
     {
         $elements = [$element];
-        if ($element instanceof NodeElementInterface && null !== $element->getId()) {
-            foreach ($this->getIdsOfAttachedRelationsWithFile($element->getId()->toString()) as $relationId) {
+        $elementId = $element instanceof NodeElementInterface ? $element->getId() : null;
+        if (null !== $elementId) {
+            foreach ($this->getIdsOfAttachedRelationsWithFile($elementId->toString()) as $relationId) {
                 $elements[] = $this->elementManager->getElementOrFail(UuidV4::fromString($relationId));
             }
         }

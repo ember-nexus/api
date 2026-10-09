@@ -41,8 +41,8 @@ class UploadConsistencyService
 
         $chunkIds = $upload->getChunkIds();
         $isConsistent = $storedLastChunkId === $upload->getLastChunkId()
-            // without any chunk there can not be any offset
-            && !([] === $chunkIds && $upload->getUploadOffset() > 0);
+            // an empty chunk list and a zero offset must coincide; neither can hold without the other
+            && ([] === $chunkIds) === (0 === $upload->getUploadOffset());
         if ($isConsistent) {
             return;
         }

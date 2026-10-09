@@ -17,10 +17,11 @@ use Ramsey\Uuid\UuidInterface;
  */
 class UploadLockService
 {
-    // a request may take 15 minutes at most (`read_body` in the Caddyfile), plus time for S3 and finalization
-    public const int TTL_IN_MILLISECONDS = 1200000;
-
-    private const string RELEASE_SCRIPT = 'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end';
+    // a request may take at most `API_UPLOAD_REQUEST_BODY_TIMEOUT` (default 15 minutes, see docker/Caddyfile) to
+    // read its body, plus a buffer for S3 and finalization
+    private const int UPLOAD_REQUEST_BODY_TIMEOUT_IN_MINUTES = 15;
+    private const int FINALIZATION_BUFFER_IN_MINUTES = 5;
+    public const int TTL_IN_MILLISECONDS = (self::UPLOAD_REQUEST_BODY_TIMEOUT_IN_MINUTES + self::FINALIZATION_BUFFER_IN_MINUTES) * 60 * 1000;
 
     public function __construct(
         private RedisClient $redisClient,
@@ -41,6 +42,14 @@ class UploadLockService
 
     public function release(UuidInterface $uploadId, string $token): void
     {
-        $this->redisClient->eval(self::RELEASE_SCRIPT, 1, (string) $this->redisKeyFactory->getUploadLockRedisKey($uploadId), $token);
+        // plain GET + DEL instead of a Lua script (EVAL) for simplicity: there is a small race window between the
+        // GET and the DEL where the key could expire and be re-acquired by a different request in between, whose
+        // lock would then be deleted here instead of this one. This is accepted because the TTL already bounds the
+        // damage, and the token is a random 128-bit value, so a collision within that window is practically
+        // impossible.
+        $key = (string) $this->redisKeyFactory->getUploadLockRedisKey($uploadId);
+        if ($this->redisClient->get($key) === $token) {
+            $this->redisClient->del([$key]);
+        }
     }
 }

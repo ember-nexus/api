@@ -107,7 +107,7 @@
 		}
 	}
 	log {
-	    no_hostname
+		no_hostname
 		output stdout
 		format json
 	}

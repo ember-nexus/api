@@ -16,6 +16,7 @@
         <exclude name="TooManyPublicMethods"/>
         <exclude name="TooManyMethods"/>
         <exclude name="ExcessivePublicCount"/>
+        <exclude name="ExcessiveParameterList"/>
     </rule>
     <rule ref="rulesets/controversial.xml">
         <exclude name="CamelCaseClassName"/>
@@ -30,6 +31,7 @@
         <exclude name="ShortVariable"/>
         <exclude name="LongVariable"/>
         <exclude name="LongClassName"/>
+        <exclude name="LongMethodName"/>
     </rule>
     <rule ref="rulesets/unusedcode.xml"/>
 </ruleset>

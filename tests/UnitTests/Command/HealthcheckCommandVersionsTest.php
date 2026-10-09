@@ -44,14 +44,14 @@ class HealthcheckCommandVersionsTest extends TestCase
         ?CypherEntityManager $cypherEntityManager = null,
         ?MongoEntityManager $mongoEntityManager = null,
         ?RedisClient $redisClient = null,
-        ?AMQPStreamConnection $AMQPStreamConnection = null,
+        ?AMQPStreamConnection $amqpStreamConnection = null,
     ): HealthcheckCommand {
         return new HealthcheckCommand(
             $cypherEntityManager ?? $this->prophesize(CypherEntityManager::class)->reveal(),
             $mongoEntityManager ?? $this->prophesize(MongoEntityManager::class)->reveal(),
             $this->prophesize(ElasticEntityManager::class)->reveal(),
             $redisClient ?? $this->prophesize(RedisClient::class)->reveal(),
-            $AMQPStreamConnection ?? $this->prophesize(AMQPStreamConnection::class)->reveal(),
+            $amqpStreamConnection ?? $this->prophesize(AMQPStreamConnection::class)->reveal(),
             $this->prophesize(S3Client::class)->reveal(),
             $this->prophesize(EmberNexusConfiguration::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
@@ -131,7 +131,7 @@ class HealthcheckCommandVersionsTest extends TestCase
         $connection = $this->prophesize(AMQPStreamConnection::class);
         $connection->getServerProperties()->willReturn(['version' => ['S', '4.1.5']]);
 
-        $command = $this->buildCommand(AMQPStreamConnection: $connection->reveal());
+        $command = $this->buildCommand(amqpStreamConnection: $connection->reveal());
 
         $this->assertSame('4.1.5', $this->invoke($command, 'getRabbitMqVersion'));
     }

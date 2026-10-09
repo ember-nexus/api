@@ -83,13 +83,19 @@ class RedisKeyFactoryTest extends TestCase
     public function testGetUploadLockRedisKey(): void
     {
         $redisKey = (new RedisKeyFactory())->getUploadLockRedisKey(Uuid::fromString('644ddc69-de1e-4636-b3b6-06c8b001fbc1'));
-        $this->assertSame('upload-lock:644ddc69-de1e-4636-b3b6-06c8b001fbc1', (string) $redisKey);
+        $this->assertSame('lock:upload:644ddc69-de1e-4636-b3b6-06c8b001fbc1', (string) $redisKey);
     }
 
     public function testGetFileCreationLockRedisKey(): void
     {
         $redisKey = (new RedisKeyFactory())->getFileCreationLockRedisKey(Uuid::fromString('644ddc69-de1e-4636-b3b6-06c8b001fbc1'));
-        $this->assertSame('file:create:644ddc69-de1e-4636-b3b6-06c8b001fbc1', (string) $redisKey);
+        $this->assertSame('lock:file-creation:644ddc69-de1e-4636-b3b6-06c8b001fbc1', (string) $redisKey);
+    }
+
+    public function testGetElementRequestLockRedisKey(): void
+    {
+        $redisKey = (new RedisKeyFactory())->getElementRequestLockRedisKey(Uuid::fromString('644ddc69-de1e-4636-b3b6-06c8b001fbc1'));
+        $this->assertSame('lock:element-request:644ddc69-de1e-4636-b3b6-06c8b001fbc1', (string) $redisKey);
     }
 
     public function testGetCronDeleteExpiredUploadRedisKey(): void

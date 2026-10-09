@@ -22,7 +22,6 @@ use Symfony\Component\Stopwatch\Stopwatch;
 use Throwable;
 
 /**
- * @SuppressWarnings("PHPMD.ExcessiveParameterList")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class S3Service
@@ -54,7 +53,7 @@ class S3Service
         private int $multipartUploadThresholdInBytes = self::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
         private int $multipartUploadPartSizeInBytes = self::MULTIPART_UPLOAD_PART_SIZE_IN_BYTES,
     ) {
-        $s3TechnicalLimitsValidator->validate($this->multipartUploadThresholdInBytes);
+        $s3TechnicalLimitsValidator->validate($this->multipartUploadThresholdInBytes, $this->multipartUploadPartSizeInBytes);
     }
 
     /**
@@ -190,6 +189,9 @@ class S3Service
      * starting the next.
      *
      * @param FileOperationInterface[] $fileOperations
+     *
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     private function deleteFiles(array $fileOperations): void
     {
@@ -212,7 +214,7 @@ class S3Service
 
         $objectConfigsToDelete = [];
         foreach ($existsWaiters as $i => $existsWaiter) {
-            if ($this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($existsWaiter)) {
+            if ($this->s3ClientWrapper->isSuccessFromObjectExistsWaiter($existsWaiter)) {
                 $objectConfigsToDelete[$i] = $objectConfigs[$i];
             }
         }
@@ -237,7 +239,7 @@ class S3Service
         }
 
         foreach ($confirmationWaiters as $confirmationWaiter) {
-            if ($this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($confirmationWaiter)) {
+            if ($this->s3ClientWrapper->isSuccessFromObjectExistsWaiter($confirmationWaiter)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.');
             }
         }
@@ -296,18 +298,44 @@ class S3Service
             'MetadataDirective' => 'REPLACE',
         ]);
 
+        $uploadChunkFileOperation = new FileOperation(
+            $uploadFileOperation->getUploadBucket(),
+            $uploadFileOperation->getUploadKey()
+        );
+
         try {
             $this->s3ClientWrapper->resolveCopyObjectOutput($copyResult);
-            // the previous object (different extension) is deleted by the caller once the element points to the new one
-            $this->deleteFile(new FileOperation(
-                $uploadFileOperation->getUploadBucket(),
-                $uploadFileOperation->getUploadKey()
-            ));
         } catch (Throwable $e) {
+            // the copy failed, so the upload-bucket chunk is no longer needed either; cleaning it up here (instead
+            // of relying solely on the upload bucket's lifecycle policy) must never turn this failed upload into a
+            // different error, so any cleanup failure is only logged, not reported to the client
+            $this->tryDeleteFile($uploadChunkFileOperation);
+
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);
         }
 
+        // the copy already succeeded, i.e. the upload itself succeeded; a failure to clean up the now-redundant
+        // upload-bucket chunk must not be reported as an upload failure
+        // the previous object (different extension) is deleted by the caller once the element points to the new one
+        $this->tryDeleteFile($uploadChunkFileOperation);
+
         return $contentLength;
+    }
+
+    /**
+     * Failures are only logged, so that they do not replace the original exception/outcome.
+     */
+    private function tryDeleteFile(FileOperationInterface $fileOperation): void
+    {
+        try {
+            $this->deleteFile($fileOperation);
+        } catch (Throwable $e) {
+            $this->logger->warning('Unable to delete upload-bucket chunk after uploadFile().', [
+                'bucket' => $fileOperation->getBucket(),
+                'key' => $fileOperation->getKey(),
+                'exception' => $e,
+            ]);
+        }
     }
 
     /**
@@ -429,13 +457,13 @@ class S3Service
         ];
 
         $objectExistsWaiter = $this->s3Client->objectExists($objectConfig);
-        if (!$this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($objectExistsWaiter)) {
+        if (!$this->s3ClientWrapper->isSuccessFromObjectExistsWaiter($objectExistsWaiter)) {
             return;
         }
 
         $this->s3Client->deleteObject($objectConfig);
         $objectExistsWaiter = $this->s3Client->objectExists($objectConfig);
-        if ($this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($objectExistsWaiter)) {
+        if ($this->s3ClientWrapper->isSuccessFromObjectExistsWaiter($objectExistsWaiter)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.');
         }
     }
@@ -448,7 +476,7 @@ class S3Service
         ];
         $objectExistsWaiter = $this->s3Client->objectExists($objectConfig);
 
-        return $this->s3ClientWrapper->getIsSuccessFromObjectExistsWaiter($objectExistsWaiter);
+        return $this->s3ClientWrapper->isSuccessFromObjectExistsWaiter($objectExistsWaiter);
     }
 
     public function getFile(FileOperationInterface $fileOperation): GetObjectOutput

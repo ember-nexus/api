@@ -8,6 +8,8 @@ use App\Command\Cron\DeleteExpiredUploadsCommand;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\CronExecutionGateService;
+use App\Service\CronTimeBudgetService;
+use App\Service\DeletionService;
 use App\Service\ElementManager;
 use App\Service\ExpiredUploadDeletionAttemptService;
 use App\Service\UploadService;
@@ -47,6 +49,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
         ?ElementManager $elementManager = null,
         ?UploadFactory $uploadFactory = null,
         ?UploadService $uploadService = null,
+        ?DeletionService $deletionService = null,
         int $expiredUploadCanBeDeletedAfterExpirationInSeconds = 3600,
         ?ClientInterface $client = null,
         ?ExpiredUploadDeletionAttemptService $attemptService = null,
@@ -79,13 +82,18 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             $attemptService = $attemptServiceProphecy->reveal();
         }
 
+        $cronTimeBudgetService = $this->prophesize(CronTimeBudgetService::class);
+        $cronTimeBudgetService->getDeadline()->willReturn(null);
+
         return new DeleteExpiredUploadsCommand(
             $cronExecutionGateService->reveal(),
+            $cronTimeBudgetService->reveal(),
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal(),
             $uploadFactory ?? $this->prophesize(UploadFactory::class)->reveal(),
             $uploadService ?? $this->prophesize(UploadService::class)->reveal(),
+            $deletionService ?? $this->prophesize(DeletionService::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
             $attemptService,
             $logger ?? $this->prophesize(LoggerInterface::class)->reveal(),
@@ -115,11 +123,13 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
         $command = new DeleteExpiredUploadsCommand(
             $cronExecutionGateService->reveal(),
+            $this->prophesize(CronTimeBudgetService::class)->reveal(),
             $this->prophesize(EmberNexusConfiguration::class)->reveal(),
             $this->prophesize(CypherEntityManager::class)->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
             $this->prophesize(UploadFactory::class)->reveal(),
             $this->prophesize(UploadService::class)->reveal(),
+            $this->prophesize(DeletionService::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
             $this->prophesize(ExpiredUploadDeletionAttemptService::class)->reveal(),
             $this->prophesize(LoggerInterface::class)->reveal(),
@@ -333,8 +343,9 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(Argument::any())->willReturn($uploadElement);
-        $elementManager->delete(Argument::is($uploadElement))->shouldBeCalledOnce()->willReturn($elementManager->reveal());
-        $elementManager->flush()->shouldBeCalledOnce()->willReturn($elementManager->reveal());
+
+        $deletionService = $this->prophesize(DeletionService::class);
+        $deletionService->delete(Argument::is($uploadElement))->shouldBeCalledOnce();
 
         $uploadFactory = $this->prophesize(UploadFactory::class);
         $uploadFactory->createUploadFromElement(Argument::any())->willThrow(new RuntimeException('malformed'));
@@ -351,6 +362,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             expiredUploadRows: [['u.id' => $uploadId->toString()]],
             elementManager: $elementManager->reveal(),
             uploadFactory: $uploadFactory->reveal(),
+            deletionService: $deletionService->reveal(),
             attemptService: $attemptService->reveal(),
             logger: $logger->reveal(),
         );

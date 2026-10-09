@@ -49,9 +49,11 @@ class CronReferenceDatasetTest extends BaseCronTestCase
         $filesBefore = $this->runGetRequest('/0fdd52ba-55da-430c-b015-3277a231e895/file', self::TOKEN);
         $this->assertSame(200, $filesBefore->getStatusCode());
 
-        [$exitCode, $output] = $this->runConsoleCommand('cron');
+        foreach (['cron:delete-expired-uploads', 'cron:reindex-files', 'cron:update-ownership'] as $command) {
+            [$exitCode, $output] = $this->runConsoleCommand($command);
+            $this->assertSame(0, $exitCode, $output);
+        }
 
-        $this->assertSame(0, $exitCode, $output);
         $this->assertSame($countsBefore, $this->getCounts());
         $filesAfter = $this->runGetRequest('/0fdd52ba-55da-430c-b015-3277a231e895/file', self::TOKEN);
         $this->assertSame(200, $filesAfter->getStatusCode());

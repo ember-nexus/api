@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * `Upload.uploadTarget` is a plain property, not a graph edge, so deleting an element does not remove uploads
@@ -15,25 +16,9 @@ class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private function createElement(string $name): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-
-        return $this->getUuidFromLocation($response);
-    }
-
     public function testDeletingElementRemovesUploadWithNoChunksUploadedYet(): void
     {
-        $elementId = $this->createElement('delete-element-cleans-up-upload-no-chunks');
+        $elementId = $this->createElement(self::TOKEN, 'delete-element-cleans-up-upload-no-chunks');
 
         $createUploadResponse = $this->runUploadRequest(
             'POST',
@@ -60,7 +45,7 @@ class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
 
     public function testDeletingElementRemovesUploadWithAnAlreadyUploadedChunk(): void
     {
-        $elementId = $this->createElement('delete-element-cleans-up-upload-with-chunk');
+        $elementId = $this->createElement(self::TOKEN, 'delete-element-cleans-up-upload-with-chunk');
 
         $filePath = __DIR__.'/../../Asset/delete-element-cleans-up-upload-with-chunk.bin';
         $this->generateDeterministicFile(65432198, 5 * 1024 * 1024, $filePath);
@@ -113,7 +98,7 @@ class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
         ];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('deletedRelationEndpointProvider')]
+    #[DataProvider('deletedRelationEndpointProvider')]
     public function testDeletingNodeRemovesUploadTargetingAttachedRelation(string $deletedEndpoint): void
     {
         $relationId = $this->createEphemeralRelation(self::TOKEN, sprintf('delete-node-cleans-up-relation-upload-%s', $deletedEndpoint));

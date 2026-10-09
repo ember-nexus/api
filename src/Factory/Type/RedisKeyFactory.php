@@ -80,7 +80,7 @@ class RedisKeyFactory
     public function getUploadLockRedisKey(UuidInterface $uploadId): RedisKey
     {
         return new RedisKey(
-            RedisPrefixType::UPLOAD_LOCK,
+            RedisPrefixType::LOCK_UPLOAD,
             $uploadId->toString()
         );
     }
@@ -88,7 +88,15 @@ class RedisKeyFactory
     public function getFileCreationLockRedisKey(UuidInterface $elementId): RedisKey
     {
         return new RedisKey(
-            RedisPrefixType::FILE_CREATION_LOCK,
+            RedisPrefixType::LOCK_FILE_CREATION,
+            $elementId->toString()
+        );
+    }
+
+    public function getElementRequestLockRedisKey(UuidInterface $elementId): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::LOCK_ELEMENT_REQUEST,
             $elementId->toString()
         );
     }

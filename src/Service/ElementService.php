@@ -12,14 +12,17 @@ use Ramsey\Uuid\UuidInterface;
 class ElementService
 {
     public function __construct(
-        private FileService $fileService,
+        private FileNameService $fileNameService,
         private FilePropertyService $filePropertyService,
+        private StorageService $storageService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
     /**
-     * Key of the stored file of the element in the storage bucket, or null if the element has no file.
+     * Key of the stored file of the element in the storage bucket, or null if the element has no file. The `hasFile`
+     * check has to stay here and short-circuit before the id/extension lookups: an element without `hasFile` may
+     * also have no id yet, and `getElementId()` would throw on it instead of yielding null.
      */
     public function getStorageKeyOfFile(NodeElementInterface|RelationElementInterface $element): ?string
     {
@@ -27,7 +30,7 @@ class ElementService
             return null;
         }
 
-        return $this->fileService->getStorageBucketKey($this->getElementId($element), $this->getFileNameExtension($element));
+        return $this->storageService->getStorageBucketKey($this->getElementId($element), $this->getFileNameExtension($element));
     }
 
     public function getElementId(NodeElementInterface|RelationElementInterface $element): UuidInterface
@@ -53,7 +56,7 @@ class ElementService
         $base = $this->getFileNameBase($element);
         $extension = $this->getFileNameExtension($element);
 
-        return $this->fileService->buildFileNameFromParts($base, $extension);
+        return $this->fileNameService->buildFileNameFromParts($base, $extension);
     }
 
     protected function getFileNameBase(
@@ -70,7 +73,7 @@ class ElementService
         if (!is_string($nameProperty)) {
             return $fallbackName;
         }
-        $nameProperty = $this->fileService->removeReservedCharactersFromFileName($nameProperty);
+        $nameProperty = $this->fileNameService->removeReservedCharactersFromFileName($nameProperty);
         if (0 === strlen($nameProperty)) {
             return $fallbackName;
         }
@@ -83,6 +86,6 @@ class ElementService
     ): string {
         $parsedFileProperty = $this->filePropertyService->parseFilePropertyFromElement($element);
 
-        return $parsedFileProperty?->getExtension() ?? FileService::DEFAULT_EXTENSION;
+        return $parsedFileProperty?->getExtension() ?? FileNameService::DEFAULT_EXTENSION;
     }
 }

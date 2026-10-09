@@ -120,7 +120,6 @@ class EtagServiceTest extends TestCase
             $self->assertInstanceOf(ElementEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
-        $authProvider = $this->prophesize(AuthProvider::class);
 
         $request = new Request(attributes: ['id' => '224b322a-c2a1-4971-8b05-28af080d67f1']);
 
@@ -148,7 +147,6 @@ class EtagServiceTest extends TestCase
             $self->assertInstanceOf(ChildrenCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
-        $authProvider = $this->prophesize(AuthProvider::class);
 
         $request = new Request(attributes: ['id' => '47d86985-68e0-4747-8921-33f3a9090549']);
 
@@ -176,7 +174,6 @@ class EtagServiceTest extends TestCase
             $self->assertInstanceOf(ParentsCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
-        $authProvider = $this->prophesize(AuthProvider::class);
 
         $request = new Request(attributes: ['id' => '685b5a01-f2d2-4764-9c69-3fd87c45d5b0']);
 
@@ -204,7 +201,6 @@ class EtagServiceTest extends TestCase
             $self->assertInstanceOf(RelatedCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
-        $authProvider = $this->prophesize(AuthProvider::class);
 
         $request = new Request(attributes: ['id' => 'adfd47a3-7d25-4bdb-b546-f5744382d488']);
 
@@ -278,7 +274,6 @@ class EtagServiceTest extends TestCase
     public function testSetCurrentRequestEtagFromRequestAndEtagTypeWithEtagTypeElementAndRequestWithoutAttribute(): void
     {
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
-        $authProvider = $this->prophesize(AuthProvider::class);
 
         $request = new Request();
 

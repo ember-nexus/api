@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
-use App\Tests\FeatureTests\BaseRequestTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ResponseInterface;
 
@@ -14,9 +13,8 @@ use Psr\Http\Message\ResponseInterface;
  * by a corrected request. A non-final chunk which exceeds the declared length is rejected the same way. Creation
  * rejects a first chunk which exceeds the declared length.
  */
-class UploadLengthEnforcementTest extends BaseRequestTestCase
+class UploadLengthEnforcementTest extends BaseUploadTestCase
 {
-    private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int MIN_CHUNK_SIZE = 5 * 1024 * 1024;
 
     /**
@@ -25,27 +23,6 @@ class UploadLengthEnforcementTest extends BaseRequestTestCase
     public static function targetProvider(): array
     {
         return ['node' => [false], 'relation' => [true]];
-    }
-
-    private function createTarget(bool $onRelation): string
-    {
-        if ($onRelation) {
-            return $this->createEphemeralRelation(self::TOKEN, 'upload-length-enforcement');
-        }
-
-        return $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
-            'type' => 'Data',
-            'data' => ['name' => 'upload-length-enforcement'],
-        ]));
-    }
-
-    private function deleteTarget(bool $onRelation, string $elementId): void
-    {
-        if ($onRelation) {
-            $this->deleteEphemeralRelation(self::TOKEN, $elementId);
-        } else {
-            $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
-        }
     }
 
     private function createUpload(string $elementId, string $body, int $uploadLength): ResponseInterface
@@ -91,7 +68,7 @@ class UploadLengthEnforcementTest extends BaseRequestTestCase
     #[DataProvider('targetProvider')]
     public function testCompletingWithFewerBytesThanDeclaredIsRejectedButKeepsUpload(bool $onRelation): void
     {
-        $elementId = $this->createTarget($onRelation);
+        $elementId = $this->createTarget($onRelation, 'upload-length-enforcement');
         $uploadId = $this->getUuidFromLocation($this->createUpload($elementId, str_repeat('a', self::MIN_CHUNK_SIZE), self::MIN_CHUNK_SIZE + 100));
         $this->assertSame(1, $this->countUploadChunksInUploadBucket($uploadId));
 
@@ -108,7 +85,7 @@ class UploadLengthEnforcementTest extends BaseRequestTestCase
     #[DataProvider('targetProvider')]
     public function testCompletingWithMoreBytesThanDeclaredIsRejectedButKeepsUpload(bool $onRelation): void
     {
-        $elementId = $this->createTarget($onRelation);
+        $elementId = $this->createTarget($onRelation, 'upload-length-enforcement');
         $uploadId = $this->getUuidFromLocation($this->createUpload($elementId, str_repeat('a', self::MIN_CHUNK_SIZE), self::MIN_CHUNK_SIZE + 100));
 
         $response = $this->patchUpload($uploadId, self::MIN_CHUNK_SIZE, str_repeat('b', 101), true);
@@ -123,7 +100,7 @@ class UploadLengthEnforcementTest extends BaseRequestTestCase
     #[DataProvider('targetProvider')]
     public function testCompletingWithExactlyTheDeclaredLengthSucceeds(bool $onRelation): void
     {
-        $elementId = $this->createTarget($onRelation);
+        $elementId = $this->createTarget($onRelation, 'upload-length-enforcement');
         $uploadId = $this->getUuidFromLocation($this->createUpload($elementId, str_repeat('a', self::MIN_CHUNK_SIZE), self::MIN_CHUNK_SIZE + 100));
 
         $this->assertNoContentResponse($this->patchUpload($uploadId, self::MIN_CHUNK_SIZE, str_repeat('b', 100), true));
@@ -137,7 +114,7 @@ class UploadLengthEnforcementTest extends BaseRequestTestCase
     #[DataProvider('targetProvider')]
     public function testNonFinalChunkExceedingDeclaredLengthIsRejectedButKeepsUpload(bool $onRelation): void
     {
-        $elementId = $this->createTarget($onRelation);
+        $elementId = $this->createTarget($onRelation, 'upload-length-enforcement');
         $uploadId = $this->getUuidFromLocation($this->createUpload($elementId, str_repeat('a', self::MIN_CHUNK_SIZE), self::MIN_CHUNK_SIZE + 100));
 
         $this->assertIsProblemResponse($this->patchUpload($uploadId, self::MIN_CHUNK_SIZE, str_repeat('b', self::MIN_CHUNK_SIZE), false), 409);
@@ -153,7 +130,7 @@ class UploadLengthEnforcementTest extends BaseRequestTestCase
     #[DataProvider('targetProvider')]
     public function testFirstChunkExceedingDeclaredLengthIsRejectedOnCreation(bool $onRelation): void
     {
-        $elementId = $this->createTarget($onRelation);
+        $elementId = $this->createTarget($onRelation, 'upload-length-enforcement');
 
         $response = $this->createUpload($elementId, str_repeat('a', self::MIN_CHUNK_SIZE), self::MIN_CHUNK_SIZE - 1);
         $this->assertIsProblemResponse($response, 409);

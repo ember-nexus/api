@@ -189,7 +189,7 @@ class HealthcheckCommand extends Command
 
         $this->io->startSection('Check API');
 
-        $client = new Client();
+        $client = new Client(['timeout' => 3]);
         $res = $client->request('GET', 'http://localhost');
         if (200 !== $res->getStatusCode() && 429 !== $res->getStatusCode()) {
             throw new Exception(sprintf('Get index endpoint is not online, expected status code 200 or 429, got %s.', $res->getStatusCode()));

@@ -6,10 +6,12 @@ namespace App\Tests\UnitTests\Command\Cron;
 
 use App\Command\Cron\ReindexFilesCommand;
 use App\Service\CronExecutionGateService;
+use App\Service\CronTimeBudgetService;
 use App\Service\ElementManager;
 use App\Service\QueueService;
 use App\Type\NodeElement;
 use App\Type\RabbitMQQueueType;
+use InvalidArgumentException;
 use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -34,8 +36,12 @@ class ReindexFilesCommandTest extends TestCase
         $cronExecutionGateService = $this->prophesize(CronExecutionGateService::class);
         $cronExecutionGateService->shouldSkipExecution()->willReturn($isCronDisabled);
 
+        $cronTimeBudgetService = $this->prophesize(CronTimeBudgetService::class);
+        $cronTimeBudgetService->getDeadline()->willReturn(null);
+
         return new ReindexFilesCommand(
             $cronExecutionGateService->reveal(),
+            $cronTimeBudgetService->reveal(),
             $queueService ?? $this->prophesize(QueueService::class)->reveal(),
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal()
         );
@@ -62,8 +68,12 @@ class ReindexFilesCommandTest extends TestCase
             new LogicException('Expected "isCronDisabled" to be of type boolean, got string.')
         );
 
+        $cronTimeBudgetService = $this->prophesize(CronTimeBudgetService::class);
+        $cronTimeBudgetService->getDeadline()->willReturn(null);
+
         $command = new ReindexFilesCommand(
             $cronExecutionGateService->reveal(),
+            $cronTimeBudgetService->reveal(),
             $this->prophesize(QueueService::class)->reveal(),
             $this->prophesize(ElementManager::class)->reveal()
         );
@@ -75,7 +85,7 @@ class ReindexFilesCommandTest extends TestCase
     public function testCommandDoesNothingIfQueueIsEmpty(): void
     {
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE), Argument::type('callable'))
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE), Argument::type('callable'), Argument::any())
             ->shouldBeCalledOnce()
             ->willReturn(0);
 
@@ -104,7 +114,7 @@ class ReindexFilesCommandTest extends TestCase
         $elementManager->flush()->shouldBeCalledOnce()->willReturn($elementManager->reveal());
 
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE), Argument::type('callable'))
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE), Argument::type('callable'), Argument::any())
             ->will(function ($args) use ($elementId) {
                 /** @var callable $handler */
                 $handler = $args[1];
@@ -131,7 +141,7 @@ class ReindexFilesCommandTest extends TestCase
         $elementManager->merge(Argument::any())->shouldNotBeCalled();
 
         $queueService = $this->prophesize(QueueService::class);
-        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE), Argument::type('callable'))
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE), Argument::type('callable'), Argument::any())
             ->will(function ($args) use ($elementId) {
                 /** @var callable $handler */
                 $handler = $args[1];
@@ -146,5 +156,27 @@ class ReindexFilesCommandTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
+    }
+
+    public function testCommandThrowsIfMessageHasNoElementId(): void
+    {
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElement(Argument::any())->shouldNotBeCalled();
+
+        $queueService = $this->prophesize(QueueService::class);
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_REINDEX_FILE_QUEUE), Argument::type('callable'), Argument::any())
+            ->will(function ($args) {
+                /** @var callable $handler */
+                $handler = $args[1];
+                $handler([]);
+
+                return 1;
+            });
+
+        $command = $this->buildCommand(queueService: $queueService->reveal(), elementManager: $elementManager->reveal());
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Expected queue message to contain a string 'elementId', got null.");
+        (new CommandTester($command))->execute([]);
     }
 }

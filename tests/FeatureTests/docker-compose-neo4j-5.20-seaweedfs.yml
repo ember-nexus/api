@@ -6,7 +6,7 @@ x-api-environment: &api-environment
   ELASTIC_AUTH: elasticsearch:9200
   REDIS_AUTH: tcp://redis?password=redis-password
   RABBITMQ_AUTH: amqp://user:password@rabbitmq:5672
-  S3_ENDPOINT: http://minio:9000
+  S3_ENDPOINT: http://seaweedfs:9000
   S3_ACCESS_KEY_ID: accessKey
   S3_SECRET_ACCESS_KEY: secretKey
   # cron commands would otherwise run whenever the scheduler triggers them during the test run; the tty-bypass
@@ -24,11 +24,15 @@ services:
       - elasticsearch
       - redis
       - rabbitmq
-      - minio
+      - seaweedfs
     expose:
       - "80"
     environment:
       DISABLE_CRON: 'true'
+      # overrides the mounted repository's own .env(.test), which point at the "minio" service name used by the
+      # default local dev stack and the neo4j-5.7-minio scenario; this scenario's S3-compatible service is named
+      # after what it actually runs instead, see docker-compose-neo4j-latest-versitygw.yml for the same reason
+      S3_ENDPOINT: http://seaweedfs:9000
     volumes:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt
@@ -42,7 +46,7 @@ services:
       - elasticsearch
       - redis
       - rabbitmq
-      - minio
+      - seaweedfs
     expose:
       - "80"
     environment: *api-environment
@@ -96,8 +100,8 @@ services:
       - RABBITMQ_DEFAULT_USER=user
       - RABBITMQ_DEFAULT_PASS=password
 
-  minio:
-    container_name: minio
+  seaweedfs:
+    container_name: seaweedfs
     image: chrislusf/seaweedfs:latest
     expose:
       - "9000"

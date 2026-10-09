@@ -9,9 +9,12 @@ use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
+use Laudis\Neo4j\ClientBuilder;
+use Laudis\Neo4j\Contracts\ClientInterface as CypherClientInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
+use Symfony\Component\Process\Process;
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
@@ -367,11 +370,62 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertSame($state, $tokenBody['data']['state']);
     }
 
+    public function getEtagOfElement(string $token, string $id, string $additionalPath, ?string $shouldEtag = null): string
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s%s', $id, $additionalPath),
+            $token
+        );
+        $etag = $response->getHeader('Etag')[0];
+        if ($shouldEtag) {
+            $this->assertSame($shouldEtag, $etag);
+        }
+
+        return $etag;
+    }
+
     public function getUuidFromLocation(ResponseInterface $response): string
     {
         $location = $response->getHeader('Location')[0];
 
         return array_reverse(explode('/', $location))[0];
+    }
+
+    public function getCypherClient(): CypherClientInterface
+    {
+        return ClientBuilder::create()
+            ->withDriver('bolt', $_ENV['CYPHER_AUTH'])
+            ->build();
+    }
+
+    /**
+     * @param array<string, string> $headers
+     */
+    public function sendFile(string $token, string $method, string $elementId, string $content, array $headers = []): ResponseInterface
+    {
+        return $this->runUploadRequest(
+            $method,
+            sprintf('/%s/file', $elementId),
+            $content,
+            $token,
+            array_merge(['Content-Type' => 'application/octet-stream'], $headers)
+        );
+    }
+
+    public function createElement(string $token, string $name): string
+    {
+        $response = $this->runPostRequest(
+            '/',
+            $token,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => $name,
+                ],
+            ]
+        );
+
+        return $this->getUuidFromLocation($response);
     }
 
     /**
@@ -438,7 +492,7 @@ abstract class BaseRequestTestCase extends TestCase
     private function isFileInStorage(string $elementId): bool
     {
         $s3Client = $this->createS3ClientForAssertions();
-        // the object key ends with the element id, see FileService::getStorageBucketKey()
+        // the object key ends with the element id, see StorageService::getStorageBucketKey()
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
             if (str_contains((string) $object->getKey(), $elementId)) {
                 return true;
@@ -455,7 +509,7 @@ abstract class BaseRequestTestCase extends TestCase
     {
         $s3Client = $this->createS3ClientForAssertions();
         $count = 0;
-        // the object key contains the upload id, see FileService::getUploadBucketKey()
+        // the object key contains the upload id, see StorageService::getUploadBucketKey()
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-upload']) as $object) {
             if (str_contains((string) $object->getKey(), $uploadId)) {
                 ++$count;
@@ -549,5 +603,20 @@ abstract class BaseRequestTestCase extends TestCase
                 unlink($path);
             }
         }
+    }
+
+    /**
+     * Computes a file's SHA-256 digest using the standalone `sha256sum` CLI tool, instead of PHP's own hash
+     * functions, so that test expectations do not depend on this environment's PHP build/patches.
+     */
+    public function computeSha256UsingCliTool(string $filePath): string
+    {
+        $process = new Process(['sha256sum', $filePath]);
+        $process->mustRun();
+
+        $output = trim($process->getOutput());
+        [$hash] = explode(' ', $output, 2);
+
+        return $hash;
     }
 }

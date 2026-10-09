@@ -16,7 +16,7 @@
   },
   "file": {
     "maxFileSizeInBytes": 10737418240,
-    "uploadExpiresInSecondsAfterFirstRequest": 10800,
+    "uploadExpiresAfterFirstRequestInSeconds": 10800,
     "uploadMinChunkSizeInBytes": 5242880,
     "uploadMaxChunkSizeInBytes": 105906176
   }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Command;
 
 use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Wire\AMQPTable;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -20,7 +21,7 @@ class CronReindexFilesTest extends BaseCronTestCase
         $connection = $this->getRabbitMqConnection();
         $channel = $connection->channel();
         // same arguments as the application uses to declare the queue
-        $channel->queue_declare(self::QUEUE, false, false, false, false);
+        $channel->queue_declare(self::QUEUE, false, true, false, false, false, new AMQPTable([]));
         [, $messageCount] = $channel->queue_declare(self::QUEUE, true);
         $channel->close();
         $connection->close();
@@ -32,7 +33,7 @@ class CronReindexFilesTest extends BaseCronTestCase
     {
         $connection = $this->getRabbitMqConnection();
         $channel = $connection->channel();
-        $channel->queue_declare(self::QUEUE, false, false, false, false);
+        $channel->queue_declare(self::QUEUE, false, true, false, false, false, new AMQPTable([]));
         $channel->basic_publish(new AMQPMessage($body), '', self::QUEUE);
         $channel->close();
         $connection->close();

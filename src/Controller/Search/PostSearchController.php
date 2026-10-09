@@ -30,7 +30,7 @@ class PostSearchController extends AbstractController
     ) {
     }
 
-    private function getIsDebugFromBody(mixed $body): bool
+    private function isDebugFromBody(mixed $body): bool
     {
         if (!array_key_exists('debug', $body)) {
             return false;
@@ -140,7 +140,7 @@ class PostSearchController extends AbstractController
     {
         $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
-        $debug = $this->getIsDebugFromBody($body);
+        $debug = $this->isDebugFromBody($body);
         $globalParameters = $this->getGlobalParametersFromBody($body);
         $steps = $this->getStepsFromBody($body);
 

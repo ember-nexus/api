@@ -29,6 +29,7 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Log\NullLogger;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -72,6 +73,9 @@ class BackupLoadCommandTest extends TestCase
         $this->failingIds = [];
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.ErrorControlOperator)
+     */
     protected function tearDown(): void
     {
         $this->backupStorage->deleteDirectory('');
@@ -183,7 +187,7 @@ class BackupLoadCommandTest extends TestCase
             ),
             new FileHashService(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
-            new \Psr\Log\NullLogger()
+            new NullLogger()
         );
 
         $tester = new CommandTester($command);

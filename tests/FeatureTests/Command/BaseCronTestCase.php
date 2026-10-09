@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Command;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use Laudis\Neo4j\ClientBuilder;
-use Laudis\Neo4j\Contracts\ClientInterface;
+use Elastic\Elasticsearch\Client as ElasticsearchClient;
+use Elastic\Elasticsearch\ClientBuilder as ElasticsearchClientBuilder;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use Predis\Client as RedisClient;
 
@@ -19,16 +19,14 @@ abstract class BaseCronTestCase extends BaseRequestTestCase
     protected const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     protected const int CHUNK_SIZE = 5 * 1024 * 1024;
 
-    protected function getCypherClient(): ClientInterface
-    {
-        return ClientBuilder::create()
-            ->withDriver('bolt', $_ENV['CYPHER_AUTH'])
-            ->build();
-    }
-
     protected function getRedisClient(): RedisClient
     {
         return new RedisClient($_ENV['REDIS_AUTH']);
+    }
+
+    protected function getElasticsearchClient(): ElasticsearchClient
+    {
+        return ElasticsearchClientBuilder::create()->setHosts([$_ENV['ELASTIC_AUTH']])->build();
     }
 
     /**

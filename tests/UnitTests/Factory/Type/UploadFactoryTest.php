@@ -52,14 +52,14 @@ class UploadFactoryTest extends TestCase
         $propertyParseService = $this->prophesize(PropertyParseService::class);
         $propertyParseService->getUploadLengthFromProperties(Argument::is($properties))->willReturn(1111);
         $propertyParseService->getUploadOffsetFromProperties(Argument::is($properties))->willReturn(2222);
-        $propertyParseService->getIsUploadCompleteFromProperties(Argument::is($properties))->willReturn(false);
+        $propertyParseService->isUploadCompleteFromProperties(Argument::is($properties))->willReturn(false);
         $propertyParseService->getUploadTargetFromProperties(Argument::is($properties))->willReturn($uploadTarget);
         $propertyParseService->getChunkIdsFromProperties(Argument::is($properties))->willReturn(['a', 'b', 'c', 'd', 'e']);
         $propertyParseService->getUploadOwnerFromProperties(Argument::is($properties))->willReturn($uploadOwner);
         $propertyParseService->getExtensionFromProperties(Argument::is($properties))->willReturn('some-ext');
         $propertyParseService->getExpiresFromProperties(Argument::is($properties))->willReturn($expires);
         $propertyParseService->getHashStateFromProperties(Argument::is($properties))->willReturn('some-hash-state');
-        $propertyParseService->getTargetHadFileAtCreationFromProperties(Argument::is($properties))->willReturn(true);
+        $propertyParseService->targetHadFileAtCreationFromProperties(Argument::is($properties))->willReturn(true);
 
         $uploadFactory = $this->buildUploadFactory(
             propertyParseService: $propertyParseService->reveal()

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
-use App\Tests\FeatureTests\BaseRequestTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ResponseInterface;
 
@@ -13,9 +12,8 @@ use Psr\Http\Message\ResponseInterface;
  * is stored and neither offset nor hash state change. Chunks of 1 to minimum - 1 bytes stay rejected on non-final
  * requests, as S3 does not accept small parts. The same rules apply when the upload is created.
  */
-class PatchUploadZeroLengthChunkTest extends BaseRequestTestCase
+class PatchUploadZeroLengthChunkTest extends BaseUploadTestCase
 {
-    private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int MIN_CHUNK_SIZE = 5 * 1024 * 1024;
 
     /**
@@ -40,27 +38,6 @@ class PatchUploadZeroLengthChunkTest extends BaseRequestTestCase
         }
 
         return $cases;
-    }
-
-    private function createTarget(bool $onRelation, string $name): string
-    {
-        if ($onRelation) {
-            return $this->createEphemeralRelation(self::TOKEN, $name);
-        }
-
-        return $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
-            'type' => 'Data',
-            'data' => ['name' => $name],
-        ]));
-    }
-
-    private function deleteTarget(bool $onRelation, string $elementId): void
-    {
-        if ($onRelation) {
-            $this->deleteEphemeralRelation(self::TOKEN, $elementId);
-        } else {
-            $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
-        }
     }
 
     private function createUpload(string $elementId, string $body): ResponseInterface

@@ -23,6 +23,16 @@ jobs:
       - run: docker pull tmknom/markdownlint
       - run: docker run --rm -v $(pwd):/work tmknom/markdownlint '**/*.md' --config tests/.markdownlintrc --ignore vendor --ignore CHANGELOG.md --ignore var --ignore tmp
 
+  caddyfile-fmt-check:
+    runs-on: ubuntu-26.04
+    name: 'Caddyfile format check'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - run: docker pull caddy:2.11.6-alpine
+      - run: docker run --rm -v $(pwd)/docker:/data -w /data caddy:2.11.6-alpine caddy fmt --diff Caddyfile
+      - run: docker run --rm -v $(pwd)/docker:/data -w /data caddy:2.11.6-alpine caddy fmt --diff Caddyfile.dev
+
   build-docker-image:
     runs-on: gh-4vcpu-ubuntu-latest-amd
     name: 'Build Docker Image'
@@ -30,6 +40,7 @@ jobs:
     needs:
       - yml-lint
       - markdown-lint
+      - caddyfile-fmt-check
     steps:
       - uses: actions/checkout@v5
       - name: Expose GitHub Runtime
@@ -168,26 +179,24 @@ jobs:
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && ./bin/with-heartbeat composer test:mutant -- --no-progress"
 
-  # phpmd is temporarily deactivated: it was removed from the dev dependencies, as its last release is too old for
-  # the current dependencies. Reactivate once a new phpmd release is available.
-#  test-mess-detector:
-#    runs-on: ubuntu-26.04
-#    name: 'Mess Detector'
-#    timeout-minutes: 5
-#    needs:
-#      - build-docker-image
-#    continue-on-error: true
-#    steps:
-#      - uses: actions/checkout@v5
-#      - run: mkdir -p /tmp/docker
-#      - uses: actions/download-artifact@v8
-#        with:
-#          name: docker-image-api-dev-amd
-#          path: /tmp/docker
-#      - name: Mess Detector
-#        run: |
-#          docker load < /tmp/docker/api-dev-amd.tar.gz
-#          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
+  test-mess-detector:
+    runs-on: ubuntu-26.04
+    name: 'Mess Detector'
+    timeout-minutes: 5
+    needs:
+      - build-docker-image
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - run: mkdir -p /tmp/docker
+      - uses: actions/download-artifact@v8
+        with:
+          name: docker-image-api-dev-amd
+          path: /tmp/docker
+      - name: Mess Detector
+        run: |
+          docker load < /tmp/docker/api-dev-amd.tar.gz
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
   test-feature:
     runs-on: ubuntu-26.04
@@ -198,7 +207,7 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-#      - test-mess-detector
+      - test-mess-detector
     strategy:
       matrix:
         dockerCompose:
@@ -236,13 +245,14 @@ jobs:
       - name: Feature Test
         run: |
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature"
-      - name: Run cron once manually
-        # DISABLE_CRON=true is set on the containers so the scheduler never fires cron during the test run above;
-        # this manually runs it once, in its own stage, after the main tests. A plain `docker exec` has no tty, so
-        # under DISABLE_CRON=true it would just no-op ("Cron is disabled"); `-t` allocates one so the command
-        # actually executes despite DISABLE_CRON.
+      - name: Run cron jobs once manually
+        # Smoke test only (business logic is unit/feature-tested elsewhere): proves the cron jobs actually run
+        # end-to-end against the prod image the way the real scheduler invokes them, i.e. with a tty, which is
+        # required here since DISABLE_CRON=true on the containers would otherwise make a tty-less exec no-op.
         run: |
-          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron
+          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron:delete-expired-uploads
+          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron:reindex-files
+          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron:update-ownership
       - name: Collect docker logs
         if: always()
         run: |
@@ -273,7 +283,7 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-#      - test-mess-detector
+      - test-mess-detector
     steps:
       - uses: actions/checkout@v5
       - run: mkdir -p /tmp/docker
@@ -336,7 +346,7 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
-#      - test-mess-detector
+      - test-mess-detector
     steps:
       - uses: actions/checkout@v5
       - run: mkdir -p /tmp/docker
@@ -393,6 +403,7 @@ jobs:
       - phpstan
       - psalm
       - cs-lint
+      - test-mess-detector
     steps:
       - uses: actions/checkout@v5
       - run: mkdir -p /tmp/docker

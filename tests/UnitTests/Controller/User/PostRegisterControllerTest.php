@@ -45,9 +45,6 @@ class PostRegisterControllerTest extends TestCase
 {
     use ProphecyTrait;
 
-    /**
-     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
-     */
     private function getPostRegisterController(
         ?ElementManager $elementManager = null,
         ?EntityManager $cypherEntityManager = null,

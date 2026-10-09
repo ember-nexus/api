@@ -2,6 +2,11 @@ version: '3'
 
 tasks:
 
+  caddy:fmt:
+    cmds:
+      - docker run --rm -v $(pwd)/docker:/data -w /data caddy:2.11.6-alpine caddy fmt --overwrite Caddyfile
+      - docker run --rm -v $(pwd)/docker:/data -w /data caddy:2.11.6-alpine caddy fmt --overwrite Caddyfile.dev
+
   dev:build:
     cmds:
       - docker compose -f ./tools/docker-compose.yml build
@@ -25,10 +30,6 @@ tasks:
   dev:k6:load:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec k6 pnpm load
-
-  generate:swagger:
-    cmds:
-      - ./tools/generate-swagger.sh
 
   prod:build:
     vars:

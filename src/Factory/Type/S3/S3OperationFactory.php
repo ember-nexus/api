@@ -17,8 +17,8 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
-use App\Service\FileService;
 use App\Service\MimeTypeService;
+use App\Service\StorageService;
 use App\Type\S3\FileOperation;
 use App\Type\S3\MergeFileChunksOperation;
 use App\Type\S3\UploadFileChunkOperation;
@@ -28,8 +28,6 @@ use Ramsey\Uuid\UuidInterface;
 
 /**
  * Builds every S3 operation value object; callers depend on this single factory instead of one per operation type.
- *
- * @SuppressWarnings("PHPMD.ExcessiveParameterList")
  */
 class S3OperationFactory
 {
@@ -37,8 +35,8 @@ class S3OperationFactory
         private EmberNexusConfiguration $emberNexusConfiguration,
         private ElementManager $elementManager,
         private ElementService $elementService,
-        private FileService $fileService,
         private MimeTypeService $mimeTypeService,
+        private StorageService $storageService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -48,7 +46,7 @@ class S3OperationFactory
     {
         return new FileOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($upload->getId(), $chunk, $chunkId)
+            $this->storageService->getUploadBucketKey($upload->getId(), $chunk, $chunkId)
         );
     }
 
@@ -62,7 +60,7 @@ class S3OperationFactory
 
         return new FileOperation(
             $this->emberNexusConfiguration->getFileS3StorageBucket(),
-            $this->fileService->getStorageBucketKey($elementId, $extension)
+            $this->storageService->getStorageBucketKey($elementId, $extension)
         );
     }
 
@@ -79,10 +77,10 @@ class S3OperationFactory
 
         return new UploadFileOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($elementId, 0),
+            $this->storageService->getUploadBucketKey($elementId, 0),
             $this->emberNexusConfiguration->getFileS3StorageBucket(),
             $this->elementService->getStorageKeyOfFile($element),
-            $this->fileService->getStorageBucketKey($elementId, $resumableUploadRequest->getExtension()),
+            $this->storageService->getStorageBucketKey($elementId, $resumableUploadRequest->getExtension()),
             $resource,
             $resumableUploadRequest->getContentLength(),
             $this->mimeTypeService->getMimeTypeFromResource($resource)
@@ -104,10 +102,10 @@ class S3OperationFactory
 
         return new UploadFileOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($elementId, 0),
+            $this->storageService->getUploadBucketKey($elementId, 0),
             $this->emberNexusConfiguration->getFileS3StorageBucket(),
             null,
-            $this->fileService->getStorageBucketKey($elementId, $extension),
+            $this->storageService->getStorageBucketKey($elementId, $extension),
             $resource,
             $contentLength,
             $this->mimeTypeService->getMimeTypeFromResource($resource)
@@ -122,7 +120,7 @@ class S3OperationFactory
 
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($uploadId, 1, $chunkId),
+            $this->storageService->getUploadBucketKey($uploadId, 1, $chunkId),
             $resumableUploadRequest->getContent(),
             $resumableUploadRequest->getContentLength(),
             'application/octet-stream'
@@ -133,7 +131,7 @@ class S3OperationFactory
     {
         return new UploadFileChunkOperation(
             $this->emberNexusConfiguration->getFileS3UploadBucket(),
-            $this->fileService->getUploadBucketKey($upload->getId(), $upload->getAlreadyUploadedChunks() + 1, $chunkId),
+            $this->storageService->getUploadBucketKey($upload->getId(), $upload->getAlreadyUploadedChunks() + 1, $chunkId),
             $partialUploadRequest->getContent(),
             $partialUploadRequest->getContentLength(),
             'application/octet-stream'
@@ -160,7 +158,7 @@ class S3OperationFactory
         $uploadKeys = [];
         $uploadId = $upload->getId();
         foreach ($upload->getChunkIds() as $index => $chunkId) {
-            $uploadKeys[] = $this->fileService->getUploadBucketKey($uploadId, $index + 1, $chunkId);
+            $uploadKeys[] = $this->storageService->getUploadBucketKey($uploadId, $index + 1, $chunkId);
         }
 
         $element = $this->elementManager->getElementOrFail($upload->getUploadTarget());
@@ -170,7 +168,7 @@ class S3OperationFactory
             $uploadKeys,
             $this->emberNexusConfiguration->getFileS3StorageBucket(),
             $this->elementService->getStorageKeyOfFile($element),
-            $this->fileService->getStorageBucketKey($upload->getUploadTarget(), $upload->getExtension())
+            $this->storageService->getStorageBucketKey($upload->getUploadTarget(), $upload->getExtension())
         );
     }
 }

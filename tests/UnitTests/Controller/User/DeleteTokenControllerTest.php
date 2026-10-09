@@ -9,6 +9,7 @@ use App\Contract\S3\FileOperationInterface;
 use App\Controller\User\DeleteTokenController;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
+use App\Service\DeletionService;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\UploadService;
@@ -42,10 +43,11 @@ class DeleteTokenControllerTest extends TestCase
         $fileDeletionService->getFileOperationsForDeletionOfElement($tokenElement)->willReturn([$fileOperation]);
 
         $uploadService = $this->prophesize(UploadService::class);
+        $deletionService = $this->prophesize(DeletionService::class);
 
         $uploadService->deleteUploadsTargeting($tokenId)->shouldBeCalledOnce();
-        $elementManager->delete($tokenElement)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
-        $elementManager->flush()->shouldBeCalledTimes(2)->willReturn($elementManager->reveal());
+        $deletionService->delete($tokenElement)->shouldBeCalledOnce();
+        $elementManager->flush()->shouldBeCalledOnce()->willReturn($elementManager->reveal());
         // files are deleted after the token is deleted and flushed
         $fileDeletionService->deleteFiles([$fileOperation])->shouldBeCalledOnce();
 
@@ -54,6 +56,7 @@ class DeleteTokenControllerTest extends TestCase
             $authProvider->reveal(),
             $uploadService->reveal(),
             $fileDeletionService->reveal(),
+            $deletionService->reveal(),
             $this->prophesize(Client401UnauthorizedExceptionFactory::class)->reveal(),
         );
 

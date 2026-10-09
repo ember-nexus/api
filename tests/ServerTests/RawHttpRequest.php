@@ -70,6 +70,8 @@ class RawHttpRequest
 
     /**
      * Returns null if the server closed the connection without answering.
+     *
+     * @SuppressWarnings(PHPMD.ErrorControlOperator)
      */
     public function readResponse(int $timeoutInSeconds = 60): ?ResponseInterface
     {
@@ -94,6 +96,9 @@ class RawHttpRequest
         return Message::parseResponse($raw);
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.ErrorControlOperator)
+     */
     public function close(): void
     {
         @fclose($this->socket);
@@ -104,6 +109,9 @@ class RawHttpRequest
         return $this->sentBodyBytes;
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.ErrorControlOperator)
+     */
     private function write(string $bytes): bool
     {
         $total = strlen($bytes);

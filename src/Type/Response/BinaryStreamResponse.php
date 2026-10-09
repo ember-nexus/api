@@ -24,6 +24,15 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
         $this->content = '';
         $stream = $object->getBody()->getContentAsResource();
 
+        $this->setRangeHeaders($object, $range);
+        $this->setDigestHeader($reprDigestHeaderValue);
+        $this->setContentTypeHeader($contentType);
+        $this->setDispositionHeader($fileName, $fileNameFallback);
+        $this->setStreamCallback($stream);
+    }
+
+    private function setRangeHeaders(GetObjectOutput $object, ?ByteRange $range): void
+    {
         $this->headers->set('Accept-Ranges', 'bytes');
         // the content type was detected by the server, browsers must not second-guess it
         $this->headers->set('X-Content-Type-Options', 'nosniff');
@@ -35,22 +44,37 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
         } else {
             $this->headers->set('Content-Length', (string) ($object->getContentLength() ?? 0));
         }
+    }
 
+    private function setDigestHeader(?string $reprDigestHeaderValue): void
+    {
         if (null !== $reprDigestHeaderValue) {
             // Repr-Digest describes the whole file, so it is valid for partial responses too. Content-Digest is
             // omitted, as it would require hashing the returned range.
             $this->headers->set('Repr-Digest', $reprDigestHeaderValue);
         }
+    }
 
+    private function setContentTypeHeader(?string $contentType): void
+    {
         $this->headers->set('Content-Type', $contentType ?? 'application/octet-stream');
+    }
 
+    private function setDispositionHeader(string $fileName, string $fileNameFallback): void
+    {
         $disposition = $this->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             $fileName,
             $fileNameFallback
         );
         $this->headers->set('Content-Disposition', $disposition);
+    }
 
+    /**
+     * @param resource $stream
+     */
+    private function setStreamCallback($stream): void
+    {
         $this->setCallback(function () use ($stream): void {
             while (!feof($stream)) {
                 $buffer = \Safe\fread($stream, self::STREAM_CHUNK_SIZE);

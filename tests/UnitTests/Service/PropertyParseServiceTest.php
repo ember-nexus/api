@@ -6,7 +6,7 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Service\FileService;
+use App\Service\FileNameService;
 use App\Service\PropertyParseService;
 use DateTimeImmutable as NativeDateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -94,6 +94,14 @@ class PropertyParseServiceTest extends TestCase
         );
     }
 
+    public function testUploadLengthMustNotBeNegative(): void
+    {
+        $this->assertBadContent(
+            fn (PropertyParseService $service) => $service->getUploadLengthFromProperties(['uploadLength' => -1]),
+            'Upload expects property uploadLength to be positive int.'
+        );
+    }
+
     public function testUploadOffsetIsReturned(): void
     {
         $this->assertSame(0, $this->buildService()->getUploadOffsetFromProperties(['uploadOffset' => 0]));
@@ -102,19 +110,19 @@ class PropertyParseServiceTest extends TestCase
 
     public function testIsUploadCompleteDefaultsToFalse(): void
     {
-        $this->assertFalse($this->buildService()->getIsUploadCompleteFromProperties([]));
+        $this->assertFalse($this->buildService()->isUploadCompleteFromProperties([]));
     }
 
     public function testIsUploadCompleteIsReturned(): void
     {
-        $this->assertTrue($this->buildService()->getIsUploadCompleteFromProperties(['uploadComplete' => true]));
-        $this->assertFalse($this->buildService()->getIsUploadCompleteFromProperties(['uploadComplete' => false]));
+        $this->assertTrue($this->buildService()->isUploadCompleteFromProperties(['uploadComplete' => true]));
+        $this->assertFalse($this->buildService()->isUploadCompleteFromProperties(['uploadComplete' => false]));
     }
 
     public function testIsUploadCompleteMustBeBool(): void
     {
         $this->assertBadContent(
-            fn (PropertyParseService $service) => $service->getIsUploadCompleteFromProperties(['uploadComplete' => 1]),
+            fn (PropertyParseService $service) => $service->isUploadCompleteFromProperties(['uploadComplete' => 1]),
             'Upload expects property uploadComplete to be bool.'
         );
     }
@@ -139,6 +147,14 @@ class PropertyParseServiceTest extends TestCase
     {
         $uuid = Uuid::uuid4();
         $this->assertTrue($uuid->equals($this->buildService()->getUploadTargetFromProperties(['uploadTarget' => $uuid->toString()])));
+    }
+
+    public function testUploadTargetRejectsMalformedUuidStringAsBadContent(): void
+    {
+        $this->assertBadContent(
+            fn (PropertyParseService $service) => $service->getUploadTargetFromProperties(['uploadTarget' => 'not-a-uuid']),
+            'Upload expects property uploadTarget to be a uuid, got string.'
+        );
     }
 
     public function testUploadTargetIsReturnedFromUuid(): void
@@ -199,6 +215,14 @@ class PropertyParseServiceTest extends TestCase
         $this->assertTrue($uuid->equals($this->buildService()->getUploadOwnerFromProperties(['uploadOwner' => $uuid->toString()])));
     }
 
+    public function testUploadOwnerRejectsMalformedUuidStringAsBadContent(): void
+    {
+        $this->assertBadContent(
+            fn (PropertyParseService $service) => $service->getUploadOwnerFromProperties(['uploadOwner' => 'not-a-uuid']),
+            'Upload expects property uploadOwner to be a uuid, got string.'
+        );
+    }
+
     public function testUploadOwnerIsReturnedFromUuid(): void
     {
         $uuid = Uuid::uuid4();
@@ -207,7 +231,7 @@ class PropertyParseServiceTest extends TestCase
 
     public function testExtensionDefaultsToDefaultExtension(): void
     {
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties([]));
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties([]));
     }
 
     public function testExtensionIsReturned(): void
@@ -217,8 +241,8 @@ class PropertyParseServiceTest extends TestCase
 
     public function testExtensionDefaultsWhenNotAString(): void
     {
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => 5]));
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => null]));
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => 5]));
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => null]));
     }
 
     public function testEmptyExtensionMeansNoExtension(): void

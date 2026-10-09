@@ -7,8 +7,8 @@ namespace App\Tests\UnitTests\Service;
 use App\Contract\NodeElementInterface;
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Service\FileNameService;
 use App\Service\FilePropertyService;
-use App\Service\FileService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -63,7 +63,7 @@ class FilePropertyServiceTest extends TestCase
         $result = $this->buildService()->parseFilePropertyFromElement($element->reveal());
 
         $this->assertNotNull($result);
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $result->getExtension());
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $result->getExtension());
     }
 
     public function testKeepsEmptyExtensionWhichMeansNoExtension(): void
@@ -109,7 +109,7 @@ class FilePropertyServiceTest extends TestCase
             $result = $this->buildService()->parseFilePropertyFromElement($element->reveal());
 
             $this->assertNotNull($result);
-            $this->assertSame(FileService::DEFAULT_EXTENSION, $result->getExtension());
+            $this->assertSame(FileNameService::DEFAULT_EXTENSION, $result->getExtension());
         }
     }
 

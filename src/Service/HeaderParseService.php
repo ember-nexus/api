@@ -12,7 +12,7 @@ use Throwable;
 class HeaderParseService
 {
     public function __construct(
-        private FileService $fileService,
+        private FileNameService $fileNameService,
         private ContentDispositionWrapper $contentDispositionWrapper,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
@@ -22,7 +22,7 @@ class HeaderParseService
     {
         $contentType = $headers->get('Content-Type');
         if (null === $contentType) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail("Endpoint requires the header 'content-type' to be present.");
+            throw $this->client400BadContentExceptionFactory->createFromDetail("Header 'Content-Type' is required.");
         }
         $contentType = trim(strtolower(explode(';', $contentType)[0]));
         if ('' === $contentType) {
@@ -42,7 +42,7 @@ class HeaderParseService
     {
         $contentDisposition = $headers->get('Content-Disposition');
         if (null === $contentDisposition) {
-            return FileService::DEFAULT_EXTENSION;
+            return FileNameService::DEFAULT_EXTENSION;
         }
         try {
             $fileName = $this->contentDispositionWrapper->parseContentDisposition($contentDisposition);
@@ -50,10 +50,10 @@ class HeaderParseService
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Could not parse 'Content-Disposition' header: %s", $exception->getMessage()));
         }
         if (null === $fileName) {
-            return FileService::DEFAULT_EXTENSION;
+            return FileNameService::DEFAULT_EXTENSION;
         }
         $fileName = basename($fileName);
-        $fileName = $this->fileService->removeReservedCharactersFromFileName($fileName);
+        $fileName = $this->fileNameService->removeReservedCharactersFromFileName($fileName);
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
         if ('' === $extension) {
             // files without extension are valid (e.g. 'Makefile'); an empty extension is stored, and the file is
@@ -61,7 +61,7 @@ class HeaderParseService
             return '';
         }
 
-        return substr($extension, 0, FileService::MAX_EXTENSION_LENGTH);
+        return substr($extension, 0, FileNameService::MAX_EXTENSION_LENGTH);
     }
 
     public function getUploadOffsetFromHeaders(HeaderBag $headers): int

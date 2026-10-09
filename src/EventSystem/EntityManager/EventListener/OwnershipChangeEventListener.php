@@ -14,6 +14,17 @@ use App\Type\AppStateType;
 use App\Type\RabbitMQQueueType;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
+/**
+ * A node's `DETACH DELETE` is a single Cypher statement (see `vendor/syndesi/cypher-entity-manager`'s
+ * `NodeDeleteToStatementEventListener`) that never dispatches `ElementPostDeleteEvent` for the relations it
+ * cascades away, so a delete path that bypasses {@see \App\Service\DeletionService} would never enqueue an
+ * `ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE` message for the elements affected by an `OWNS`/`HAS_SEARCH_ACCESS`/
+ * `IS_IN_GROUP` relation removed that way - their `_groupsWithSearchAccess`/`_usersWithSearchAccess` could go stale.
+ * As of now, every node/relation delete path (the only one being
+ * {@see \App\Controller\Element\DeleteElementController}) goes through {@see \App\Service\DeletionService}, which
+ * avoids this gap by deleting each touching relation individually before the node itself - so this is a latent
+ * hazard for a future bypass, not a currently reachable one.
+ */
 class OwnershipChangeEventListener
 {
     /**

@@ -6,6 +6,9 @@ namespace App\Tests\ExampleGenerationController;
 
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ */
 abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTestCase
 {
     /**
@@ -24,6 +27,14 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
     private const array REMOVED_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link'];
 
     /**
+     * tests/ExampleGenerationControllerWithDifferentConfiguration runs against an API instance configured with a
+     * different domain, to prove that it is not hardcoded. Documentation examples should still look consistent
+     * with those generated against the default instance, so the different domain is normalized away here.
+     */
+    private const string DIFFERENT_CONFIGURATION_DOMAIN = 'http://api-different-configuration';
+    private const string DEFAULT_DOMAIN = 'http://api';
+
+    /**
      * If the environment variable FIX_CONTROLLER_OUTPUT is set, differing documentation files are updated
      * automatically instead of failing the test.
      */
@@ -40,6 +51,22 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         );
         \Safe\file_put_contents($pathToProjectRoot.$pathToDocumentationFile, $content);
         $this->assertTrue(true);
+    }
+
+    protected function createDocumentedElement(string $id, string $name, string $token): void
+    {
+        $response = $this->runPostRequest(
+            '/',
+            $token,
+            [
+                'id' => $id,
+                'type' => 'Data',
+                'data' => [
+                    'name' => $name,
+                ],
+            ]
+        );
+        $this->assertIsCreatedResponse($response, false);
     }
 
     public function getHeadersFromRequest(ResponseInterface $response): string
@@ -136,6 +163,9 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
             && str_starts_with($response->getHeaderLine('Content-Type'), 'application/problem+json');
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
     public function assertBodyInDocumentationIsIdenticalToBodyFromRequest(
         string $pathToProjectRoot,
         string $pathToDocumentationFile,
@@ -147,6 +177,7 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         if ($isJson) {
             $body = $this->getFormattedResponseBodyAsJsonString($response);
         }
+        $body = str_replace(self::DIFFERENT_CONFIGURATION_DOMAIN, self::DEFAULT_DOMAIN, $body);
         if ($this->isProblemJsonResponse($response)) {
             // every problem json response identifies its request as `urn:uuid:<id>`, which differs per request
             $ignoreLinesContainingString[] = '"instance": "urn:uuid:';

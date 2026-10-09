@@ -50,7 +50,7 @@ class GetInstanceConfigurationController extends AbstractController
             ],
             'file' => [
                 'maxFileSizeInBytes' => $this->emberNexusConfiguration->getFileMaxFileSizeInBytes(),
-                'uploadExpiresInSecondsAfterFirstRequest' => $this->emberNexusConfiguration->getFileUploadExpiresInSecondsAfterFirstRequest(),
+                'uploadExpiresAfterFirstRequestInSeconds' => $this->emberNexusConfiguration->getFileUploadExpiresAfterFirstRequestInSeconds(),
                 'uploadMinChunkSizeInBytes' => $this->emberNexusConfiguration->getFileUploadMinChunkSizeInBytes(),
                 'uploadMaxChunkSizeInBytes' => $this->emberNexusConfiguration->getFileUploadMaxChunkSizeInBytes(),
             ],

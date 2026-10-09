@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Type\FileHashAlgorithm;
 use ArrayAccess;
 use Traversable;
 
@@ -16,12 +17,6 @@ use Traversable;
  */
 class FileHashService
 {
-    public const string ALGORITHM = 'sha256';
-
-    /**
-     * `file.hash` entries of other algorithms are ignored.
-     */
-    public const array SUPPORTED_ALGORITHMS = [self::ALGORITHM];
     private const int READ_CHUNK_SIZE = 1024 * 1024;
 
     /**
@@ -77,7 +72,7 @@ class FileHashService
             if (!is_string($algorithm) || !is_string($value)) {
                 continue;
             }
-            if (!in_array($algorithm, self::SUPPORTED_ALGORITHMS, true)) {
+            if (!in_array($algorithm, FileHashAlgorithm::values(), true)) {
                 continue;
             }
             $hashes[$algorithm] = strtolower($value);

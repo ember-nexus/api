@@ -7,4 +7,6 @@
 #  |   |   |   |   |   |   + year
 #  |   |   |   |   |   |   |   + command
 #  |   |   |   |   |   |   |   |
-   0   */5 *   *   *   *   *   php bin/console cron
+   0   */3  *   *   *   *   *   MAX_WORK_TIME_IN_S=150 php bin/console cron:update-ownership
+   0   */5  *   *   *   *   *   MAX_WORK_TIME_IN_S=240 php bin/console cron:reindex-files
+   0   */20 *   *   *   *   *   MAX_WORK_TIME_IN_S=900 php bin/console cron:delete-expired-uploads

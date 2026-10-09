@@ -181,9 +181,14 @@ services:
     arguments:
       $rabbitMQAuth: '%env(RABBITMQ_AUTH)%'
 
+  # lazy: the real TCP connection + AMQP handshake only happens on first actual use (e.g. ->channel()), not merely
+  # by being injected into a constructor; without this, RabbitMqConnectionListener's kernel.terminate handler forces
+  # a connection to be opened (and immediately closed again) on every single request, even ones that never touch
+  # RabbitMQ at all, since it unconditionally closes the (constructor-injected) connection
   PhpAmqpLib\Connection\AMQPStreamConnection:
     factory: ['@App\Factory\RabbitMQFactory', 'createRabbitMQ']
     class: PhpAmqpLib\Connection\AMQPStreamConnection
+    lazy: true
 
   App\Factory\S3ClientFactory:
     arguments:

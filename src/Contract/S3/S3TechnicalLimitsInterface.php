@@ -20,4 +20,10 @@ interface S3TechnicalLimitsInterface
      * Also limits a single server-side copy; larger objects require a multipart upload.
      */
     public function getMaxSinglePutSizeInBytes(): int;
+
+    /**
+     * Maximum size of a single part of a multipart upload, distinct from {@see getMaxSinglePutSizeInBytes()}, which
+     * bounds a single non-multipart PUT/copy instead.
+     */
+    public function getMaxMultipartUploadPartSizeInBytes(): int;
 }

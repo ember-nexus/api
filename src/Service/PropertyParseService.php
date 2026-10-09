@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
@@ -27,6 +28,9 @@ class PropertyParseService
             $uploadLength = $properties['uploadLength'];
             if (!is_int($uploadLength)) {
                 throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property uploadLength to be either int or to be absent.');
+            }
+            if ($uploadLength < 0) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property uploadLength to be positive int.');
             }
         }
 
@@ -55,7 +59,7 @@ class PropertyParseService
     /**
      * @param mixed[] $properties
      */
-    public function getIsUploadCompleteFromProperties(mixed $properties): bool
+    public function isUploadCompleteFromProperties(mixed $properties): bool
     {
         if (!array_key_exists('uploadComplete', $properties)) {
             return false;
@@ -74,7 +78,7 @@ class PropertyParseService
      *
      * @param mixed[] $properties
      */
-    public function getTargetHadFileAtCreationFromProperties(mixed $properties): bool
+    public function targetHadFileAtCreationFromProperties(mixed $properties): bool
     {
         if (!array_key_exists('targetHadFileAtCreation', $properties)) {
             return true;
@@ -97,7 +101,11 @@ class PropertyParseService
         }
         $uploadTarget = $properties['uploadTarget'];
         if (is_string($uploadTarget)) {
-            $uploadTarget = Uuid::fromString($uploadTarget);
+            try {
+                $uploadTarget = Uuid::fromString($uploadTarget);
+            } catch (InvalidUuidStringException) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Upload expects property uploadTarget to be a uuid, got %s.', get_debug_type($properties['uploadTarget'])));
+            }
         }
         if (!($uploadTarget instanceof UuidInterface)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Upload expects property uploadTarget to be a uuid, got %s.', get_debug_type($uploadTarget)));
@@ -139,7 +147,11 @@ class PropertyParseService
         }
         $uploadOwner = $properties['uploadOwner'];
         if (is_string($uploadOwner)) {
-            $uploadOwner = Uuid::fromString($uploadOwner);
+            try {
+                $uploadOwner = Uuid::fromString($uploadOwner);
+            } catch (InvalidUuidStringException) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Upload expects property uploadOwner to be a uuid, got %s.', get_debug_type($properties['uploadOwner'])));
+            }
         }
         if (!($uploadOwner instanceof UuidInterface)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Upload expects property uploadOwner to be a uuid, got %s.', get_debug_type($uploadOwner)));
@@ -156,7 +168,7 @@ class PropertyParseService
         // a missing, null or non-string extension falls back to the default; an empty string means no extension
         $extension = $properties['extension'] ?? null;
         if (!is_string($extension)) {
-            return FileService::DEFAULT_EXTENSION;
+            return FileNameService::DEFAULT_EXTENSION;
         }
 
         return $extension;
