@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Type;
 
-use App\Service\FileService;
+use App\Service\FileNameService;
 use App\Type\FileProperty;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -18,7 +18,7 @@ class FilePropertyTest extends TestCase
     {
         $fileProperty = new FileProperty();
 
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $fileProperty->getExtension());
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $fileProperty->getExtension());
     }
 
     public function testSetExtensionReturnsStaticAndUpdatesValue(): void
@@ -42,6 +42,6 @@ class FilePropertyTest extends TestCase
     {
         $fileProperty = new FileProperty();
 
-        $this->assertSame(['extension' => FileService::DEFAULT_EXTENSION], $fileProperty->jsonSerialize());
+        $this->assertSame(['extension' => FileNameService::DEFAULT_EXTENSION], $fileProperty->jsonSerialize());
     }
 }

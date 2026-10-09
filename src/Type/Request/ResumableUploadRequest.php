@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Type\Request;
 
 use App\Contract\Request\ResumableUploadRequestInterface;
-use App\Service\FileService;
+use App\Service\FileNameService;
 use Ramsey\Uuid\UuidInterface;
 
 final readonly class ResumableUploadRequest implements ResumableUploadRequestInterface
@@ -19,7 +19,7 @@ final readonly class ResumableUploadRequest implements ResumableUploadRequestInt
         private ?bool $isUploadComplete = false,
         private ?int $uploadLength = null,
         private ?int $contentLength = null,
-        private string $extension = FileService::DEFAULT_EXTENSION,
+        private string $extension = FileNameService::DEFAULT_EXTENSION,
     ) {
     }
 

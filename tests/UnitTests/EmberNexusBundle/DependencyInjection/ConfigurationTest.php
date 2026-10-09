@@ -117,4 +117,44 @@ class ConfigurationTest extends TestCase
 
         $this->process([EmberNexusConfiguration::PAGE_SIZE => [EmberNexusConfiguration::PAGE_SIZE_MIN => 0]]);
     }
+
+    public function testStorageAndUploadBucketCanDifferWithSameName(): void
+    {
+        $config = $this->process([
+            EmberNexusConfiguration::FILE => [
+                EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET => 'bucket-a',
+                EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET => 'bucket-b',
+            ],
+        ]);
+
+        $this->assertSame('bucket-a', $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET]);
+        $this->assertSame('bucket-b', $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET]);
+    }
+
+    public function testSameStorageAndUploadBucketNameIsRejected(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage(sprintf(
+            '"%s" and "%s" must not be the same bucket name.',
+            EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET,
+            EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET
+        ));
+
+        $this->process([
+            EmberNexusConfiguration::FILE => [
+                EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET => 'same-bucket',
+                EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET => 'same-bucket',
+            ],
+        ]);
+    }
+
+    public function testDefaultBucketNamesAreNotRejectedAsEqual(): void
+    {
+        $config = $this->process([]);
+
+        $this->assertNotSame(
+            $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_S3_STORAGE_BUCKET],
+            $config[EmberNexusConfiguration::FILE][EmberNexusConfiguration::FILE_S3_UPLOAD_BUCKET]
+        );
+    }
 }

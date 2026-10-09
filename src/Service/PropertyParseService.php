@@ -156,7 +156,7 @@ class PropertyParseService
         // a missing, null or non-string extension falls back to the default; an empty string means no extension
         $extension = $properties['extension'] ?? null;
         if (!is_string($extension)) {
-            return FileService::DEFAULT_EXTENSION;
+            return FileNameService::DEFAULT_EXTENSION;
         }
 
         return $extension;

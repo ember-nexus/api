@@ -1321,14 +1321,17 @@ class S3ServiceTest extends TestCase
         $this->assertSame(1234, $contentLength);
     }
 
-    public function testUploadFileRethrowsExceptionDuringUpload(): void
+    /**
+     * A failed copy still means the upload-bucket chunk is no longer needed, so it is cleaned up here too.
+     */
+    public function testUploadFileRethrowsExceptionDuringUploadAndCleansUpTheUploadChunk(): void
     {
         $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
         $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
         $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
         $uploadFileOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
-        $uploadFileOperation->getUploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
-        $uploadFileOperation->getUploadKey()->shouldBeCalledOnce()->willReturn('upload-key');
+        $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $uploadFileOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
         $uploadFileOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
         $uploadFileOperation->getPreviousStorageKey()->shouldNotBeCalled();
         $uploadFileOperation = $uploadFileOperation->reveal();
@@ -1344,6 +1347,8 @@ class S3ServiceTest extends TestCase
 
         $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
         $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(1234);
+
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
 
         $s3Client = $this->prophesize(S3Client::class);
         $s3Client->putObject(Argument::is([
@@ -1363,6 +1368,15 @@ class S3ServiceTest extends TestCase
             'ContentType' => 'text/plain',
             'MetadataDirective' => 'REPLACE',
         ]))->shouldBeCalledOnce()->willReturn($copyObjectOutput);
+        // the upload-bucket chunk is cleaned up despite the copy having failed
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledOnce();
 
         $originalException = new Exception('some message');
 
@@ -1373,21 +1387,216 @@ class S3ServiceTest extends TestCase
 
         $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
         $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce()->willThrow($originalException);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, false);
 
         $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
         $s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
             ->shouldBeCalledOnce()->willReturn($uploadFileChunkOperation);
 
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->warning(Argument::cetera())->shouldNotBeCalled();
+
         $s3Service = $this->buildS3Service(
             s3Client: $s3Client->reveal(),
             s3OperationFactory: $s3OperationFactory->reveal(),
             s3ClientWrapper: $s3ClientWrapper->reveal(),
-            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal()
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal(),
+            logger: $logger->reveal(),
         );
 
         $this->expectException(Server500LogicErrorException::class);
 
         $s3Service->uploadFile($uploadFileOperation);
+    }
+
+    /**
+     * Even when the copy fails, a failure to clean up the now-redundant upload-bucket chunk must not replace or mask
+     * the original upload failure with a different error.
+     */
+    public function testUploadFileRethrowsOriginalExceptionEvenWhenCleanupOfUploadBucketChunkAlsoFails(): void
+    {
+        $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
+        $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $uploadFileOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $uploadFileOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
+        $uploadFileOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
+        $uploadFileOperation->getPreviousStorageKey()->shouldNotBeCalled();
+        $uploadFileOperation = $uploadFileOperation->reveal();
+
+        $uploadFileChunkOperation = $this->prophesize(UploadFileChunkOperationInterface::class);
+        $uploadFileChunkOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $uploadFileChunkOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
+        $uploadFileChunkOperation->getContent()->shouldBeCalledOnce()->willReturn('some content');
+        $uploadFileChunkOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
+        $uploadFileChunkOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
+
+        $copyObjectOutput = $this->prophesize(CopyObjectOutput::class)->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(1234);
+
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->putObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+            'Body' => 'some content',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce();
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+        $s3Client->copyObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'CopySource' => 'upload-bucket/upload-key',
+            'ContentType' => 'text/plain',
+            'MetadataDirective' => 'REPLACE',
+        ]))->shouldBeCalledOnce()->willReturn($copyObjectOutput);
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledOnce();
+
+        $originalException = new Exception('some message');
+
+        $finalException = $this->prophesize(Server500LogicErrorException::class)->reveal();
+        $cleanupFailure = $this->prophesize(Server500LogicErrorException::class)->reveal();
+
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate(Argument::is('Upload failed: some message'), Argument::is([]), Argument::is($originalException))->shouldBeCalledOnce()->willReturn($finalException);
+        $server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.')->shouldBeCalledOnce()->willReturn($cleanupFailure);
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce()->willThrow($originalException);
+        // the chunk still exists after the delete attempt, i.e. the cleanup itself failed as well
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, true);
+
+        $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
+        $s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
+            ->shouldBeCalledOnce()->willReturn($uploadFileChunkOperation);
+
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->warning(
+            'Unable to delete upload-bucket chunk after uploadFile().',
+            Argument::that(static fn (array $context): bool => 'upload-bucket' === $context['bucket']
+                && 'upload-key' === $context['key']
+                && $cleanupFailure === $context['exception'])
+        )->shouldBeCalledOnce();
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            s3OperationFactory: $s3OperationFactory->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal(),
+            logger: $logger->reveal(),
+        );
+
+        try {
+            $s3Service->uploadFile($uploadFileOperation);
+            $this->fail('Expected exception was not thrown.');
+        } catch (Server500LogicErrorException $e) {
+            // the original copy failure must be the one surfaced, not a cleanup-failure error
+            $this->assertSame($finalException, $e);
+        }
+    }
+
+    /**
+     * The copy into the storage bucket already succeeded, i.e. the upload itself succeeded; a failure to clean up
+     * the now-redundant upload-bucket chunk afterward must not be reported as an upload failure.
+     */
+    public function testUploadFileSucceedsEvenWhenCleanupOfUploadBucketChunkFails(): void
+    {
+        $uploadFileOperation = $this->prophesize(UploadFileOperationInterface::class);
+        $uploadFileOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
+        $uploadFileOperation->getStorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
+        $uploadFileOperation->getStorageKey()->shouldBeCalledOnce()->willReturn('storage-key');
+        $uploadFileOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $uploadFileOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
+        $uploadFileOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
+        $uploadFileOperation->getPreviousStorageKey()->shouldNotBeCalled();
+        $uploadFileOperation = $uploadFileOperation->reveal();
+
+        $uploadFileChunkOperation = $this->prophesize(UploadFileChunkOperationInterface::class);
+        $uploadFileChunkOperation->getUploadBucket()->shouldBeCalledTimes(2)->willReturn('upload-bucket');
+        $uploadFileChunkOperation->getUploadKey()->shouldBeCalledTimes(2)->willReturn('upload-key');
+        $uploadFileChunkOperation->getContent()->shouldBeCalledOnce()->willReturn('some content');
+        $uploadFileChunkOperation->getMimeType()->shouldBeCalledOnce()->willReturn('text/plain');
+        $uploadFileChunkOperation->getContentLength()->shouldBeCalledOnce()->willReturn(null);
+
+        $copyObjectOutput = $this->prophesize(CopyObjectOutput::class)->reveal();
+
+        $headObjectOutput = $this->prophesize(HeadObjectOutput::class);
+        $headObjectOutput->getContentLength()->shouldBeCalledOnce()->willReturn(1234);
+
+        $objectExistsWaiter = $this->prophesize(ObjectExistsWaiter::class)->reveal();
+
+        $s3Client = $this->prophesize(S3Client::class);
+        $s3Client->putObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+            'Body' => 'some content',
+            'ContentType' => 'text/plain',
+        ]))->shouldBeCalledOnce();
+        $s3Client->headObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledOnce()->willReturn($headObjectOutput->reveal());
+        $s3Client->copyObject(Argument::is([
+            'Bucket' => 'storage-bucket',
+            'Key' => 'storage-key',
+            'CopySource' => 'upload-bucket/upload-key',
+            'ContentType' => 'text/plain',
+            'MetadataDirective' => 'REPLACE',
+        ]))->shouldBeCalledOnce()->willReturn($copyObjectOutput);
+        $s3Client->objectExists(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledTimes(2)->willReturn($objectExistsWaiter);
+        // the chunk still exists after the delete attempt, i.e. the cleanup failed
+        $s3Client->deleteObject(Argument::is([
+            'Bucket' => 'upload-bucket',
+            'Key' => 'upload-key',
+        ]))->shouldBeCalledOnce();
+
+        $s3ClientWrapper = $this->prophesize(S3ClientWrapper::class);
+        $s3ClientWrapper->getIsSuccessFromObjectExistsWaiter(Argument::is($objectExistsWaiter))->shouldBeCalledTimes(2)->willReturn(true, true);
+        $s3ClientWrapper->resolveCopyObjectOutput(Argument::is($copyObjectOutput))->shouldBeCalledOnce();
+
+        $s3OperationFactory = $this->prophesize(S3OperationFactory::class);
+        $s3OperationFactory->createUploadFileChunkOperationFromUploadFileOperation(Argument::is($uploadFileOperation))
+            ->shouldBeCalledOnce()->willReturn($uploadFileChunkOperation);
+
+        $cleanupFailure = $this->prophesize(Server500LogicErrorException::class)->reveal();
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.')->shouldBeCalledOnce()->willReturn($cleanupFailure);
+
+        $logger = $this->prophesize(LoggerInterface::class);
+        $logger->warning(
+            'Unable to delete upload-bucket chunk after uploadFile().',
+            Argument::that(static fn (array $context): bool => 'upload-bucket' === $context['bucket']
+                && 'upload-key' === $context['key']
+                && $cleanupFailure === $context['exception'])
+        )->shouldBeCalledOnce();
+
+        $s3Service = $this->buildS3Service(
+            s3Client: $s3Client->reveal(),
+            s3OperationFactory: $s3OperationFactory->reveal(),
+            s3ClientWrapper: $s3ClientWrapper->reveal(),
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal(),
+            logger: $logger->reveal(),
+        );
+
+        $contentLength = $s3Service->uploadFile($uploadFileOperation);
+        $this->assertSame(1234, $contentLength);
     }
 
     public function testExistsFile(): void

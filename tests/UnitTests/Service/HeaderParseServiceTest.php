@@ -6,7 +6,7 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Service\FileService;
+use App\Service\FileNameService;
 use App\Service\HeaderParseService;
 use App\Wrapper\ContentDispositionWrapper;
 use Exception;
@@ -25,12 +25,12 @@ class HeaderParseServiceTest extends TestCase
     use ProphecyTrait;
 
     private function buildHeaderParseService(
-        ?FileService $fileService = null,
+        ?FileNameService $fileNameService = null,
         ?ContentDispositionWrapper $contentDispositionWrapper = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
     ): HeaderParseService {
         return new HeaderParseService(
-            $fileService ?? $this->prophesize(FileService::class)->reveal(),
+            $fileNameService ?? $this->prophesize(FileNameService::class)->reveal(),
             $contentDispositionWrapper ?? $this->prophesize(ContentDispositionWrapper::class)->reveal(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
         );
@@ -146,11 +146,11 @@ class HeaderParseServiceTest extends TestCase
         $contentDispositionWrapper = $this->prophesize(ContentDispositionWrapper::class);
         $contentDispositionWrapper->parseContentDisposition(Argument::is('inline; filename=Test.jpg'))->shouldBeCalledOnce()->willReturn('Test.jpg');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->removeReservedCharactersFromFileName(Argument::is('Test.jpg'))->shouldBeCalledOnce()->willReturn('Test.jpg');
+        $fileNameService = $this->prophesize(FileNameService::class);
+        $fileNameService->removeReservedCharactersFromFileName(Argument::is('Test.jpg'))->shouldBeCalledOnce()->willReturn('Test.jpg');
 
         $headerParseService = $this->buildHeaderParseService(
-            fileService: $fileService->reveal(),
+            fileNameService: $fileNameService->reveal(),
             contentDispositionWrapper: $contentDispositionWrapper->reveal()
         );
 
@@ -218,11 +218,11 @@ class HeaderParseServiceTest extends TestCase
         $contentDispositionWrapper = $this->prophesize(ContentDispositionWrapper::class);
         $contentDispositionWrapper->parseContentDisposition(Argument::is('inline; filename=Test'))->shouldBeCalledOnce()->willReturn('Test');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->removeReservedCharactersFromFileName(Argument::is('Test'))->shouldBeCalledOnce()->willReturn('Test');
+        $fileNameService = $this->prophesize(FileNameService::class);
+        $fileNameService->removeReservedCharactersFromFileName(Argument::is('Test'))->shouldBeCalledOnce()->willReturn('Test');
 
         $headerParseService = $this->buildHeaderParseService(
-            fileService: $fileService->reveal(),
+            fileNameService: $fileNameService->reveal(),
             contentDispositionWrapper: $contentDispositionWrapper->reveal(),
         );
 
@@ -238,11 +238,11 @@ class HeaderParseServiceTest extends TestCase
         $contentDispositionWrapper = $this->prophesize(ContentDispositionWrapper::class);
         $contentDispositionWrapper->parseContentDisposition(Argument::is('inline'))->shouldBeCalledOnce()->willReturn('Test.'.$longExtension);
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->removeReservedCharactersFromFileName(Argument::is('Test.'.$longExtension))->shouldBeCalledOnce()->willReturn('Test.'.$longExtension);
+        $fileNameService = $this->prophesize(FileNameService::class);
+        $fileNameService->removeReservedCharactersFromFileName(Argument::is('Test.'.$longExtension))->shouldBeCalledOnce()->willReturn('Test.'.$longExtension);
 
         $headerParseService = $this->buildHeaderParseService(
-            fileService: $fileService->reveal(),
+            fileNameService: $fileNameService->reveal(),
             contentDispositionWrapper: $contentDispositionWrapper->reveal(),
         );
 

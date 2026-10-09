@@ -16,8 +16,8 @@ use App\Service\DigestService;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\EtagService;
+use App\Service\FileNameService;
 use App\Service\FileRangeService;
-use App\Service\FileService;
 use App\Service\S3Service;
 use App\Type\AccessType;
 use App\Type\EtagType;
@@ -38,7 +38,7 @@ class GetElementFileController extends AbstractController
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
         private ElementService $elementService,
-        private FileService $fileService,
+        private FileNameService $fileNameService,
         private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private FileRangeService $fileRangeService,
@@ -72,7 +72,7 @@ class GetElementFileController extends AbstractController
         }
 
         $fileName = $this->elementService->getFileName($element);
-        $fileNameFallback = $this->fileService->getAsciiSafeFileName($fileName);
+        $fileNameFallback = $this->fileNameService->getAsciiSafeFileName($fileName);
 
         $fileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
 

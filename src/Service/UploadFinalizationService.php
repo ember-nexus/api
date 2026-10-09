@@ -11,6 +11,7 @@ use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
+use App\Type\FileHashAlgorithm;
 use HashContext;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -124,7 +125,7 @@ class UploadFinalizationService
                     'extension' => $upload->getExtension(),
                     'mimeType' => $mergedMimeType,
                     'hash' => [
-                        FileHashService::ALGORITHM => $hash,
+                        FileHashAlgorithm::SHA_256->value => $hash,
                     ],
                 ]);
                 $element->addProperty('hasFile', true);
@@ -139,13 +140,38 @@ class UploadFinalizationService
             $this->fileCreationLockService->release($upload->getUploadTarget(), $lockToken);
         }
 
-        // only after the flush the element points to the merged object, so the previous one can go
-        $this->elementFileDeletionService->deletePreviousFileAfterReplace($mergeFileChunksOperation);
-        $this->s3Service->deleteFileChunks($mergeFileChunksOperation);
-        $this->uploadService->deleteUpload($upload);
-        $this->elementManager->flush();
+        // only after the flush the element points to the merged object, so the previous one can go. The upload has
+        // already succeeded from the client's perspective by this point, so a failure here must not be reported as
+        // one; it is only logged, so that it does not turn a successful upload into an error response.
+        $this->cleanUpAfterSuccessfulFinalization($upload, $mergeFileChunksOperation);
 
         $this->eventDispatcher->dispatch(new ElementFileReplaceEvent($upload->getUploadTarget()));
+    }
+
+    /**
+     * Each step is independent, so that one failing (e.g. the previous file) does not skip the others (e.g. the
+     * chunks). Failures are only logged: the upload bucket's lifecycle policy and
+     * {@see \App\Command\Cron\DeleteExpiredUploadsCommand} eventually clean up whatever is left behind.
+     */
+    private function cleanUpAfterSuccessfulFinalization(UploadInterface $upload, MergeFileChunksOperationInterface $mergeFileChunksOperation): void
+    {
+        $this->tryCleanupStep($upload, fn () => $this->elementFileDeletionService->deletePreviousFileAfterReplace($mergeFileChunksOperation));
+        $this->tryCleanupStep($upload, fn () => $this->s3Service->deleteFileChunks($mergeFileChunksOperation));
+        $this->tryCleanupStep($upload, fn () => $this->uploadService->deleteUpload($upload));
+        $this->tryCleanupStep($upload, fn () => $this->elementManager->flush());
+    }
+
+    private function tryCleanupStep(UploadInterface $upload, callable $step): void
+    {
+        try {
+            $step();
+        } catch (Throwable $throwable) {
+            $this->logger->error(sprintf(
+                "Upload %s finalized successfully, but a post-merge cleanup step failed: '%s'.",
+                $upload->getId()->toString(),
+                $throwable->getMessage()
+            ));
+        }
     }
 
     // best effort, the failure which is being handled is the one which matters

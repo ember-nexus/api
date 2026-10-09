@@ -8,6 +8,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
+use App\Type\FileHashAlgorithm;
 use ArrayAccess;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
@@ -399,7 +400,7 @@ class EtagCalculatorService
     }
 
     /**
-     * Prefers {@see FileHashService::ALGORITHM}, otherwise uses the alphabetically first algorithm for determinism.
+     * Prefers {@see FileHashAlgorithm::SHA_256}, otherwise uses the alphabetically first algorithm for determinism.
      *
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
@@ -417,7 +418,7 @@ class EtagCalculatorService
             return null;
         }
 
-        $preferredValue = $hash[FileHashService::ALGORITHM] ?? null;
+        $preferredValue = $hash[FileHashAlgorithm::SHA_256->value] ?? null;
         if (is_string($preferredValue) && '' !== $preferredValue) {
             return $preferredValue;
         }

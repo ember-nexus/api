@@ -100,6 +100,29 @@ class UploadServiceTest extends TestCase
         return $upload;
     }
 
+    public function testGenerateUploadChunkIdIsRandomAndAcceptedInKeys(): void
+    {
+        [$service] = $this->buildService();
+
+        $first = $service->generateUploadChunkId();
+        $this->assertMatchesRegularExpression('/^[0-9A-Za-z]{1,64}$/', $first);
+        // base58 of 16 bytes has at most 22 characters
+        $this->assertLessThanOrEqual(22, strlen($first));
+        $this->assertGreaterThanOrEqual(16, strlen($first));
+        $this->assertNotSame($first, $service->generateUploadChunkId());
+    }
+
+    public function testGeneratedUploadChunkIdsAreUnique(): void
+    {
+        [$service] = $this->buildService();
+
+        $ids = [];
+        for ($i = 0; $i < 200; ++$i) {
+            $ids[] = $service->generateUploadChunkId();
+        }
+        $this->assertCount(200, array_unique($ids));
+    }
+
     public function testMergeUploadElementCreatesNewElementWhenNoneExists(): void
     {
         $id = UuidV4::uuid4();

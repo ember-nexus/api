@@ -10,9 +10,8 @@ use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\ElementToRawService;
-use App\Service\FileService;
 use App\Service\S3Service;
-use App\Service\StringService;
+use App\Service\StorageService;
 use App\Type\NodeElement;
 use App\Type\S3\FileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -127,9 +126,8 @@ class BackupCreateCommandTest extends TestCase
             $this->prophesize(ElementToRawService::class)->reveal(),
             $elementService->reveal(),
             $bag->reveal(),
-            new FileService(
+            new StorageService(
                 $this->prophesize(EmberNexusConfiguration::class)->reveal(),
-                new StringService($this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()),
                 $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
             ),
             $s3Service->reveal(),

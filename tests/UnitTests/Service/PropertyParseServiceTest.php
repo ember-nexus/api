@@ -6,7 +6,7 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use App\Service\FileService;
+use App\Service\FileNameService;
 use App\Service\PropertyParseService;
 use DateTimeImmutable as NativeDateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -207,7 +207,7 @@ class PropertyParseServiceTest extends TestCase
 
     public function testExtensionDefaultsToDefaultExtension(): void
     {
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties([]));
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties([]));
     }
 
     public function testExtensionIsReturned(): void
@@ -217,8 +217,8 @@ class PropertyParseServiceTest extends TestCase
 
     public function testExtensionDefaultsWhenNotAString(): void
     {
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => 5]));
-        $this->assertSame(FileService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => null]));
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => 5]));
+        $this->assertSame(FileNameService::DEFAULT_EXTENSION, $this->buildService()->getExtensionFromProperties(['extension' => null]));
     }
 
     public function testEmptyExtensionMeansNoExtension(): void

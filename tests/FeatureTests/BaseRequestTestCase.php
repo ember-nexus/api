@@ -12,6 +12,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
+use Symfony\Component\Process\Process;
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
@@ -438,7 +439,7 @@ abstract class BaseRequestTestCase extends TestCase
     private function isFileInStorage(string $elementId): bool
     {
         $s3Client = $this->createS3ClientForAssertions();
-        // the object key ends with the element id, see FileService::getStorageBucketKey()
+        // the object key ends with the element id, see StorageService::getStorageBucketKey()
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
             if (str_contains((string) $object->getKey(), $elementId)) {
                 return true;
@@ -455,7 +456,7 @@ abstract class BaseRequestTestCase extends TestCase
     {
         $s3Client = $this->createS3ClientForAssertions();
         $count = 0;
-        // the object key contains the upload id, see FileService::getUploadBucketKey()
+        // the object key contains the upload id, see StorageService::getUploadBucketKey()
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-upload']) as $object) {
             if (str_contains((string) $object->getKey(), $uploadId)) {
                 ++$count;
@@ -549,5 +550,20 @@ abstract class BaseRequestTestCase extends TestCase
                 unlink($path);
             }
         }
+    }
+
+    /**
+     * Computes a file's SHA-256 digest using the standalone `sha256sum` CLI tool, instead of PHP's own hash
+     * functions, so that test expectations do not depend on this environment's PHP build/patches.
+     */
+    public function computeSha256UsingCliTool(string $filePath): string
+    {
+        $process = new Process(['sha256sum', $filePath]);
+        $process->mustRun();
+
+        $output = trim($process->getOutput());
+        [$hash] = explode(' ', $output, 2);
+
+        return $hash;
     }
 }

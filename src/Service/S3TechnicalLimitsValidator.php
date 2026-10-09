@@ -20,12 +20,15 @@ class S3TechnicalLimitsValidator
     ) {
     }
 
-    public function validate(int $multipartUploadThresholdInBytes = S3Service::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES): void
-    {
+    public function validate(
+        int $multipartUploadThresholdInBytes = S3Service::MULTIPART_UPLOAD_THRESHOLD_IN_BYTES,
+        int $multipartUploadPartSizeInBytes = S3Service::MULTIPART_UPLOAD_PART_SIZE_IN_BYTES,
+    ): void {
         $this->validateMinChunkSize();
         $this->validateMaxChunkCount();
         $this->validateMaxObjectSize();
         $this->validateMultipartUploadThreshold($multipartUploadThresholdInBytes);
+        $this->validateMaxPartSize($multipartUploadPartSizeInBytes);
     }
 
     private function validateMinChunkSize(): void
@@ -65,6 +68,25 @@ class S3TechnicalLimitsValidator
 
         if ($configuredMaxFileSize > $technicalMaxObjectSize) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Configured 'file.maxFileSizeInBytes' (%d) can not be larger than the storage backend's technical maximum object size (%d).", $configuredMaxFileSize, $technicalMaxObjectSize));
+        }
+    }
+
+    /**
+     * Mirrors {@see S3Service::getMultipartUploadPartSizeInBytes()}: the part size has to grow with the file size to
+     * stay within the backend's maximum chunk count, which could in theory push it past the backend's maximum part
+     * size for a large enough configured 'file.maxFileSizeInBytes'.
+     */
+    private function validateMaxPartSize(int $multipartUploadPartSizeInBytes): void
+    {
+        $configuredMaxFileSize = $this->emberNexusConfiguration->getFileMaxFileSizeInBytes();
+        $technicalMaxChunkCount = $this->s3TechnicalLimits->getMaxChunkCount();
+        $technicalMaxPartSize = $this->s3TechnicalLimits->getMaxMultipartUploadPartSizeInBytes();
+
+        $requiredPartSizeForMaxFileSize = (int) ceil($configuredMaxFileSize / $technicalMaxChunkCount);
+        $worstCasePartSize = max($multipartUploadPartSizeInBytes, $requiredPartSizeForMaxFileSize);
+
+        if ($worstCasePartSize > $technicalMaxPartSize) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("The multipart upload part size required to stay within the storage backend's maximum chunk count for the configured 'file.maxFileSizeInBytes' (%d) is %d bytes, which exceeds the storage backend's technical maximum part size (%d).", $configuredMaxFileSize, $worstCasePartSize, $technicalMaxPartSize));
         }
     }
 }

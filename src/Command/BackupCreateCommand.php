@@ -9,8 +9,8 @@ use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\ElementToRawService;
-use App\Service\FileService;
 use App\Service\S3Service;
+use App\Service\StorageService;
 use App\Style\EmberNexusStyle;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
@@ -57,7 +57,7 @@ class BackupCreateCommand extends Command
         private ElementToRawService $elementToRawService,
         private ElementService $elementService,
         private ParameterBagInterface $bag,
-        private FileService $fileService,
+        private StorageService $storageService,
         private S3Service $s3Service,
         private S3OperationFactory $s3OperationFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
@@ -315,7 +315,7 @@ class BackupCreateCommand extends Command
         return sprintf(
             '%s/node/%s.json',
             $this->backupName,
-            $this->fileService->uuidToNestedFolderStructure($nodeId, $levels)
+            $this->storageService->uuidToNestedFolderStructure($nodeId, $levels)
         );
     }
 
@@ -326,7 +326,7 @@ class BackupCreateCommand extends Command
         return sprintf(
             '%s/relation/%s.json',
             $this->backupName,
-            $this->fileService->uuidToNestedFolderStructure($relationId, $levels)
+            $this->storageService->uuidToNestedFolderStructure($relationId, $levels)
         );
     }
 
@@ -334,11 +334,11 @@ class BackupCreateCommand extends Command
     {
         $levels = max(0, (int) ceil(log($this->fileCount, 256)) - 1);
 
-        return $this->fileService->appendExtension(
+        return $this->storageService->appendExtension(
             sprintf(
                 '%s/file/%s',
                 $this->backupName,
-                $this->fileService->uuidToNestedFolderStructure($elementId, $levels)
+                $this->storageService->uuidToNestedFolderStructure($elementId, $levels)
             ),
             $extension
         );

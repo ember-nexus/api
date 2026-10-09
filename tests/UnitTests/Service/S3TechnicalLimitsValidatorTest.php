@@ -29,6 +29,7 @@ class S3TechnicalLimitsValidatorTest extends TestCase
         int $technicalMaxChunkCount = 10_000,
         int $technicalMaxObjectSize = 5 * 1024 * 1024 * 1024 * 1024,
         int $technicalMaxSinglePutSize = 5 * 1024 * 1024 * 1024,
+        int $technicalMaxMultipartUploadPartSize = 5 * 1024 * 1024 * 1024,
         ?Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory = null,
     ): S3TechnicalLimitsValidator {
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
@@ -41,6 +42,7 @@ class S3TechnicalLimitsValidatorTest extends TestCase
         $s3TechnicalLimits->getMaxChunkCount()->willReturn($technicalMaxChunkCount);
         $s3TechnicalLimits->getMaxObjectSizeInBytes()->willReturn($technicalMaxObjectSize);
         $s3TechnicalLimits->getMaxSinglePutSizeInBytes()->willReturn($technicalMaxSinglePutSize);
+        $s3TechnicalLimits->getMaxMultipartUploadPartSizeInBytes()->willReturn($technicalMaxMultipartUploadPartSize);
 
         return new S3TechnicalLimitsValidator(
             $emberNexusConfiguration->reveal(),
@@ -128,5 +130,66 @@ class S3TechnicalLimitsValidatorTest extends TestCase
 
         $validator->validate();
         $this->addToAssertionCount(1);
+    }
+
+    /**
+     * Mirrors {@see \App\Service\S3Service::getMultipartUploadPartSizeInBytes()}: the part size has to grow with
+     * the configured 'file.maxFileSizeInBytes' to stay within the backend's maximum chunk count, which must not be
+     * allowed to exceed the backend's maximum part size.
+     */
+    public function testThrowsIfRequiredPartSizeForConfiguredMaxFileSizeExceedsTechnicalMaxPartSize(): void
+    {
+        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate(Argument::containingString('maxFileSizeInBytes'))
+            ->shouldBeCalledOnce()
+            ->willReturn($exception);
+
+        $validator = $this->buildValidator(
+            configuredMinChunkSize: 5 * 1024 * 1024,
+            configuredChunkDigitsLength: 4,
+            configuredMaxFileSize: 10_000_000, // 10,000,000 bytes / 10,000 chunks = part size of 1,000
+            technicalMaxChunkCount: 10_000,
+            technicalMaxMultipartUploadPartSize: 999, // just below the required 1,000 bytes
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal(),
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+        $validator->validate(multipartUploadPartSizeInBytes: 500);
+    }
+
+    public function testExactlyAtTechnicalMaxPartSizeIsAllowed(): void
+    {
+        $validator = $this->buildValidator(
+            configuredMinChunkSize: 5 * 1024 * 1024,
+            configuredChunkDigitsLength: 4,
+            configuredMaxFileSize: 10_000_000,
+            technicalMaxChunkCount: 10_000,
+            technicalMaxMultipartUploadPartSize: 1_000, // exactly matches the required part size
+        );
+
+        $validator->validate(multipartUploadPartSizeInBytes: 500);
+        $this->addToAssertionCount(1);
+    }
+
+    public function testThrowsIfConfiguredMultipartUploadPartSizeItselfExceedsTechnicalMaxPartSize(): void
+    {
+        $exception = $this->prophesize(Server500LogicErrorException::class)->reveal();
+        $server500LogicErrorExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
+        $server500LogicErrorExceptionFactory->createFromTemplate(Argument::containingString('maxFileSizeInBytes'))
+            ->shouldBeCalledOnce()
+            ->willReturn($exception);
+
+        $validator = $this->buildValidator(
+            configuredMinChunkSize: 5 * 1024 * 1024,
+            configuredChunkDigitsLength: 4,
+            configuredMaxFileSize: 10 * 1024 * 1024 * 1024,
+            technicalMaxMultipartUploadPartSize: 100 * 1024 * 1024,
+            server500LogicErrorExceptionFactory: $server500LogicErrorExceptionFactory->reveal(),
+        );
+
+        $this->expectException(Server500LogicErrorException::class);
+        // the configured part size itself (independent of the file-size-driven calculation) already exceeds the limit
+        $validator->validate(multipartUploadPartSizeInBytes: 200 * 1024 * 1024);
     }
 }

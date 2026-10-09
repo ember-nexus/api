@@ -17,7 +17,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
-use App\Service\FileService;
+use App\Service\StorageService;
 use App\Service\MimeTypeService;
 use App\Type\NodeElement;
 use App\Type\S3\FileOperation;
@@ -42,7 +42,7 @@ class S3OperationFactoryTest extends TestCase
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
         ?ElementManager $elementManager = null,
         ?ElementService $elementService = null,
-        ?FileService $fileService = null,
+        ?StorageService $storageService = null,
         ?MimeTypeService $mimeTypeService = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
         ?Server500LogicErrorExceptionFactory $server500LogicExceptionFactory = null,
@@ -51,8 +51,8 @@ class S3OperationFactoryTest extends TestCase
             $emberNexusConfiguration ?? $this->prophesize(EmberNexusConfiguration::class)->reveal(),
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal(),
             $elementService ?? $this->prophesize(ElementService::class)->reveal(),
-            $fileService ?? $this->prophesize(FileService::class)->reveal(),
             $mimeTypeService ?? $this->prophesize(MimeTypeService::class)->reveal(),
+            $storageService ?? $this->prophesize(StorageService::class)->reveal(),
             $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal(),
             $server500LogicExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
@@ -65,12 +65,12 @@ class S3OperationFactoryTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($id), Argument::is(3), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getUploadBucketKey(Argument::is($id), Argument::is(3), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
 
         $factory = $this->buildS3OperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
-            fileService: $fileService->reveal()
+            storageService: $storageService->reveal()
         );
 
         $upload = $this->prophesize(UploadInterface::class);
@@ -97,12 +97,12 @@ class S3OperationFactoryTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileS3StorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getStorageBucketKey(Argument::is($id), Argument::is('test'))->shouldBeCalledOnce()->willReturn('storage-key.test');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getStorageBucketKey(Argument::is($id), Argument::is('test'))->shouldBeCalledOnce()->willReturn('storage-key.test');
 
         $factory = $this->buildS3OperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
-            fileService: $fileService->reveal(),
+            storageService: $storageService->reveal(),
             elementService: $elementService->reveal()
         );
 
@@ -154,9 +154,9 @@ class S3OperationFactoryTest extends TestCase
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
         $emberNexusConfiguration->getFileS3StorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
-        $fileService->getStorageBucketKey(Argument::is($elementId), Argument::is('txt'))->shouldBeCalledOnce()->willReturn('storage-key.txt');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
+        $storageService->getStorageBucketKey(Argument::is($elementId), Argument::is('txt'))->shouldBeCalledOnce()->willReturn('storage-key.txt');
 
         $mimeTypeService = $this->prophesize(MimeTypeService::class);
         $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
@@ -165,7 +165,7 @@ class S3OperationFactoryTest extends TestCase
             elementService: $elementService->reveal(),
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementManager: $elementManager->reveal(),
-            fileService: $fileService->reveal(),
+            storageService: $storageService->reveal(),
             mimeTypeService: $mimeTypeService->reveal()
         );
 
@@ -203,9 +203,9 @@ class S3OperationFactoryTest extends TestCase
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
         $emberNexusConfiguration->getFileS3StorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
-        $fileService->getStorageBucketKey(Argument::is($elementId), Argument::is('txt'))->shouldBeCalledOnce()->willReturn('storage-key.txt');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
+        $storageService->getStorageBucketKey(Argument::is($elementId), Argument::is('txt'))->shouldBeCalledOnce()->willReturn('storage-key.txt');
 
         $mimeTypeService = $this->prophesize(MimeTypeService::class);
         $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
@@ -217,7 +217,7 @@ class S3OperationFactoryTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementManager: $elementManager->reveal(),
             elementService: $elementService->reveal(),
-            fileService: $fileService->reveal(),
+            storageService: $storageService->reveal(),
             mimeTypeService: $mimeTypeService->reveal()
         );
 
@@ -258,9 +258,9 @@ class S3OperationFactoryTest extends TestCase
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
         $emberNexusConfiguration->getFileS3StorageBucket()->shouldBeCalledOnce()->willReturn('storage-bucket');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
-        $fileService->getStorageBucketKey(Argument::is($elementId), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('storage-key.ext');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getUploadBucketKey(Argument::is($elementId), Argument::is(0))->shouldBeCalledOnce()->willReturn('upload-key');
+        $storageService->getStorageBucketKey(Argument::is($elementId), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('storage-key.ext');
 
         $mimeTypeService = $this->prophesize(MimeTypeService::class);
         $mimeTypeService->getMimeTypeFromResource(Argument::is('some content'))->shouldBeCalledOnce()->willReturn('text/plain');
@@ -271,7 +271,7 @@ class S3OperationFactoryTest extends TestCase
         $factory = $this->buildS3OperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementService: $elementService->reveal(),
-            fileService: $fileService->reveal(),
+            storageService: $storageService->reveal(),
             mimeTypeService: $mimeTypeService->reveal()
         );
 
@@ -321,12 +321,12 @@ class S3OperationFactoryTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
 
         $factory = $this->buildS3OperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
-            fileService: $fileService->reveal()
+            storageService: $storageService->reveal()
         );
 
         $operation = $factory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, '0123456789abcdef');
@@ -376,12 +376,12 @@ class S3OperationFactoryTest extends TestCase
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(4), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getUploadBucketKey(Argument::is($uploadId), Argument::is(4), Argument::is('0123456789abcdef'))->shouldBeCalledOnce()->willReturn('upload-key');
 
         $factory = $this->buildS3OperationFactory(
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
-            fileService: $fileService->reveal()
+            storageService: $storageService->reveal()
         );
 
         $operation = $factory->createUploadFileChunkOperationFromPartialUploadRequest($partialUploadRequest->reveal(), $upload->reveal(), '0123456789abcdef');
@@ -440,17 +440,17 @@ class S3OperationFactoryTest extends TestCase
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::is($uploadTarget))->shouldBeCalledOnce()->willReturn($element);
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('aaaaaaaaaaaaaaa1'))->shouldBeCalledOnce()->willReturn('upload-key-0001');
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2), Argument::is('aaaaaaaaaaaaaaa2'))->shouldBeCalledOnce()->willReturn('upload-key-0002');
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(3), Argument::is('aaaaaaaaaaaaaaa3'))->shouldBeCalledOnce()->willReturn('upload-key-0003');
-        $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('target-key.ext');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('aaaaaaaaaaaaaaa1'))->shouldBeCalledOnce()->willReturn('upload-key-0001');
+        $storageService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2), Argument::is('aaaaaaaaaaaaaaa2'))->shouldBeCalledOnce()->willReturn('upload-key-0002');
+        $storageService->getUploadBucketKey(Argument::is($uploadId), Argument::is(3), Argument::is('aaaaaaaaaaaaaaa3'))->shouldBeCalledOnce()->willReturn('upload-key-0003');
+        $storageService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('target-key.ext');
 
         $factory = $this->buildS3OperationFactory(
             elementService: $elementService->reveal(),
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementManager: $elementManager->reveal(),
-            fileService: $fileService->reveal()
+            storageService: $storageService->reveal()
         );
 
         $mergeFileChunksOperation = $factory->createMergeFileOperationFromUpload($upload->reveal());
@@ -485,10 +485,10 @@ class S3OperationFactoryTest extends TestCase
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElementOrFail(Argument::is($uploadTarget))->shouldBeCalledOnce()->willReturn($element);
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('aaaaaaaaaaaaaaa1'))->shouldBeCalledOnce()->willReturn('upload-key-0001');
-        $fileService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2), Argument::is('aaaaaaaaaaaaaaa2'))->shouldBeCalledOnce()->willReturn('upload-key-0002');
-        $fileService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('target-key.ext');
+        $storageService = $this->prophesize(StorageService::class);
+        $storageService->getUploadBucketKey(Argument::is($uploadId), Argument::is(1), Argument::is('aaaaaaaaaaaaaaa1'))->shouldBeCalledOnce()->willReturn('upload-key-0001');
+        $storageService->getUploadBucketKey(Argument::is($uploadId), Argument::is(2), Argument::is('aaaaaaaaaaaaaaa2'))->shouldBeCalledOnce()->willReturn('upload-key-0002');
+        $storageService->getStorageBucketKey(Argument::is($uploadTarget), Argument::is('ext'))->shouldBeCalledOnce()->willReturn('target-key.ext');
 
         $elementService = $this->prophesize(ElementService::class);
         $elementService->getStorageKeyOfFile(Argument::is($element))->shouldBeCalledOnce()->willReturn('target-key.prev');
@@ -497,7 +497,7 @@ class S3OperationFactoryTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration->reveal(),
             elementManager: $elementManager->reveal(),
             elementService: $elementService->reveal(),
-            fileService: $fileService->reveal()
+            storageService: $storageService->reveal()
         );
 
         $mergeFileChunksOperation = $factory->createMergeFileOperationFromUpload($upload->reveal());

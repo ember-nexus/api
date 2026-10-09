@@ -15,6 +15,7 @@ use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
+use Tuupola\Base58;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveParameterList")
@@ -29,6 +30,15 @@ class UploadService
         private UploadFactory $uploadFactory,
         private CypherEntityManager $cypherEntityManager,
     ) {
+    }
+
+    /**
+     * Every attempt to upload a chunk generates its own id (base58 of 128 random bits, like tokens), so that concurrent attempts for the same chunk index can
+     * never overwrite each other's object; the id of the accepted attempt is stored on the `Upload` element.
+     */
+    public function generateUploadChunkId(): string
+    {
+        return (new Base58())->encode(random_bytes(16));
     }
 
     public function mergeUploadElement(UploadInterface $upload): void

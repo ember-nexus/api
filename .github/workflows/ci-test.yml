@@ -237,10 +237,9 @@ jobs:
         run: |
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature"
       - name: Run cron once manually
-        # DISABLE_CRON=true is set on the containers so the scheduler never fires cron during the test run above;
-        # this manually runs it once, in its own stage, after the main tests. A plain `docker exec` has no tty, so
-        # under DISABLE_CRON=true it would just no-op ("Cron is disabled"); `-t` allocates one so the command
-        # actually executes despite DISABLE_CRON.
+        # Smoke test only (business logic is unit/feature-tested elsewhere): proves `cron` actually runs
+        # end-to-end against the prod image the way the real scheduler invokes it, i.e. with a tty, which is
+        # required here since DISABLE_CRON=true on the containers would otherwise make a tty-less exec no-op.
         run: |
           docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron
       - name: Collect docker logs

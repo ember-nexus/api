@@ -143,6 +143,22 @@ class UploadConsistencyServiceTest extends TestCase
         $this->service->assertConsistent($this->createElement(null), $upload);
     }
 
+    /**
+     * The symmetric case of {@see testUploadWithOffsetButWithoutChunksIsDeleted()}: a non-empty chunk list can not
+     * coincide with a zero offset either.
+     */
+    public function testUploadWithChunksButZeroOffsetIsDeleted(): void
+    {
+        $upload = $this->createUpload(['aaaa'], 0);
+        $this->s3Service->deleteFile(Argument::any())->shouldNotBeCalled();
+        $this->uploadService->deleteUploadAndChunks($upload)->shouldBeCalledOnce();
+        $this->elementManager->flush()->shouldBeCalledOnce()->willReturn($this->elementManager->reveal());
+        $this->logger->error(Argument::type('string'))->shouldBeCalledOnce();
+
+        $this->expectException(Client409ConflictException::class);
+        $this->service->assertConsistent($this->createElement('aaaa'), $upload);
+    }
+
     public function testUploadWithInvalidLastChunkIdIsDeleted(): void
     {
         $upload = $this->createUpload(['aaaa'], 10);

@@ -68,7 +68,7 @@ class SinglePartUploadLifecycleTest extends BaseRequestTestCase
                 'extension' => 'jpg',
                 'mimeType' => 'image/jpeg',
                 'hash' => [
-                    'sha256' => hash_file('sha256', __DIR__.'/../../Asset/cherry-blossoms.jpg'),
+                    'sha256' => $this->computeSha256UsingCliTool(__DIR__.'/../../Asset/cherry-blossoms.jpg'),
                 ],
             ],
             $getNodeResponseData2['file']

@@ -44,7 +44,7 @@ class FilePropertyService
         // file has no extension at all
         $extensionProperty = $rawFileProperties['extension'] ?? null;
         if (!is_string($extensionProperty)) {
-            return FileService::DEFAULT_EXTENSION;
+            return FileNameService::DEFAULT_EXTENSION;
         }
 
         return $extensionProperty;

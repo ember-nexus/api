@@ -7,7 +7,7 @@ namespace App\Tests\FeatureTests\Endpoint\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * A file's storage key includes its extension (see FileService::getStorageBucketKey()), so replacing a file with
+ * A file's storage key includes its extension (see StorageService::getStorageBucketKey()), so replacing a file with
  * one of a different extension writes to a new key. Verifies that only the new content and extension are served
  * afterwards; deletion of the old S3 object is covered by S3ServiceTest::testUploadFileDeletesPreviousFileIfItExists().
  */

@@ -16,7 +16,6 @@ use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
-use App\Service\FileService;
 use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadAppendService;
@@ -110,6 +109,7 @@ class UploadAppendServiceTest extends TestCase
 
         $this->uploadService = $this->prophesize(UploadService::class);
         $this->uploadService->appendChunkIfOffsetMatches(Argument::cetera())->willReturn($offsetMatches);
+        $this->uploadService->generateUploadChunkId()->willReturn('aaaaaaaaaaaaaaaa');
         $this->uploadFinalizationService = $this->prophesize(UploadFinalizationService::class);
         $this->uploadChunkValidator = $this->prophesize(UploadChunkValidator::class);
 
@@ -129,9 +129,6 @@ class UploadAppendServiceTest extends TestCase
         $this->incrementalHashService->updateFromResource(Argument::cetera())->will(function () {});
         $this->incrementalHashService->serializeContextForStorage(Argument::any())->willReturn('next-state');
 
-        $fileService = $this->prophesize(FileService::class);
-        $fileService->generateUploadChunkId()->willReturn('aaaaaaaaaaaaaaaa');
-
         $client409ConflictExceptionFactory = $this->prophesize(Client409ConflictExceptionFactory::class);
         $client409ConflictExceptionFactory->createFromDetail(Argument::cetera())->will(
             fn ($args) => new Client409ConflictException('type', detail: $args[0])
@@ -145,7 +142,6 @@ class UploadAppendServiceTest extends TestCase
             $this->s3OperationFactory->reveal(),
             $this->s3Service->reveal(),
             $this->incrementalHashService->reveal(),
-            $fileService->reveal(),
             $client409ConflictExceptionFactory->reveal(),
             $this->elementManager->reveal(),
             $this->elementService->reveal(),

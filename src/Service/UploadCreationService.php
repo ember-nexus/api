@@ -13,6 +13,7 @@ use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
 use App\Factory\Type\S3\S3OperationFactory;
 use App\Security\AuthProvider;
+use App\Type\FileHashAlgorithm;
 use App\Type\Response\CreatedResponse;
 use App\Type\Upload;
 use DateInterval;
@@ -53,7 +54,6 @@ class UploadCreationService
         private UploadService $uploadService,
         private FileSizeLimitService $fileSizeLimitService,
         private UploadBodyLimitService $uploadBodyLimitService,
-        private FileService $fileService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private UploadChunkValidator $uploadChunkValidator,
         private ElementFileDeletionService $elementFileDeletionService,
@@ -105,7 +105,7 @@ class UploadCreationService
         $resource = $resumableUploadRequest->getContent();
         // hashed before the upload, so that a digest mismatch never replaces an existing file
         $this->stopwatch->start(self::PROFILER_DIRECT_UPLOAD_HASH_CALCULATION);
-        $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
+        $hashContext = $this->incrementalHashService->createContext(FileHashAlgorithm::SHA_256->value);
         $this->incrementalHashService->updateFromResource($hashContext, $resource);
         $hash = $this->incrementalHashService->finalize($hashContext);
         $this->stopwatch->stop(self::PROFILER_DIRECT_UPLOAD_HASH_CALCULATION);
@@ -133,7 +133,7 @@ class UploadCreationService
             'extension' => $resumableUploadRequest->getExtension(),
             'mimeType' => $uploadFileOperation->getMimeType(),
             'hash' => [
-                FileHashService::ALGORITHM => $hash,
+                FileHashAlgorithm::SHA_256->value => $hash,
             ],
         ]);
         $element->addProperty('hasFile', true);
@@ -185,11 +185,11 @@ class UploadCreationService
             $this->stopwatch->stop(self::PROFILER_CHUNK_UPLOAD_LENGTH_CHECK);
 
             $this->stopwatch->start(self::PROFILER_CHUNK_UPLOAD_HASH_CALCULATION);
-            $hashContext = $this->incrementalHashService->createContext(FileHashService::ALGORITHM);
+            $hashContext = $this->incrementalHashService->createContext(FileHashAlgorithm::SHA_256->value);
             $this->incrementalHashService->updateFromResource($hashContext, $resource);
             $this->stopwatch->stop(self::PROFILER_CHUNK_UPLOAD_HASH_CALCULATION);
 
-            $chunkId = $this->fileService->generateUploadChunkId();
+            $chunkId = $this->uploadService->generateUploadChunkId();
             $uploadFileChunkOperation = $this->s3OperationFactory->createUploadFileChunkOperationFromResumableUploadRequest($resumableUploadRequest, $uploadId, $chunkId);
             $this->stopwatch->start(self::PROFILER_CHUNK_UPLOAD_S3_UPLOAD);
             $uploadOffset = $this->s3Service->uploadFileChunk($uploadFileChunkOperation);
