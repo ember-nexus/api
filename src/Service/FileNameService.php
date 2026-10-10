@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Type\DottedName;
+
 class FileNameService
 {
     // neither POSIX nor HTTP/WebDAV mandate a filename length limit, but 255 is the component limit (NAME_MAX) of
@@ -35,8 +37,7 @@ class FileNameService
             $baseName = $parts[0];
             $extension = trim(substr($parts[1], 0, self::MAX_EXTENSION_LENGTH));
 
-            return sprintf(
-                '%s.%s',
+            return (string) new DottedName(
                 trim(substr($baseName, 0, self::MAX_FILENAME_LENGTH - strlen($extension) - 1)),
                 $extension
             );
@@ -66,6 +67,6 @@ class FileNameService
         }
         $name = trim(substr(trim($name), 0, self::MAX_FILENAME_LENGTH - strlen($extension) - 1));
 
-        return sprintf('%s.%s', $name, $extension);
+        return (string) new DottedName($name, $extension);
     }
 }

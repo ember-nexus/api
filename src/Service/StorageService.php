@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Type\DashJoinedKey;
+use App\Type\DottedName;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Ramsey\Uuid\UuidInterface;
 
@@ -24,7 +26,7 @@ class StorageService
      */
     public function appendExtension(string $pathWithoutExtension, string $extension): string
     {
-        return '' === $extension ? $pathWithoutExtension : sprintf('%s.%s', $pathWithoutExtension, $extension);
+        return (string) new DottedName($pathWithoutExtension, $extension);
     }
 
     public function getStorageBucketKey(UuidInterface $id, string $extension): string
@@ -56,15 +58,16 @@ class StorageService
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Chunk index can not be longer than %d digits, i.e. bigger than %d.', $digits, $maxIndex));
         }
 
-        return sprintf(
-            '%s-%s%s.%s',
-            $this->uuidToNestedFolderStructure(
-                $id,
-                $this->emberNexusConfiguration->getFileS3UploadBucketLevels(),
-                $this->emberNexusConfiguration->getFileS3UploadBucketLevelLength(),
+        return (string) new DottedName(
+            (string) new DashJoinedKey(
+                $this->uuidToNestedFolderStructure(
+                    $id,
+                    $this->emberNexusConfiguration->getFileS3UploadBucketLevels(),
+                    $this->emberNexusConfiguration->getFileS3UploadBucketLevelLength(),
+                ),
+                str_pad((string) $chunkIndex, $digits, '0', STR_PAD_LEFT),
+                $chunkId,
             ),
-            str_pad((string) $chunkIndex, $digits, '0', STR_PAD_LEFT),
-            null === $chunkId ? '' : '-'.$chunkId,
             self::UPLOAD_EXTENSION
         );
     }

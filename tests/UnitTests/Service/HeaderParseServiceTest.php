@@ -108,7 +108,7 @@ class HeaderParseServiceTest extends TestCase
         $exception = $this->prophesize(Client400BadContentException::class)->reveal();
 
         $client400BadContentExceptionFactory = $this->prophesize(Client400BadContentExceptionFactory::class);
-        $client400BadContentExceptionFactory->createFromDetail(Argument::is("Endpoint requires the header 'content-type' to be present."))->shouldBeCalledOnce()->willReturn($exception);
+        $client400BadContentExceptionFactory->createFromDetail(Argument::is("Header 'Content-Type' is required."))->shouldBeCalledOnce()->willReturn($exception);
 
         $headerParseService = $this->buildHeaderParseService(
             client400BadContentExceptionFactory: $client400BadContentExceptionFactory->reveal()

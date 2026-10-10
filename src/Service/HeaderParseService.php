@@ -22,7 +22,7 @@ class HeaderParseService
     {
         $contentType = $headers->get('Content-Type');
         if (null === $contentType) {
-            throw $this->client400BadContentExceptionFactory->createFromDetail("Endpoint requires the header 'content-type' to be present.");
+            throw $this->client400BadContentExceptionFactory->createFromDetail("Header 'Content-Type' is required.");
         }
         $contentType = trim(strtolower(explode(';', $contentType)[0]));
         if ('' === $contentType) {

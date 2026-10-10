@@ -17,8 +17,11 @@ use Ramsey\Uuid\UuidInterface;
  */
 class UploadLockService
 {
-    // a request may take 15 minutes at most (`read_body` in the Caddyfile), plus time for S3 and finalization
-    public const int TTL_IN_MILLISECONDS = 1200000;
+    // a request may take at most `API_UPLOAD_REQUEST_BODY_TIMEOUT` (default 15 minutes, see docker/Caddyfile) to
+    // read its body, plus a buffer for S3 and finalization
+    private const int UPLOAD_REQUEST_BODY_TIMEOUT_IN_MINUTES = 15;
+    private const int FINALIZATION_BUFFER_IN_MINUTES = 5;
+    public const int TTL_IN_MILLISECONDS = (self::UPLOAD_REQUEST_BODY_TIMEOUT_IN_MINUTES + self::FINALIZATION_BUFFER_IN_MINUTES) * 60 * 1000;
 
     public function __construct(
         private RedisClient $redisClient,
