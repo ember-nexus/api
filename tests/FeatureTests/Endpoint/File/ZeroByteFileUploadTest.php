@@ -14,25 +14,10 @@ class ZeroByteFileUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private function createElement(string $name): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-
-        return $this->getUuidFromLocation($response);
-    }
 
     public function testZeroByteFileCanBeUploadedDirectlyAndDownloadedAgain(): void
     {
-        $elementId = $this->createElement('zero-byte-direct-upload');
+        $elementId = $this->createElement(self::TOKEN, 'zero-byte-direct-upload');
 
         // no 'Upload-Complete' header at all -> a direct, non-resumable upload of the (empty) request body
         $response = $this->runUploadRequest(

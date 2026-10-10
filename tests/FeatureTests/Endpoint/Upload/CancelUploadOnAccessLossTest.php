@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use Laudis\Neo4j\ClientBuilder;
-use Laudis\Neo4j\Contracts\ClientInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
@@ -20,11 +18,6 @@ class CancelUploadOnAccessLossTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int CHUNK_SIZE = 5 * 1024 * 1024;
-
-    private function getCypherClient(): ClientInterface
-    {
-        return ClientBuilder::create()->withDriver('bolt', $_ENV['CYPHER_AUTH'])->build();
-    }
 
     /**
      * @return array{0: string, 1: string} [targetId, uploadId], the upload has one stored chunk

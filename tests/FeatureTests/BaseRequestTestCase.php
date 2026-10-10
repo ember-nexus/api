@@ -9,6 +9,8 @@ use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
+use Laudis\Neo4j\ClientBuilder;
+use Laudis\Neo4j\Contracts\ClientInterface as CypherClientInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
@@ -368,11 +370,62 @@ abstract class BaseRequestTestCase extends TestCase
         $this->assertSame($state, $tokenBody['data']['state']);
     }
 
+    public function getEtagOfElement(string $token, string $id, string $additionalPath, ?string $shouldEtag = null): string
+    {
+        $response = $this->runGetRequest(
+            sprintf('/%s%s', $id, $additionalPath),
+            $token
+        );
+        $etag = $response->getHeader('Etag')[0];
+        if ($shouldEtag) {
+            $this->assertSame($shouldEtag, $etag);
+        }
+
+        return $etag;
+    }
+
     public function getUuidFromLocation(ResponseInterface $response): string
     {
         $location = $response->getHeader('Location')[0];
 
         return array_reverse(explode('/', $location))[0];
+    }
+
+    public function getCypherClient(): CypherClientInterface
+    {
+        return ClientBuilder::create()
+            ->withDriver('bolt', $_ENV['CYPHER_AUTH'])
+            ->build();
+    }
+
+    /**
+     * @param array<string, string> $headers
+     */
+    public function sendFile(string $token, string $method, string $elementId, string $content, array $headers = []): ResponseInterface
+    {
+        return $this->runUploadRequest(
+            $method,
+            sprintf('/%s/file', $elementId),
+            $content,
+            $token,
+            array_merge(['Content-Type' => 'application/octet-stream'], $headers)
+        );
+    }
+
+    public function createElement(string $token, string $name): string
+    {
+        $response = $this->runPostRequest(
+            '/',
+            $token,
+            [
+                'type' => 'Data',
+                'data' => [
+                    'name' => $name,
+                ],
+            ]
+        );
+
+        return $this->getUuidFromLocation($response);
     }
 
     /**

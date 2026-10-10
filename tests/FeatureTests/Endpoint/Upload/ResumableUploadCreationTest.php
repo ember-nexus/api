@@ -15,25 +15,10 @@ class ResumableUploadCreationTest extends BaseRequestTestCase
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int CHUNK_SIZE = 5 * 1024 * 1024;
 
-    private function createElement(string $name): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-
-        return $this->getUuidFromLocation($response);
-    }
 
     public function testResumableUploadCreationWithInitialData(): void
     {
-        $elementId = $this->createElement('resumable-upload-creation-with-data');
+        $elementId = $this->createElement(self::TOKEN, 'resumable-upload-creation-with-data');
 
         $filePath = __DIR__.'/../../Asset/resumable-upload-creation-with-data.bin';
         $this->generateDeterministicFile(19283746, self::CHUNK_SIZE, $filePath);
@@ -67,7 +52,7 @@ class ResumableUploadCreationTest extends BaseRequestTestCase
 
     public function testResumableUploadCreationWithoutInitialData(): void
     {
-        $elementId = $this->createElement('resumable-upload-creation-without-data');
+        $elementId = $this->createElement(self::TOKEN, 'resumable-upload-creation-without-data');
 
         $createUploadResponse = $this->runUploadRequest(
             'POST',

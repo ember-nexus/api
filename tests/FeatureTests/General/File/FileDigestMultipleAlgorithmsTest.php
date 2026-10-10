@@ -19,16 +19,6 @@ class FileDigestMultipleAlgorithmsTest extends BaseRequestTestCase
     private const string ASSET_PATH = __DIR__.'/../../Asset/file-digest-multiple-algorithms.bin';
     private const string UNSUPPORTED_MEMBER = 'md5=:1B2M2Y8AsgTpgAmY7PhCfg==:';
 
-    private function createElement(string $name): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            ['type' => 'Data', 'data' => ['name' => $name]]
-        );
-
-        return $this->getUuidFromLocation($response);
-    }
 
     private function sha256Member(string $hexHash): string
     {
@@ -51,7 +41,7 @@ class FileDigestMultipleAlgorithmsTest extends BaseRequestTestCase
 
     public function testUploadSucceedsWhenSha256IsFirstAmongMultipleAlgorithms(): void
     {
-        $id = $this->createElement('digest-multi-sha256-first');
+        $id = $this->createElement(self::TOKEN, 'digest-multi-sha256-first');
         $this->generateDeterministicFile(80010001, 2048, self::ASSET_PATH);
         $sha256 = $this->sha256Member(hash_file('sha256', self::ASSET_PATH));
 
@@ -66,7 +56,7 @@ class FileDigestMultipleAlgorithmsTest extends BaseRequestTestCase
 
     public function testUploadSucceedsWhenSha256IsLastAmongMultipleAlgorithms(): void
     {
-        $id = $this->createElement('digest-multi-sha256-last');
+        $id = $this->createElement(self::TOKEN, 'digest-multi-sha256-last');
         $this->generateDeterministicFile(80010002, 2048, self::ASSET_PATH);
         $sha256 = $this->sha256Member(hash_file('sha256', self::ASSET_PATH));
 
@@ -81,7 +71,7 @@ class FileDigestMultipleAlgorithmsTest extends BaseRequestTestCase
 
     public function testUploadIsRejectedWhenNoDeclaredAlgorithmIsSupported(): void
     {
-        $id = $this->createElement('digest-multi-no-supported-algorithm');
+        $id = $this->createElement(self::TOKEN, 'digest-multi-no-supported-algorithm');
         $this->generateDeterministicFile(80010003, 2048, self::ASSET_PATH);
 
         $response = $this->upload($id, self::ASSET_PATH, [
@@ -96,7 +86,7 @@ class FileDigestMultipleAlgorithmsTest extends BaseRequestTestCase
 
     public function testUploadIsRejectedWhenSha256IsDeclaredTwice(): void
     {
-        $id = $this->createElement('digest-multi-duplicate-sha256');
+        $id = $this->createElement(self::TOKEN, 'digest-multi-duplicate-sha256');
         $this->generateDeterministicFile(80010004, 2048, self::ASSET_PATH);
         $sha256 = $this->sha256Member(hash_file('sha256', self::ASSET_PATH));
 
@@ -112,7 +102,7 @@ class FileDigestMultipleAlgorithmsTest extends BaseRequestTestCase
 
     public function testUploadIsRejectedWhenDigestHeaderIsUnparseable(): void
     {
-        $id = $this->createElement('digest-multi-unparseable');
+        $id = $this->createElement(self::TOKEN, 'digest-multi-unparseable');
         $this->generateDeterministicFile(80010005, 2048, self::ASSET_PATH);
 
         $response = $this->upload($id, self::ASSET_PATH, [

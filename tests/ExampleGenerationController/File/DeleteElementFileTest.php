@@ -15,26 +15,10 @@ class DeleteElementFileTest extends BaseRequestTestCase
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private function createElement(string $id, string $name): void
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'id' => $id,
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-        $this->assertIsCreatedResponse($response, false);
-    }
-
     public function testDeleteElementFileSuccess204(): void
     {
         $elementId = '6f7a8b9c-0d1e-4f2a-3b4c-5d6e7f8a9b0c';
-        $this->createElement($elementId, 'delete-element-file-204');
+        $this->createElement($elementId, 'delete-element-file-204', self::TOKEN);
 
         $filePath = __DIR__.'/../Asset/example-delete-element-file-204.bin';
         $this->generateDeterministicFile(99999999, 2048, $filePath);
@@ -63,7 +47,7 @@ class DeleteElementFileTest extends BaseRequestTestCase
     public function testDeleteElementFileFailure401(): void
     {
         $elementId = '7a8b9c0d-1e2f-4a3b-4c5d-6e7f8a9b0c1d';
-        $this->createElement($elementId, 'delete-element-file-401');
+        $this->createElement($elementId, 'delete-element-file-401', self::TOKEN);
 
         $response = $this->runDeleteRequest(sprintf('/%s/file', $elementId), 'thisTokenDoesNotExist');
         $this->assertIsProblemResponse($response, 401);

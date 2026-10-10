@@ -13,33 +13,20 @@ class UpdateNormalRelationEtagTest extends BaseRequestTestCase
     private const string ID_DATA_2 = 'eeccb6bf-91da-4da1-8bef-b797a32eb8a6';
     private const string ID_RELATED = '7f3afac6-013e-4b28-acc7-f4fe1c418c99';
 
-    private function testEtagOfElement(string $token, string $id, string $additionalPath, ?string $shouldEtag = null): string
-    {
-        $response = $this->runGetRequest(
-            sprintf('/%s%s', $id, $additionalPath),
-            $token
-        );
-        $etag = $response->getHeader('Etag')[0];
-        if ($shouldEtag) {
-            $this->assertSame($shouldEtag, $etag);
-        }
-
-        return $etag;
-    }
 
     public function testEtagBeforeAndAfterUpdatingCentralNormalRelation(): void
     {
-        $initialEtagNode1Self = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"YoB0OOEREXk"');
-        $initialEtagNode1Parents = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', '"3j6Nn1Zg7Vh"');
-        $initialEtagNode1Children = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', '"CXBnJAUbSJp"');
-        $initialEtagNode1Related = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related', '"KLXJORKMBo2"');
+        $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"YoB0OOEREXk"');
+        $initialEtagNode1Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', '"3j6Nn1Zg7Vh"');
+        $initialEtagNode1Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', '"CXBnJAUbSJp"');
+        $initialEtagNode1Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related', '"KLXJORKMBo2"');
 
-        $initialEtagNode2Self = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_2, '', '"7VR6m1Ibrsd"');
-        $initialEtagNode2Parents = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', '"Ii50AcImQIP"');
-        $initialEtagNode2Children = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', '"qgOpKWhgph"');
-        $initialEtagNode2Related = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related', '"4MjlN2a6NE5"');
+        $initialEtagNode2Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '', '"7VR6m1Ibrsd"');
+        $initialEtagNode2Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', '"Ii50AcImQIP"');
+        $initialEtagNode2Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', '"qgOpKWhgph"');
+        $initialEtagNode2Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related', '"4MjlN2a6NE5"');
 
-        $initialEtagRelatedSelf = $this->testEtagOfElement(self::TOKEN, self::ID_RELATED, '', '"UoDabdDMmbq"');
+        $initialEtagRelatedSelf = $this->getEtagOfElement(self::TOKEN, self::ID_RELATED, '', '"UoDabdDMmbq"');
 
         $response = $this->runPatchRequest(
             sprintf(
@@ -53,21 +40,21 @@ class UpdateNormalRelationEtagTest extends BaseRequestTestCase
         );
         $this->assertNoContentResponse($response);
 
-        $this->testEtagOfElement(self::TOKEN, self::ID_DATA_1, '', $initialEtagNode1Self);
-        $this->testEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', $initialEtagNode1Parents);
-        $this->testEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', $initialEtagNode1Children);
-        $finalEtagNode1Related = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related');
+        $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', $initialEtagNode1Self);
+        $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', $initialEtagNode1Parents);
+        $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', $initialEtagNode1Children);
+        $finalEtagNode1Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related');
 
         $this->assertNotSame($initialEtagNode1Related, $finalEtagNode1Related);
 
-        $this->testEtagOfElement(self::TOKEN, self::ID_DATA_2, '', $initialEtagNode2Self);
-        $this->testEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', $initialEtagNode2Parents);
-        $this->testEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', $initialEtagNode2Children);
-        $finalEtagNode2Related = $this->testEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related');
+        $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '', $initialEtagNode2Self);
+        $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', $initialEtagNode2Parents);
+        $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', $initialEtagNode2Children);
+        $finalEtagNode2Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related');
 
         $this->assertNotSame($initialEtagNode2Related, $finalEtagNode2Related);
 
-        $finalEtagRelatedSelf = $this->testEtagOfElement(self::TOKEN, self::ID_RELATED, '');
+        $finalEtagRelatedSelf = $this->getEtagOfElement(self::TOKEN, self::ID_RELATED, '');
 
         $this->assertNotSame($initialEtagRelatedSelf, $finalEtagRelatedSelf);
     }

@@ -19,14 +19,6 @@ class PostFileCreationLockTest extends BaseRequestTestCase
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int MIN_CHUNK_SIZE = 5 * 1024 * 1024;
 
-    private function createElement(): string
-    {
-        return $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
-            'type' => 'Data',
-            'data' => ['name' => 'post-file-creation-lock'],
-        ]));
-    }
-
     private function deleteElement(string $elementId): void
     {
         $this->assertIsDeletedResponse($this->runDeleteRequest(sprintf('/%s', $elementId), self::TOKEN));
@@ -52,7 +44,7 @@ class PostFileCreationLockTest extends BaseRequestTestCase
 
     public function testPostWhileCreationLockIsHeldFails(): void
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createElement(self::TOKEN, 'post-file-creation-lock');
         $redis = $this->getRedis();
         $redis->set($this->lockKey($elementId), 'other-request', 'PX', 60000);
 
@@ -70,7 +62,7 @@ class PostFileCreationLockTest extends BaseRequestTestCase
 
     public function testPostReleasesLockAfterSuccess(): void
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createElement(self::TOKEN, 'post-file-creation-lock');
 
         $this->assertIsCreatedResponse($this->upload('POST', $elementId, 'some content'), false);
         $this->assertSame(0, $this->getRedis()->exists($this->lockKey($elementId)));
@@ -80,7 +72,7 @@ class PostFileCreationLockTest extends BaseRequestTestCase
 
     public function testPostReleasesLockAfterFailedRequest(): void
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createElement(self::TOKEN, 'post-file-creation-lock');
 
         $wrongDigest = sprintf('sha-256=:%s:', base64_encode(str_repeat('a', 32)));
         $response = $this->upload('POST', $elementId, 'some content', ['Repr-Digest' => $wrongDigest]);
@@ -95,7 +87,7 @@ class PostFileCreationLockTest extends BaseRequestTestCase
 
     public function testPostReleasesLockAfterElementAlreadyHasFile(): void
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createElement(self::TOKEN, 'post-file-creation-lock');
         $this->assertIsCreatedResponse($this->upload('POST', $elementId, 'some content'), false);
 
         $this->assertIsProblemResponse($this->upload('POST', $elementId, 'other content'), 409);
@@ -106,7 +98,7 @@ class PostFileCreationLockTest extends BaseRequestTestCase
 
     public function testPostWhileUploadTargetsElementFails(): void
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createElement(self::TOKEN, 'post-file-creation-lock');
 
         $createResponse = $this->upload('POST', $elementId, str_repeat('a', self::MIN_CHUNK_SIZE), [
             'Upload-Complete' => '?0',
@@ -130,7 +122,7 @@ class PostFileCreationLockTest extends BaseRequestTestCase
 
     public function testPutWhileCreationLockIsHeldFails(): void
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createElement(self::TOKEN, 'post-file-creation-lock');
         $redis = $this->getRedis();
         $redis->set($this->lockKey($elementId), 'other-request', 'PX', 60000);
 
@@ -146,7 +138,7 @@ class PostFileCreationLockTest extends BaseRequestTestCase
 
     public function testPutReplacesExistingFileWithoutLock(): void
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createElement(self::TOKEN, 'post-file-creation-lock');
         $this->assertIsCreatedResponse($this->upload('POST', $elementId, 'some content'), false);
 
         $response = $this->upload('PUT', $elementId, 'replaced content');

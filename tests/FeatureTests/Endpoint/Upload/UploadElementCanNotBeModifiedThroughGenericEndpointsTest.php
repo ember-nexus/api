@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
-use App\Tests\FeatureTests\BaseRequestTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
@@ -18,11 +17,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
  * re-checked and updated. For users with access to the node, `PUT`/`PATCH` are expected to answer 400 (forbidden
  * property); a different status code than 404 here is a reason to review the access rules, not just this test.
  */
-class UploadElementCanNotBeModifiedThroughGenericEndpointsTest extends BaseRequestTestCase
+class UploadElementCanNotBeModifiedThroughGenericEndpointsTest extends BaseUploadTestCase
 {
-    private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
-    private const int CHUNK_SIZE = 5 * 1024 * 1024;
-
     /**
      * @return array<string, array{0: array<string, mixed>}>
      */
@@ -37,14 +33,6 @@ class UploadElementCanNotBeModifiedThroughGenericEndpointsTest extends BaseReque
             'expires' => [['expires' => '2099-01-01T00:00:00+00:00']],
             'arbitrary property' => [['name' => 'changed']],
         ];
-    }
-
-    private function createNode(): string
-    {
-        return $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
-            'type' => 'Data',
-            'data' => ['name' => 'upload-generic-endpoints'],
-        ]));
     }
 
     private function createUpload(string $elementId): string
@@ -75,7 +63,7 @@ class UploadElementCanNotBeModifiedThroughGenericEndpointsTest extends BaseReque
     #[DataProvider('internalPropertiesProvider')]
     public function testPutAndPatchOfUploadElementAnswerNotFound(array $properties): void
     {
-        $elementId = $this->createNode();
+        $elementId = $this->createElement(self::TOKEN, 'upload-generic-endpoints');
         $uploadId = $this->createUpload($elementId);
 
         $this->assertIsProblemResponse($this->runPutRequest(sprintf('/%s', $uploadId), self::TOKEN, $properties), 404);
@@ -88,7 +76,7 @@ class UploadElementCanNotBeModifiedThroughGenericEndpointsTest extends BaseReque
 
     public function testGetAndDeleteOfUploadElementAnswerNotFound(): void
     {
-        $elementId = $this->createNode();
+        $elementId = $this->createElement(self::TOKEN, 'upload-generic-endpoints');
         $uploadId = $this->createUpload($elementId);
 
         $this->assertIsProblemResponse($this->runGetRequest(sprintf('/%s', $uploadId), self::TOKEN), 404);

@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
-use App\Tests\FeatureTests\BaseRequestTestCase;
 use ArrayObject;
-use Laudis\Neo4j\ClientBuilder;
-use Laudis\Neo4j\Contracts\ClientInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
 
@@ -19,18 +16,8 @@ use stdClass;
  * The state which can not be reached through the API (a passed expiration date, a corrupted hash state) is
  * manipulated directly in the graph database, as the upload node is the single source of truth for it.
  */
-class PatchUploadStateErrorsTest extends BaseRequestTestCase
+class PatchUploadStateErrorsTest extends BaseUploadTestCase
 {
-    private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
-    private const int CHUNK_SIZE = 5 * 1024 * 1024;
-
-    private function getCypherClient(): ClientInterface
-    {
-        return ClientBuilder::create()
-            ->withDriver('bolt', $_ENV['CYPHER_AUTH'])
-            ->build();
-    }
-
     private function setUploadProperty(string $uploadId, string $propertyExpression): void
     {
         $result = $this->getCypherClient()->run(
@@ -38,14 +25,6 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
             ['id' => $uploadId]
         );
         $this->assertSame(1, $result->first()->get('count'));
-    }
-
-    private function createNode(string $name): string
-    {
-        return $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
-            'type' => 'Data',
-            'data' => ['name' => $name],
-        ]));
     }
 
     /**
@@ -99,7 +78,7 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
 
     public function testPatchOfExpiredUploadReturns410(): void
     {
-        $elementId = $this->createNode('patch-upload-expired');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-expired');
         $uploadId = $this->createUpload($elementId, '');
         $this->assertUploadStillAtOffset($uploadId, 0);
 
@@ -116,7 +95,7 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
 
     public function testHeadOfExpiredUploadReturns410(): void
     {
-        $elementId = $this->createNode('head-upload-expired');
+        $elementId = $this->createElement(self::TOKEN, 'head-upload-expired');
         $uploadId = $this->createUpload($elementId, '');
         $this->assertUploadStillAtOffset($uploadId, 0);
 
@@ -130,7 +109,7 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
 
     public function testPatchOfNotYetExpiredUploadSucceeds(): void
     {
-        $elementId = $this->createNode('patch-upload-not-expired');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-not-expired');
         $uploadId = $this->createUpload($elementId, '');
 
         // counterpart of the 410 test: shifting the expiration date into the future keeps the upload usable
@@ -144,7 +123,7 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
 
     public function testPatchExceedingUploadLengthReturns409(): void
     {
-        $elementId = $this->createNode('patch-upload-exceeds-length');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-exceeds-length');
         $uploadId = $this->createUpload($elementId, '', ['Upload-Length' => 10]);
         $this->assertUploadStillAtOffset($uploadId, 0);
 
@@ -164,7 +143,7 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
 
     public function testPatchWithinUploadLengthSucceeds(): void
     {
-        $elementId = $this->createNode('patch-upload-within-length');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-within-length');
         $uploadId = $this->createUpload($elementId, '', ['Upload-Length' => 10]);
 
         $this->assertNoContentResponse($this->patchUpload($uploadId, 0, str_repeat('a', 10)));
@@ -194,7 +173,7 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
     #[DataProvider('unusableHashStateProvider')]
     public function testPatchWithUnusableStoredHashStateReturns409(string $hashState): void
     {
-        $elementId = $this->createNode('patch-upload-broken-hash-state');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-broken-hash-state');
         // the first chunk stores the running hash state of the upload
         $uploadId = $this->createUpload($elementId, str_repeat('a', self::CHUNK_SIZE));
         $this->assertUploadStillAtOffset($uploadId, self::CHUNK_SIZE);
@@ -218,7 +197,7 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
      */
     public function testPatchOfInconsistentUploadReturns409AndDeletesUpload(): void
     {
-        $elementId = $this->createNode('patch-upload-inconsistent');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-inconsistent');
         $uploadId = $this->createUpload($elementId, str_repeat('a', self::CHUNK_SIZE));
         $this->assertUploadStillAtOffset($uploadId, self::CHUNK_SIZE);
         $this->assertSame(1, $this->countUploadChunksInUploadBucket($uploadId));
@@ -239,7 +218,7 @@ class PatchUploadStateErrorsTest extends BaseRequestTestCase
 
     public function testHeadOfInconsistentUploadReturns409AndDeletesUpload(): void
     {
-        $elementId = $this->createNode('head-upload-inconsistent');
+        $elementId = $this->createElement(self::TOKEN, 'head-upload-inconsistent');
         $uploadId = $this->createUpload($elementId, str_repeat('a', self::CHUNK_SIZE));
 
         $this->setUploadProperty($uploadId, "u.lastChunkId = 'ffffffffffffffff'");

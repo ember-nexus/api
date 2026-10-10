@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Endpoint\Upload;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
-use Laudis\Neo4j\ClientBuilder;
-use Laudis\Neo4j\Contracts\ClientInterface;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -34,13 +32,6 @@ class ResumableUploadUnfinalizedStateTest extends BaseRequestTestCase
     private const string LABEL = 'ResumableUploadUnfinalizedStateTestTarget';
     private const string DECOY_LABEL = 'ResumableUploadUnfinalizedStateTestDecoy';
     private const string CONSTRAINT_NAME = 'resumable_upload_unfinalized_state_test_has_file_unique';
-
-    private function getCypherClient(): ClientInterface
-    {
-        return ClientBuilder::create()
-            ->withDriver('bolt', $_ENV['CYPHER_AUTH'])
-            ->build();
-    }
 
     // the decoy node claims the only allowed `true` value of the constrained property first, so it is the
     // target's own later write of `hasFile = true` which introduces the duplicate and fails

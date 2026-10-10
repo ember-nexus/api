@@ -14,25 +14,10 @@ class FileDigestTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private function createElement(string $name): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-
-        return $this->getUuidFromLocation($response);
-    }
 
     public function testDownloadResponseIncludesReprDigestHeader(): void
     {
-        $elementId = $this->createElement('digest-response-headers');
+        $elementId = $this->createElement(self::TOKEN, 'digest-response-headers');
 
         $filePath = __DIR__.'/../../Asset/file-digest-response.bin';
         $this->generateDeterministicFile(11223344, 4096, $filePath);
@@ -63,7 +48,7 @@ class FileDigestTest extends BaseRequestTestCase
 
     public function testRangedResponseIncludesReprDigestButNotContentDigest(): void
     {
-        $elementId = $this->createElement('digest-ranged-response');
+        $elementId = $this->createElement(self::TOKEN, 'digest-ranged-response');
 
         $filePath = __DIR__.'/../../Asset/file-digest-ranged.bin';
         $this->generateDeterministicFile(55667788, 4096, $filePath);
@@ -97,7 +82,7 @@ class FileDigestTest extends BaseRequestTestCase
 
     public function testUploadWithCorrectDigestSucceeds(): void
     {
-        $elementId = $this->createElement('digest-upload-correct');
+        $elementId = $this->createElement(self::TOKEN, 'digest-upload-correct');
 
         $filePath = __DIR__.'/../../Asset/file-digest-correct.bin';
         $this->generateDeterministicFile(99887766, 2048, $filePath);
@@ -123,7 +108,7 @@ class FileDigestTest extends BaseRequestTestCase
 
     public function testUploadWithMismatchedDigestIsRejected(): void
     {
-        $elementId = $this->createElement('digest-upload-mismatch');
+        $elementId = $this->createElement(self::TOKEN, 'digest-upload-mismatch');
 
         $filePath = __DIR__.'/../../Asset/file-digest-mismatch.bin';
         $this->generateDeterministicFile(13245768, 2048, $filePath);
@@ -154,7 +139,7 @@ class FileDigestTest extends BaseRequestTestCase
 
     public function testUploadWithUnsupportedDigestAlgorithmIsRejected(): void
     {
-        $elementId = $this->createElement('digest-upload-unsupported');
+        $elementId = $this->createElement(self::TOKEN, 'digest-upload-unsupported');
 
         $filePath = __DIR__.'/../../Asset/file-digest-unsupported.bin';
         $this->generateDeterministicFile(24681012, 2048, $filePath);
@@ -178,7 +163,7 @@ class FileDigestTest extends BaseRequestTestCase
 
     public function testResumableUploadCompletionVerifiesDigest(): void
     {
-        $elementId = $this->createElement('digest-resumable');
+        $elementId = $this->createElement(self::TOKEN, 'digest-resumable');
 
         $fileSeed = 987654321;
         $fileSize = 6 * 1024 * 1024;
@@ -227,7 +212,7 @@ class FileDigestTest extends BaseRequestTestCase
 
     public function testReplacingFileWithMismatchedDigestLeavesOriginalFileIntact(): void
     {
-        $elementId = $this->createElement('digest-replace-mismatch');
+        $elementId = $this->createElement(self::TOKEN, 'digest-replace-mismatch');
 
         $originalFilePath = __DIR__.'/../../Asset/file-digest-replace-original.bin';
         $this->generateDeterministicFile(11223344, 2048, $originalFilePath);
@@ -273,7 +258,7 @@ class FileDigestTest extends BaseRequestTestCase
 
     public function testResumableReplaceWithMismatchedDigestLeavesOriginalFileIntact(): void
     {
-        $elementId = $this->createElement('digest-resumable-replace-mismatch');
+        $elementId = $this->createElement(self::TOKEN, 'digest-resumable-replace-mismatch');
 
         $originalFilePath = __DIR__.'/../../Asset/file-digest-resumable-replace-original.bin';
         $this->generateDeterministicFile(99001122, 2048, $originalFilePath);

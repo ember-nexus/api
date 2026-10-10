@@ -26,10 +26,6 @@ tasks:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec k6 pnpm load
 
-  generate:swagger:
-    cmds:
-      - ./tools/generate-swagger.sh
-
   prod:build:
     vars:
       VERSION:

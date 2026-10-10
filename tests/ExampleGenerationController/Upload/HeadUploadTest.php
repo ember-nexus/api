@@ -18,22 +18,6 @@ class HeadUploadTest extends BaseRequestTestCase
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private function createElement(string $id, string $name): void
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'id' => $id,
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-        $this->assertIsCreatedResponse($response, false);
-    }
-
     private function createResumableUpload(string $elementId, string $assetName): string
     {
         $filePath = __DIR__.'/../Asset/'.$assetName;
@@ -60,7 +44,7 @@ class HeadUploadTest extends BaseRequestTestCase
     public function testHeadUploadSuccess204(): void
     {
         $elementId = '8b9c0d1e-2f3a-4b4c-5d6e-7f8a9b0c1d2e';
-        $this->createElement($elementId, 'head-upload-204');
+        $this->createElement($elementId, 'head-upload-204', self::TOKEN);
         $uploadId = $this->createResumableUpload($elementId, 'example-head-upload-204.bin');
 
         $response = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
@@ -81,7 +65,7 @@ class HeadUploadTest extends BaseRequestTestCase
     public function testHeadUploadFailure401(): void
     {
         $elementId = '9c0d1e2f-3a4b-4c5d-6e7f-8a9b0c1d2e3f';
-        $this->createElement($elementId, 'head-upload-401');
+        $this->createElement($elementId, 'head-upload-401', self::TOKEN);
         $uploadId = $this->createResumableUpload($elementId, 'example-head-upload-401.bin');
 
         $response = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), 'thisTokenDoesNotExist');

@@ -50,6 +50,22 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
         $this->assertTrue(true);
     }
 
+    protected function createElement(string $id, string $name, string $token): void
+    {
+        $response = $this->runPostRequest(
+            '/',
+            $token,
+            [
+                'id' => $id,
+                'type' => 'Data',
+                'data' => [
+                    'name' => $name,
+                ],
+            ]
+        );
+        $this->assertIsCreatedResponse($response, false);
+    }
+
     public function getHeadersFromRequest(ResponseInterface $response): string
     {
         $cleanedHeaders = [];

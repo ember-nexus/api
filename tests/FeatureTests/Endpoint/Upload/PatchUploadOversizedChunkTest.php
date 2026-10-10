@@ -15,21 +15,6 @@ class PatchUploadOversizedChunkTest extends BaseRequestTestCase
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int FIRST_CHUNK_SIZE = 5 * 1024 * 1024;
 
-    private function createElement(string $name): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-
-        return $this->getUuidFromLocation($response);
-    }
 
     private function getMaxAppendSizeInBytes(string $uploadLimitHeaderValue): int
     {
@@ -41,7 +26,7 @@ class PatchUploadOversizedChunkTest extends BaseRequestTestCase
 
     public function testOversizedFinalChunkIsRejected(): void
     {
-        $elementId = $this->createElement('patch-upload-oversized-chunk');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-oversized-chunk');
 
         $firstChunkPath = __DIR__.'/../../Asset/patch-upload-oversized-chunk-first.bin';
         $this->generateDeterministicFile(19283746, self::FIRST_CHUNK_SIZE, $firstChunkPath);

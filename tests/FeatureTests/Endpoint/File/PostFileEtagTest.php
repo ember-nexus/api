@@ -15,21 +15,6 @@ class PostFileEtagTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private function createElement(string $name): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-
-        return $this->getUuidFromLocation($response);
-    }
 
     /**
      * @param array<string, string> $additionalHeaders
@@ -53,7 +38,7 @@ class PostFileEtagTest extends BaseRequestTestCase
 
     public function testPostFileIsRejectedWhenIfMatchDoesNotMatch(): void
     {
-        $elementId = $this->createElement('post-file-etag-if-match-mismatch');
+        $elementId = $this->createElement(self::TOKEN, 'post-file-etag-if-match-mismatch');
 
         $response = $this->postFile($elementId, ['If-Match' => '"definitelyNotTheEtag"']);
         $this->assertIsProblemResponse($response, 412);
@@ -66,7 +51,7 @@ class PostFileEtagTest extends BaseRequestTestCase
 
     public function testPostFileIsRejectedWhenIfMatchCarriesTheElementEtag(): void
     {
-        $elementId = $this->createElement('post-file-etag-element-etag-does-not-apply');
+        $elementId = $this->createElement(self::TOKEN, 'post-file-etag-element-etag-does-not-apply');
 
         $elementEtag = $this->runGetRequest(sprintf('/%s', $elementId), self::TOKEN)->getHeader('Etag')[0];
 
@@ -79,7 +64,7 @@ class PostFileEtagTest extends BaseRequestTestCase
 
     public function testPostFileWithoutPreconditionHeadersStillWorks(): void
     {
-        $elementId = $this->createElement('post-file-etag-no-precondition');
+        $elementId = $this->createElement(self::TOKEN, 'post-file-etag-no-precondition');
 
         $this->assertIsCreatedResponse($this->postFile($elementId), false);
 
@@ -91,7 +76,7 @@ class PostFileEtagTest extends BaseRequestTestCase
      */
     public function testPostFileProceedsWhenIfNoneMatchDoesNotMatch(): void
     {
-        $elementId = $this->createElement('post-file-etag-if-none-match');
+        $elementId = $this->createElement(self::TOKEN, 'post-file-etag-if-none-match');
 
         $response = $this->postFile($elementId, ['If-None-Match' => '"definitelyNotTheEtag"']);
         $this->assertIsCreatedResponse($response, false);

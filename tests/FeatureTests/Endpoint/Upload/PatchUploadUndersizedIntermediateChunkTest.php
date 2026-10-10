@@ -16,21 +16,6 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int CHUNK_SIZE = 5 * 1024 * 1024;
 
-    private function createElement(string $name): string
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-
-        return $this->getUuidFromLocation($response);
-    }
 
     /**
      * @return array{0: string, 1: int} the created upload's id, and the offset it is now at
@@ -59,7 +44,7 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
 
     public function testZeroLengthIntermediateChunkIsAcceptedAsNoOp(): void
     {
-        $elementId = $this->createElement('patch-upload-undersized-zero');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-undersized-zero');
         [$uploadId, $offset] = $this->createResumableUploadWithOneChunk($elementId, 'patch-upload-undersized-zero.bin');
 
         $response = $this->runUploadRequest(
@@ -86,7 +71,7 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
 
     public function testUndersizedNonZeroIntermediateChunkIsRejected(): void
     {
-        $elementId = $this->createElement('patch-upload-undersized-nonzero');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-undersized-nonzero');
         [$uploadId, $offset] = $this->createResumableUploadWithOneChunk($elementId, 'patch-upload-undersized-nonzero.bin');
 
         $tinyChunkPath = __DIR__.'/../../Asset/patch-upload-undersized-nonzero-chunk.bin';
@@ -115,7 +100,7 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
      */
     public function testZeroLengthFinalChunkIsStillAccepted(): void
     {
-        $elementId = $this->createElement('patch-upload-zero-final-chunk');
+        $elementId = $this->createElement(self::TOKEN, 'patch-upload-zero-final-chunk');
         [$uploadId, $offset] = $this->createResumableUploadWithOneChunk($elementId, 'patch-upload-zero-final-chunk.bin');
 
         $response = $this->runUploadRequest(

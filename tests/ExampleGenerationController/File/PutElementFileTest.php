@@ -15,26 +15,10 @@ class PutElementFileTest extends BaseRequestTestCase
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private function createElement(string $id, string $name): void
-    {
-        $response = $this->runPostRequest(
-            '/',
-            self::TOKEN,
-            [
-                'id' => $id,
-                'type' => 'Data',
-                'data' => [
-                    'name' => $name,
-                ],
-            ]
-        );
-        $this->assertIsCreatedResponse($response, false);
-    }
-
     public function testPutElementFileSuccess201(): void
     {
         $elementId = '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
-        $this->createElement($elementId, 'put-element-file-201');
+        $this->createElement($elementId, 'put-element-file-201', self::TOKEN);
 
         $filePath = __DIR__.'/../Asset/example-put-element-file-201.bin';
         $this->generateDeterministicFile(55555555, 2048, $filePath);
@@ -64,7 +48,7 @@ class PutElementFileTest extends BaseRequestTestCase
     public function testPutElementFileSuccess204WithInitialData(): void
     {
         $elementId = '2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e';
-        $this->createElement($elementId, 'put-element-file-204-with-data');
+        $this->createElement($elementId, 'put-element-file-204-with-data', self::TOKEN);
 
         // non-final chunks must meet the server's configured minimum chunk size (advertised via 'Upload-Limit')
         $filePath = __DIR__.'/../Asset/example-put-element-file-204-with-data.bin';
@@ -101,7 +85,7 @@ class PutElementFileTest extends BaseRequestTestCase
     public function testPutElementFileSuccess204WithoutInitialData(): void
     {
         $elementId = '3c4d5e6f-7a8b-4c9d-0e1f-2a3b4c5d6e7f';
-        $this->createElement($elementId, 'put-element-file-204-without-data');
+        $this->createElement($elementId, 'put-element-file-204-without-data', self::TOKEN);
 
         $response = $this->runUploadRequest(
             'PUT',
@@ -130,7 +114,7 @@ class PutElementFileTest extends BaseRequestTestCase
     public function testPutElementFileFailure400(): void
     {
         $elementId = '4d5e6f7a-8b9c-4d0e-1f2a-3b4c5d6e7f8a';
-        $this->createElement($elementId, 'put-element-file-400');
+        $this->createElement($elementId, 'put-element-file-400', self::TOKEN);
 
         $originalFilePath = __DIR__.'/../Asset/example-put-element-file-400-original.bin';
         $this->generateDeterministicFile(77777777, 2048, $originalFilePath);
@@ -181,7 +165,7 @@ class PutElementFileTest extends BaseRequestTestCase
     public function testPutElementFileFailure401(): void
     {
         $elementId = '5e6f7a8b-9c0d-4e1f-2a3b-4c5d6e7f8a9b';
-        $this->createElement($elementId, 'put-element-file-401');
+        $this->createElement($elementId, 'put-element-file-401', self::TOKEN);
 
         $response = $this->runUploadRequest(
             'PUT',
