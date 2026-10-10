@@ -11,6 +11,7 @@ use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
+use App\Service\DeletionService;
 use App\Service\ElementManager;
 use App\Service\S3Service;
 use App\Service\UploadService;
@@ -39,7 +40,7 @@ class UploadServiceTest extends TestCase
     use ProphecyTrait;
 
     /**
-     * @return array{0: UploadService, 1: ObjectProphecy<ElementManager>, 2: ObjectProphecy<Server500LogicErrorExceptionFactory>, 3: ObjectProphecy<S3OperationFactory>, 4: ObjectProphecy<S3Service>, 5: ObjectProphecy<UploadFactory>, 6: ObjectProphecy<CypherEntityManager>}
+     * @return array{0: UploadService, 1: ObjectProphecy<ElementManager>, 2: ObjectProphecy<Server500LogicErrorExceptionFactory>, 3: ObjectProphecy<S3OperationFactory>, 4: ObjectProphecy<S3Service>, 5: ObjectProphecy<UploadFactory>, 6: ObjectProphecy<CypherEntityManager>, 7: ObjectProphecy<DeletionService>}
      */
     private function buildService(
         ?ObjectProphecy $elementManager = null,
@@ -48,6 +49,7 @@ class UploadServiceTest extends TestCase
         ?ObjectProphecy $s3Service = null,
         ?ObjectProphecy $uploadFactory = null,
         ?ObjectProphecy $cypherEntityManager = null,
+        ?ObjectProphecy $deletionService = null,
     ): array {
         $elementManager ??= $this->prophesize(ElementManager::class);
         $server500LogicErrorExceptionFactory ??= $this->prophesize(Server500LogicErrorExceptionFactory::class);
@@ -55,6 +57,7 @@ class UploadServiceTest extends TestCase
         $s3Service ??= $this->prophesize(S3Service::class);
         $uploadFactory ??= $this->prophesize(UploadFactory::class);
         $cypherEntityManager ??= $this->prophesize(CypherEntityManager::class);
+        $deletionService ??= $this->prophesize(DeletionService::class);
 
         $service = new UploadService(
             $elementManager->reveal(),
@@ -63,9 +66,10 @@ class UploadServiceTest extends TestCase
             $s3Service->reveal(),
             $uploadFactory->reveal(),
             $cypherEntityManager->reveal(),
+            $deletionService->reveal(),
         );
 
-        return [$service, $elementManager, $server500LogicErrorExceptionFactory, $fileOperationFactory, $s3Service, $uploadFactory, $cypherEntityManager];
+        return [$service, $elementManager, $server500LogicErrorExceptionFactory, $fileOperationFactory, $s3Service, $uploadFactory, $cypherEntityManager, $deletionService];
     }
 
     /**
@@ -236,9 +240,9 @@ class UploadServiceTest extends TestCase
         $upload = $this->buildUpload(id: $id);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
 
-        [$service, $elementManager] = $this->buildService();
+        [$service, $elementManager, , , , , , $deletionService] = $this->buildService();
         $elementManager->getElementOrFail($id)->willReturn($element)->shouldBeCalledOnce();
-        $elementManager->delete($element)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
+        $deletionService->delete($element)->shouldBeCalledOnce();
 
         $service->deleteUpload($upload->reveal());
     }
@@ -249,12 +253,12 @@ class UploadServiceTest extends TestCase
         $upload = $this->buildUpload(id: $id);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
 
-        [$service, $elementManager, , $fileOperationFactory, $s3Service] = $this->buildService();
+        [$service, $elementManager, , $fileOperationFactory, $s3Service, , , $deletionService] = $this->buildService();
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
         $fileOperationFactory->createFileOperationFromUpload(Argument::cetera())->shouldNotBeCalled();
         $s3Service->deleteFile(Argument::any())->shouldNotBeCalled();
         $elementManager->getElementOrFail($id)->willReturn($element);
-        $elementManager->delete($element)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
+        $deletionService->delete($element)->shouldBeCalledOnce();
 
         $service->deleteUploadAndChunks($upload->reveal());
     }
@@ -265,14 +269,14 @@ class UploadServiceTest extends TestCase
         $upload = $this->buildUpload(id: $id, chunkIds: ['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2']);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
 
-        [$service, $elementManager, , $fileOperationFactory, $s3Service] = $this->buildService();
+        [$service, $elementManager, , $fileOperationFactory, $s3Service, , , $deletionService] = $this->buildService();
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
         foreach ([1, 2] as $chunk) {
             $fileOperationFactory->createFileOperationFromUpload($upload->reveal(), $chunk, 'aaaaaaaaaaaaaaa'.$chunk)->willReturn($fileOperation)->shouldBeCalledOnce();
         }
         $s3Service->deleteFile($fileOperation)->shouldBeCalledTimes(2);
         $elementManager->getElementOrFail($id)->willReturn($element);
-        $elementManager->delete($element)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
+        $deletionService->delete($element)->shouldBeCalledOnce();
 
         $service->deleteUploadAndChunks($upload->reveal());
     }
@@ -324,13 +328,13 @@ class UploadServiceTest extends TestCase
         $elementId = UuidV4::uuid4();
         $uploadId = UuidV4::uuid4();
 
-        [$service, $elementManager, , , , , $cypherEntityManager] = $this->buildService();
+        [$service, $elementManager, , , , , $cypherEntityManager, $deletionService] = $this->buildService();
         $client = $this->prophesize(ClientInterface::class);
         $client->runStatement(Argument::any())->willReturn($this->buildSummarizedResultOf(new CypherMap(['u.id' => $uploadId->toString()])));
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
         $elementManager->getElement(Argument::that(fn (UuidInterface $id) => $id->equals($uploadId)))->willReturn(null);
-        $elementManager->delete(Argument::any())->shouldNotBeCalled();
+        $deletionService->delete(Argument::any())->shouldNotBeCalled();
 
         $service->deleteUploadsTargeting($elementId);
         $this->addToAssertionCount(1);
@@ -342,14 +346,14 @@ class UploadServiceTest extends TestCase
         $uploadId = UuidV4::uuid4();
         $uploadElement = (new NodeElement())->setId($uploadId)->setLabel('Upload');
 
-        [$service, $elementManager, , , , $uploadFactory, $cypherEntityManager] = $this->buildService();
+        [$service, $elementManager, , , , $uploadFactory, $cypherEntityManager, $deletionService] = $this->buildService();
         $client = $this->prophesize(ClientInterface::class);
         $client->runStatement(Argument::any())->willReturn($this->buildSummarizedResultOf(new CypherMap(['u.id' => $uploadId->toString()])));
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
         $elementManager->getElement(Argument::that(fn (UuidInterface $id) => $id->equals($uploadId)))->willReturn($uploadElement);
         $uploadFactory->createUploadFromElement($uploadElement)->willThrow(new Exception('bad upload'));
-        $elementManager->delete(Argument::any())->shouldNotBeCalled();
+        $deletionService->delete(Argument::any())->shouldNotBeCalled();
 
         $service->deleteUploadsTargeting($elementId);
         $this->addToAssertionCount(1);
@@ -362,7 +366,7 @@ class UploadServiceTest extends TestCase
         $uploadElement = (new NodeElement())->setId($uploadId)->setLabel('Upload');
         $upload = $this->buildUpload(id: $uploadId, chunkIds: ['aaaaaaaaaaaaaaa1'])->reveal();
 
-        [$service, $elementManager, , $fileOperationFactory, $s3Service, $uploadFactory, $cypherEntityManager] = $this->buildService();
+        [$service, $elementManager, , $fileOperationFactory, $s3Service, $uploadFactory, $cypherEntityManager, $deletionService] = $this->buildService();
         $client = $this->prophesize(ClientInterface::class);
         $client->runStatement(Argument::any())->willReturn($this->buildSummarizedResultOf(new CypherMap(['u.id' => $uploadId->toString()])));
         $cypherEntityManager->getClient()->willReturn($client->reveal());
@@ -375,7 +379,7 @@ class UploadServiceTest extends TestCase
         $s3Service->deleteFile($fileOperation)->shouldBeCalledOnce();
 
         $elementManager->getElementOrFail($uploadId)->willReturn($uploadElement);
-        $elementManager->delete($uploadElement)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
+        $deletionService->delete($uploadElement)->shouldBeCalledOnce();
 
         $service->deleteUploadsTargeting($elementId);
     }

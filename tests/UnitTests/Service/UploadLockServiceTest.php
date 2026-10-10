@@ -25,7 +25,7 @@ class UploadLockServiceTest extends TestCase
         $uploadId = Uuid::uuid4();
         $redis = $this->prophesize(Client::class);
         $redis->set(
-            'upload-lock:'.$uploadId->toString(),
+            'lock:upload:'.$uploadId->toString(),
             Argument::that(fn ($token) => is_string($token) && 32 === strlen($token)),
             'PX',
             UploadLockService::TTL_IN_MILLISECONDS,
@@ -52,7 +52,7 @@ class UploadLockServiceTest extends TestCase
         $redis->eval(
             Argument::that(fn ($script) => str_contains($script, 'get') && str_contains($script, 'del')),
             1,
-            'upload-lock:'.$uploadId->toString(),
+            'lock:upload:'.$uploadId->toString(),
             'my-token'
         )->shouldBeCalledOnce()->willReturn(1);
 

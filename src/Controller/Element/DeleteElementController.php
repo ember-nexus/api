@@ -9,6 +9,7 @@ use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\DeletionService;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\UploadService;
@@ -28,6 +29,7 @@ class DeleteElementController extends AbstractController
         private AccessChecker $accessChecker,
         private UploadService $uploadService,
         private ElementFileDeletionService $elementFileDeletionService,
+        private DeletionService $deletionService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -53,12 +55,16 @@ class DeleteElementController extends AbstractController
         $element = $this->elementManager->getElementOrFail($elementId);
         $fileOperations = $this->elementFileDeletionService->getFileOperationsForDeletionOfElement($element);
 
+        // intentionally not clearing any FileCreationLockService/UploadLockService Redis lock for this element here:
+        // both locks have short TTLs (FileCreationLockService::TTL_IN_MILLISECONDS / UploadLockService::TTL_IN_MILLISECONDS)
+        // and are only held for the duration of a single request, so a lock surviving this deletion by a few minutes
+        // at most is not worth the added complexity of reaching into Redis from the delete path
+
         // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
         $this->uploadService->deleteUploadsTargeting($elementId);
         $this->elementManager->flush();
 
-        $this->elementManager->delete($element);
-        $this->elementManager->flush();
+        $this->deletionService->delete($element);
 
         $this->elementFileDeletionService->deleteFiles($fileOperations);
 

@@ -11,7 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
- * `POST /<id>/file` creates the file: it reserves the element in Redis (`file:create:<id>`) while it runs and fails if
+ * `POST /<id>/file` creates the file: it reserves the element in Redis (`lock:file-creation:<id>`) while it runs and fails if
  * the element has an upload in progress. `PUT /<id>/file` does not take the lock, but respects it.
  */
 class PostFileCreationLockTest extends BaseRequestTestCase

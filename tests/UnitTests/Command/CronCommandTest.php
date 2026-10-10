@@ -11,6 +11,7 @@ use App\Command\CronCommand;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\CronExecutionGateService;
+use App\Service\DeletionService;
 use App\Service\ElementManager;
 use App\Service\ExpiredUploadDeletionAttemptService;
 use App\Service\QueueService;
@@ -66,6 +67,7 @@ class CronCommandTest extends TestCase
             $this->prophesize(ElementManager::class)->reveal(),
             $this->prophesize(UploadFactory::class)->reveal(),
             $this->prophesize(UploadService::class)->reveal(),
+            $this->prophesize(DeletionService::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
             $this->prophesize(ExpiredUploadDeletionAttemptService::class)->reveal(),
             $this->prophesize(LoggerInterface::class)->reveal(),
@@ -172,6 +174,7 @@ class CronCommandTest extends TestCase
             $this->prophesize(ElementManager::class)->reveal(),
             $this->prophesize(UploadFactory::class)->reveal(),
             $this->prophesize(UploadService::class)->reveal(),
+            $this->prophesize(DeletionService::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
             $this->prophesize(ExpiredUploadDeletionAttemptService::class)->reveal(),
             $this->prophesize(LoggerInterface::class)->reveal(),

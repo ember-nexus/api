@@ -6,6 +6,7 @@ namespace App\Controller\User;
 
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Security\AuthProvider;
+use App\Service\DeletionService;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\UploadService;
@@ -22,6 +23,7 @@ class DeleteTokenController extends AbstractController
         private AuthProvider $authProvider,
         private UploadService $uploadService,
         private ElementFileDeletionService $elementFileDeletionService,
+        private DeletionService $deletionService,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
     ) {
     }
@@ -54,8 +56,7 @@ class DeleteTokenController extends AbstractController
         $this->uploadService->deleteUploadsTargeting($tokenId);
         $this->elementManager->flush();
 
-        $this->elementManager->delete($tokenElement);
-        $this->elementManager->flush();
+        $this->deletionService->delete($tokenElement);
 
         $this->elementFileDeletionService->deleteFiles($fileOperations);
 

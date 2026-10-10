@@ -26,7 +26,7 @@ class FileCreationLockServiceTest extends TestCase
         $elementId = Uuid::uuid4();
         $redis = $this->prophesize(Client::class);
         $redis->set(
-            'file:create:'.$elementId->toString(),
+            'lock:file-creation:'.$elementId->toString(),
             Argument::that(fn ($token) => is_string($token) && 32 === strlen($token)),
             'PX',
             900000,
@@ -49,7 +49,7 @@ class FileCreationLockServiceTest extends TestCase
     {
         $elementId = Uuid::uuid4();
         $redis = $this->prophesize(Client::class);
-        $redis->exists('file:create:'.$elementId->toString())->shouldBeCalledOnce()->willReturn($existsResult);
+        $redis->exists('lock:file-creation:'.$elementId->toString())->shouldBeCalledOnce()->willReturn($existsResult);
 
         $this->assertSame($expected, (new FileCreationLockService($redis->reveal(), new RedisKeyFactory()))->isLocked($elementId));
     }
@@ -69,7 +69,7 @@ class FileCreationLockServiceTest extends TestCase
         $redis->eval(
             Argument::that(fn ($script) => str_contains($script, 'get') && str_contains($script, 'del')),
             1,
-            'file:create:'.$elementId->toString(),
+            'lock:file-creation:'.$elementId->toString(),
             'my-token'
         )->shouldBeCalledOnce()->willReturn(1);
 

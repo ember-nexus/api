@@ -7,6 +7,7 @@ namespace App\Command\Cron;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\CronExecutionGateService;
+use App\Service\DeletionService;
 use App\Service\ElementManager;
 use App\Service\ExpiredUploadDeletionAttemptService;
 use App\Service\UploadService;
@@ -41,6 +42,7 @@ class DeleteExpiredUploadsCommand extends Command
         private ElementManager $elementManager,
         private UploadFactory $uploadFactory,
         private UploadService $uploadService,
+        private DeletionService $deletionService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private ExpiredUploadDeletionAttemptService $expiredUploadDeletionAttemptService,
         private LoggerInterface $logger,
@@ -132,8 +134,7 @@ class DeleteExpiredUploadsCommand extends Command
         try {
             $uploadElement = $this->elementManager->getElement(Uuid::fromString($uploadId));
             if (null !== $uploadElement) {
-                $this->elementManager->delete($uploadElement);
-                $this->elementManager->flush();
+                $this->deletionService->delete($uploadElement);
             }
             $this->expiredUploadDeletionAttemptService->clear($uploadId);
             $outcome = 'The upload node was removed, chunks in S3 may be left behind.';
