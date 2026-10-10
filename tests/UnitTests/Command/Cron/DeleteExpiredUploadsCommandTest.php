@@ -8,6 +8,7 @@ use App\Command\Cron\DeleteExpiredUploadsCommand;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\CronExecutionGateService;
+use App\Service\CronTimeBudgetService;
 use App\Service\DeletionService;
 use App\Service\ElementManager;
 use App\Service\ExpiredUploadDeletionAttemptService;
@@ -81,8 +82,12 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             $attemptService = $attemptServiceProphecy->reveal();
         }
 
+        $cronTimeBudgetService = $this->prophesize(CronTimeBudgetService::class);
+        $cronTimeBudgetService->getDeadline()->willReturn(null);
+
         return new DeleteExpiredUploadsCommand(
             $cronExecutionGateService->reveal(),
+            $cronTimeBudgetService->reveal(),
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager ?? $this->prophesize(ElementManager::class)->reveal(),
@@ -118,6 +123,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
         $command = new DeleteExpiredUploadsCommand(
             $cronExecutionGateService->reveal(),
+            $this->prophesize(CronTimeBudgetService::class)->reveal(),
             $this->prophesize(EmberNexusConfiguration::class)->reveal(),
             $this->prophesize(CypherEntityManager::class)->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),

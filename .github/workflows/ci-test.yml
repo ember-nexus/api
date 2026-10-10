@@ -236,12 +236,14 @@ jobs:
       - name: Feature Test
         run: |
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature"
-      - name: Run cron once manually
-        # Smoke test only (business logic is unit/feature-tested elsewhere): proves `cron` actually runs
-        # end-to-end against the prod image the way the real scheduler invokes it, i.e. with a tty, which is
+      - name: Run cron jobs once manually
+        # Smoke test only (business logic is unit/feature-tested elsewhere): proves the cron jobs actually run
+        # end-to-end against the prod image the way the real scheduler invokes them, i.e. with a tty, which is
         # required here since DISABLE_CRON=true on the containers would otherwise make a tty-less exec no-op.
         run: |
-          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron
+          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron:delete-expired-uploads
+          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron:reindex-files
+          docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron:update-ownership
       - name: Collect docker logs
         if: always()
         run: |

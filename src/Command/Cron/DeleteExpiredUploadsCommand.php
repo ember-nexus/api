@@ -7,6 +7,7 @@ namespace App\Command\Cron;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\CronExecutionGateService;
+use App\Service\CronTimeBudgetService;
 use App\Service\DeletionService;
 use App\Service\ElementManager;
 use App\Service\ExpiredUploadDeletionAttemptService;
@@ -37,6 +38,7 @@ class DeleteExpiredUploadsCommand extends Command
 
     public function __construct(
         private CronExecutionGateService $cronExecutionGateService,
+        private CronTimeBudgetService $cronTimeBudgetService,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private ElementManager $elementManager,
@@ -60,6 +62,11 @@ class DeleteExpiredUploadsCommand extends Command
             $this->io->finalMessage('Cron is disabled; this command terminates early.');
 
             return Command::SUCCESS;
+        }
+
+        $deadline = $this->cronTimeBudgetService->getDeadline();
+        if (null === $deadline) {
+            $this->io->writeln('  Running interactively; no time limit applied.');
         }
 
         $deletedCount = 0;
@@ -86,6 +93,11 @@ class DeleteExpiredUploadsCommand extends Command
                         ++$failedCount;
                     }
                 }
+            }
+            if (null !== $deadline && time() >= $deadline) {
+                // remaining expired uploads (if any) are left for the next scheduled run; nothing to undo here,
+                // every upload up to this point was already fully handled above
+                break;
             }
             // keyset pagination: the id strictly increases, so every upload is visited once and the loop always ends
         } while (count($expiredUploadIds) >= self::PAGE_SIZE);

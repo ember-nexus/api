@@ -43,29 +43,53 @@ class QueueService
         $queue = $queueType->value;
         $channel = $this->declareQueue($channel, $queueType);
         $jsonMessage = \Safe\json_encode($eventData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $properties = $this->isDurable($queueType) ? ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT] : [];
+        $properties = ['timestamp' => time()];
+        if ($this->isDurable($queueType)) {
+            $properties['delivery_mode'] = AMQPMessage::DELIVERY_MODE_PERSISTENT;
+        }
         $message = new AMQPMessage($jsonMessage, $properties);
         $channel->basic_publish($message, '', $queue);
         $channel->close();
     }
 
     /**
-     * Drains all messages currently waiting in the given queue, calling $handler for each decoded message.
-     * Messages are acknowledged once $handler returns without throwing. A message which fails (or can not be decoded) is
-     * logged, republished at the end of the queue with an increased try counter (after the queue was drained, so it is
-     * not consumed again in this run) and acknowledged; after MAX_TRIES failed tries it is dropped and this is logged.
+     * Drains messages currently waiting in the given queue, calling $handler for each decoded message. Messages are
+     * acknowledged once $handler returns without throwing. A message which fails (or can not be decoded) is logged,
+     * republished at the end of the queue with an increased try counter and a fresh timestamp (after the queue was
+     * drained, so it is not consumed again in this run) and acknowledged; after MAX_TRIES failed tries it is dropped
+     * and this is logged.
+     *
+     * Consumption stops, without touching the message (`basic_nack` with requeue, no try counter change), as soon as
+     * a message published after this call started is reached: since a single queue is strictly FIFO, that message
+     * (and everything after it) was not part of the backlog this call set out to drain, so leaving it for a later
+     * run (or a concurrently running instance) is correct regardless of how many other consumers are also draining
+     * this queue right now. $deadline (a unix timestamp, or null to never stop early - e.g. for an interactive,
+     * unattended-by-nobody invocation) is checked before fetching each message, for the same reason: whatever has
+     * not been fetched yet is simply left in the queue, untouched.
+     *
      * Returns the number of successfully processed messages.
      */
-    public function consumeQueue(RabbitMQQueueType $queueType, callable $handler): int
+    public function consumeQueue(RabbitMQQueueType $queueType, callable $handler, ?int $deadline = null): int
     {
         $channel = $this->AMQPStreamConnection->channel();
         $queue = $queueType->value;
         $channel = $this->declareQueue($channel, $queueType);
 
+        $runStart = time();
         $processedMessages = 0;
         /** @var array<array{body: string, tries: int}> $messagesToRequeue */
         $messagesToRequeue = [];
-        while (null !== ($message = $channel->basic_get($queue))) {
+        while (null === $deadline || time() < $deadline) {
+            $message = $channel->basic_get($queue);
+            if (null === $message) {
+                break;
+            }
+            if ($this->getMessageTimestamp($message) >= $runStart) {
+                // reached a message published after this run started: the backlog from before this run has been
+                // fully drained (by this instance, or by concurrently running ones), give it back untouched
+                $message->nack(true);
+                break;
+            }
             try {
                 $eventData = \Safe\json_decode($message->getBody(), true);
                 $handler($eventData);
@@ -99,6 +123,9 @@ class QueueService
         foreach ($messagesToRequeue as $messageToRequeue) {
             $properties = [
                 'application_headers' => new AMQPTable([self::TRY_COUNT_HEADER => $messageToRequeue['tries']]),
+                // a fresh timestamp on every retry republish is intentional, not an oversight: it only means this
+                // message becomes eligible for a later run's backlog-cutoff, never the one currently in progress
+                'timestamp' => time(),
             ];
             if ($isDurable) {
                 $properties['delivery_mode'] = AMQPMessage::DELIVERY_MODE_PERSISTENT;
@@ -123,6 +150,20 @@ class QueueService
         $tries = $headers->getNativeData()[self::TRY_COUNT_HEADER] ?? 0;
 
         return is_int($tries) ? $tries : 0;
+    }
+
+    /**
+     * Missing timestamp (e.g. a message published before this property existed) is treated as old enough to
+     * process, not as "just published" - the safe default, and self-resolving once queues are recreated.
+     */
+    private function getMessageTimestamp(AMQPMessage $message): int
+    {
+        if (!$message->has('timestamp')) {
+            return 0;
+        }
+        $timestamp = $message->get('timestamp');
+
+        return is_int($timestamp) ? $timestamp : 0;
     }
 
     private function isDurable(RabbitMQQueueType $queueType): bool
