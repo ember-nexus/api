@@ -22,7 +22,7 @@ class PostElementFileTest extends BaseRequestTestCase
     public function testPostElementFileSuccess201(): void
     {
         $elementId = 'a4dfda49-96db-4b58-95f4-4a6cae835674';
-        $this->createElement($elementId, 'post-element-file-201', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'post-element-file-201', self::TOKEN);
 
         $filePath = __DIR__.'/../Asset/example-post-element-file-201.bin';
         $this->generateDeterministicFile(11111111, 2048, $filePath);
@@ -52,7 +52,7 @@ class PostElementFileTest extends BaseRequestTestCase
     public function testPostElementFileSuccess204WithInitialData(): void
     {
         $elementId = '90db2934-3f27-4a37-8e05-a03ea3e5e5f2';
-        $this->createElement($elementId, 'post-element-file-204-with-data', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'post-element-file-204-with-data', self::TOKEN);
 
         // non-final chunks must meet the server's configured minimum chunk size (advertised via 'Upload-Limit')
         $filePath = __DIR__.'/../Asset/example-post-element-file-204-with-data.bin';
@@ -89,7 +89,7 @@ class PostElementFileTest extends BaseRequestTestCase
     public function testPostElementFileSuccess204WithoutInitialData(): void
     {
         $elementId = '2b6a4c9f-2c9d-4b2a-9f1b-3b8ea3c7f6a1';
-        $this->createElement($elementId, 'post-element-file-204-without-data', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'post-element-file-204-without-data', self::TOKEN);
 
         $response = $this->runUploadRequest(
             'POST',
@@ -114,7 +114,7 @@ class PostElementFileTest extends BaseRequestTestCase
     public function testPostElementFileFailure400(): void
     {
         $elementId = 'd15c34e0-4c8a-4d1b-9f5c-7e3a1b2c4d5e';
-        $this->createElement($elementId, 'post-element-file-400', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'post-element-file-400', self::TOKEN);
 
         $filePath = __DIR__.'/../Asset/example-post-element-file-400.bin';
         $this->generateDeterministicFile(33333333, 2048, $filePath);
@@ -153,7 +153,7 @@ class PostElementFileTest extends BaseRequestTestCase
     public function testPostElementFileFailure401(): void
     {
         $elementId = 'f3a1b2c4-5d6e-4f7a-8b9c-0d1e2f3a4b5c';
-        $this->createElement($elementId, 'post-element-file-401', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'post-element-file-401', self::TOKEN);
 
         $response = $this->runUploadRequest(
             'POST',
@@ -208,7 +208,7 @@ class PostElementFileTest extends BaseRequestTestCase
     public function testPostElementFileFailure409(): void
     {
         $elementId = '6b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d5e';
-        $this->createElement($elementId, 'post-element-file-409', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'post-element-file-409', self::TOKEN);
 
         $filePath = __DIR__.'/../Asset/example-post-element-file-409.bin';
         $this->generateDeterministicFile(44444444, 2048, $filePath);

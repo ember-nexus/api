@@ -47,7 +47,7 @@ class PatchUploadTest extends BaseRequestTestCase
     public function testPatchUploadSuccess204IntermediateChunk(): void
     {
         $elementId = 'c2d3e4f5-6a7b-4c8d-9e0f-1a2b3c4d5e6f';
-        $this->createElement($elementId, 'patch-upload-204-intermediate', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'patch-upload-204-intermediate', self::TOKEN);
 
         // three chunks, so the second PATCH (tested here) is still an intermediate one, not the final chunk
         $filePath = __DIR__.'/../Asset/example-patch-upload-204-intermediate.bin';
@@ -95,7 +95,7 @@ class PatchUploadTest extends BaseRequestTestCase
     public function testPatchUploadSuccess204FinalChunk(): void
     {
         $elementId = 'd3e4f5a6-7b8c-4d9e-0f1a-2b3c4d5e6f7a';
-        $this->createElement($elementId, 'patch-upload-204-final', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'patch-upload-204-final', self::TOKEN);
         [$uploadId, $chunks] = $this->createResumableUploadWithOneChunkRemaining($elementId, 'example-patch-upload-204-final.bin');
 
         $secondChunk = \Safe\fopen($chunks[1], 'r');
@@ -124,7 +124,7 @@ class PatchUploadTest extends BaseRequestTestCase
     public function testPatchUploadFailure400(): void
     {
         $elementId = 'e4f5a6b7-8c9d-4e0f-1a2b-3c4d5e6f7a8b';
-        $this->createElement($elementId, 'patch-upload-400', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'patch-upload-400', self::TOKEN);
         [$uploadId, $chunks] = $this->createResumableUploadWithOneChunkRemaining($elementId, 'example-patch-upload-400.bin');
 
         $bogusHash = str_repeat('00', 32);
@@ -163,7 +163,7 @@ class PatchUploadTest extends BaseRequestTestCase
     public function testPatchUploadFailure409(): void
     {
         $elementId = 'f5a6b7c8-9d0e-4f1a-2b3c-4d5e6f7a8b9c';
-        $this->createElement($elementId, 'patch-upload-409', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'patch-upload-409', self::TOKEN);
         [$uploadId, $chunks] = $this->createResumableUploadWithOneChunkRemaining($elementId, 'example-patch-upload-409.bin');
 
         $incorrectOffset = self::CHUNK_SIZE + 1;
@@ -199,7 +199,7 @@ class PatchUploadTest extends BaseRequestTestCase
     public function testPatchUploadFailure401(): void
     {
         $elementId = 'a6b7c8d9-0e1f-4a2b-3c4d-5e6f7a8b9c0d';
-        $this->createElement($elementId, 'patch-upload-401', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'patch-upload-401', self::TOKEN);
         [$uploadId, $chunks] = $this->createResumableUploadWithOneChunkRemaining($elementId, 'example-patch-upload-401.bin');
 
         $secondChunk = \Safe\fopen($chunks[1], 'r');

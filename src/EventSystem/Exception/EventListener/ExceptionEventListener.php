@@ -81,7 +81,10 @@ class ExceptionEventListener
         if ($this->kernel->isDebug()) {
             $data['exception'] = [
                 'message' => $originalException->getMessage(),
-                'trace' => $originalException->getTrace(),
+                // getTrace() exposes the live call arguments of every frame, any of which (e.g. a non-backed enum
+                // instance) can make json_encode() throw and take down the error response itself; the string
+                // form carries the same debugging value (file/line/function per frame) without that risk
+                'trace' => $originalException->getTraceAsString(),
             ];
         }
         // getMessage() is always empty (ProblemJsonException never forwards it to the parent Exception), getDetail()

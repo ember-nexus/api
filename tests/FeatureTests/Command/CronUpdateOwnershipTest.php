@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\FeatureTests\Command;
 
+use DateTimeImmutable;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 use PHPUnit\Framework\Attributes\Group;
@@ -130,22 +131,34 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
      * set up a precondition (see e.g. BaseCronTestCase::setUploadProperty()). The relation actually under test in
      * each scenario below is always created afterwards through the real HTTP endpoint, so it does exercise the
      * event listener/queue/command end to end.
+     *
+     * A minimal Elasticsearch stub document is indexed for the relation too (empty body; existence is all that
+     * matters here): the real app always creates one alongside the Neo4j relation, and each test's cleanup later
+     * deletes this user through the real HTTP endpoint, which cascades to every remaining relation - including
+     * this one - and 500s if the corresponding document is missing instead of merely empty.
      */
-    private function grantAdminOwnershipOf(string $userId): void
+    private function grantOwnershipOf(string $userId): void
     {
-        $adminUserId = $this->getUserIdForToken(self::TOKEN);
+        $ownerUserId = $this->getUserIdForToken(self::TOKEN);
         $result = $this->getCypherClient()->run(
-            'MATCH (admin:User {id: $adminUserId}), (target:User {id: $userId}) '.
-            'CREATE (admin)-[r:OWNS {id: randomUUID(), created: datetime(), updated: datetime()}]->(target) '.
+            'MATCH (owner:User {id: $ownerUserId}), (target:User {id: $userId}) '.
+            'CREATE (owner)-[r:OWNS {id: randomUUID(), created: datetime(), updated: datetime()}]->(target) '.
             'RETURN r.id AS id',
-            ['adminUserId' => $adminUserId, 'userId' => $userId]
+            ['ownerUserId' => $ownerUserId, 'userId' => $userId]
         );
-        $this->assertNotNull($result->first()->get('id'));
+        $relationId = $result->first()->get('id');
+        $this->assertNotNull($relationId);
+        $now = (new DateTimeImmutable())->format(DateTimeImmutable::ATOM);
+        $this->getElasticsearchClient()->index([
+            'index' => 'relation_owns',
+            'id' => $relationId,
+            'body' => ['created' => $now, 'updated' => $now],
+        ]);
     }
 
     /**
      * Creating a relation requires CREATE access on its start and READ access on its end; defaults to self::TOKEN,
-     * which has that for anything it (directly or transitively, via grantAdminOwnershipOf()) owns.
+     * which has that for anything it (directly or transitively, via grantOwnershipOf()) owns.
      */
     private function createRelation(string $type, string $startId, string $endId, ?string $token = null): string
     {
@@ -209,7 +222,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $this->drainQueue();
 
         [$newUserId, $newUserToken] = $this->registerUserWithToken('owns');
-        $this->grantAdminOwnershipOf($newUserId);
+        $this->grantOwnershipOf($newUserId);
         $elementId = $this->createNode('cron-update-ownership-owns-target');
 
         $this->assertSearchAccess($newUserToken, $elementId, false);
@@ -262,7 +275,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $this->drainQueue();
 
         [$memberUserId] = $this->registerUserWithToken('group-member');
-        $this->grantAdminOwnershipOf($memberUserId);
+        $this->grantOwnershipOf($memberUserId);
 
         $groupNodeId = $this->getUuidFromLocation($this->runPostRequest('/', self::TOKEN, [
             'type' => 'Group',
@@ -296,9 +309,9 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $this->drainQueue();
 
         [$memberUserId, $memberUserToken] = $this->registerUserWithToken('group-search-access-member');
-        $this->grantAdminOwnershipOf($memberUserId);
+        $this->grantOwnershipOf($memberUserId);
 
-        // created by the admin, not by the member: the member has no OWNS/CREATED relation to it whatsoever
+        // created by the owner, not by the member: the member has no OWNS/CREATED relation to it whatsoever
         $elementId = $this->createNode('cron-update-ownership-group-search-access-target');
         $this->assertSearchAccess($memberUserToken, $elementId, false);
 
@@ -336,7 +349,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     {
         $this->drainQueue();
         [$newUserId] = $this->registerUserWithToken('disabled');
-        $this->grantAdminOwnershipOf($newUserId);
+        $this->grantOwnershipOf($newUserId);
         $elementId = $this->createNode('cron-update-ownership-disabled');
         $this->createRelation('OWNS', $newUserId, $elementId);
         $messageCount = $this->getQueueMessageCount();
@@ -370,7 +383,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $this->drainQueue();
         $this->publishRawMessage('this is not json');
         [$newUserId] = $this->registerUserWithToken('malformed');
-        $this->grantAdminOwnershipOf($newUserId);
+        $this->grantOwnershipOf($newUserId);
         $elementId = $this->createNode('cron-update-ownership-after-malformed-message');
         $this->createRelation('OWNS', $newUserId, $elementId);
 

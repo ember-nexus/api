@@ -84,7 +84,7 @@ class QueueService
             if (null === $message) {
                 break;
             }
-            if ($this->getMessageTimestamp($message) >= $runStart) {
+            if ($this->getMessageTimestamp($message) > $runStart) {
                 // reached a message published after this run started: the backlog from before this run has been
                 // fully drained (by this instance, or by concurrently running ones), give it back untouched
                 $message->nack(true);

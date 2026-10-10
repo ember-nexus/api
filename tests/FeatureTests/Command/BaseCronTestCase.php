@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\FeatureTests\Command;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
+use Elastic\Elasticsearch\Client as ElasticsearchClient;
+use Elastic\Elasticsearch\ClientBuilder as ElasticsearchClientBuilder;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use Predis\Client as RedisClient;
 
@@ -20,6 +22,11 @@ abstract class BaseCronTestCase extends BaseRequestTestCase
     protected function getRedisClient(): RedisClient
     {
         return new RedisClient($_ENV['REDIS_AUTH']);
+    }
+
+    protected function getElasticsearchClient(): ElasticsearchClient
+    {
+        return ElasticsearchClientBuilder::create()->setHosts([$_ENV['ELASTIC_AUTH']])->build();
     }
 
     /**

@@ -42,7 +42,7 @@ class DeleteUploadTest extends BaseRequestTestCase
     public function testDeleteUploadSuccess204(): void
     {
         $elementId = 'a0b1c2d3-4e5f-4a6b-7c8d-9e0f1a2b3c4d';
-        $this->createElement($elementId, 'delete-upload-204', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'delete-upload-204', self::TOKEN);
         $uploadId = $this->createResumableUpload($elementId, 'example-delete-upload-204.bin');
 
         $response = $this->runDeleteRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
@@ -59,7 +59,7 @@ class DeleteUploadTest extends BaseRequestTestCase
     public function testDeleteUploadFailure401(): void
     {
         $elementId = 'b1c2d3e4-5f6a-4b7c-8d9e-0f1a2b3c4d5e';
-        $this->createElement($elementId, 'delete-upload-401', self::TOKEN);
+        $this->createDocumentedElement($elementId, 'delete-upload-401', self::TOKEN);
         $uploadId = $this->createResumableUpload($elementId, 'example-delete-upload-401.bin');
 
         $response = $this->runDeleteRequest(sprintf('/upload/%s', $uploadId), 'thisTokenDoesNotExist');
