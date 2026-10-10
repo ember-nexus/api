@@ -39,6 +39,9 @@ class BackupCreateCommand extends Command
     private int $nodeCount = 0;
     private int $relationCount = 0;
     private int $fileCount = 0;
+    private int $skippedNodeCount = 0;
+    private int $skippedRelationCount = 0;
+    private int $skippedFileCount = 0;
     private string $backupName = '';
     private int $pageSize = 10;
     private bool $prettyPrint = false;
@@ -114,9 +117,9 @@ class BackupCreateCommand extends Command
     {
         $data = [
             'backupCreated' => (new DateTime())->format('Y-m-d H:i:s e'),
-            'nodeCount' => $this->nodeCount,
-            'relationCount' => $this->relationCount,
-            'fileCount' => $this->fileCount,
+            'nodeCount' => $this->nodeCount - $this->skippedNodeCount,
+            'relationCount' => $this->relationCount - $this->skippedRelationCount,
+            'fileCount' => $this->fileCount - $this->skippedFileCount,
             'hostname' => gethostname(),
             'version' => $this->bag->get('version'),
         ];
@@ -164,7 +167,11 @@ class BackupCreateCommand extends Command
             foreach ($nodeIds as $nodeId) {
                 $node = $this->elementManager->getNode($nodeId);
                 if (null === $node) {
-                    throw new LogicException('Node can not be null');
+                    // node was deleted concurrently while the backup was running; skip it.
+                    // $this->nodeCount is left untouched since getNodePath() derives the sharding
+                    // depth from it, which must stay stable across the whole run.
+                    ++$this->skippedNodeCount;
+                    continue;
                 }
                 $data = $this->elementToRawService->elementToRaw($node, false);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
@@ -179,7 +186,7 @@ class BackupCreateCommand extends Command
         $progressBar?->clear();
         $this->io->stopSection(sprintf(
             'Successfully backed up <info>%d</info> nodes.',
-            $this->nodeCount
+            $this->nodeCount - $this->skippedNodeCount
         ));
     }
 
@@ -219,7 +226,11 @@ class BackupCreateCommand extends Command
             foreach ($relationIds as $relationId) {
                 $relation = $this->elementManager->getRelation($relationId);
                 if (null === $relation) {
-                    throw new LogicException('Relation can not be null');
+                    // relation was deleted concurrently while the backup was running; skip it.
+                    // $this->relationCount is left untouched since getRelationPath() derives the
+                    // sharding depth from it, which must stay stable across the whole run.
+                    ++$this->skippedRelationCount;
+                    continue;
                 }
                 $data = $this->elementToRawService->elementToRaw($relation, false);
                 $json = \Safe\json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | ($this->prettyPrint ? JSON_PRETTY_PRINT : 0));
@@ -234,7 +245,7 @@ class BackupCreateCommand extends Command
         $progressBar?->clear();
         $this->io->stopSection(sprintf(
             'Successfully backed up <info>%d</info> relations.',
-            $this->relationCount
+            $this->relationCount - $this->skippedRelationCount
         ));
     }
 
@@ -285,6 +296,10 @@ class BackupCreateCommand extends Command
             $element = $this->elementManager->getElement($elementId);
 
             if (null === $element) {
+                // element was deleted concurrently while the backup was running; skip it.
+                // $this->fileCount is left untouched since getFilePath() derives the sharding
+                // depth from it, which must stay stable across the whole run.
+                ++$this->skippedFileCount;
                 $progressBar?->advance();
                 continue;
             }
@@ -304,7 +319,7 @@ class BackupCreateCommand extends Command
         $progressBar?->clear();
         $this->io->stopSection(sprintf(
             'Successfully backed up <info>%d</info> files.',
-            $this->fileCount
+            $this->fileCount - $this->skippedFileCount
         ));
     }
 

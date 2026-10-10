@@ -55,6 +55,7 @@ class BackupFetchCommand extends Command
         $this->io->title('Backup Fetch');
 
         $this->checkBackupNameIsAvailable($input->getArgument('name'), $input->getOption('force'));
+        $source = $this->checkSourceIsHttpOrHttps($input->getArgument('source'));
 
         $this->io->startSection('Downloading and inspecting archive');
         $tempFilePath = sprintf(
@@ -62,7 +63,7 @@ class BackupFetchCommand extends Command
             sys_get_temp_dir(),
             uniqid()
         );
-        file_put_contents($tempFilePath, file_get_contents($input->getArgument('source')));
+        file_put_contents($tempFilePath, file_get_contents($source));
         $fileSize = filesize($tempFilePath);
         if (!$fileSize) {
             $fileSize = 0;
@@ -201,7 +202,7 @@ class BackupFetchCommand extends Command
             $progressBar?->advance();
 
             if ($item->isDir()) {
-                $manager->createDirectory(sprintf('dest://%s/%s/%s', $destinationPath, $itemDir, $itemName));
+                $manager->createDirectory(sprintf('dest://%s%s/%s', $destinationPath, $itemDir, $itemName));
             }
         }
         $progressBar?->finish();
@@ -257,5 +258,15 @@ class BackupFetchCommand extends Command
             $this->backupStorage->deleteDirectory($name);
         }
         $this->backupStorage->createDirectory($name);
+    }
+
+    private function checkSourceIsHttpOrHttps(string $source): string
+    {
+        $scheme = parse_url($source, PHP_URL_SCHEME);
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            throw new Exception(sprintf("Source must be a HTTP(S) URL, got '%s'.", $source));
+        }
+
+        return $source;
     }
 }

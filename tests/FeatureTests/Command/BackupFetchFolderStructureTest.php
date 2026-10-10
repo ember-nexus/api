@@ -6,6 +6,7 @@ namespace App\Tests\FeatureTests\Command;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Symfony\Component\Process\Process;
 use ZipArchive;
 
 /**
@@ -37,16 +38,29 @@ class BackupFetchFolderStructureTest extends BaseRequestTestCase
         unlink($zipPath);
     }
 
+    /**
+     * `backup:fetch` only accepts HTTP(S) sources, so the fixture ZIP is served over a local built-in PHP
+     * webserver rather than being passed as a filesystem path.
+     */
     private function runBackupFetchCommand(string $backupName, string $zipPath): void
     {
-        $command = sprintf(
-            'php bin/console backup:fetch %s %s --force',
-            escapeshellarg($backupName),
-            escapeshellarg($zipPath)
-        );
-        $resultCode = 0;
-        \Safe\exec($command, result_code: $resultCode);
-        $this->assertSame(0, $resultCode, sprintf('Command should succeed: %s', $command));
+        $port = random_int(20000, 60000);
+        $server = new Process(['php', '-S', sprintf('127.0.0.1:%d', $port), '-t', dirname($zipPath)]);
+        $server->start();
+        usleep(300000);
+
+        try {
+            $command = sprintf(
+                'php bin/console backup:fetch %s %s --force',
+                escapeshellarg($backupName),
+                escapeshellarg(sprintf('http://127.0.0.1:%d/%s', $port, basename($zipPath)))
+            );
+            $resultCode = 0;
+            \Safe\exec($command, result_code: $resultCode);
+            $this->assertSame(0, $resultCode, sprintf('Command should succeed: %s', $command));
+        } finally {
+            $server->stop();
+        }
     }
 
     private function assertNestedFileWasExtractedCorrectly(string $backupName): void
