@@ -35,7 +35,7 @@ class EtagService
 
     public function setCurrentRequestEtagFromRequestAndEtagType(Request $request, EtagType $etagType): static
     {
-        if (EtagType::INDEX_COLLECTION == $etagType) {
+        if (EtagType::INDEX_COLLECTION === $etagType) {
             $event = new IndexCollectionEtagEvent($this->authProvider->getUserId());
         } else {
             if (!$request->attributes->has('id')) {
@@ -77,11 +77,12 @@ class EtagService
         if (in_array($request->getMethod(), ['GET', 'HEAD'], true)) {
             return AccessType::READ;
         }
-        if (EtagType::ELEMENT === $etagType && 'DELETE' === $request->getMethod()) {
-            return AccessType::DELETE;
-        }
 
-        return AccessType::UPDATE;
+        return match ($etagType) {
+            EtagType::ELEMENT => 'DELETE' === $request->getMethod() ? AccessType::DELETE : AccessType::UPDATE,
+            EtagType::FILE => AccessType::UPDATE,
+            EtagType::CHILDREN_COLLECTION, EtagType::PARENTS_COLLECTION, EtagType::RELATED_COLLECTION, EtagType::INDEX_COLLECTION => throw new Exception(sprintf('Etag type %s does not support non-safe HTTP methods.', $etagType->value)),
+        };
     }
 
     public function getCurrentRequestEtag(): ?Etag
