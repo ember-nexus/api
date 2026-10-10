@@ -61,6 +61,37 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $connection->close();
     }
 
+    /**
+     * Non-destructively checks whether a message with this exact body is currently in the queue (every message
+     * fetched here is nack'd with requeue, so nothing is actually consumed). Used instead of an exact
+     * {@see self::getQueueMessageCount()} count where a specific message's presence is what matters, not the
+     * queue's total depth: a relation change under test can legitimately leave a second, unrelated element queued
+     * for its own (redundant but harmless) recalculation, e.g. when the element gaining access is also the
+     * publishing user's first-ever recalculation, and that is not this assertion's concern.
+     */
+    private function queueContainsMessageWithBody(string $body): bool
+    {
+        $this->declareQueues();
+
+        $connection = $this->getRabbitMqConnection();
+        $channel = $connection->channel();
+        $found = false;
+        $fetchedMessages = [];
+        while (null !== ($message = $channel->basic_get(self::QUEUE))) {
+            $fetchedMessages[] = $message;
+            if ($message->getBody() === $body) {
+                $found = true;
+            }
+        }
+        foreach ($fetchedMessages as $message) {
+            $message->nack(true);
+        }
+        $channel->close();
+        $connection->close();
+
+        return $found;
+    }
+
     private function drainQueue(): void
     {
         [$exitCode, $output] = $this->runConsoleCommand('cron:update-ownership');
@@ -125,35 +156,46 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     /**
      * Creating a relation via the HTTP endpoint requires CREATE access on its start and READ access on its end
      * (`PostIndexController`), so an independent, freshly registered user does not otherwise have any relationship
-     * to self::TOKEN's user or to elements it owns. This grants self::TOKEN's user direct `OWNS` access to the given
-     * (otherwise unrelated) user directly in the graph, as a *test precondition only* - it deliberately bypasses the
-     * application (no event is dispatched for it), the same way other feature tests poke Cypher/Mongo directly to
-     * set up a precondition (see e.g. BaseCronTestCase::setUploadProperty()). The relation actually under test in
-     * each scenario below is always created afterwards through the real HTTP endpoint, so it does exercise the
-     * event listener/queue/command end to end.
+     * to self::TOKEN's user or to elements it owns. This grants self::TOKEN's user direct `CREATE`/`DELETE` access
+     * to the given (otherwise unrelated) user directly in the graph, as a *test precondition only* - it
+     * deliberately bypasses the application (no event is dispatched for it), the same way other feature tests poke
+     * Cypher/Mongo directly to set up a precondition (see e.g. BaseCronTestCase::setUploadProperty()). The relation
+     * actually under test in each scenario below is always created afterwards through the real HTTP endpoint, so
+     * it does exercise the event listener/queue/command end to end.
      *
-     * A minimal Elasticsearch stub document is indexed for the relation too (empty body; existence is all that
-     * matters here): the real app always creates one alongside the Neo4j relation, and each test's cleanup later
-     * deletes this user through the real HTTP endpoint, which cascades to every remaining relation - including
-     * this one - and 500s if the corresponding document is missing instead of merely empty.
+     * `HAS_CREATE_ACCESS`/`HAS_DELETE_ACCESS` (not `OWNS`) on purpose: each test's cleanup later deletes this user
+     * through the real HTTP endpoint, which cascades to every remaining relation, including this one - were it an
+     * `OWNS` edge onto self::TOKEN's own (shared, fixture-wide) user,
+     * {@see \App\EventSystem\EntityManager\EventListener\OwnershipChangeEventListener} would queue a real
+     * recalculation of that shared user's own search access, which can cascade through everything it owns. These
+     * two types are deliberately excluded from that listener's trigger list, so deleting them is a no-op for it.
+     *
+     * A minimal Elasticsearch stub document is indexed for each relation too (existence is all that matters here):
+     * the real app always creates one alongside the Neo4j relation, and that cascading cleanup delete 500s if the
+     * corresponding document is missing entirely.
      */
     private function grantOwnershipOf(string $userId): void
     {
         $ownerUserId = $this->getUserIdForToken(self::TOKEN);
-        $result = $this->getCypherClient()->run(
-            'MATCH (owner:User {id: $ownerUserId}), (target:User {id: $userId}) '.
-            'CREATE (owner)-[r:OWNS {id: randomUUID(), created: datetime(), updated: datetime()}]->(target) '.
-            'RETURN r.id AS id',
-            ['ownerUserId' => $ownerUserId, 'userId' => $userId]
-        );
-        $relationId = $result->first()->get('id');
-        $this->assertNotNull($relationId);
         $now = (new DateTimeImmutable())->format(DateTimeImmutable::ATOM);
-        $this->getElasticsearchClient()->index([
-            'index' => 'relation_owns',
-            'id' => $relationId,
-            'body' => ['created' => $now, 'updated' => $now],
-        ]);
+        foreach (['HAS_CREATE_ACCESS', 'HAS_DELETE_ACCESS'] as $relationType) {
+            $result = $this->getCypherClient()->run(
+                sprintf(
+                    'MATCH (owner:User {id: $ownerUserId}), (target:User {id: $userId}) '.
+                    'CREATE (owner)-[r:%s {id: randomUUID(), created: datetime(), updated: datetime()}]->(target) '.
+                    'RETURN r.id AS id',
+                    $relationType
+                ),
+                ['ownerUserId' => $ownerUserId, 'userId' => $userId]
+            );
+            $relationId = $result->first()->get('id');
+            $this->assertNotNull($relationId);
+            $this->getElasticsearchClient()->index([
+                'index' => sprintf('relation_%s', strtolower($relationType)),
+                'id' => $relationId,
+                'body' => ['created' => $now, 'updated' => $now],
+            ]);
+        }
     }
 
     /**
@@ -233,7 +275,9 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         [$exitCode, $output] = $this->runConsoleCommand('cron:update-ownership');
         $this->assertSame(0, $exitCode, $output);
         $this->assertMatchesRegularExpression('/updated search access of [1-9]\d* element\(s\)/', $output);
-        $this->assertSame(0, $this->getQueueMessageCount());
+        // settles any further, harmless recalculation this change may have queued (e.g. the newly-accessed
+        // element's own redundant recheck) before the next step asserts a delta of zero
+        $this->drainQueue();
 
         $this->assertSearchAccess($newUserToken, $elementId, true);
 
@@ -285,9 +329,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $this->createRelation('IS_IN_GROUP', $memberUserId, $groupNodeId);
         $this->assertGreaterThanOrEqual(1, $this->getQueueMessageCount());
 
-        [$exitCode, $output] = $this->runConsoleCommand('cron:update-ownership');
-        $this->assertSame(0, $exitCode, $output);
-        $this->assertSame(0, $this->getQueueMessageCount());
+        $this->drainQueue();
 
         $this->deleteNode($groupNodeId);
         $this->deleteNode($memberUserId);
@@ -323,9 +365,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $relationId = $this->createRelation('HAS_SEARCH_ACCESS', $groupNodeId, $elementId);
         $this->assertGreaterThanOrEqual(1, $this->getQueueMessageCount());
 
-        [$exitCode, $output] = $this->runConsoleCommand('cron:update-ownership');
-        $this->assertSame(0, $exitCode, $output);
-        $this->assertSame(0, $this->getQueueMessageCount());
+        $this->drainQueue();
 
         $this->assertSearchAccess($memberUserToken, $elementId, true);
 
@@ -391,8 +431,10 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
 
         $this->assertSame(0, $exitCode, $output);
         $this->assertMatchesRegularExpression('/updated search access of [1-9]\d* element\(s\)/', $output);
-        // the malformed message is still waiting for its remaining tries
-        $this->assertSame(1, $this->getQueueMessageCount());
+        // the malformed message specifically is still waiting for its remaining tries; checked by content rather
+        // than by total queue depth, since the valid relation change above may legitimately leave its own
+        // harmless, unrelated recalculation queued alongside it
+        $this->assertTrue($this->queueContainsMessageWithBody('this is not json'));
 
         $this->deleteNode($elementId);
         $this->deleteNode($newUserId);

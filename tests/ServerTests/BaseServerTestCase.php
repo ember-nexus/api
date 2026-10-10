@@ -42,7 +42,7 @@ abstract class BaseServerTestCase extends BaseRequestTestCase
         return $_ENV['SERVER_TEST_TOKEN'];
     }
 
-    protected function createElement(): string
+    protected function createServerTestElement(): string
     {
         $response = $this->runPostRequest('/', $this->getToken(), ['type' => 'Data', 'data' => ['name' => 'server test']]);
         $this->assertSame(201, $response->getStatusCode());
@@ -59,7 +59,7 @@ abstract class BaseServerTestCase extends BaseRequestTestCase
      */
     protected function createElementWithResumableUpload(): array
     {
-        $elementId = $this->createElement();
+        $elementId = $this->createServerTestElement();
         $response = $this->runUploadRequest(
             'POST',
             sprintf('/%s/file', $elementId),
