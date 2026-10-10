@@ -91,10 +91,10 @@ ember_nexus:
     # Grace period after an upload expires during which the cron:delete-expired-uploads command will not yet delete it. Gives clients a bit of leeway past the expiration date before their partial upload and its S3 chunks are removed.
     expiredUploadCanBeDeletedAfterExpirationInSeconds: 3600
 
-    # Name of the S3 bucket used for storage of files. Multiple S3 providers are supported (e.g. MinIO, VersityGW, SeaweedFS), but this bucket and S3UploadBucket must be hosted on the same S3 provider/instance, and must not share the same name.
+    # Name of the S3 bucket used for storage of files. Multiple S3 providers are supported (e.g. MinIO, VersityGW, SeaweedFS), but this bucket and the upload bucket must be hosted on the same S3 provider/instance, and must not share the same name.
     S3StorageBucket: api-storage
 
-    # Name of the S3 bucket used for temporary storage of uploads. Must be hosted on the same S3 provider/instance as S3StorageBucket, and must not share its name.
+    # Name of the S3 bucket used for temporary storage of uploads. Must be hosted on the same S3 provider/instance as the storage bucket, and must not share its name.
     S3UploadBucket: api-upload
 
     # Number of levels (folders) used within the S3 storage bucket.
