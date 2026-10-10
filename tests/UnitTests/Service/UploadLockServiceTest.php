@@ -48,13 +48,21 @@ class UploadLockServiceTest extends TestCase
     public function testReleaseComparesTokenBeforeDeleting(): void
     {
         $uploadId = Uuid::uuid4();
+        $key = 'lock:upload:'.$uploadId->toString();
         $redis = $this->prophesize(Client::class);
-        $redis->eval(
-            Argument::that(fn ($script) => str_contains($script, 'get') && str_contains($script, 'del')),
-            1,
-            'lock:upload:'.$uploadId->toString(),
-            'my-token'
-        )->shouldBeCalledOnce()->willReturn(1);
+        $redis->get($key)->shouldBeCalledOnce()->willReturn('my-token');
+        $redis->del([$key])->shouldBeCalledOnce();
+
+        (new UploadLockService($redis->reveal(), new RedisKeyFactory()))->release($uploadId, 'my-token');
+    }
+
+    public function testReleaseDoesNotDeleteWhenTokenDoesNotMatch(): void
+    {
+        $uploadId = Uuid::uuid4();
+        $key = 'lock:upload:'.$uploadId->toString();
+        $redis = $this->prophesize(Client::class);
+        $redis->get($key)->shouldBeCalledOnce()->willReturn('someone-elses-token');
+        $redis->del(Argument::cetera())->shouldNotBeCalled();
 
         (new UploadLockService($redis->reveal(), new RedisKeyFactory()))->release($uploadId, 'my-token');
     }
