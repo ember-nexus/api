@@ -15,7 +15,6 @@ class PostFileEtagTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-
     /**
      * @param array<string, string> $additionalHeaders
      */

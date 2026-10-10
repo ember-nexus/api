@@ -15,7 +15,6 @@ class PatchUploadOversizedChunkTest extends BaseRequestTestCase
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int FIRST_CHUNK_SIZE = 5 * 1024 * 1024;
 
-
     private function getMaxAppendSizeInBytes(string $uploadLimitHeaderValue): int
     {
         $this->assertMatchesRegularExpression('/max-append-size=(\d+)/', $uploadLimitHeaderValue);

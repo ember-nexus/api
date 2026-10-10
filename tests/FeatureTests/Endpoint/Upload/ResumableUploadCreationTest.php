@@ -15,7 +15,6 @@ class ResumableUploadCreationTest extends BaseRequestTestCase
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int CHUNK_SIZE = 5 * 1024 * 1024;
 
-
     public function testResumableUploadCreationWithInitialData(): void
     {
         $elementId = $this->createElement(self::TOKEN, 'resumable-upload-creation-with-data');

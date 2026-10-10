@@ -12,7 +12,6 @@ class CreateOwnsRelationEtagTest extends BaseRequestTestCase
     private const string ID_DATA_1 = 'd62f5169-1e12-42eb-ac91-8a6cfa9b3244';
     private const string ID_DATA_2 = 'a0691ac0-b75b-4c4f-9fe0-a95b30263e10';
 
-
     public function testEtagBeforeAndAfterCreatingCentralOwnsRelation(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"Sv20bjBNB4C"');

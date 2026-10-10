@@ -15,7 +15,6 @@ class DeleteNodeEtagTest extends BaseRequestTestCase
     private const string ID_DATA_4 = '4b04fac0-a2db-454c-9d1d-1880a82ecd0f';
     private const string ID_DATA_5 = '02a52492-ee1d-43fe-ad1a-bde040552fd0';
 
-
     public function testEtagBeforeAndAfterDeletingCentralNode(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"SPPl9HgNJoQ"');

@@ -13,7 +13,6 @@ class DeleteOwnsRelationEtagTest extends BaseRequestTestCase
     private const string ID_DATA_2 = '8b0e08f1-beda-4753-91ba-26f2c2546cdb';
     private const string ID_OWNS = '8adecb8f-01ca-41c9-907c-dca9ee8f4bc9';
 
-
     public function testEtagBeforeAndAfterDeletingCentralOwnsRelation(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"3fKNknCFOBH"');

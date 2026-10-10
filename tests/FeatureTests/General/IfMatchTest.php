@@ -14,7 +14,6 @@ class IfMatchTest extends BaseRequestTestCase
     private const string ID_CHILD = 'ad966733-6cfb-427b-8661-8207a58bdc7f';
     private const string ID_RELATED = '1647af8f-2f6a-46de-ab8a-3f1a740761f3';
 
-
     public function testIfMatchElementNode(): void
     {
         $this->getEtagOfElement(self::TOKEN, self::ID_DATA, '', '"6JM8JahrCeu"');

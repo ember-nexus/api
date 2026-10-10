@@ -16,7 +16,6 @@ class MaximumEtagTest extends BaseRequestTestCase
     private const string GROUP_UUID = '42c7a0f3-fc9b-478b-b658-52ecb44238b8';
     private const string SOME_NODE_UUID = '81f811e2-c19f-4339-94e2-c0376fec097e';
 
-
     private function testEtagOfElementDoesNotExist(string $token, string $id, string $additionalPath): void
     {
         $response = $this->runGetRequest(

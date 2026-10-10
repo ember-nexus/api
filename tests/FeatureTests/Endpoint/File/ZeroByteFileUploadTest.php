@@ -14,7 +14,6 @@ class ZeroByteFileUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-
     public function testZeroByteFileCanBeUploadedDirectlyAndDownloadedAgain(): void
     {
         $elementId = $this->createElement(self::TOKEN, 'zero-byte-direct-upload');

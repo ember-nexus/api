@@ -19,7 +19,6 @@ class FileDigestMultipleAlgorithmsTest extends BaseRequestTestCase
     private const string ASSET_PATH = __DIR__.'/../../Asset/file-digest-multiple-algorithms.bin';
     private const string UNSUPPORTED_MEMBER = 'md5=:1B2M2Y8AsgTpgAmY7PhCfg==:';
 
-
     private function sha256Member(string $hexHash): string
     {
         return sprintf('sha-256=:%s:', base64_encode(\Safe\hex2bin($hexHash)));

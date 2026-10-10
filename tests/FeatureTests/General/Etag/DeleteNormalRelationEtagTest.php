@@ -13,7 +13,6 @@ class DeleteNormalRelationEtagTest extends BaseRequestTestCase
     private const string ID_DATA_2 = '119cdc2a-e169-4cc5-a20a-7d6b67e05c25';
     private const string ID_RELATED = '41e07860-c278-4d3a-b96a-47465e832b5e';
 
-
     public function testEtagBeforeAndAfterDeletingCentralNormalRelation(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"TAtItfs3idO"');

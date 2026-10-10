@@ -16,7 +16,6 @@ class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const int CHUNK_SIZE = 5 * 1024 * 1024;
 
-
     /**
      * @return array{0: string, 1: int} the created upload's id, and the offset it is now at
      */

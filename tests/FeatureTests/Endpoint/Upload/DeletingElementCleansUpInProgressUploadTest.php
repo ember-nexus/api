@@ -15,7 +15,6 @@ class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-
     public function testDeletingElementRemovesUploadWithNoChunksUploadedYet(): void
     {
         $elementId = $this->createElement(self::TOKEN, 'delete-element-cleans-up-upload-no-chunks');

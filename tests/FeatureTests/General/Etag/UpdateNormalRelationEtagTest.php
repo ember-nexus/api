@@ -13,7 +13,6 @@ class UpdateNormalRelationEtagTest extends BaseRequestTestCase
     private const string ID_DATA_2 = 'eeccb6bf-91da-4da1-8bef-b797a32eb8a6';
     private const string ID_RELATED = '7f3afac6-013e-4b28-acc7-f4fe1c418c99';
 
-
     public function testEtagBeforeAndAfterUpdatingCentralNormalRelation(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"YoB0OOEREXk"');

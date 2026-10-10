@@ -13,7 +13,6 @@ class UpdateOwnsRelationEtagTest extends BaseRequestTestCase
     private const string ID_DATA_2 = 'f8ebe840-387d-4e35-b76d-1e367e6b2b2d';
     private const string ID_OWNS = '57f312c3-7536-43dc-92df-06b5ef3b87ee';
 
-
     public function testEtagBeforeAndAfterUpdatingCentralOwnsRelation(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"fkFkIGpTl6c"');

@@ -12,7 +12,6 @@ class CreateNormalRelationEtagTest extends BaseRequestTestCase
     private const string ID_DATA_1 = '106e6b00-4026-462b-9394-e7da4bc777ed';
     private const string ID_DATA_2 = '89ecbd25-0402-468f-af0c-3f307fff5b9f';
 
-
     public function testEtagBeforeAndAfterCreatingCentralNormalRelation(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"9GlvHTmFZ2A"');

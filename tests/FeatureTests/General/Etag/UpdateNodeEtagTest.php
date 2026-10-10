@@ -19,7 +19,6 @@ class UpdateNodeEtagTest extends BaseRequestTestCase
     private const string ID_RELATED_1 = '3d793ff1-5587-45e3-aa17-1677dec2854a';
     private const string ID_RELATED_2 = '5f7dfb9c-9b76-43dc-aa75-6b5a023a10e8';
 
-
     public function testEtagBeforeAndAfterUpdatingCentralNode(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"32Y4YaICHSp"');

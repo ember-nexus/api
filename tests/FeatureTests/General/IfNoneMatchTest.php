@@ -14,7 +14,6 @@ class IfNoneMatchTest extends BaseRequestTestCase
     private const string ID_CHILD = 'f621c1b9-1d3f-4a9c-999c-99d1edcc9c6f';
     private const string ID_RELATED = 'b576e116-f5f1-4106-92e6-1547b8131108';
 
-
     public function testIfMatchElementNode(): void
     {
         $this->getEtagOfElement(self::TOKEN, self::ID_DATA, '', '"ROiR1100cKu"');

@@ -74,10 +74,7 @@ class ReindexFilesCommand extends Command
     {
         $rawElementId = $eventData['elementId'] ?? null;
         if (!is_string($rawElementId) || '' === $rawElementId) {
-            throw new InvalidArgumentException(sprintf(
-                "Expected queue message to contain a string 'elementId', got %s.",
-                get_debug_type($rawElementId)
-            ));
+            throw new InvalidArgumentException(sprintf("Expected queue message to contain a string 'elementId', got %s.", get_debug_type($rawElementId)));
         }
         $elementId = Uuid::fromString($rawElementId);
         $element = $this->elementManager->getElement($elementId);

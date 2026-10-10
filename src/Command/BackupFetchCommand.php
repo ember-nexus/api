@@ -23,6 +23,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 use function Safe\filesize;
+use function Safe\parse_url;
 use function Safe\sha1_file;
 use function Safe\unlink;
 

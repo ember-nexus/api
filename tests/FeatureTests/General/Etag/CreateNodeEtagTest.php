@@ -14,7 +14,6 @@ class CreateNodeEtagTest extends BaseRequestTestCase
     private const string ID_DATA_4 = '1ef20009-1db9-4e74-a3d4-2de7ec475dde';
     private const string ID_DATA_5 = '47016bbb-405a-49a1-9531-8d1efa4d5e0a';
 
-
     public function testEtagBeforeAndAfterCreatingCentralNode(): void
     {
         $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"GJiTEF7Lrtc"');
