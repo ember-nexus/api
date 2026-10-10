@@ -1066,8 +1066,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         uploadMinChunkSizeInBytes?: int|Param, // Minimum size in bytes of uploaded chunks. Limited by the S3 provider, e.g. AWS requires that chunks are at least 5 MiB big. // Default: 5242880
  *         uploadMaxChunkSizeInBytes?: int|Param, // Maximum size in bytes of uploaded chunks. Limited by the S3 provider, Caddy and the PHP configuration. // Default: 105906176
  *         expiredUploadCanBeDeletedAfterExpirationInSeconds?: int|Param, // Grace period after an upload expires during which the cron:delete-expired-uploads command will not yet delete it. Gives clients a bit of leeway past the expiration date before their partial upload and its S3 chunks are removed. // Default: 3600
- *         S3StorageBucket?: scalar|Param|null, // Name of the S3 bucket used for storage of files. // Default: "api-storage"
- *         S3UploadBucket?: scalar|Param|null, // Name of the S3 bucket used for temporary storage of uploads. // Default: "api-upload"
+ *         S3StorageBucket?: scalar|Param|null, // Name of the S3 bucket used for storage of files. Multiple S3 providers are supported (e.g. MinIO, VersityGW, SeaweedFS), but this bucket and the upload bucket must be hosted on the same S3 provider/instance, and must not share the same name. // Default: "api-storage"
+ *         S3UploadBucket?: scalar|Param|null, // Name of the S3 bucket used for temporary storage of uploads. Must be hosted on the same S3 provider/instance as the storage bucket, and must not share its name. // Default: "api-upload"
  *         S3StorageBucketLevels?: int|Param, // Number of levels (folders) used within the S3 storage bucket. // Default: 3
  *         S3StorageBucketLevelLength?: int|Param, // Number of characters used for each level (folder) in the S3 storage bucket. // Default: 2
  *         S3UploadBucketLevels?: int|Param, // Number of levels (folders) used within the S3 upload bucket. // Default: 2
