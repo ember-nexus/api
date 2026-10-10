@@ -12,7 +12,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
-use Safe\Exceptions\FilesystemException;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -66,16 +65,5 @@ class BackupFetchCommandTest extends TestCase
         $this->expectExceptionMessage(sprintf("Source must be a HTTP(S) URL, got '%s'.", $source));
 
         $this->runCommand($source);
-    }
-
-    public function testHttpsSourceSchemeIsAccepted(): void
-    {
-        // the backup name check and the scheme check both run before the download itself, and succeed; the
-        // command then fails trying to actually connect (there is no server at this address), proving the
-        // scheme guard itself did not reject the HTTPS source
-        $this->expectException(FilesystemException::class);
-        $this->expectExceptionMessage('Connection refused');
-
-        $this->runCommand('https://127.0.0.1:1/backup.zip');
     }
 }

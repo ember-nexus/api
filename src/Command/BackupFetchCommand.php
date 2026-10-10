@@ -23,7 +23,6 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 use function Safe\filesize;
-use function Safe\parse_url;
 use function Safe\sha1_file;
 use function Safe\unlink;
 
@@ -263,7 +262,9 @@ class BackupFetchCommand extends Command
 
     private function checkSourceIsHttpOrHttps(string $source): string
     {
-        $scheme = parse_url($source, PHP_URL_SCHEME);
+        // intentionally uses the non-Safe parse_url(): a malformed/non-HTTP(S) source must fall through to the
+        // in_array() check below and produce the descriptive exception message, not Safe's generic one
+        $scheme = parse_url($source, PHP_URL_SCHEME); // @phpstan-ignore theCodingMachineSafe.function
         if (!in_array($scheme, ['http', 'https'], true)) {
             throw new Exception(sprintf("Source must be a HTTP(S) URL, got '%s'.", $source));
         }
