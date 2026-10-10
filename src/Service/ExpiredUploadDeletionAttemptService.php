@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Type\RedisKeyFactory;
+use DateTimeZone;
 use Predis\Client as RedisClient;
+use Safe\DateTimeImmutable;
 use Safe\Exceptions\JsonException;
 
 /**
@@ -19,7 +21,7 @@ class ExpiredUploadDeletionAttemptService
 {
     public const int MAX_ATTEMPTS = 3;
     // longer than the last retry delay, so that the counter survives until the final attempt
-    public const int TTL_IN_SECONDS = 604800;
+    public const int TTL_IN_SECONDS = 7 * 24 * 60 * 60;
     /**
      * @var array<int, int> delay in seconds until the next attempt, indexed by the number of failed attempts
      */
@@ -41,7 +43,7 @@ class ExpiredUploadDeletionAttemptService
     {
         $notBefore = $this->read($uploadId)['notBefore'];
 
-        return $notBefore > time();
+        return $notBefore > $this->now();
     }
 
     /**
@@ -50,7 +52,7 @@ class ExpiredUploadDeletionAttemptService
     public function recordFailure(string $uploadId): int
     {
         $attempts = $this->read($uploadId)['attempts'] + 1;
-        $notBefore = time() + (self::RETRY_DELAYS_IN_SECONDS[$attempts] ?? 0);
+        $notBefore = $this->now() + (self::RETRY_DELAYS_IN_SECONDS[$attempts] ?? 0);
         $this->redisClient->set(
             (string) $this->redisKeyFactory->getCronDeleteExpiredUploadRedisKey($uploadId),
             \Safe\json_encode(['attempts' => $attempts, 'notBefore' => $notBefore]),
@@ -64,6 +66,13 @@ class ExpiredUploadDeletionAttemptService
     public function clear(string $uploadId): void
     {
         $this->redisClient->del([(string) $this->redisKeyFactory->getCronDeleteExpiredUploadRedisKey($uploadId)]);
+    }
+
+    // time() returns a timezone-independent Unix timestamp already, but the PHP default timezone can still affect
+    // date/time functions elsewhere; going through UTC explicitly here avoids relying on that default.
+    private function now(): int
+    {
+        return (new DateTimeImmutable('now', new DateTimeZone('UTC')))->getTimestamp();
     }
 
     /**

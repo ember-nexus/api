@@ -6,9 +6,16 @@ namespace App\Service;
 
 class FileNameService
 {
+    // there is no universal hard limit on filename length, but 255 bytes is the safe upper bound most filesystems
+    // and clients support
     public const int MAX_FILENAME_LENGTH = 255;
     public const int MAX_EXTENSION_LENGTH = 64;
     public const string DEFAULT_EXTENSION = 'bin';
+
+    /**
+     * @var list<string>
+     */
+    private const array RESERVED_FILE_NAME_CHARACTERS = ['"', '*', '/', ':', '<', '>', '?', '\\', '|'];
 
     public function __construct(
         private StringService $stringService,
@@ -40,7 +47,7 @@ class FileNameService
     public function removeReservedCharactersFromFileName(string $fileName): string
     {
         return trim(str_replace(
-            ['"', '*', '/', ':', '<', '>', '?', '\\', '|'],
+            self::RESERVED_FILE_NAME_CHARACTERS,
             '',
             $fileName
         ));

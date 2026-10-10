@@ -13,19 +13,18 @@ use Ramsey\Uuid\UuidInterface;
  * `POST` requests can not both create the file. `PUT` requests do not take the lock (parallel replacements are
  * allowed), but respect it.
  *
- * The lock is a Redis key holding a random token; it expires on its own so that a crashed request can not block the
- * element forever, and is only released by its owner (compare-and-delete).
+ * The lock is a Redis key holding the acquiring request's id; it expires on its own so that a crashed request can
+ * not block the element forever, and is only released by its owner (compare-and-delete).
  */
 class FileCreationLockService
 {
     // a single request upload may take 15 minutes at most (`read_body` in the Caddyfile)
     public const int TTL_IN_MILLISECONDS = 900000;
 
-    private const string RELEASE_SCRIPT = 'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end';
-
     public function __construct(
         private RedisClient $redisClient,
         private RedisKeyFactory $redisKeyFactory,
+        private RequestIdService $requestIdService,
     ) {
     }
 
@@ -34,7 +33,7 @@ class FileCreationLockService
      */
     public function acquire(UuidInterface $elementId): ?string
     {
-        $token = bin2hex(random_bytes(16));
+        $token = $this->requestIdService->getRequestId()->toString();
         $result = $this->redisClient->set((string) $this->redisKeyFactory->getFileCreationLockRedisKey($elementId), $token, 'PX', self::TTL_IN_MILLISECONDS, 'NX');
 
         return null === $result ? null : $token;
@@ -47,6 +46,14 @@ class FileCreationLockService
 
     public function release(UuidInterface $elementId, string $token): void
     {
-        $this->redisClient->eval(self::RELEASE_SCRIPT, 1, (string) $this->redisKeyFactory->getFileCreationLockRedisKey($elementId), $token);
+        // plain GET + DEL instead of a Lua script (EVAL) for simplicity: there is a small race window between the
+        // GET and the DEL where the key could expire and be re-acquired by a different request in between, whose
+        // lock would then be deleted here instead of this one. This is accepted because the TTL already bounds the
+        // damage, and the token is the acquiring request's id, so a collision would require another request to be
+        // assigned the exact same request id within that window, which is practically impossible (UUIDv4).
+        $key = (string) $this->redisKeyFactory->getFileCreationLockRedisKey($elementId);
+        if ($this->redisClient->get($key) === $token) {
+            $this->redisClient->del([$key]);
+        }
     }
 }

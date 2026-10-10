@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Factory\Type\RedisKeyFactory;
 use App\Service\FileCreationLockService;
+use App\Service\RequestIdService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
@@ -21,19 +22,31 @@ class FileCreationLockServiceTest extends TestCase
 {
     use ProphecyTrait;
 
-    public function testAcquireSetsKeyWithNxAndTtlAndReturnsToken(): void
+    private const string REQUEST_ID = '3950e94a-2cd0-43ef-ac5a-8e116a4263c8';
+
+    private function buildRequestIdService(string $requestId = self::REQUEST_ID): RequestIdService
+    {
+        $requestIdService = $this->prophesize(RequestIdService::class);
+        $requestIdService->getRequestId()->willReturn(Uuid::fromString($requestId));
+
+        return $requestIdService->reveal();
+    }
+
+    public function testAcquireSetsKeyWithNxAndTtlAndReturnsTheRequestIdAsToken(): void
     {
         $elementId = Uuid::uuid4();
         $redis = $this->prophesize(Client::class);
         $redis->set(
             'lock:file-creation:'.$elementId->toString(),
-            Argument::that(fn ($token) => is_string($token) && 32 === strlen($token)),
+            self::REQUEST_ID,
             'PX',
             900000,
             'NX'
         )->shouldBeCalledOnce()->willReturn('OK');
 
-        $this->assertIsString((new FileCreationLockService($redis->reveal(), new RedisKeyFactory()))->acquire($elementId));
+        $token = (new FileCreationLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->acquire($elementId);
+
+        $this->assertSame(self::REQUEST_ID, $token);
     }
 
     public function testAcquireReturnsNullIfAlreadyLocked(): void
@@ -41,7 +54,7 @@ class FileCreationLockServiceTest extends TestCase
         $redis = $this->prophesize(Client::class);
         $redis->set(Argument::cetera())->willReturn(null);
 
-        $this->assertNull((new FileCreationLockService($redis->reveal(), new RedisKeyFactory()))->acquire(Uuid::uuid4()));
+        $this->assertNull((new FileCreationLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->acquire(Uuid::uuid4()));
     }
 
     #[DataProvider('isLockedProvider')]
@@ -51,7 +64,7 @@ class FileCreationLockServiceTest extends TestCase
         $redis = $this->prophesize(Client::class);
         $redis->exists('lock:file-creation:'.$elementId->toString())->shouldBeCalledOnce()->willReturn($existsResult);
 
-        $this->assertSame($expected, (new FileCreationLockService($redis->reveal(), new RedisKeyFactory()))->isLocked($elementId));
+        $this->assertSame($expected, (new FileCreationLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->isLocked($elementId));
     }
 
     /**
@@ -65,14 +78,22 @@ class FileCreationLockServiceTest extends TestCase
     public function testReleaseComparesTokenBeforeDeleting(): void
     {
         $elementId = Uuid::uuid4();
+        $key = 'lock:file-creation:'.$elementId->toString();
         $redis = $this->prophesize(Client::class);
-        $redis->eval(
-            Argument::that(fn ($script) => str_contains($script, 'get') && str_contains($script, 'del')),
-            1,
-            'lock:file-creation:'.$elementId->toString(),
-            'my-token'
-        )->shouldBeCalledOnce()->willReturn(1);
+        $redis->get($key)->shouldBeCalledOnce()->willReturn('my-token');
+        $redis->del([$key])->shouldBeCalledOnce();
 
-        (new FileCreationLockService($redis->reveal(), new RedisKeyFactory()))->release($elementId, 'my-token');
+        (new FileCreationLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->release($elementId, 'my-token');
+    }
+
+    public function testReleaseDoesNotDeleteWhenTokenDoesNotMatch(): void
+    {
+        $elementId = Uuid::uuid4();
+        $key = 'lock:file-creation:'.$elementId->toString();
+        $redis = $this->prophesize(Client::class);
+        $redis->get($key)->shouldBeCalledOnce()->willReturn('someone-elses-token');
+        $redis->del(Argument::cetera())->shouldNotBeCalled();
+
+        (new FileCreationLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->release($elementId, 'my-token');
     }
 }
