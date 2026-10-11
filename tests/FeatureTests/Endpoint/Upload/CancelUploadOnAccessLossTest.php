@@ -62,7 +62,21 @@ class CancelUploadOnAccessLossTest extends BaseRequestTestCase
     {
         $result = $this->getCypherClient()->run('MATCH (u:Upload {id: $id}) RETURN count(u) AS count', ['id' => $uploadId]);
         $this->assertSame($exists ? 1 : 0, $result->first()->get('count'));
-        $this->assertSame($exists ? 1 : 0, $this->countUploadChunksInUploadBucket($uploadId));
+
+        $expectedChunkCount = $exists ? 1 : 0;
+        // listing the upload bucket is eventually consistent on some S3-compatible backends (observed on
+        // SeaweedFS), so a chunk that was just written (or just deleted) can briefly be missing (or lingering)
+        // from a ListObjectsV2 response; poll briefly rather than asserting on the very first attempt, the same
+        // way assertSearchAccess() does for Elasticsearch elsewhere in this suite
+        $actualChunkCount = $expectedChunkCount;
+        for ($attempt = 0; $attempt < 10; ++$attempt) {
+            $actualChunkCount = $this->countUploadChunksInUploadBucket($uploadId);
+            if ($actualChunkCount === $expectedChunkCount) {
+                break;
+            }
+            usleep(300_000);
+        }
+        $this->assertSame($expectedChunkCount, $actualChunkCount);
     }
 
     /**
