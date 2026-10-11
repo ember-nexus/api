@@ -9,8 +9,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * `Upload.uploadTarget` is a plain property, not a graph edge, so deleting an element does not remove uploads
- * targeting it. Verifies that DeleteElementController cleans them up immediately (see
- * UploadService::deleteUploadsTargeting()), both with and without already uploaded chunks.
+ * targeting it; this verifies they are cleaned up immediately anyway, both with and without already uploaded
+ * chunks.
  */
 class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
 {

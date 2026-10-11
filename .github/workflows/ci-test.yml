@@ -246,9 +246,9 @@ jobs:
         run: |
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature"
       - name: Run cron jobs once manually
-        # Smoke test only (business logic is unit/feature-tested elsewhere): proves the cron jobs actually run
-        # end-to-end against the prod image the way the real scheduler invokes them, i.e. with a tty, which is
-        # required here since DISABLE_CRON=true on the containers would otherwise make a tty-less exec no-op.
+        # Smoke test only (business logic is unit/feature-tested elsewhere): proves the cron jobs run end-to-end
+        # against the prod image with a tty, since DISABLE_CRON=true on the containers would otherwise make a
+        # tty-less exec a no-op.
         run: |
           docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron:delete-expired-uploads
           docker exec -t --user "$(id -u):$(id -g)" api-prod php bin/console cron:reindex-files
@@ -424,7 +424,7 @@ jobs:
         run: |
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker load < /tmp/docker/api-prod-amd.tar.gz
-      # the scenarios run one after another and restart the production container with lower limits, see bin/test-server
+      # the scenarios run one after another and restart the production container with lower limits
       - name: Server Test
         run: |
           chmod +x ./bin/test-server

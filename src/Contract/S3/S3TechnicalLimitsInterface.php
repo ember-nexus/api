@@ -6,7 +6,7 @@ namespace App\Contract\S3;
 
 /**
  * Hard limits of the S3 storage backend itself. Operator configuration (`file.*`) may only be more restrictive,
- * see {@see \App\Service\S3TechnicalLimitsValidator}.
+ * never less.
  */
 interface S3TechnicalLimitsInterface
 {

@@ -7,7 +7,8 @@ namespace App\Tests\FeatureTests\Endpoint\Upload;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Mirrors ResumableUploadLifecycleTest, but targets a relation instead of a node.
+ * The resumable upload lifecycle (create with a first chunk, finish with the final chunk) exercised on a
+ * relation instead of a node.
  */
 class ResumableUploadLifecycleOnRelationTest extends BaseRequestTestCase
 {
@@ -60,7 +61,6 @@ class ResumableUploadLifecycleOnRelationTest extends BaseRequestTestCase
         );
         $relationId = $this->getUuidFromLocation($relation);
 
-        // create the upload with the first chunk
         $chunk1 = \Safe\fopen($chunks[0], 'r');
         $createUploadResponse = $this->runUploadRequest(
             'POST',
@@ -78,13 +78,11 @@ class ResumableUploadLifecycleOnRelationTest extends BaseRequestTestCase
         $this->assertSame((string) self::CHUNK_SIZE, $createUploadResponse->getHeader('Upload-Offset')[0]);
         $uploadId = $this->getUuidFromLocation($createUploadResponse);
 
-        // check upload status through HEAD
         $headResponse1 = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
         $this->assertSame(204, $headResponse1->getStatusCode());
         $this->assertSame('?0', $headResponse1->getHeader('Upload-Complete')[0]);
         $this->assertSame((string) self::CHUNK_SIZE, $headResponse1->getHeader('Upload-Offset')[0]);
 
-        // upload the second, final chunk
         $chunk2 = \Safe\fopen($chunks[1], 'r');
         $finishUploadResponse = $this->runUploadRequest(
             'PATCH',
@@ -101,11 +99,9 @@ class ResumableUploadLifecycleOnRelationTest extends BaseRequestTestCase
         $this->assertSame('?1', $finishUploadResponse->getHeader('Upload-Complete')[0]);
         $this->assertSame((string) self::FILE_SIZE, $finishUploadResponse->getHeader('Upload-Offset')[0]);
 
-        // upload resource is gone once finished
         $headResponse2 = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
         $this->assertSame(404, $headResponse2->getStatusCode());
 
-        // verify the merged file is downloadable and matches what was uploaded
         $downloadResponse = $this->runGetRequest(sprintf('/%s/file', $relationId), self::TOKEN);
         $this->assertIsBinaryStreamResponse($downloadResponse, 'text/plain');
         $this->assertSame(self::FILE_SIZE, strlen((string) $downloadResponse->getBody()));

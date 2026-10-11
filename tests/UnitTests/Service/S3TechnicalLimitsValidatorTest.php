@@ -133,9 +133,8 @@ class S3TechnicalLimitsValidatorTest extends TestCase
     }
 
     /**
-     * Mirrors {@see \App\Service\S3Service::getMultipartUploadPartSizeInBytes()}: the part size has to grow with
-     * the configured 'file.maxFileSizeInBytes' to stay within the backend's maximum chunk count, which must not be
-     * allowed to exceed the backend's maximum part size.
+     * The part size has to grow with the configured 'file.maxFileSizeInBytes' to stay within the backend's
+     * maximum chunk count, which must not be allowed to exceed the backend's maximum part size.
      */
     public function testThrowsIfRequiredPartSizeForConfiguredMaxFileSizeExceedsTechnicalMaxPartSize(): void
     {

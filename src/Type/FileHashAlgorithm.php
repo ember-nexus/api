@@ -6,7 +6,7 @@ namespace App\Type;
 
 /**
  * Algorithms supported for `file.hash` entries: file content hashing, upload verification, and backup integrity
- * checks (see {@see \App\Service\FileHashService}).
+ * checks.
  */
 enum FileHashAlgorithm: string
 {

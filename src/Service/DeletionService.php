@@ -13,13 +13,10 @@ use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
- * Deletes a node together with every relation touching it, each going through {@see ElementManager}'s normal
- * delete lifecycle. Needed because a node's `DETACH DELETE` is a single Cypher statement that never dispatches
- * `ElementPreDeleteEvent`/`ElementPostDeleteEvent` for the relations it cascades away, so listeners hooked on those
- * events (e.g. {@see \App\EventSystem\EntityManager\EventListener\ExpireEtagOnChangeEventListener},
- * {@see \App\EventSystem\EntityManager\EventListener\OwnershipChangeEventListener}) would otherwise never fire for
- * them. {@see ElementManager} itself stays free of this cascading behavior; this is opt-in for call sites that want
- * it.
+ * Deletes a node together with every relation touching it, each going through ElementManager's normal delete
+ * lifecycle. A node's `DETACH DELETE` is a single Cypher statement that never dispatches delete events for the
+ * relations it cascades away, so event listeners would otherwise never fire for them; this cascading behavior is
+ * opt-in for call sites that want it, not built into ElementManager itself.
  */
 class DeletionService
 {

@@ -14,13 +14,9 @@ use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
- * Implicit per-request lock on the element a `PATCH`/`PUT`/`DELETE /{id}` request targets, see
- * {@see ElementRequestLockService} for why. Acquired before the `Etag`/`If-Match` checks (which run on the same
- * `kernel.controller` event; this listener's priority must stay higher than
- * {@see EtagControllerEventListener}/{@see IfMatchControllerEventListener}/{@see IfNoneMatchControllerEventListener}),
- * so the whole read-check-write sequence of this request runs while holding the lock. Released once the response is
- * ready, regardless of whether the controller succeeded or threw (`kernel.response` still fires for exception
- * responses).
+ * Implicit per-request lock on the element a `PATCH`/`PUT`/`DELETE /{id}` request targets, held for the whole
+ * read-check-write sequence. Must run before the `Etag`/`If-Match` checks on the same `kernel.controller` event, so
+ * its priority has to stay higher than theirs; released on `kernel.response` even if the controller threw.
  */
 class ElementRequestLockControllerEventListener
 {

@@ -20,21 +20,16 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
- * A node's `DETACH DELETE` is a single Cypher statement (see `vendor/syndesi/cypher-entity-manager`'s
- * `NodeDeleteToStatementEventListener`) that never dispatches `ElementPreDeleteEvent`/`ElementPostDeleteEvent` for
- * the relations it cascades away, so a delete path that bypasses {@see \App\Service\DeletionService} would never
- * expire the ETag cache keys of the elements on the other end of those relations via this listener. As of now,
- * every node/relation delete path (the only one being {@see \App\Controller\Element\DeleteElementController}) goes
- * through {@see \App\Service\DeletionService}, which avoids this gap by deleting each touching relation
- * individually before the node itself - so this is a latent hazard for a future bypass, not a currently reachable
- * one.
+ * A node's cascading `DETACH DELETE` never dispatches delete events for the relations it removes, so a delete path
+ * that doesn't delete each relation individually first would silently skip expiring their endpoints' ETag cache
+ * keys - a latent hazard today, since every current delete path happens to delete relations one by one before the
+ * node.
  */
 class ExpireEtagOnChangeEventListener
 {
     /**
-     * Keys which have to be expired after an element was deleted, by element id. They are expired only after the
-     * delete, as a concurrent read before that would cache the ETag again. The related elements can not be looked up
-     * anymore after the delete, therefore the keys are collected before it and remembered here.
+     * Collected before the delete (elements can't be looked up afterwards) and expired only after it, since a
+     * concurrent read beforehand would just cache the ETag again.
      *
      * @var array<string, RedisKey[]>
      */

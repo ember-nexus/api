@@ -7,8 +7,7 @@ namespace App\Tests\FeatureTests\Endpoint\Upload;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Mirrors the PATCH error cases of PatchUploadIncorrectOffsetTest, PatchUploadOversizedChunkTest and
- * PatchUploadUndersizedIntermediateChunkTest, but for an upload targeting a relation instead of a node.
+ * Covers the PATCH error cases for an upload targeting a relation instead of a node.
  */
 class PatchUploadErrorsOnRelationTest extends BaseRequestTestCase
 {

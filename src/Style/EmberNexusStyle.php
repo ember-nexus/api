@@ -162,10 +162,9 @@ class EmberNexusStyle extends SymfonyStyle
     }
 
     /**
-     * Progress bars are written to stderr and are redrawn in place. This only works in an interactive terminal; in
-     * all other cases (e.g. ci, output redirected into a file) every redraw would end up as its own log line, without
-     * any context. Therefore, a progress bar is only returned if the error output is decorated, i.e. it is a terminal (or
-     * colors are forced through --ansi).
+     * Progress bars redraw in place on stderr, which only works in an interactive terminal; elsewhere (CI, output
+     * redirected to a file) every redraw would become its own contextless log line, so a progress bar is only
+     * returned when the error output is decorated (a terminal, or `--ansi`).
      */
     public function createProgressBarInInteractiveTerminal(int $max = 0): ?ProgressBar
     {

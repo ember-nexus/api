@@ -8,8 +8,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
  * Write access to the file and the uploads of a relation: users without access to the relation must not be able to
- * create, replace or delete its file or to interact with its uploads (404 in all cases). Counterpart of
- * FileEndpointAccessControlTest and UploadEndpointAccessControlTest, which cover nodes.
+ * create, replace or delete its file or to interact with its uploads (404 in all cases).
  *
  * Uses the two unrelated users of the "security.filePermission" scenario and creates a fresh relation per test.
  */

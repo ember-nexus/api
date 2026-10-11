@@ -53,7 +53,7 @@ class DigestService
     /**
      * Parses an RFC 8941 Dictionary of `algorithm=:base64:` members (no parameters are supported, as none are
      * defined by RFC 9530) into their decoded byte values, keyed by algorithm. Unsupported algorithms are included
-     * as well; only {@see DigestAlgorithm::SHA_256} is validated and used by callers of this class.
+     * as well; only `sha-256` is validated and used by callers of this class.
      *
      * @return array<string, string> raw byte values by algorithm name
      */

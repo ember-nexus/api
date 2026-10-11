@@ -18,12 +18,11 @@ class ElementToRawService
     }
 
     /**
-     * @param bool $applyPropertyBlacklist Whether to dispatch {@see ElementPropertyReturnEvent} and honor the
-     *                                     property blacklists it collects (e.g. a Token's `hash` or a User's
-     *                                     `_passwordHash`). These blacklists exist to keep such properties out of
-     *                                     HTTP responses; callers that need the full, unfiltered element data for
-     *                                     internal purposes (e.g. `backup:create`) must pass `false` so the
-     *                                     resulting data can be restored without losing those properties.
+     * @param bool $applyPropertyBlacklist Whether to honor the property blacklists collected for the element (e.g.
+     *                                     a Token's `hash` or a User's `_passwordHash`), keeping them out of HTTP
+     *                                     responses. Callers that need the full, unfiltered data for internal
+     *                                     purposes must pass `false` so it can be restored without losing those
+     *                                     properties.
      *
      * @return array<string, mixed>
      */

@@ -8,10 +8,9 @@ use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Returns the body of requests which are read completely into memory, e.g. json bodies. The web server silently cuts
- * off request bodies which are sent too slowly, so a body which is shorter than announced is answered with 408
- * instead of being parsed, which would result in misleading parsing errors. Requests without `Content-Length`, e.g.
- * chunked ones, can not be checked.
+ * Returns the body of requests which are read completely into memory, e.g. json bodies. The web server silently
+ * cuts off bodies sent too slowly, so a body shorter than announced is answered with 408 instead of being parsed
+ * into misleading errors; requests without `Content-Length` can not be checked.
  */
 class RequestContentService
 {

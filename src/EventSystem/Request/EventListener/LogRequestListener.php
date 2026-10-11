@@ -36,9 +36,9 @@ class LogRequestListener
                     'ip' => $request->getClientIp(),
                 ],
                 'request' => [
-                    // the route-matching routers's own listener already resolved `_route` on kernel.request; a
-                    // request without a matching route (404) or which never reached routing (e.g. rejected by
-                    // ApiKeyCheckOnKernelRequestEventListener before RouterListener ran) simply has none
+                    // the router's own listener already resolved `_route` on kernel.request; a request without a
+                    // matching route (404), or one that never reached routing at all (e.g. rejected earlier), simply
+                    // has none
                     'route' => $request->attributes->get('_route', 'n/a'),
                     'uri' => $request->getUri(),
                     'method' => $request->getMethod(),

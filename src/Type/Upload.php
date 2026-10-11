@@ -93,9 +93,8 @@ final readonly class Upload implements UploadInterface
 
     /**
      * Whether the target already had a file when this upload was created (a resumable replace started through
-     * `PUT`). Such an upload is expected to still find `hasFile === true` right before it completes, so the
-     * `hasFile` conflict checks in {@see \App\Service\UploadAppendService} and
-     * {@see \App\Service\UploadFinalizationService} only apply when this is false.
+     * `PUT`); such an upload is expected to still have `hasFile === true` right up to completion, so file-conflict
+     * checks elsewhere only apply when this is false.
      */
     public function targetHadFileAtCreation(): bool
     {

@@ -7,8 +7,8 @@ namespace App\Tests\FeatureTests\General\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Mirrors FileTopLevelPropertyTest, but targets relations, fetched directly and inside the /related, /children
- * and /parents collections.
+ * Targets relations instead of nodes, fetched directly and inside the /related, /children and /parents
+ * collections.
  */
 class FileTopLevelPropertyOnRelationTest extends BaseRequestTestCase
 {

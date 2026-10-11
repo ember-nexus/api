@@ -7,8 +7,8 @@ namespace App\Tests\ServerTests;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Started with `memory_limit = 3M`, see tests/ServerTests/ini/low-memory: PHP fails before the application, i.e.
- * Symfony's error handler, can answer. The web server (`intercept` in docker/Caddyfile) replaces the empty answer.
+ * Started with `memory_limit = 3M`: PHP fails before the application, i.e. Symfony's error handler, can answer. The
+ * web server's `intercept` directive replaces the empty answer.
  */
 #[Group('server-php-boot-failure')]
 class PhpBootFailureTest extends BaseServerTestCase
@@ -20,7 +20,7 @@ class PhpBootFailureTest extends BaseServerTestCase
         $this->assertSame(500, $response->getStatusCode());
         $this->assertResponseMatchesDocumentation('php-boot-failure', $response);
         $this->assertStringNotContainsStringIgnoringCase('memory', (string) $response->getBody());
-        // the response created by the web server identifies its request as well, see docker/Caddyfile
+        // the response created by the web server identifies its request as well
         $this->assertNotSame(
             $this->getInstanceOfProblemResponse($response),
             $this->getInstanceOfProblemResponse($this->runGetRequest('/', $this->getToken()))

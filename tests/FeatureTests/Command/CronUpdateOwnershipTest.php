@@ -24,7 +24,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     {
         $connection = $this->getRabbitMqConnection();
         $channel = $connection->channel();
-        // same arguments as QueueService uses to declare this (durable, bounded, dead-lettered) queue
+        // matches the durable, bounded, dead-lettered queue configuration used in production
         $channel->queue_declare(self::DEAD_LETTER_QUEUE, false, true, false, false, false, new AMQPTable([
             'x-max-length' => self::QUEUE_MAX_LENGTH,
         ]));
@@ -62,12 +62,9 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     }
 
     /**
-     * Non-destructively checks whether a message with this exact body is currently in the queue (every message
-     * fetched here is nack'd with requeue, so nothing is actually consumed). Used instead of an exact
-     * {@see self::getQueueMessageCount()} count where a specific message's presence is what matters, not the
-     * queue's total depth: a relation change under test can legitimately leave a second, unrelated element queued
-     * for its own (redundant but harmless) recalculation, e.g. when the element gaining access is also the
-     * publishing user's first-ever recalculation, and that is not this assertion's concern.
+     * Non-destructively checks whether a message with this exact body is in the queue (fetched messages are
+     * nack'd with requeue). Checked by content rather than total queue depth, since a relation change under test
+     * can legitimately leave an extra, unrelated recalculation queued alongside it.
      */
     private function queueContainsMessageWithBody(string $body): bool
     {
@@ -154,25 +151,12 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     }
 
     /**
-     * Creating a relation via the HTTP endpoint requires CREATE access on its start and READ access on its end
-     * (`PostIndexController`), so an independent, freshly registered user does not otherwise have any relationship
-     * to self::TOKEN's user or to elements it owns. This grants self::TOKEN's user direct `CREATE`/`DELETE` access
-     * to the given (otherwise unrelated) user directly in the graph, as a *test precondition only* - it
-     * deliberately bypasses the application (no event is dispatched for it), the same way other feature tests poke
-     * Cypher/Mongo directly to set up a precondition (see e.g. BaseCronTestCase::setUploadProperty()). The relation
-     * actually under test in each scenario below is always created afterwards through the real HTTP endpoint, so
-     * it does exercise the event listener/queue/command end to end.
-     *
-     * `HAS_CREATE_ACCESS`/`HAS_DELETE_ACCESS` (not `OWNS`) on purpose: each test's cleanup later deletes this user
-     * through the real HTTP endpoint, which cascades to every remaining relation, including this one - were it an
-     * `OWNS` edge onto self::TOKEN's own (shared, fixture-wide) user,
-     * {@see \App\EventSystem\EntityManager\EventListener\OwnershipChangeEventListener} would queue a real
-     * recalculation of that shared user's own search access, which can cascade through everything it owns. These
-     * two types are deliberately excluded from that listener's trigger list, so deleting them is a no-op for it.
-     *
-     * A minimal Elasticsearch stub document is indexed for each relation too (existence is all that matters here):
-     * the real app always creates one alongside the Neo4j relation, and that cascading cleanup delete 500s if the
-     * corresponding document is missing entirely.
+     * Grants self::TOKEN's user direct CREATE/DELETE access to the given (otherwise unrelated) user by writing
+     * the relation straight into the graph, as a test precondition only; the relation actually under test in
+     * each scenario is always created afterwards through the real HTTP endpoint. Uses HAS_CREATE_ACCESS/
+     * HAS_DELETE_ACCESS rather than OWNS so that each test's cleanup delete of this user doesn't also trigger a
+     * real search-access recalculation of the shared fixture user. A minimal Elasticsearch stub document is
+     * indexed for each relation too, since the cascading cleanup delete fails if it's missing entirely.
      */
     private function grantOwnershipOf(string $userId): void
     {
@@ -303,16 +287,9 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     }
 
     /**
-     * A pure `OWNS`-owned-by-the-group scenario, as this test's name would suggest, is not actually how this
-     * application's access model behaves for *direct* per-user access: `AccessChecker::getDirectUsersWithAccessToNode()`
-     * only honors a group hop for a *user's own* `_usersWithSearchAccess` entry when the querying user also created
-     * the element themselves (see the existing `_99_01_IsInGroupAfterOwnsHaveNoEffectTest`, which documents that a
-     * plain `IS_IN_GROUP` + `OWNS` chain grants no *direct, per-user* access this way). That is not how group access
-     * to search actually works though: `_groupsWithSearchAccess` is calculated (and matched at query time against
-     * the searching user's own groups) independently of any of that - see
-     * testGroupMemberGainsSearchAccessViaGroupHasSearchAccessWithoutOwningOrCreatingTheElement() below, which covers
-     * that actual outcome. This test therefore only covers the `IS_IN_GROUP` relation-change mechanism itself (queued
-     * and drained without error), not a search-access outcome.
+     * A plain `IS_IN_GROUP` relation change grants no direct, per-user search access by itself, so this test only
+     * covers that the change is queued and drained without error; the actual group-conferred search-access outcome
+     * is covered separately below.
      */
     public function testGroupMembershipChangeIsQueuedAndConsumedWithoutError(): void
     {
@@ -337,14 +314,9 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     }
 
     /**
-     * Covers the actual outcome of group-conferred search access: `AccessChecker::getDirectGroupsWithAccessToNode()`
-     * (unlike its per-user sibling `getDirectUsersWithAccessToNode()`) does *not* require the querying user to have
-     * created the element - a group's `HAS_SEARCH_ACCESS` relation is resolved once into `_groupsWithSearchAccess`,
-     * and `ElasticsearchQueryDslMixinSearchStepEventListener::buildCombinedQuery()` matches that field at query time
-     * against whichever groups the searching user is currently in (`AccessChecker::getUsersGroups()`). So a group
-     * member gains search access to everything the group has `HAS_SEARCH_ACCESS` to, even without ever having
-     * created or directly owned any of it themselves - unlike the (deliberately unresolved) direct, per-user
-     * `_usersWithSearchAccess` case covered by testGroupMembershipChangeIsQueuedAndConsumedWithoutError() above.
+     * Covers the actual outcome of group-conferred search access: a group member gains search access to everything
+     * the group has `HAS_SEARCH_ACCESS` to, even without ever having created or directly owned it themselves -
+     * unlike the direct, per-user case covered above.
      */
     public function testGroupMemberGainsSearchAccessViaGroupHasSearchAccessWithoutOwningOrCreatingTheElement(): void
     {
@@ -431,9 +403,8 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
 
         $this->assertSame(0, $exitCode, $output);
         $this->assertMatchesRegularExpression('/updated search access of [1-9]\d* element\(s\)/', $output);
-        // the malformed message specifically is still waiting for its remaining tries; checked by content rather
-        // than by total queue depth, since the valid relation change above may legitimately leave its own
-        // harmless, unrelated recalculation queued alongside it
+        // the malformed message is still waiting for its remaining tries; checked by content, not queue depth,
+        // since the valid relation change above may also leave its own harmless recalculation queued
         $this->assertTrue($this->queueContainsMessageWithBody('this is not json'));
 
         $this->deleteNode($elementId);

@@ -7,7 +7,7 @@ namespace App\Tests\FeatureTests\Endpoint\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Mirrors ZeroByteFileUploadTest, but targets a relation instead of a node.
+ * Targets a relation instead of a node.
  */
 class ZeroByteFileUploadOnRelationTest extends BaseRequestTestCase
 {

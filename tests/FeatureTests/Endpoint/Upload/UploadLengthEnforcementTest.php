@@ -8,10 +8,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Completing an upload with fewer or more bytes than the declared `Upload-Length` is rejected with 409 (same status as
- * the already existing "exceeds" case). Only the request is rejected, the upload keeps its state and can be completed
- * by a corrected request. A non-final chunk which exceeds the declared length is rejected the same way. Creation
- * rejects a first chunk which exceeds the declared length.
+ * Completing an upload with fewer or more bytes than the declared `Upload-Length` is rejected with 409; only the
+ * request is rejected, and the upload keeps its state so a corrected request can still complete it. The same
+ * length check applies to non-final chunks and to the first chunk at creation.
  */
 class UploadLengthEnforcementTest extends BaseUploadTestCase
 {

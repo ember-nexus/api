@@ -25,16 +25,10 @@ use Syndesi\ElasticDataStructures\Type\Document;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
 /**
- * Recalculates `_groupsWithSearchAccess`/`_usersWithSearchAccess` for elements affected by relation changes
- * (`OWNS`/`HAS_SEARCH_ACCESS`/`IS_IN_GROUP`) published by {@see \App\EventSystem\EntityManager\EventListener\OwnershipChangeEventListener}.
- *
- * Recalculation only happens once this command drains the queue, so a stored element's search access can lag behind
- * the graph by up to the interval this command is scheduled at (i.e. an eventual-consistency window).
- *
- * Each queue message recalculates exactly one element: either a relation's own id/endpoints (for the original
- * relation-change event), or a single `elementId` (for a child, queued directly by the parent that affected it, see
- * {@see recalculateElementAndQueueChildren()}). Children are never walked in-process - this bounds every message to
- * O(1) work and lets a deep subtree change settle over several cron ticks instead of one unbounded run.
+ * Recalculates `_groupsWithSearchAccess`/`_usersWithSearchAccess` for elements affected by relation changes; runs
+ * asynchronously via queue, so search access can lag behind the graph by up to this command's cron interval. Each
+ * message recalculates one element and queues its children instead of recursing in-process, bounding every message
+ * to O(1) work.
  *
  * @psalm-suppress PropertyNotSetInConstructor $io
  */
@@ -110,11 +104,9 @@ class UpdateOwnershipCommand extends Command
             return;
         }
 
-        // the original relation-change event: the relation's own id (relations have search access documents too)
-        // plus both of its endpoints can each be affected by the change; a deleted relation can no longer be
-        // reloaded, so all three ids travel in the payload itself rather than being looked up from the (possibly
-        // already gone) relation. They are deduplicated since e.g. a self-referencing relation can have the same
-        // id in more than one of these three fields, and each distinct element only needs recalculating once.
+        // the relation's own id and both endpoints can each be affected; since a deleted relation can't be reloaded,
+        // all three ids travel in the payload itself. They are deduplicated since a self-referencing relation can
+        // repeat an id across these fields.
         $rawIds = [];
         foreach (['relationId', 'startId', 'endId'] as $key) {
             $rawId = $eventData[$key] ?? null;
@@ -126,10 +118,9 @@ class UpdateOwnershipCommand extends Command
             $this->recalculateElementAndQueueChildren(Uuid::fromString($rawId));
         }
 
-        // IS_IN_GROUP is special: it does not change the group's (endId's) own direct accessors (it grants the
-        // member the group's rights, not access to the group node itself), so the group's own delta above is always
-        // zero and the normal "cascade to children only on non-zero delta" rule would never reach what actually
-        // changed: every element the group (transitively) owns. So its children are always recalculated directly.
+        // IS_IN_GROUP grants the member the group's rights rather than access to the group node itself, so the
+        // group's own delta is always zero and the normal cascade-on-change rule would never reach what actually
+        // changed; its children are therefore always recalculated directly regardless of delta.
         $endId = $eventData['endId'] ?? null;
         if ('IS_IN_GROUP' === ($eventData['relationType'] ?? null) && is_string($endId) && '' !== $endId) {
             foreach ($this->getChildrenIds(Uuid::fromString($endId)) as $childId) {
@@ -139,11 +130,9 @@ class UpdateOwnershipCommand extends Command
     }
 
     /**
-     * Recomputes direct groups/users for the given element, stores only if the set changed, and only then queues
-     * that element's children for the same recomputation as separate messages: children are guaranteed unchanged
-     * when the parent's own delta was zero, so the cascade stops there. Queueing (instead of recursing in-process)
-     * also means a cycle in the ownership graph can not loop forever here - each message does O(1) work, and the
-     * cascade self-terminates once recalculation everywhere it reaches reports no further change.
+     * Queues children only when this element's own access changed, since an unchanged parent means unchanged
+     * children too; this also makes a cycle in the ownership graph self-terminating, as each message does O(1)
+     * work and the cascade stops once nothing reachable changes anymore.
      */
     private function recalculateElementAndQueueChildren(UuidInterface $elementId): void
     {
@@ -166,10 +155,10 @@ class UpdateOwnershipCommand extends Command
     }
 
     /**
-     * Recomputes the direct groups/users with search access for the given element (reusing the exact same
-     * calculation {@see \App\EventSystem\EntityManager\EventListener\CalculateSearchAccessEventListener} uses on
-     * create), compares it against the currently stored Elasticsearch document as sets, and stores it only if it
-     * changed. Returns whether it changed.
+     * Reuses the same search-access calculation used on element create, so results stay consistent between
+     * creation and recalculation.
+     *
+     * @return bool whether the stored access changed
      */
     private function recalculateSearchAccess(NodeElementInterface|RelationElementInterface $element): bool
     {
@@ -210,8 +199,6 @@ class UpdateOwnershipCommand extends Command
      */
     private function getChildrenIds(UuidInterface $parentId): array
     {
-        // same "children of an element" graph semantics as EtagCalculatorService::calculateChildrenCollectionEtag():
-        // nodes/relations directly OWNed by the element
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (parent {id: \$parentId})-[:OWNS]->(children)\n".
             'RETURN children.id AS id',

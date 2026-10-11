@@ -8,8 +8,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
  * Verifies that intermediate PATCH chunks below the minimum chunk size are rejected, as S3 requires every
- * multipart part except the last to be at least 5 MiB. The completing chunk (`Upload-Complete: ?1`) is exempt, and so
- * is a chunk of exactly 0 bytes, which is a no-op (see PatchUploadZeroLengthChunkTest).
+ * multipart part except the last to be at least 5 MiB. The completing chunk (`Upload-Complete: ?1`) is exempt, and
+ * so is a chunk of exactly 0 bytes, which is a no-op.
  */
 class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
 {

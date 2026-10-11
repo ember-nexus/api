@@ -12,9 +12,8 @@ use Ramsey\Uuid\UuidInterface;
 
 /**
  * Calculates the direct groups/users with search access to a node or relation, and the Elasticsearch index name its
- * document is stored under. Shared by {@see \App\EventSystem\EntityManager\EventListener\CalculateSearchAccessEventListener}
- * (create time / after backup load) and {@see \App\Command\Cron\UpdateOwnershipCommand} (recalculation after later
- * relation changes), so both use the exact same access-calculation logic.
+ * document is stored under. Shared by the code paths that calculate it at create time and the ones that recalculate
+ * it later, so both use the exact same access-calculation logic.
  */
 class SearchAccessCalculatorService
 {

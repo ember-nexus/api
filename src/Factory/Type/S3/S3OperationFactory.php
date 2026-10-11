@@ -89,7 +89,7 @@ class S3OperationFactory
 
     /**
      * @param resource $resource
-     * @param int|null $contentLength enables multipart uploads for large files in {@see \App\Service\S3Service::uploadFile()}
+     * @param int|null $contentLength when known, enables a multipart upload for large files
      */
     public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, $resource, ?int $contentLength = null): UploadFileOperationInterface
     {

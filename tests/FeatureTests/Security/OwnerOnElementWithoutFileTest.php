@@ -7,8 +7,7 @@ namespace App\Tests\FeatureTests\Security;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Verifies how the file endpoints behave for the owner of an element which has no file. Successful file operations
- * of owners are covered by {@see FileEndpointAccessControlTest}.
+ * Verifies how the file endpoints behave for the owner of an element which has no file.
  */
 class OwnerOnElementWithoutFileTest extends BaseRequestTestCase
 {

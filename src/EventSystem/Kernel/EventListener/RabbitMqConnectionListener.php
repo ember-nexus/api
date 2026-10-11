@@ -18,9 +18,9 @@ class RabbitMqConnectionListener
     }
 
     /**
-     * The connection service is lazy (see config/services.yaml), so most requests never actually open one; closing
-     * it unconditionally would force it open here just to immediately close it again. Only an already-initialized
-     * (i.e. actually used) connection needs closing.
+     * The connection service is lazy, so most requests never actually open one; closing it unconditionally would
+     * force it open just to immediately close it again. Only an already-initialized (i.e. actually used) connection
+     * needs closing.
      */
     #[AsEventListener('kernel.terminate')]
     public function onKernelTerminate(): void

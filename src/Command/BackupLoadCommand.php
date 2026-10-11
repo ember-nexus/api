@@ -261,8 +261,6 @@ class BackupLoadCommand extends Command
     }
 
     /**
-     * Verifies the backup file against the `file.hash.<algorithm>` values stored on its element.
-     *
      * @return string|null error message, or null if all hashes match
      */
     private function verifyFileHashes(NodeElementInterface|RelationElementInterface $element, string $path): ?string

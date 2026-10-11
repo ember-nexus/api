@@ -96,9 +96,8 @@ services:
       - MINIO_ROOT_PASSWORD=CHANGEME123
     command: server /data --console-address ":9001"
 
-  # one-shot container that creates the two S3 buckets Ember Nexus expects (file.S3StorageBucket
-  # and file.S3UploadBucket, see the configuration reference) and then exits; minio does not create
-  # these on its own
+  # one-shot container that creates the two S3 buckets Ember Nexus expects (file.S3StorageBucket and
+  # file.S3UploadBucket); minio does not create these on its own
   minio-init:
     container_name: minio-init
     image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z

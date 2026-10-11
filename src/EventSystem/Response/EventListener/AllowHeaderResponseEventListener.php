@@ -9,11 +9,9 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Adds the `Allow` header, which lists the methods supported by the requested URL. Every method of an URL is its own
- * route, so the methods are collected from all routes which share the path of the matched route.
- *
- * Requests without a matching route (404) get no header; the `405` response carries the header of the router, see
- * NoRouteFoundExceptionEventListener.
+ * Adds the `Allow` header, listing the methods supported by the requested URL; since every method of a URL is its
+ * own route, the methods are collected from all routes sharing the matched route's path. Requests without a
+ * matching route (404) get no header here; a `405` carries its own `Allow` header from the router instead.
  */
 class AllowHeaderResponseEventListener
 {
@@ -85,7 +83,7 @@ class AllowHeaderResponseEventListener
                 // Symfony matches HEAD requests to routes of GET
                 $methods[] = 'HEAD';
             }
-            // the preflight of every URL is answered by public/index.php
+            // every URL supports OPTIONS for the CORS preflight
             $methods[] = 'OPTIONS';
             $methods = array_values(array_unique($methods));
             sort($methods);

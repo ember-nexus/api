@@ -8,18 +8,9 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
- * Narrows the `Access-Control-Allow-Methods` header, set to the global list of all methods used by the API in
- * public/index.php, down to the methods actually supported by the requested URL, by mirroring the `Allow` header:
- * see AllowHeaderResponseEventListener for the regular case, and NoRouteFoundExceptionEventListener for the `405`
- * case, where `Allow` is populated from the router's own exception instead of a matched route. Both describe the
- * exact same set of methods, so copying the already-resolved value is all that's needed; there is no route lookup
- * or other computation to do here, so this listener costs nothing beyond the header copy itself.
- *
- * Must run after AllowHeaderResponseEventListener, hence the explicit negative priority: `Allow` has to be resolved
- * first for there to be anything to mirror.
- *
- * Requests without a matching route (404) or the CORS preflight (answered directly by public/index.php, before
- * Symfony boots, and thus never carrying an `Allow` header to mirror) keep the global list set by public/index.php.
+ * Narrows the global `Access-Control-Allow-Methods` header down to the methods actually supported by the requested
+ * URL, by copying the already-resolved `Allow` header set elsewhere for the same URL. Must run after
+ * AllowHeaderResponseEventListener (hence the negative priority), since `Allow` needs to be resolved first.
  */
 class CorsAllowMethodsResponseEventListener
 {

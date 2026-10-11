@@ -22,7 +22,7 @@ interface UploadInterface
     public function getAlreadyUploadedChunks(): int;
 
     /**
-     * Ids of the accepted chunk objects in upload order, see {@see \App\Service\StorageService::getUploadBucketKey()}.
+     * Ids of the accepted chunk objects, in upload order.
      *
      * @return list<string>
      */

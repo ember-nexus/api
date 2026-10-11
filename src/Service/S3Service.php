@@ -184,9 +184,8 @@ class S3Service
 
     /**
      * Same steps as {@see deleteFile()} for each operation, but all S3 calls of a step are issued for every
-     * operation before any of them is read, so the underlying HTTP client can run them concurrently (bounded by
-     * {@see EmberNexusConfiguration::FILE_S3_MAX_HOST_CONNECTIONS}) instead of resolving one file fully before
-     * starting the next.
+     * operation before any of them is read, so the underlying HTTP client can run them concurrently instead of
+     * resolving one file fully before starting the next.
      *
      * @param FileOperationInterface[] $fileOperations
      *
@@ -272,10 +271,6 @@ class S3Service
         return $uploadContentLength;
     }
 
-    /**
-     * Files from {@see MULTIPART_UPLOAD_THRESHOLD_IN_BYTES} upwards are streamed directly into the storage bucket as
-     * a multipart upload, smaller ones are copied over from the upload bucket.
-     */
     public function uploadFile(UploadFileOperationInterface $uploadFileOperation): int
     {
         $contentLength = $uploadFileOperation->getContentLength();
@@ -306,9 +301,8 @@ class S3Service
         try {
             $this->s3ClientWrapper->resolveCopyObjectOutput($copyResult);
         } catch (Throwable $e) {
-            // the copy failed, so the upload-bucket chunk is no longer needed either; cleaning it up here (instead
-            // of relying solely on the upload bucket's lifecycle policy) must never turn this failed upload into a
-            // different error, so any cleanup failure is only logged, not reported to the client
+            // the copy failed, so clean up the now-unneeded upload-bucket chunk; failures here must only be logged,
+            // never turned into the reported error
             $this->tryDeleteFile($uploadChunkFileOperation);
 
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Upload failed: %s', $e->getMessage()), previous: $e);

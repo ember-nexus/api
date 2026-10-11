@@ -7,8 +7,7 @@ namespace App\Tests\FeatureTests\Endpoint\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Concrete (non-wildcard) `If-None-Match` and `If-Match` values on the file endpoints of nodes and relations, see
- * WildcardFileEtagTest for the `*` variants.
+ * Concrete (non-wildcard) `If-None-Match` and `If-Match` values on the file endpoints of nodes and relations.
  */
 class FileEtagTest extends BaseRequestTestCase
 {
@@ -76,10 +75,8 @@ class FileEtagTest extends BaseRequestTestCase
     }
 
     /**
-     * `EtagCalculatorService::calculateFileEtag()` combines the element's own ETag (id + `updated` timestamp) with
-     * the file's hash. Any property write, including a name-only `PATCH`, changes the element's `updated`
-     * timestamp and therefore the file ETag too, even though the file's bytes are untouched. This pins that
-     * behaviour down: renaming the element changes the file ETag.
+     * Any property write, including a name-only `PATCH`, changes the element's `updated` timestamp and therefore
+     * the file ETag too, even though the file's bytes are untouched.
      */
     public function testFileEtagChangesWhenTheElementIsRenamedEvenThoughTheFileItselfIsUnchanged(): void
     {

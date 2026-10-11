@@ -7,7 +7,7 @@ namespace App\Tests\FeatureTests\Endpoint\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Mirrors ReplaceFileWithDifferentExtensionTest, but targets a relation instead of a node.
+ * Targets a relation instead of a node.
  */
 class ReplaceFileWithDifferentExtensionOnRelationTest extends BaseRequestTestCase
 {

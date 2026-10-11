@@ -1,5 +1,5 @@
-# Stack for the server tests, see bin/test-server. Service names are used as host names, the containers have no fixed
-# names so that the stack can run next to the development stack.
+# Stack for the server tests. Service names are used as host names, the containers have no fixed names so that the
+# stack can run next to the development stack.
 services:
 
   api-dev:
@@ -17,7 +17,7 @@ services:
       - ../../:/var/www/html
       - ../FeatureTests/well-known-security.txt:/well-known-security.txt
 
-  # production image without mounted source code, i.e. as it is delivered; the limits are lowered by bin/test-server
+  # production image without mounted source code, i.e. as it is delivered; limits are lowered per test scenario
   api-prod:
     image: api:prod-amd
     depends_on:

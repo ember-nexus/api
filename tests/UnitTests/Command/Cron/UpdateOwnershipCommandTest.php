@@ -243,8 +243,7 @@ class UpdateOwnershipCommandTest extends TestCase
 
     /**
      * The parent's child is never fetched or recalculated within this same handler call - it is only queued as a
-     * brand new, standalone message (see {@see UpdateOwnershipCommand::recalculateElementAndQueueChildren()}), to
-     * be recalculated whenever that message is drained, possibly in a later run.
+     * brand new, standalone message, to be recalculated whenever that message is drained, possibly in a later run.
      */
     public function testCommandQueuesChildrenAsNewMessagesInsteadOfRecalculatingThemInProcess(): void
     {

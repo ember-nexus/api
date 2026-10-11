@@ -7,12 +7,10 @@ namespace App\Tests\ExampleGenerationControllerWithDifferentConfiguration\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Runs with `file.maxFileSizeInBytes` set to 1024 bytes, see configuration.yml in the parent directory. Must be run
- * with `composer test:example-generation-controller:with-different-configuration`, otherwise the default limit of
- * 10 GiB applies and the tests fail.
- *
- * Because the limit is smaller than the minimum chunk size, the running-total check of a resumable upload can only be
- * reached by the final chunk.
+ * Runs with `file.maxFileSizeInBytes` set to 1024 bytes. Must be run via
+ * `composer test:example-generation-controller:with-different-configuration`, otherwise the default limit of 10 GiB
+ * applies and the tests fail. Because the limit is smaller than the minimum chunk size, the running-total check of
+ * a resumable upload can only be reached by the final chunk.
  */
 class MaxFileSizeTest extends BaseRequestTestCase
 {

@@ -27,9 +27,9 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
     private const array REMOVED_HEADERS = ['X-Debug-Token', 'X-Debug-Token-Link'];
 
     /**
-     * tests/ExampleGenerationControllerWithDifferentConfiguration runs against an API instance configured with a
-     * different domain, to prove that it is not hardcoded. Documentation examples should still look consistent
-     * with those generated against the default instance, so the different domain is normalized away here.
+     * Some tests run against an API instance configured with a different domain, to prove that it is not
+     * hardcoded. Documentation examples should still look consistent with those generated against the default
+     * instance, so the different domain is normalized away here.
      */
     private const string DIFFERENT_CONFIGURATION_DOMAIN = 'http://api-different-configuration';
     private const string DEFAULT_DOMAIN = 'http://api';
@@ -241,9 +241,9 @@ abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTe
     }
 
     /**
-     * Updates the documentation of a search result. If the documented result differs from the response (ignoring
-     * volatile values), the whole file is replaced. Otherwise, only the Elasticsearch scores are updated in place, so
-     * that unrelated values like timestamps are not changed.
+     * Updates the documentation of a search result: if it differs from the response ignoring volatile values, the
+     * whole file is replaced; otherwise only the Elasticsearch scores are updated in place, so unrelated values
+     * like timestamps stay untouched.
      */
     private function fixSearchResultDocumentation(
         string $pathToProjectRoot,

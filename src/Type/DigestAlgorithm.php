@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Type;
 
 /**
- * Algorithms supported in the RFC 9530 `Repr-Digest` / `Content-Digest` headers (see
- * {@see \App\Service\DigestService}).
+ * Algorithms supported in the RFC 9530 `Repr-Digest` / `Content-Digest` headers.
  */
 enum DigestAlgorithm: string
 {

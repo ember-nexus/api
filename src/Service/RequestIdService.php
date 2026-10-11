@@ -9,9 +9,9 @@ use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * The web server sets the request header `X-Request-Id` for every request (docker/Caddyfile), which is also part of
- * its access log and, as `instance` (`urn:uuid:<id>`), of every problem json response, so that a client can find the
- * log lines of its request. Without the header, e.g. on the console, a new id is generated.
+ * The web server sets the request header `X-Request-Id` for every request, which is also part of its access log
+ * and, as `instance` (`urn:uuid:<id>`), of every problem json response, so that a client can find the log lines of
+ * its request. Without the header, e.g. on the console, a new id is generated.
  */
 class RequestIdService
 {

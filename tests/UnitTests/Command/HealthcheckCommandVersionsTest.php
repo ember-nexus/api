@@ -29,10 +29,9 @@ use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 
 /**
- * The Cypher/Mongo/Redis/RabbitMQ parts of the healthcheck; S3 has its own test (HealthcheckCommandS3Test). Elastic
- * (its client is a final SDK class with a final transport, only reachable through the real HTTP layer), the version
- * probes (Alpine/Caddy/FrankenPHP/PHP) and the final API ping are covered by the command example test instead
- * (SystemHealthcheckTest), which runs against real services.
+ * The Cypher/Mongo/Redis/RabbitMQ parts of the healthcheck. Elastic's client is a final SDK class with a final
+ * transport, only reachable through the real HTTP layer, so it is covered elsewhere together with the version
+ * probes and the final API ping.
  */
 #[Small]
 #[CoversClass(HealthcheckCommand::class)]

@@ -8,9 +8,8 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
  * Verifies the download filename in `Content-Disposition`: the element's string 'name' property if set, otherwise
- * the element's id, with the stored extension. A missing extension property falls back to "bin", while an empty extension (uploaded filename
- * without any extension, e.g. 'Makefile') means that the file has no extension at all: no suffix and no trailing dot
- * (see ElementService::getFileName()).
+ * its id, with the stored extension appended. An empty extension (e.g. 'Makefile') is downloaded with no
+ * extension at all, not even a trailing dot.
  */
 class FileNameFallbackTest extends BaseRequestTestCase
 {

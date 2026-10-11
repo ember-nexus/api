@@ -7,8 +7,8 @@ namespace App\Tests\FeatureTests\Endpoint\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Mirrors GetFileRangeTest, but targets a relation instead of a node. The relation and its deterministic file
- * are created once and shared by all tests of this class.
+ * Targets a relation instead of a node. The relation and its deterministic file are created once and shared
+ * by all tests of this class.
  */
 class GetFileRangeOnRelationTest extends BaseRequestTestCase
 {

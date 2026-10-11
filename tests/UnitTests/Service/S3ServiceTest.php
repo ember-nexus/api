@@ -1367,7 +1367,6 @@ class S3ServiceTest extends TestCase
             'ContentType' => 'text/plain',
             'MetadataDirective' => 'REPLACE',
         ]))->shouldBeCalledOnce()->willReturn($copyObjectOutput);
-        // the upload-bucket chunk is cleaned up despite the copy having failed
         $s3Client->objectExists(Argument::is([
             'Bucket' => 'upload-bucket',
             'Key' => 'upload-key',
@@ -2133,9 +2132,9 @@ class S3ServiceTest extends TestCase
     }
 
     /**
-     * {@see Result::resolve()} is final and can therefore not be doubled with Prophecy; a real {@see DeleteObjectOutput}
-     * wrapping a stubbed HTTP response is built instead, so calling `resolve()` on it behaves like a real, already
-     * succeeded S3 call.
+     * `Result::resolve()` is final and can therefore not be doubled with Prophecy; a real `DeleteObjectOutput`
+     * wrapping a stubbed HTTP response is built instead, so calling `resolve()` on it behaves like a real,
+     * already succeeded S3 call.
      */
     private function buildDeleteObjectOutput(): DeleteObjectOutput
     {

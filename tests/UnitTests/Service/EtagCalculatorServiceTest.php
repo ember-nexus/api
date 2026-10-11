@@ -1541,7 +1541,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method; the file etag now always combines the element etag with the stored hash
+        // the file etag now always combines the element etag with the stored hash
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertNotNull($etag);
 
@@ -1604,7 +1604,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method; 'blake3' sorts before 'md5', so it is used as the hash component
+        // 'blake3' sorts before 'md5', so it is used as the hash component
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertNotNull($etag);
     }
@@ -1654,7 +1654,7 @@ class EtagCalculatorServiceTest extends TestCase
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        // run service method; falls back to calculateElementEtag(), i.e. a Cypher query, not an S3 call
+        // falls back to the element etag, i.e. a Cypher query, not an S3 call
         $etag = $etagCalculatorService->calculateFileEtag($id);
         $this->assertNotNull($etag);
 

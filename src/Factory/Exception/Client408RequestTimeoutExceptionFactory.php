@@ -30,9 +30,7 @@ class Client408RequestTimeoutExceptionFactory
     }
 
     /**
-     * Returns an exception in the format of: "The request body is incomplete, received %d of %d bytes announced by the
-     * Content-Length header. The connection was interrupted or the request body was not sent within the time limit of
-     * the server.". The server cuts off slow request bodies silently, so a shorter body is the only sign of it.
+     * The server cuts off slow request bodies silently, so a shorter-than-announced body is the only sign of it.
      */
     public function createFromIncompleteBody(int $receivedLength, int $announcedLength): Client408RequestTimeoutException
     {

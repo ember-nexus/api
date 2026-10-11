@@ -6,8 +6,7 @@ use App\Kernel;
 
 require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 
-// keep in sync with the snippet `problem_json_headers` in docker/Caddyfile; the `Allow` header depends on the route,
-// see AllowHeaderResponseEventListener
+// the `Allow` header depends on the route and is set per-request by AllowHeaderResponseEventListener instead
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: *');
 header('Access-Control-Expose-Headers: ETag, Location');

@@ -8,19 +8,13 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * A failure while merging the chunks and updating the element in `UploadFinalizationService::finalize()` (e.g. S3
- * or the database not being reachable) is not the client's fault: the upload is put back to unfinalized (not
- * deleted) with its hash state preserved, so the client retries completion with an empty `PATCH`,
- * `Upload-Complete: ?1`, at the offset reported by `HEAD`.
+ * A failure merging chunks and updating the element (e.g. S3 or the database unreachable) is not the client's
+ * fault: the upload is put back to unfinalized with its hash state preserved, so the client retries completion
+ * with an empty `PATCH`, `Upload-Complete: ?1`, at the offset reported by `HEAD`.
  *
- * There is no existing, reliable way in this suite to make the S3 merge itself fail without disturbing concurrent
- * tests (the storage bucket is shared and can not be emptied or renamed while other tests are running, and MinIO
- * here has no reachable per-request policy control). Instead, this forces the failure on the database side of the
- * same code path: a uniqueness constraint on a label used by no other element makes the merge's own write of
- * `hasFile = true` onto the upload's target collide with a decoy node created just for this test, so the S3 merge
- * of the chunks genuinely succeeds and only the following graph write fails. `finalize()` treats that exactly the
- * same as a failing S3 merge. Runs in the `command` group because it manipulates a global schema constraint (the
- * constraint itself is scoped to a label no other test uses, so it does not affect concurrent parallel tests).
+ * The S3 merge itself can't reliably be made to fail without disturbing concurrent tests, so this forces the
+ * failure on the database side instead, via a uniqueness constraint scoped to a label no other test uses. Runs
+ * in the `command` group because it manipulates a schema constraint.
  */
 #[Group('command')]
 class ResumableUploadUnfinalizedStateTest extends BaseRequestTestCase

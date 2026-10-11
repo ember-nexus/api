@@ -8,9 +8,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * A non-final chunk of exactly 0 bytes is a no-op which reports the current offset (usable as status check): nothing
- * is stored and neither offset nor hash state change. Chunks of 1 to minimum - 1 bytes stay rejected on non-final
- * requests, as S3 does not accept small parts. The same rules apply when the upload is created.
+ * A non-final chunk of exactly 0 bytes is a no-op usable as a status check (nothing is stored, offset and hash
+ * state untouched); chunks of 1 to minimum - 1 bytes stay rejected on non-final requests, as S3 does not accept
+ * small parts. The same rules apply when the upload is created.
  */
 class PatchUploadZeroLengthChunkTest extends BaseUploadTestCase
 {

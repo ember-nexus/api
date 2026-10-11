@@ -55,12 +55,9 @@ class DeleteElementController extends AbstractController
         $element = $this->elementManager->getElementOrFail($elementId);
         $fileOperations = $this->elementFileDeletionService->getFileOperationsForDeletionOfElement($element);
 
-        // intentionally not clearing any FileCreationLockService/UploadLockService Redis lock for this element here:
-        // both locks have short TTLs (FileCreationLockService::TTL_IN_MILLISECONDS / UploadLockService::TTL_IN_MILLISECONDS)
-        // and are only held for the duration of a single request, so a lock surviving this deletion by a few minutes
-        // at most is not worth the added complexity of reaching into Redis from the delete path
-
-        // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
+        // intentionally not clearing the FileCreationLockService/UploadLockService Redis lock for this element
+        // here: both have short TTLs and are only held for a single request, so a lock surviving this deletion by
+        // a few minutes at most is not worth the added complexity of reaching into Redis from the delete path
         $this->uploadService->deleteUploadsTargeting($elementId);
         $this->elementManager->flush();
 

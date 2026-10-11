@@ -10,15 +10,15 @@ use Ramsey\Uuid\UuidInterface;
 
 /**
  * Reserves an element for the creation of its file: `POST /<id>/file` holds the lock while it runs, so concurrent
- * `POST` requests can not both create the file. `PUT` requests do not take the lock (parallel replacements are
- * allowed), but respect it.
+ * `POST` requests can not both create the file; `PUT` requests do not take the lock (parallel replacements are
+ * allowed) but do respect it.
  *
  * The lock is a Redis key holding the acquiring request's id; it expires on its own so that a crashed request can
  * not block the element forever, and is only released by its owner (compare-and-delete).
  */
 class FileCreationLockService
 {
-    // a single request upload may take 15 minutes at most (`read_body` in the Caddyfile)
+    // a single request upload may take 15 minutes at most
     public const int TTL_IN_MILLISECONDS = 900000;
 
     public function __construct(

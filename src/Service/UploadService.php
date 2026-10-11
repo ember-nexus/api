@@ -72,12 +72,9 @@ class UploadService
     }
 
     /**
-     * Compare-and-set on `uploadOffset` and `lastChunkId`, the only graph properties of the chunk list (the list
-     * itself is stored in MongoDB, and an empty final chunk does not move the offset): appends the chunk of $next
-     * only if the stored upload is still incomplete and in the state of $expected, i.e. no other request appended
-     * a chunk in the meantime. Chunk ids are unique per attempt, so `lastChunkId` identifies the state exactly.
-     * The graph update is atomic, the list is written by the following merge, which is flushed. Returns false if the
-     * upload was modified concurrently.
+     * Compare-and-set on `uploadOffset` and `lastChunkId` (the only graph properties of the chunk list): appends
+     * the chunk of $next only if the stored upload is still incomplete and in the state of $expected, i.e. no other
+     * request appended a chunk in the meantime. Returns false if the upload was modified concurrently.
      */
     public function appendChunkIfOffsetMatches(UploadInterface $expected, UploadInterface $next): bool
     {
@@ -106,9 +103,9 @@ class UploadService
     }
 
     /**
-     * Puts a completed upload back to incomplete, e.g. after its finalization failed, so that the client can complete
-     * it again. Only touches the graph, as nothing else is needed and the entity manager may hold state of the failed
-     * finalization. Returns false if the upload does not exist or is not complete.
+     * Puts a completed upload back to incomplete (e.g. after a failed finalization) so the client can complete it
+     * again; only touches the graph, since the entity manager may hold state from the failed finalization. Returns
+     * false if the upload does not exist or is not complete.
      */
     public function markUploadAsUnfinalized(UploadInterface $upload, string $hashState): bool
     {
@@ -126,7 +123,7 @@ class UploadService
     }
 
     /**
-     * Goes through {@see DeletionService} (uploads have no relations today, so this is a no-op safety net for now),
+     * Deletes via the shared deletion path (uploads have no relations today, so this is mostly a no-op safety net),
      * and therefore also flushes, unlike most of this class's other methods.
      */
     public function deleteUpload(UploadInterface $upload): void
@@ -151,11 +148,11 @@ class UploadService
     }
 
     /**
-     * Deletes uploads targeting the element (for nodes also the ones targeting attached relations, as these are deleted
-     * together with the node), as `uploadTarget` is a plain property and not a relation. Must be
-     * called before the element itself is deleted; it is not an event listener because nested
-     * `flush()` calls are not supported. Each matched upload is flushed individually (see {@see deleteUpload()}),
-     * so callers no longer need (but may keep) a flush of their own right after this call.
+     * Deletes uploads targeting the element (for nodes, also ones targeting attached relations, since these are
+     * deleted together with the node), as `uploadTarget` is a plain property, not a relation. Must be called before
+     * the element itself is deleted, since nested `flush()` calls during the element's own deletion are not
+     * supported; each matched upload is flushed individually, so callers no longer need (but may keep) a flush of
+     * their own right after this call.
      */
     public function deleteUploadsTargeting(UuidInterface $elementId): void
     {

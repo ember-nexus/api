@@ -45,8 +45,8 @@ class BackupFetchTest extends BaseCommandTestCase
     }
 
     /**
-     * Uses the reference dataset version which is also used by the other tests (see bin/test-feature-prepare), so
-     * that this test stays up to date automatically. A real environment variable wins over the value in `.env`.
+     * Uses the same reference dataset version as the other tests, so that this test stays up to date automatically.
+     * A real environment variable wins over the value in `.env`.
      */
     private function getReferenceDatasetVersion(): string
     {

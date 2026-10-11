@@ -19,11 +19,11 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Throwable;
 
 /**
- * Removes the files of elements which are deleted, as the files live in S3 and are not removed with the element.
+ * Removes the files of elements which are deleted, since files live in S3 and are not removed with the element.
  *
- * Usage: collect the file operations before the element is deleted, as the relations attached to a node are gone
- * afterwards, then delete the files after the element was deleted and flushed. If deleting a file fails, the failure
- * is logged and the file stays behind in S3 as an orphan instead of the element pointing to a missing file.
+ * Collect the file operations before the element is deleted (relations attached to a node are gone afterwards),
+ * then delete the files after the element is deleted and flushed; a failing delete is only logged, leaving an
+ * orphan rather than failing the request.
  */
 class ElementFileDeletionService
 {
@@ -74,9 +74,10 @@ class ElementFileDeletionService
     }
 
     /**
-     * Deletes the object a replaced file was stored in before, if the new file is stored under a different key (e.g.
-     * changed extension). To be called after the element was flushed and therefore points to the new object; a
-     * failing delete is logged and never fails the request. Overwrites of the same key can not be rolled back.
+     * Deletes the object a replaced file was stored in before, if the new file is stored under a different key
+     * (e.g. changed extension); overwrites of the same key can not be rolled back, so nothing is deleted in that
+     * case. Must be called after the element was flushed and points to the new object - a failing delete is only
+     * logged, never failing the request.
      */
     public function deletePreviousFileAfterReplace(UploadFileOperationInterface|MergeFileChunksOperationInterface $operation): void
     {

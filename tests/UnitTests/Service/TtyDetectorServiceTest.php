@@ -11,9 +11,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * The real tty state of STDIN can not be controlled from within a PHPUnit process, so this only pins down that the
- * check is safe to call and returns a boolean; the actual interactive/non-interactive distinction is exercised by
- * `CronExecutionGateServiceTest` (which mocks this service) and, for the real behaviour, manually against a
- * running container (see the feature test suite's cron CI wiring).
+ * check is safe to call and returns a boolean. The actual interactive/non-interactive distinction is exercised
+ * elsewhere, where this service is mocked.
  */
 #[Small]
 #[CoversClass(TtyDetectorService::class)]

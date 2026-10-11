@@ -7,9 +7,9 @@ namespace App\Tests\ServerTests;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Started with API_REQUEST_BODY_TIMEOUT=10s and API_UPLOAD_REQUEST_BODY_TIMEOUT=20s instead of 30s and 15min, see
- * docker/Caddyfile: only single request uploads (POST/PUT /<id>/file) and chunks (PATCH /upload/<id>) may take longer
- * than the default to send their request body.
+ * Started with API_REQUEST_BODY_TIMEOUT=10s and API_UPLOAD_REQUEST_BODY_TIMEOUT=20s instead of 30s and 15min: only
+ * single request uploads (POST/PUT /<id>/file) and chunks (PATCH /upload/<id>) may take longer than the default to
+ * send their request body.
  */
 #[Group('server-timeouts')]
 class RequestBodyTimeoutTest extends BaseServerTestCase

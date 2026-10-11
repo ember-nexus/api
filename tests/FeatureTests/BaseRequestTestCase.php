@@ -492,7 +492,7 @@ abstract class BaseRequestTestCase extends TestCase
     private function isFileInStorage(string $elementId): bool
     {
         $s3Client = $this->createS3ClientForAssertions();
-        // the object key ends with the element id, see StorageService::getStorageBucketKey()
+        // the object key ends with the element id
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-storage']) as $object) {
             if (str_contains((string) $object->getKey(), $elementId)) {
                 return true;
@@ -509,7 +509,7 @@ abstract class BaseRequestTestCase extends TestCase
     {
         $s3Client = $this->createS3ClientForAssertions();
         $count = 0;
-        // the object key contains the upload id, see StorageService::getUploadBucketKey()
+        // the object key contains the upload id
         foreach ($s3Client->listObjectsV2(['Bucket' => 'api-upload']) as $object) {
             if (str_contains((string) $object->getKey(), $uploadId)) {
                 ++$count;

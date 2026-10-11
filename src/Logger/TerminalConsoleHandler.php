@@ -16,12 +16,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Writes log records of console commands to the terminal, but only if the commands run in one. Without a terminal
- * (cron, CI, pipes) the records are left to the JSON handlers, and regular requests never activate this handler, as
- * they do not dispatch console events.
- *
- * By default records with the level notice and above are shown, the verbosity options of the command (`-v`, `-vv`,
- * `-vvv`) show more. The handler does not bubble, so records it wrote are not written a second time by other handlers.
+ * Writes log records to the terminal only when the command actually runs in one; without a terminal (cron, CI,
+ * pipes) records are left to the JSON handlers. Does not bubble, so records it writes are not duplicated by other
+ * handlers.
  */
 final class TerminalConsoleHandler implements HandlerInterface, EventSubscriberInterface
 {

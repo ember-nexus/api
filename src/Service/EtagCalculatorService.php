@@ -400,7 +400,7 @@ class EtagCalculatorService
     }
 
     /**
-     * Prefers {@see FileHashAlgorithm::SHA_256}, otherwise uses the alphabetically first algorithm for determinism.
+     * Prefers `sha256`, otherwise uses the alphabetically first algorithm for determinism.
      *
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")

@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Started with a single PHP thread (FRANKENPHP_NUM_THREADS=1, FRANKENPHP_MAX_THREADS=1), FRANKENPHP_MAX_WAIT_TIME=2s
- * and API_UPLOAD_REQUEST_BODY_TIMEOUT=20s, see docker/Caddyfile.
+ * and API_UPLOAD_REQUEST_BODY_TIMEOUT=20s.
  */
 #[Group('server-threads')]
 class PhpThreadExhaustionTest extends BaseServerTestCase

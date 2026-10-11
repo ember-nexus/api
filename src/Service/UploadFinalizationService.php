@@ -42,12 +42,9 @@ class UploadFinalizationService
     }
 
     /**
-     * A verdict about the upload as a whole (size limit, inconsistent state, digest) deletes the upload, as nothing is
-     * left to resume. Any other failure while merging the chunks and updating the element (e.g. S3 or a database not
-     * being reachable) is not the client's fault: the upload is put back to unfinalized in the graph (not complete,
-     * hash state including all chunks) and the exception is thrown as usual. All chunks are still stored, so the
-     * client completes the upload again with a `PATCH` without body, `Upload-Complete: ?1` and the offset reported by
-     * `HEAD`.
+     * A verdict about the upload as a whole (size limit, inconsistent state, digest) deletes the upload, since
+     * nothing is left to resume. Any other failure (e.g. S3 or the database being unreachable) instead puts the
+     * upload back to unfinalized, so the client can complete it again with a `PATCH` once the issue is resolved.
      *
      * @param HashContext $hashContext           hash of the whole uploaded file, including the completing chunk
      * @param string|null $reprDigestHeaderValue `Repr-Digest` header of the request which completed the upload; it
@@ -150,8 +147,8 @@ class UploadFinalizationService
 
     /**
      * Each step is independent, so that one failing (e.g. the previous file) does not skip the others (e.g. the
-     * chunks). Failures are only logged: the upload bucket's lifecycle policy and
-     * {@see \App\Command\Cron\DeleteExpiredUploadsCommand} eventually clean up whatever is left behind.
+     * chunks). Failures are only logged, since leftover upload-bucket chunks and uploads are eventually cleaned up
+     * elsewhere.
      */
     private function cleanUpAfterSuccessfulFinalization(UploadInterface $upload, MergeFileChunksOperationInterface $mergeFileChunksOperation): void
     {

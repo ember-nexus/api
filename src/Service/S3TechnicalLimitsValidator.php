@@ -72,9 +72,8 @@ class S3TechnicalLimitsValidator
     }
 
     /**
-     * Mirrors {@see S3Service::getMultipartUploadPartSizeInBytes()}: the part size has to grow with the file size to
-     * stay within the backend's maximum chunk count, which could in theory push it past the backend's maximum part
-     * size for a large enough configured 'file.maxFileSizeInBytes'.
+     * The part size has to grow with the file size to stay within the backend's maximum chunk count, which could
+     * in theory push it past the backend's maximum part size for a large enough configured 'file.maxFileSizeInBytes'.
      */
     private function validateMaxPartSize(int $multipartUploadPartSizeInBytes): void
     {

@@ -7,7 +7,7 @@ namespace App\Tests\FeatureTests\General\File;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Mirrors FileRemovedWhenElementRemovedTest, but targets a relation instead of a node.
+ * Targets a relation instead of a node.
  */
 class FileRemovedWhenRelationRemovedTest extends BaseRequestTestCase
 {

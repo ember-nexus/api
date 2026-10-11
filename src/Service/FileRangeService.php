@@ -9,8 +9,8 @@ use App\Factory\Exception\Client416RangeNotSatisfiableExceptionFactory;
 use App\Type\ByteRange;
 
 /**
- * Parses the HTTP `Range` header (RFC 9110, Section 14.1.2). Only a single range is supported, multiple ranges
- * result in a 400 Bad Request. Valid but unsatisfiable ranges result in a 416 Range Not Satisfiable.
+ * Parses the HTTP `Range` header (RFC 9110, Section 14.1.2); only a single range is supported. Multiple or
+ * syntactically invalid ranges are a 400, a valid but unsatisfiable range is a 416.
  */
 class FileRangeService
 {
@@ -21,10 +21,9 @@ class FileRangeService
     }
 
     /**
-     * Evaluates the `If-Range` precondition (RFC 9110, Section 13.1.5) of a request which contains a `Range` header:
-     * the range is only served if the client still holds the current representation, otherwise the full file has to
-     * be answered with `200`. Only strong entity tags are compared, a weak tag never matches. HTTP dates never
-     * match, as no `Last-Modified` header is served for files, so the client can not have got one from this API.
+     * Evaluates the `If-Range` precondition (RFC 9110, Section 13.1.5): the range is only served if the client's
+     * tag still matches (a strong match only), otherwise the full file is answered with `200`. HTTP dates never
+     * match, since no `Last-Modified` header is served for files.
      */
     public function isRangeConditionSatisfied(?string $ifRangeHeader, ?string $currentEtag): bool
     {
@@ -85,7 +84,6 @@ class FileRangeService
      */
     private function resolveSuffixRange(string $rawSuffixLength, int $totalContentLength): array
     {
-        // suffix range: last <suffixLength> bytes
         $suffixLength = (int) $rawSuffixLength;
         if ($suffixLength <= 0) {
             throw $this->client416RangeNotSatisfiableExceptionFactory->createFromDetail('Requested suffix range must request at least 1 byte.', ['totalLength' => $totalContentLength], $totalContentLength);

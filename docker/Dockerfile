@@ -1,8 +1,7 @@
-# PHP itself is compiled from source in the `php_base` stage below instead of reusing the prebuilt
+# PHP is compiled from source in the `php_base` stage below instead of reusing the prebuilt
 # `dunglas/frankenphp:*-alpine` image, for control over the build (pinned/reproducible toolchain, SQL
-# stripped out, etc.). Note this does NOT get ext/hash's SHA-NI (hardware-accelerated SHA-256) code path
-# working on Alpine/musl either -- confirmed by building it here too (still ~330 MB/s, same as the prebuilt
-# image); see ext/hash/php_hash_sha.h (PHP_HASH_INTRIN_SHA_RESOLVER) in php-src for why.
+# stripped out, etc.) and to apply the SHA-NI patches further down -- building vanilla source without them
+# still leaves ext/hash's SHA-256 on the slow path on Alpine/musl (~330 MB/s, same as the prebuilt image).
 #
 # `php_base`'s RUN steps are adapted from https://github.com/docker-library/php (MIT licensed), with all
 # SQL-related configure flags/extensions removed (this project has no SQL dependency) and ZTS + embed kept
@@ -22,13 +21,11 @@ ARG PHP_VERSION='8.5.11'
 ARG FRANKENPHP_VERSION='1.12.7'
 ARG WATCHER_VERSION='0.14.5'
 # pinned to a full patch version (not just "1.26") so `golang:${GO_VERSION}-alpine` resolves to the exact
-# same toolchain on every rebuild instead of silently floating to whatever the latest 1.26.x patch is;
-# matches the Go version FrankenPHP v1.12.7 itself builds with (see its go.mod)
+# same toolchain on every rebuild, matching the Go version FrankenPHP v1.12.7 itself builds with.
 ARG GO_VERSION='1.26.8'
-# pinned to a full patch version of the xcaddy/caddy-builder image (FrankenPHP v1.12.7 itself depends on
-# the 2.11.x line of github.com/caddyserver/caddy/v2); this image only supplies the xcaddy build tool, not
-# the embedded Caddy core (that version comes from Go module resolution against frankenphp's go.mod), but
-# pinning it avoids floating to whatever "2.11" resolves to on a later rebuild
+# pinned to a full patch version of the xcaddy/caddy-builder image; it only supplies the xcaddy build tool,
+# not the embedded Caddy core (that version comes from Go module resolution instead), so pinning it avoids
+# floating to whatever "2.11" resolves to on a later rebuild.
 ARG CADDY_BUILDER_VERSION='2.11.6'
 
 
@@ -68,21 +65,12 @@ ENV PHPIZE_DEPS="\
 		pkgconf \
 		re2c" \
     PHP_INI_DIR="/usr/local/etc/php" \
-# Apply stack smash protection to functions using local buffers and alloca()
-# Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
-# Enable optimization (-O2)
-# Enable linker optimization (this sorts the hash buckets to improve cache locality, and is non-default)
-# https://github.com/docker-library/php/issues/272
-# -D_LARGEFILE_SOURCE and -D_FILE_OFFSET_BITS=64 (https://www.php.net/manual/en/intro.filesystem.php)
-# -DHAVE_FUNC_ATTRIBUTE_TARGET=1: works around ext/hash's SHA-256 (and zend_cpuinfo's other SIMD dispatch)
-# never getting a hardware-accelerated code path on Alpine. That path is gated behind this exact macro (see
-# ext/hash/php_hash_sha.h / Zend/zend_cpuinfo.h), which configure only sets via build/ax_gcc_func_attribute.m4
-# -- a probe that treats *any* compiler warning on a throwaway one-line test as "attribute unsupported", even
-# though GCC only warns (never errors) for it; see https://github.com/php/php-src/issues/15384. GCC on Alpine
-# does support `__attribute__((target(...)))` in the actual code (ordinary, well-supported syntax), so this
-# just skips the flaky probe instead of trusting it; if that's wrong, `make` fails loudly on a real compiler
-# error instead of silently keeping the slow path. Harmless on arm64: the attribute-gated code is additionally
-# scoped to `__i386__`/`__x86_64__` at the point this macro is checked, so it has no effect there.
+# https://github.com/docker-library/php/issues/272, -D_LARGEFILE_SOURCE and -D_FILE_OFFSET_BITS=64
+# (https://www.php.net/manual/en/intro.filesystem.php); -DHAVE_FUNC_ATTRIBUTE_TARGET=1 works around
+# configure's flaky GCC attribute probe (see https://github.com/php/php-src/issues/15384) never granting
+# ext/hash's SHA-256 a hardware-accelerated code path on Alpine; GCC there does support the attribute in
+# real code, so this skips the probe instead of trusting it. Harmless on arm64, where the gated code is
+# scoped to x86 anyway.
     PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_FUNC_ATTRIBUTE_TARGET=1" \
     PHP_CPPFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_FUNC_ATTRIBUTE_TARGET=1" \
     PHP_LDFLAGS="-Wl,-O1 -pie" \
@@ -162,26 +150,17 @@ RUN set -eux; \
 	; \
 	docker-php-source extract; \
 	cd /usr/src/php; \
-# ext/hash's hash_update_stream() (used by IncrementalHashService for upload chunk hashing) reads the
-# resource through php_stream_read() in a 1024-byte buffer, which for a large chunk means well over 100,000
-# small stream reads, each paying PHP's stream-wrapper dispatch overhead; that dominates once SHA-256 itself
-# is SHA-NI-accelerated (see -DHAVE_FUNC_ATTRIBUTE_TARGET=1 above). Bump it to 16KiB: measured as the point
-# where throughput plateaus (larger buffers, up to 1MiB+, gave no further gain in benchmarking -- and large
-# buffers eventually regress due to allocation/copy overhead), while cutting the read-call count by ~16x and
-# staying a total non-issue as a stack buffer. Only the buffer inside PHP_FUNCTION(hash_update_stream) is
-# touched (matched by the `toread = 1024` line immediately following the declaration, which is unique to
-# that function) -- hash()/hash_hmac()/hash_update_file()'s own `buf[1024]` (used for e.g. hashing a
-# filename/path directly, not this project's upload path) are deliberately left as-is.
+# ext/hash's hash_update_stream() reads in a 1024-byte buffer; once SHA-256 itself is SHA-NI-accelerated, the
+# per-read stream-wrapper overhead dominates for large upload chunks. Bump it to 16KiB, the point where
+# throughput plateaus (measured; larger buffers regress from allocation/copy overhead). Only the buffer used
+# for stream hashing is touched; hash()/hash_hmac()/hash_update_file() keep their own buf[1024].
 	sed -i '/char buf\[1024\];/{N;s/char buf\[1024\];\n\([ \t]*\)zend_long toread = 1024;/char buf[16384];\n\1zend_long toread = 16384;/}' ext/hash/hash.c; \
 	grep -q 'char buf\[16384\];' ext/hash/hash.c; \
 	grep -q 'zend_long toread = 16384;' ext/hash/hash.c; \
 	[ "$(grep -c 'char buf\[1024\];' ext/hash/hash.c)" = 3 ]; \
-# SHA256Transform() (the SHA-NI dispatch used by the hash above) re-checks zend_cpu_supports() -- a CPUID
-# feature lookup -- on every single 64-byte block, i.e. over a million times for a large upload chunk, unlike
-# every other SIMD-dispatched function in php-src (crc32_x86_simd_update(), php_base64_encode_ex(), etc.),
-# which resolve their CPU-feature check exactly once via an ifunc resolver or a PHP_MINIT_FUNCTION-cached
-# pointer. This patch brings SHA256Transform() in line with that existing convention: the check is resolved
-# once in PHP_MINIT_FUNCTION(hash) into a plain static int, instead of being repeated every block.
+# SHA256Transform() (the SHA-NI dispatch this patch targets) re-checks the CPU feature support on every
+# 64-byte block, unlike other SIMD-dispatched code in php-src that resolves it once. This patch moves the
+# check into a one-time static flag, in line with that existing convention.
 	patch -p1 --forward < /usr/local/src/php-patches/0001-hash-sha-minit-shani-resolver.patch; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
 	test "$PHP_INI_DIR" != "${PHP_INI_DIR%/php}"; \
@@ -258,8 +237,8 @@ RUN set -eux; \
 	php --version
 
 # informational only (never fails the build): reports whether ext/hash's SHA-256 actually got the SHA-NI
-# hardware path this time, see the -DHAVE_FUNC_ATTRIBUTE_TARGET=1 comment above for why this was in doubt.
-# the sample is generated in memory (random_bytes + str_repeat), nothing is read from or stored in the repo.
+# hardware path this time (see the -DHAVE_FUNC_ATTRIBUTE_TARGET=1 workaround above). The sample is generated
+# in memory, nothing is read from or stored in the repo.
 RUN if [ "$(uname -m)" = "x86_64" ]; then \
 		php -r ' \
 			$data = str_repeat(random_bytes(1024 * 1024), 32); \

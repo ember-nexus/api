@@ -52,7 +52,6 @@ class DeleteTokenController extends AbstractController
         $tokenElement = $this->elementManager->getElementOrFail($tokenId);
         $fileOperations = $this->elementFileDeletionService->getFileOperationsForDeletionOfElement($tokenElement);
 
-        // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
         $this->uploadService->deleteUploadsTargeting($tokenId);
         $this->elementManager->flush();
 

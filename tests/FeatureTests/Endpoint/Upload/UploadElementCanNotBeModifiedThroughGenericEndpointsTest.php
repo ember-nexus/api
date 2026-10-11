@@ -7,15 +7,13 @@ namespace App\Tests\FeatureTests\Endpoint\Upload;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * The `Upload` element holds internal state of the upload endpoints, e.g. the offset, the owner and the hash state of
- * the integrity check. It must not be readable or modifiable through the generic element endpoints.
+ * The `Upload` element holds internal state of the upload endpoints and must not be readable or modifiable
+ * through the generic element endpoints.
  *
- * WARNING: today every request below answers 404, because the upload owner has no access to the `Upload` node itself
- * (it has no `OWNS` relation), so the generic endpoints behave as if the element did not exist. The
- * `UploadElementPropertyChangeEventListener` (400, forbidden property) is only the second line of defense.
- * Once global permissions are introduced, users may have access to `Upload` nodes: then these expectations have to be
- * re-checked and updated. For users with access to the node, `PUT`/`PATCH` are expected to answer 400 (forbidden
- * property); a different status code than 404 here is a reason to review the access rules, not just this test.
+ * WARNING: today every request below answers 404 only because the upload owner has no access to the `Upload`
+ * node itself; the forbidden-property check is only the second line of defense. Once global permissions are
+ * introduced and users gain access to `Upload` nodes, `PUT`/`PATCH` are expected to answer 400 instead - a
+ * different status code than that here is a reason to review the access rules, not just this test.
  */
 class UploadElementCanNotBeModifiedThroughGenericEndpointsTest extends BaseUploadTestCase
 {

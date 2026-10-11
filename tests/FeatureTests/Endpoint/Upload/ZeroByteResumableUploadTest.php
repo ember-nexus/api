@@ -8,8 +8,7 @@ use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
  * Verifies that a zero-length file can be created through the resumable upload flow: an empty creation request
- * followed by an empty completing PATCH. Unlike ZeroByteFileUploadTest, this goes through the S3 multipart merge
- * path of `PatchUploadController::createFile()`.
+ * followed by an empty completing PATCH. This goes through the S3 multipart merge path rather than a direct upload.
  */
 class ZeroByteResumableUploadTest extends BaseRequestTestCase
 {

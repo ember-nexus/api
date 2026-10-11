@@ -19,10 +19,8 @@ class QueueService
     private const string TRY_COUNT_HEADER = 'x-try-count';
 
     /**
-     * Queue types which are additionally declared with a bounded length + dead-letter target. Every queue is
-     * durable with persistent messages (see declareQueue()/publishEvent()/consumeQueue()); the bounded
-     * length + dead-letter part of it remains opt-in per queue, since an unbounded queue is the right choice for
-     * some queue types (e.g. one drained promptly by a cron job never grows large enough to need a bound).
+     * Queue types declared with a bounded length + dead-letter target; opt-in per queue, since some queue types
+     * (e.g. ones drained promptly by a cron job) never grow large enough to need a bound.
      *
      * @var RabbitMQQueueType[]
      */
@@ -54,19 +52,13 @@ class QueueService
     }
 
     /**
-     * Drains messages currently waiting in the given queue, calling $handler for each decoded message. Messages are
-     * acknowledged once $handler returns without throwing. A message which fails (or can not be decoded) is logged,
-     * republished at the end of the queue with an increased try counter and a fresh timestamp (after the queue was
-     * drained, so it is not consumed again in this run) and acknowledged; after MAX_TRIES failed tries it is dropped
-     * and this is logged.
+     * Drains messages currently waiting in the given queue, calling $handler for each. A failed (or undecodable)
+     * message is logged and republished at the end of the queue with an incremented try counter, up to MAX_TRIES,
+     * after which it is dropped instead.
      *
-     * Consumption stops, without touching the message (`basic_nack` with requeue, no try counter change), as soon as
-     * a message published after this call started is reached: since a single queue is strictly FIFO, that message
-     * (and everything after it) was not part of the backlog this call set out to drain, so leaving it for a later
-     * run (or a concurrently running instance) is correct regardless of how many other consumers are also draining
-     * this queue right now. $deadline (a unix timestamp, or null to never stop early - e.g. for an interactive,
-     * unattended-by-nobody invocation) is checked before fetching each message, for the same reason: whatever has
-     * not been fetched yet is simply left in the queue, untouched.
+     * Consumption stops, leaving the message untouched, as soon as a message published after this call started is
+     * reached: the queue is strictly FIFO, so that message belongs to a later run's backlog. $deadline is checked
+     * before each fetch for the same reason.
      *
      * Returns the number of successfully processed messages.
      */
@@ -170,16 +162,12 @@ class QueueService
     }
 
     /**
-     * Declares the given queue as durable, adding a bounded length + dead-letter target for the queue types opted
-     * into that via {@see self::BOUNDED_LENGTH_QUEUE_TYPES}, or the plain durable declaration otherwise. Every
-     * queue is durable (RabbitMQ's `transient_nonexcl_queues` feature - a non-durable, non-exclusive queue - is
-     * deprecated and refused outright by a future RabbitMQ version) and every message is published persistent
-     * (see publishEvent()/consumeQueue()), so a queue's definition and its messages both survive a broker restart.
+     * Declares the given queue as durable, adding a bounded length + dead-letter target for queue types opted
+     * into that via {@see self::BOUNDED_LENGTH_QUEUE_TYPES}.
      *
-     * If a queue of the same name was already declared elsewhere with different arguments (e.g. left over from
-     * before this queue type became durable), RabbitMQ refuses the redeclaration with a channel-level
-     * `PRECONDITION_FAILED` (406) error, which also closes the channel. In that case, it is dropped and recreated
-     * with the new arguments on a fresh channel rather than requiring a queue rename/migration.
+     * If a queue of the same name was already declared elsewhere with different arguments, RabbitMQ refuses the
+     * redeclaration with a 406 PRECONDITION_FAILED error, which also closes the channel; in that case it is dropped
+     * and recreated with the new arguments on a fresh channel.
      */
     private function declareQueue(AMQPChannel $channel, RabbitMQQueueType $queueType): AMQPChannel
     {

@@ -7,7 +7,7 @@ namespace App\Tests\FeatureTests\Endpoint\Upload;
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
 /**
- * Mirrors ZeroByteResumableUploadTest, but targets a relation instead of a node.
+ * Targets a relation instead of a node.
  */
 class ZeroByteResumableUploadOnRelationTest extends BaseRequestTestCase
 {

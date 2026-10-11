@@ -12,10 +12,10 @@ use App\Factory\Type\S3\S3OperationFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * The chunk list of an upload lives in MongoDB, its last chunk id and offset live in the graph (see
- * {@see UploadService::appendChunkIfOffsetMatches()}). Both are written one after another, so an outage between the
- * two writes leaves an upload whose chunk list lacks a chunk which the offset and hash already contain. Such an
- * upload can never produce the file the client sent, so it is removed instead of being continued.
+ * The chunk list of an upload lives in MongoDB, its last chunk id and offset live in the graph. Both are written
+ * one after another, so an outage between the two writes can leave an upload whose chunk list lacks a chunk the
+ * offset and hash already contain; such an upload can never produce the file the client sent, so it is removed
+ * instead of continued.
  */
 class UploadConsistencyService
 {

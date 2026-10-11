@@ -68,8 +68,8 @@ class ExceptionEventListener
             'type' => $extendedException->getType(),
             'title' => $extendedException->getTitle(),
             'status' => $extendedException->getStatus(),
-            // identifies this occurrence of the problem, the id is also part of the logs (`requestId` of the
-            // application, `request_id` of the web server); see docker/Caddyfile for the errors of the web server
+            // identifies this occurrence of the problem; the id is also part of the logs (`requestId` of the
+            // application, `request_id` of the web server)
             'instance' => $instanceLink ?? sprintf('urn:uuid:%s', $this->requestIdService->getRequestId()->toString()),
             'detail' => $extendedException->getDetail(),
             ...$additionalProperties,

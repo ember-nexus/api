@@ -14,16 +14,14 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * Checks the file handling of `backup:create` and `backup:load` against the real database and S3 storage. The
- * output is not compared against documentation snapshots, so no files in `docs/` are needed.
+ * Checks the file handling of `backup:create` and `backup:load` against the real database and S3 storage; skip
+ * decisions, size limits and error isolation are covered by unit tests instead.
  *
- * The details (skip decisions, size limit, error isolation) are covered by unit tests.
- *
- * The test methods rely on running in declaration order (PHPUnit's default) and each build on the database state
- * the previous one left behind, instead of every method resetting back to a freshly loaded `reference-dataset`:
- * only {@see testBackupCreateAndLoadRoundTripIncludesFiles} loads it, the round-trip backup every method restores
- * afterwards is functionally equivalent to it (element ids survive the export/import). A full reload is expensive,
- * it recreates every Elasticsearch index/mapping from scratch.
+ * Test methods rely on running in declaration order and each build on the database state the previous one left
+ * behind, instead of resetting back to a freshly loaded `reference-dataset` every time: only
+ * {@see testBackupCreateAndLoadRoundTripIncludesFiles} loads it, and the round-trip backup every method restores
+ * afterwards is functionally equivalent (element ids survive the export/import). A full reload is expensive, as it
+ * recreates every Elasticsearch index/mapping from scratch.
  */
 class BackupFilesTest extends BaseCommandTestCase
 {
@@ -46,9 +44,8 @@ class BackupFilesTest extends BaseCommandTestCase
         foreach ([self::ROUND_TRIP_BACKUP, self::TAMPERED_BACKUP, self::EXTENSIONLESS_ROUND_TRIP_BACKUP] as $name) {
             $this->runCommand(sprintf('rm -rf %s', escapeshellarg(self::BACKUP_DIRECTORY.$name)));
         }
-        // The database is intentionally left as-is (not dropped, not reloaded), see the class docblock: the next
-        // test method builds on it, and neither BackupListTest (runs next, does not touch the database) nor
-        // BackupLoadTest (runs last, drops and loads reference-dataset itself) needs it in any particular state.
+        // The database is intentionally left as-is (not dropped, not reloaded): the next test method builds on it,
+        // and no later test in this directory needs a particular state beforehand.
     }
 
     private function getFileCountFromCreateOutput(string $output): int

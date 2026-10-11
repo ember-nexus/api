@@ -9,9 +9,9 @@ use Psr\Http\Message\ResponseInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
- * Base for tests of the server behaviour (web server limits, PHP failures) against the production image, which is
- * started with lower limits by `bin/test-server`. The special responses are compared with the files in `docs/server/`,
- * set the environment variable FIX_CONTROLLER_OUTPUT to update them.
+ * Base for tests of the server behaviour (web server limits, PHP failures) against the production image, started
+ * with lower limits. The special responses are compared against recorded documentation; set the environment
+ * variable FIX_CONTROLLER_OUTPUT to update them.
  */
 abstract class BaseServerTestCase extends BaseRequestTestCase
 {
