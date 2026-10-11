@@ -1,0 +1,10 @@
+{
+  "name": "If-None-Match",
+  "in": "header",
+  "required": false,
+  "x-scalar-ignore": true,
+  "description": "Makes the GET request conditional. Returns 304 if ETag matches.",
+  "schema": {
+    "type": "string"
+  }
+}

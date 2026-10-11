@@ -11,7 +11,7 @@ class Client400IncompleteMutualDependencyExceptionFactory
 {
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -25,7 +25,7 @@ class Client400IncompleteMutualDependencyExceptionFactory
     public function createFromTemplate(array $properties, array $setProperties, array $missingProperties): Client400IncompleteMutualDependencyException
     {
         if (count($properties) < 2) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Mutual dependency requires at least two properties.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Mutual dependency requires at least two properties.');
         }
 
         $message = sprintf(
@@ -50,7 +50,7 @@ class Client400IncompleteMutualDependencyExceptionFactory
         }
 
         if (0 === count($missingProperties)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('At least one missing property is required.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('At least one missing property is required.');
         } elseif (1 === count($missingProperties)) {
             $message .= sprintf(
                 " property '%s' is missing.",

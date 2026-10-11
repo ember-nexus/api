@@ -6,48 +6,26 @@ namespace App\EventSystem\Request\EventListener;
 
 use App\Security\AuthProvider;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
-use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 
 class LogRequestListener
 {
-    /**
-     * @psalm-suppress PropertyNotSetInConstructor
-     */
-    private Request $request;
-
     public function __construct(
-        #[Autowire(service: 'router.default')]
-        private UrlMatcherInterface|RequestMatcherInterface $matcher,
         private AuthProvider $authProvider,
         private LoggerInterface $logger,
     ) {
     }
 
     #[AsEventListener]
-    public function onKernelRequest(RequestEvent $event): void
+    public function onKernelResponse(ResponseEvent $event): void
     {
         if (!$event->isMainRequest()) {
             return;
         }
-        $this->request = $event->getRequest();
-    }
 
-    #[AsEventListener]
-    public function onKernelResponse(ResponseEvent $event): void
-    {
+        $request = $event->getRequest();
         $response = $event->getResponse();
-
-        if ($this->matcher instanceof RequestMatcherInterface) {
-            $parameters = $this->matcher->matchRequest($this->request);
-        } else {
-            $parameters = $this->matcher->match($this->request->getPathInfo());
-        }
 
         $this->logger->info(
             'Handled request.',
@@ -55,13 +33,16 @@ class LogRequestListener
                 'client' => [
                     'user' => $this->authProvider->isAnonymous() ? 'anonymous' : $this->authProvider->getUserId()->toString(),
                     'token' => $this->authProvider->getTokenId()?->toString(),
-                    'ip' => $this->request->getClientIp(),
+                    'ip' => $request->getClientIp(),
                 ],
                 'request' => [
-                    'route' => $parameters['_route'] ?? 'n/a',
-                    'uri' => $this->request->getUri(),
-                    'method' => $this->request->getMethod(),
-                    'type' => $this->request->getContentTypeFormat(),
+                    // the route-matching routers's own listener already resolved `_route` on kernel.request; a
+                    // request without a matching route (404) or which never reached routing (e.g. rejected by
+                    // ApiKeyCheckOnKernelRequestEventListener before RouterListener ran) simply has none
+                    'route' => $request->attributes->get('_route', 'n/a'),
+                    'uri' => $request->getUri(),
+                    'method' => $request->getMethod(),
+                    'type' => $request->getContentTypeFormat(),
                 ],
                 'response' => [
                     'status' => $response->getStatusCode(),

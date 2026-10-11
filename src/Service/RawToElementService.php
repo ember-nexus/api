@@ -13,6 +13,10 @@ use App\Type\RelationElement;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+ * @SuppressWarnings("PHPMD.NPathComplexity")
+ */
 class RawToElementService
 {
     public function __construct(
@@ -24,7 +28,7 @@ class RawToElementService
     /**
      * @param array<string, mixed> $rawData
      */
-    public function rawToElement(array $rawData): NodeElementInterface|RelationElementInterface
+    public function rawToElement(array $rawData, bool $supportFile = false): NodeElementInterface|RelationElementInterface
     {
         if (!array_key_exists('type', $rawData)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'valid type');
@@ -58,6 +62,10 @@ class RawToElementService
             $rawValueToNormalizedValueEvent = new RawValueToNormalizedValueEvent($rawPropertyValue);
             $this->eventDispatcher->dispatch($rawValueToNormalizedValueEvent);
             $normalizedProperties[$rawPropertyName] = $rawValueToNormalizedValueEvent->getNormalizedValue();
+        }
+
+        if (true === $supportFile && array_key_exists('file', $rawData)) {
+            $normalizedProperties['file'] = $rawData['file'];
         }
 
         if (null !== $start && null !== $end) {

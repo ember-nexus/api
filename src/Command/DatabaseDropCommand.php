@@ -6,9 +6,12 @@ namespace App\Command;
 
 use App\Style\EmberNexusStyle;
 use App\Type\RabbitMQQueueType;
+use AsyncAws\S3\S3Client;
+use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use Predis\Client;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -27,6 +30,8 @@ use Throwable;
 #[AsCommand(name: 'database:drop', description: 'Resets all connected databases.')]
 class DatabaseDropCommand extends Command
 {
+    private const int MAX_S3_DELETE_ITERATIONS = 10000;
+
     private EmberNexusStyle $io;
 
     public function __construct(
@@ -35,6 +40,8 @@ class DatabaseDropCommand extends Command
         private ElasticEntityManager $elasticEntityManager,
         private Client $redisClient,
         private AMQPStreamConnection $AMQPStreamConnection,
+        private S3Client $s3Client,
+        private EmberNexusConfiguration $emberNexusConfiguration,
     ) {
         parent::__construct();
     }
@@ -46,6 +53,13 @@ class DatabaseDropCommand extends Command
             'f',
             InputOption::VALUE_NEGATABLE,
             'If enabled, command will not ask for manual confirmation.',
+            false
+        );
+        $this->addOption(
+            'no-files',
+            null,
+            InputOption::VALUE_NEGATABLE,
+            'Disable deletion of object storage (S3) data, i.e. keep the storage and upload buckets untouched.',
             false
         );
     }
@@ -74,7 +88,13 @@ class DatabaseDropCommand extends Command
 
         $this->deleteMongo();
 
-        $this->deleteObjectStorage();
+        if ($input->getOption('no-files')) {
+            $this->io->startSection('Task 3 of 6: Object Storage');
+            $this->io->writeln('Skipping object storage deletion (--no-files).');
+            $this->io->stopSection('Skipped object storage deletion.');
+        } else {
+            $this->deleteObjectStorage();
+        }
 
         $this->deleteElastic();
 
@@ -111,8 +131,74 @@ class DatabaseDropCommand extends Command
     private function deleteObjectStorage(): void
     {
         $this->io->startSection('Task 3 of 6: Object Storage');
-        $this->io->writeln('Deleting object storage data...');
-        $this->io->stopSection('Object storage is currently not implemented, nothing to delete.');
+        $this->io->writeln('Deleting Object data...');
+        $this->deleteAllObjectsFromBucket($this->emberNexusConfiguration->getFileS3StorageBucket());
+        $this->deleteAllObjectsFromBucket($this->emberNexusConfiguration->getFileS3UploadBucket());
+        $this->io->stopSection('Successfully deleted object storage.');
+    }
+
+    private function deleteAllObjectsFromBucket(string $bucket): void
+    {
+        $this->abortAllMultipartUploadsFromBucket($bucket);
+
+        for ($iteration = 0; $iteration < self::MAX_S3_DELETE_ITERATIONS; ++$iteration) {
+            $objects = $this->s3Client->listObjectsV2([
+                'Bucket' => $bucket,
+            ]);
+            $objectsToBeDeleted = [];
+            foreach ($objects->getContents() as $object) {
+                $objectsToBeDeleted[] = [
+                    'Key' => $object->getKey(),
+                ];
+            }
+            if (0 === count($objectsToBeDeleted)) {
+                return;
+            }
+            // S3 accepts at most 1000 keys per request
+            foreach (array_chunk($objectsToBeDeleted, 1000) as $objectsChunk) {
+                $result = $this->s3Client->deleteObjects([
+                    'Bucket' => $bucket,
+                    'Delete' => [
+                        'Objects' => $objectsChunk,
+                    ],
+                ]);
+                $errors = $result->getErrors();
+                if (count($errors) > 0) {
+                    $messages = [];
+                    foreach ($errors as $error) {
+                        $messages[] = sprintf('%s (%s)', $error->getKey() ?? '?', $error->getMessage() ?? $error->getCode() ?? 'unknown error');
+                    }
+                    throw new RuntimeException(sprintf("Unable to delete objects from bucket '%s': %s", $bucket, join(', ', $messages)));
+                }
+            }
+        }
+
+        throw new RuntimeException(sprintf("Bucket '%s' is not empty after %d delete rounds, aborting.", $bucket, self::MAX_S3_DELETE_ITERATIONS));
+    }
+
+    private function abortAllMultipartUploadsFromBucket(string $bucket): void
+    {
+        for ($iteration = 0; $iteration < self::MAX_S3_DELETE_ITERATIONS; ++$iteration) {
+            $abortedUploads = 0;
+            foreach ($this->s3Client->listMultipartUploads(['Bucket' => $bucket])->getUploads() as $upload) {
+                $key = $upload->getKey();
+                $uploadId = $upload->getUploadId();
+                if (null === $key || null === $uploadId) {
+                    continue;
+                }
+                $this->s3Client->abortMultipartUpload([
+                    'Bucket' => $bucket,
+                    'Key' => $key,
+                    'UploadId' => $uploadId,
+                ]);
+                ++$abortedUploads;
+            }
+            if (0 === $abortedUploads) {
+                return;
+            }
+        }
+
+        throw new RuntimeException(sprintf("Unable to abort all unfinished multipart uploads of bucket '%s'.", $bucket));
     }
 
     private function deleteElastic(): void

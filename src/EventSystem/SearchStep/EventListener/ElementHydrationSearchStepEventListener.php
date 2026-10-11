@@ -255,9 +255,7 @@ class ElementHydrationSearchStepEventListener
         foreach ($elementIds as $elementId) {
             $element = $this->elementManager->getElement($elementId);
             if ($element) {
-                $elementData[] = $this->elementToRawService->elementToRaw(
-                    $element
-                );
+                $elementData[] = $this->elementToRawService->elementToRaw($element);
             }
         }
 

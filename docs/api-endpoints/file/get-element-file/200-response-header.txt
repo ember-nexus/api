@@ -1,0 +1,15 @@
+Accept-Ranges: bytes
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Cache-Control: no-cache, private
+Content-Disposition: attachment; filename=Rose.jpg
+Content-Length: 138937
+Content-Type: image/jpeg
+Date: Fri, 02 Oct 2026 22:37:59 GMT
+Etag: "WtYtAaTJWIv"
+Repr-Digest: sha-256=:cSS7oKhtzBDhtceO+Wi5Lh/mgcFtDy7J81sOhEjBpMA=:
+X-Content-Type-Options: nosniff
+X-Powered-By: Ember Nexus API

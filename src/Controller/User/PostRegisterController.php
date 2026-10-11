@@ -6,12 +6,13 @@ namespace App\Controller\User;
 
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Response\CreatedResponse;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\UserPasswordHasher;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
+use App\Type\Response\CreatedResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -38,7 +39,8 @@ class PostRegisterController extends AbstractController
         private CreateElementFromRawDataService $createElementFromRawDataService,
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -53,25 +55,22 @@ class PostRegisterController extends AbstractController
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
 
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
         $rawData = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('User', $body);
         $userId = UuidV4::uuid4();
         $password = $this->requestUtilService->getStringFromBody('password', $body);
-        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $rawData);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
         $this->checkForDuplicateUniqueUserIdentifier($uniqueUserIdentifier);
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
-        if (array_key_exists($uniqueIdentifier, $rawData)) {
-            // remove unique identifier from data payload, was required in releases before 0.1.6
-            unset($rawData[$uniqueIdentifier]);
-        }
 
         $userNode = $this->createElementFromRawDataService->createElementFromRawData(
             $userId,
             'User',
-            rawData: $rawData
+            rawData: $rawData,
+            skipReservedTypeCheck: true
         );
         $userNode->addProperty($uniqueIdentifier, $uniqueUserIdentifier);
         $userNode->addProperty('_passwordHash', $this->userPasswordHasher->hashPassword($password));
@@ -98,7 +97,7 @@ class PostRegisterController extends AbstractController
         ));
         $rawCount = $res->first()->get('count');
         if (!is_int($rawCount)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawCount))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property count as int, not %s.', get_debug_type($rawCount))); // @codeCoverageIgnore
         }
         if ($rawCount > 0) {
             throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($uniqueUserIdentifier);

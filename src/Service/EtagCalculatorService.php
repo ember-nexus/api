@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
+use App\Type\FileHashAlgorithm;
+use ArrayAccess;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
@@ -22,8 +24,9 @@ class EtagCalculatorService
     public function __construct(
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
+        private ElementManager $elementManager,
         private LoggerInterface $logger,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -119,7 +122,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($parentId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -191,7 +194,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($childId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -262,7 +265,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($centerId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -333,7 +336,7 @@ class EtagCalculatorService
         $etagCalculator->addUuid($userId);
         $rawSortedTuples = $result[0]['sortedTuples'];
         if (!($rawSortedTuples instanceof CypherList)) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
         foreach ($rawSortedTuples as $idUpdatedPair) {
             $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
@@ -351,5 +354,82 @@ class EtagCalculatorService
         );
 
         return $etag;
+    }
+
+    public function calculateFileEtag(UuidInterface $elementId): ?Etag
+    {
+        $this->logger->debug(
+            'Calculating Etag for file.',
+            [
+                'elementId' => $elementId->toString(),
+            ]
+        );
+
+        $element = $this->elementManager->getElementOrFail($elementId);
+        if (!$element->hasProperty('hasFile') || true !== $element->getProperty('hasFile')) {
+            // an element without file has no file representation, so conditional requests on it are not evaluated
+            return null;
+        }
+
+        $elementEtag = $this->calculateElementEtag($elementId);
+        if (null === $elementEtag) {
+            return null;
+        }
+
+        $rawFileProperties = $element->hasProperty('file') ? $element->getProperty('file') : null;
+        $fileHash = $this->extractPreferredHashFromFileProperties($rawFileProperties);
+
+        $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
+        $etagCalculator->addString((string) $elementEtag);
+        if (null !== $fileHash) {
+            $etagCalculator->addString($fileHash);
+        }
+        // no stored hash, e.g. files uploaded before hashing was introduced: the element etag already captures
+        // identity and recency, so it is not folded into itself again as a fake hash component
+        $etag = $etagCalculator->getEtag();
+
+        $this->logger->debug(
+            'Calculated Etag for file.',
+            [
+                'elementId' => $elementId->toString(),
+                'etag' => $etag,
+            ]
+        );
+
+        return $etag;
+    }
+
+    /**
+     * Prefers {@see FileHashAlgorithm::SHA_256}, otherwise uses the alphabetically first algorithm for determinism.
+     *
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     */
+    private function extractPreferredHashFromFileProperties(mixed $rawFileProperties): ?string
+    {
+        if (!is_array($rawFileProperties) && !($rawFileProperties instanceof ArrayAccess)) {
+            return null;
+        }
+        $hash = $rawFileProperties['hash'] ?? null;
+        if (is_object($hash) && method_exists($hash, 'getArrayCopy')) {
+            $hash = $hash->getArrayCopy();
+        }
+        if (!is_array($hash) || [] === $hash) {
+            return null;
+        }
+
+        $preferredValue = $hash[FileHashAlgorithm::SHA_256->value] ?? null;
+        if (is_string($preferredValue) && '' !== $preferredValue) {
+            return $preferredValue;
+        }
+
+        ksort($hash);
+        foreach ($hash as $value) {
+            if (is_string($value) && '' !== $value) {
+                return $value;
+            }
+        }
+
+        return null;
     }
 }

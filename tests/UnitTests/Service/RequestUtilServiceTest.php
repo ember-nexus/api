@@ -9,13 +9,11 @@ use App\Exception\Client400MissingPropertyException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Service\RequestUtilService;
-use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
-use ReflectionMethod;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
@@ -24,7 +22,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class RequestUtilServiceTest extends TestCase
 {
     private function getRequestUtilService(
-        ?EmberNexusConfiguration $emberNexusConfiguration = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
         ?Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory = null,
     ): RequestUtilService {
@@ -34,7 +31,6 @@ class RequestUtilServiceTest extends TestCase
         $client400MissingPropertyExceptionFactory = new Client400MissingPropertyExceptionFactory($urlGenerator);
 
         return new RequestUtilService(
-            $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
             $client400BadContentExceptionFactory,
             $client400MissingPropertyExceptionFactory
         );
@@ -102,80 +98,13 @@ class RequestUtilServiceTest extends TestCase
         $requestUtilService->validateTypeFromBody('Test', $body);
     }
 
-    public function testGetUniqueUserIdentifierFromBodyAndDataOld(): void
-    {
-        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
-        $requestUtilService = $this->getRequestUtilService(
-            emberNexusConfiguration: $emberNexusConfiguration
-        );
-        $method = new ReflectionMethod(RequestUtilService::class, 'getUniqueUserIdentifierFromBodyAndDataOld');
-
-        $body = [];
-        $data = [];
-        try {
-            $method->invokeArgs($requestUtilService, [$body, $data]);
-        } catch (Exception $e) {
-            $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
-            /**
-             * @var Client400MissingPropertyException $e
-             */
-            $this->assertSame("Endpoint requires that the request contains property 'data.email' to be set to string.", $e->getDetail());
-        }
-
-        $body = [];
-        $data = [
-            'email' => 1234,
-        ];
-        try {
-            $method->invokeArgs($requestUtilService, [$body, $data]);
-        } catch (Exception $e) {
-            $this->assertInstanceOf(Client400BadContentException::class, $e);
-            /**
-             * @var Client400BadContentException $e
-             */
-            $this->assertSame("Endpoint expects property 'data.email' to be string, got int 1234.", $e->getDetail());
-        }
-
-        $body = [];
-        $data = [
-            'email' => [
-                'some' => 'object',
-            ],
-        ];
-        try {
-            $method->invokeArgs($requestUtilService, [$body, $data]);
-        } catch (Exception $e) {
-            $this->assertInstanceOf(Client400BadContentException::class, $e);
-            /**
-             * @var Client400BadContentException $e
-             */
-            $this->assertSame("Endpoint expects property 'data.email' to be string, got array with one element.", $e->getDetail());
-        }
-
-        $body = [];
-        $data = [
-            'email' => 'test@localhost.dev',
-        ];
-        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$body, $data]);
-        $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
-
-        $body = [
-            'user' => 'test@localhost.dev',
-        ];
-        $data = [];
-        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$body, $data]);
-        $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
-    }
-
-    public function testGetUniqueUserIdentifierFromDataNew(): void
+    public function testGetUniqueUserIdentifierFromBodyAndData(): void
     {
         $requestUtilService = $this->getRequestUtilService();
-        $method = new ReflectionMethod(RequestUtilService::class, 'getUniqueUserIdentifierFromBodyNew');
 
         $body = [];
         try {
-            $method->invokeArgs($requestUtilService, [$body]);
+            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
             /**
@@ -188,7 +117,7 @@ class RequestUtilServiceTest extends TestCase
             'uniqueUserIdentifier' => 1234,
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$body]);
+            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -203,7 +132,7 @@ class RequestUtilServiceTest extends TestCase
             ],
         ];
         try {
-            $method->invokeArgs($requestUtilService, [$body]);
+            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
         } catch (Exception $e) {
             $this->assertInstanceOf(Client400BadContentException::class, $e);
             /**
@@ -215,84 +144,7 @@ class RequestUtilServiceTest extends TestCase
         $body = [
             'uniqueUserIdentifier' => 'test@localhost.dev',
         ];
-        $uniqueUserIdentifier = $method->invokeArgs($requestUtilService, [$body]);
-        $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
-    }
-
-    public function testGetUniqueUserIdentifierFromBodyAndDataWithOldWayEnabled(): void
-    {
-        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
-        $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
-        $emberNexusConfiguration->method('isFeatureFlag280OldUniqueUserIdentifierDisabled')->willReturn(false);
-        $requestUtilService = $this->getRequestUtilService(
-            emberNexusConfiguration: $emberNexusConfiguration
-        );
-
-        $body = [
-            'data' => [],
-        ];
-        try {
-            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
-        } catch (Exception $e) {
-            $this->assertInstanceOf(Client400MissingPropertyException::class, $e);
-            /**
-             * @var Client400MissingPropertyException $e
-             */
-            $this->assertSame("Endpoint requires that the request contains property 'uniqueUserIdentifier' to be set to string.", $e->getDetail());
-        }
-
-        $body = [
-            'uniqueUserIdentifier' => 1234,
-            'data' => [],
-        ];
-        try {
-            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
-        } catch (Exception $e) {
-            $this->assertInstanceOf(Client400BadContentException::class, $e);
-            /**
-             * @var Client400BadContentException $e
-             */
-            $this->assertSame("Endpoint expects property 'uniqueUserIdentifier' to be string, got int 1234.", $e->getDetail());
-        }
-
-        $body = [
-            'uniqueUserIdentifier' => [
-                'some' => 'object',
-            ],
-            'data' => [],
-        ];
-        try {
-            $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
-        } catch (Exception $e) {
-            $this->assertInstanceOf(Client400BadContentException::class, $e);
-            /**
-             * @var Client400BadContentException $e
-             */
-            $this->assertSame("Endpoint expects property 'uniqueUserIdentifier' to be string, got array with one element.", $e->getDetail());
-        }
-
-        $body = [
-            'uniqueUserIdentifier' => 'test@localhost.dev',
-            'data' => [],
-        ];
-        $uniqueUserIdentifier = $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
-        $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
-
-        $body = [
-            'uniqueUserIdentifier' => 'testNew@localhost.dev',
-            'data' => [
-                'email' => 'testOld@localhost.dev',
-            ],
-        ];
-        $uniqueUserIdentifier = $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
-        $this->assertSame('testOld@localhost.dev', $uniqueUserIdentifier);
-
-        $body = [
-            'data' => [
-                'email' => 'test@localhost.dev',
-            ],
-        ];
-        $uniqueUserIdentifier = $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $body['data']);
+        $uniqueUserIdentifier = $requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
         $this->assertSame('test@localhost.dev', $uniqueUserIdentifier);
     }
 

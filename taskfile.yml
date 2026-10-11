@@ -17,3 +17,45 @@ tasks:
   dev:cli:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec api /bin/bash
+
+  dev:k6:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml exec k6 pnpm demo
+
+  dev:k6:load:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml exec k6 pnpm load
+
+  prod:build:
+    vars:
+      VERSION:
+        sh: echo "local-$(date +%Y%m%d)"
+      TAG:
+        sh: echo "embernexus/api:local-$(date +%Y%m%d)"
+      OUTPUT_FILE:
+        sh: echo "ember-nexus-api-local-$(date +%Y%m%d).tar.gz"
+      COMPOSE_OUTPUT_FILE:
+        sh: echo "docker-compose.yml"
+    cmds:
+      - docker build -f ./docker/Dockerfile --target production --build-arg VERSION={{.VERSION}} -t {{.TAG}} .
+      - docker save {{.TAG}} > ~/Downloads/{{.OUTPUT_FILE}}
+      - chown $(id -u):$(id -g) ~/Downloads/{{.OUTPUT_FILE}}
+      - sed "s|__EMBER_NEXUS_API_IMAGE__|{{.TAG}}|" ./tools/docker-compose.demo.tmpl.yml > ~/Downloads/{{.COMPOSE_OUTPUT_FILE}}
+      - chown $(id -u):$(id -g) ~/Downloads/{{.COMPOSE_OUTPUT_FILE}}
+      - echo "demo security.txt" > ~/Downloads/well-known-security.txt
+      - chown $(id -u):$(id -g) ~/Downloads/well-known-security.txt
+      - |
+        echo ""
+        echo "Getting started:"
+        echo "docker load < {{.OUTPUT_FILE}}"
+        echo "echo \"demo security.txt\" > well-known-security.txt"
+        echo "mkdir -p ./volumes/neo4j/data"
+        echo "mkdir -p ./volumes/neo4j/logs"
+        echo "mkdir -p ./volumes/mongodb"
+        echo "mkdir -p ./volumes/elasticsearch"
+        echo "mkdir -p ./volumes/redis"
+        echo "mkdir -p ./volumes/rabbitmq"
+        echo "mkdir -p ./volumes/minio"
+        echo "mkdir -p ./volumes/api"
+        echo "chmod 777 -R ./volumes"
+        echo "docker compose up -d"

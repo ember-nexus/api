@@ -25,14 +25,12 @@ class ElementDefragmentizeService
     public function defragmentize(
         NodeInterface|RelationInterface $cypherFragment,
         ?DocumentInterface $documentFragment,
-        mixed $fileFragment,
     ): NodeElementInterface|RelationElementInterface {
         if ($cypherFragment instanceof NodeInterface) {
             $event = new NodeElementDefragmentizeEvent(
                 new NodeElement(),
                 $cypherFragment,
-                $documentFragment,
-                $fileFragment
+                $documentFragment
             );
             $this->eventDispatcher->dispatch($event);
 
@@ -41,8 +39,7 @@ class ElementDefragmentizeService
         $event = new RelationElementDefragmentizeEvent(
             new RelationElement(),
             $cypherFragment,
-            $documentFragment,
-            $fileFragment
+            $documentFragment
         );
         $this->eventDispatcher->dispatch($event);
 

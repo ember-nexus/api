@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Helper\Regex;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
@@ -72,7 +72,7 @@ class TokenRevokeCommand extends Command
         private EmberNexusConfiguration $emberNexusConfiguration,
         private AuthProvider $authProvider,
         private LoggerInterface $logger,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -241,7 +241,7 @@ class TokenRevokeCommand extends Command
 
                 $rawUserId = $res[0]['u.id'];
                 if (!is_string($rawUserId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property u.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property u.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
                 }
                 $this->userId = Uuid::fromString($rawUserId);
             }
@@ -312,27 +312,27 @@ class TokenRevokeCommand extends Command
         foreach ($queryResultLines as $queryResultLine) {
             $rawTokenId = $queryResultLine['t.id'];
             if (!is_string($rawTokenId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.id as string, not %s.', get_debug_type($rawTokenId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.id as string, not %s.', get_debug_type($rawTokenId))); // @codeCoverageIgnore
             }
             $rawTokenCreated = $queryResultLine['t.created'];
             if (!($rawTokenCreated instanceof \Laudis\Neo4j\Types\DateTime) && !($rawTokenCreated instanceof DateTimeZoneId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.created as DateTime|DateTimeZoneId, not %s.', get_debug_type($rawTokenCreated))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.created as DateTime|DateTimeZoneId, not %s.', get_debug_type($rawTokenCreated))); // @codeCoverageIgnore
             }
             $expirationDate = $queryResultLine['t.expirationDate'];
             if (!($expirationDate instanceof \Laudis\Neo4j\Types\DateTime) && !($expirationDate instanceof DateTimeZoneId) && !is_null($expirationDate)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.expirationDate as DateTime|DateTimeZoneId or null, not %s.', get_debug_type($expirationDate))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.expirationDate as DateTime|DateTimeZoneId or null, not %s.', get_debug_type($expirationDate))); // @codeCoverageIgnore
             }
             $rawUserId = $queryResultLine['u.id'];
             if (!is_string($rawUserId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property u.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property u.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
             }
             $rawUserUniqueIdentifier = $queryResultLine['userUniqueIdentifier'];
             if (!is_string($rawUserUniqueIdentifier)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property userUniqueIdentifier as string, not %s.', get_debug_type($rawUserUniqueIdentifier))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property userUniqueIdentifier as string, not %s.', get_debug_type($rawUserUniqueIdentifier))); // @codeCoverageIgnore
             }
             $rawTokenHash = $queryResultLine['t.hash'];
             if (!is_string($rawTokenHash)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.hash as string, not %s.', get_debug_type($rawTokenHash))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property t.hash as string, not %s.', get_debug_type($rawTokenHash))); // @codeCoverageIgnore
             }
             $result[] = new TokenRevokeEntry(
                 Uuid::fromString($rawTokenId),

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\EventSystem\Response\EventListener;
 
 use App\EventSystem\Response\EventListener\EtagResponseEventListener;
-use App\Response\CollectionResponse;
-use App\Response\ElementResponse;
 use App\Service\EtagService;
 use App\Type\Etag;
+use App\Type\Response\CollectionResponse;
+use App\Type\Response\ElementResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;

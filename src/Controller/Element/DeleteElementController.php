@@ -7,12 +7,15 @@ namespace App\Controller\Element;
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
-use App\Response\NoContentResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\DeletionService;
+use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
+use App\Service\UploadService;
 use App\Type\AccessType;
 use App\Type\EtagType;
+use App\Type\Response\NoContentResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +27,9 @@ class DeleteElementController extends AbstractController
         private ElementManager $elementManager,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private UploadService $uploadService,
+        private ElementFileDeletionService $elementFileDeletionService,
+        private DeletionService $deletionService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
@@ -46,12 +52,21 @@ class DeleteElementController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $element = $this->elementManager->getElement($elementId);
-        if (null === $element) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-        }
-        $this->elementManager->delete($element);
+        $element = $this->elementManager->getElementOrFail($elementId);
+        $fileOperations = $this->elementFileDeletionService->getFileOperationsForDeletionOfElement($element);
+
+        // intentionally not clearing any FileCreationLockService/UploadLockService Redis lock for this element here:
+        // both locks have short TTLs (FileCreationLockService::TTL_IN_MILLISECONDS / UploadLockService::TTL_IN_MILLISECONDS)
+        // and are only held for the duration of a single request, so a lock surviving this deletion by a few minutes
+        // at most is not worth the added complexity of reaching into Redis from the delete path
+
+        // separate flush before deleting the element, see UploadService::deleteUploadsTargeting()
+        $this->uploadService->deleteUploadsTargeting($elementId);
         $this->elementManager->flush();
+
+        $this->deletionService->delete($element);
+
+        $this->elementFileDeletionService->deleteFiles($fileOperations);
 
         return new NoContentResponse();
     }

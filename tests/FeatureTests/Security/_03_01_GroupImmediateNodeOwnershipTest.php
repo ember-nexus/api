@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\Security;
+namespace App\Tests\FeatureTests\Security;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
@@ -28,6 +28,12 @@ class _03_01_GroupImmediateNodeOwnershipTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($response, 'Group');
         $response = $this->runGetRequest(sprintf('/%s', self::DATA), self::TOKEN);
         $this->assertIsNodeResponse($response, 'Data');
+    }
+
+    public function testGetAllowedNodeFile(): void
+    {
+        $response = $this->runGetRequest(sprintf('/%s/file', self::DATA), self::TOKEN);
+        $this->assertIsBinaryStreamResponse($response, 'image/jpeg');
     }
 
     public function testGetAllowedRelations(): void

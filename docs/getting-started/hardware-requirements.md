@@ -79,7 +79,9 @@ Alternatively, other graph databases which support OpenCypher and Bolt 4.4+ can 
 - Self-hosted: At least 1 GB RAM, 1+ vCPU, and 10+ GB storage.
 - Clusters: [documentation](https://min.io/docs/minio/linux/operations/install-deploy-manage/deploy-minio-multi-node-multi-drive.html).
 
-Alternatively, other S3-compatible object storage APIs can and should be used if available.
+Alternatively, other S3-compatible object storage APIs can and should be used if available, e.g. MinIO, VersityGW or SeaweedFS.
+
+Only a single S3 provider/instance is supported at a time: both the storage bucket and the upload bucket must be hosted on that same provider, since files are merged from the upload bucket into the storage bucket via a server-side copy, which S3-compatible providers only support within themselves.
 
 ### Elastic Search
 

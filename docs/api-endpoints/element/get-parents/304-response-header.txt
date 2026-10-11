@@ -1,9 +1,9 @@
-Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: GET, HEAD, OPTIONS
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: GET, HEAD, OPTIONS
 Cache-Control: no-cache, private
-Date: Sun, 10 Mar 2024 13:46:31 GMT
-Etag: "TMfc6KdsY3a"
+Date: Fri, 02 Oct 2026 22:37:56 GMT
+Etag: "5eT3LcZFgR0"
 X-Powered-By: Ember Nexus API

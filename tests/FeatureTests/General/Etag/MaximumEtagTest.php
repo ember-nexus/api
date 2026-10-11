@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\FeatureTests\General\Etag;
+namespace App\Tests\FeatureTests\General\Etag;
 
 use App\Tests\FeatureTests\BaseRequestTestCase;
 
@@ -16,20 +16,6 @@ class MaximumEtagTest extends BaseRequestTestCase
     private const string GROUP_UUID = '42c7a0f3-fc9b-478b-b658-52ecb44238b8';
     private const string SOME_NODE_UUID = '81f811e2-c19f-4339-94e2-c0376fec097e';
 
-    private function testEtagOfElement(string $token, string $id, string $additionalPath, ?string $shouldEtag = null): string
-    {
-        $response = $this->runGetRequest(
-            sprintf('/%s%s', $id, $additionalPath),
-            $token
-        );
-        $etag = $response->getHeader('Etag')[0];
-        if ($shouldEtag) {
-            $this->assertSame($shouldEtag, $etag);
-        }
-
-        return $etag;
-    }
-
     private function testEtagOfElementDoesNotExist(string $token, string $id, string $additionalPath): void
     {
         $response = $this->runGetRequest(
@@ -41,30 +27,30 @@ class MaximumEtagTest extends BaseRequestTestCase
 
     public function testEtagBeforeAndAfterGoingOverEtagLimit(): void
     {
-        $initialEtagNodeParentSelf = $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '', '"XIoWpD03PDi"');
-        $initialEtagNodeParentParents = $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '/parents', '"CH5uJMBOiL5"');
-        $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '/children', '"72kOJ5B1f1p"');
+        $initialEtagNodeParentSelf = $this->getEtagOfElement(self::TOKEN, self::PARENT_UUID, '', '"XIoWpD03PDi"');
+        $initialEtagNodeParentParents = $this->getEtagOfElement(self::TOKEN, self::PARENT_UUID, '/parents', '"CH5uJMBOiL5"');
+        $this->getEtagOfElement(self::TOKEN, self::PARENT_UUID, '/children', '"72kOJ5B1f1p"');
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::PARENT_UUID, '/related');
 
-        $initialEtagNodeChildSelf = $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '', '"MF9LXcsbS9W"');
-        $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '/parents', '"TA9dR0e3QFg"');
-        $initialEtagNodeChildChildren = $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '/children', '"YumWkClVdjC"');
-        $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '/related', '"TA9dR0e3QFg"');
+        $initialEtagNodeChildSelf = $this->getEtagOfElement(self::TOKEN, self::CHILD_UUID, '', '"MF9LXcsbS9W"');
+        $this->getEtagOfElement(self::TOKEN, self::CHILD_UUID, '/parents', '"TA9dR0e3QFg"');
+        $initialEtagNodeChildChildren = $this->getEtagOfElement(self::TOKEN, self::CHILD_UUID, '/children', '"YumWkClVdjC"');
+        $this->getEtagOfElement(self::TOKEN, self::CHILD_UUID, '/related', '"TA9dR0e3QFg"');
 
-        $initialEtagNodeRelatedSelf = $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '', '"ITsmYNHWAVL"');
-        $initialEtagNodeRelatedParents = $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '/parents', '"A14DEvTRqFm"');
-        $initialEtagNodeRelatedChildren = $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '/children', '"elPrb0N3odH"');
+        $initialEtagNodeRelatedSelf = $this->getEtagOfElement(self::TOKEN, self::RELATED_UUID, '', '"ITsmYNHWAVL"');
+        $initialEtagNodeRelatedParents = $this->getEtagOfElement(self::TOKEN, self::RELATED_UUID, '/parents', '"A14DEvTRqFm"');
+        $initialEtagNodeRelatedChildren = $this->getEtagOfElement(self::TOKEN, self::RELATED_UUID, '/children', '"elPrb0N3odH"');
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::RELATED_UUID, '/related');
 
-        $initialEtagNodeGroupSelf = $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '', '"ghh3kF8BXvi"');
-        $initialEtagNodeGroupParents = $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '/parents', '"gfRnoZmYUIs"');
-        $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '/children', '"6CStc81LfoX"');
+        $initialEtagNodeGroupSelf = $this->getEtagOfElement(self::TOKEN, self::GROUP_UUID, '', '"ghh3kF8BXvi"');
+        $initialEtagNodeGroupParents = $this->getEtagOfElement(self::TOKEN, self::GROUP_UUID, '/parents', '"gfRnoZmYUIs"');
+        $this->getEtagOfElement(self::TOKEN, self::GROUP_UUID, '/children', '"6CStc81LfoX"');
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/related');
 
-        $initialEtagNodeSomeNodeSelf = $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '', '"X3ETsa7nPQg"');
-        $initialEtagNodeSomeNodeParents = $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/parents', '"PNXGItBje4l"');
-        $initialEtagNodeSomeNodeChildren = $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/children', '"EfU099ffuDv"');
-        $initialEtagNodeSomeNodeRelated = $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/related', '"QpKhKWN0FsH"');
+        $initialEtagNodeSomeNodeSelf = $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '', '"X3ETsa7nPQg"');
+        $initialEtagNodeSomeNodeParents = $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/parents', '"PNXGItBje4l"');
+        $initialEtagNodeSomeNodeChildren = $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/children', '"EfU099ffuDv"');
+        $initialEtagNodeSomeNodeRelated = $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/related', '"QpKhKWN0FsH"');
 
         // add one more central node with relations to bring all etags over their limit
 
@@ -130,30 +116,30 @@ class MaximumEtagTest extends BaseRequestTestCase
 
         // verify that the etags are no longer generated
 
-        $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '', $initialEtagNodeParentSelf);
-        $this->testEtagOfElement(self::TOKEN, self::PARENT_UUID, '/parents', $initialEtagNodeParentParents);
+        $this->getEtagOfElement(self::TOKEN, self::PARENT_UUID, '', $initialEtagNodeParentSelf);
+        $this->getEtagOfElement(self::TOKEN, self::PARENT_UUID, '/parents', $initialEtagNodeParentParents);
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::PARENT_UUID, '/children');
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::PARENT_UUID, '/related');
 
-        $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '', $initialEtagNodeChildSelf);
+        $this->getEtagOfElement(self::TOKEN, self::CHILD_UUID, '', $initialEtagNodeChildSelf);
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::CHILD_UUID, '/parents');
-        $this->testEtagOfElement(self::TOKEN, self::CHILD_UUID, '/children', $initialEtagNodeChildChildren);
+        $this->getEtagOfElement(self::TOKEN, self::CHILD_UUID, '/children', $initialEtagNodeChildChildren);
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::CHILD_UUID, '/related');
 
-        $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '', $initialEtagNodeRelatedSelf);
-        $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '/parents', $initialEtagNodeRelatedParents);
-        $this->testEtagOfElement(self::TOKEN, self::RELATED_UUID, '/children', $initialEtagNodeRelatedChildren);
+        $this->getEtagOfElement(self::TOKEN, self::RELATED_UUID, '', $initialEtagNodeRelatedSelf);
+        $this->getEtagOfElement(self::TOKEN, self::RELATED_UUID, '/parents', $initialEtagNodeRelatedParents);
+        $this->getEtagOfElement(self::TOKEN, self::RELATED_UUID, '/children', $initialEtagNodeRelatedChildren);
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::RELATED_UUID, '/related');
 
-        $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '', $initialEtagNodeGroupSelf);
-        $this->testEtagOfElement(self::TOKEN, self::GROUP_UUID, '/parents', $initialEtagNodeGroupParents);
+        $this->getEtagOfElement(self::TOKEN, self::GROUP_UUID, '', $initialEtagNodeGroupSelf);
+        $this->getEtagOfElement(self::TOKEN, self::GROUP_UUID, '/parents', $initialEtagNodeGroupParents);
         // todo: enable test once https://github.com/ember-nexus/api/issues/238 is fixed
         // $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/children');
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/related');
 
-        $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '', $initialEtagNodeSomeNodeSelf);
-        $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/parents', $initialEtagNodeSomeNodeParents);
-        $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/children', $initialEtagNodeSomeNodeChildren);
-        $this->testEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/related', $initialEtagNodeSomeNodeRelated);
+        $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '', $initialEtagNodeSomeNodeSelf);
+        $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/parents', $initialEtagNodeSomeNodeParents);
+        $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/children', $initialEtagNodeSomeNodeChildren);
+        $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '/related', $initialEtagNodeSomeNodeRelated);
     }
 }

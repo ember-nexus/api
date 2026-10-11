@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\EventSystem\ElementDefragmentize\EventListener;
 
 use App\EventSystem\ElementDefragmentize\Event\RelationElementDefragmentizeEvent;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class RelationElementDefragmentizeEventListener
 {
     public function __construct(
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -23,27 +23,27 @@ class RelationElementDefragmentizeEventListener
 
         $identifier = $cypherFragment->getProperty('id');
         if (null === $identifier) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires cypher fragment to contain valid UUID.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires cypher fragment to contain valid UUID.');
         }
         $identifier = UuidV4::fromString($identifier);
 
         $start = $cypherFragment->getStartNode();
         if (null === $start) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires cypher fragment to contain valid start node.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires cypher fragment to contain valid start node.');
         }
         $start = $start->getProperty('id');
         if (null === $start) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires start node to have valid UUID.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires start node to have valid UUID.');
         }
         $start = UuidV4::fromString($start);
 
         $end = $cypherFragment->getEndNode();
         if (null === $end) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires cypher fragment to contain valid end node.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires cypher fragment to contain valid end node.');
         }
         $end = $end->getProperty('id');
         if (null === $end) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires end node to have valid UUID.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Relation element defragmentize event listener requires end node to have valid UUID.');
         }
         $end = UuidV4::fromString($end);
 

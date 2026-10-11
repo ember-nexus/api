@@ -1,10 +1,34 @@
+# The production image only contains the application, the connections to the other services are configured through its
+# environment (the repository is not mounted, so no `.env` file provides them).
+x-api-environment: &api-environment
+  CYPHER_AUTH: bolt://neo4j:password@neo4j
+  MONGO_AUTH: mongodb://mongodb:password@mongodb:27017
+  ELASTIC_AUTH: elasticsearch:9200
+  REDIS_AUTH: tcp://redis?password=redis-password
+  RABBITMQ_AUTH: amqp://user:password@rabbitmq:5672
+  S3_ENDPOINT: http://minio:9000
+  S3_ACCESS_KEY_ID: accessKey
+  S3_SECRET_ACCESS_KEY: secretKey
+  # cron commands would otherwise run whenever the scheduler triggers them during the test run; the tty-bypass
+  # rule still lets a manually-`docker exec -t`'d cron command run despite this
+  DISABLE_CRON: 'true'
+
 services:
 
   api-dev:
     container_name: api-dev
     image: api:dev-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
     expose:
       - "80"
+    environment:
+      DISABLE_CRON: 'true'
     volumes:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt
@@ -12,10 +36,37 @@ services:
   api:
     container_name: api
     image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
     expose:
       - "80"
+    environment: *api-environment
     volumes:
-      - ../../:/var/www/html
+      # the repository is deliberately not mounted: the production image is tested as it is shipped
+      - ./well-known-security.txt:/well-known-security.txt
+
+  # second API instance, only differs in its configuration file; used by the tests of
+  # tests/ExampleGenerationControllerWithDifferentConfiguration via API_DOMAIN=http://api-different-configuration
+  api-different-configuration:
+    container_name: api-different-configuration
+    image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
+    expose:
+      - "80"
+    environment: *api-environment
+    volumes:
+      - ../ExampleGenerationControllerWithDifferentConfiguration/configuration.yml:/var/www/html/config/packages/ember_nexus.yaml:ro
       - ./well-known-security.txt:/well-known-security.txt
 
   neo4j:
@@ -35,6 +86,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongodb
       - MONGO_INITDB_ROOT_PASSWORD=password
+      - GLIBC_TUNABLES=glibc.pthread.rseq=1
 
   elasticsearch:
     container_name: elasticsearch
@@ -62,3 +114,37 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=user
       - RABBITMQ_DEFAULT_PASS=password
+
+  minio:
+    container_name: minio
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    expose:
+      - "9000"
+      - "9001"
+    environment:
+      - MINIO_ROOT_USER=ROOTNAME
+      - MINIO_ROOT_PASSWORD=CHANGEME123
+    command: server /data --console-address ":9001"
+
+  minio-init:
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set minio http://minio:9000 ROOTNAME CHANGEME123; do
+        echo 'Waiting for MinIO...';
+        sleep 1;
+      done;
+
+      mc mb --ignore-existing minio/api-storage;
+      mc mb --ignore-existing minio/api-upload;
+
+      mc anonymous set none minio/api-storage;
+      mc anonymous set none minio/api-upload;
+
+      mc admin user add minio accessKey secretKey || true;
+      mc admin policy attach minio readwrite --user accessKey;
+
+      echo 'MinIO buckets and user configured';
+      "

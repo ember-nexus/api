@@ -1,0 +1,113 @@
+# The production image only contains the application, the connections to the other services are configured through its
+# environment (the repository is not mounted, so no `.env` file provides them).
+x-api-environment: &api-environment
+  CYPHER_AUTH: bolt://neo4j:password@neo4j
+  MONGO_AUTH: mongodb://mongodb:password@mongodb:27017
+  ELASTIC_AUTH: elasticsearch:9200
+  REDIS_AUTH: tcp://redis?password=redis-password
+  RABBITMQ_AUTH: amqp://user:password@rabbitmq:5672
+  S3_ENDPOINT: http://seaweedfs:9000
+  S3_ACCESS_KEY_ID: accessKey
+  S3_SECRET_ACCESS_KEY: secretKey
+  # cron commands would otherwise run whenever the scheduler triggers them during the test run; the tty-bypass
+  # rule still lets a manually-`docker exec -t`'d cron command run despite this
+  DISABLE_CRON: 'true'
+
+services:
+
+  api-dev:
+    container_name: api-dev
+    image: api:dev-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - seaweedfs
+    expose:
+      - "80"
+    environment:
+      DISABLE_CRON: 'true'
+      # overrides the mounted repository's own .env(.test), which point at the "minio" service name used by the
+      # default local dev stack and the neo4j-5.7-minio scenario; this scenario's S3-compatible service is named
+      # after what it actually runs instead, see docker-compose-neo4j-latest-versitygw.yml for the same reason
+      S3_ENDPOINT: http://seaweedfs:9000
+    volumes:
+      - ../../:/var/www/html
+      - ./well-known-security.txt:/well-known-security.txt
+
+  api-prod:
+    container_name: api-prod
+    image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - seaweedfs
+    expose:
+      - "80"
+    environment: *api-environment
+    volumes:
+      # the repository is deliberately not mounted: the production image is tested as it is shipped
+      - ./well-known-security.txt:/well-known-security.txt
+
+  neo4j:
+    container_name: neo4j
+    image: neo4j:5.20
+    expose:
+      - "7474"
+      - "7687"
+    environment:
+      - NEO4J_AUTH=neo4j/password
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:7
+    expose:
+      - "27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - GLIBC_TUNABLES=glibc.pthread.rseq=1
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:8.8.1
+    expose:
+      - "9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=true
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    expose:
+      - "5672"
+      - "15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+
+  seaweedfs:
+    container_name: seaweedfs
+    image: chrislusf/seaweedfs:latest
+    expose:
+      - "9000"
+      - "8888"
+    environment:
+      - AWS_ACCESS_KEY_ID=accessKey
+      - AWS_SECRET_ACCESS_KEY=secretKey
+      - S3_BUCKET=api-storage,api-upload
+    command: ["mini", "-dir=/data", "-s3.port=9000"]

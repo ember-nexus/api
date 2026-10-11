@@ -1,0 +1,9 @@
+{
+  "name": "k6-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "mkdir -p tmp && k6 run scripts/demo.js",
+    "load": "mkdir -p tmp && k6 run -e N=1000 -e K=8 scripts/demo.js"
+  }
+}

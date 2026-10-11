@@ -8,14 +8,15 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Helper\Regex;
-use App\Response\CreatedResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\RelationElement;
+use App\Type\Response\CreatedResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,6 +35,7 @@ class PostElementController extends AbstractController
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -60,7 +62,7 @@ class PostElementController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         if (array_key_exists('start', $body)) {
             // owns-relation can only target nodes
@@ -68,7 +70,7 @@ class PostElementController extends AbstractController
         }
         if (array_key_exists('end', $body)) {
             // owns-relation can only target nodes
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('start', 'non-existent', 'existent');
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('end', 'non-existent', 'existent');
         }
 
         if (array_key_exists('id', $body)) {

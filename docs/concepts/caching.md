@@ -19,6 +19,10 @@ Ember Nexus API supports the headers to determine whether cached content is stil
 - `If-Match`, see [MDN's documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Match).
 - `If-None-Match`, see [MDN's documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match).
 
+Note that `If-Match` is checked before the write, but is not atomic with it: a concurrent write between the check and
+the actual write is possible and is not detected. `If-Match` therefore reduces, but does not eliminate, the chance of
+overwriting a concurrent change.
+
 The value of the `Etag` header is calculated as the XXH3 hash from the identifiers and `updatedAt` timestamps of all
 involved elements.  
 As the `updatedAt` timestamp uses microsecond precision, the resulting `Etag` will be different as long as updates
@@ -37,8 +41,8 @@ The first `GET` request can be executed normally:
 
 ```bash
 curl \
-  -H "Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv" \
-  https://api.localhost/35cd3b18-0d0c-4e98-876e-898b930797f2
+  -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
+  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
 ```
 
 The response then contains the `Etag`-header.  
@@ -59,9 +63,9 @@ status code 304 not modified, which tells the client that the data returned by t
 
 ```bash
 curl \
-  -H "Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv" \
-  -H "If-None-Match: \"6JM8JahrCeu\"" \
-  https://api.localhost/35cd3b18-0d0c-4e98-876e-898b930797f2
+  -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
+  -H "If-None-Match: \"FdjM5IgJhIE\"" \
+  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
 ```
 
 Response:
@@ -79,9 +83,9 @@ and return up-to-date data for the endpoint:
 
 ```bash
 curl \
-  -H "Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv" \
+  -H "Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc" \
   -H "If-None-Match: \"invalid\"" \
-  https://api.localhost/35cd3b18-0d0c-4e98-876e-898b930797f2
+  https://api.localhost/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac
 ```
 
 Response:

@@ -2,5 +2,6 @@
   "type": "http://api/error/403/forbidden",
   "title": "Forbidden",
   "status": 403,
+  "instance": "urn:uuid:7ade7fdf-f7f7-47a0-bd83-2ab01d68f36c",
   "detail": "Requested endpoint, element or action is forbidden."
 }

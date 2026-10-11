@@ -1,0 +1,39 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Type;
+
+use App\Service\FileNameService;
+use JsonSerializable;
+
+class FileProperty implements JsonSerializable
+{
+    private string $extension = FileNameService::DEFAULT_EXTENSION;
+
+    public function __construct()
+    {
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'extension' => $this->getExtension(),
+        ];
+    }
+
+    public function getExtension(): string
+    {
+        return $this->extension;
+    }
+
+    public function setExtension(string $extension): static
+    {
+        $this->extension = $extension;
+
+        return $this;
+    }
+}
