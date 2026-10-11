@@ -29,6 +29,10 @@ services:
       - "80"
     environment:
       DISABLE_CRON: 'true'
+      # overrides the mounted repository's own .env(.test), which point at the "minio" service name used by the
+      # default local dev stack and the neo4j-5.7-minio scenario; this scenario's S3-compatible service is named
+      # after what it actually runs instead, see docker-compose-neo4j-5.20-seaweedfs.yml for the same reason
+      S3_ENDPOINT: http://versitygw:9000
     volumes:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt
