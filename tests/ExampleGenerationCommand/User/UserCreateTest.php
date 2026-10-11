@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\ExampleGenerationCommand\User;
+namespace App\Tests\ExampleGenerationCommand\User;
 
 use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
 

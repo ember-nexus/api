@@ -8,14 +8,14 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class UpdateElementFromRawDataService
 {
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -45,7 +45,7 @@ class UpdateElementFromRawDataService
             $typeOrLabel = $element->getType();
         }
         if (null === $typeOrLabel) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Type or label should not be null here.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Type or label should not be null here.');
         }
 
         $elementPropertyChangeEvent = new ElementPropertyChangeEvent($typeOrLabel, $element, $normalizedData);

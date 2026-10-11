@@ -22,13 +22,6 @@ Users which immediately own a node, have full access to it.
 | `2-01-03-22` | `User` | `🟠 PUT /<Data>/file`     | Valid request body. | ✔️ 204 | no         | ❌ todo v0.2.0  |
 | `2-01-03-23` | `User` | `🟠 PATCH /<Data>/file`   | Valid request body. | ✔️ 204 | no         | ❌ todo v0.2.0  |
 | `2-01-03-24` | `User` | `🔴 DELETE /<Data>/file`  | -                   | ✔️ ?   | no         | ❌ todo v0.2.0  |
-| `2-01-03-30` | `User` | `🟣 COPY /<Data>`         | Valid request body. | ✔️ ?   | no         | ❌ todo v0.2.0  |
-| `2-01-03-31` | `User` | `🟣 LOCK /<Data>`         | Valid request body. | ✔️ ?   | no         | ❌ todo v0.2.0  |
-| `2-01-03-32` | `User` | `🟣 UNLOCK /<Data>`       | Valid request body. | ✔️ ?   | no         | ❌ todo v0.2.0  |
-| `2-01-03-33` | `User` | `🟣 MKCOL /<Data>`        | Valid request body. | ✔️ ?   | no         | ❌ todo v0.2.0  |
-| `2-01-03-34` | `User` | `🟣 MOVE /<Data>`         | Valid request body. | ✔️ ?   | no         | ❌ todo v0.2.0  |
-| `2-01-03-35` | `User` | `🟣 PROPFIND /<Data>`     | Valid request body. | ✔️ ?   | yes?       | ❌ todo v0.2.0  |
-| `2-01-03-36` | `User` | `🟣 PROPPATCH /<Data>`    | Valid request body. | ✔️ ?   | no         | ❌ todo v0.2.0  |
 
 <script>
 renderGraph(document.getElementById('graph'), {

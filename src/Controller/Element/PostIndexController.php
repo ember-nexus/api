@@ -9,13 +9,14 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
-use App\Response\CreatedResponse;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
+use App\Service\RequestContentService;
 use App\Type\AccessType;
 use App\Type\RelationElement;
+use App\Type\Response\CreatedResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,6 +40,7 @@ class PostIndexController extends AbstractController
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -58,7 +60,7 @@ class PostIndexController extends AbstractController
             }
         }
 
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         if (array_key_exists('id', $body)) {
             $elementId = UuidV4::fromString($body['id']);
@@ -79,10 +81,7 @@ class PostIndexController extends AbstractController
         $startId = null;
         if (array_key_exists('start', $body)) {
             $startId = UuidV4::fromString($body['start']);
-            $startElement = $this->elementManager->getElement($startId);
-            if (null === $startElement) {
-                throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-            }
+            $startElement = $this->elementManager->getElementOrFail($startId);
             if (!$this->accessChecker->hasAccessToElement($userId, $startId, AccessType::CREATE)) {
                 throw $this->client404NotFoundExceptionFactory->createFromTemplate();
             }
@@ -94,10 +93,7 @@ class PostIndexController extends AbstractController
         $endId = null;
         if (array_key_exists('end', $body)) {
             $endId = UuidV4::fromString($body['end']);
-            $endElement = $this->elementManager->getElement($endId);
-            if (null === $endElement) {
-                throw $this->client404NotFoundExceptionFactory->createFromTemplate();
-            }
+            $endElement = $this->elementManager->getElementOrFail($endId);
             if (!$this->accessChecker->hasAccessToElement($userId, $endId, AccessType::READ)) {
                 throw $this->client404NotFoundExceptionFactory->createFromTemplate();
             }

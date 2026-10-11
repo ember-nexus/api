@@ -11,7 +11,7 @@ jobs:
 
 
   checkout-repo-and-bump-version:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: Check out Repo and Bump Version
     timeout-minutes: 10
     steps:
@@ -192,7 +192,7 @@ jobs:
 
 
   publish-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     name: Publish release
     timeout-minutes: 10
     needs: [build-docker-image-amd, build-docker-image-arm]

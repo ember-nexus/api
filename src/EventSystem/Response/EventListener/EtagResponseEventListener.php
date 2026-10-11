@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventSystem\Response\EventListener;
 
-use App\Response\CollectionResponse;
-use App\Response\ElementResponse;
-use App\Response\NotModifiedResponse;
+use App\Contract\EtagCapableResponseInterface;
 use App\Service\EtagService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -22,11 +20,7 @@ class EtagResponseEventListener
     public function onKernelResponse(ResponseEvent $event): void
     {
         $response = $event->getResponse();
-        if (!(
-            $response instanceof CollectionResponse
-            || $response instanceof ElementResponse
-            || $response instanceof NotModifiedResponse
-        )) {
+        if (!($response instanceof EtagCapableResponseInterface)) {
             return;
         }
         $etag = $this->etagService->getCurrentRequestEtag();

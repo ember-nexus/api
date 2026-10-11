@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Security;
 
 use App\Exception\Server500LogicErrorException;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -30,7 +30,7 @@ class AuthProviderTest extends TestCase
 
         $serverException = new Server500LogicErrorException('');
 
-        $serverExceptionFactory = $this->prophesize(Server500LogicExceptionFactory::class);
+        $serverExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
         $serverExceptionFactory
             ->createFromTemplate(Argument::is('anonymousUserUUID must be set to a valid UUID'))
             ->shouldBeCalledOnce()
@@ -52,7 +52,7 @@ class AuthProviderTest extends TestCase
         $authProvider = new AuthProvider(
             $bag->reveal(),
             $this->prophesize(TokenGenerator::class)->reveal(),
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->assertTrue($authProvider->isAnonymous());
@@ -68,7 +68,7 @@ class AuthProviderTest extends TestCase
         $authProvider = new AuthProvider(
             $bag->reveal(),
             $this->prophesize(TokenGenerator::class)->reveal(),
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $authProvider->setUserAndToken(Uuid::fromString('d3e0ce1e-cdf1-4c80-beae-266008d5e520'));
@@ -109,7 +109,7 @@ class AuthProviderTest extends TestCase
         $authProvider = new AuthProvider(
             $bag->reveal(),
             $tokenGenerator->reveal(),
-            $this->prophesize(Server500LogicExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $redisTokenKeyFromHashedToken = $authProvider->getRedisTokenKeyFromHashedToken('test');

@@ -8,8 +8,10 @@ if [ -z "$BACKUP_FOLDER_CAN_BE_RESET" ]; then
   exit 1
 fi
 
-TERM_WIDTH=$(stty size | awk '{print $2}')
-if [ "$TERM_WIDTH" -ne 80 ]; then
+TERM_WIDTH=$(stty size 2>/dev/null | awk '{print $2}')
+if [ -z "$TERM_WIDTH" ]; then
+  echo "No terminal detected, skipping terminal width check (80 chars are expected)."
+elif [ "$TERM_WIDTH" -ne 80 ]; then
   echo "Tests must be run in an terminal with 80 chars width, due to limitations in CI."
   exit 1
 fi

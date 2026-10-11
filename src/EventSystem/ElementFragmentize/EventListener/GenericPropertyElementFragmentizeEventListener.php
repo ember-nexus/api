@@ -52,6 +52,7 @@ class GenericPropertyElementFragmentizeEventListener
         foreach ($element->getProperties() as $name => $value) {
             $elasticFragment->addProperty($name, $value);
             if (is_array($value)) {
+                $cypherFragment->addProperty($name, true);
                 $mongoFragment->addProperty($name, $value);
                 continue;
             }
@@ -86,6 +87,7 @@ class GenericPropertyElementFragmentizeEventListener
                 continue;
             }
             if (is_object($value)) {
+                $cypherFragment->addProperty($name, true);
                 $mongoFragment->addProperty($name, $value);
                 continue;
             }
@@ -111,7 +113,7 @@ class GenericPropertyElementFragmentizeEventListener
                 $elasticFragment->addProperty($name, $value);
                 continue;
             }
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate(sprintf("Unknown data type with value '%s'.", $value), ['value' => $value]);
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate(sprintf("Unknown data type '%s'.", get_debug_type($value)), ['value' => $value]);
         }
     }
 }

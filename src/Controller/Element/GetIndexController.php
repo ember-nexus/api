@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Element;
 
 use App\Attribute\EndpointSupportsEtag;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use App\Type\EtagType;
@@ -23,7 +23,7 @@ class GetIndexController extends AbstractController
         private CypherEntityManager $cypherEntityManager,
         private AuthProvider $authProvider,
         private CollectionService $collectionService,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -58,11 +58,11 @@ class GetIndexController extends AbstractController
         if (count($res) > 0) {
             $totalCount = $res->first()->get('totalCount');
             if (!is_int($totalCount)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property totalCount as int, not %s.', get_debug_type($totalCount))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property totalCount as int, not %s.', get_debug_type($totalCount))); // @codeCoverageIgnore
             }
             $rawElementIds = $res->first()->get('elementIds');
             if (!($rawElementIds instanceof CypherList)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementIds as CypherList, not %s.', get_debug_type($rawElementIds))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementIds as CypherList, not %s.', get_debug_type($rawElementIds))); // @codeCoverageIgnore
             }
             foreach ($rawElementIds as $elementId) {
                 $nodeIds[] = UuidV4::fromString($elementId);

@@ -2,6 +2,5 @@
 flysystem:
   storages:
     backup.storage:
-      adapter: 'local'
-      options:
+      local:
         directory: '%kernel.project_dir%/var/backup'

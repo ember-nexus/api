@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Factory\EventSystem\ElementFragmentize\Event;
+namespace App\Tests\UnitTests\Factory\EventSystem\ElementFragmentize\Event;
 
 use App\Factory\EventSystem\ElementFragmentize\Event\RelationElementFragmentizeEventFactory;
 use App\Type\RelationElement;
@@ -27,6 +27,5 @@ class RelationElementFragmentizeEventFactoryTest extends TestCase
         $this->assertNotNull($event->getCypherFragment());
         $this->assertNotNull($event->getElasticFragment());
         $this->assertNotNull($event->getMongoFragment());
-        $this->assertNull($event->getFileFragment());
     }
 }

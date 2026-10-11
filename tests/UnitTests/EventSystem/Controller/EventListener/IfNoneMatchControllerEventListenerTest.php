@@ -8,10 +8,10 @@ use App\Attribute\EndpointSupportsEtag;
 use App\EventSystem\Controller\EventListener\IfNoneMatchControllerEventListener;
 use App\Exception\Client412PreconditionFailedException;
 use App\Factory\Exception\Client412PreconditionFailedExceptionFactory;
-use App\Response\NotModifiedResponse;
 use App\Service\EtagService;
 use App\Type\Etag;
 use App\Type\EtagType;
+use App\Type\Response\NotModifiedResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -33,7 +33,7 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
         $event = new ControllerEvent(
             $this->prophesize(HttpKernelInterface::class)->reveal(),
             $closure,
-            $this->prophesize(Request::class)->reveal(),
+            new Request(),
             HttpKernelInterface::MAIN_REQUEST
         );
 
@@ -54,7 +54,7 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
         $event = new ControllerEvent(
             $this->prophesize(HttpKernelInterface::class)->reveal(),
             $closure,
-            $this->prophesize(Request::class)->reveal(),
+            new Request(),
             HttpKernelInterface::MAIN_REQUEST
         );
 
@@ -422,5 +422,92 @@ class IfNoneMatchControllerEventListenerTest extends TestCase
 
         $response = $event->getController()();
         $this->assertInstanceOf(NotModifiedResponse::class, $response);
+    }
+
+    public function testWildcardIfNoneMatchReturns304ForGet(): void
+    {
+        $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
+        fn () => true;
+
+        $request = new Request();
+        $request->headers->set('If-None-Match', '*');
+
+        $event = new ControllerEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $closure,
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $etagService = $this->prophesize(EtagService::class);
+        $etagService->getCurrentRequestEtag()->shouldBeCalledOnce()->willReturn(new Etag('someEtag'));
+
+        $eventListener = new IfNoneMatchControllerEventListener(
+            $etagService->reveal(),
+            $this->prophesize(Client412PreconditionFailedExceptionFactory::class)->reveal()
+        );
+        $eventListener->onKernelController($event);
+
+        $this->assertNotSame($closure, $event->getController());
+        $this->assertInstanceOf(NotModifiedResponse::class, ($event->getController())());
+    }
+
+    public function testWildcardIfNoneMatchReturns412ForPost(): void
+    {
+        $closure = #[EndpointSupportsEtag(EtagType::FILE)]
+        fn () => true;
+
+        $request = new Request();
+        $request->setMethod('POST');
+        $request->headers->set('If-None-Match', '*');
+
+        $event = new ControllerEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $closure,
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $etagService = $this->prophesize(EtagService::class);
+        $etagService->getCurrentRequestEtag()->shouldBeCalledOnce()->willReturn(new Etag('someEtag'));
+
+        $client412PreconditionFailedExceptionFactory = $this->prophesize(Client412PreconditionFailedExceptionFactory::class);
+        $client412PreconditionFailedExceptionFactory->createFromTemplate()->willReturn(new Client412PreconditionFailedException('title'));
+
+        $eventListener = new IfNoneMatchControllerEventListener(
+            $etagService->reveal(),
+            $client412PreconditionFailedExceptionFactory->reveal()
+        );
+
+        $this->expectException(Client412PreconditionFailedException::class);
+        $eventListener->onKernelController($event);
+    }
+
+    public function testWildcardIfNoneMatchIsIgnoredWithoutCurrentEtag(): void
+    {
+        $closure = #[EndpointSupportsEtag(EtagType::FILE)]
+        fn () => true;
+
+        $request = new Request();
+        $request->setMethod('POST');
+        $request->headers->set('If-None-Match', '*');
+
+        $event = new ControllerEvent(
+            $this->prophesize(HttpKernelInterface::class)->reveal(),
+            $closure,
+            $request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        $etagService = $this->prophesize(EtagService::class);
+        $etagService->getCurrentRequestEtag()->shouldBeCalledOnce()->willReturn(null);
+
+        $eventListener = new IfNoneMatchControllerEventListener(
+            $etagService->reveal(),
+            $this->prophesize(Client412PreconditionFailedExceptionFactory::class)->reveal()
+        );
+        $eventListener->onKernelController($event);
+
+        $this->assertSame($closure, $event->getController());
     }
 }

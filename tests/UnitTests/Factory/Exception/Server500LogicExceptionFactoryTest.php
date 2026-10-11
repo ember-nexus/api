@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Factory\Exception;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
-#[CoversClass(Server500LogicExceptionFactory::class)]
+#[CoversClass(Server500LogicErrorExceptionFactory::class)]
 class Server500LogicExceptionFactoryTest extends TestCase
 {
     use ProphecyTrait;
@@ -35,7 +35,7 @@ class Server500LogicExceptionFactoryTest extends TestCase
         $bag->get(Argument::is('kernel.environment'))->shouldBeCalledOnce()->willReturn('prod');
         $logger = $this->prophesize(LoggerInterface::class);
         $logger->error(Argument::is('a'), Argument::is([]))->shouldBeCalledOnce();
-        $factory = new Server500LogicExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger->reveal());
+        $factory = new Server500LogicErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger->reveal());
 
         $exception = $factory->createFromTemplate('a');
 
@@ -62,7 +62,7 @@ class Server500LogicExceptionFactoryTest extends TestCase
         $bag->get(Argument::is('kernel.environment'))->shouldBeCalledOnce()->willReturn('dev');
         $logger = $this->prophesize(LoggerInterface::class);
         $logger->error(Argument::is('a'), Argument::is([]))->shouldBeCalledOnce();
-        $factory = new Server500LogicExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger->reveal());
+        $factory = new Server500LogicErrorExceptionFactory($urlGenerator->reveal(), $bag->reveal(), $logger->reveal());
 
         $exception = $factory->createFromTemplate('a');
 

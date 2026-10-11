@@ -3,11 +3,6 @@
 <!-- panels:start -->
 <!-- div:left-panel -->
 
-> [!NOTE]
-> This endpoint's request body received a breaking change with version [0.1.6](https://github.com/ember-nexus/api/releases/tag/0.1.6).
-> The previous variant is deprecated and will be removed in version 0.2.0.
-> Link to the old documentation: [POST /token (old)](/api-endpoints/user/post-token-old.md).
-
 Endpoint for creating new tokens.
 
 The endpoint can be configured; see

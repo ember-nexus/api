@@ -18,7 +18,6 @@ class RelationElementDefragmentizeEvent implements EventInterface
         private RelationElementInterface $relationElement,
         private RelationInterface $cypherFragment,
         private ?DocumentInterface $documentFragment,
-        private mixed $fileFragment = null,
     ) {
     }
 
@@ -35,10 +34,5 @@ class RelationElementDefragmentizeEvent implements EventInterface
     public function getDocumentFragment(): ?DocumentInterface
     {
         return $this->documentFragment;
-    }
-
-    public function getFileFragment(): mixed
-    {
-        return $this->fileFragment;
     }
 }

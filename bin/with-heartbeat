@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Runs the given command and prints a "still running" line every HEARTBEAT_INTERVAL seconds (default 10), so long
+# running commands without a tty (e.g. in ci) do not look stuck. Exits with the exit code of the command.
+
+INTERVAL="${HEARTBEAT_INTERVAL:-10}"
+START=$(date +%s)
+
+"$@" &
+COMMAND_PID=$!
+
+trap 'kill "$COMMAND_PID" 2>/dev/null' INT TERM
+
+(
+  while sleep "$INTERVAL"; do
+    echo "[heartbeat] still running... ($(( $(date +%s) - START ))s)"
+  done
+) &
+HEARTBEAT_PID=$!
+
+wait "$COMMAND_PID"
+EXIT_CODE=$?
+
+kill "$HEARTBEAT_PID" 2>/dev/null
+wait "$HEARTBEAT_PID" 2>/dev/null
+
+exit "$EXIT_CODE"

@@ -1,0 +1,7 @@
+ Error 405 - Method Not Allowed
+
+ The requested route exists, but does not support the used HTTP method.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+
+ Link to http.dev's explanation of the 405 error code: https://http.dev/405

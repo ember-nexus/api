@@ -6,9 +6,10 @@ namespace App\Controller\User;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Response\NoContentResponse;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
+use App\Type\Response\NoContentResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +22,7 @@ class PostChangePasswordController extends AbstractController
         private SecurityUtilService $securityUtilService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -31,8 +33,7 @@ class PostChangePasswordController extends AbstractController
     )]
     public function postChangePassword(Request $request): Response
     {
-        $body = \Safe\json_decode($request->getContent(), true);
-        $data = $this->requestUtilService->getDataFromBody($body);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         $this->requestUtilService->validateTypeFromBody('ActionChangePassword', $body);
 
@@ -40,7 +41,7 @@ class PostChangePasswordController extends AbstractController
         $currentPassword = $this->requestUtilService->getStringFromBody('currentPassword', $body);
         $this->validateNewPasswordIsDifferentFromCurrentPassword($newPassword, $currentPassword);
 
-        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
 
         $userNode = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
         $userId = $userNode->getId();

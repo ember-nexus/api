@@ -12,6 +12,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\OutputStyle;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
@@ -22,6 +23,7 @@ class BackupListCommand extends Command
     private OutputStyle $io;
 
     public function __construct(
+        #[Target('backup.storage')]
         private FilesystemOperator $backupStorage,
         private LoggerInterface $logger,
     ) {

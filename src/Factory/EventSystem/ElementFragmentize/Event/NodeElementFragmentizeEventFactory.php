@@ -18,8 +18,7 @@ class NodeElementFragmentizeEventFactory
             $nodeElement,
             new Node(),
             new MongoDocument(),
-            new ElasticDocument(),
-            null
+            new ElasticDocument()
         );
     }
 }

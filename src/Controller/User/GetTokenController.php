@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\User;
 
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\ElementResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,7 +18,7 @@ class GetTokenController extends AbstractController
         private ElementResponseService $elementResponseService,
         private AuthProvider $authProvider,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -36,7 +36,7 @@ class GetTokenController extends AbstractController
         $tokenId = $this->authProvider->getTokenId();
 
         if (!$tokenId) {
-            throw $this->server500LogicExceptionFactory->createFromTemplate('Token uuid should not be null.');
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Token uuid should not be null.');
         }
 
         return $this->elementResponseService->buildElementResponseFromId($tokenId);

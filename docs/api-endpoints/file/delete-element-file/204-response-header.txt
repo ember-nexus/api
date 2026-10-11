@@ -1,0 +1,8 @@
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Cache-Control: no-cache, private
+Date: Fri, 02 Oct 2026 22:37:59 GMT
+X-Powered-By: Ember Nexus API

@@ -23,20 +23,17 @@ class NodeElementFragmentizeEventTest extends TestCase
         $cypherFragment = new Node();
         $mongoFragment = new MongoDocument();
         $elasticFragment = new ElasticDocument();
-        $fileFragment = null;
 
         $nodeElementFragmentizeEvent = new NodeElementFragmentizeEvent(
             $nodeElement,
             $cypherFragment,
             $mongoFragment,
-            $elasticFragment,
-            $fileFragment
+            $elasticFragment
         );
 
         $this->assertSame($nodeElement, $nodeElementFragmentizeEvent->getNodeElement());
         $this->assertSame($cypherFragment, $nodeElementFragmentizeEvent->getCypherFragment());
         $this->assertSame($mongoFragment, $nodeElementFragmentizeEvent->getMongoFragment());
         $this->assertSame($elasticFragment, $nodeElementFragmentizeEvent->getElasticFragment());
-        $this->assertSame($fileFragment, $nodeElementFragmentizeEvent->getFileFragment());
     }
 }

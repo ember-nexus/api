@@ -15,14 +15,23 @@ class ProblemJsonException extends Exception implements ExceptionInterface
     protected int $status;
     protected string $detail;
     protected ?string $instance = null;
+    /**
+     * @var array<string, mixed>
+     */
+    protected array $additionalProperties;
+    /**
+     * @var array<string, string>
+     */
+    protected array $headers = [];
 
     /**
-     * @param string         $type     A URI reference [RFC3986] that identifies the
-     * @param string         $title    A short, human-readable summary of the problem
-     * @param int            $status   The HTTP status code ([RFC7231], Section 6)
-     * @param string         $detail   A human-readable explanation specific to this
-     * @param string|null    $instance A URI reference that identifies the specific
-     * @param Throwable|null $previous the previous throwable used for the exception chaining
+     * @param string               $type                 A URI reference [RFC3986] that identifies the
+     * @param string               $title                A short, human-readable summary of the problem
+     * @param int                  $status               The HTTP status code ([RFC7231], Section 6)
+     * @param string               $detail               A human-readable explanation specific to this
+     * @param string|null          $instance             A URI reference that identifies the specific
+     * @param Throwable|null       $previous             the previous throwable used for the exception chaining
+     * @param array<string, mixed> $additionalProperties Array of additional properties which will be added to the resulting Problem JSON response
      */
     public function __construct(
         string $type,
@@ -31,6 +40,7 @@ class ProblemJsonException extends Exception implements ExceptionInterface
         string $detail,
         ?string $instance = null,
         ?Throwable $previous = null,
+        array $additionalProperties = [],
     ) {
         parent::__construct('', 0, $previous);
         $this->type = $type;
@@ -38,6 +48,7 @@ class ProblemJsonException extends Exception implements ExceptionInterface
         $this->status = $status;
         $this->detail = $detail;
         $this->instance = $instance;
+        $this->additionalProperties = $additionalProperties;
     }
 
     public function getType(): string
@@ -63,5 +74,31 @@ class ProblemJsonException extends Exception implements ExceptionInterface
     public function getInstance(): ?string
     {
         return $this->instance;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getAdditionalProperties(): array
+    {
+        return $this->additionalProperties;
+    }
+
+    /**
+     * @param array<string, string> $headers HTTP headers which will be added to the resulting Problem JSON response
+     */
+    public function setHeaders(array $headers): static
+    {
+        $this->headers = $headers;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 }

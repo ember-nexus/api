@@ -18,6 +18,9 @@ services:
       - '../src/DependencyInjection/'
       - '../src/Kernel.php'
 
+  # only one S3 connection is supported for now; replace with a per-connection factory once there are more
+  App\Contract\S3\S3TechnicalLimitsInterface: '@App\Type\S3\S3TechnicalLimits'
+
   # library services
 
   monolog_json_formatter:
@@ -178,6 +181,21 @@ services:
     arguments:
       $rabbitMQAuth: '%env(RABBITMQ_AUTH)%'
 
+  # lazy: the real TCP connection + AMQP handshake only happens on first actual use (e.g. ->channel()), not merely
+  # by being injected into a constructor; without this, RabbitMqConnectionListener's kernel.terminate handler forces
+  # a connection to be opened (and immediately closed again) on every single request, even ones that never touch
+  # RabbitMQ at all, since it unconditionally closes the (constructor-injected) connection
   PhpAmqpLib\Connection\AMQPStreamConnection:
     factory: ['@App\Factory\RabbitMQFactory', 'createRabbitMQ']
     class: PhpAmqpLib\Connection\AMQPStreamConnection
+    lazy: true
+
+  App\Factory\S3ClientFactory:
+    arguments:
+      $s3Endpoint: '%env(S3_ENDPOINT)%'
+      $s3AccessKeyId: '%env(S3_ACCESS_KEY_ID)%'
+      $s3SecretAccessKey: '%env(S3_SECRET_ACCESS_KEY)%'
+
+  AsyncAws\S3\S3Client:
+    factory: ['@App\Factory\S3ClientFactory', 'createS3Client']
+    class: AsyncAws\S3\S3Client

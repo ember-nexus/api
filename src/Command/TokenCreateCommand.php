@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Helper\Regex;
 use App\Security\TokenGenerator;
 use App\Service\ElementManager;
@@ -35,7 +35,7 @@ class TokenCreateCommand extends Command
         private CypherEntityManager $cypherEntityManager,
         private TokenGenerator $tokenGenerator,
         private EmberNexusConfiguration $emberNexusConfiguration,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }
@@ -95,7 +95,7 @@ class TokenCreateCommand extends Command
             }
             $rawIdentifier = $res->first()->get('id');
             if (!is_string($rawIdentifier)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawIdentifier))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawIdentifier))); // @codeCoverageIgnore
             }
             $identifier = Uuid::fromString($rawIdentifier);
         }

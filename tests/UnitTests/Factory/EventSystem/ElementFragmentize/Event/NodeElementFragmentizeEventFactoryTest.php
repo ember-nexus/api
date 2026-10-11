@@ -27,6 +27,5 @@ class NodeElementFragmentizeEventFactoryTest extends TestCase
         $this->assertNotNull($event->getCypherFragment());
         $this->assertNotNull($event->getElasticFragment());
         $this->assertNotNull($event->getMongoFragment());
-        $this->assertNull($event->getFileFragment());
     }
 }

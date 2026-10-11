@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\EventSystem\EntityManager\EventListener;
 
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
+use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
-use App\Factory\Exception\Server500LogicExceptionFactory;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\RedisKeyFactory;
 use App\Type\RedisKey;
 use Exception;
@@ -18,13 +19,27 @@ use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
+/**
+ * A node's cascading `DETACH DELETE` never dispatches delete events for the relations it removes, so a delete path
+ * that doesn't delete each relation individually first would silently skip expiring their endpoints' ETag cache
+ * keys - a latent hazard today, since every current delete path happens to delete relations one by one before the
+ * node.
+ */
 class ExpireEtagOnChangeEventListener
 {
+    /**
+     * Collected before the delete (elements can't be looked up afterwards) and expired only after it, since a
+     * concurrent read beforehand would just cache the ETag again.
+     *
+     * @var array<string, RedisKey[]>
+     */
+    private array $redisEtagKeysToExpireAfterDelete = [];
+
     public function __construct(
         private Client $redisClient,
         private CypherEntityManager $cypherEntityManager,
         private RedisKeyFactory $redisKeyTypeFactory,
-        private Server500LogicExceptionFactory $server500LogicExceptionFactory,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 
@@ -46,6 +61,24 @@ class ExpireEtagOnChangeEventListener
         $this->handleEvent($event);
     }
 
+    #[AsEventListener]
+    public function onElementPostDeleteEvent(ElementPostDeleteEvent $event): void
+    {
+        $elementId = $event->getElement()->getId();
+        if (null === $elementId) {
+            return;
+        }
+        $key = $elementId->toString();
+        $redisEtagKeysToExpire = $this->redisEtagKeysToExpireAfterDelete[$key] ?? [
+            $this->redisKeyTypeFactory->getEtagElementRedisKey($elementId),
+            $this->redisKeyTypeFactory->getEtagFileRedisKey($elementId),
+        ];
+        unset($this->redisEtagKeysToExpireAfterDelete[$key]);
+        foreach ($redisEtagKeysToExpire as $redisEtagKeyToExpire) {
+            $this->redisClient->expire((string) $redisEtagKeyToExpire, 0);
+        }
+    }
+
     /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
@@ -62,6 +95,8 @@ class ExpireEtagOnChangeEventListener
          * @var RedisKey[] $redisEtagKeysToExpire
          */
         $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagElementRedisKey($elementId);
+        // the file ETag depends on the element's name, its file property and its ETag
+        $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagFileRedisKey($elementId);
 
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (node {id: \$elementId})\n".
@@ -86,41 +121,41 @@ class ExpireEtagOnChangeEventListener
         if (1 === count($result)) {
             $rawChildrenList = $result[0]['childrenList'];
             if (!($rawChildrenList instanceof CypherList)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property childrenList as CypherList, not %s.', get_debug_type($rawChildrenList))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property childrenList as CypherList, not %s.', get_debug_type($rawChildrenList))); // @codeCoverageIgnore
             }
             foreach ($rawChildrenList as $childId) {
                 if (!is_string($childId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property childrenList.item as string, not %s.', get_debug_type($childId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property childrenList.item as string, not %s.', get_debug_type($childId))); // @codeCoverageIgnore
                 }
                 $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey(Uuid::fromString($childId));
             }
             $rawParentsList = $result[0]['parentsList'];
             if (!($rawParentsList instanceof CypherList)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property parentsList as CypherList, not %s.', get_debug_type($rawParentsList))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property parentsList as CypherList, not %s.', get_debug_type($rawParentsList))); // @codeCoverageIgnore
             }
             foreach ($rawParentsList as $parentId) {
                 if (!is_string($parentId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property parentsList.item as string, not %s.', get_debug_type($parentId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property parentsList.item as string, not %s.', get_debug_type($parentId))); // @codeCoverageIgnore
                 }
                 $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey(Uuid::fromString($parentId));
             }
             $rawRelatedList = $result[0]['relatedList'];
             if (!($rawRelatedList instanceof CypherList)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property relatedList as CypherList, not %s.', get_debug_type($rawRelatedList))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property relatedList as CypherList, not %s.', get_debug_type($rawRelatedList))); // @codeCoverageIgnore
             }
             foreach ($rawRelatedList as $centerId) {
                 if (!is_string($centerId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property relatedList.item as string, not %s.', get_debug_type($centerId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property relatedList.item as string, not %s.', get_debug_type($centerId))); // @codeCoverageIgnore
                 }
                 $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey(Uuid::fromString($centerId));
             }
             $rawIndexList = $result[0]['indexList'];
             if (!($rawIndexList instanceof CypherList)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property indexList as CypherList, not %s.', get_debug_type($rawIndexList))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property indexList as CypherList, not %s.', get_debug_type($rawIndexList))); // @codeCoverageIgnore
             }
             foreach ($rawIndexList as $userId) {
                 if (!is_string($userId)) {
-                    throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property indexList.item as string, not %s.', get_debug_type($userId))); // @codeCoverageIgnore
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property indexList.item as string, not %s.', get_debug_type($userId))); // @codeCoverageIgnore
                 }
                 $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey(Uuid::fromString($userId));
             }
@@ -137,11 +172,11 @@ class ExpireEtagOnChangeEventListener
         if (1 === count($result)) {
             $rawStartId = $result[0]['start.id'];
             if (!is_string($rawStartId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property start.id as string, not %s.', get_debug_type($rawStartId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property start.id as string, not %s.', get_debug_type($rawStartId))); // @codeCoverageIgnore
             }
             $rawEndId = $result[0]['end.id'];
             if (!is_string($rawEndId)) {
-                throw $this->server500LogicExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property end.id as string, not %s.', get_debug_type($rawEndId))); // @codeCoverageIgnore
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property end.id as string, not %s.', get_debug_type($rawEndId))); // @codeCoverageIgnore
             }
             $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey(Uuid::fromString($rawStartId));
             $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey(Uuid::fromString($rawEndId));
@@ -149,6 +184,12 @@ class ExpireEtagOnChangeEventListener
                 $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey(Uuid::fromString($rawEndId));
                 $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey(Uuid::fromString($rawStartId));
             }
+        }
+
+        if ($event instanceof ElementPreDeleteEvent) {
+            $this->redisEtagKeysToExpireAfterDelete[$elementId->toString()] = $redisEtagKeysToExpire;
+
+            return;
         }
 
         foreach ($redisEtagKeysToExpire as $redisEtagKeyToExpire) {

@@ -1,0 +1,9 @@
+ Error 408 - Request Timeout
+
+ The HTTP 408 Request Timeout client error response status code indicates that the server did not receive the complete
+ request body, e.g. because the connection was interrupted or because the request body was not sent within the time
+ limit of the server. Retry the request, if necessary with a smaller request body, e.g. by uploading smaller chunks.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+
+ Link to http.dev's explanation of the 408 error code: https://http.dev/408

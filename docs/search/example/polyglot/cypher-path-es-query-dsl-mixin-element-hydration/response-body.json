@@ -5,6 +5,7 @@
       "type": "Plant",
       "id": "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
       "data": {
+        "created": "2026-09-24T19:04:03+00:00",
         "images": [
           {
             "description": "Wild columbine (Aquilegia canadensis) in Talcott Mountain State Park",
@@ -19,19 +20,28 @@
             "link": "https://en.wikipedia.org/wiki/File:Aquilegia_canadensis_Redmarkviolinist.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:28+00:00",
-        "updated": "2025-09-25T18:35:28+00:00",
+        "hasFile": true,
         "name": "Columbine",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:03+00:00",
         "scientificName": "A. canadensis",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Aquilegia_canadensis",
         "description": "Aquilegia canadensis, the Canadian or Canada columbine, eastern red columbine, or wild columbine, is a species of flowering plant in the buttercup family Ranunculaceae. It is an herbaceous perennial native to woodland and rocky slopes in eastern North America, prized for its red and yellow flowers. It readily hybridizes with other species in the genus Aquilegia."
+      },
+      "file": {
+        "contentLength": 51355,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "25772ade78beadc7fc55053016c88b17ede751fc001518b0a25428af523f8e64"
+        }
       }
     },
     {
       "type": "Plant",
       "id": "eb5373ef-50ae-462f-a07a-5ccf767bff21",
       "data": {
+        "created": "2026-09-24T19:04:03+00:00",
         "images": [
           {
             "description": "Flowering Corymbia ficifolia, Austins Ferry, Tasmania, Australia",
@@ -46,19 +56,28 @@
             "link": "https://en.wikipedia.org/wiki/File:Corymbia_ficifolia_in_Berkeley_California.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:28+00:00",
-        "updated": "2025-09-25T18:35:28+00:00",
+        "hasFile": true,
         "name": "Eucalyptus Blossom",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:03+00:00",
         "scientificName": "C. ficifolia",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Corymbia_ficifolia",
-        "description": "Corymbia ficifolia, commonly known as red flowering gum,[2] is a species of small tree that is endemic to the south-west of Western Australia. It has rough, fibrous bark on the trunk and branches, egg-shaped to broadly lance-shape adult leaves, flower buds in groups of seven, bright red, pink or orange flowers and urn-shaped fruit. It has a restricted distribution in the wild but is one of the most commonly planted ornamental eucalypts."
+        "description": "Corymbia ficifolia, commonly known as red flowering gum, is a species of small tree that is endemic to the south-west of Western Australia. It has rough, fibrous bark on the trunk and branches, egg-shaped to broadly lance-shape adult leaves, flower buds in groups of seven, bright red, pink or orange flowers and urn-shaped fruit. It has a restricted distribution in the wild but is one of the most commonly planted ornamental eucalypts."
+      },
+      "file": {
+        "contentLength": 102098,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "dbd69e49d315abad39a57c90fee358301f7217b4ef5597286d9b16ae09d4a3c2"
+        }
       }
     },
     {
       "type": "Plant",
       "id": "731fd394-6e0d-4a43-9693-4a7a7d97731e",
       "data": {
+        "created": "2026-09-24T19:04:03+00:00",
         "images": [
           {
             "description": "",
@@ -67,19 +86,28 @@
             "link": "https://en.wikipedia.org/wiki/File:Bromeliaceae03.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:28+00:00",
-        "updated": "2025-09-25T18:35:28+00:00",
+        "hasFile": true,
         "name": "Bromeliad",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:03+00:00",
         "scientificName": "G. lingulata",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Guzmania_lingulata",
-        "description": "Guzmania lingulata, the droophead tufted airplant or scarlet star, is a species of flowering plant in the family Bromeliaceae, subfamily Tillandsioideae. This evergreen epiphytic perennial[2] is native to rainforest habitats in Central America, northern and central South America and southern Mexico.[1] The Latin word lingulata means \"tongue-shaped\".[3] The foliage grows in a star-shaped basal rosette culminating in an orange and red bracted inflorescence. It is among the most commonly cultivated bromeliad types, with cultivars producing flowers in shades of maroon, red, orange, yellow or pink."
+        "description": "Guzmania lingulata, the droophead tufted airplant or scarlet star, is a species of flowering plant in the family Bromeliaceae, subfamily Tillandsioideae. This evergreen epiphytic perennial is native to rainforest habitats in Central America, northern and central South America and southern Mexico. The Latin word lingulata means \"tongue-shaped\". The foliage grows in a star-shaped basal rosette culminating in an orange and red bracted inflorescence. It is among the most commonly cultivated bromeliad types, with cultivars producing flowers in shades of maroon, red, orange, yellow or pink."
+      },
+      "file": {
+        "contentLength": 82201,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "d13ab134d7d1b9933d4369c9aeeae07827fdfb3cd6f2ae6c4b549375412ef097"
+        }
       }
     },
     {
       "type": "Plant",
       "id": "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
       "data": {
+        "created": "2026-09-24T19:04:03+00:00",
         "images": [
           {
             "description": "A poster showing three different stages of a Common Poppy flower (Papaver rhoeas): bud, flower and fruit (capsule).",
@@ -88,19 +116,28 @@
             "link": "https://en.wikipedia.org/wiki/File:Poster_papaver_3a.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:26+00:00",
-        "updated": "2025-09-25T18:35:26+00:00",
+        "hasFile": true,
         "name": "Poppy",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:03+00:00",
         "scientificName": "P. rhoeas",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Papaver_rhoeas",
-        "description": "Papaver rhoeas, with common names including common poppy,[3] corn poppy, corn rose, field poppy,[4] Flanders poppy, red poppy, and Odai, is an annual herbaceous species of flowering plant in the poppy family Papaveraceae. It is native to north Africa and temperate Eurasia and is introduced into temperate areas on all other continents except Antarctica."
+        "description": "Papaver rhoeas, with common names including common poppy, corn poppy, corn rose, field poppy, Flanders poppy, red poppy, and Odai, is an annual herbaceous species of flowering plant in the poppy family Papaveraceae. It is native to north Africa and temperate Eurasia and is introduced into temperate areas on all other continents except Antarctica."
+      },
+      "file": {
+        "contentLength": 125585,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "0e468bf4e2b26f8e04914eb4dda88622c7c196b4a7a71e82bb857068a6e0b70a"
+        }
       }
     },
     {
       "type": "Plant",
       "id": "3f6be764-d780-44d0-a12f-15326abe091d",
       "data": {
+        "created": "2026-09-24T19:04:03+00:00",
         "images": [
           {
             "description": "Grevillea rosmarinifolia subsp. glabella at Stocks Nursery and Botanic Gardens, Harden, NSW",
@@ -109,19 +146,28 @@
             "link": "https://en.wikipedia.org/wiki/File:Grevillea_rosmarinifolia_glabella.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:28+00:00",
-        "updated": "2025-09-25T18:35:28+00:00",
+        "hasFile": true,
         "name": "Grevillea",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:03+00:00",
         "scientificName": "G. rosmarinifolia",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Grevillea_rosmarinifolia",
-        "description": "Grevillea rosmarinifolia, commonly known as rosemary grevillea,[2] is a species of flowering plant in the family Proteaceae and is endemic to south-eastern continental Australia and naturalised in other parts of the country. It is usually an erect, compact to open shrub with linear, narrowly elliptic or narrowly oblong leaves with the edges rolled under, and loose clusters of pink to red flowers."
+        "description": "Grevillea rosmarinifolia, commonly known as rosemary grevillea, is a species of flowering plant in the family Proteaceae and is endemic to south-eastern continental Australia and naturalised in other parts of the country. It is usually an erect, compact to open shrub with linear, narrowly elliptic or narrowly oblong leaves with the edges rolled under, and loose clusters of pink to red flowers."
+      },
+      "file": {
+        "contentLength": 84441,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "488aa6a8d34a9927c057eacc28d8917f462af819f011bca44d533d4204b56d6b"
+        }
       }
     },
     {
       "type": "Plant",
       "id": "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
       "data": {
+        "created": "2026-09-24T19:04:03+00:00",
         "images": [
           {
             "description": "Sturt's Desert Pea Swainsona formosa, Melbourne Zoo",
@@ -136,19 +182,28 @@
             "link": "https://en.wikipedia.org/wiki/File:A.I.B.T_Sturt_Peas.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:28+00:00",
-        "updated": "2025-09-25T18:35:28+00:00",
+        "hasFile": true,
         "name": "Sturt\\u2019s Desert Pea",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:03+00:00",
         "scientificName": "S. formosa",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Swainsona_formosa",
-        "description": "Swainsona formosa, commonly known as Sturt's desert pea or Sturt pea,[3] is a species of flowering plant in the family Fabaceae and is native to all continental states and the Northern Territory of Australia, with the exception of Victoria. It is a prostrate annual or short lived perennial herb with imparipinnate leaves with about 15 elliptic to egg-shaped leaflets with the narrower end towards the base, and racemes of usually red flowers in racemes of 2 to 6."
+        "description": "Swainsona formosa, commonly known as Sturt's desert pea or Sturt pea, is a species of flowering plant in the family Fabaceae and is native to all continental states and the Northern Territory of Australia, with the exception of Victoria. It is a prostrate annual or short lived perennial herb with imparipinnate leaves with about 15 elliptic to egg-shaped leaflets with the narrower end towards the base, and racemes of usually red flowers in racemes of 2 to 6."
+      },
+      "file": {
+        "contentLength": 98146,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "23c083fd8583e0c241fa72f8dca1af7523b531625317fd209cdd0b3102d724a4"
+        }
       }
     },
     {
       "type": "Plant",
       "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
       "data": {
+        "created": "2026-09-24T19:04:01+00:00",
         "images": [
           {
             "description": "in Seoul Forest, South Korea",
@@ -169,19 +224,28 @@
             "link": "https://en.wikipedia.org/wiki/File:Tulipa_orphanidea_060506.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:26+00:00",
-        "updated": "2025-09-25T18:35:26+00:00",
+        "hasFile": true,
         "name": "Tulip",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:01+00:00",
         "scientificName": "Tulipa",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Tulip",
-        "description": "Tulips are spring-blooming perennial herbaceous bulbiferous geophytes in the Tulipa genus. Their flowers are usually large, showy, and brightly coloured, generally red, orange, pink, yellow, or white. They often have a different coloured blotch at the base of the tepals, internally. Because of a degree of variability within the populations and a long history of cultivation, classification has been complex and controversial. The tulip is a member of the lily family, Liliaceae,[2] along with 14 other genera, where it is most closely related to Amana, Erythronium, and Gagea in the tribe Lilieae."
+        "description": "Tulips are spring-blooming perennial herbaceous bulbiferous geophytes in the Tulipa genus. Their flowers are usually large, showy, and brightly coloured, generally red, orange, pink, yellow, or white. They often have a different coloured blotch at the base of the tepals, internally. Because of a degree of variability within the populations and a long history of cultivation, classification has been complex and controversial. The tulip is a member of the lily family, Liliaceae, along with 14 other genera, where it is most closely related to Amana, Erythronium, and Gagea in the tribe Lilieae."
+      },
+      "file": {
+        "contentLength": 105488,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "c4c242897c43a74e9e4a8b5bf89e6b2cb1cbd99f8d621f33eea175cbf6dfab97"
+        }
       }
     },
     {
       "type": "Plant",
       "id": "0f3aced5-8484-49d4-9579-e3ec5facde95",
       "data": {
+        "created": "2026-09-24T19:04:03+00:00",
         "description": "Telopea speciosissima, commonly known as the New South Wales waratah or simply waratah, is a large shrub in the plant family Proteaceae. It is endemic to New South Wales in Australia. No subspecies are recognised; the closely related Telopea aspera was classified as a separate species in 1995. T. speciosissima is a shrub to 3 or 4 m (9.8 or 13.1 ft) high and 2 m (6.6 ft) wide, with dark green leaves. Its several stems arise from a pronounced woody base known as a lignotuber. The species is well renowned for its striking large red springtime inflorescences (flowerheads), each including hundreds of individual flowers. These are visited by the eastern pygmy possum (Cercartetus nanus), birds such as honeyeaters (Meliphagidae), and various insects.\n\nThe floral emblem for its home state of New South Wales, Telopea speciosissima has featured prominently in art, architecture, and advertising, particularly since Australian federation. Commercially grown in several countries as a cut flower, it is also cultivated in home gardens, requiring good drainage yet adequate moisture, but is vulnerable to various fungal diseases and pests. A number of cultivars with various shades of red, pink and even white flowers are available. Horticulturists have also developed hybrids with T. oreades and T. mongaensis which are more tolerant of cold, shade, and heavier soils.",
         "images": [
           {
@@ -197,18 +261,27 @@
             "link": "https://en.wikipedia.org/wiki/File:Telopea_speciosissima_RNP.JPG"
           }
         ],
-        "created": "2025-09-25T18:35:28+00:00",
-        "updated": "2025-09-25T18:35:28+00:00",
+        "hasFile": true,
         "name": "Waratah",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:03+00:00",
         "scientificName": "T. speciosissima",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Telopea_speciosissima"
+      },
+      "file": {
+        "contentLength": 72759,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "0926def0aa909d3e889aa5ba0a01df37772ea79f87a67d0565f4d4c6ed1a60fe"
+        }
       }
     },
     {
       "type": "Plant",
       "id": "c05a9e25-11bc-48db-8fea-6d1b885119b0",
       "data": {
+        "created": "2026-09-24T19:04:03+00:00",
         "images": [
           {
             "description": "Bush Ochre (Anigozanthos), Australian Garden, Royal Botanic Gardens, Cranbourne, Victoria, Australia. 29 June, 2006.",
@@ -217,13 +290,21 @@
             "link": "https://en.wikipedia.org/wiki/File:Bush-Pearl-in-RBG-Cranbourne.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:28+00:00",
-        "updated": "2025-09-25T18:35:28+00:00",
+        "hasFile": true,
         "name": "Kangaroo Paw",
-        "scenario": "general.botanicExample",
+        "updated": "2026-09-24T19:04:03+00:00",
         "scientificName": "Anigozanthos",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Anigozanthos",
-        "description": "Anigozanthos is a genus of plant found naturally in the Southwestern Australia biogeographic region, belonging to the bloodwort family Haemodoraceae.[1][2] The 11 species and their subspecies are commonly known as kangaroo paw or catspaw, depending on their size, and the shape and colour of their flowers. A further species, previously identified as Anigozanthos fuliginosus (black kangaroo paw), was separated to a monotypic genus as Macropidia fuliginosa. All 11 species of Anigozanthos are endemic to the south west of Western Australia,[3] Noongar Boodjar.\n\nThe species are recognised by their unusual flowers, numerous hybrids and cultivars have been developed for cultivation and floristry in recent years; kangaroo paws are much in demand as house plants and as cut flowers. The red-and-green kangaroo paw is the floral emblem of Western Australia."
+        "description": "Anigozanthos is a genus of plant found naturally in the Southwestern Australia biogeographic region, belonging to the bloodwort family Haemodoraceae. The 11 species and their subspecies are commonly known as kangaroo paw or catspaw, depending on their size, and the shape and colour of their flowers. A further species, previously identified as Anigozanthos fuliginosus (black kangaroo paw), was separated to a monotypic genus as Macropidia fuliginosa. All 11 species of Anigozanthos are endemic to the south west of Western Australia, Noongar Boodjar.\n\nThe species are recognised by their unusual flowers, numerous hybrids and cultivars have been developed for cultivation and floristry in recent years; kangaroo paws are much in demand as house plants and as cut flowers. The red-and-green kangaroo paw is the floral emblem of Western Australia."
+      },
+      "file": {
+        "contentLength": 133185,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "a5bc64f577b8715d3f8c33f17bf7a7d87dbd00001fb341de53dc52279147f04f"
+        }
       }
     }
   ],
@@ -238,9 +319,9 @@
         }
       },
       "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
-      "start": 1758825392.880632,
-      "end": 1758825393.209822,
-      "duration": 0.3291900157928467
+      "start": 1790276707.085009,
+      "end": 1790276707.595679,
+      "duration": 0.5106699466705322
     },
     {
       "input": {
@@ -508,7 +589,7 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1758825393.21006,
+      "start": 1790276707.596112,
       "indices": "*",
       "combinedQuery": {
         "_source": [
@@ -587,8 +668,8 @@
           }
         }
       },
-      "end": 1758825393.372277,
-      "duration": 0.162217
+      "end": 1790276707.754085,
+      "duration": 0.157973
     },
     {
       "input": {
@@ -841,74 +922,74 @@
                   "id": "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.463559
+                    "score": 3.4491417
                   }
                 },
                 {
                   "id": "eb5373ef-50ae-462f-a07a-5ccf767bff21",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.296052
+                    "score": 3.2790928
                   }
                 },
                 {
                   "id": "731fd394-6e0d-4a43-9693-4a7a7d97731e",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.206095
+                    "score": 3.2175324
                   }
                 },
                 {
                   "id": "6a2b73e7-716b-4a8d-a8e6-69ab80b65e67",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.8846285
+                    "score": 2.8893025
                   }
                 },
                 {
                   "id": "3f6be764-d780-44d0-a12f-15326abe091d",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.8042715
+                    "score": 2.826378
                   }
                 },
                 {
                   "id": "36eca1a2-8a7b-42c5-860a-4ad444f8792f",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.6625946
+                    "score": 2.6774929
                   }
                 },
                 {
                   "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.599828
+                    "score": 2.5809202
                   }
                 },
                 {
                   "id": "0f3aced5-8484-49d4-9579-e3ec5facde95",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.5568495
+                    "score": 2.5349326
                   }
                 },
                 {
                   "id": "c05a9e25-11bc-48db-8fea-6d1b885119b0",
                   "type": "Plant",
                   "metadata": {
-                    "score": 2.3461056
+                    "score": 2.3267329
                   }
                 }
               ],
               "totalHits": 9,
-              "maxScore": 3.463559
+              "maxScore": 3.4491417
             }
           ]
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1758825393.372446,
+      "start": 1790276707.754366,
       "accessibleElementIds": [
         "a3e1063d-a714-4fb4-a95e-6a11e7076bb0",
         "eb5373ef-50ae-462f-a07a-5ccf767bff21",
@@ -920,8 +1001,8 @@
         "0f3aced5-8484-49d4-9579-e3ec5facde95",
         "c05a9e25-11bc-48db-8fea-6d1b885119b0"
       ],
-      "end": 1758825393.410484,
-      "duration": 0.038038
+      "end": 1790276707.799931,
+      "duration": 0.045565
     }
   ]
 }

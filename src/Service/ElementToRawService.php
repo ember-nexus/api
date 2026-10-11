@@ -18,9 +18,15 @@ class ElementToRawService
     }
 
     /**
+     * @param bool $applyPropertyBlacklist Whether to honor the property blacklists collected for the element (e.g.
+     *                                     a Token's `hash` or a User's `_passwordHash`), keeping them out of HTTP
+     *                                     responses. Callers that need the full, unfiltered data for internal
+     *                                     purposes must pass `false` so it can be restored without losing those
+     *                                     properties.
+     *
      * @return array<string, mixed>
      */
-    public function elementToRaw(NodeElementInterface|RelationElementInterface $element): array
+    public function elementToRaw(NodeElementInterface|RelationElementInterface $element, bool $applyPropertyBlacklist = true): array
     {
         $rawData = [
             'type' => null,
@@ -28,6 +34,7 @@ class ElementToRawService
             'start' => null,
             'end' => null,
             'data' => [],
+            'file' => null,
         ];
 
         if ($element instanceof NodeElementInterface) {
@@ -41,14 +48,25 @@ class ElementToRawService
             $rawData['end'] = $element->getEnd()?->toString();
         }
 
-        $elementPropertyReturnEvent = new ElementPropertyReturnEvent($element);
-        $this->eventDispatcher->dispatch($elementPropertyReturnEvent);
-        $normalizedProperties = $elementPropertyReturnEvent->getElementPropertiesWhichAreNotOnBlacklist();
+        if ($applyPropertyBlacklist) {
+            $elementPropertyReturnEvent = new ElementPropertyReturnEvent($element);
+            $this->eventDispatcher->dispatch($elementPropertyReturnEvent);
+            $normalizedProperties = $elementPropertyReturnEvent->getElementPropertiesWhichAreNotOnBlacklist();
+        } else {
+            $normalizedProperties = $element->getProperties();
+        }
 
         foreach ($normalizedProperties as $normalizedPropertyName => $normalizedPropertyValue) {
             $normalizedValueToRawValueEvent = new NormalizedValueToRawValueEvent($normalizedPropertyValue);
             $this->eventDispatcher->dispatch($normalizedValueToRawValueEvent);
             $rawData['data'][$normalizedPropertyName] = $normalizedValueToRawValueEvent->getRawValue();
+        }
+
+        if (array_key_exists('file', $rawData['data'])) {
+            $rawData['file'] = $rawData['data']['file'];
+            unset($rawData['data']['file']);
+        } else {
+            unset($rawData['file']);
         }
 
         return $rawData;

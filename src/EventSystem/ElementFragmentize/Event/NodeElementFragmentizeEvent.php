@@ -20,7 +20,6 @@ class NodeElementFragmentizeEvent implements EventInterface
         private NodeInterface $cypherFragment,
         private MongoDocumentInterface $mongoFragment,
         private ElasticDocumentInterface $elasticFragment,
-        private mixed $fileFragment,
     ) {
     }
 
@@ -42,10 +41,5 @@ class NodeElementFragmentizeEvent implements EventInterface
     public function getElasticFragment(): ElasticDocumentInterface
     {
         return $this->elasticFragment;
-    }
-
-    public function getFileFragment(): mixed
-    {
-        return $this->fileFragment;
     }
 }

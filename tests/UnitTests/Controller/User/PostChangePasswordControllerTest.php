@@ -9,10 +9,12 @@ use App\Exception\Client400BadContentException;
 use App\Exception\Client401UnauthorizedException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Response\NoContentResponse;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
+use App\Type\Response\NoContentResponse;
 use Exception;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -43,6 +45,7 @@ class PostChangePasswordControllerTest extends TestCase
             $securityUtilService ?? $this->createMock(SecurityUtilService::class),
             new Client400BadContentExceptionFactory($urlGenerator),
             new Client401UnauthorizedExceptionFactory($urlGenerator),
+            new RequestContentService(new Client408RequestTimeoutExceptionFactory($urlGenerator)),
         );
     }
 

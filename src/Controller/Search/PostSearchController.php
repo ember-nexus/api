@@ -9,7 +9,8 @@ use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
-use App\Response\JsonResponse;
+use App\Service\RequestContentService;
+use App\Type\Response\JsonResponse;
 use App\Type\SearchStepType;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,10 +26,11 @@ class PostSearchController extends AbstractController
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
+        private RequestContentService $requestContentService,
     ) {
     }
 
-    private function getIsDebugFromBody(mixed $body): bool
+    private function isDebugFromBody(mixed $body): bool
     {
         if (!array_key_exists('debug', $body)) {
             return false;
@@ -136,9 +138,9 @@ class PostSearchController extends AbstractController
     )]
     public function postSearch(Request $request): Response
     {
-        $body = \Safe\json_decode($request->getContent(), true);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
-        $debug = $this->getIsDebugFromBody($body);
+        $debug = $this->isDebugFromBody($body);
         $globalParameters = $this->getGlobalParametersFromBody($body);
         $steps = $this->getStepsFromBody($body);
 

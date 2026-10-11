@@ -21,13 +21,6 @@ Users who are not connected to nodes in any way, can not have access to them:
 | `1-01-02-22` | `User` | `🟠 PUT /<Data>/file`     | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
 | `1-01-02-23` | `User` | `🟠 PATCH /<Data>/file`   | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
 | `1-01-02-24` | `User` | `🔴 DELETE /<Data>/file`  | -                   | ❌ 404  | yes        | ✔️ implemented |
-| `1-01-02-30` | `User` | `🟣 COPY /<Data>`         | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
-| `1-01-02-31` | `User` | `🟣 LOCK /<Data>`         | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
-| `1-01-02-32` | `User` | `🟣 UNLOCK /<Data>`       | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
-| `1-01-02-33` | `User` | `🟣 MKCOL /<Data>`        | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
-| `1-01-02-34` | `User` | `🟣 MOVE /<Data>`         | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
-| `1-01-02-35` | `User` | `🟣 PROPFIND /<Data>`     | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
-| `1-01-02-36` | `User` | `🟣 PROPPATCH /<Data>`    | Valid request body. | ❌ 404  | yes        | ✔️ implemented |
 
 <script>
 renderGraph(document.getElementById('graph'), {

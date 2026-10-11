@@ -7,10 +7,11 @@ namespace App\Controller\User;
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Response\JsonResponse;
 use App\Security\TokenGenerator;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
+use App\Type\Response\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +25,7 @@ class PostTokenController extends AbstractController
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private RequestUtilService $requestUtilService,
         private SecurityUtilService $securityUtilService,
+        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -34,11 +36,10 @@ class PostTokenController extends AbstractController
     )]
     public function postToken(Request $request): Response
     {
-        $body = \Safe\json_decode($request->getContent(), true);
-        $data = $this->requestUtilService->getDataFromBody($body);
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
 
         $this->requestUtilService->validateTypeFromBody('Token', $body);
-        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body, $data);
+        $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
 
         $userElement = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
         $userId = $userElement->getId();

@@ -21,7 +21,7 @@ class RedisElementEtagEventListener
     ) {
     }
 
-    #[AsEventListener]
+    #[AsEventListener(priority: 10)]
     public function onElementEtagEvent(ElementEtagEvent $event): void
     {
         $redisKey = $this->redisKeyTypeFactory->getEtagElementRedisKey($event->getElementId());

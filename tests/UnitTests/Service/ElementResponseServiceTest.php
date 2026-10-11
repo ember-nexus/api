@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\tests\UnitTests\Service;
+namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Server500LogicErrorException;
-use App\Factory\Exception\Server500LogicExceptionFactory;
-use App\Response\ElementResponse;
+use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\ElementResponseService;
 use App\Service\ElementToRawService;
 use App\Type\NodeElement;
+use App\Type\Response\ElementResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -42,7 +42,7 @@ class ElementResponseServiceTest extends TestCase
             ->shouldBeCalledOnce()
             ->willReturn($data);
 
-        $server500LogicExceptionFactory = $this->prophesize(Server500LogicExceptionFactory::class);
+        $server500LogicExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
 
         $elementResponseService = new ElementResponseService(
             $elementManager->reveal(),
@@ -68,7 +68,7 @@ class ElementResponseServiceTest extends TestCase
 
         $elementToRawService = $this->prophesize(ElementToRawService::class);
 
-        $server500LogicExceptionFactory = $this->prophesize(Server500LogicExceptionFactory::class);
+        $server500LogicExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
         $server500LogicExceptionFactory
             ->createFromTemplate(Argument::is("Unable to find element with the id '336eff5e-ff4e-463f-abed-168c06af5fae'."))
             ->shouldBeCalledOnce()

@@ -21,7 +21,7 @@ class RedisRelatedCollectionEtagEventListener
     ) {
     }
 
-    #[AsEventListener]
+    #[AsEventListener(priority: 10)]
     public function onRelatedCollectionEtagEvent(RelatedCollectionEtagEvent $event): void
     {
         $redisKey = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey($event->getCenterId());

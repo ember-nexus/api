@@ -1,0 +1,13 @@
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, POST, PUT
+Cache-Control: no-store, private
+Date: Fri, 02 Oct 2026 22:38:01 GMT
+Expires: Sat, 03 Oct 2026 01:38:01 GMT
+Location: /upload/90c4f77c-3755-4121-8c9f-a1cfd2c60d0f
+Upload-Complete: ?0
+Upload-Limit: max-age=10800, max-size=10737418240, min-append-size=5242880, max-append-size=105906176
+Upload-Offset: 5242880
+X-Powered-By: Ember Nexus API

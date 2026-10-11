@@ -19,6 +19,8 @@
         <PropertyNotSetInConstructor>
             <errorLevel type="suppress">
                 <referencedProperty name="Symfony\Bundle\FrameworkBundle\Controller\AbstractController::$container"/>
+                <!-- initialized in Response::__construct() through a property hook, which psalm does not recognize -->
+                <referencedProperty name="Symfony\Component\HttpFoundation\Response::$headers"/>
             </errorLevel>
         </PropertyNotSetInConstructor>
         <ClassMustBeFinal errorLevel="suppress" />

@@ -12,6 +12,8 @@ use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
 use Laudis\Neo4j\Types\DateTimeZoneId as LaudisDateTimeZoneId;
 use Laudis\Neo4j\Types\LocalDateTime as LaudisLocalDateTime;
 use Laudis\Neo4j\Types\LocalTime as LaudisLocalTime;
+use MongoDB\Model\BSONArray;
+use MongoDB\Model\BSONDocument;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class GenericPropertyElementDefragmentizeEventListener
@@ -45,9 +47,15 @@ class GenericPropertyElementDefragmentizeEventListener
         } else {
             $element = $event->getRelationElement();
         }
+        $documentProperties = [];
         if ($documentFragment) {
             $documentProperties = $documentFragment->getProperties();
             $documentProperties = ReservedPropertyNameHelper::removeReservedPropertyNamesFromArray($documentProperties);
+            foreach ($documentProperties as $key => $value) {
+                if (($value instanceof BSONArray) || ($value instanceof BSONDocument)) {
+                    $documentProperties[$key] = $value->getArrayCopy();
+                }
+            }
             $element->addProperties($documentProperties);
         }
         $cypherProperties = $cypherFragment->getProperties();
@@ -67,6 +75,12 @@ class GenericPropertyElementDefragmentizeEventListener
             }
             if ($value instanceof LaudisLocalTime) {
                 $cypherProperties[$key] = $value->toArray();
+            }
+            // remove placeholder values from neo4j for non-scalar properties
+            if (is_bool($value)) {
+                if (true === $value && array_key_exists($key, $documentProperties)) {
+                    unset($cypherProperties[$key]);
+                }
             }
         }
         $element->addProperties($cypherProperties);
