@@ -87,11 +87,17 @@ class UploadCancellationService
     }
 
     /**
+     * `u.id IS NOT NULL`: an upload node briefly without its `id` property set (e.g. mid-write of a concurrent
+     * request) must not abort this review, which runs on every element deletion that touches an `OWNS`/
+     * `IS_IN_GROUP`/`HAS_UPDATE_ACCESS` relation - effectively almost every deletion in the application, since
+     * every element has an `OWNS` edge from its creator. The same filter is already used for the same reason in
+     * {@see \App\Command\Cron\DeleteExpiredUploadsCommand}.
+     *
      * @return string[]
      */
     private function getUploadIds(): array
     {
-        $queryResult = $this->cypherEntityManager->getClient()->runStatement(Statement::create('MATCH (u:Upload) RETURN u.id'));
+        $queryResult = $this->cypherEntityManager->getClient()->runStatement(Statement::create('MATCH (u:Upload) WHERE u.id IS NOT NULL RETURN u.id'));
 
         $uploadIds = [];
         foreach ($queryResult as $queryResultLine) {
