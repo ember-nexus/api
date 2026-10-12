@@ -1,0 +1,41 @@
+name: 'Collect and upload Docker Compose logs'
+description: >
+  Collects `ps`, per-service logs, a redacted container state summary and host info for a Compose stack, then
+  uploads them as an artifact. Intended to be called with `if: always()` so it also runs on failure.
+inputs:
+  compose-file:
+    description: 'Path to the docker-compose file'
+    required: true
+  compose-project:
+    description: 'Optional Compose project name (-p flag)'
+    required: false
+    default: ''
+  artifact-name:
+    description: 'Name of the uploaded artifact'
+    required: true
+  retention-days:
+    description: 'Retention in days for the uploaded artifact'
+    required: false
+    default: '7'
+runs:
+  using: 'composite'
+  steps:
+    - name: Collect docker logs
+      shell: bash
+      run: |
+        mkdir -p docker-logs
+        COMPOSE="docker compose ${{ inputs.compose-project != '' && format('-p {0}', inputs.compose-project) || '' }} -f ${{ inputs.compose-file }}"
+        $COMPOSE ps -a > docker-logs/_ps.txt 2>&1 || true
+        for svc in $($COMPOSE config --services); do
+          $COMPOSE logs --no-color --timestamps "$svc" > "docker-logs/$svc.log" 2>&1 || true
+        done
+        # only name / exit code / OOM flag / error - never dump full inspect output (contains container env)
+        docker inspect $(docker ps -aq) --format '{{.Name}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} {{.State.Error}}' > docker-logs/_state.txt 2>&1 || true
+        uname -a > docker-logs/_host.txt
+
+    - uses: actions/upload-artifact@v6
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: docker-logs/
+        if-no-files-found: ignore
+        retention-days: ${{ inputs.retention-days }}

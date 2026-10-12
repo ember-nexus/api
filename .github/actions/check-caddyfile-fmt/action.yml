@@ -1,0 +1,11 @@
+name: 'Caddyfile format check'
+description: 'Checks docker/Caddyfile and docker/Caddyfile.dev are formatted with `caddy fmt`.'
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: docker pull caddy:2.11.6-alpine
+    - shell: bash
+      run: docker run --rm -v "$(pwd)/docker":/data -w /data caddy:2.11.6-alpine caddy fmt --diff Caddyfile
+    - shell: bash
+      run: docker run --rm -v "$(pwd)/docker":/data -w /data caddy:2.11.6-alpine caddy fmt --diff Caddyfile.dev
