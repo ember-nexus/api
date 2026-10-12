@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Helper\S3ProviderNameHelper;
 use App\Style\EmberNexusStyle;
+use AsyncAws\S3\Result\BucketExistsWaiter;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
@@ -105,18 +107,29 @@ class HealthcheckCommand extends Command
         return $this->AMQPStreamConnection->getServerProperties()['version'][1];
     }
 
-    private function getS3Status(): string
+    private function getS3Provider(): string
     {
-        $isStorageBucketOnline = $this->s3Client->bucketExists(['Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket()])->isSuccess();
-        if (!$isStorageBucketOnline) {
+        $storageBucketResult = $this->s3Client->bucketExists(['Bucket' => $this->emberNexusConfiguration->getFileS3StorageBucket()]);
+        if (!$storageBucketResult->isSuccess()) {
             throw new Exception(sprintf('Unable to connect to bucket %s.', $this->emberNexusConfiguration->getFileS3StorageBucket()));
         }
-        $isUploadBucketOnline = $this->s3Client->bucketExists(['Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket()])->isSuccess();
-        if (!$isUploadBucketOnline) {
+        $uploadBucketResult = $this->s3Client->bucketExists(['Bucket' => $this->emberNexusConfiguration->getFileS3UploadBucket()]);
+        if (!$uploadBucketResult->isSuccess()) {
             throw new Exception(sprintf('Unable to connect to bucket %s.', $this->emberNexusConfiguration->getFileS3UploadBucket()));
         }
 
-        return 'online';
+        return S3ProviderNameHelper::normalize($this->getS3ServerHeader($storageBucketResult));
+    }
+
+    private function getS3ServerHeader(BucketExistsWaiter $result): ?string
+    {
+        foreach ($result->info()['response']->getHeaders(false) as $name => $values) {
+            if ('server' === strtolower($name)) {
+                return $values[0] ?? null;
+            }
+        }
+
+        return null;
     }
 
     private function getAlpineVersion(): string
@@ -177,7 +190,7 @@ class HealthcheckCommand extends Command
         $this->io->writeln(sprintf('Elasticsearch version: %s', $this->getElasticVersion()));
         $this->io->writeln(sprintf('Redis version:         %s', $this->getRedisVersion()));
         $this->io->writeln(sprintf('RabbitMQ version:      %s', $this->getRabbitMqVersion()));
-        $this->io->writeln(sprintf('S3 buckets:            %s', $this->getS3Status()));
+        $this->io->writeln(sprintf('S3 provider:           %s', $this->getS3Provider()));
         $this->io->stopSection('All databases are online.');
 
         $this->io->startSection('Check internal services');

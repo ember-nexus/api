@@ -6,7 +6,8 @@ namespace App\Tests\UnitTests\Command;
 
 use App\Command\HealthcheckCommand;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use AsyncAws\Core\Test\ResultMockFactory;
+use AsyncAws\Core\Response;
+use AsyncAws\Core\Test\Http\SimpleMockedResponse;
 use AsyncAws\Core\Waiter;
 use AsyncAws\S3\Result\BucketExistsWaiter;
 use AsyncAws\S3\S3Client;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
 use Prophecy\PhpUnit\ProphecyTrait;
+use ReflectionClass;
 use ReflectionMethod;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
@@ -32,16 +34,33 @@ class HealthcheckCommandS3Test extends TestCase
 {
     use ProphecyTrait;
 
-    private function bucketWaiter(bool $isSuccess): BucketExistsWaiter
+    /**
+     * @param array<string, string|list<string>> $headers
+     */
+    private function bucketWaiter(bool $isSuccess, array $headers = []): BucketExistsWaiter
     {
-        /** @var BucketExistsWaiter */
-        return ResultMockFactory::waiter(BucketExistsWaiter::class, $isSuccess ? Waiter::STATE_SUCCESS : Waiter::STATE_FAILURE);
+        $responseReflection = new ReflectionClass(Response::class);
+        $response = $responseReflection->newInstanceWithoutConstructor();
+        $responseReflection->getProperty('resolveResult')->setValue($response, true);
+        $responseReflection->getProperty('bodyDownloaded')->setValue($response, true);
+        $responseReflection->getProperty('httpResponse')->setValue($response, new SimpleMockedResponse('', $headers));
+
+        /** @var BucketExistsWaiter $waiter */
+        $waiter = (new ReflectionClass(BucketExistsWaiter::class))->newInstanceWithoutConstructor();
+        $waiterReflection = new ReflectionClass(Waiter::class);
+        $waiterReflection->getProperty('response')->setValue($waiter, $response);
+        $waiterReflection->getProperty('finalState')->setValue($waiter, $isSuccess ? Waiter::STATE_SUCCESS : Waiter::STATE_FAILURE);
+
+        return $waiter;
     }
 
-    private function getS3Status(bool $isStorageBucketOnline, bool $isUploadBucketOnline): string
+    /**
+     * @param array<string, string|list<string>> $storageBucketHeaders
+     */
+    private function getS3Provider(bool $isStorageBucketOnline, bool $isUploadBucketOnline, array $storageBucketHeaders = []): string
     {
         $s3Client = $this->prophesize(S3Client::class);
-        $s3Client->bucketExists(['Bucket' => 'storage-bucket'])->willReturn($this->bucketWaiter($isStorageBucketOnline));
+        $s3Client->bucketExists(['Bucket' => 'storage-bucket'])->willReturn($this->bucketWaiter($isStorageBucketOnline, $storageBucketHeaders));
         if ($isStorageBucketOnline) {
             $s3Client->bucketExists(['Bucket' => 'upload-bucket'])->willReturn($this->bucketWaiter($isUploadBucketOnline));
         } else {
@@ -63,12 +82,7 @@ class HealthcheckCommandS3Test extends TestCase
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
 
-        return (new ReflectionMethod($command, 'getS3Status'))->invoke($command);
-    }
-
-    public function testBothBucketsOnline(): void
-    {
-        $this->assertSame('online', $this->getS3Status(true, true));
+        return (new ReflectionMethod($command, 'getS3Provider'))->invoke($command);
     }
 
     public function testStorageBucketOfflineFailsBeforeCheckingUploadBucket(): void
@@ -76,7 +90,7 @@ class HealthcheckCommandS3Test extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Unable to connect to bucket storage-bucket.');
 
-        $this->getS3Status(false, true);
+        $this->getS3Provider(false, true);
     }
 
     public function testUploadBucketOfflineFails(): void
@@ -84,6 +98,21 @@ class HealthcheckCommandS3Test extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Unable to connect to bucket upload-bucket.');
 
-        $this->getS3Status(true, false);
+        $this->getS3Provider(true, false);
+    }
+
+    public function testServerHeaderIsUsedAsProviderName(): void
+    {
+        $this->assertSame('MinIO', $this->getS3Provider(true, true, ['Server' => 'MinIO']));
+    }
+
+    public function testServerHeaderNameIsMatchedCaseInsensitively(): void
+    {
+        $this->assertSame('MinIO', $this->getS3Provider(true, true, ['server' => 'MinIO']));
+    }
+
+    public function testMissingServerHeaderFallsBackToUnknown(): void
+    {
+        $this->assertSame('Unknown', $this->getS3Provider(true, true, []));
     }
 }
