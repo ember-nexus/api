@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Type\Response;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CreatedResponse extends Response
@@ -21,5 +22,13 @@ class CreatedResponse extends Response
             $headers['Location'] = $location;
         }
         parent::__construct(null, $status, $headers);
+    }
+
+    public function prepare(Request $request): static
+    {
+        parent::prepare($request);
+        $this->headers->remove('Content-Type');
+
+        return $this;
     }
 }
