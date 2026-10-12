@@ -1,0 +1,26 @@
+name: 'Load Docker image artifact'
+description: 'Downloads a previously uploaded Docker image artifact (tar.gz) and loads it into the local daemon.'
+inputs:
+  artifact-name:
+    description: 'Name of the artifact to download'
+    required: true
+  tar-filename:
+    description: 'Filename of the tar.gz inside the artifact'
+    required: true
+  download-path:
+    description: 'Directory to download the artifact into'
+    required: false
+    default: '/tmp/docker'
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: mkdir -p "${{ inputs.download-path }}"
+
+    - uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.download-path }}
+
+    - shell: bash
+      run: docker load < "${{ inputs.download-path }}/${{ inputs.tar-filename }}"

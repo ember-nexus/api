@@ -1,0 +1,9 @@
+name: 'YML lint'
+description: 'Lints all YAML files in the repository with yamllint, using tests/.yamllint.'
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: docker pull cytopia/yamllint
+    - shell: bash
+      run: docker run --rm -t -v "$(pwd)":/data cytopia/yamllint --config-file=tests/.yamllint .

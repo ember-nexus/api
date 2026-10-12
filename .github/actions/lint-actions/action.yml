@@ -1,0 +1,12 @@
+name: 'Actions lint'
+description: >
+  Lints all GitHub Actions workflows and composite actions with actionlint, using tests/.actionlint.yaml.
+  Shellcheck integration is disabled (actionlint's own syntax/expression checks only) to keep this a workflow-syntax
+  gate rather than a shell-script style audit.
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: docker pull rhysd/actionlint:latest
+    - shell: bash
+      run: docker run --rm -v "$(pwd)":/repo --workdir /repo rhysd/actionlint:latest -color -shellcheck= -config-file=tests/.actionlint.yaml

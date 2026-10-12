@@ -1,0 +1,9 @@
+name: 'Markdown lint'
+description: 'Lints all Markdown files in the repository with markdownlint, using tests/.markdownlintrc.'
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: docker pull tmknom/markdownlint
+    - shell: bash
+      run: docker run --rm -v "$(pwd)":/work tmknom/markdownlint '**/*.md' --config tests/.markdownlintrc --ignore vendor --ignore CHANGELOG.md --ignore var --ignore tmp

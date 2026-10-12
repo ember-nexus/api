@@ -9,11 +9,69 @@ permissions:
   contents: write
 jobs:
 
+  actionlint:
+    runs-on: ubuntu-26.04
+    name: 'Actionlint'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/lint-actions
+
+  yml-lint:
+    runs-on: ubuntu-26.04
+    name: 'YML lint'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/lint-yml
+
+  markdown-lint:
+    runs-on: ubuntu-26.04
+    name: 'Markdown lint'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/lint-markdown
+
+  caddyfile-fmt-check:
+    runs-on: ubuntu-26.04
+    name: 'Caddyfile format check'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/check-caddyfile-fmt
+
+  changelog-verify:
+    runs-on: ubuntu-26.04
+    name: 'Changelog verify'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read Unreleased changelog section
+        id: get-changelog
+        uses: superfaceai/release-changelog-action@v3
+        with:
+          path-to-changelog: CHANGELOG.md
+          version: Unreleased
+          operation: read
+      - name: Fail if Unreleased section is empty
+        run: |
+          if [ -z "$(echo '${{ steps.get-changelog.outputs.changelog }}' | tr -d '[:space:]')" ]; then
+            echo "::error::CHANGELOG.md has no entries under 'Unreleased' - add a changelog entry before releasing."
+            exit 1
+          fi
+
 
   checkout-repo-and-bump-version:
     runs-on: ubuntu-26.04
     name: Check out Repo and Bump Version
     timeout-minutes: 10
+    needs:
+      - actionlint
+      - yml-lint
+      - markdown-lint
+      - caddyfile-fmt-check
+      - changelog-verify
     steps:
 
       - uses: actions/checkout@v5
@@ -67,182 +125,162 @@ jobs:
           retention-days: 7
 
 
-  build-docker-image-amd:
+  build-docker-image-dev-amd:
     runs-on: gh-4vcpu-ubuntu-latest-amd
-    name: Build Docker Image - AMD
+    name: Build Docker Image - Dev - AMD
     timeout-minutes: 20
     needs: checkout-repo-and-bump-version
     steps:
-
-      - uses: actions/download-artifact@v8
+      - uses: ./.github/actions/download-release-artifacts
+      - uses: ./.github/actions/build-docker-image
         with:
-          name: bumped-repo
-          path: /tmp
+          target: development
+          arch: amd
+          cache-from: 'false'
+          cache-to: 'false'
+          artifact-name: docker-image-api-dev-amd
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: actions/download-artifact@v8
-        with:
-          name: ci-env
-          path: /tmp
-
-      - name: Extract artifacts
-        shell: bash
-        run: |
-          ls -la /tmp
-          tar xvfz /tmp/bumped-repo.tar.gz -C ./
-          ls -la
-          mkdir -p /tmp/ci-env
-          tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
-          ls -la /tmp/ci-env
-
-      - name: Load version from artifact
-        shell: bash
-        run: |
-          ls -la /tmp/ci-env
-          cat /tmp/ci-env/NEW_VERSION.txt
-          cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
-
-      - name: Debug version
-        run: |
-          echo $NEW_VERSION
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build Docker image - AMD
-        run: |
-          docker build \
-            --target production \
-            --build-arg="VERSION=${{ env.NEW_VERSION }}" \
-            --no-cache \
-            -t api:latest-amd \
-            -f ./docker/Dockerfile \
-            .
-          docker save api:latest-amd | gzip > api-latest-amd.tar.gz
-
-      - uses: actions/upload-artifact@v6
-        with:
-          name: docker-image-api-latest-amd
-          path: api-latest-amd.tar.gz
-          retention-days: 7
-
-
-  build-docker-image-arm:
+  build-docker-image-dev-arm:
     runs-on: gh-4vcpu-ubuntu-latest-arm
-    name: Build Docker Image - ARM
+    name: Build Docker Image - Dev - ARM
     timeout-minutes: 20
     needs: checkout-repo-and-bump-version
     steps:
-
-      - uses: actions/download-artifact@v8
+      - uses: ./.github/actions/download-release-artifacts
+      - uses: ./.github/actions/build-docker-image
         with:
-          name: bumped-repo
-          path: /tmp
+          target: development
+          arch: arm
+          cache-from: 'false'
+          cache-to: 'false'
+          artifact-name: docker-image-api-dev-arm
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: actions/download-artifact@v8
+  build-docker-image-prod-amd:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: Build Docker Image - Prod - AMD
+    timeout-minutes: 20
+    needs: checkout-repo-and-bump-version
+    steps:
+      - uses: ./.github/actions/download-release-artifacts
+      - uses: ./.github/actions/build-docker-image
         with:
-          name: ci-env
-          path: /tmp
+          target: production
+          arch: amd
+          version: ${{ env.NEW_VERSION }}
+          cache-from: 'false'
+          cache-to: 'false'
+          artifact-name: docker-image-api-prod-amd
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract artifacts
-        shell: bash
-        run: |
-          ls -la /tmp
-          tar xvfz /tmp/bumped-repo.tar.gz -C ./
-          ls -la
-          mkdir -p /tmp/ci-env
-          tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
-          ls -la /tmp/ci-env
+  build-docker-image-prod-arm:
+    runs-on: gh-4vcpu-ubuntu-latest-arm
+    name: Build Docker Image - Prod - ARM
+    timeout-minutes: 20
+    needs: checkout-repo-and-bump-version
+    steps:
+      - uses: ./.github/actions/download-release-artifacts
+      - uses: ./.github/actions/build-docker-image
+        with:
+          target: production
+          arch: arm
+          version: ${{ env.NEW_VERSION }}
+          cache-from: 'false'
+          cache-to: 'false'
+          artifact-name: docker-image-api-prod-arm
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Load version from artifact
-        shell: bash
-        run: |
-          ls -la /tmp/ci-env
-          cat /tmp/ci-env/NEW_VERSION.txt
-          cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
 
-      - name: Debug version
-        run: |
-          echo $NEW_VERSION
-
+  e2e-test-amd:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: End To End Test - AMD
+    timeout-minutes: 15
+    needs:
+      - build-docker-image-dev-amd
+      - build-docker-image-prod-amd
+    steps:
+      - uses: ./.github/actions/download-release-artifacts
+      - uses: ./.github/actions/load-docker-image
+        with:
+          artifact-name: docker-image-api-dev-amd
+          tar-filename: dev-amd.tar.gz
+      - uses: ./.github/actions/load-docker-image
+        with:
+          artifact-name: docker-image-api-prod-amd
+          tar-filename: prod-amd.tar.gz
       - name: Login to Docker Hub
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build Docker image - ARM
-        run: |
-          docker build \
-            --target production \
-            --build-arg="VERSION=${{ env.NEW_VERSION }}" \
-            --no-cache \
-            -t api:latest-arm \
-            -f ./docker/Dockerfile \
-            .
-          docker save api:latest-arm | gzip > api-latest-arm.tar.gz
-
-      - uses: actions/upload-artifact@v6
+      - uses: ./.github/actions/compose-stack-up
         with:
-          name: docker-image-api-latest-arm
-          path: api-latest-arm.tar.gz
-          retention-days: 7
+          compose-file: ./tests/EndToEndTests/docker-compose-neo4j-latest-versitygw.yml
+          exec-container: api-dev
+          prepare-script: ./bin/test-end-to-end-prepare
+      - name: End To End Test
+        run: |
+          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:end-to-end"
+      - uses: ./.github/actions/collect-docker-logs
+        if: always()
+        with:
+          compose-file: ./tests/EndToEndTests/docker-compose-neo4j-latest-versitygw.yml
+          artifact-name: docker-logs-release-e2e-amd
+
+  e2e-test-arm:
+    runs-on: gh-4vcpu-ubuntu-latest-arm
+    name: End To End Test - ARM
+    timeout-minutes: 15
+    needs:
+      - build-docker-image-dev-arm
+      - build-docker-image-prod-arm
+    steps:
+      - uses: ./.github/actions/download-release-artifacts
+      - uses: ./.github/actions/load-docker-image
+        with:
+          artifact-name: docker-image-api-dev-arm
+          tar-filename: dev-arm.tar.gz
+      - uses: ./.github/actions/load-docker-image
+        with:
+          artifact-name: docker-image-api-prod-arm
+          tar-filename: prod-arm.tar.gz
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: ./.github/actions/compose-stack-up
+        with:
+          compose-file: ./tests/EndToEndTests/docker-compose-neo4j-latest-versitygw.yml
+          exec-container: api-dev
+          prepare-script: ./bin/test-end-to-end-prepare
+      - name: End To End Test
+        run: |
+          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:end-to-end"
+      - uses: ./.github/actions/collect-docker-logs
+        if: always()
+        with:
+          compose-file: ./tests/EndToEndTests/docker-compose-neo4j-latest-versitygw.yml
+          artifact-name: docker-logs-release-e2e-arm
 
 
   publish-release:
     runs-on: ubuntu-26.04
     name: Publish release
     timeout-minutes: 10
-    needs: [build-docker-image-amd, build-docker-image-arm]
+    needs:
+      - e2e-test-amd
+      - e2e-test-arm
     steps:
-
-      - shell: bash
-        run: |
-          pwd
-          ls -la
 
       - uses: actions/checkout@v5
 
-      - shell: bash
-        run: |
-          pwd
-          ls -la
-          git config -l | cat
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: bumped-repo
-          path: /tmp
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: ci-env
-          path: /tmp
-
-      - name: Extract artifacts
-        shell: bash
-        run: |
-          ls -la /tmp
-          tar xvfz /tmp/bumped-repo.tar.gz -C ./
-          ls -la
-          mkdir -p /tmp/ci-env
-          tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
-          ls -la /tmp/ci-env
-
-      - shell: bash
-        run: |
-          pwd
-          ls -la
-          git config -l | cat
-
-      - name: Load version from artifact
-        shell: bash
-        run: |
-          ls -la /tmp/ci-env
-          cat /tmp/ci-env/NEW_VERSION.txt
-          cat /tmp/ci-env/NEW_VERSION.txt >> $GITHUB_ENV
+      - uses: ./.github/actions/download-release-artifacts
 
       - name: Debug version
         run: |
@@ -260,13 +298,6 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: Debug GPG
-        run: |
-          echo "fingerprint: ${{ steps.import-gpg.outputs.fingerprint }}"
-          echo "keyid:       ${{ steps.import-gpg.outputs.keyid }}"
-          echo "name:        ${{ steps.import-gpg.outputs.name }}"
-          echo "email:       ${{ steps.import-gpg.outputs.email }}"
-
       - name: Git configuration
         run: |
           git config --global user.email "${{ steps.import-gpg.outputs.email }}"
@@ -278,15 +309,15 @@ jobs:
           git commit -m "chore: release ${{ env.NEW_VERSION }}"
           git tag ${{ env.NEW_VERSION }}
 
-      - uses: actions/download-artifact@v8
+      - uses: ./.github/actions/load-docker-image
         with:
-          name: docker-image-api-latest-amd
-          path: /tmp/docker
+          artifact-name: docker-image-api-prod-amd
+          tar-filename: prod-amd.tar.gz
 
-      - uses: actions/download-artifact@v8
+      - uses: ./.github/actions/load-docker-image
         with:
-          name: docker-image-api-latest-arm
-          path: /tmp/docker
+          artifact-name: docker-image-api-prod-arm
+          tar-filename: prod-arm.tar.gz
 
       - name: Login to Docker Hub
         uses: docker/login-action@v4
@@ -294,49 +325,51 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          version: latest
+
       - name: Create multi arch Docker image
         shell: bash
         run: |
-          ls -la /tmp/docker
+          mkdir -p /tmp/docker
 
-          docker load < /tmp/docker/api-latest-amd.tar.gz
-          docker load < /tmp/docker/api-latest-arm.tar.gz
-          docker tag api:latest-amd embernexus/api:tmp-latest-amd
-          docker tag api:latest-arm embernexus/api:tmp-latest-arm
-          docker tag api:latest-amd embernexus/api:${{ env.NEW_VERSION }}-amd
-          docker tag api:latest-arm embernexus/api:${{ env.NEW_VERSION }}-arm
+          docker tag api:prod-amd embernexus/api:tmp-latest-amd
+          docker tag api:prod-arm embernexus/api:tmp-latest-arm
+          docker tag api:prod-amd embernexus/api:${{ env.NEW_VERSION }}-amd
+          docker tag api:prod-arm embernexus/api:${{ env.NEW_VERSION }}-arm
           docker save embernexus/api:${{ env.NEW_VERSION }}-amd | gzip > /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-amd.tar.gz
           docker save embernexus/api:${{ env.NEW_VERSION }}-arm | gzip > /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
           docker push embernexus/api:tmp-latest-amd
           docker push embernexus/api:tmp-latest-arm
 
+          # docker buildx imagetools create both creates and pushes the multi-arch manifest in one step, and -
+          # unlike `docker manifest create --amend` - correctly composes inputs that are themselves image indexes
+          # (e.g. carrying provenance/SBOM attestation manifests), so it has no "is a manifest list" failure mode.
           echo "Creating and pushing multi arch image embernexus/api:latest"
-          docker manifest create \
-            embernexus/api:latest \
-            --amend embernexus/api:tmp-latest-amd \
-            --amend embernexus/api:tmp-latest-arm
-          docker manifest push embernexus/api:latest
+          docker buildx imagetools create \
+            -t embernexus/api:latest \
+            embernexus/api:tmp-latest-amd \
+            embernexus/api:tmp-latest-arm
 
           echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION }}"
-          docker manifest create \
-            embernexus/api:${{ env.NEW_VERSION }} \
-            --amend embernexus/api:tmp-latest-amd \
-            --amend embernexus/api:tmp-latest-arm
-          docker manifest push embernexus/api:${{ env.NEW_VERSION }}
+          docker buildx imagetools create \
+            -t embernexus/api:${{ env.NEW_VERSION }} \
+            embernexus/api:tmp-latest-amd \
+            embernexus/api:tmp-latest-arm
 
           echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }}"
-          docker manifest create \
-            embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }} \
-            --amend embernexus/api:tmp-latest-amd \
-            --amend embernexus/api:tmp-latest-arm
-          docker manifest push embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }}
+          docker buildx imagetools create \
+            -t embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }} \
+            embernexus/api:tmp-latest-amd \
+            embernexus/api:tmp-latest-arm
 
           echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }}"
-          docker manifest create \
-            embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }} \
-            --amend embernexus/api:tmp-latest-amd \
-            --amend embernexus/api:tmp-latest-arm
-          docker manifest push embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }}
+          docker buildx imagetools create \
+            -t embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }} \
+            embernexus/api:tmp-latest-amd \
+            embernexus/api:tmp-latest-arm
 
           echo "Creating temporary JWT key for Docker Hub"
           export TMP_DOCKERHUB_JWT_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${{ secrets.DOCKERHUB_USERNAME}}'", "password": "'${{ secrets.DOCKERHUB_TOKEN }}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)

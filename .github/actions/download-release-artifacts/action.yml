@@ -1,0 +1,29 @@
+name: 'Download release artifacts'
+description: >
+  Downloads and extracts the `bumped-repo` (version-bumped working tree) and `ci-env` (NEW_VERSION* variables)
+  artifacts produced by the release pipeline's version-bump job, and exports the version variables to
+  $GITHUB_ENV for subsequent steps.
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/download-artifact@v8
+      with:
+        name: bumped-repo
+        path: /tmp
+
+    - uses: actions/download-artifact@v8
+      with:
+        name: ci-env
+        path: /tmp
+
+    - name: Extract artifacts
+      shell: bash
+      run: |
+        set -eu
+        tar xvfz /tmp/bumped-repo.tar.gz -C ./
+        mkdir -p /tmp/ci-env
+        tar xvfz /tmp/ci-env.tar.gz -C /tmp/ci-env/
+
+    - name: Load version from artifact
+      shell: bash
+      run: cat /tmp/ci-env/NEW_VERSION.txt >> "$GITHUB_ENV"

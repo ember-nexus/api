@@ -1,0 +1,44 @@
+name: 'Bring up Docker Compose stack and wait for health'
+description: >
+  Starts a Docker Compose stack, gives it a moment to settle, installs Composer dependencies inside the API
+  container and waits for `healthcheck` to pass before handing control back to the caller.
+inputs:
+  compose-file:
+    description: 'Path to the docker-compose file'
+    required: true
+  compose-project:
+    description: 'Optional Compose project name (-p flag)'
+    required: false
+    default: ''
+  exec-container:
+    description: 'Name of the API container to exec composer install / healthcheck against'
+    required: true
+  prepare-script:
+    description: 'Optional script to chmod +x before bringing the stack up (referenced by the compose file itself)'
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - name: Prepare
+      if: inputs.prepare-script != ''
+      shell: bash
+      run: chmod 777 "${{ inputs.prepare-script }}"
+
+    - name: Compose up
+      shell: bash
+      run: |
+        set -eu
+        COMPOSE="docker compose ${{ inputs.compose-project != '' && format('-p {0}', inputs.compose-project) || '' }} -f ${{ inputs.compose-file }}"
+        $COMPOSE up --quiet-pull -d --wait
+        echo "giving containers a moment to settle (10s)"
+        sleep 10
+        echo "finished waiting"
+        $COMPOSE ps
+
+    - name: Install dependencies and wait for healthcheck
+      shell: bash
+      run: |
+        set -eu
+        docker exec --user "$(id -u):$(id -g)" "${{ inputs.exec-container }}" bash -c "composer install --ignore-platform-req=php --quiet"
+        docker exec --user "$(id -u):$(id -g)" "${{ inputs.exec-container }}" bash -c "php bin/console healthcheck"

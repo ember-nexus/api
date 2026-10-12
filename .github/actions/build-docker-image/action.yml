@@ -1,0 +1,99 @@
+name: 'Build Docker image'
+description: >
+  Builds the API Docker image for a given target/arch via Buildx, saves it to a tar.gz and uploads it as an
+  artifact. Always disables provenance/SBOM attestations, since those cause Buildx to emit an OCI image index
+  (manifest list) even for a single-arch --load build, which later breaks `docker manifest create --amend`.
+inputs:
+  target:
+    description: 'Dockerfile build target (development or production)'
+    required: true
+  arch:
+    description: 'Architecture suffix used for image tags/artifact names (amd or arm)'
+    required: true
+  version:
+    description: 'Value passed as the VERSION build-arg (production target only)'
+    required: false
+    default: ''
+  cache-from:
+    description: 'Whether to read from the GitHub Actions Buildx cache'
+    required: false
+    default: 'true'
+  cache-to:
+    description: 'Whether to write to the GitHub Actions Buildx cache'
+    required: false
+    default: 'true'
+  artifact-name:
+    description: 'Name of the uploaded artifact'
+    required: true
+  artifact-retention-days:
+    description: 'Retention in days for the uploaded artifact'
+    required: false
+    default: '7'
+  dockerhub-username:
+    description: 'Docker Hub username, used to log in before building (avoids anonymous pull rate limits)'
+    required: false
+    default: ''
+  dockerhub-password:
+    description: 'Docker Hub password/token, used to log in before building'
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - name: Expose GitHub Runtime
+      uses: crazy-max/ghaction-github-runtime@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+      with:
+        version: latest
+
+    - name: Login to Docker Hub
+      if: inputs.dockerhub-username != ''
+      uses: docker/login-action@v4
+      with:
+        username: ${{ inputs.dockerhub-username }}
+        password: ${{ inputs.dockerhub-password }}
+
+    - name: Build and save Docker image - ${{ inputs.target }} ${{ inputs.arch }}
+      shell: bash
+      run: |
+        set -eu
+        TAG="api:${{ inputs.target == 'development' && 'dev' || 'prod' }}-${{ inputs.arch }}"
+        TARBALL="${{ inputs.target == 'development' && 'dev' || 'prod' }}-${{ inputs.arch }}.tar.gz"
+
+        CACHE_ARGS=()
+        if [ "${{ inputs.cache-from }}" = "true" ]; then
+          CACHE_ARGS+=(--cache-from "type=gha,scope=${{ inputs.arch }}-${{ inputs.target }}")
+        fi
+        if [ "${{ inputs.cache-to }}" = "true" ]; then
+          CACHE_ARGS+=(--cache-to "type=gha,mode=max,scope=${{ inputs.arch }}-${{ inputs.target }}")
+        fi
+        if [ "${{ inputs.cache-from }}" != "true" ] && [ "${{ inputs.cache-to }}" != "true" ]; then
+          CACHE_ARGS+=(--no-cache)
+        fi
+
+        BUILD_ARG_ARGS=()
+        if [ -n "${{ inputs.version }}" ]; then
+          BUILD_ARG_ARGS+=(--build-arg "VERSION=${{ inputs.version }}")
+        fi
+
+        docker buildx build \
+          --target "${{ inputs.target }}" \
+          --provenance=false \
+          --sbom=false \
+          "${CACHE_ARGS[@]}" \
+          "${BUILD_ARG_ARGS[@]}" \
+          --load \
+          -t "$TAG" \
+          -f ./docker/Dockerfile \
+          .
+
+        docker save "$TAG" | gzip > "$TARBALL"
+        echo "TARBALL_PATH=$TARBALL" >> "$GITHUB_ENV"
+
+    - uses: actions/upload-artifact@v6
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ env.TARBALL_PATH }}
+        retention-days: ${{ inputs.artifact-retention-days }}
