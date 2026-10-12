@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `cron:update-ownership` command, recalculating direct group/user access after `OWNS`, `HAS_SEARCH_ACCESS` and
   `IS_IN_GROUP` relations change, closes #438.
 - Add taskfile.dev development environment into the API repository itself, closes #461.
-- Add S3 status check to healthcheck command, closes #200.
+- Add S3 status check to healthcheck command, closes #200. Updated to display the S3 server variant as well, closes
+  #492.
 - Add support to delete files in S3 / object storage through the `php bin/console database:drop` command, closes #309.
 - Add support to back up files in S3 / object storage through the `php bin/console backup:create` command, closes #308.
 - Verify file contents against the stored `file.hash.sha256` values during `php bin/console backup:load`; files with
