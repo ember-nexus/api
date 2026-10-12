@@ -56,6 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   match the one actually created on element creation (`CREATED`).
 - Fix the exception log line always missing its `detail` (e.g. the received/announced byte counts of a `408` request
   timeout), since it logged the always-empty `Exception::getMessage()` instead.
+- Fix `Content-Type: text/html` being sent on `201 Created` responses, which have no body, closes #475.
+- Fix FrankenPHP worker threads only getting a 512 KiB stack instead of the system default 8 MiB, which could crash
+  deeply recursive PHP code (e.g. `cache:clear` triggered over HTTP) with a stack overflow.
 
 ### Removed
 - **Breaking change**: Remove `POST /token`, `POST /register` and `POST /change-password` v1 request-body compatibility
