@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\ExampleGenerationControllerWithDifferentConfiguration\File;
 
-use App\Tests\FeatureTests\BaseRequestTestCase;
+use App\Tests\EndToEndTests\BaseRequestTestCase;
 
 /**
  * Runs with `file.maxFileSizeInBytes` set to 1024 bytes. Must be run via

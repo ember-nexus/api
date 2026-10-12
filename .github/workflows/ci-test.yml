@@ -198,9 +198,9 @@ jobs:
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
-  test-feature:
+  test-end-to-end:
     runs-on: ubuntu-26.04
-    name: 'Feature Test'
+    name: 'End To End Test'
     timeout-minutes: 15
     needs:
       - test-unit
@@ -232,21 +232,21 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Setup
         run: |
-          chmod 777 ./bin/test-feature-prepare
+          chmod 777 ./bin/test-end-to-end-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker load < /tmp/docker/api-prod-amd.tar.gz
-          docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml up --quiet-pull -d --wait
+          docker compose -f ./tests/EndToEndTests/docker-compose-${{ matrix.dockerCompose }}.yml up --quiet-pull -d --wait
           echo "giving containers a moment to settle (10s)"
           sleep 10
           echo "finished waiting"
-          docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml ps
+          docker compose -f ./tests/EndToEndTests/docker-compose-${{ matrix.dockerCompose }}.yml ps
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "composer install --ignore-platform-req=php --quiet"
           docker exec --user "$(id -u):$(id -g)" api-dev bash -c "php bin/console healthcheck"
-      - name: Feature Test
+      - name: End To End Test
         run: |
-          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:feature"
+          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api-prod\" && echo \$API_DOMAIN && composer test:end-to-end"
       - name: Run cron jobs once manually
-        # Smoke test only (business logic is unit/feature-tested elsewhere): proves the cron jobs run end-to-end
+        # Smoke test only (business logic is unit/end-to-end-tested elsewhere): proves the cron jobs run end-to-end
         # against the prod image with a tty, since DISABLE_CRON=true on the containers would otherwise make a
         # tty-less exec a no-op.
         run: |
@@ -257,7 +257,7 @@ jobs:
         if: always()
         run: |
           mkdir -p docker-logs
-          COMPOSE="docker compose -f ./tests/FeatureTests/docker-compose-${{ matrix.dockerCompose }}.yml"
+          COMPOSE="docker compose -f ./tests/EndToEndTests/docker-compose-${{ matrix.dockerCompose }}.yml"
           $COMPOSE ps -a > docker-logs/_ps.txt 2>&1 || true
           for svc in $($COMPOSE config --services); do
             $COMPOSE logs --no-color --timestamps "$svc" > "docker-logs/$svc.log" 2>&1 || true
@@ -269,7 +269,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: docker-logs-feature-${{ matrix.dockerCompose }}
+          name: docker-logs-end-to-end-${{ matrix.dockerCompose }}
           path: docker-logs/
           if-no-files-found: ignore
           retention-days: 7
@@ -302,7 +302,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Setup
         run: |
-          chmod 777 ./bin/test-feature-prepare
+          chmod 777 ./bin/test-end-to-end-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker load < /tmp/docker/api-prod-amd.tar.gz
           docker compose -f ./tests/ExampleGenerationController/docker-compose.yml up --quiet-pull -d --wait
@@ -361,7 +361,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Setup
         run: |
-          chmod 777 ./bin/test-feature-command-prepare
+          chmod 777 ./bin/test-end-to-end-command-prepare
           docker load < /tmp/docker/api-dev-amd.tar.gz
           docker compose -f ./tests/ExampleGenerationCommand/docker-compose.yml up --quiet-pull -d --wait
           echo "giving containers a moment to settle (10s)"

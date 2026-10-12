@@ -15,7 +15,7 @@ services:
       - "80"
     volumes:
       - ../../:/var/www/html
-      - ../FeatureTests/well-known-security.txt:/well-known-security.txt
+      - ../EndToEndTests/well-known-security.txt:/well-known-security.txt
 
   # production image without mounted source code, i.e. as it is delivered; limits are lowered per test scenario
   api-prod:
@@ -30,7 +30,7 @@ services:
     expose:
       - "80"
     volumes:
-      - ../FeatureTests/well-known-security.txt:/well-known-security.txt
+      - ../EndToEndTests/well-known-security.txt:/well-known-security.txt
       - ./ini:/server-test-ini:ro
     environment:
       # additional php.ini directory, only used by scenarios which need a different PHP configuration

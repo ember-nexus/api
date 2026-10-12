@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
-abstract class BaseRequestTestCase extends \App\Tests\FeatureTests\BaseRequestTestCase
+abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestTestCase
 {
     /**
      * @var string[] IGNORED_HEADERS
