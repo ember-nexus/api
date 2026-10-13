@@ -139,6 +139,7 @@ jobs:
     timeout-minutes: 30
     needs: checkout-repo-and-bump-version
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/download-release-artifacts
       # Production is built first, pristine (--no-cache, no GHA cache), so the released image is always built
       # from scratch. Development is built right after in the same job/builder and reuses production's just-built
@@ -165,6 +166,7 @@ jobs:
     timeout-minutes: 30
     needs: checkout-repo-and-bump-version
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/download-release-artifacts
       - uses: ./.github/actions/build-docker-image-release
         with:
@@ -190,6 +192,7 @@ jobs:
     needs:
       - build-docker-image-amd
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/download-release-artifacts
       - uses: ./.github/actions/load-docker-image
         with:
@@ -225,6 +228,7 @@ jobs:
     needs:
       - build-docker-image-arm
     steps:
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/download-release-artifacts
       - uses: ./.github/actions/load-docker-image
         with:
