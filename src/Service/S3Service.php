@@ -443,7 +443,10 @@ class S3Service
         return max($this->multipartUploadPartSizeInBytes, $partSizeRequiredByMaxChunkCount);
     }
 
-    public function deleteFile(FileOperationInterface $fileOperation): void
+    /**
+     * @return bool false if the object did not exist, i.e. there was nothing to delete
+     */
+    public function deleteFile(FileOperationInterface $fileOperation): bool
     {
         $objectConfig = [
             'Bucket' => $fileOperation->getBucket(),
@@ -452,7 +455,7 @@ class S3Service
 
         $objectExistsWaiter = $this->s3Client->objectExists($objectConfig);
         if (!$this->s3ClientWrapper->isSuccessFromObjectExistsWaiter($objectExistsWaiter)) {
-            return;
+            return false;
         }
 
         $this->s3Client->deleteObject($objectConfig);
@@ -460,6 +463,8 @@ class S3Service
         if ($this->s3ClientWrapper->isSuccessFromObjectExistsWaiter($objectExistsWaiter)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to delete file.');
         }
+
+        return true;
     }
 
     public function existsFile(FileOperationInterface $fileOperation): bool

@@ -71,7 +71,7 @@ class DeleteElementFileController extends AbstractController
         $this->elementManager->merge($element);
         $this->elementManager->flush();
 
-        $this->elementFileDeletionService->deleteFile($deleteFileOperation);
+        $this->elementFileDeletionService->deleteFile($deleteFileOperation, $elementId);
 
         $this->eventDispatcher->dispatch(new ElementFileDeleteEvent($elementId));
 

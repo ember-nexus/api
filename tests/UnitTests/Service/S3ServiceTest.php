@@ -915,7 +915,7 @@ class S3ServiceTest extends TestCase
             s3ClientWrapper: $s3ClientWrapper->reveal()
         );
 
-        $s3Service->deleteFile($fileOperation);
+        $this->assertFalse($s3Service->deleteFile($fileOperation));
     }
 
     public function testDeleteFileDeletesExistingFile(): void
@@ -945,7 +945,7 @@ class S3ServiceTest extends TestCase
             s3ClientWrapper: $s3ClientWrapper->reveal()
         );
 
-        $s3Service->deleteFile($fileOperation);
+        $this->assertTrue($s3Service->deleteFile($fileOperation));
     }
 
     public function testDeleteFileThrowsWhenDeletedFileWasNotDeleted(): void

@@ -15,11 +15,13 @@ use App\EventSystem\EntityManager\Event\ElementPreMergeEvent;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Helper\Neo4jClientHelper;
+use App\Type\FragmentGroup;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\Node;
 use Laudis\Neo4j\Types\Relationship;
 use OutOfBoundsException;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
@@ -50,6 +52,7 @@ class ElementManager
         private EventDispatcherInterface $eventDispatcher,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -88,6 +91,9 @@ class ElementManager
             $this->eventDispatcher->dispatch(new ElementPreMergeEvent($element));
             $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
             $this->cypherEntityManager->merge($fragmentGroup->getCypherFragment());
+            $this->logIfMongoDocumentMissing($element, $fragmentGroup, 'updated');
+            $this->logIfElasticDocumentMissing($element, $fragmentGroup, 'updated');
+            // merging into Mongo/Elasticsearch upserts, so a missing document is created rather than left absent
             $this->mongoEntityManager->merge($fragmentGroup->getMongoFragment());
             $this->elasticEntityManager->merge($fragmentGroup->getElasticFragment());
         }
@@ -96,8 +102,13 @@ class ElementManager
             $this->eventDispatcher->dispatch(new ElementPreDeleteEvent($element));
             $fragmentGroup = $this->elementFragmentizeService->fragmentize($element);
             $this->cypherEntityManager->delete($fragmentGroup->getCypherFragment());
+            $this->logIfMongoDocumentMissing($element, $fragmentGroup, 'deleted');
+            // deleting a missing Mongo document is a no-op, but the Elasticsearch client throws on a missing one, so
+            // it is only called when the document actually exists
             $this->mongoEntityManager->delete($fragmentGroup->getMongoFragment());
-            $this->elasticEntityManager->delete($fragmentGroup->getElasticFragment());
+            if (!$this->logIfElasticDocumentMissing($element, $fragmentGroup, 'deleted')) {
+                $this->elasticEntityManager->delete($fragmentGroup->getElasticFragment());
+            }
         }
 
         $this->cypherEntityManager->flush();
@@ -125,6 +136,43 @@ class ElementManager
         $this->deleteQueue = [];
 
         return $this;
+    }
+
+    /**
+     * Returns true if the element's Mongo document did not exist (and logged a notice for it).
+     */
+    private function logIfMongoDocumentMissing(NodeElementInterface|RelationElementInterface $element, FragmentGroup $fragmentGroup, string $verb): bool
+    {
+        $mongoFragment = $fragmentGroup->getMongoFragment();
+        if (null !== $this->mongoEntityManager->getOneByIdentifier((string) $mongoFragment->getCollection(), (string) $mongoFragment->getIdentifier())) {
+            return false;
+        }
+        $this->logger->notice(sprintf(
+            "To be %s element with id '%s' does not have a MongoDB document.",
+            $verb,
+            $element->getId()?->toString() ?? 'null'
+        ));
+
+        return true;
+    }
+
+    /**
+     * Returns true if the element's Elasticsearch document did not exist (and logged a notice for it). On delete,
+     * callers must skip the actual delete call themselves when this returns true.
+     */
+    private function logIfElasticDocumentMissing(NodeElementInterface|RelationElementInterface $element, FragmentGroup $fragmentGroup, string $verb): bool
+    {
+        $elasticFragment = $fragmentGroup->getElasticFragment();
+        if (null !== $this->elasticEntityManager->getOneByIdentifier((string) $elasticFragment->getIndex(), (string) $elasticFragment->getIdentifier())) {
+            return false;
+        }
+        $this->logger->notice(sprintf(
+            "To be %s element with id '%s' does not have an Elasticsearch document.",
+            $verb,
+            $element->getId()?->toString() ?? 'null'
+        ));
+
+        return true;
     }
 
     public function getElement(UuidInterface $id): NodeElementInterface|RelationElementInterface|null

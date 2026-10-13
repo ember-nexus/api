@@ -8,6 +8,8 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use Laudis\Neo4j\Databags\Statement;
+use Monolog\Attribute\WithMonologChannel;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -16,11 +18,14 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  * @SuppressWarnings("PHPMD.ExcessiveClassLength")
  */
+#[WithMonologChannel('audit')]
 class AccessChecker
 {
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private AuthProvider $authProvider,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -49,6 +54,16 @@ class AccessChecker
 
     public function hasAccessToElement(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
     {
+        $hasAccess = $this->checkAccessToElement($userId, $elementId, $accessType);
+        if (!$hasAccess) {
+            $this->logAccessDenied($userId, $elementId, $accessType);
+        }
+
+        return $hasAccess;
+    }
+
+    private function checkAccessToElement(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
+    {
         if (ElementType::NODE === $this->getElementType($elementId)) {
             if (AccessType::READ === $accessType) {
                 return $this->hasReadAccessToNode($userId, $elementId);
@@ -61,6 +76,24 @@ class AccessChecker
         }
 
         return $this->hasGeneralAccessToRelation($userId, $elementId, $accessType);
+    }
+
+    /**
+     * Logged on the dedicated, always-flushed `audit` channel instead of regular request logging (see monolog.yaml).
+     */
+    private function logAccessDenied(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): void
+    {
+        $this->logger->notice(
+            'Access to element was denied.',
+            [
+                'elementId' => $elementId->toString(),
+                'accessType' => $accessType->value,
+                'client' => [
+                    'user' => $this->authProvider->isAnonymous() ? 'anonymous' : $userId->toString(),
+                    'token' => $this->authProvider->getTokenId()?->toString(),
+                ],
+            ]
+        );
     }
 
     public function hasReadAccessToNode(UuidInterface $userId, UuidInterface $elementId): bool
@@ -131,7 +164,7 @@ class AccessChecker
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (element {id: \$elementId})\n".
-            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*1..]->(element)\n".
+            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element)\n".
             "WHERE\n".
             "  user.id = element.id\n".
             "  OR\n".
@@ -304,8 +337,8 @@ class AccessChecker
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (start)-[element {id: \$elementId}]->(end)\n".
-            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_'.$accessType->value."_ACCESS*1..]->(start)\n".
-            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_'.$accessType->value."_ACCESS*1..]->(end)\n".
+            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(start)\n".
+            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(end)\n".
             "WHERE\n".
             "  (\n".
             "    user.id = start.id\n".

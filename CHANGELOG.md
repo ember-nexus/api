@@ -7,10 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Add configurable timeout for expression (Go Expr Lang) execution via `expression.timeoutInMilliseconds` (default
-  5000ms), so a slow or runaway expression can no longer block a request indefinitely, closes [#482].
+  5000ms), so a slow or runaway expression can no longer block a request indefinitely, closes #482.
+- Add dedicated `audit` log channel, always flushed regardless of request errors, logging `Group` node writes
+  (`PUT`/`PATCH`/`DELETE`), access-denied requests, and calls to user/token endpoints, closes #347.
+- Log a notice when an element being deleted or updated is missing its MongoDB or Elasticsearch document, or (on
+  delete) its S3 file.
 
 ### Changed
-- Update the Go Expr Lang dependency and other Go dependencies used by the `expr-cli` binary, related to [#482].
+- Update the Go Expr Lang dependency and other Go dependencies used by the `expr-cli` binary, related to #482.
+- Update reference dataset to version 0.0.35.
+
+### Fixed
+- Being a direct member of a `Group` (via `IS_IN_GROUP`) now also grants `CREATE`/`UPDATE`/`DELETE` access to the
+  group node itself, not just `READ` access, closes #238.
+- Deleting an element whose Elasticsearch document was already missing no longer fails with a 500 error.
 
 ## 0.1.32 - 2026-10-13
 ### Added

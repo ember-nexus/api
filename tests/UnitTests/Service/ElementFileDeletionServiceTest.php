@@ -110,20 +110,26 @@ class ElementFileDeletionServiceTest extends TestCase
 
     public function testNodeWithFileHasFileOperation(): void
     {
-        $node = $this->buildNode(UuidV4::uuid4());
+        $nodeId = UuidV4::uuid4();
+        $node = $this->buildNode($nodeId);
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
         $this->client->runStatement(Argument::any())->willReturn($this->buildAttachedRelationsResult());
         $this->elementService->hasFile($node)->willReturn(true);
         $this->fileOperationFactory->createFileOperationFromElement($node)->willReturn($fileOperation);
 
-        $this->assertSame([$fileOperation], $this->service->getFileOperationsForDeletionOfElement($node));
+        $this->assertSame(
+            [['elementId' => $nodeId, 'operation' => $fileOperation]],
+            $this->service->getFileOperationsForDeletionOfElement($node)
+        );
     }
 
     public function testFilesOfAttachedRelationsAreIncludedForNodes(): void
     {
         $node = $this->buildNode(UuidV4::uuid4());
         $relationId = UuidV4::uuid4();
-        $relation = $this->prophesize(RelationElementInterface::class)->reveal();
+        $relation = $this->prophesize(RelationElementInterface::class);
+        $relation->getId()->willReturn($relationId);
+        $relation = $relation->reveal();
         $relationFileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
 
         $this->client->runStatement(Argument::any())->willReturn($this->buildAttachedRelationsResult($relationId->toString()));
@@ -132,29 +138,43 @@ class ElementFileDeletionServiceTest extends TestCase
         $this->elementService->hasFile($relation)->willReturn(true);
         $this->fileOperationFactory->createFileOperationFromElement($relation)->willReturn($relationFileOperation);
 
-        $this->assertSame([$relationFileOperation], $this->service->getFileOperationsForDeletionOfElement($node));
+        $this->assertSame(
+            [['elementId' => $relationId, 'operation' => $relationFileOperation]],
+            $this->service->getFileOperationsForDeletionOfElement($node)
+        );
     }
 
     public function testRelationDoesNotQueryForAttachedRelations(): void
     {
-        $relation = $this->prophesize(RelationElementInterface::class)->reveal();
+        $relationId = UuidV4::uuid4();
+        $relation = $this->prophesize(RelationElementInterface::class);
+        $relation->getId()->willReturn($relationId);
+        $relation = $relation->reveal();
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
         $this->client->runStatement(Argument::any())->shouldNotBeCalled();
         $this->elementService->hasFile($relation)->willReturn(true);
         $this->fileOperationFactory->createFileOperationFromElement($relation)->willReturn($fileOperation);
 
-        $this->assertSame([$fileOperation], $this->service->getFileOperationsForDeletionOfElement($relation));
+        $this->assertSame(
+            [['elementId' => $relationId, 'operation' => $fileOperation]],
+            $this->service->getFileOperationsForDeletionOfElement($relation)
+        );
     }
 
     public function testDeleteFilesDeletesEveryFile(): void
     {
+        $firstId = UuidV4::uuid4();
+        $secondId = UuidV4::uuid4();
         $first = $this->prophesize(FileOperationInterface::class)->reveal();
         $second = $this->prophesize(FileOperationInterface::class)->reveal();
 
-        $this->s3Service->deleteFile($first)->shouldBeCalledOnce();
-        $this->s3Service->deleteFile($second)->shouldBeCalledOnce();
+        $this->s3Service->deleteFile($first)->shouldBeCalledOnce()->willReturn(true);
+        $this->s3Service->deleteFile($second)->shouldBeCalledOnce()->willReturn(true);
 
-        $this->service->deleteFiles([$first, $second]);
+        $this->service->deleteFiles([
+            ['elementId' => $firstId, 'operation' => $first],
+            ['elementId' => $secondId, 'operation' => $second],
+        ]);
     }
 
     public function testDeleteFilesLogsFailuresAndContinues(): void
@@ -166,9 +186,12 @@ class ElementFileDeletionServiceTest extends TestCase
         $second = $this->prophesize(FileOperationInterface::class)->reveal();
 
         $this->s3Service->deleteFile($failingOperation)->willThrow(new RuntimeException('S3 is down'));
-        $this->s3Service->deleteFile($second)->shouldBeCalledOnce();
+        $this->s3Service->deleteFile($second)->shouldBeCalledOnce()->willReturn(true);
 
-        $this->service->deleteFiles([$failingOperation, $second]);
+        $this->service->deleteFiles([
+            ['elementId' => UuidV4::uuid4(), 'operation' => $failingOperation],
+            ['elementId' => UuidV4::uuid4(), 'operation' => $second],
+        ]);
 
         $this->assertLogHappened(
             $this->logger,
@@ -189,6 +212,31 @@ class ElementFileDeletionServiceTest extends TestCase
         $this->service->deleteFile($operation);
 
         $this->assertCount(1, $this->logger->records->all());
+    }
+
+    public function testDeleteFileLogsNoticeWhenFileDoesNotExist(): void
+    {
+        $elementId = UuidV4::uuid4();
+        $operation = $this->prophesize(FileOperationInterface::class)->reveal();
+        $this->s3Service->deleteFile($operation)->willReturn(false);
+
+        $this->service->deleteFile($operation, $elementId);
+
+        $this->assertLogHappened(
+            $this->logger,
+            'notice',
+            sprintf("To be deleted element with id '%s' does not have a file in S3.", $elementId->toString())
+        );
+    }
+
+    public function testDeleteFileWithoutElementIdDoesNotLogWhenFileDoesNotExist(): void
+    {
+        $operation = $this->prophesize(FileOperationInterface::class)->reveal();
+        $this->s3Service->deleteFile($operation)->willReturn(false);
+
+        $this->service->deleteFile($operation);
+
+        $this->assertCount(0, $this->logger->records->all());
     }
 
     public function testDeletePreviousFileAfterReplaceDeletesTheOldKey(): void
