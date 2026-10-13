@@ -5,36 +5,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.32 - 2026-10-13
 ### Added
 - Add file endpoints `GET`/`POST`/`PUT`/`DELETE /<uuid>/file` and resumable, chunked upload endpoints
-  `POST`/`PATCH`/`DELETE`/`HEAD /<uuid>/upload`, backed by S3 / object storage, closes #119.
-- Add `ETag`, `If-Match`, `If-None-Match` and `If-Range` support to file endpoints, related to #119.
-- Add byte-range (`Range`/`Content-Range`) support to `GET /<uuid>/file`, related to #119.
+  `POST`/`PATCH`/`DELETE`/`HEAD /<uuid>/upload`, backed by S3 / object storage, closes [#119].
+- Add `ETag`, `If-Match`, `If-None-Match` and `If-Range` support to file endpoints, related to [#119].
+- Add byte-range (`Range`/`Content-Range`) support to `GET /<uuid>/file`, related to [#119].
 - Add `cron:update-ownership` command, recalculating direct group/user access after `OWNS`, `HAS_SEARCH_ACCESS` and
-  `IS_IN_GROUP` relations change, closes #438.
-- Add taskfile.dev development environment into the API repository itself, closes #461.
-- Add S3 status check to healthcheck command, closes #200. Updated to display the S3 server variant as well, closes
-  #492.
-- Add support to delete files in S3 / object storage through the `php bin/console database:drop` command, closes #309.
-- Add support to back up files in S3 / object storage through the `php bin/console backup:create` command, closes #308.
+  `IS_IN_GROUP` relations change, closes [#438].
+- Add taskfile.dev development environment into the API repository itself, closes [#461].
+- Add S3 status check to healthcheck command, closes [#200]. Updated to display the S3 server variant as well, closes
+  [#492].
+- Add support to delete files in S3 / object storage through the `php bin/console database:drop` command, closes [#309].
+- Add support to back up files in S3 / object storage through the `php bin/console backup:create` command, closes [#308].
 - Verify file contents against the stored `file.hash.sha256` values during `php bin/console backup:load`; files with
   mismatching or missing hashes are skipped with a warning. Verification can be disabled with `--skip-verify`, related
-  to #119.
-- Add support for `Content-Disposition` HTTP header, including transliteration of non-latin-characters, closes #447.
+  to [#119].
+- Add support for `Content-Disposition` HTTP header, including transliteration of non-latin-characters, closes [#447].
 - Store value `true` as placeholder for non-scalar properties in Neo4j. Does not change API responses, but is available
   for Neo4j based queries, e.g. to check whether a non-scalar property exists on the element.
 - Add mimetype detection for multipart / chunked uploads.
 
 ### Changed
-- Upgrade FrankenPHP to 1.12.1, related to #457 and #461.
-- Upgrade PHP to 8.5.4, related to #457 and #461.
-- Upgrade PHP dependencies, related to #457 and #461.
-- Increase max post limit from 2 MB (PHP default) to 101 MiB, related to #119.
+- Upgrade FrankenPHP to 1.12.1, related to [#457] and [#461].
+- Upgrade PHP to 8.5.4, related to [#457] and [#461].
+- Upgrade PHP dependencies, related to [#457] and [#461].
+- Increase max post limit from 2 MB (PHP default) to 101 MiB, related to [#119].
 - Change header `Access-Control-Allow-Headers` to `*`, due to growing number of supported headers.
 - Change unsupported HTTP methods on existing routes to answer `405 Method Not Allowed` instead of `500`, and add a
-  per-endpoint `Allow` header (including on `405` responses), related to #119.
+  per-endpoint `Allow` header (including on `405` responses), related to [#119].
 - Add `instance` (`urn:uuid:<request id>`) to every `problem+json` response, matching the request id used in logs and
-  the Caddy `request_id`, related to #119.
+  the Caddy `request_id`, related to [#119].
 - Reduce CLI command log output: only printed when attached to a real terminal, notice level and up by default
   (`-v` for more).
 - Remove the version string from CLI output in development mode.
@@ -45,26 +47,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pass required environment variables directly to unmounted API instances in CI / example-generation Docker Compose
   files, instead of relying on a mounted `.env` file.
 
+### Removed
+- **Breaking change**: Remove `POST /token`, `POST /register` and `POST /change-password` v1 request-body compatibility
+  support. Only the current request body introduced in 2024 is accepted now.
+- Remove queue `REBUILD_SEARCH_DOCUMENT`, replaced by the durable, dead-letter-backed `ELASTICSEARCH_UPDATE_OWNERSHIP`
+  queue, related to [#438].
+
 ### Fixed
 - Fix bug with deserialization of MongoDB documents.
 - Fix priority race condition between the `If-Match` and `If-None-Match` event listeners: `If-Match` is now evaluated
   before `If-None-Match` when both are sent together (RFC 9110 Section 13.2.2). A failing `If-Match` combined with a
   matching `If-None-Match` used to incorrectly answer `304`/`412` from `If-None-Match` instead of the `412` that
-  `If-Match` should give, related to #119.
+  `If-Match` should give, related to [#119].
 - Fix the `onCreatedByUser` access restriction (and the equivalent implicit rule used by `GET .../children`,
   `.../parents` and `.../related`) never actually matching, because the checked relation type (`CREATED_BY`) did not
   match the one actually created on element creation (`CREATED`).
 - Fix the exception log line always missing its `detail` (e.g. the received/announced byte counts of a `408` request
   timeout), since it logged the always-empty `Exception::getMessage()` instead.
-- Fix `Content-Type: text/html` being sent on `201 Created` responses, which have no body, closes #475.
+- Fix `Content-Type: text/html` being sent on `201 Created` responses, which have no body, closes [#475].
 - Fix FrankenPHP worker threads only getting a 512 KiB stack instead of the system default 8 MiB, which could crash
   deeply recursive PHP code (e.g. `cache:clear` triggered over HTTP) with a stack overflow.
-
-### Removed
-- **Breaking change**: Remove `POST /token`, `POST /register` and `POST /change-password` v1 request-body compatibility
-  support. Only the current request body introduced in 2024 is accepted now.
-- Remove queue `REBUILD_SEARCH_DOCUMENT`, replaced by the durable, dead-letter-backed `ELASTICSEARCH_UPDATE_OWNERSHIP`
-  queue, related to #438.
 
 ## 0.1.31 - 2026-02-10
 ### Changed
