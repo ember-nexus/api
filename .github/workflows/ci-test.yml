@@ -40,7 +40,7 @@ jobs:
   build-docker-image:
     runs-on: gh-4vcpu-ubuntu-latest-amd
     name: 'Build Docker Image'
-    timeout-minutes: 40
+    timeout-minutes: 60
     needs:
       - actionlint
       - yml-lint
