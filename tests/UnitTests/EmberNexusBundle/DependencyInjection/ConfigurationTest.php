@@ -111,6 +111,40 @@ class ConfigurationTest extends TestCase
         $this->process([EmberNexusConfiguration::FILE => ['unknownOption' => 1]]);
     }
 
+    public function testExpressionDefaults(): void
+    {
+        $config = $this->process([]);
+
+        $this->assertSame([
+            EmberNexusConfiguration::EXPRESSION_ENABLED => true,
+            EmberNexusConfiguration::EXPRESSION_WARNING_LENGTH => 512,
+            EmberNexusConfiguration::EXPRESSION_MAX_LENGTH => 10 * 1024,
+            EmberNexusConfiguration::EXPRESSION_TIMEOUT_IN_MILLISECONDS => 5000,
+        ], $config[EmberNexusConfiguration::EXPRESSION]);
+    }
+
+    public function testExpressionTimeoutCanBeOverwritten(): void
+    {
+        $config = $this->process([
+            EmberNexusConfiguration::EXPRESSION => [
+                EmberNexusConfiguration::EXPRESSION_TIMEOUT_IN_MILLISECONDS => 1000,
+            ],
+        ]);
+
+        $this->assertSame(1000, $config[EmberNexusConfiguration::EXPRESSION][EmberNexusConfiguration::EXPRESSION_TIMEOUT_IN_MILLISECONDS]);
+    }
+
+    public function testExpressionTimeoutCanBeSetToNull(): void
+    {
+        $config = $this->process([
+            EmberNexusConfiguration::EXPRESSION => [
+                EmberNexusConfiguration::EXPRESSION_TIMEOUT_IN_MILLISECONDS => null,
+            ],
+        ]);
+
+        $this->assertNull($config[EmberNexusConfiguration::EXPRESSION][EmberNexusConfiguration::EXPRESSION_TIMEOUT_IN_MILLISECONDS]);
+    }
+
     public function testPageSizeMinimumIsEnforced(): void
     {
         $this->expectException(InvalidConfigurationException::class);

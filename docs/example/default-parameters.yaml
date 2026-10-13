@@ -37,6 +37,9 @@ ember_nexus:
     # Maximum length for executable expressions. Exceeding the limit will throw an exception.
     maxLength: 10240
 
+    # Maximum runtime of the Go Expr Lang CLI call in milliseconds, at least 100. Can be set to null to disable the limit.
+    timeoutInMilliseconds: 5000
+
   # Configures the /instance-configuration endpoint.
   instanceConfiguration:
 

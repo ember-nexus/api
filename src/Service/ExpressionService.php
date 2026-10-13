@@ -6,10 +6,12 @@ namespace App\Service;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
+use App\Factory\Exception\Client422UnprocessableContentExceptionFactory;
 use App\Security\AuthProvider;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Psr\Log\LoggerInterface;
 use stdClass;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 /**
@@ -24,6 +26,7 @@ class ExpressionService
         private LoggerInterface $logger,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
+        private Client422UnprocessableContentExceptionFactory $client422UnprocessableContentExceptionFactory,
     ) {
     }
 
@@ -86,8 +89,27 @@ class ExpressionService
         $tempFile = \Safe\tempnam(sys_get_temp_dir(), 'expr_cli_');
         \Safe\file_put_contents($tempFile, $runtimePayload);
 
+        $timeoutInMilliseconds = $this->emberNexusConfiguration->getExpressionTimeoutInMilliseconds();
+
         $process = new Process(['/usr/local/bin/expr-cli', '-f', $tempFile]);
-        $process->run();
+        if (null !== $timeoutInMilliseconds) {
+            $process->setTimeout($timeoutInMilliseconds / 1000);
+        }
+
+        try {
+            $this->runProcess($process);
+        } catch (ProcessTimedOutException) {
+            \Safe\unlink($tempFile);
+            $this->logger->notice(
+                'Expression execution timed out.',
+                [
+                    'expression_truncated' => substr($expression, 0, 256),
+                    'timeout_in_milliseconds' => $timeoutInMilliseconds,
+                    'user' => $this->authProvider->getUserId()->toString(),
+                ]
+            );
+            throw $this->client422UnprocessableContentExceptionFactory->createFromExpressionTimeout((int) $timeoutInMilliseconds);
+        }
         \Safe\unlink($tempFile);
 
         if (!$process->isSuccessful()) {
@@ -105,5 +127,15 @@ class ExpressionService
         $result = $process->getOutput();
 
         return \Safe\json_decode($result, true);
+    }
+
+    /**
+     * Isolated as its own seam so tests can simulate a timeout without waiting on a real clock.
+     *
+     * @throws ProcessTimedOutException
+     */
+    protected function runProcess(Process $process): void
+    {
+        $process->run();
     }
 }

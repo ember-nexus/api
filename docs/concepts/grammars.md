@@ -93,7 +93,8 @@ more information.
 
 > [!SECURITY]
 > Expressions can be deactivated and expression strings are limited to a length of 10kb. Expressions longer than 512
-> characters are furthermore logged.  
+> characters are furthermore logged. Additionally, a single expression's execution is limited to 5000ms by default;
+> expressions exceeding this limit are aborted and respond with a `422 Unprocessable Content` error.  
 > You can change these settings in [Ember Nexus's configuration](/getting-started/configuration).
 
 Links:

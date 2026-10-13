@@ -28,6 +28,8 @@ class EmberNexusConfiguration
     public const string EXPRESSION_ENABLED = 'enabled';
     public const string EXPRESSION_WARNING_LENGTH = 'warningLength';
     public const string EXPRESSION_MAX_LENGTH = 'maxLength';
+    public const string EXPRESSION_TIMEOUT_IN_MILLISECONDS = 'timeoutInMilliseconds';
+    public const int EXPRESSION_MIN_TIMEOUT_IN_MILLISECONDS = 100;
 
     public const string INSTANCE_CONFIGURATION = 'instanceConfiguration';
     public const string INSTANCE_CONFIGURATION_ENABLED = 'enabled';
@@ -66,6 +68,7 @@ class EmberNexusConfiguration
     private bool $expressionEnabled;
     private int $expressionWarningLength;
     private int $expressionMaxLength;
+    private ?int $expressionTimeoutInMilliseconds = null;
     private bool $instanceConfigurationEnabled;
     private bool $instanceConfigurationShowVersion;
     private int $tokenMinLifetimeInSeconds;
@@ -186,6 +189,17 @@ class EmberNexusConfiguration
                 self::EXPRESSION_MAX_LENGTH,
             ]
         ));
+        $value = self::getValueFromConfig(
+            $configuration,
+            [
+                self::EXPRESSION,
+                self::EXPRESSION_TIMEOUT_IN_MILLISECONDS,
+            ]
+        );
+        if (null !== $value) {
+            $value = (int) $value;
+        }
+        $emberNexusConfiguration->setExpressionTimeoutInMilliseconds($value);
 
         $emberNexusConfiguration->setInstanceConfigurationEnabled((bool) self::getValueFromConfig(
             $configuration,
@@ -500,6 +514,21 @@ class EmberNexusConfiguration
     public function setExpressionMaxLength(int $expressionMaxLength): static
     {
         $this->expressionMaxLength = $expressionMaxLength;
+
+        return $this;
+    }
+
+    public function getExpressionTimeoutInMilliseconds(): ?int
+    {
+        return $this->expressionTimeoutInMilliseconds;
+    }
+
+    public function setExpressionTimeoutInMilliseconds(?int $expressionTimeoutInMilliseconds): static
+    {
+        if (null !== $expressionTimeoutInMilliseconds && $expressionTimeoutInMilliseconds < self::EXPRESSION_MIN_TIMEOUT_IN_MILLISECONDS) {
+            throw new Exception(sprintf('Expression timeout must be null or at least %d milliseconds.', self::EXPRESSION_MIN_TIMEOUT_IN_MILLISECONDS));
+        }
+        $this->expressionTimeoutInMilliseconds = $expressionTimeoutInMilliseconds;
 
         return $this;
     }

@@ -1044,6 +1044,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         enabled?: bool|Param, // If true, expressions are executed. // Default: true
  *         warningLength?: int|Param, // Minimum length for executable expressions to trigger a warning in the logs. // Default: 512
  *         maxLength?: int|Param, // Maximum length for executable expressions. Exceeding the limit will throw an exception. // Default: 10240
+ *         timeoutInMilliseconds?: scalar|Param|null, // Maximum runtime of the Go Expr Lang CLI call in milliseconds, at least 100. Can be set to null to disable the limit. // Default: 5000
  *     },
  *     instanceConfiguration?: array{ // Configures the /instance-configuration endpoint.
  *         enabled?: bool|Param, // If true, enables the endpoint. If false, 403 error messages are returned. // Default: true

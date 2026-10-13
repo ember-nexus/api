@@ -1,0 +1,8 @@
+ Error 422 - Unprocessable Content
+
+ The request content was syntactically valid, but could not be processed due to a configured resource limit, e.g. an
+ expression (Go Expr Lang) query exceeding its configured timeout.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+
+ Link to http.dev's explanation of the 422 error code: https://http.dev/422
