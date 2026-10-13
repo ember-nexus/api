@@ -475,6 +475,9 @@ class EmberNexusConfiguration
         return $this->registerUniqueIdentifierRegex;
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.ErrorControlOperator")
+     */
     public function setRegisterUniqueIdentifierRegex(string|false $registerUniqueIdentifierRegex): static
     {
         if (false !== $registerUniqueIdentifierRegex) {
