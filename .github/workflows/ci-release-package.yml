@@ -47,19 +47,27 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v5
-      - name: Read Unreleased changelog section
-        id: get-changelog
+
+      - name: Compute next version
+        id: next-version
+        shell: bash
+        run: |
+          docker pull usvc/semver:latest
+          version=$(cat composer.json | jq -r .version)
+          bumpType=${{ github.event.inputs.release-type }}
+          newVersion="$(docker run usvc/semver:latest bump $bumpType $version | tr -d '\r')"
+          echo "version=$newVersion" >> "$GITHUB_OUTPUT"
+
+      # Dry-run the same changelog operation that checkout-repo-and-bump-version will perform for real later.
+      # This checkout is throwaway (nothing from this job is uploaded/persisted), so its only purpose is to catch
+      # upfront anything the action's parser would choke on (e.g. malformed CHANGELOG.md) against the actual next
+      # version, instead of finding out after the version bump/build/e2e steps have already run.
+      - name: Dry-run release the changelog (result discarded)
         uses: superfaceai/release-changelog-action@v3
         with:
           path-to-changelog: CHANGELOG.md
-          version: Unreleased
-          operation: read
-      - name: Fail if Unreleased section is empty
-        run: |
-          if [ -z "$(echo '${{ steps.get-changelog.outputs.changelog }}' | tr -d '[:space:]')" ]; then
-            echo "::error::CHANGELOG.md has no entries under 'Unreleased' - add a changelog entry before releasing."
-            exit 1
-          fi
+          version: ${{ steps.next-version.outputs.version }}
+          operation: release
 
 
   checkout-repo-and-bump-version:
@@ -125,73 +133,52 @@ jobs:
           retention-days: 7
 
 
-  build-docker-image-dev-amd:
+  build-docker-image-amd:
     runs-on: gh-4vcpu-ubuntu-latest-amd
-    name: Build Docker Image - Dev - AMD
-    timeout-minutes: 20
+    name: Build Docker Image - AMD
+    timeout-minutes: 30
     needs: checkout-repo-and-bump-version
     steps:
       - uses: ./.github/actions/download-release-artifacts
-      - uses: ./.github/actions/build-docker-image
+      # Production is built first, pristine (--no-cache, no GHA cache), so the released image is always built
+      # from scratch. Development is built right after in the same job/builder and reuses production's just-built
+      # layers (shared ancestor stages such as php_base/frankenphp_builder/php) via the local Buildx builder cache.
+      - uses: ./.github/actions/build-docker-image-release
+        with:
+          target: production
+          arch: amd
+          version: ${{ env.NEW_VERSION }}
+          artifact-name: docker-image-api-prod-amd
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: ./.github/actions/build-docker-image-release
         with:
           target: development
           arch: amd
-          cache-from: 'false'
-          cache-to: 'false'
           artifact-name: docker-image-api-dev-amd
           dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  build-docker-image-dev-arm:
+  build-docker-image-arm:
     runs-on: gh-4vcpu-ubuntu-latest-arm
-    name: Build Docker Image - Dev - ARM
-    timeout-minutes: 20
+    name: Build Docker Image - ARM
+    timeout-minutes: 30
     needs: checkout-repo-and-bump-version
     steps:
       - uses: ./.github/actions/download-release-artifacts
-      - uses: ./.github/actions/build-docker-image
+      - uses: ./.github/actions/build-docker-image-release
+        with:
+          target: production
+          arch: arm
+          version: ${{ env.NEW_VERSION }}
+          artifact-name: docker-image-api-prod-arm
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: ./.github/actions/build-docker-image-release
         with:
           target: development
           arch: arm
-          cache-from: 'false'
-          cache-to: 'false'
           artifact-name: docker-image-api-dev-arm
-          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  build-docker-image-prod-amd:
-    runs-on: gh-4vcpu-ubuntu-latest-amd
-    name: Build Docker Image - Prod - AMD
-    timeout-minutes: 20
-    needs: checkout-repo-and-bump-version
-    steps:
-      - uses: ./.github/actions/download-release-artifacts
-      - uses: ./.github/actions/build-docker-image
-        with:
-          target: production
-          arch: amd
-          version: ${{ env.NEW_VERSION }}
-          cache-from: 'false'
-          cache-to: 'false'
-          artifact-name: docker-image-api-prod-amd
-          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  build-docker-image-prod-arm:
-    runs-on: gh-4vcpu-ubuntu-latest-arm
-    name: Build Docker Image - Prod - ARM
-    timeout-minutes: 20
-    needs: checkout-repo-and-bump-version
-    steps:
-      - uses: ./.github/actions/download-release-artifacts
-      - uses: ./.github/actions/build-docker-image
-        with:
-          target: production
-          arch: arm
-          version: ${{ env.NEW_VERSION }}
-          cache-from: 'false'
-          cache-to: 'false'
-          artifact-name: docker-image-api-prod-arm
           dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
@@ -201,8 +188,7 @@ jobs:
     name: End To End Test - AMD
     timeout-minutes: 15
     needs:
-      - build-docker-image-dev-amd
-      - build-docker-image-prod-amd
+      - build-docker-image-amd
     steps:
       - uses: ./.github/actions/download-release-artifacts
       - uses: ./.github/actions/load-docker-image
@@ -237,8 +223,7 @@ jobs:
     name: End To End Test - ARM
     timeout-minutes: 15
     needs:
-      - build-docker-image-dev-arm
-      - build-docker-image-prod-arm
+      - build-docker-image-arm
     steps:
       - uses: ./.github/actions/download-release-artifacts
       - uses: ./.github/actions/load-docker-image
