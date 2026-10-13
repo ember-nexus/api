@@ -17,6 +17,7 @@ class Configuration implements ConfigurationInterface
     public const int CACHE_ETAG_DEFAULT_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS = 100;
     public const int EXPRESSION_WARNING_LENGTH = 512;
     public const int EXPRESSION_MAX_LENGTH = 10 * 1024;
+    public const int EXPRESSION_TIMEOUT_IN_MILLISECONDS = 5000;
     public const int SIZE_OF_10GIB_IN_BYTES = 10 * 1024 * 1024 * 1024;
     public const int SIZE_OF_101MIB_IN_BYTES = 101 * 1024 * 1024;
     public const int SIZE_OF_5MIB_IN_BYTES = 5 * 1024 * 1024;
@@ -87,6 +88,10 @@ class Configuration implements ConfigurationInterface
                         ->info('Maximum length for executable expressions. Exceeding the limit will throw an exception.')
                         ->min(1)
                         ->defaultValue(self::EXPRESSION_MAX_LENGTH)
+                    ->end()
+                    ->scalarNode(EmberNexusConfiguration::EXPRESSION_TIMEOUT_IN_MILLISECONDS)
+                        ->info(sprintf('Maximum runtime of the Go Expr Lang CLI call in milliseconds, at least %d. Can be set to null to disable the limit.', EmberNexusConfiguration::EXPRESSION_MIN_TIMEOUT_IN_MILLISECONDS))
+                        ->defaultValue(self::EXPRESSION_TIMEOUT_IN_MILLISECONDS)
                     ->end()
                 ->end()
             ->end()

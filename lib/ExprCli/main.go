@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/expr-lang/expr"
 )
@@ -66,7 +67,22 @@ func main() {
 	}
 
 	// Compile expression
-	program, err := expr.Compile(input.Expression, expr.Env(input.Parameters))
+	// "sleep" exists solely to let tests reliably exercise the CLI timeout (App\Service\ExpressionService)
+	// without depending on how fast the host CPU can churn through a busy loop.
+	sleepFunction := expr.Function(
+		"sleep",
+		func(params ...any) (any, error) {
+			milliseconds, ok := params[0].(int)
+			if !ok {
+				return nil, fmt.Errorf("sleep: expected an int argument")
+			}
+			time.Sleep(time.Duration(milliseconds) * time.Millisecond)
+
+			return nil, nil
+		},
+		new(func(int) any),
+	)
+	program, err := expr.Compile(input.Expression, expr.Env(input.Parameters), sleepFunction)
 	if err != nil {
 		exitWithError(fmt.Sprintf("compile error: %v", err))
 	}

@@ -6,8 +6,10 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Exception\Client400BadContentException;
 use App\Exception\Client403ForbiddenException;
+use App\Exception\Client422UnprocessableContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
+use App\Factory\Exception\Client422UnprocessableContentExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\ExpressionService;
 use App\Tests\UnitTests\AssertLoggerTrait;
@@ -21,6 +23,8 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 
@@ -35,12 +39,14 @@ class ExpressionServiceTest extends TestCase
         ?AuthProvider $authProvider = null,
         ?EmberNexusConfiguration $emberNexusConfiguration = null,
         ?LoggerInterface $logger = null,
+        bool $simulateTimeout = false,
     ): ExpressionService {
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator->generate(Argument::cetera())->willReturn('https://mock.dev/123');
         $urlGenerator = $urlGenerator->reveal();
         $client400BadContentExceptionFactory = new Client400BadContentExceptionFactory($urlGenerator);
         $client403ForbiddenExceptionFactory = new Client403ForbiddenExceptionFactory($urlGenerator);
+        $client422UnprocessableContentExceptionFactory = new Client422UnprocessableContentExceptionFactory($urlGenerator);
 
         if (null === $authProvider) {
             $authProvider = $this->prophesize(AuthProvider::class);
@@ -55,12 +61,23 @@ class ExpressionServiceTest extends TestCase
             $emberNexusConfiguration->setExpressionWarningLength(100);
         }
 
+        if ($simulateTimeout) {
+            // overridden so the timeout branch can be verified without actually waiting on a real clock
+            return new class($authProvider, $emberNexusConfiguration, $logger ?? $this->prophesize(LoggerInterface::class)->reveal(), $client400BadContentExceptionFactory, $client403ForbiddenExceptionFactory, $client422UnprocessableContentExceptionFactory) extends ExpressionService {
+                protected function runProcess(Process $process): void
+                {
+                    throw new ProcessTimedOutException($process, ProcessTimedOutException::TYPE_GENERAL);
+                }
+            };
+        }
+
         return new ExpressionService(
             $authProvider,
             $emberNexusConfiguration,
             $logger ?? $this->prophesize(LoggerInterface::class)->reveal(),
             $client400BadContentExceptionFactory,
-            $client403ForbiddenExceptionFactory
+            $client403ForbiddenExceptionFactory,
+            $client422UnprocessableContentExceptionFactory
         );
     }
 
@@ -242,5 +259,55 @@ class ExpressionServiceTest extends TestCase
         }
         $this->assertInstanceOf(Client400BadContentException::class, $exception);
         $this->assertSame("Expression execution failed.\n\ncompile error: unknown name a (1:5)\n | 1 + a\n | ....^", $exception->getDetail());
+    }
+
+    public function testShortQueryWithinTimeoutSucceeds(): void
+    {
+        $emberNexusConfiguration = new EmberNexusConfiguration();
+        $emberNexusConfiguration->setExpressionEnabled(true);
+        $emberNexusConfiguration->setExpressionMaxLength(1000);
+        $emberNexusConfiguration->setExpressionWarningLength(1000);
+        $emberNexusConfiguration->setExpressionTimeoutInMilliseconds(2000);
+        $expressionService = $this->getExpressionService(
+            emberNexusConfiguration: $emberNexusConfiguration
+        );
+
+        $result = $expressionService->runExpression('len(map(1..1000, # * 2))');
+
+        $this->assertSame(1000, $result);
+    }
+
+    public function testExceededTimeoutThrowsClient422UnprocessableContentException(): void
+    {
+        $logger = TestLogger::create();
+        $emberNexusConfiguration = new EmberNexusConfiguration();
+        $emberNexusConfiguration->setExpressionEnabled(true);
+        $emberNexusConfiguration->setExpressionMaxLength(1000);
+        $emberNexusConfiguration->setExpressionWarningLength(1000);
+        $emberNexusConfiguration->setExpressionTimeoutInMilliseconds(500);
+        $expressionService = $this->getExpressionService(
+            emberNexusConfiguration: $emberNexusConfiguration,
+            logger: $logger,
+            simulateTimeout: true
+        );
+
+        $exception = null;
+        try {
+            $expressionService->runExpression('1');
+        } catch (Throwable $t) {
+            $exception = $t;
+        }
+        $this->assertInstanceOf(Client422UnprocessableContentException::class, $exception);
+        $this->assertSame('Query execution timed out after 500 ms.', $exception->getDetail());
+        $this->assertLogHappened(
+            $logger,
+            'notice',
+            'Expression execution timed out.',
+            [
+                'expression_truncated' => '1',
+                'timeout_in_milliseconds' => 500,
+                'user' => '3f34b034-bbe4-4461-a023-dc2920c1b1c3',
+            ]
+        );
     }
 }
