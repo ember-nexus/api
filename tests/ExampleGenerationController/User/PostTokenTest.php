@@ -28,7 +28,10 @@ class PostTokenTest extends BaseRequestTestCase
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
-            $response
+            $response,
+            // the response body embeds a freshly generated secret token, whose Base58-encoded length varies by a
+            // character between runs, which would otherwise make Content-Length flaky
+            ['Content-Length']
         );
         $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
             self::PATH_TO_ROOT,

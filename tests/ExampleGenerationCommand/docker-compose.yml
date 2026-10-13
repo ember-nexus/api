@@ -2,7 +2,7 @@ services:
 
   api:
     container_name: api
-    image: api:dev-amd
+    image: api:dev
     depends_on:
       - neo4j
       - mongodb

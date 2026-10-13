@@ -97,7 +97,13 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
         ));
     }
 
-    public function checkHeadersAreIdentical(string $headers1, string $headers2): bool
+    /**
+     * @param string[] $additionalIgnoredHeaders headers to ignore on top of self::IGNORED_HEADERS, for responses
+     *                                           whose body legitimately varies in byte length between runs (e.g.
+     *                                           a freshly generated secret token), which would otherwise make
+     *                                           Content-Length flaky
+     */
+    public function checkHeadersAreIdentical(string $headers1, string $headers2, array $additionalIgnoredHeaders = []): bool
     {
         // the remaining lifetime of an upload depends on the timing of the test run, allow a deviation of +-5 seconds
         if (
@@ -124,8 +130,9 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
         $intersect = array_intersect($headers1, $headers2);
         $headersWhichAreUnique = array_merge(array_diff($headers1, $intersect), array_diff($headers2, $intersect));
 
+        $ignoredHeaders = array_merge(self::IGNORED_HEADERS, $additionalIgnoredHeaders);
         foreach ($headersWhichAreUnique as $headerWhichIsUnique) {
-            foreach (self::IGNORED_HEADERS as $ignoredHeader) {
+            foreach ($ignoredHeaders as $ignoredHeader) {
                 if (str_starts_with($headerWhichIsUnique, $ignoredHeader)) {
                     continue 2;
                 }
@@ -137,11 +144,14 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
         return true;
     }
 
-    public function assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(string $pathToProjectRoot, string $pathToDocumentationFile, ResponseInterface $response): void
+    /**
+     * @param string[] $additionalIgnoredHeaders see {@see checkHeadersAreIdentical}
+     */
+    public function assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(string $pathToProjectRoot, string $pathToDocumentationFile, ResponseInterface $response, array $additionalIgnoredHeaders = []): void
     {
         $headers = $this->getHeadersFromRequest($response);
         $documentationHeaders = file_get_contents($pathToProjectRoot.$pathToDocumentationFile);
-        $areHeadersIdentical = $this->checkHeadersAreIdentical($documentationHeaders, $headers);
+        $areHeadersIdentical = $this->checkHeadersAreIdentical($documentationHeaders, $headers, $additionalIgnoredHeaders);
         if (!$areHeadersIdentical && $this->isFixControllerOutputEnabled()) {
             $this->fixDocumentationFile($pathToProjectRoot, $pathToDocumentationFile, $headers);
 

@@ -1,5 +1,10 @@
 name: 'Load Docker image artifact'
-description: 'Downloads a previously uploaded Docker image artifact (tar.gz) and loads it into the local daemon.'
+description: >
+  Downloads a previously uploaded Docker image artifact (tar.gz) and loads it into the local daemon. The image is
+  always baked and loaded under its arch-agnostic tag (api:dev or api:prod), since a job normally only ever has
+  one arch's image loaded at a time. Pass `rename-to` when a job needs more than one arch's image of the same
+  target side by side (e.g. to assemble a multi-arch manifest) - it immediately retags the freshly loaded image,
+  so a later load of the other arch's image doesn't overwrite it.
 inputs:
   artifact-name:
     description: 'Name of the artifact to download'
@@ -11,6 +16,12 @@ inputs:
     description: 'Directory to download the artifact into'
     required: false
     default: '/tmp/docker'
+  rename-to:
+    description: >
+      If set, retag the freshly loaded image under this name (e.g. api:prod-amd), to avoid collisions when
+      loading more than one arch of the same target into the same daemon
+    required: false
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -24,3 +35,11 @@ runs:
 
     - shell: bash
       run: docker load < "${{ inputs.download-path }}/${{ inputs.tar-filename }}"
+
+    - name: Rename loaded image
+      if: inputs.rename-to != ''
+      shell: bash
+      run: |
+        set -eu
+        LOADED_TAG="api:$(basename "${{ inputs.tar-filename }}" .tar.gz | cut -d- -f1)"
+        docker tag "$LOADED_TAG" "${{ inputs.rename-to }}"
