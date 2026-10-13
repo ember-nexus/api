@@ -398,6 +398,46 @@ abstract class BaseRequestTestCase extends TestCase
             ->build();
     }
 
+    public function withoutAnonymousUser(callable $callback): void
+    {
+        $anonymousUserId = $_ENV['ANONYMOUS_USER_UUID'];
+        $cypherClient = $this->getCypherClient();
+
+        $nodeRow = $cypherClient->run(
+            'MATCH (n {id: $id}) RETURN labels(n) AS labels, properties(n) AS props',
+            ['id' => $anonymousUserId]
+        )->first();
+        $labels = $nodeRow->get('labels')->toArray();
+        $properties = $nodeRow->get('props')->toArray();
+
+        $relationRows = $cypherClient->run(
+            'MATCH (n {id: $id})-[r]-(m) RETURN type(r) AS type, properties(r) AS props, m.id AS otherId, startNode(r).id = $id AS outgoing',
+            ['id' => $anonymousUserId]
+        )->toArray();
+
+        $cypherClient->run('MATCH (n {id: $id}) DETACH DELETE n', ['id' => $anonymousUserId]);
+
+        try {
+            $callback();
+        } finally {
+            $cypherClient->run(
+                sprintf('CREATE (n:%s) SET n = $props', implode(':', $labels)),
+                ['props' => $properties]
+            );
+            foreach ($relationRows as $relationRow) {
+                $relationType = $relationRow->get('type');
+                $query = $relationRow->get('outgoing')
+                    ? sprintf('MATCH (n {id: $id}), (m {id: $otherId}) CREATE (n)-[r:%s]->(m) SET r = $props', $relationType)
+                    : sprintf('MATCH (n {id: $id}), (m {id: $otherId}) CREATE (m)-[r:%s]->(n) SET r = $props', $relationType);
+                $cypherClient->run($query, [
+                    'id' => $anonymousUserId,
+                    'otherId' => $relationRow->get('otherId'),
+                    'props' => $relationRow->get('props')->toArray(),
+                ]);
+            }
+        }
+    }
+
     /**
      * @param array<string, string> $headers
      */

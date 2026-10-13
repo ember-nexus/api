@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\User;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class GetMeTest extends BaseRequestTestCase
 {
@@ -41,5 +42,14 @@ class GetMeTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest('/me', self::INVALID_TOKEN);
         $this->assertIsProblemResponse($response, 401);
+    }
+
+    #[Group('command')]
+    public function testGetAnonymousMeFailsWhenAnonymousUserIsMissing(): void
+    {
+        $this->withoutAnonymousUser(function (): void {
+            $response = $this->runGetRequest('/me', null);
+            $this->assertIsProblemResponse($response, 403);
+        });
     }
 }

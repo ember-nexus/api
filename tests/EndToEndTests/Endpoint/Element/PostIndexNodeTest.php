@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\Element;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class PostIndexNodeTest extends BaseRequestTestCase
 {
@@ -51,5 +52,14 @@ class PostIndexNodeTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 400);
+    }
+
+    #[Group('command')]
+    public function testCreateNodeWithoutTokenFailsWhenAnonymousUserIsMissing(): void
+    {
+        $this->withoutAnonymousUser(function (): void {
+            $response = $this->runPostRequest('/', null, ['type' => 'Data']);
+            $this->assertIsProblemResponse($response, 403);
+        });
     }
 }
