@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\User;
 
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
@@ -38,6 +39,7 @@ class PostRegisterController extends AbstractController
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private RequestContentService $requestContentService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
 
@@ -59,6 +61,7 @@ class PostRegisterController extends AbstractController
         $userId = UuidV4::uuid4();
         $password = $this->requestUtilService->getStringFromBody('password', $body);
         $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
+        $this->checkUniqueUserIdentifierAgainstRegex($uniqueUserIdentifier);
         $this->checkForDuplicateUniqueUserIdentifier($uniqueUserIdentifier);
 
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
@@ -75,6 +78,23 @@ class PostRegisterController extends AbstractController
         $this->elementManager->flush();
 
         return $this->createCreatedResponse($userId);
+    }
+
+    /**
+     * The configured regex is already validated as a compilable pattern when the configuration is built (see
+     * {@see EmberNexusConfiguration::setRegisterUniqueIdentifierRegex()}), so preg_match can not fail here.
+     *
+     * @throws \App\Exception\Client400BadContentException
+     */
+    private function checkUniqueUserIdentifierAgainstRegex(string $uniqueUserIdentifier): void
+    {
+        $uniqueIdentifierRegex = $this->emberNexusConfiguration->getRegisterUniqueIdentifierRegex();
+        if (false === $uniqueIdentifierRegex) {
+            return;
+        }
+        if (!\Safe\preg_match($uniqueIdentifierRegex, $uniqueUserIdentifier)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('uniqueUserIdentifier', sprintf("to match the configured pattern '%s'", $uniqueIdentifierRegex), $uniqueUserIdentifier);
+        }
     }
 
     /**

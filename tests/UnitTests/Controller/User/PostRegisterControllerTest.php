@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Controller\User;
 
 use App\Controller\User\PostRegisterController;
+use App\Exception\Client400BadContentException;
 use App\Exception\Client400ReservedIdentifierException;
 use App\Exception\Client403ForbiddenException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
@@ -56,6 +57,7 @@ class PostRegisterControllerTest extends TestCase
         ?Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory = null,
         ?Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory = null,
         ?Server500LogicErrorExceptionFactory $server500LogicExceptionFactory = null,
+        ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
     ): PostRegisterController {
         return new PostRegisterController(
             $elementManager ?? $this->createMock(ElementManager::class),
@@ -68,7 +70,8 @@ class PostRegisterControllerTest extends TestCase
             $client400ReservedIdentifierExceptionFactory ?? $this->createMock(Client400ReservedIdentifierExceptionFactory::class),
             $client403ForbiddenExceptionFactory ?? $this->createMock(Client403ForbiddenExceptionFactory::class),
             $server500LogicExceptionFactory ?? $this->createMock(Server500LogicErrorExceptionFactory::class),
-            new RequestContentService(new Client408RequestTimeoutExceptionFactory($this->createStub(UrlGeneratorInterface::class)))
+            new RequestContentService(new Client408RequestTimeoutExceptionFactory($this->createStub(UrlGeneratorInterface::class))),
+            $client400BadContentExceptionFactory ?? $this->createMock(Client400BadContentExceptionFactory::class),
         );
     }
 
@@ -76,6 +79,7 @@ class PostRegisterControllerTest extends TestCase
     {
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
+        $emberNexusConfiguration->method('getRegisterUniqueIdentifierRegex')->willReturn(false);
         $emberNexusConfiguration->method('isRegisterEnabled')->willReturn(true);
 
         $null = null;
@@ -130,6 +134,7 @@ class PostRegisterControllerTest extends TestCase
     {
         $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
         $emberNexusConfiguration->method('getRegisterUniqueIdentifier')->willReturn('email');
+        $emberNexusConfiguration->method('getRegisterUniqueIdentifierRegex')->willReturn(false);
         $emberNexusConfiguration->method('isRegisterEnabled')->willReturn(true);
 
         $requestUtilService = new RequestUtilService(
@@ -288,6 +293,55 @@ class PostRegisterControllerTest extends TestCase
 
         $userId = Uuid::uuid4();
         $method->invokeArgs($postRegisterController, [$userId]);
+    }
+
+    public function testCheckUniqueUserIdentifierAgainstRegexWithDisabledRegex(): void
+    {
+        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->method('getRegisterUniqueIdentifierRegex')->willReturn(false);
+        $postRegisterController = $this->getPostRegisterController(
+            emberNexusConfiguration: $emberNexusConfiguration
+        );
+        $method = new ReflectionMethod(PostRegisterController::class, 'checkUniqueUserIdentifierAgainstRegex');
+
+        $method->invokeArgs($postRegisterController, ['anything goes']);
+        $this->assertTrue(true);
+    }
+
+    public function testCheckUniqueUserIdentifierAgainstRegexWithMatchingValue(): void
+    {
+        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->method('getRegisterUniqueIdentifierRegex')->willReturn('/^[0-9]+$/');
+        $postRegisterController = $this->getPostRegisterController(
+            emberNexusConfiguration: $emberNexusConfiguration
+        );
+        $method = new ReflectionMethod(PostRegisterController::class, 'checkUniqueUserIdentifierAgainstRegex');
+
+        $method->invokeArgs($postRegisterController, ['1234']);
+        $this->assertTrue(true);
+    }
+
+    public function testCheckUniqueUserIdentifierAgainstRegexWithNonMatchingValue(): void
+    {
+        $emberNexusConfiguration = $this->createMock(EmberNexusConfiguration::class);
+        $emberNexusConfiguration->method('getRegisterUniqueIdentifierRegex')->willReturn('/^[0-9]+$/');
+
+        $urlGenerator = $this->createMock(UrlGeneratorInterface::class);
+        $urlGenerator->method('generate')->willReturn('url');
+        $client400BadContentExceptionFactory = new Client400BadContentExceptionFactory($urlGenerator);
+
+        $postRegisterController = $this->getPostRegisterController(
+            emberNexusConfiguration: $emberNexusConfiguration,
+            client400BadContentExceptionFactory: $client400BadContentExceptionFactory
+        );
+        $method = new ReflectionMethod(PostRegisterController::class, 'checkUniqueUserIdentifierAgainstRegex');
+
+        try {
+            $method->invokeArgs($postRegisterController, ['not-numeric']);
+            $this->fail('Expected exception Client400BadContentException was not thrown.');
+        } catch (Exception $e) {
+            $this->assertInstanceOf(Client400BadContentException::class, $e);
+        }
     }
 
     public function testCreateCreatedResponse(): void

@@ -19,6 +19,8 @@ The request must contain the following attributes:
   Whitespace at the start or end of the string will **not** be removed, though it is discouraged.  
   No password complexity check is performed.
 - `uniqueUserIdentifier`: Some attribute uniquely identifying a user, normally an email address. Can be configured.
+  Its content is checked against `register.uniqueIdentifierRegex`, which defaults to a loose email-shaped check;
+  see [application configuration](/getting-started/configuration?id=application-configuration) for details.
 - `data`: Optional properties stored in the user element.
 
 ```json
@@ -137,6 +139,7 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { id: 'checkType', ...workflowDecision, label: 'is type given?' },
     { id: 'checkTypeContent', ...workflowDecision, label: 'is type equal to "User"?' },
     { id: 'checkIdentifier', ...workflowDecision, label: "is uniqueUserIdentifier given?" },
+    { id: 'checkIdentifierRegex', ...workflowDecision, label: 'does identifier match configured regex?' },
     { id: 'checkIdentifierUnique', ...workflowDecision, label: 'is identifier unique?' },
     { id: 'createUser', ...workflowStep, label: "create user" },
     { id: 'error400', ...workflowEndError, label: "return 400" },
@@ -153,8 +156,10 @@ renderWorkflow(document.getElementById('graph-container-1'), {
     { source: 'checkType', target: 'error400', label: 'no' },
     { source: 'checkTypeContent', target: 'checkIdentifier', label: 'yes' },
     { source: 'checkTypeContent', target: 'error400', label: 'no' },
-    { source: 'checkIdentifier', target: 'checkIdentifierUnique', label: 'yes' },
+    { source: 'checkIdentifier', target: 'checkIdentifierRegex', label: 'yes' },
     { source: 'checkIdentifier', target: 'error400', label: 'no' },
+    { source: 'checkIdentifierRegex', target: 'checkIdentifierUnique', label: 'yes' },
+    { source: 'checkIdentifierRegex', target: 'error400', label: 'no' },
     { source: 'checkIdentifierUnique', target: 'createUser', label: 'yes' },
     { source: 'checkIdentifierUnique', target: 'error400', label: 'no' },
     { source: 'createUser', target: 'success201', label: '' },

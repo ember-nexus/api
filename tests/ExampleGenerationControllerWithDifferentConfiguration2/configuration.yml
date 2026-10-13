@@ -1,0 +1,3 @@
+ember_nexus:
+  register:
+    uniqueIdentifierRegex: '/^[0-9]+$/'

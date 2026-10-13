@@ -1038,7 +1038,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     register?: array{ // Handles the /register endpoint.
  *         enabled?: bool|Param, // If true, the /register endpoint is active and anonymous users can create accounts. // Default: true
  *         uniqueIdentifier?: scalar|Param|null, // The property name of the identifier. Identifier must be unique across the API, usually the email. // Default: "email"
- *         uniqueIdentifierRegex?: scalar|Param|null, // Either false or a regex for checking the identifier content. // Default: false
+ *         uniqueIdentifierRegex?: scalar|Param|null, // Either false or a regex for checking the identifier content. Defaults to a loose check for an "@" sign, since the identifier is an email address by default. // Default: "/^[^\s@]+@[^\s@]+$/"
  *     },
  *     expression?: array{ // Configures settings related to the execution of expressions
  *         enabled?: bool|Param, // If true, expressions are executed. // Default: true

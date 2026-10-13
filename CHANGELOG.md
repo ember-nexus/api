@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`PUT`/`PATCH`/`DELETE`), access-denied requests, and calls to user/token endpoints, closes #347.
 - Log a notice when an element being deleted or updated is missing its MongoDB or Elasticsearch document, or (on
   delete) its S3 file.
+- The `register.uniqueIdentifierRegex` configuration is now actually enforced on `POST /register`; it defaults to a
+  loose email-shaped pattern, closes #283.
 
 ### Changed
 - Update the Go Expr Lang dependency and other Go dependencies used by the `expr-cli` binary, related to #482.

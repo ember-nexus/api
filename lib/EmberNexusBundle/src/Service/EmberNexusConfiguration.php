@@ -477,6 +477,15 @@ class EmberNexusConfiguration
 
     public function setRegisterUniqueIdentifierRegex(string|false $registerUniqueIdentifierRegex): static
     {
+        if (false !== $registerUniqueIdentifierRegex) {
+            try {
+                // the pattern's validity is being tested here, so a native PHP warning on failure is expected noise;
+                // it is suppressed since the exception below already surfaces the failure
+                @\Safe\preg_match($registerUniqueIdentifierRegex, '');
+            } catch (\Safe\Exceptions\PcreException $pcreException) {
+                throw new Exception(sprintf("Unique identifier regex '%s' is not a valid regular expression.", $registerUniqueIdentifierRegex), previous: $pcreException);
+            }
+        }
         $this->registerUniqueIdentifierRegex = $registerUniqueIdentifierRegex;
 
         return $this;
