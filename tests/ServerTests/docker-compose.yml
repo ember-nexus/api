@@ -3,7 +3,7 @@
 services:
 
   api-dev:
-    image: api:dev-amd
+    image: api:dev
     depends_on:
       - neo4j
       - mongodb
@@ -19,7 +19,7 @@ services:
 
   # production image without mounted source code, i.e. as it is delivered; limits are lowered per test scenario
   api-prod:
-    image: api:prod-amd
+    image: api:prod
     depends_on:
       - neo4j
       - mongodb

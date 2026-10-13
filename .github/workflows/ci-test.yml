@@ -82,7 +82,7 @@ jobs:
           tar-filename: dev-amd.tar.gz
       - name: CS Lint
         run: |
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && PHP_CS_FIXER_IGNORE_ENV=1 composer cs:list"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && PHP_CS_FIXER_IGNORE_ENV=1 composer cs:list"
 
   psalm:
     runs-on: ubuntu-26.04
@@ -98,7 +98,7 @@ jobs:
           tar-filename: dev-amd.tar.gz
       - name: Psalm
         run: |
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer psalm -- --no-progress"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer psalm -- --no-progress"
 
   phpstan:
     runs-on: ubuntu-26.04
@@ -114,7 +114,7 @@ jobs:
           tar-filename: dev-amd.tar.gz
       - name: Phpstan
         run: |
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer phpstan -- --no-progress"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer phpstan -- --no-progress"
 
   test-unit:
     runs-on: ubuntu-26.04
@@ -130,7 +130,7 @@ jobs:
           tar-filename: dev-amd.tar.gz
       - name: Unit Test
         run: |
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
   test-mutant:
     runs-on: ubuntu-26.04
@@ -147,7 +147,7 @@ jobs:
           tar-filename: dev-amd.tar.gz
       - name: Mutant Test
         run: |
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && ./bin/with-heartbeat composer test:mutant -- --no-progress"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && ./bin/with-heartbeat composer test:mutant -- --no-progress"
 
   test-mess-detector:
     runs-on: ubuntu-26.04
@@ -164,7 +164,7 @@ jobs:
           tar-filename: dev-amd.tar.gz
       - name: Mess Detector
         run: |
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev-amd sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer mess"
 
   test-end-to-end:
     runs-on: ubuntu-26.04

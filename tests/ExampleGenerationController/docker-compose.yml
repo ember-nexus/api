@@ -17,7 +17,7 @@ services:
 
   api-dev:
     container_name: api-dev
-    image: api:dev-amd
+    image: api:dev
     depends_on:
       - neo4j
       - mongodb
@@ -35,7 +35,7 @@ services:
 
   api:
     container_name: api
-    image: api:prod-amd
+    image: api:prod
     depends_on:
       - neo4j
       - mongodb
@@ -53,7 +53,7 @@ services:
   # second API instance, only differs in its configuration file; targeted via API_DOMAIN=http://api-different-configuration
   api-different-configuration:
     container_name: api-different-configuration
-    image: api:prod-amd
+    image: api:prod
     depends_on:
       - neo4j
       - mongodb

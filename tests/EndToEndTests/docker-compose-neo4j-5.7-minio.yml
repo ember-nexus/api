@@ -17,7 +17,7 @@ services:
 
   api-dev:
     container_name: api-dev
-    image: api:dev-amd
+    image: api:dev
     depends_on:
       - neo4j
       - mongodb
@@ -35,7 +35,7 @@ services:
 
   api-prod:
     container_name: api-prod
-    image: api:prod-amd
+    image: api:prod
     depends_on:
       - neo4j
       - mongodb

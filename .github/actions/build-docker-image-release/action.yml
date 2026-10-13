@@ -53,7 +53,7 @@ runs:
       shell: bash
       run: |
         set -eu
-        TAG="api:${{ inputs.target == 'development' && 'dev' || 'prod' }}-${{ inputs.arch }}"
+        TAG="api:${{ inputs.target == 'development' && 'dev' || 'prod' }}"
         TARBALL="${{ inputs.target == 'development' && 'dev' || 'prod' }}-${{ inputs.arch }}.tar.gz"
 
         CACHE_ARGS=()
