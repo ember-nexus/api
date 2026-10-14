@@ -22,13 +22,10 @@ jobs:
           arch: amd
           artifact-name: docker-image-docs-ci-dev-amd
           artifact-retention-days: 1
-      - uses: ./.github/actions/load-docker-image-docs
+      - uses: ./.github/actions/run-docs-pnpm-command
         with:
           artifact-name: docker-image-docs-ci-dev-amd
-          tar-filename: docs-dev-amd.tar.gz
-      - name: Build dist
-        run: |
-          docker run -v $(pwd)/docs:/core --user "$(id -u):$(id -g)" docs:dev sh -c "cd /core && pnpm install && pnpm run build"
+          command: build
       - name: Archive dist
         run: tar -czf docs-dist.tar.gz -C docs dist
       - uses: actions/upload-artifact@v6

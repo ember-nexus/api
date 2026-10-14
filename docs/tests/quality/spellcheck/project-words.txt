@@ -41,6 +41,10 @@ Geospatial
 lilytree
 colour
 parameterizing
+reindexing
+
+# RFC 9530 (Digest Fields) header name
+Repr
 
 # Expr Lang builtin function names
 bitnot
