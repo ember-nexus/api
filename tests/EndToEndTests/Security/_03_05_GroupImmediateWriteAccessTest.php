@@ -6,14 +6,13 @@ namespace App\Tests\EndToEndTests\Security;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
 
-/**
- * @note Regression test for https://github.com/ember-nexus/api/issues/238: being a direct member of a group (via
- *       IS_IN_GROUP, without an additional OWNS relation) must grant CREATE/UPDATE/DELETE access to the group node
- *       itself, not just READ access.
- */
 class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 {
-    private const string TOKEN = 'secret-token:J0ik1otCHLbH08cd4C1ToB';
+    private const string TOKEN_MEMBER = 'secret-token:J0ik1otCHLbH08cd4C1ToB';
+
+    private const string TOKEN_OWNER = 'secret-token:77G6kkMk5hiQqRSZaJyrXK';
+
+    private const string TOKEN_ACCESS = 'secret-token:oRACZjdcNS5xpdEq7LmC3H';
 
     private const string GROUP = '67f8978f-6205-4e95-a20c-e82fa3367f6a';
 
@@ -42,7 +41,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 
     public function testGetIndex(): void
     {
-        $response = $this->runGetRequest('/', self::TOKEN);
+        $response = $this->runGetRequest('/', self::TOKEN_MEMBER);
         $this->assertIsCollectionResponse($response);
     }
 
@@ -52,7 +51,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 
         $response = $this->runPostRequest(
             sprintf('/%s', self::GROUP),
-            self::TOKEN,
+            self::TOKEN_MEMBER,
             [
                 'type' => 'Data',
                 'data' => [
@@ -70,7 +69,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
     {
         $dataResponse = $this->runPostRequest(
             '/',
-            self::TOKEN,
+            self::TOKEN_MEMBER,
             [
                 'type' => 'Data',
                 'data' => [
@@ -83,7 +82,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 
         $response = $this->runPostRequest(
             '/',
-            self::TOKEN,
+            self::TOKEN_MEMBER,
             [
                 'type' => 'OWNS',
                 'start' => self::GROUP,
@@ -93,23 +92,71 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($response);
     }
 
-    public function testUpdateGroupThroughPatch(): void
+    public function testMemberCannotUpdateGroupThroughPatch(): void
     {
         $auditLogOffset = $this->getAuditLogSize();
 
         $response = $this->runPatchRequest(
             sprintf('/%s', self::GROUP),
-            self::TOKEN,
+            self::TOKEN_MEMBER,
             [
-                'name' => 'Group updated through PATCH',
+                'name' => 'Group updated through PATCH by a plain member',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 404);
+
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN_MEMBER);
+        $this->assertIsNodeResponse($response, 'Group');
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertSame('Group', $body['data']['name']);
+
+        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
+        $this->assertStringNotContainsString('Group node was updated.', $auditLogEntry);
+    }
+
+    public function testMemberCannotUpdateGroupThroughPut(): void
+    {
+        $response = $this->runPutRequest(
+            sprintf('/%s', self::GROUP),
+            self::TOKEN_MEMBER,
+            [
+                'name' => 'Group updated through PUT by a plain member',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 404);
+
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN_MEMBER);
+        $this->assertIsNodeResponse($response, 'Group');
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertSame('Group', $body['data']['name']);
+    }
+
+    public function testMemberCannotDeleteGroup(): void
+    {
+        $response = $this->runDeleteRequest(sprintf('/%s', self::GROUP), self::TOKEN_MEMBER);
+        $this->assertIsProblemResponse($response, 404);
+
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN_MEMBER);
+        $this->assertIsNodeResponse($response, 'Group');
+    }
+
+    public function testOwnerCanUpdateGroupThroughPatch(): void
+    {
+        $auditLogOffset = $this->getAuditLogSize();
+
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::GROUP),
+            self::TOKEN_OWNER,
+            [
+                'name' => 'Group updated through PATCH by its owner',
             ]
         );
         $this->assertNoContentResponse($response);
 
-        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN);
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN_OWNER);
         $this->assertIsNodeResponse($response, 'Group');
         $body = json_decode((string) $response->getBody(), true);
-        $this->assertSame('Group updated through PATCH', $body['data']['name']);
+        $this->assertSame('Group updated through PATCH by its owner', $body['data']['name']);
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
         $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
@@ -117,23 +164,23 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $this->assertStringContainsString(self::GROUP, $auditLogEntry);
     }
 
-    public function testUpdateGroupThroughPut(): void
+    public function testOwnerCanUpdateGroupThroughPut(): void
     {
         $auditLogOffset = $this->getAuditLogSize();
 
         $response = $this->runPutRequest(
             sprintf('/%s', self::GROUP),
-            self::TOKEN,
+            self::TOKEN_OWNER,
             [
-                'name' => 'Group updated through PUT',
+                'name' => 'Group updated through PUT by its owner',
             ]
         );
         $this->assertNoContentResponse($response);
 
-        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN);
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN_OWNER);
         $this->assertIsNodeResponse($response, 'Group');
         $body = json_decode((string) $response->getBody(), true);
-        $this->assertSame('Group updated through PUT', $body['data']['name']);
+        $this->assertSame('Group updated through PUT by its owner', $body['data']['name']);
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
         $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
@@ -141,14 +188,39 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $this->assertStringContainsString(self::GROUP, $auditLogEntry);
     }
 
-    public function testDeleteGroup(): void
+    public function testAccessUserCanUpdateGroupThroughPatch(): void
     {
         $auditLogOffset = $this->getAuditLogSize();
 
-        $response = $this->runDeleteRequest(sprintf('/%s', self::GROUP), self::TOKEN);
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::GROUP),
+            self::TOKEN_ACCESS,
+            [
+                'name' => 'Group updated through PATCH via explicit update access',
+            ]
+        );
+        $this->assertNoContentResponse($response);
+
+        // TOKEN_ACCESS only has HAS_UPDATE_ACCESS/HAS_DELETE_ACCESS, not read access, so verify via the member token
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN_MEMBER);
+        $this->assertIsNodeResponse($response, 'Group');
+        $body = json_decode((string) $response->getBody(), true);
+        $this->assertSame('Group updated through PATCH via explicit update access', $body['data']['name']);
+
+        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
+        $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
+        $this->assertStringContainsString('Group node was updated.', $auditLogEntry);
+        $this->assertStringContainsString(self::GROUP, $auditLogEntry);
+    }
+
+    public function testAccessUserCanDeleteGroup(): void
+    {
+        $auditLogOffset = $this->getAuditLogSize();
+
+        $response = $this->runDeleteRequest(sprintf('/%s', self::GROUP), self::TOKEN_ACCESS);
         $this->assertIsDeletedResponse($response);
 
-        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN);
+        $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN_ACCESS);
         $this->assertIsProblemResponse($response, 404);
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);

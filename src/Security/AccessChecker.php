@@ -96,6 +96,18 @@ class AccessChecker
         );
     }
 
+    /**
+     * UPDATE/DELETE require an explicit OWNS/HAS_X_ACCESS relation, not just group membership.
+     */
+    private function getMinimumAccessRelationsHops(AccessType $accessType): int
+    {
+        if (AccessType::UPDATE === $accessType || AccessType::DELETE === $accessType) {
+            return 1;
+        }
+
+        return 0;
+    }
+
     public function hasReadAccessToNode(UuidInterface $userId, UuidInterface $elementId): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
@@ -161,10 +173,11 @@ class AccessChecker
 
     public function hasGeneralAccessToNode(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
     {
+        $minimumRelationsHops = $this->getMinimumAccessRelationsHops($accessType);
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (element {id: \$elementId})\n".
-            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element)\n".
+            sprintf('OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_%s_ACCESS*%d..]->(element)'."\n", $accessType->value, $minimumRelationsHops).
             "WHERE\n".
             "  user.id = element.id\n".
             "  OR\n".
@@ -334,11 +347,12 @@ class AccessChecker
 
     public function hasGeneralAccessToRelation(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
     {
+        $minimumRelationsHops = $this->getMinimumAccessRelationsHops($accessType);
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
             "MATCH (start)-[element {id: \$elementId}]->(end)\n".
-            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(start)\n".
-            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(end)\n".
+            sprintf('OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_%s_ACCESS*%d..]->(start)'."\n", $accessType->value, $minimumRelationsHops).
+            sprintf('OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_%s_ACCESS*%d..]->(end)'."\n", $accessType->value, $minimumRelationsHops).
             "WHERE\n".
             "  (\n".
             "    user.id = start.id\n".

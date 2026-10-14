@@ -15,12 +15,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Update the Go Expr Lang dependency and other Go dependencies used by the `expr-cli` binary, related to #482.
-- Update reference dataset to version 0.0.35.
+- Update reference dataset to version 0.0.36.
 
 ### Fixed
-- Being a direct member of a `Group` (via `IS_IN_GROUP`) now also grants `CREATE`/`UPDATE`/`DELETE` access to the
-  group node itself, not just `READ` access, closes #238.
+- Being a direct member of a `Group` (via `IS_IN_GROUP`) now also grants `CREATE` access to the group node itself,
+  not just `READ`/`SEARCH` access, closes #238.
 - Deleting an element whose Elasticsearch document was already missing no longer fails with a 500 error.
+- `backup:create` no longer fails entirely when an element's file is missing from S3; the file is now skipped and
+  logged instead.
+
+### Security
+- `UPDATE`/`DELETE` access to a `Group` node now requires an explicit `OWNS` or `HAS_UPDATE_ACCESS`/
+  `HAS_DELETE_ACCESS` relation to that group node; group membership alone no longer grants it, preventing any member
+  from deleting or modifying the group.
 
 ## 0.1.32 - 2026-10-13
 ### Added
