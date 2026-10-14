@@ -1,0 +1,26 @@
+---
+command: database:drop
+name: database:drop
+helpCommand: php bin/console database:drop --help
+helpOutput: database-drop-help.html
+exampleCommand: php bin/console database:drop -f
+exampleOutput: database-drop.html
+---
+
+Resets the entire instance by deleting all data from every connected backend: all nodes and
+relations in the graph database, the MongoDB database, all objects in S3 object storage, all
+Elasticsearch indices, all Redis keys, and all RabbitMQ queues.
+
+Options:
+
+- `-f`, `--force` - skips the interactive "Are you sure?" confirmation prompt. Without it, the
+  command asks for confirmation and aborts (returning a non-zero exit code) if not confirmed.
+- `--no-files` - skips deleting the objects in S3 object storage.
+
+TODO: this command has no automated tests yet, and this page has no example for `--no-files`.
+
+<Note title="Destructive">
+    This command is irreversible and deletes everything the instance currently stores - there is no
+    per-collection or per-graph option. Only use it in throwaway or test environments, or right
+    before restoring a backup with `backup:load`.
+</Note>

@@ -1,0 +1,61 @@
+{
+  "paths": {
+    "/upload/{uuid}": {
+      "patch": {
+        "responses": {
+          "204": {
+            "description": "The chunk was stored successfully.  \nSpecific meaning depends on `Upload-Complete`:\n\n- `?0`: The chunk was appended, and the upload remains open for further chunks. Its new state is returned in the response headers.\n- `?1`: The chunk was appended and the upload is now complete - the uploaded chunks were merged and attached as the target element's file, and the resumable upload no longer exists.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "Upload-Complete": {
+                "$ref": "#/components/headers/Upload-Complete"
+              },
+              "Upload-Offset": {
+                "$ref": "#/components/headers/Upload-Offset"
+              },
+              "Upload-Length": {
+                "$ref": "#/components/headers/Upload-Length"
+              },
+              "Upload-Limit": {
+                "$ref": "#/components/headers/Upload-Limit"
+              },
+              "Expires": {
+                "$ref": "#/components/headers/Expires"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/204",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/204",
+                "name": "HTTP.dev"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

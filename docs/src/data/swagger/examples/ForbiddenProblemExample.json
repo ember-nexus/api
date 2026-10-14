@@ -1,0 +1,14 @@
+{
+  "components": {
+    "examples": {
+      "ForbiddenProblemExample": {
+        "value": {
+          "type": "https://api.example.com/error/403/forbidden",
+          "title": "Forbidden",
+          "status": 403,
+          "detail": "Requested endpoint, element or action is forbidden."
+        }
+      }
+    }
+  }
+}

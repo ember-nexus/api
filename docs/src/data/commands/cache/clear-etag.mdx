@@ -1,0 +1,17 @@
+---
+command: cache:clear:etag
+name: cache:clear:etag
+helpCommand: php bin/console cache:clear:etag --help
+helpOutput: cache-clear-etag-help.html
+exampleCommand: php bin/console cache:clear:etag -f
+exampleOutput: cache-clear-etag.html
+---
+
+Expires every cached ETag value stored in Redis, forcing the API to recompute conditional-request
+responses (`If-None-Match` / `304 Not Modified` checks) from scratch instead of relying on
+previously cached ETags.
+
+Takes no arguments or options. It scans Redis for all keys matching `etag:*` and expires them
+immediately; it does not touch any other cached data. Use this after changes that could make
+existing ETags stale in a way the application itself doesn't detect - for example after directly
+editing data in the underlying databases outside of the API.

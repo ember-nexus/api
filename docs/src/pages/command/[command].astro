@@ -1,0 +1,69 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+
+import TerminalExample from 'src/component/TerminalExample.astro';
+
+import { htmlComponents } from '../../component/registry.html.ts';
+import Default from '../../layouts/Default.astro';
+import { commandParam } from '../../lib/index.ts';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+    const entries = await getCollection('commands');
+    return entries.map((entry) => ({
+        // Same helper the sidebar uses for hrefs.
+        params: { command: commandParam(entry.data.command) },
+        props: { entry },
+    }));
+};
+
+const { entry } = Astro.props;
+const { Content, headings: contentHeadings } = await render(entry);
+const { command, name, description, helpCommand, helpOutput, exampleCommand, exampleOutput } = entry.data;
+
+const titleSlug = command.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
+const terminalHeadings = [
+    { depth: 1, slug: titleSlug, text: command },
+    ...contentHeadings,
+    { depth: 2, slug: 'help',    text: 'Help' },
+    { depth: 2, slug: 'example', text: 'Example' },
+];
+---
+
+<Default title={`${name ?? command} command`} description={description} ogType="article" headings={terminalHeadings}>
+    <div class="page-title-block">
+        <h1 id={titleSlug} class="page-title-text is-code">{command}</h1>
+        <div class="page-title-divider"></div>
+    </div>
+
+    <div class="prose dark:prose-invert">
+        <Content components={htmlComponents} />
+
+        <TerminalExample
+            file={`src/data/command-output/${helpOutput}`}
+            command={helpCommand}
+            label="Help"
+            id="help"
+        />
+
+        <TerminalExample
+            file={`src/data/command-output/${exampleOutput}`}
+            command={exampleCommand}
+            label="Example"
+            id="example"
+        />
+    </div>
+</Default>
+
+<style>
+    .prose,
+    .api-doc {
+        max-width: 76rem;
+        width: 100%;
+        margin-inline: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+</style>

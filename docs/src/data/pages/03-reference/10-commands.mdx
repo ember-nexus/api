@@ -1,0 +1,63 @@
+---
+type: reference
+title: Commands
+---
+
+List of all CLI commands, organized by group.
+
+## Backup
+
+Commands for creating, listing, fetching, and loading backups.
+Backups can be used to snapshot the current state of the database or to
+restore a previously saved state, including from external sources.
+
+<CommandGroupList group="backup" />
+
+## Cache
+
+Commands for managing the application cache.
+Use these commands to invalidate cached data, such as ETag caches, when you
+need to force the API to recompute responses.
+
+<CommandGroupList group="cache" />
+
+## Cron
+
+Background maintenance tasks. Every API container instance already runs these automatically every
+few minutes (see [Background tasks](/reference/configuration#background-tasks)) - use these
+commands to run a task on demand instead, e.g. to clean up expired resumable uploads immediately
+rather than waiting for the next automatic run.
+
+<CommandGroupList group="cron" />
+
+## Database
+
+Low-level database management commands.
+These commands operate directly on the underlying database and should be used
+with caution, as they can result in permanent data loss.
+
+<CommandGroupList group="database" />
+
+## System
+
+General system and maintenance commands.
+Use these commands to check the health of the running instance and diagnose
+connectivity issues with dependent services.
+
+<CommandGroupList group="system" />
+
+## Token
+
+Commands for managing authentication tokens.
+Use these commands to create new tokens or revoke existing ones directly from
+the CLI, without requiring an active HTTP session.
+
+<CommandGroupList group="token" />
+
+## User
+
+Commands for managing user accounts.
+Use these commands to create new users and set up initial credentials from
+the command line.
+
+<CommandGroupList group="user" />

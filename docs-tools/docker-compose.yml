@@ -1,0 +1,33 @@
+name: doc
+
+services:
+
+  core:
+    container_name: core
+    build:
+      dockerfile: docs-tools/Dockerfile
+      context: ..
+      target: development
+    tty: true
+    volumes:
+      - ../docs:/core
+    environment:
+      VERSION: '0.1.31'
+    working_dir: /core
+    ports:
+      - 4321:4321
+
+  # Chromium for Playwright, kept out of the `core` image entirely — pin this
+  # tag to the exact `@playwright/test` version in docs/package.json (the npm
+  # package and the browsers baked into this image must match).
+  e2e:
+    container_name: e2e
+    image: mcr.microsoft.com/playwright:v1.62.1-noble
+    tty: true
+    volumes:
+      - ../docs:/core
+    working_dir: /core
+    environment:
+      BASE_URL: http://core:4322
+    depends_on:
+      - core

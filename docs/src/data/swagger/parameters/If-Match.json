@@ -1,0 +1,30 @@
+{
+  "components": {
+    "parameters": {
+      "If-Match": {
+        "name": "If-Match",
+        "in": "header",
+        "required": false,
+        "example": "\"YgbFC4u5EgC\"",
+        "description": "Used primarily for optimistic concurrency control — the request is only executed if the resource's `ETag` matches the provided value.",
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Match",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/if-match",
+            "name": "HTTP.dev"
+          },
+          {
+            "url": "/guide/caching-and-conditional-requests",
+            "name": "Caching guide"
+          }
+        ],
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+---
+interface Props {
+    src: string;
+    title: string;
+    height?: number;
+}
+
+const { src, title, height = 500 } = Astro.props;
+---
+
+<div class="iframe-card rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <iframe
+        src={src}
+        title={title}
+        loading="lazy"
+        style={`height: ${height}px;`}
+        class="w-full block bg-white"
+    ></iframe>
+</div>

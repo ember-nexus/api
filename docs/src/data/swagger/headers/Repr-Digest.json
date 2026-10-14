@@ -1,0 +1,24 @@
+{
+  "components": {
+    "headers": {
+      "Repr-Digest": {
+        "description": "Cryptographic digest of the file's full content, in RFC 9530 structured-field format. Only `sha-256` is supported: `sha-256=:[base64]:`, where the base64 payload is the raw 32-byte SHA-256 digest. Omitted if the element has no stored hash yet (e.g. records predating this feature).",
+        "schema": {
+          "type": "string",
+          "example": "sha-256=:X4a4pOezhox2tI5PXW8UAd7NAdOKPjE3wYlYs+eTt7Y=:"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://datatracker.ietf.org/doc/html/rfc9530",
+            "name": "RFC 9530"
+          },
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Repr-Digest",
+            "name": "MDN"
+          }
+        ],
+        "x-ember-nexus-important": true
+      }
+    }
+  }
+}

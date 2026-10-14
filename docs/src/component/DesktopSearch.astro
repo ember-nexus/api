@@ -1,0 +1,140 @@
+---
+import { Icon } from 'astro-icon/components';
+import PagefindConfig from 'astro-pagefind/components/PagefindConfig.astro';
+
+const iconBtn =
+    "inline-flex cursor-pointer items-center justify-center rounded-md p-2 text-gray-700 transition hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] dark:text-zinc-200 dark:hover:bg-zinc-800";
+---
+
+<!-- Trigger button (desktop only, hidden on mobile) -->
+<button
+    type="button"
+    id="ds-open"
+    aria-label="Open search"
+    title="Search"
+    aria-haspopup="dialog"
+    class:list={["hidden sm:inline-flex", iconBtn]}
+>
+    <Icon name="search" class="size-5" />
+</button>
+
+<!-- Modal: backdrop + floating panel -->
+<div id="ds-modal" class="ds-modal" aria-modal="true" role="dialog" aria-label="Search" hidden>
+
+    <!-- Semi-transparent backdrop (click to close) -->
+    <div id="ds-backdrop" class="ds-backdrop"></div>
+
+    <!-- Floating panel: pinned to top-center, grows downward -->
+    <div class="ds-panel">
+
+        <!-- Search bar row: input island + X island -->
+        <div class="ds-bar">
+            <PagefindConfig instance="search" />
+            <pagefind-input
+                instance="search"
+                placeholder="Search…"
+                class="ds-input"
+            ></pagefind-input>
+            <button
+                type="button"
+                id="ds-close"
+                aria-label="Close search"
+                class="ds-close"
+            >
+                <Icon name="x" class="size-5" />
+            </button>
+        </div>
+
+        <!-- Results scroll wrapper — overflow here, not on the panel -->
+        <div class="ds-results-scroll" id="ds-results-scroll">
+            <pagefind-results
+                instance="search"
+                id="ds-results"
+                class="ds-results"
+                max-results="8"
+                hide-sub-results
+            ></pagefind-results>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function initDesktopSearch() {
+        const modal     = document.getElementById('ds-modal')   as HTMLElement | null;
+        const backdrop  = document.getElementById('ds-backdrop') as HTMLElement | null;
+        const openBtn   = document.getElementById('ds-open')    as HTMLButtonElement | null;
+        const closeBtn  = document.getElementById('ds-close')   as HTMLButtonElement | null;
+        const resultsEl   = document.getElementById('ds-results')        as HTMLElement | null;
+        const resultsScroll = document.getElementById('ds-results-scroll') as HTMLElement | null;
+        if (!modal || !backdrop || !openBtn || !closeBtn || !resultsEl || !resultsScroll) return;
+
+        const pfInput = modal.querySelector<HTMLElement & { focus(): void }>('pagefind-input[instance="search"]');
+
+        function clearSearch() {
+            // Find the native <input> rendered inside pagefind-input and reset it
+            const inner = pfInput?.querySelector<HTMLInputElement>('input.pf-input');
+            if (inner) {
+                inner.value = '';
+                inner.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+
+            // Track visual viewport height (accounts for on-screen keyboard on mobile)
+        function updateVvh() {
+            const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            document.documentElement.style.setProperty('--vvh', `${h}px`);
+        }
+        updateVvh();
+        window.visualViewport?.addEventListener('resize', updateVvh);
+        window.addEventListener('resize', updateVvh);
+
+        function open() {
+            modal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => pfInput?.focus(), 50);
+        }
+
+        function close() {
+            modal.hidden = true;
+            document.body.style.overflow = '';
+            clearSearch();
+        }
+
+        openBtn.addEventListener('click', open);
+        closeBtn.addEventListener('click', close);
+        backdrop.addEventListener('click', close);
+
+        // ESC closes; Cmd/Ctrl+K opens
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.hidden) close();
+            if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                open();
+            }
+        });
+
+        // Auto-close when viewport drops to mobile width
+        const mq = window.matchMedia('(max-width: 639px)');
+        mq.addEventListener('change', (e) => { if (e.matches) close(); });
+
+        // Show/hide results scroll wrapper
+        resultsScroll.hidden = true;
+        const observer = new MutationObserver(() => {
+            resultsScroll.hidden = resultsEl.childElementCount === 0;
+        });
+        observer.observe(resultsEl, { childList: true, subtree: true });
+
+        // Close when a result link is navigated to
+        resultsScroll.addEventListener('click', (e) => {
+            if ((e.target as HTMLElement).closest('a')) close();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDesktopSearch);
+    } else {
+        initDesktopSearch();
+    }
+    document.addEventListener('astro:page-load', initDesktopSearch);
+</script>

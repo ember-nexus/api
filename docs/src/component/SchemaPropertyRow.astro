@@ -1,0 +1,251 @@
+---
+import { Code } from 'astro-expressive-code/components';
+import { marked } from 'marked';
+
+import { schemaPath } from '../lib/routes.ts';
+import { schemaParam } from '../util/index.ts';
+
+interface Props {
+    name: string;
+    node: unknown;
+    required: boolean;
+    depth?: number;
+}
+
+const { name, node, required, depth = 0 } = Astro.props;
+
+const n = (node !== null && node !== undefined && typeof node === 'object' ? node : {}) as Record<string, unknown>;
+
+function refName(ref: unknown): string | null {
+    if (typeof ref !== 'string') return null;
+    const m = /#\/components\/schemas\/(.+)$/.exec(ref);
+    return m ? m[1] : null;
+}
+
+interface TypeDisplay {
+    refSlug: string | null;
+    refLabel: string | null;
+    suffix: string;
+    plain: string | null;
+    format: string | null;
+}
+
+function describeType(raw: unknown): TypeDisplay {
+    const empty: TypeDisplay = { refSlug: null, refLabel: null, suffix: '', plain: '—', format: null };
+    if (raw === null || raw === undefined || typeof raw !== 'object') return empty;
+    const r = raw as Record<string, unknown>;
+
+    const direct = refName(r.$ref);
+    if (direct) return { refSlug: schemaParam(direct), refLabel: direct, suffix: '', plain: null, format: null };
+
+    if (r.type === 'array' && r.items) {
+        const items = r.items as Record<string, unknown>;
+        if (typeof items.type === 'string' && items.type.startsWith('#/')) {
+            items.$ref = items.type;
+            delete items.type;
+        }
+        const inner = describeType(r.items);
+        return {
+            refSlug: inner.refSlug,
+            refLabel: inner.refLabel,
+            suffix: '[]',
+            plain: inner.refSlug ? null : (inner.plain ?? ''),
+            format: null,
+        };
+    }
+
+    if (Array.isArray(r.enum)) return { ...empty, plain: 'enum', refSlug: null };
+
+    const comp = (['oneOf', 'anyOf', 'allOf'] as const).find(k => Array.isArray(r[k]));
+    if (comp) return { ...empty, plain: `one of ${(r[comp] as unknown[]).length}` };
+
+    if (typeof r.type === 'string') {
+        return {
+            refSlug: null,
+            refLabel: null,
+            suffix: '',
+            plain: r.type,
+            format: typeof r.format === 'string' ? r.format : null,
+        };
+    }
+
+    if (r.properties || r.additionalProperties) return { ...empty, plain: 'object' };
+
+    return empty;
+}
+
+const typeDisplay = describeType(node);
+
+const childRequired = new Set<string>(
+    Array.isArray(n.required) ? (n.required as string[]) : [],
+);
+
+const childProperties: [string, unknown][] =
+    n.type === 'object' && n.properties && typeof n.properties === 'object'
+        ? Object.entries(n.properties as Record<string, unknown>)
+        : [];
+
+const composition = (['oneOf', 'anyOf', 'allOf'] as const).find(k => Array.isArray(n[k]));
+
+interface Variant {
+    name: string;
+    slug: string;
+    discriminatorHint: string | null;
+}
+
+const variants: Variant[] = [];
+if (composition) {
+    const discriminatorMapping =
+        n.discriminator &&
+        typeof n.discriminator === 'object' &&
+        !Array.isArray(n.discriminator)
+            ? ((n.discriminator as Record<string, unknown>).mapping as Record<string, string> | undefined)
+            : undefined;
+
+    for (const entry of n[composition] as unknown[]) {
+        const refStr = (entry as Record<string, unknown>)?.$ref;
+        const variantName = refName(refStr);
+        if (!variantName) continue;
+
+        let hint: string | null = null;
+        if (discriminatorMapping) {
+            for (const [key, val] of Object.entries(discriminatorMapping)) {
+                if (refName(val) === variantName) { hint = key; break; }
+            }
+        }
+        variants.push({ name: variantName, slug: schemaParam(variantName), discriminatorHint: hint });
+    }
+}
+
+const exampleRaw = n.example;
+
+type ExampleKind = 'none' | 'scalar' | 'complex';
+
+let exampleKind: ExampleKind = 'none';
+let exampleScalar = '';
+let exampleCode = '';
+
+if (exampleRaw !== undefined) {
+    if (exampleRaw === null || typeof exampleRaw === 'string' || typeof exampleRaw === 'number' || typeof exampleRaw === 'boolean') {
+        exampleKind = 'scalar';
+        exampleScalar = typeof exampleRaw === 'string' ? `"${exampleRaw}"` : String(exampleRaw);
+    } else {
+        exampleKind = 'complex';
+        exampleCode = JSON.stringify(exampleRaw, null, 2);
+    }
+}
+
+const description = typeof n.description === 'string' ? n.description : null;
+
+const nestedBgClass = depth === 0 ? 'bg-white dark:bg-black' : 'bg-gray-50 dark:bg-zinc-950';
+
+const discriminatorProp: string | null =
+    n.discriminator &&
+    typeof n.discriminator === 'object' &&
+    !Array.isArray(n.discriminator) &&
+    typeof (n.discriminator as Record<string, unknown>).propertyName === 'string'
+        ? String((n.discriminator as Record<string, unknown>).propertyName)
+        : null;
+---
+
+<div class={`schema-property-row flex flex-col gap-1.5 px-4 py-3 ${nestedBgClass}`}>
+    <div class="flex items-center justify-between gap-2">
+        <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 min-w-0">
+            <span class="font-mono font-semibold text-sm text-gray-900 dark:text-gray-100">{name}</span>
+            <span class="text-gray-400 text-sm">:</span>
+
+            {typeDisplay.refSlug && (
+                <>
+                    <a
+                        href={schemaPath(typeDisplay.refSlug)}
+                        class="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                        {typeDisplay.refLabel}
+                    </a>
+                    {typeDisplay.suffix && (
+                        <span class="font-mono text-sm text-blue-600 dark:text-blue-400">{typeDisplay.suffix}</span>
+                    )}
+                </>
+            )}
+
+            {!typeDisplay.refSlug && (
+                <span class="font-mono text-sm text-blue-600 dark:text-blue-400">
+                    {(typeDisplay.plain ?? '') + typeDisplay.suffix}
+                </span>
+            )}
+
+            {typeDisplay.format && (
+                <>
+                    <span class="text-gray-400 text-xs">·</span>
+                    <span class="font-mono text-xs text-gray-500 dark:text-gray-400">{typeDisplay.format}</span>
+                </>
+            )}
+        </div>
+        <span class="shrink-0 text-xs font-semibold tracking-wider uppercase text-gray-400">
+            {required ? 'required' : 'optional'}
+        </span>
+    </div>
+
+    {description && (
+        <div class="text-sm text-gray-600 dark:text-gray-400" set:html={marked.parse(description)}></div>
+    )}
+
+    {exampleKind === 'scalar' && (
+        <p class="text-xs text-gray-400 dark:text-gray-500">
+            example{' '}
+            <code class="text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-zinc-800 px-1 py-0.5 rounded">{exampleScalar}</code>
+        </p>
+    )}
+
+    {exampleKind === 'complex' && (
+        <div class="schema-example-block mt-0.5">
+            <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">example</p>
+            <Code code={exampleCode} lang="json" frame="none" />
+        </div>
+    )}
+
+    {childProperties.length > 0 && (
+        <div class="mt-1 border border-hairline rounded-lg overflow-hidden divide-y divide-hairline">
+            {childProperties.map(([childName, childNode]) => (
+                <Astro.self
+                    name={childName}
+                    node={childNode}
+                    required={childRequired.has(childName)}
+                    depth={depth + 1}
+                />
+            ))}
+        </div>
+    )}
+
+    {variants.length > 0 && (
+        <div class="mt-1 border border-hairline rounded-lg overflow-hidden">
+            <p class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-zinc-950 border-b border-hairline">
+                {discriminatorProp
+                    ? <>Resolves to one of the following (by <code class="bg-gray-100 dark:bg-zinc-800 px-1 rounded font-mono">{discriminatorProp}</code>) — each has its own schema page:</>
+                    : <>Resolves to one of the following — each has its own schema page:</>
+                }
+            </p>
+            <div class="divide-y divide-hairline">
+                {variants.map((v) => (
+                    <div class="flex flex-col gap-0.5 px-4 py-2.5 bg-white dark:bg-black">
+                        <div class="flex items-center gap-2">
+                            <a
+                                href={schemaPath(v.slug)}
+                                class="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                                {v.name} ↗
+                            </a>
+                            {v.discriminatorHint && (
+                                <code class="text-xs bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono text-gray-600 dark:text-gray-300">
+                                    kind: "{v.discriminatorHint}"
+                                </code>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )}
+</div>
+
+

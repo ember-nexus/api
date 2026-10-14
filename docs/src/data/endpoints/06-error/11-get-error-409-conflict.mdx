@@ -1,0 +1,28 @@
+---
+endpoint: get-error-409-conflict
+group: error
+method: get
+name: 409 conflict
+endpointUrl: /error/409/conflict
+swaggerUrl: /error/409/conflict
+---
+
+General error response. As this endpoint is static, it can not return specific details or logs for a previously sent
+error response.
+
+Returned when the request conflicts with the current state of the resource: a file already exists on `POST /<uuid>/file`, an `Upload-Offset` mismatch on `PATCH /upload/<uuid>` (extension keys `expected-offset`, `provided-offset`), or another request currently holds the per-upload lock.
+
+Example problem response body (`application/problem+json`):
+
+```json
+{
+  "type": "https://api.example.com/error/409/conflict",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "Offset from request does not match offset of resource.",
+  "expected-offset": 20971520,
+  "provided-offset": 10485760
+}
+```
+
+TODO: describe every conflict cause in detail; extension key naming (kebab-case vs camelCase) is undecided.

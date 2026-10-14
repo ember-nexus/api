@@ -1,0 +1,99 @@
+---
+type: guide
+title: Pagination
+---
+
+## Introduction to pagination
+
+Collection endpoints such as `/`, `/<uuid>/children`, `/<uuid>/parents` and `/<uuid>/related` are unconstrained, i.e.
+the number of elements returned by them is not limited. This represents a challenge for both the API server and the
+client, as sending a large number of nodes for a single request can cost a lot of time and bandwidth.
+
+To solve this issue, these endpoints are paginated, i.e. limit the number of elements returned for a single request
+(page), and the client can choose when to load more results (pages).
+
+The number of pages is again unrestricted, however the number of elements, also called the page size, is limited. By
+default, the minimum page size is 5, while the maximum page size is 100, and the page size used by default is 25
+elements - all are [configurable](/reference/configuration).
+
+Both numbers can be defined by using query parameters, e.g.:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
+  'https://api.example.com/?page=2&pageSize=10'
+```
+
+This request will return all elements from the 2nd page, which can contain up to 10 elements:
+
+```json
+{
+  "type": "_PartialCollection",
+  "id": "/?page=2&pageSize=10",
+  "totalNodes": 11,
+  "links": {
+    "first": "/?pageSize=10",
+    "previous": "/?page=1&pageSize=10",
+    "next": null,
+    "last": "/?page=2&pageSize=10"
+  },
+  "nodes": [
+    {
+      "type": "Tag",
+      "id": "45482998-274a-43d0-a466-f31d0b24cc0a",
+      "data": {
+        "name": "Yellow"
+      }
+    }
+  ],
+  "relations": []
+}
+```
+
+The response contains relevant information for the client:
+
+- `id`: The identity of the current page.
+- `totalNodes`: The number of nodes returned by all pages.  
+  **Note**: **Pagination depends on the nodes**, and relations can be empty, have a one-to-one mapping with the nodes,
+  or a many-to-one mapping with the nodes, as their inclusion depends on the endpoint's context, number of available
+  relations etc. Therefore, the total number of relations is usually not useful, and therefore omitted.
+- `links`: An object containing the named links `first` and `last`, both are always set, and the optional links
+  `previous` and `next`. They are set if the link actually exists, and become `null` if they do not.
+
+**Note**: Query parameters with the default value are dropped from the links, as they represent superfluous information.
+
+## Iterating over pages
+
+If you need more elements than a single page can return, you need to iterate over multiple or all pages.
+
+To do this, you first execute your regular request normally, i.e. the first page, and use the value of its `links.next`
+response as your next link. Repeat this until the value is `null`, i.e. there are no more pages to query.
+
+You can make this process faster by increasing the number of elements per page, i.e. by setting the query parameter
+`pageSize` to the maximum allowed value (`100`).
+
+In Python this would look like this:
+
+```python
+import requests
+
+BASE_URL = "https://api.example.com"  # adjust to your actual host
+
+url = "/56fda20c-b238-4034-b555-1df47c47e17a/children?pageSize=100"
+all_nodes = []
+all_relations = []
+
+while url is not None:
+    response = requests.get(BASE_URL + url)
+    data = response.json()
+
+    all_nodes.extend(data["nodes"])
+    all_relations.extend(data["relations"])
+
+    url = data.get("links", {}).get("next")
+```
+
+**Note**: Similar to why pagination is introduced in the first place, your application should implement some sort of
+fail-safe / short circuit protection.  
+E.g. if the requests against `GET /` would return one million elements, your app should not execute ten thousand
+requests to retrieve them all.

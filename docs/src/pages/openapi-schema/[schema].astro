@@ -1,0 +1,95 @@
+---
+// One page per component schema, generated straight from the central swagger
+// file — the schema counterpart to `api/[endpoint].astro`.
+//
+// Unlike the endpoint page we use `SwaggerParser.parse` (not `.dereference`):
+// we want the `$ref`s left intact so we can render them as cross-links, and so
+// self-referential schemas (e.g. Element → Element) don't expand forever.
+import SwaggerParser from '@apidevtools/swagger-parser';
+import type { GetStaticPaths } from 'astro';
+import { Code } from 'astro-expressive-code/components';
+import { marked } from 'marked';
+import type { OpenAPIObject } from 'openapi3-ts/oas31';
+
+import SchemaPropertyList from '../../component/SchemaPropertyList.astro';
+import Default from '../../layouts/Default.astro';
+import type { Schema } from '../../type';
+import { extractSchemas } from '../../util/index.ts';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+    const spec = (await SwaggerParser.parse(
+        './src/data/swagger.json',
+    )) as OpenAPIObject;
+
+    return extractSchemas(spec).map((schema) => ({
+        params: { schema: schema.id },
+        props: { schema },
+    }));
+};
+
+interface Props {
+    schema: Schema;
+}
+
+const { schema } = Astro.props;
+
+const raw = (schema.schema ?? {}) as Record<string, unknown>;
+
+const description = typeof raw.description === 'string' ? raw.description : null;
+
+const pretty = JSON.stringify(schema.schema, null, 2);
+
+// Mirror the hasContent check from SchemaPropertyList to conditionally include
+// the Properties entry in the TOC.
+const hasProperties = ((): boolean => {
+    const properties =
+        raw.type === 'object' && raw.properties && typeof raw.properties === 'object'
+            ? Object.keys(raw.properties as Record<string, unknown>).length > 0
+            : false;
+    const composition = (['oneOf', 'anyOf', 'allOf'] as const).find(k => Array.isArray(raw[k]));
+    const hasVariantsOrRefs =
+        composition !== undefined && (raw[composition] as unknown[]).length > 0;
+    return properties || hasVariantsOrRefs;
+})();
+
+const titleSlug = schema.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
+const schemaHeadings: { depth: number; slug: string; text: string }[] = [
+    { depth: 1, slug: titleSlug, text: schema.name },
+    ...(hasProperties ? [{ depth: 2, slug: 'properties', text: 'Properties' }] : []),
+    { depth: 2, slug: 'raw-schema', text: 'Raw Schema' },
+];
+---
+
+<Default title={`${schema.name} schema`} description={description ?? undefined} ogType="article" headings={schemaHeadings}>
+    <div class="page-title-block">
+        <h1 id={titleSlug} class="page-title-text is-code">{schema.name}</h1>
+        <div class="page-title-divider"></div>
+    </div>
+
+    {description && (
+        <section class="mb-6">
+            <div class="prose dark:prose-invert" set:html={marked.parse(description)}></div>
+        </section>
+    )}
+
+    <section>
+        {hasProperties && <h2 class="api-block-title mb-3" id="properties">Properties</h2>}
+        <SchemaPropertyList schema={schema.schema} />
+    </section>
+
+    <section>
+        <h2 class="api-block-title mb-3" id="raw-schema">Raw Schema</h2>
+        <div class="prose dark:prose-invert">
+            <Code code={pretty} lang="json" frame="none" />
+        </div>
+    </section>
+</Default>
+
+<style>
+    section {
+        max-width: 76rem;
+        width: 100%;
+        margin-inline: auto;
+    }
+</style>

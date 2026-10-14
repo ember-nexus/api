@@ -1,0 +1,28 @@
+---
+type: guide
+title: Restricting results with minScore
+---
+import searchQuery from './07-restricting-results-with-min-score/query.sh?raw';
+import searchResultBody from './07-restricting-results-with-min-score/result.json';
+import searchResultHeaders from './07-restricting-results-with-min-score/header.txt?raw';
+
+This example reuses the [full text search for "lily"](/reference/search/elasticsearch-query-dsl-mixin/full-text-search),
+but adds a step parameter `minScore` of `3.0`. Any element whose Elasticsearch relevance score falls below this
+threshold is dropped from the result, before the remaining ids are [hydrated](/reference/search/element-hydration).
+
+<Code code={searchQuery} lang="bash" mark="minScore" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+Compared to the unrestricted full text search - which returned 20 elements with scores ranging from 4.57 down to 1.44 -
+this response only contains the 8 elements whose score is at least `3.0`. `minScore` is applied by Elasticsearch itself
+via its `min_score` request property, so it affects `totalHits` as well: pagination is calculated only over the
+elements that pass the threshold.
+
+**Note**: `minScore` compares against Elasticsearch's raw relevance score, which depends on the query type and the
+current state of the index. It is not a normalized percentage, so a useful threshold usually needs to be found through
+experimentation. It defaults to `null`, i.e. no filtering.

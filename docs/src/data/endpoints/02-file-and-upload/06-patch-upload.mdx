@@ -1,0 +1,52 @@
+---
+endpoint: patch-upload
+group: file-and-upload
+method: patch
+name: Patch upload
+endpointUrl: /upload/<uuid>
+swaggerUrl: /upload/{uuid}
+---
+
+Appends the next chunk to a resumable upload created by [`POST /<uuid>/file`](/api/post-element-file) or [`PUT /<uuid>/file`](/api/put-element-file).
+
+Every request requires `Content-Type: application/partial-upload` and an `Upload-Offset` header equal to the upload's
+current offset - the value from the previous response's `Upload-Offset` header (or `HEAD`'s, if reconnecting after a
+restart). An offset that does not match fails with `409 Conflict`, listing the expected and provided values in the
+problem's details, so the client can re-synchronize.
+
+The `Upload-Complete` header is **required** on this endpoint (`400 Bad Request` if missing). Set `?1` on the chunk
+that finishes the upload; its body may be empty, which completes the upload without transmitting further data. With
+`?0`, a chunk smaller than `file.uploadMinChunkSizeInBytes` is rejected with `400 Bad Request`, except a body of
+exactly zero bytes, which is accepted as a no-op (a status check, like [`HEAD /upload/<uuid>`](/api/head-upload)).
+Every body is capped at `file.uploadMaxChunkSizeInBytes` (default 101 MiB); larger bodies fail with `400 Bad Request`.
+
+Completing with a total size different from `Upload-Length` (if one was declared) fails with `409 Conflict` and
+the upload is deleted. While another request on the same upload is being processed (per-upload lock), this endpoint
+answers `409 Conflict`.
+
+Once the final chunk is stored, all chunks are merged and attached as the target element's file (as if uploaded via
+[`PUT /<uuid>/file`](/api/put-element-file)), and the resumable upload itself ceases to exist - subsequent requests against its
+URL respond with `404`.
+
+<Note>
+    Every unfinished upload has a limited lifetime, reported in the `max-age` field of its `Upload-Limit` header and
+    reflected in its `Expires` header (`max-age` is the remaining lifetime). Once that time passes, appending further chunks fails with `410 Gone`; the
+    upload has to be recreated from scratch via `POST` or `PUT`.
+</Note>
+
+<Note>
+    This endpoint does not support `If-Match` or `If-None-Match`; unlike the element endpoints, requesting it with
+    either header has no effect.
+</Note>
+
+On the chunk that sets `Upload-Complete: ?1`, a `Repr-Digest` header (or `Content-Digest`, as a fallback) can be sent
+with the SHA-256 digest of the complete, reassembled file, in
+[RFC 9530](https://datatracker.ietf.org/doc/html/rfc9530) structured-field format (`sha-256=:[base64]:`), the same as
+for a direct upload on [`POST /<uuid>/file`](/api/post-element-file). A mismatch fails with `400 Bad Request`; the
+upload's target element keeps whatever file it had before (if any).
+
+TODO: a failed completion currently deletes the upload (chunks included) instead of leaving it resumable - undecided,
+see [upload reference](/reference/upload#verifying-integrity).
+
+TODO: error extension keys are currently kebab-case (`expected-offset`, `provided-offset`, `total-length`) - naming
+undecided.

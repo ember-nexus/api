@@ -68,6 +68,112 @@ jobs:
           dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+  docs-build-docker-image:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: 'Docs: Build Docker Image'
+    timeout-minutes: 20
+    needs:
+      - actionlint
+      - yml-lint
+      - markdown-lint
+      - caddyfile-fmt-check
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/build-docker-image-docs
+        with:
+          target: development
+          arch: amd
+          artifact-name: docker-image-docs-dev-amd
+          artifact-retention-days: 7
+
+  docs-cs-lint:
+    runs-on: ubuntu-26.04
+    name: 'Docs: CS Lint'
+    timeout-minutes: 5
+    needs:
+      - docs-build-docker-image
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/load-docker-image-docs
+        with:
+          artifact-name: docker-image-docs-dev-amd
+          tar-filename: docs-dev-amd.tar.gz
+      - name: CS Lint
+        run: |
+          docker run -v $(pwd)/docs:/core --user "$(id -u):$(id -g)" docs:dev sh -c "cd /core && pnpm install && pnpm run cs"
+
+  docs-spellcheck:
+    runs-on: ubuntu-26.04
+    name: 'Docs: Spellcheck'
+    timeout-minutes: 5
+    needs:
+      - docs-build-docker-image
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/load-docker-image-docs
+        with:
+          artifact-name: docker-image-docs-dev-amd
+          tar-filename: docs-dev-amd.tar.gz
+      - name: Spellcheck
+        run: |
+          docker run -v $(pwd)/docs:/core --user "$(id -u):$(id -g)" docs:dev sh -c "cd /core && pnpm install && pnpm run spellcheck"
+
+  docs-quality:
+    runs-on: ubuntu-26.04
+    name: 'Docs: Quality'
+    timeout-minutes: 5
+    needs:
+      - docs-build-docker-image
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/load-docker-image-docs
+        with:
+          artifact-name: docker-image-docs-dev-amd
+          tar-filename: docs-dev-amd.tar.gz
+      - name: Quality
+        run: |
+          docker run -v $(pwd)/docs:/core --user "$(id -u):$(id -g)" docs:dev sh -c "cd /core && pnpm install && pnpm run test"
+
+  docs-e2e:
+    runs-on: ubuntu-26.04
+    name: 'Docs: End To End Test'
+    timeout-minutes: 15
+    needs:
+      - docs-build-docker-image
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/load-docker-image-docs
+        with:
+          artifact-name: docker-image-docs-dev-amd
+          tar-filename: docs-dev-amd.tar.gz
+      - name: Build and start preview server
+        run: |
+          docker run -d --name docs-core --network host \
+            -v $(pwd)/docs:/core -w /core \
+            --user "$(id -u):$(id -g)" -e HOME=/tmp \
+            docs:dev sh -c "pnpm install && pnpm run build && pnpm run preview -- --host 0.0.0.0 --port 4322"
+      - name: Wait for preview server
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:4322 > /dev/null && exit 0
+            sleep 1
+          done
+          echo "preview server did not start in time" >&2
+          docker logs docs-core >&2
+          exit 1
+      - name: Playwright e2e
+        run: |
+          docker run --rm --network host \
+            -v $(pwd)/docs:/core -w /core \
+            -e BASE_URL=http://localhost:4322 \
+            mcr.microsoft.com/playwright:v1.62.1-noble npx playwright test
+      - name: Docs container logs
+        if: always()
+        run: docker logs docs-core || true
+      - name: Clean up preview server
+        if: always()
+        run: docker rm -f docs-core || true
+
   cs-lint:
     runs-on: ubuntu-26.04
     name: 'CS Lint'

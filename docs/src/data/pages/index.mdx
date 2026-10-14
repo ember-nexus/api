@@ -1,0 +1,119 @@
+---
+type: page
+title: "Ember Nexus: Knowledge Graph API"
+name: Overview
+---
+
+Ember Nexus is a self-hosted backend for connected data. You store **elements** - nodes and the
+relations between them - and get a complete REST API with user accounts, permissions, file storage
+and powerful search already built in.
+
+No schema to design up front. No permission system to write. No search integration to maintain.
+One API, running on your own infrastructure, with your data staying yours.
+
+Ember Nexus is [source first](https://sourcefirst.com/) and ships as a single
+[Docker image](https://hub.docker.com/r/embernexus/api) for AMD and ARM.
+
+## What people build with it
+
+- **Knowledge bases and note apps**: Notes, tags, backlinks and attachments are a graph. Store them as one instead of
+  fighting a relational schema.
+- **Content platforms and CMS**: Pages, authors, categories and media, with per-user and per-group publishing rights.
+- **Private clouds and archives**: Files and metadata side by side, shared deliberately, searchable instantly.
+- **Anything multi-user**: Every element is private to its owner until access is explicitly granted. Collaboration is
+  built into the data model, not bolted on.
+
+## How it feels
+
+Create a node — any type, any properties, no migration:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "Note",
+        "data": {
+          "title": "Graph databases",
+          "tags": [
+            "db",
+            "graph"
+          ]
+        }
+      }' \
+  https://api.example.com/
+```
+
+Connect it to another element — relations are data too:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "LINKS_TO",
+        "start": "<note-uuid>",
+        "end": "<other-uuid>"
+      }' \
+  https://api.example.com/
+```
+
+Search it — full-text and graph traversal in a single request:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "steps": [
+          {
+            "type": "elasticsearch-query-dsl-mixin",
+            "query": {
+              "match": {
+                "title": "graph"
+              }
+            }
+          },
+          {
+            "type": "element-hydration"
+          }
+        ]
+      }' \
+  https://api.example.com/search
+```
+
+Results only ever contain elements the requesting user is allowed to see — even though the query
+itself is freely written by the user.
+
+## Three ideas that make it different
+
+**Everything is a graph — including permissions.** Ownership and access rights are relations in
+the same graph as your data. Owning a node means owning its subtree; sharing with a group shares
+with all its members, nested groups included. Access can be queried and audited like any other
+data. See the [access model](/reference/access-model).
+
+**Users can write real queries, safely.** Clients may send full Elasticsearch Query DSL and graph
+path queries directly to the API. A restricted query grammar and an enforced access filter make
+this safe even for untrusted users — power that normally requires custom backend code, available
+out of the box. See [search](/reference/search).
+
+**Search is a pipeline.** Chain search steps across databases: find candidates via full-text,
+expand them along graph relations, hydrate the results — one request, permissions enforced at
+every step.
+
+## What you need
+
+Ember Nexus runs on your hardware via Docker and uses proven databases under the hood: Neo4j,
+Elasticsearch, MongoDB, Redis, RabbitMQ and S3-compatible storage. Plan for at least 8 GB of RAM —
+Neo4j and Elasticsearch are memory-hungry. A complete Docker Compose setup is part of the
+[installation guide](/getting-started/installation).
+
+## Get started
+
+- [Installation](/getting-started/installation) — running in minutes with Docker Compose
+- [First steps](/getting-started/first-api-requests) — create a user, get a token, store your first data
+- [Search](/guide/search) — write your first search pipeline
+- [Live demo](https://reference-dataset.ember-nexus.dev/) — explore a running instance with
+example data, including tokens that never expire
+- [GitHub](https://github.com/ember-nexus/api) — releases, issues, and the source itself
+- [Discord](https://discord.gg/qbQFBrJrRC) — ask questions, share what you build

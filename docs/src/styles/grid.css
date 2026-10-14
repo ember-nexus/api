@@ -1,0 +1,152 @@
+.content-grid {
+    --breakout-pad: 8ch;
+    --main-width:   85ch;
+    --toc-gap:      1.5rem;
+    --toc-width:    20ch;
+
+    display: grid;
+    grid-template-columns:
+        [full-start]
+        1fr
+        [breakout-start]
+        var(--breakout-pad)
+        [main-start]
+        minmax(0, var(--main-width))
+        [main-end]
+        var(--breakout-pad)
+        [breakout-end]
+        var(--toc-gap)
+        [toc-start]
+        var(--toc-width)
+        [toc-end]
+        1fr
+        [full-end];
+
+    & > * {
+        grid-column: main;
+    }
+
+    padding-block: 1.5rem;
+    row-gap: 1.5rem;
+}
+
+.col-main     { grid-column: main; }
+.col-breakout { grid-column: breakout; }
+.col-full     { grid-column: full; }
+
+/* In-page anchor targets (heading ids, footnote reference ids, ...) land
+   flush under the fixed header without this — same header heights
+   (h-14/sm:h-16) Header.astro itself uses, plus a little breathing room. */
+.content-grid [id] {
+    scroll-margin-top: calc(3.5rem + 1rem);
+}
+@media (min-width: 640px) {
+    .content-grid [id] {
+        scroll-margin-top: calc(4rem + 1rem);
+    }
+}
+
+.toc-sidebar {
+    /* Fixed outside the grid — position:sticky inside a grid with auto row heights
+       is unreliable. Fixed lets us precisely control where the TOC starts.
+       JS sets top/max-height on scroll; right/width are layout constants. */
+    display: none; /* hidden on mobile — shown only on desktop below */
+    position: fixed;
+    /* Mirror the grid's right gutter: sidebar is 16rem, grid columns use ch units
+       at root font size. right = (viewport - sidebar - 2×breakout - main - toc-gap - toc) / 2 */
+    right: max(0px, calc((100vw - 16rem - 16ch - 85ch - 1.5rem - 20ch) / 2));
+    width: 20ch;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px;
+    padding-top: 16px; /* breathing room between header and first TOC link when sticky */
+    margin-inline: -4px;
+}
+
+.toc-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.toc-nav a {
+    color: var(--c-toc);
+    text-decoration: none;
+    display: block;
+    padding-block: 0.35rem;
+    padding-inline: 0.35rem;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease;
+}
+
+.toc-nav a:hover {
+    color: var(--c-toc-hover);
+}
+
+.toc-nav a.toc-link--active {
+    color: var(--c-toc-active);
+    font-weight: 500;
+}
+
+.toc-nav a:focus {
+    outline: none;
+}
+
+.toc-nav a:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* Dark-mode TOC colors are handled via --c-toc-* vars set in colors.css */
+
+.content-grid .prose {
+    max-width: unset;
+    width: 100%;
+}
+
+.content-grid > g6-graph,
+.content-grid > * > g6-graph{
+    display: block;
+    margin-inline: calc(-1 * var(--breakout-pad));
+    width: calc(100% + 2 * var(--breakout-pad));
+}
+
+.content-grid > .two-column,
+.content-grid > * > .two-column {
+    margin-inline: calc(-1 * var(--breakout-pad));
+    width: calc(100% + 2 * var(--breakout-pad));
+}
+
+@media (min-width: 769px) {
+    .toc-sidebar {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .content-grid {
+        --breakout-pad: 0ch;
+        --toc-gap:      0rem;
+        --toc-width:    0ch;
+
+        grid-template-columns:
+            [full-start breakout-start]
+            1.5rem
+            [main-start]
+            minmax(0, 1fr)
+            [main-end toc-start toc-end breakout-end]
+            1.5rem
+            [full-end];
+    }
+
+    /* Larger tap targets inside the mobile overlay */
+    #toc-panel .toc-nav ul {
+        font-size: 0.9rem;
+    }
+
+    #toc-panel .toc-nav a {
+        padding-block: 0.6rem;
+    }
+}

@@ -1,0 +1,24 @@
+---
+command: cron:delete-expired-uploads
+name: cron:delete-expired-uploads
+helpCommand: php bin/console cron:delete-expired-uploads --help
+helpOutput: cron-delete-expired-uploads-help.html
+exampleCommand: php bin/console cron:delete-expired-uploads
+exampleOutput: cron-delete-expired-uploads.html
+---
+
+Permanently deletes resumable uploads (started via [`POST /<uuid>/file`](/api/post-element-file) or
+[`PUT /<uuid>/file`](/api/put-element-file)) that expired and were never completed, freeing their
+already-uploaded chunks from storage.
+
+Takes no arguments or options. An upload becomes eligible once its `expires` timestamp (see
+[`PATCH /upload/<uuid>`](/api/patch-upload)) is further in the past than the configured grace period - the
+grace period is added on top of the expiry itself, so an upload isn't deleted the instant it
+expires. Uploads that were explicitly deleted with [`DELETE /upload/<uuid>`](/api/delete-upload),
+or removed automatically because their target element was deleted, are skipped since there is
+nothing left to clean up.
+
+<Note>
+    Normally run as part of [`cron`](/command/cron), not invoked directly. It's safe to run at any
+    time, though - it only ever touches uploads that are already expired.
+</Note>

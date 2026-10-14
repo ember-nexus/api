@@ -1,0 +1,87 @@
+{
+  "components": {
+    "schemas": {
+      "InstanceConfiguration": {
+        "type": "object",
+        "description": "Configuration parameters and limits of the current API instance.",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true,
+            "description": "API version. `null` if the administrator has disabled exposing it via `instanceConfiguration.showVersion`.",
+            "example": "0.1.31"
+          },
+          "pageSize": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "integer",
+                "example": 5
+              },
+              "default": {
+                "type": "integer",
+                "example": 25
+              },
+              "max": {
+                "type": "integer",
+                "example": 100
+              }
+            }
+          },
+          "register": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "example": true
+              },
+              "uniqueIdentifier": {
+                "type": "string",
+                "example": "email"
+              },
+              "uniqueIdentifierRegex": {
+                "type": "boolean",
+                "nullable": true,
+                "example": false
+              }
+            }
+          },
+          "expression": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "example": true
+              },
+              "maxLength": {
+                "type": "integer",
+                "example": 10240
+              }
+            }
+          },
+          "file": {
+            "type": "object",
+            "properties": {
+              "maxFileSizeInBytes": {
+                "type": "integer",
+                "example": 10737418240
+              },
+              "uploadExpiresInSecondsAfterFirstRequest": {
+                "type": "integer",
+                "example": 10800
+              },
+              "uploadMinChunkSizeInBytes": {
+                "type": "integer",
+                "example": 5242880
+              },
+              "uploadMaxChunkSizeInBytes": {
+                "type": "integer",
+                "example": 105906176
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

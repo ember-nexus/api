@@ -1,0 +1,14 @@
+{
+  "components": {
+    "examples": {
+      "FileAlreadyExistsProblemExample": {
+        "value": {
+          "type": "https://api.example.com/error/409/conflict",
+          "title": "Conflict",
+          "status": 409,
+          "detail": "Element with id '7b80b203-2b82-40f5-accd-c7089fe6114e' already has an associated file; can not create new file. Delete existing file first or replace it with PUT."
+        }
+      }
+    }
+  }
+}

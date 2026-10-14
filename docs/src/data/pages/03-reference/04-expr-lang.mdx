@@ -1,0 +1,104 @@
+---
+type: reference
+title: Expr Lang
+---
+
+[Expr Lang](https://github.com/expr-lang/expr) is a Go expression language and evaluation engine. Ember Nexus embeds
+it wherever a client needs to compute a value from data it doesn't control ahead of time, instead of writing a custom
+mini-language for every feature that needs it.
+
+Expressions are sandboxed: they can only read the data explicitly passed into them, cannot call arbitrary Go code, and
+cannot perform I/O. Ember Nexus currently uses expressions for parameterizing search steps that have no native concept
+of parameters:
+
+- The [Elasticsearch query](/reference/search/elasticsearch-query-dsl-mixin#parameterized-elasticsearch-queries) step
+  evaluates any `{{expression}}` found inside its `query` object.
+- The [Element hydration](/reference/search/element-hydration) step's `elementIds` input accepts an expression instead
+  of a literal array.
+
+More Ember Nexus features are expected to adopt expressions over time, which is why this page lives here rather than
+under [Search](/reference/search) - treat it as the shared reference for the language itself, independent of which
+feature embeds it.
+
+## Trying it out
+
+Use the official [Expr Lang playground](https://expr-lang.org/playground) to experiment with expressions without
+having to send real requests. Paste in some example `Env` data and iterate on the expression until it produces the
+value you want, then copy it into your query.
+
+## Core features
+
+- **Familiar operators**: arithmetic (`+ - * / % ^`), comparison (`== != < >`), logical (`and or not`), and membership
+  (`in`).
+- **Nil coalescing and ternaries**: `a ?? b` falls back to `b` if `a` is nil; `condition ? a : b` picks between two
+  values.
+- **Safe navigation**: `a?.b` returns nil instead of erroring if `a` is nil.
+- **Slicing**: `array[1:4]` extracts a subarray; negative indices count from the end.
+- **The pipe operator**: `user.Name | lower()` passes the left-hand value as the first argument to the function on the
+  right, letting you chain several transformations left to right.
+- **Predicates and closures**: functions like `filter` and `map` take a predicate expression where `#` refers to the
+  current array element (or its fields directly, e.g. `.score`), so `filter(elements, {.score > 1.0})` keeps only
+  elements scoring above `1.0`.
+
+See the full [language definition](https://expr-lang.org/docs/language-definition) for exhaustive syntax and typing
+rules.
+
+## Builtin functions
+
+Expr Lang ships a large standard library of builtin functions, grouped roughly as follows - see the
+[builtin function reference](https://expr-lang.org/docs/language-definition#builtin-functions) for the complete,
+authoritative list:
+
+- **String**: `trim`, `split`, `replace`, `upper`, `lower`, `indexOf`, `hasPrefix`, ...
+- **Array**: `filter`, `map`, `sort`, `sortBy`, `all`, `any`, `none`, `find`, `reduce`, `flatten`, `join`, ...
+- **Map**: `keys`, `values`, `toPairs`, `fromPairs`, ...
+- **Number**: `max`, `min`, `abs`, `ceil`, `floor`, `round`, ...
+- **Date/time**: `now`, `duration`, `date`, `timezone`, ...
+- **Type conversion**: `int`, `float`, `string`, `toJSON`, `fromJSON`, `toBase64`, `fromBase64`, ...
+- **Bitwise**: `bitand`, `bitor`, `bitxor`, `bitnot`, `bitshl`, `bitshr`, ...
+- **Utility**: `len`, `get`, `type`, `count`, `uniq`, `reverse`, ...
+
+## Examples
+
+Given an `Env` of:
+
+```json
+{
+  "elements": [
+    { "id": "a", "score": 0.9 },
+    { "id": "b", "score": 1.4 },
+    { "id": "c", "score": 1.1 },
+    { "id": "d", "score": 2.0 }
+  ]
+}
+```
+
+Keep only elements scoring above `1.0`, sort by score descending, and extract just their ids:
+
+```
+map(sortBy(filter(elements, {.score > 1.0}), {.score}, "desc"), {.id})
+```
+
+This evaluates to `["d", "b", "c"]`. See
+[parameterized element ids](/reference/search/element-hydration/parameterized-element-ids) for this exact expression
+used inside a real request.
+
+Fall back to a default page size, then clamp it to a maximum of 100:
+
+```
+min(pageSize ?? 25, 100)
+```
+
+Build a string by combining several parameters:
+
+```
+"user:" + userId + ":" + (tag ?? "untagged")
+```
+
+## See also
+
+- [Parameters and expressions](/guide/search/parameters-and-expressions) - how Ember Nexus resolves a step's
+  `parameters` object before any expression sees it.
+- [Expr Lang GitHub repository](https://github.com/expr-lang/expr) - source code, issue tracker and releases.
+- [Expr Lang documentation](https://expr-lang.org/docs/language-definition) - the full language reference.
+- [Expr Lang playground](https://expr-lang.org/playground) - try expressions online.

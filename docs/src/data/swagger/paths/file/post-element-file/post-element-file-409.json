@@ -1,0 +1,58 @@
+{
+  "paths": {
+    "/{uuid}/file": {
+      "post": {
+        "responses": {
+          "409": {
+            "description": "The element already has a file attached. Delete the existing file first, or replace it with `PUT`.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/409",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/409",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                },
+                "examples": {
+                  "fileAlreadyExists": {
+                    "$ref": "#/components/examples/FileAlreadyExistsProblemExample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+---
+type: reference
+title: Element schema
+---
+
+Every element's properties are physically split across several databases internally. This is invisible when using
+the [element endpoints](/reference/endpoints#element), but matters when writing queries or search steps that target
+one of these databases directly, e.g. [Cypher path query](/reference/search/cypher-path-subset).
+
+## Databases
+
+Property data lives in up to four databases:
+
+- **Neo4j** and **MongoDB** are primary databases[^primary-database].
+- **S3** — used here simply as a database for file content — is also a primary database[^primary-database].
+- **Elasticsearch** is a secondary database[^secondary-database].
+
+[^primary-database]: Holds the primary, original copy of a piece of data — nothing else generates or supplies it.
+[^secondary-database]: Holds data that is derived or generated from one or more primary databases[^primary-database],
+    or that is otherwise received from elsewhere rather than being the original source.
+
+## Property types
+
+| Property type              |    Neo4j    |   MongoDB   | Elasticsearch |     S3      |
+|----------------------------|:-----------:|:-----------:|:-------------:|:-----------:|
+| Boolean                    |  <Check />  | <Missing /> |   <Check />   | <Missing /> |
+| Integer                    |  <Check />  | <Missing /> |   <Check />   | <Missing /> |
+| Float                      |  <Check />  | <Missing /> |   <Check />   | <Missing /> |
+| DateTime                   |  <Check />  | <Missing /> |   <Check />   | <Missing /> |
+| String (≤ 1024 characters) |  <Check />  | <Missing /> |   <Check />   | <Missing /> |
+| String (> 1024 characters) | <Missing /> |  <Check />  |   <Check />   | <Missing /> |
+| List                       | <Missing /> |  <Check />  |   <Check />   | <Missing /> |
+| Object                     | <Missing /> |  <Check />  |   <Check />   | <Missing /> |
+| File                       | <Missing /> | <Missing /> |  <Missing />  |  <Check />  |
+
+Neo4j only stores scalar properties — booleans, numbers, dates, and strings up to 1024 characters — never lists,
+objects, or files. MongoDB picks up everything Neo4j can't: lists, objects, and strings longer than 1024 characters.
+Elasticsearch additionally holds a copy of every property regardless of type or length, except files. S3 stores only
+the file attached to an element, never its properties.
+
+**Note**: The JSON API itself has no native datetime type, so a date submitted as a normal property just arrives as a
+string. `DateTime` values only ever occur internally, for the `created` and `updated` [special fields](#special-fields)
+below — which, as an exception to the row above, are additionally written to MongoDB. Elasticsearch also receives
+these as ISO 8601 strings, but its default dynamic mapping detects the format and converts them into a native `date`
+field internally, so they remain queryable as dates rather than plain text.
+
+**Note**: A list of numbers (e.g. an embedding) is currently stored as a plain list, with no special vector handling —
+Elasticsearch does not yet index it as a vector field. Native vector search support is planned for a future release.
+
+## Special fields
+
+A handful of fields are always written the same way, independent of their content:
+
+| Field                 | Neo4j                           | MongoDB                               | Elasticsearch                                        |
+|-----------------------|---------------------------------|---------------------------------------|------------------------------------------------------|
+| `name`                | <Check />                       | <Check />                             | <Check />                                            |
+| `id`                  | <Check /> property              | <Check /> `_id` (document identifier) | <Check /> `_id` (document identifier)                |
+| `type`                | <Check /> label / relation type | <Check /> collection name             | <Check /> index name                                 |
+| `created` / `updated` | <Check /> native DateTime       | <Check /> `UTCDateTime`               | <Check /> native `date` (sent as an ISO 8601 string) |
+| `hasFile`             | <Check /> boolean               | <Check /> boolean                     | <Check /> boolean                                    |
+
+`created` and `updated` are timestamps maintained automatically by the server. `hasFile` is a cheap boolean mirror of
+whether an element currently has a file attached, kept alongside the element data itself so collection/search
+listings can show it without paying for the more expensive [file metadata](/reference/file#metadata) lookup.
+
+These are only the fields whose *storage* is special. For the full list of properties the API reserves from direct
+writes, see [reserved properties](/reference/security#reserved-properties).
+
+### Null values
+
+Setting a property to `null` does not store a null value — it deletes the property. This also applies when
+[replacing an element](/api/put-element), where any existing property not mentioned in the request body is treated as
+if it had been set to `null`. See also [`PATCH /<uuid>`](/api/patch-element).
+
+## See also
+
+- [Neo4j's type documentation](https://neo4j.com/docs/cypher-manual/25/values-and-types/)
+- [MongoDB's type documentation](https://www.mongodb.com/docs/mongodb-shell/reference/data-types/)
+- [Elasticsearch's type documentation](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/field-data-types)

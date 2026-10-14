@@ -1,0 +1,23 @@
+---
+endpoint: head-upload
+group: file-and-upload
+method: head
+name: Head upload
+endpointUrl: /upload/<uuid>
+swaggerUrl: /upload/{uuid}
+---
+
+Returns the current state of a resumable upload created by [`POST /<uuid>/file`](/api/post-element-file) or
+[`PUT /<uuid>/file`](/api/put-element-file), without transferring any of the data already uploaded. The response has
+no body - `Upload-Offset`, `Upload-Length`, `Upload-Complete`, `Upload-Limit` and `Expires` are all returned as
+headers, matching what the creating request or the last [`PATCH /upload/<uuid>`](/api/patch-upload) returned.
+
+<Note>
+    Only the user who created the upload can query it - even a user with full access to the upload's target element
+    gets `404` for an upload they did not start themselves.
+</Note>
+
+<Note>
+    This endpoint does not support `If-Match` or `If-None-Match`; unlike the element endpoints, requesting it with
+    either header has no effect.
+</Note>

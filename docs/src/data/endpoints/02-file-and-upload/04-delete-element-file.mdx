@@ -1,0 +1,21 @@
+---
+endpoint: delete-element-file
+group: file-and-upload
+method: delete
+name: Delete element file
+endpointUrl: /<uuid>/file
+swaggerUrl: /{uuid}/file
+---
+
+Removes the file attached to the referenced element, as well as file related metadata from the element's properties.
+
+The element itself is not deleted, and a new file can be attached to it afterwards with
+[`POST /<uuid>/file`](/api/post-element-file).
+
+Supports `If-Match`/`If-None-Match` (incl. `*`): a failing precondition, or `If-Match` on an element without file,
+answers `412`.
+
+<Note>
+    Deleting an element with [`DELETE /<uuid>`](/api/delete-element) already deletes its file as a side effect.
+    Call this endpoint only when the element itself should be kept, just without its file.
+</Note>

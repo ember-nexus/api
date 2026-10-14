@@ -1,0 +1,23 @@
+{
+  "components": {
+    "headers": {
+      "Accept-Ranges": {
+        "description": "Always `bytes` - indicates that this endpoint honors the `Range` request header for partial downloads.",
+        "schema": {
+          "type": "string",
+          "example": "bytes"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept-Ranges",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/accept-ranges",
+            "name": "HTTP.dev"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+---
+endpoint: patch-element
+group: element
+method: patch
+name: Patch element
+endpointUrl: /<uuid>
+swaggerUrl: /{uuid}
+---
+
+Updates properties of the referenced element.
+
+Properties with the value `null` will be deleted.
+
+Already existing properties whose keys are not mentioned in the `PATCH`-request are kept as they are.
+
+**Note**: A handful of properties are reserved and can not be set through this request - see
+[Reserved properties](/reference/security#reserved-properties).
+
+**Note**: Changes take up to a second before they become searchable in Elasticsearch.

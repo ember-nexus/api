@@ -1,0 +1,18 @@
+---
+endpoint: post-register
+version: dev
+group: user
+method: post
+name: Post register
+endpointUrl: /register
+swaggerUrl: /register
+---
+
+Endpoint used to create a new user account.
+
+**Note**: This endpoint can be disabled via the `register.enabled` configuration option, in which case a
+`403 Forbidden` response is returned instead. It should therefore be considered optional.
+
+`password` can be any string; it is hashed internally and no complexity check is performed. Leading/trailing
+whitespace is preserved, though discouraged. `uniqueUserIdentifier` must not already be in use by another account,
+otherwise a `400 Bad Request` is returned.

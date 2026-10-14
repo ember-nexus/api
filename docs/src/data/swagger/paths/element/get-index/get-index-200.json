@@ -1,0 +1,103 @@
+{
+  "paths": {
+    "/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Index elements found. Returns a collection.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/ETag-optional"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartialCollection"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Returning root nodes in a collection response.",
+                    "value": {
+                      "type": "_PartialCollection",
+                      "id": "/",
+                      "totalNodes": 3,
+                      "links": {
+                        "first": "/",
+                        "previous": null,
+                        "next": null,
+                        "last": "/"
+                      },
+                      "nodes": [
+                        {
+                          "type": "Sphere",
+                          "id": "56fda20c-b238-4034-b555-1df47c47e17a",
+                          "data": {
+                            "created": "2025-09-27T10:26:49+00:00",
+                            "name": "Tag",
+                            "updated": "2025-09-27T10:26:49+00:00"
+                          }
+                        },
+                        {
+                          "type": "Sphere",
+                          "id": "7b80b203-2b82-40f5-accd-c7089fe6114e",
+                          "data": {
+                            "created": "2025-09-27T10:26:49+00:00",
+                            "name": "Comment",
+                            "updated": "2025-09-27T10:26:49+00:00"
+                          }
+                        },
+                        {
+                          "type": "Token",
+                          "id": "e3b81351-fe0c-4f8f-ad22-78b6157edde8",
+                          "data": {
+                            "created": "2025-09-27T10:26:49+00:00",
+                            "updated": "2025-09-27T10:26:49+00:00",
+                            "note": "Token contains token only due to testing purposes.",
+                            "state": "ACTIVE"
+                          }
+                        }
+                      ],
+                      "relations": []
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

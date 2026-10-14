@@ -1,0 +1,22 @@
+---
+type: guide
+title: Explicit element ids
+---
+import searchQuery from './01-explicit-element-ids/query.sh?raw';
+import searchResultBody from './01-explicit-element-ids/result.json';
+import searchResultHeaders from './01-explicit-element-ids/header.txt?raw';
+
+The simplest way to use the element hydration step: providing a literal list of element ids directly in `query.elementIds`.
+This is useful whenever the client already knows exactly which elements it wants, e.g. from a previous, unrelated
+request, and just needs the full element objects.
+
+<Code code={searchQuery} lang="bash" mark="elementIds" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+As this is the only step in the request, there are no prior `stepResults` to build on - the three ids are hydrated
+directly, in the order they were requested.

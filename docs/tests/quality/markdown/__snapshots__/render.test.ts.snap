@@ -1,0 +1,458 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`markdown snapshots > 03-reference/03-search/01-elasticsearch-query-dsl-mixin 1`] = `
+"# Elasticsearch query
+
+The Elasticsearch query step allows users to execute queries against the internal Elasticsearch
+database. As Elasticsearch is a document-based database, **only a list of individual elements** can be returned.
+
+## Core features
+
+- [Full-text search](https://www.elastic.co/docs/solutions/search/full-text), including optional fuzziness,
+  singular/plural handling etc.
+- [Keyword search](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword), i.e. searching for
+  exact string matches.
+- [Boolean queries](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-bool-query), which allow
+  multiple smaller queries to be combined.
+- [Range queries](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-range-query), used to
+  compare numeric or date fields. This works out of the box, as Elasticsearch automatically maps well-formed numbers
+  and dates to the appropriate field types.
+- [Vector search](https://www.elastic.co/docs/solutions/search/vector/knn), useful for semantic search.
+  - Ember Nexus does not yet generate vector embeddings itself, i.e. the user or some bot needs to provide vectors. It
+    is a planned feature: [Issue #110](https://github.com/ember-nexus/api/issues/110).
+  - Alternatively Elasticsearch also offers a [semantic search](https://www.elastic.co/docs/solutions/search/semantic-search/semantic-search-semantic-text)
+    feature, where Elasticsearch handles the text-to-vector conversion itself. However, this feature seems to be
+    restricted towards enterprise-customers only.
+- [Geospatial search](https://www.elastic.co/docs/reference/query-languages/query-dsl/geo-queries), i.e. searching for
+  coordinates, lines, polygons, distances to other points, inside/outside polygon checks and more.
+  - As with vector search, this requires elements to be indexed with a dedicated \`geo_point\` or \`geo_shape\` field
+    mapping, which Ember Nexus does not yet set up automatically.
+
+**Note**: Elasticsearch indices are currently managed automatically, which works for most use cases. Advanced features
+like vector or geospatial search need manual index setup - this is possible, just not through the Ember Nexus API yet.
+Support for this is planned - see [ticket #477](https://github.com/ember-nexus/api/issues/477).
+
+## Step parameters
+
+In addition to \`query\`, the step's \`parameters\` object supports the following options:
+
+- \`nodeTypes\`: Optional, list of node types. If provided the search is restricted to the provided node types.
+- \`relationTypes\`: Optional, list of relation types. If provided the search is restricted to the provided relation
+  types.
+- \`page\`: Optional, int, default is 1. The page of results to return.
+- \`pageSize\`: Optional, int, default is 25. Limits the number of results per page.
+- \`minScore\`: Optional, numeric, default is \`null\`. If set to a numeric value like \`1.0\`, removes all search results
+  with a lower score.
+
+## Step result
+
+- \`elements\`: List of search element objects returned by Elasticsearch. Each object contains:
+  - \`id\`: Element id (UUID).
+  - \`type\`: Type of the element.
+  - \`metadata.score\`: Numeric value returned by Elasticsearch. A high score implies a high fit between the query and
+    the element.
+- \`totalHits\`: Integer, number of total elements found by the query. Can be used to calculate how many pages of
+  results are available. Very high numbers of results might be rounded or estimates by Elasticsearch.
+- \`maxScore\`: Maximum score achieved by any element, regardless of whether it is part of the current page of results.
+
+## Parameterized Elasticsearch queries
+
+Elasticsearch on its own does not support parameters in their Query DSL language. However, Ember Nexus uses the
+[Expr Lang](/reference/expr-lang.md) language to integrate expressions directly into the Query DSL query.
+These expressions need to be defined as strings surrounded by two curly brackets, e.g. \`{{your_expression}}\`, and their
+result will replace the expression string inside the query. The replaced value can be a string itself, but also all
+other JSON data types like numbers, arrays and objects are supported.\\
+Expressions will receive the search step's resolved \`parameters\` object as their only input - see
+[how parameters are resolved](/reference/search.md#how-parameters-are-resolved) for where those values come from.
+
+See [Expr Lang](/reference/expr-lang.md) for the language's features and a link to its playground, and
+[parameters and expressions](/guide/search/parameters-and-expressions.md) for a walkthrough of how parameters flow between
+search steps.
+
+See the [parameterized search example](/reference/search/elasticsearch-query-dsl-mixin/parameterized-search.md) below.
+
+## Examples
+
+- [Full text search](/reference/search/elasticsearch-query-dsl-mixin/full-text-search.md)
+- [Exact keyword matching](/reference/search/elasticsearch-query-dsl-mixin/exact-keyword-matching.md)
+- [Combining queries with bool](/reference/search/elasticsearch-query-dsl-mixin/combining-queries-with-bool.md)
+- [Range queries on numeric fields](/reference/search/elasticsearch-query-dsl-mixin/range-queries-on-numeric-fields.md)
+- [Restricting results with minScore](/reference/search/elasticsearch-query-dsl-mixin/restricting-results-with-min-score.md)
+- [Query string](/reference/search/elasticsearch-query-dsl-mixin/query-string.md)
+- [Text prefix search](/reference/search/elasticsearch-query-dsl-mixin/text-prefix-search.md)
+- [Wildcard search](/reference/search/elasticsearch-query-dsl-mixin/wildcard-search.md)
+- [Parameterized search](/reference/search/elasticsearch-query-dsl-mixin/parameterized-search.md)
+
+See [writing an Elasticsearch query](/guide/search/writing-an-elasticsearch-query.md) for a walkthrough of building and
+running a custom query against this step, including how to use Kibana's console and how to parameterize queries.
+
+## Unsupported Elasticsearch features
+
+- Other query languages like ES|QL, PromQL, SQL, EQL and others are not supported.\\
+  If there is demand, please open a [feature request ticket on GitHub](https://github.com/ember-nexus/api/issues/new).
+- Aggregations and join-like features are generally not supported - see [security aspects](#security-aspects).
+- Defining a custom sort direction is not yet supported. It is tracked in [GitHub issue #456](https://github.com/ember-nexus/api/issues/456).
+
+## Security aspects
+
+This search step is limited in three ways:
+
+- Elasticsearch search requests are readonly by default.
+- Only elements accessible by the user can be searched.
+- Only accessible element ids are returned.
+
+While this removes support for aggregated properties and direct property lookups, this approach also disables
+additional dangerous approaches like the [terms lookup query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-terms-query#query-dsl-terms-lookup)
+and [joins](https://www.elastic.co/docs/reference/query-languages/query-dsl/joining-queries). Note that joins are
+considered to be expensive, and are therefore already disabled in normal Elasticsearch deployments.
+
+As there is no way to manipulate or exfiltrate arbitrary data, this search step **is considered safe** and can therefore
+be executed by any user.
+"
+`;
+
+exports[`markdown snapshots > 03-reference/03-search/01-elasticsearch-query-dsl-mixin/01-full-text-search 1`] = `
+"# Full text search
+
+This example uses Elasticsearch's [\`match\` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query)
+to perform a full text search of the word "lily" against the property \`description\` of all elements accessible to the
+user.\\
+Results are then [hydrated](/reference/search/element-hydration.md), i.e. transformed into a collection response.
+
+\`\`\`bash
+curl -X POST \\
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \\
+  -H 'Content-Type: application/json' \\
+  -d '{
+        "debug": true,
+        "steps": [
+          {
+            "type": "elasticsearch-query-dsl-mixin",
+            "query": {
+              "match": {
+                "description": {
+                  "query": "lily"
+                }
+              }
+            }
+          },
+          {
+            "type": "element-hydration"
+          }
+        ]
+      }' \\
+  https://api.example.com/search
+\`\`\`
+
+##### Response Body
+
+\`\`\`json
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Taxon",
+      "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+      "data": {
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Gloriosa",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Colchicaceae/Gloriosa",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_(plant)",
+        "description": "Gloriosa is a genus of 12 species in the plant family Colchicaceae, and includes the formerly recogn..."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "data": {
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flame_lily.png",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flame_lily.png/500px-Flame_lily.png",
+            "link": "https://en.wikipedia.org/wiki/File:Flame_lily.png"
+          },
+          {
+            "description": "Gloriosa superba at Mabvuku, Harare, Zimbabwe",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Gloriosa_superba_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gloriosa_superba_1.jpg/960px-Gloriosa_supe...",
+            "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Flame Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "G. superba",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
+        "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include fl..."
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+      "data": {
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Lilieae",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae/Lilieae",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Lilieae",
+        "description": "The Lilieae are a monophyletic tribe of monocotyledon perennial, herbaceous mainly bulbous flowering..."
+      }
+    },
+    "... 17 more items omitted (shapes seen: type:Taxon, type:Plant) ..."
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "match": {
+            "description": {
+              "query": "lily"
+            }
+          }
+        },
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\\\EventSystem\\\\SearchStep\\\\EventListener\\\\ElasticsearchQueryDslMixinSe...",
+      "start": 1758825391.222043,
+      "indices": "*",
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 25,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "match": {
+                  "description": {
+                    "query": "lily"
+                  }
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "end": 1758825391.252388,
+      "duration": 0.030345
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "elements": [
+                {
+                  "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 4.5739636
+                  }
+                },
+                {
+                  "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.9976888
+                  }
+                },
+                {
+                  "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 3.7564187
+                  }
+                },
+                "... 17 more items omitted (shapes seen: type:Taxon, type:Plant) ..."
+              ],
+              "totalHits": 20,
+              "maxScore": 4.5739636
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\\\EventSystem\\\\SearchStep\\\\EventListener\\\\ElementHydrationSearchStepEventListener)",
+      "start": 1758825391.25256,
+      "accessibleElementIds": [
+        "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+        "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+        "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+        "... 17 more items omitted (shapes seen: string) ..."
+      ],
+      "end": 1758825391.322722,
+      "duration": 0.070162
+    }
+  ]
+}
+\`\`\`
+
+##### Response Headers
+
+\`\`\`http
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Cache-Control: no-cache, private
+Content-Type: application/json; charset=utf-8
+Date: Thu, 11 Sep 2025 20:23:41 GMT
+Transfer-Encoding: chunked
+X-Powered-By: Ember Nexus API
+\`\`\`
+
+Every result contains the term "lily" somewhere in its description, including plants that are not lilies botanically -
+Magnolia ("lilytree"), Daffodil ("Lent lily"), Desert Rose ("impala lily"). The Debug tab shows the relevance score of
+each element; results are ordered by it, from 4.57 down to 1.44.
+"
+`;
+
+exports[`markdown snapshots > index 1`] = `
+"# Ember Nexus: Knowledge Graph API
+
+Ember Nexus is a self-hosted backend for connected data. You store **elements** - nodes and the
+relations between them - and get a complete REST API with user accounts, permissions, file storage
+and powerful search already built in.
+
+No schema to design up front. No permission system to write. No search integration to maintain.
+One API, running on your own infrastructure, with your data staying yours.
+
+Ember Nexus is [source first](https://sourcefirst.com/) and ships as a single
+[Docker image](https://hub.docker.com/r/embernexus/api) for AMD and ARM.
+
+## What people build with it
+
+- **Knowledge bases and note apps**: Notes, tags, backlinks and attachments are a graph. Store them as one instead of
+  fighting a relational schema.
+- **Content platforms and CMS**: Pages, authors, categories and media, with per-user and per-group publishing rights.
+- **Private clouds and archives**: Files and metadata side by side, shared deliberately, searchable instantly.
+- **Anything multi-user**: Every element is private to its owner until access is explicitly granted. Collaboration is
+  built into the data model, not bolted on.
+
+## How it feels
+
+Create a node — any type, any properties, no migration:
+
+\`\`\`bash
+curl \\
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \\
+  -H 'Content-Type: application/json' \\
+  -d '{
+        "type": "Note",
+        "data": {
+          "title": "Graph databases",
+          "tags": [
+            "db",
+            "graph"
+          ]
+        }
+      }' \\
+  https://api.example.com/
+\`\`\`
+
+Connect it to another element — relations are data too:
+
+\`\`\`bash
+curl \\
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \\
+  -H 'Content-Type: application/json' \\
+  -d '{
+        "type": "LINKS_TO",
+        "start": "<note-uuid>",
+        "end": "<other-uuid>"
+      }' \\
+  https://api.example.com/
+\`\`\`
+
+Search it — full-text and graph traversal in a single request:
+
+\`\`\`bash
+curl \\
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \\
+  -H 'Content-Type: application/json' \\
+  -d '{
+        "steps": [
+          {
+            "type": "elasticsearch-query-dsl-mixin",
+            "query": {
+              "match": {
+                "title": "graph"
+              }
+            }
+          },
+          {
+            "type": "element-hydration"
+          }
+        ]
+      }' \\
+  https://api.example.com/search
+\`\`\`
+
+Results only ever contain elements the requesting user is allowed to see — even though the query
+itself is freely written by the user.
+
+## Three ideas that make it different
+
+**Everything is a graph — including permissions.** Ownership and access rights are relations in
+the same graph as your data. Owning a node means owning its subtree; sharing with a group shares
+with all its members, nested groups included. Access can be queried and audited like any other
+data. See the [access model](/reference/access-model.md).
+
+**Users can write real queries, safely.** Clients may send full Elasticsearch Query DSL and graph
+path queries directly to the API. A restricted query grammar and an enforced access filter make
+this safe even for untrusted users — power that normally requires custom backend code, available
+out of the box. See [search](/reference/search.md).
+
+**Search is a pipeline.** Chain search steps across databases: find candidates via full-text,
+expand them along graph relations, hydrate the results — one request, permissions enforced at
+every step.
+
+## What you need
+
+Ember Nexus runs on your hardware via Docker and uses proven databases under the hood: Neo4j,
+Elasticsearch, MongoDB, Redis, RabbitMQ and S3-compatible storage. Plan for at least 8 GB of RAM —
+Neo4j and Elasticsearch are memory-hungry. A complete Docker Compose setup is part of the
+[installation guide](/getting-started/installation.md).
+
+## Get started
+
+- [Installation](/getting-started/installation.md) — running in minutes with Docker Compose
+- [First steps](/getting-started/first-api-requests.md) — create a user, get a token, store your first data
+- [Search](/guide/search.md) — write your first search pipeline
+- [Live demo](https://reference-dataset.ember-nexus.dev/) — explore a running instance with
+  example data, including tokens that never expire
+- [GitHub](https://github.com/ember-nexus/api) — releases, issues, and the source itself
+- [Discord](https://discord.gg/qbQFBrJrRC) — ask questions, share what you build
+"
+`;

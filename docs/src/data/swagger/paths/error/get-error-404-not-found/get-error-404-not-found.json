@@ -1,0 +1,90 @@
+{
+  "paths": {
+    "/error/404/not-found": {
+      "get": {
+        "summary": "Get error 404 not found",
+        "description": "Static informational page for the `https://api.example.com/error/404/not-found` problem type, explaining why the error is thrown.",
+        "operationId": "get-error-404-not-found",
+        "tags": [
+          "Error"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/error/404/not-found",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a static, human-readable explanation of the error.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "404_not_found": {
+                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 404 - Not Found\n\n The requested element was not found.\n\n This can happen due to multiple reasons:\n\n - The requested route does not exist.\n - The requested element did never exist.\n - There is a typo within the element's UUID.\n - You do not have access to the element.\n - You do not have the correct type of access to the element.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 404 error code: https://http.dev/404\n\n"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "components": {
+    "examples": {
+      "MalformedRangeProblemExample": {
+        "summary": "The `Range` header could not be parsed, or requests more than one range.",
+        "value": {
+          "type": "https://api.example.com/error/400/bad-content",
+          "title": "Bad content",
+          "status": 400,
+          "detail": "Could not parse 'Range' header: 'bytes=0-10,20-30'. Only a single range of the form 'bytes=<start>-<end>', 'bytes=<start>-' or 'bytes=-<suffixLength>' is supported."
+        }
+      }
+    }
+  }
+}

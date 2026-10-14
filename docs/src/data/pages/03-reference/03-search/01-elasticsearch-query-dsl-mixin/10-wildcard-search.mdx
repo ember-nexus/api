@@ -1,0 +1,26 @@
+---
+type: guide
+title: Wildcard search
+---
+import searchQuery from './10-wildcard-search/query.sh?raw';
+import searchResultBody from './10-wildcard-search/result.json';
+import searchResultHeaders from './10-wildcard-search/header.txt?raw';
+
+This example uses Elasticsearch's [`wildcard` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-wildcard-query)
+to find all elements whose `description` contains a word matching the pattern `colo*r` - i.e. both the American
+spelling "color" and the British spelling "colour" - restricted to the first page of `5` results via the `pageSize`
+step parameter.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+**Note**: like `prefix`, `wildcard` is a term-level query and is matched against the exact indexed value. `*` matches
+zero or more characters, `?` matches exactly one character.
+
+<Code code={searchQuery} lang="bash" mark="wildcard" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+The response only contains the first `5` of `29` total matching elements, as requested via `pageSize`.

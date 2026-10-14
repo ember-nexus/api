@@ -1,0 +1,103 @@
+/*
+ * Terminal example — a single card that fuses an Expressive Code command block
+ * with its rendered CLI output so they look like one terminal.
+ *
+ * Theme handling mirrors the EC config (`themes: ['min-dark', 'min-light']`,
+ * `useDarkModeMediaQuery: true`), so it switches on `prefers-color-scheme`.
+ * All color values come from --c-term-* and --c-ansi-* vars defined in colors.css.
+ */
+
+.terminal-example {
+    --term-bg:   var(--c-term-bg);
+    --term-fg:   var(--c-term-fg);
+    --term-line: var(--c-term-line);
+    --term-pad:  0.7rem 1rem;
+
+    /* ANSI foreground palette — theme-aware via colors.css vars */
+    --ansi-dim:    var(--c-ansi-dim);
+    --ansi-red:    var(--c-ansi-red);
+    --ansi-green:  var(--c-ansi-green);
+    --ansi-yellow: var(--c-ansi-yellow);
+    --ansi-blue:   var(--c-ansi-blue);
+    --ansi-purple: var(--c-ansi-purple);
+    --ansi-cyan:   var(--c-ansi-cyan);
+    --ansi-white:  var(--c-ansi-white);
+
+    display: block;
+    overflow: hidden;                 /* clips inner corners flat + outer corners to the radius */
+    border: 1px solid var(--term-line);
+    border-radius: 0.5rem;            /* outer corners stay round (matches the old rounded-lg) */
+    background-color: var(--term-bg);
+    color: var(--term-fg);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* ---- command block (Expressive Code) ---------------------------------- */
+/* Strip EC's own frame chrome so it dissolves into the shared shell.       */
+.terminal-example .expressive-code,
+.terminal-example .expressive-code figure,
+.terminal-example .expressive-code .frame,
+.terminal-example .expressive-code pre {
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;   /* let the shared --term-bg show through */
+}
+
+.terminal-example .expressive-code pre {
+    padding: var(--term-pad) !important;
+}
+
+/* EC applies the code's own padding on <code> (block) and .ec-line .code (inline),
+   *in addition to* the <pre>. Left unchecked it stacks on the padding above and
+   shows up as a phantom margin around the command. Keep a single source of padding
+   (the <pre>) by cancelling EC's inner padding; zeroing .code's inline-start also
+   aligns the command's left edge with the output. */
+.terminal-example .expressive-code pre > code {
+    padding-block: 0 !important;
+}
+
+.terminal-example .expressive-code .ec-line .code {
+    padding-inline-start: 0 !important;
+}
+
+/* ---- response block --------------------------------------------------- */
+.terminal-example .terminal-output {
+    padding: var(--term-pad);
+    overflow-x: auto;                              /* long lines scroll inside the clipped shell */
+    border-top: 1px solid var(--term-line);        /* the thin divider between command & output */
+    background-color: transparent;
+    color: var(--term-fg);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    vertical-align: middle;
+
+    /* ANSI classes — theme-aware via the vars above */
+    .reset       { color: var(--term-fg); }
+    .bg-reset    { background-color: var(--term-bg); }
+    .inverted    { color: var(--term-bg); }         /* reverse-video: fg becomes the bg color */
+    .bg-inverted { background-color: var(--term-fg); }
+    .dimgray     { color: var(--ansi-dim); }
+    .red         { color: var(--ansi-red); }
+    .green       { color: var(--ansi-green); }
+    .yellow      { color: var(--ansi-yellow); }
+    .blue        { color: var(--ansi-blue); }
+    .purple      { color: var(--ansi-purple); }
+    .cyan        { color: var(--ansi-cyan); }
+    .white       { color: var(--ansi-white); }
+    .bg-black    { background-color: #000; }
+    .bg-red      { background-color: var(--ansi-red); }
+    .bg-green    { background-color: var(--ansi-green); }
+    .bg-yellow   { background-color: var(--ansi-yellow); }
+    .bg-blue     { background-color: var(--ansi-blue); }
+    .bg-purple   { background-color: var(--ansi-purple); }
+    .bg-cyan     { background-color: var(--ansi-cyan); }
+    .bg-white    { background-color: #fff; }
+    .underline   { text-decoration: underline; }
+    .bold        { font-weight: bold; }
+    .italic      { font-style: italic; }
+    .blink       { text-decoration: blink; }
+    .crossed-out { text-decoration: line-through; }
+    .highlighted { filter: contrast(70%) brightness(190%); }
+}

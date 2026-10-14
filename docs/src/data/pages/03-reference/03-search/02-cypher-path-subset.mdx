@@ -1,0 +1,56 @@
+---
+type: reference
+title: Cypher path query
+---
+
+The Cypher path query step is a single task, executable within [`POST /search`](/api/post-search) requests.
+
+It executes a user defined Cypher query against the internal Neo4j database.
+
+## Security aspects
+
+The following safeguards are in place:
+
+- Queries are executed in a **readonly transaction**, which limits access to the database dramatically.
+- The **result of queries is validated and filtered** by non-user-defined queries, therefore making sure that no
+  inaccessible elements are accessed.
+- The **result of the search step is limited** to a list of paths, containing the filtered and validated `elementIds`.
+  This makes sure that no manipulated or specifically crafted properties etc. are returned.
+- The **user's query is validated against a stricter subset of Cypher 25, called Cypher Path Subset**. It is limited to
+  path searches only, i.e. clauses resulting in write access or side effects like existence clauses and function calls
+  are forbidden.  
+  The query can only return the variable `paths`, which must be of type [Path](https://neo4j.com/docs/cypher-manual/current/patterns/reference/#path-patterns).
+
+With all the different safeguards in place and full test coverage across all guards, **this search step is considered
+safe**.
+
+## Input parameters
+
+Any parameters available are passed as query variables to the database, i.e. as `$parameterName` inside the query
+string. Unlike the Elasticsearch query step, expressions (`{{...}}`) are not supported here.
+
+## Input query
+
+The query must be of type string, and can only return a single variable named `paths`.
+
+## Step result
+
+List of paths result objects, which contain a list of node ids and relation ids.
+
+- `paths`: List of paths returned by Neo4j. Each object contains the following properties:
+  - `nodeIds`: List of element ids (UUID), in path order.
+  - `relationIds`: List of element ids (UUID), in path order.
+
+## Grammar
+
+See the [grammar page](/reference/search/cypher-path-subset/grammar) for the ANTLR railroad diagram and how Cypher
+Path Subset differs from the full Cypher 25 grammar.
+
+## Examples
+
+- [Find tagged elements](/reference/search/cypher-path-subset/find-tagged-elements)
+- [Find nested elements](/reference/search/cypher-path-subset/find-nested-elements)
+- [Parameterized cypher search](/reference/search/cypher-path-subset/parameterized-cypher-search)
+
+See [writing a Cypher query](/guide/search/writing-a-cypher-query) for a walkthrough of building and running a query
+against this step.

@@ -1,0 +1,45 @@
+---
+import OverlayPanel from './OverlayPanel.astro';
+import SidebarNode from './SidebarNode.astro';
+import { buildSidebar } from '../lib/index.ts';
+
+const items = await buildSidebar();
+const currentPath = Astro.url.pathname;
+---
+
+<OverlayPanel
+    id="sidebar"
+    side="left"
+    label="Sidebar"
+    desktopClass="sm:top-16 sm:h-[calc(100dvh-4rem)] sm:w-64 sm:border-r sm:border-gray-200 sm:dark:border-zinc-800"
+>
+    <nav>
+        <ul class="flex flex-col gap-0.5">
+            {items.map((item) => <SidebarNode item={item} currentPath={currentPath} />)}
+        </ul>
+    </nav>
+</OverlayPanel>
+
+<script>
+    // Scroll active sidebar link into view on open and on initial load.
+    function scrollActiveLink() {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+        sidebar.querySelector('[aria-current=page]')?.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
+
+    window.addEventListener('overlay-open', (e: Event) => {
+        const { id } = (e as CustomEvent<{ id: string }>).detail;
+        if (id === 'sidebar') {
+            requestAnimationFrame(scrollActiveLink);
+        }
+    });
+
+    // Also scroll on initial page load (desktop sidebar is always visible).
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(scrollActiveLink));
+    } else {
+        requestAnimationFrame(scrollActiveLink);
+    }
+    document.addEventListener('astro:page-load', () => requestAnimationFrame(scrollActiveLink));
+</script>

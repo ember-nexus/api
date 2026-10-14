@@ -1,0 +1,39 @@
+---
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+
+import { Code } from 'astro-expressive-code/components';
+import { parse } from 'node-html-parser';
+
+import { trimBlankLines } from '../util/htmlUtil.ts';
+
+interface Props {
+    /** Path to the HTML file to embed. Absolute, or relative to the project root. */
+    file: string;
+    /** The CLI command shown above the output. */
+    command: string;
+    /** Optional heading label rendered above the terminal block and used as a TOC anchor. */
+    label?: string;
+    /** Optional id for the section heading (used by TocNav). */
+    id?: string;
+}
+
+const { file, command, label, id } = Astro.props;
+
+// Runs at build time: read the file, keep only the colorized <pre> contents,
+// trimmed of the blank lines `aha` pads its output with.
+const raw = await readFile(path.resolve(process.cwd(), file), 'utf-8');
+const preInnerHtml = parse(raw).querySelector('pre')?.innerHTML ?? raw;
+const bodyHtml = `<pre>${trimBlankLines(preInnerHtml)}</pre>`;
+---
+{/*
+    Structure only — all visual styling lives in the global `terminal-example.css`.
+    The two children stack with NO gap; the wrapper draws the shell (background,
+    border, rounded outer corners) and `overflow: hidden` clips the inner corners
+    flat automatically, so the command block + output read as one terminal.
+*/}
+{label && <h3 id={id} class="api-block-title">{label}</h3>}
+<div class="terminal-example not-prose">
+    <Code code={command} lang="bash" />
+    <div class="terminal-output" set:html={bodyHtml} data-pagefind-ignore="all" translate="no"></div>
+</div>

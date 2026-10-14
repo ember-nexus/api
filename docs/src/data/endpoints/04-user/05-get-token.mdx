@@ -1,0 +1,17 @@
+---
+endpoint: get-token
+group: user
+method: get
+name: Get token
+endpointUrl: /token
+swaggerUrl: /token
+---
+
+Alias endpoint; returns the element of the currently used token. This is equivalent to `GET /<uuid>` for the token's
+own `id`, and is useful when that `id` is not yet known.
+
+To list all tokens of the current user, request the root elements and filter for the `Token` type instead.
+
+**Note**: Unlike most other endpoints, this one requires a token: calling it without one (i.e. as the default
+anonymous user) returns `403 Forbidden` rather than `401 Unauthorized`. An invalid or expired token still results in
+`401 Unauthorized`.

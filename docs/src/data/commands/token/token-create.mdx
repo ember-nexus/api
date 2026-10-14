@@ -1,0 +1,20 @@
+---
+command: token:create
+name: token:create
+helpCommand: php bin/console token:create --help
+helpOutput: token-create-help.html
+exampleCommand: php bin/console token:create token-create-test@localhost.dev 1234
+exampleOutput: token-create.html
+---
+
+Creates a new authentication token for a user directly from the CLI, without going through an HTTP
+login request - useful for scripting, seeding test accounts, or bootstrapping access when no token
+exists yet.
+
+Both arguments are required: `identifier` is the user's unique identifier (typically their email,
+depending on the instance's configured unique identifier field) or the user's UUID directly, and
+`password` is that user's plaintext password. The command looks up the user, verifies the password
+against the stored hash, and on success prints a newly generated token.
+
+The command exits with a failure status (without creating a token) if the identifier can't be
+resolved to exactly one user, if the user has no password set, or if the password doesn't match.

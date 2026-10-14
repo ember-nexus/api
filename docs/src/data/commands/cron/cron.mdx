@@ -1,0 +1,22 @@
+---
+command: cron
+name: cron
+helpCommand: php bin/console cron --help
+helpOutput: cron-help.html
+exampleCommand: php bin/console cron
+exampleOutput: cron.html
+---
+
+Runs every registered background task once, in sequence. It does not itself schedule anything or
+run in a loop - every API container instance already invokes it automatically every 5 minutes
+(see the [configuration reference](/reference/configuration#background-tasks)), so no
+external scheduler needs to be set up for this to run.
+
+Takes no arguments or options. Currently runs [`cron:delete-expired-uploads`](/command/cron-delete-expired-uploads)
+followed by [`cron:reindex-files`](/command/cron-reindex-files). (A `cron:update-ownership` command exists as an empty stub and is not part of `cron`.) If cron is disabled instance-wide,
+the command exits immediately without running any of the individual tasks.
+
+<Note>
+    Each task can also be run on its own, e.g. for testing or to run it on a different schedule
+    than the others - see [`cron:delete-expired-uploads`](/command/cron-delete-expired-uploads).
+</Note>

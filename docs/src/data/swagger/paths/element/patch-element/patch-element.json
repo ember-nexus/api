@@ -1,0 +1,74 @@
+{
+  "paths": {
+    "/{uuid}": {
+      "patch": {
+        "summary": "Patch element",
+        "description": "Updates the data properties of an given element. Not updated root keys of the element's data are kept as they are.",
+        "operationId": "patch-element",
+        "tags": [
+          "Element"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Id of the element whose data is to be updated."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Arbitrary data related to the element.",
+                "additionalProperties": true,
+                "example": {
+                  "hello": "world :D"
+                }
+              }
+            }
+          }
+        },
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "PATCH",
+              "url": "https://api.example.com/7b80b203-2b82-40f5-accd-c7089fe6114e",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"someDataKey\": \"some new value :D\"}"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

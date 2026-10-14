@@ -1,0 +1,23 @@
+---
+type: guide
+title: Query string
+---
+import searchQuery from './08-query-string/query.sh?raw';
+import searchResultBody from './08-query-string/result.json';
+import searchResultHeaders from './08-query-string/header.txt?raw';
+
+This example uses Elasticsearch's [`query string` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-query-string-query)
+to perform a full text similar search across all elements accessible to the user, with in-query logic.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+**Note**: The query string must be properly formatted, as otherwise Elasticsearch itself will throw an error.
+
+<Code code={searchQuery} lang="bash" mark="query_string" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+The results include only elements whose description properties include the word "blue" and exclude the word "red".

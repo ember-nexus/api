@@ -1,0 +1,25 @@
+{
+  "components": {
+    "headers": {
+      "Upload-Offset": {
+        "description": "Number of bytes already stored for the resumable upload. On a request, it must match the upload's current offset exactly; on a response, it reflects the offset after the request was processed.",
+        "schema": {
+          "type": "integer",
+          "example": 5242880
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://datatracker.ietf.org/doc/draft-ietf-httpbis-resumable-upload/",
+            "name": "IETF draft"
+          },
+          {
+            "url": "https://http.dev/upload-offset",
+            "name": "HTTP.dev"
+          }
+        ],
+        "x-ember-nexus-important": true,
+        "required": true
+      }
+    }
+  }
+}

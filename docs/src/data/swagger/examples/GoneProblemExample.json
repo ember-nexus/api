@@ -1,0 +1,14 @@
+{
+  "components": {
+    "examples": {
+      "GoneProblemExample": {
+        "value": {
+          "type": "https://api.example.com/error/410/gone",
+          "title": "Gone",
+          "status": 410,
+          "detail": "Requested resource is no longer available and is expected to soon be permanently deleted."
+        }
+      }
+    }
+  }
+}

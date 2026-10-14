@@ -1,0 +1,24 @@
+{
+  "components": {
+    "headers": {
+      "Access-Control-Allow-Methods": {
+        "description": "Indicates which HTTP methods are permitted for cross-origin requests, typically returned in preflight responses.",
+        "schema": {
+          "type": "string",
+          "example": "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Methods",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/access-control-allow-methods",
+            "name": "HTTP.dev"
+          }
+        ],
+        "required": true
+      }
+    }
+  }
+}

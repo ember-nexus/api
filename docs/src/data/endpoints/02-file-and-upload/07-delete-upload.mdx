@@ -1,0 +1,27 @@
+---
+endpoint: delete-upload
+group: file-and-upload
+method: delete
+name: Delete upload
+endpointUrl: /upload/<uuid>
+swaggerUrl: /upload/{uuid}
+---
+
+Aborts a resumable upload created by [`POST /<uuid>/file`](/api/post-element-file) or
+[`PUT /<uuid>/file`](/api/put-element-file): already-uploaded chunks are removed from storage, and the upload itself
+ceases to exist. The upload's target element is left untouched - it still has no file (or keeps its previous one, for
+an upload started via `PUT`).
+
+<Note>
+    Only the user who created the upload can delete it - even a user with full access to the upload's target element
+    gets `404` for an upload they did not start themselves.
+</Note>
+
+While another request on the same upload is being processed (per-upload lock), this endpoint answers
+`409 Conflict`.
+
+<Note>
+    Deleting an upload is optional. Unfinished uploads expire on their own once their `Expires` timestamp passes (see
+    [`PATCH /upload/<uuid>`](/api/patch-upload)), but deleting one explicitly frees the already-uploaded chunks immediately instead
+    of waiting for expiry.
+</Note>

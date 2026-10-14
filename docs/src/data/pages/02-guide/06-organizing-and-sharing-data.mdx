@@ -1,0 +1,133 @@
+---
+type: guide
+title: Organizing and sharing data
+---
+
+This page focuses on practical patterns for organizing and sharing data. For the underlying mechanics of ownership,
+access grants and groups, see the [access model](/reference/access-model) reference page.
+
+Organizing your data is important because:
+
+- Organized data can be easily accessed, searched and used.
+- Access management and sharing in general is simpler when data is organized.
+- Performance can drop when a few nodes are collected to too many other nodes / have too many relations. Usually only a
+  problem for 10.000+ relations, also called [super nodes](https://medium.com/neo4j/graph-modeling-all-about-super-nodes-d6ad7e11015b).
+  - Super nodes can appear for time based data as well. E.g. if you create and store a "report" every 5 minutes under
+    the same parent node, then you will have more than 8.000 elements after just a month. In order to reduce this load
+    on the parent node, you can use time based sub-groupings:
+
+<TwoColumn>
+    <ComparisonCard variant="bad" title="Bad">
+        <g6-graph layout="antv-dagre-TB" variant="bad">
+            <script type="application/json">{`
+        {
+            "elements": [
+                { "id": "parent", "type": "Collection", "data": { "name": "Parent" }},
+                { "id": "report1", "type": "Report", "data": { "name": "Report 2026.01.01" }},
+                { "id": "report2", "type": "Report", "data": { "name": "Report 2026.01.15" }},
+                { "id": "report3", "type": "Report", "data": { "name": "Report 2026.02.01" }},
+                { "id": "report4", "type": "Report", "data": { "name": "Report 2026.02.15" }},
+                { "id": "owns1", "type": "OWNS", "start": "parent", "end": "report1" },
+                { "id": "owns2", "type": "OWNS", "start": "parent", "end": "report2" },
+                { "id": "owns3", "type": "OWNS", "start": "parent", "end": "report3" },
+                { "id": "owns4", "type": "OWNS", "start": "parent", "end": "report4" }
+            ]
+        }
+      `}</script>
+        </g6-graph>
+    </ComparisonCard>
+
+    <ComparisonCard variant="good" title="Good">
+        <g6-graph layout="antv-dagre-TB" variant="good">
+            <script type="application/json">{`
+        {
+            "elements": [
+                { "id": "parent", "type": "Collection", "data": { "name": "Parent" }},
+                { "id": "collection1", "type": "Collection", "data": { "name": "Reports 2026.01" }},
+                { "id": "collection2", "type": "Collection", "data": { "name": "Reports 2026.02" }},
+                { "id": "report1", "type": "Report", "data": { "name": "Report 2026.01.01" }},
+                { "id": "report2", "type": "Report", "data": { "name": "Report 2026.01.15" }},
+                { "id": "report3", "type": "Report", "data": { "name": "Report 2026.02.01" }},
+                { "id": "report4", "type": "Report", "data": { "name": "Report 2026.02.15" }},
+                { "id": "ownsCollection1", "type": "OWNS", "start": "parent", "end": "collection1" },
+                { "id": "ownsCollection2", "type": "OWNS", "start": "parent", "end": "collection2" },
+                { "id": "owns1", "type": "OWNS", "start": "collection1", "end": "report1" },
+                { "id": "owns2", "type": "OWNS", "start": "collection1", "end": "report2" },
+                { "id": "owns3", "type": "OWNS", "start": "collection2", "end": "report3" },
+                { "id": "owns4", "type": "OWNS", "start": "collection2", "end": "report4" }
+            ]
+        }
+      `}</script>
+        </g6-graph>
+    </ComparisonCard>
+</TwoColumn>
+
+## General tips
+
+- Group elements together by using parent nodes - a single node which "owns" all related elements.
+- Use nested groups.
+- Do not be afraid to change groupings, hierarchies etc. - Ember Nexus uses a graph database internally, so these
+  operations are generally not expensive.
+
+## Tips for multi-user installations
+
+- Do not grant individual users access to specific elements, groups or similar. Instead, create a `Group`, add the user
+  to the group, and grant the group access to the element.
+
+<TwoColumn>
+    <ComparisonCard variant="bad" title="Bad">
+        <g6-graph layout="force" variant="bad">
+            <script type="application/json">{`
+            {
+                "elements": [
+                    { "id": "user1", "type": "User", "data": { "name": "User 1" }},
+                    { "id": "user2", "type": "User", "data": { "name": "User 2" }},
+                    { "id": "user3", "type": "User", "data": { "name": "User 3" }},
+                    { "id": "user4", "type": "User", "data": { "name": "User 4" }},
+                    { "id": "user5", "type": "User", "data": { "name": "User 5" }},
+                    { "id": "data", "type": "Data", "data": { "name": "Data" }},
+                    { "id": "owns1", "type": "OWNS", "start": "user1", "end": "data" },
+                    { "id": "owns2", "type": "OWNS", "start": "user2", "end": "data" },
+                    { "id": "owns3", "type": "OWNS", "start": "user3", "end": "data" },
+                    { "id": "owns4", "type": "OWNS", "start": "user4", "end": "data" },
+                    { "id": "owns5", "type": "OWNS", "start": "user5", "end": "data" }
+                ]
+            }
+          `}</script>
+        </g6-graph>
+    </ComparisonCard>
+    
+    <ComparisonCard variant="good" title="Good">
+        <g6-graph layout="force" variant="good">
+            <script type="application/json">{`
+            {
+                "elements": [
+                    { "id": "user1", "type": "User", "data": { "name": "User 1" }},
+                    { "id": "user2", "type": "User", "data": { "name": "User 2" }},
+                    { "id": "user3", "type": "User", "data": { "name": "User 3" }},
+                    { "id": "user4", "type": "User", "data": { "name": "User 4" }},
+                    { "id": "user5", "type": "User", "data": { "name": "User 5" }},
+                    { "id": "data", "type": "Data", "data": { "name": "Data" }},
+                    { "id": "group", "type": "Group", "data": { "name": "Group" }},
+                    { "id": "owns", "type": "OWNS", "start": "group", "end": "data" },
+                    { "id": "isInGroup1", "type": "IS_IN_GROUP", "start": "user1", "end": "group" },
+                    { "id": "isInGroup2", "type": "IS_IN_GROUP", "start": "user2", "end": "group" },
+                    { "id": "isInGroup3", "type": "IS_IN_GROUP", "start": "user3", "end": "group" },
+                    { "id": "isInGroup4", "type": "IS_IN_GROUP", "start": "user4", "end": "group" },
+                    { "id": "isInGroup5", "type": "IS_IN_GROUP", "start": "user5", "end": "group" }
+                ]
+            }
+          `}</script>
+        </g6-graph>
+    </ComparisonCard>
+</TwoColumn>
+
+## Sharing and transferring ownership
+
+To share an element with someone else, grant their user (or, following the tip above, a group they belong to) one of
+the `HAS_X_ACCESS` relations, or `OWNS` for full access - see [access model](/reference/access-model) for the full set
+of operations and how conditional access (per type, per parent, per creator) works.
+
+To hand ownership of an element over to someone else entirely, rather than just sharing it, see
+[transfer of ownership](/reference/access-model/transfer-of-ownership) - it also covers what to watch out for so you
+don't lock yourself out mid-transfer.

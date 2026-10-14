@@ -1,0 +1,24 @@
+{
+  "components": {
+    "headers": {
+      "Cache-Control": {
+        "description": "Directives controlling caching behavior for the response.",
+        "schema": {
+          "type": "string",
+          "example": "no-cache, private"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/cache-control",
+            "name": "HTTP.dev"
+          }
+        ],
+        "required": true
+      }
+    }
+  }
+}

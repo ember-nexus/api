@@ -1,0 +1,45 @@
+{
+  "components": {
+    "schemas": {
+      "PartialCollection": {
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "totalNodes",
+          "links",
+          "nodes",
+          "relations"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": "_PartialCollection"
+          },
+          "id": {
+            "type": "string",
+            "description": "URL of the current collection page."
+          },
+          "totalNodes": {
+            "type": "integer"
+          },
+          "links": {
+            "$ref": "#/components/schemas/CollectionLinks"
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "#/components/schemas/Element"
+            }
+          },
+          "relations": {
+            "type": "array",
+            "items": {
+              "type": "#/components/schemas/Element"
+            }
+          }
+        }
+      }
+    }
+  }
+}

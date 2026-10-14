@@ -1,0 +1,25 @@
+---
+type: guide
+title: Parameterized search
+---
+import searchQuery from './11-parameterized-search/query.sh?raw';
+import searchResultBody from './11-parameterized-search/result.json';
+import searchResultHeaders from './11-parameterized-search/header.txt?raw';
+
+This example shows how to inject client-provided data into an Elasticsearch Query DSL query using an
+[expression](/reference/search/elasticsearch-query-dsl-mixin#parameterized-elasticsearch-queries). The `{{someElementIds}}`
+placeholder is replaced with the `someElementIds` step parameter before the query is sent to Elasticsearch, resulting in
+a [`terms` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-terms-query) that matches
+exactly the three given element ids.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+<Code code={searchQuery} lang="bash" mark="someElementIds" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+All three elements referenced by `someElementIds` are returned, in the order Elasticsearch ranks them - not necessarily
+the order they were listed in the parameter.

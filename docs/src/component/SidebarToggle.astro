@@ -1,0 +1,20 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+    icon?: string;
+}
+
+const { icon = 'panel-left' } = Astro.props;
+---
+<button
+    type="button"
+    data-overlay-toggle="sidebar"
+    aria-label="Toggle sidebar"
+    aria-controls="sidebar"
+    class="inline-flex cursor-pointer items-center justify-center rounded-md p-2 text-gray-700 transition hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] dark:text-zinc-200 dark:hover:bg-zinc-800"
+>
+    <Icon name={icon} class="size-5" />
+</button>
+
+

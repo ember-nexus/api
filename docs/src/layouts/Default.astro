@@ -1,0 +1,412 @@
+---
+import '../styles/global.css'
+
+import Header from '../component/Header.astro'
+import OverlayPanel from '../component/OverlayPanel.astro'
+import PageNav from '../component/PageNav.astro'
+import Sidebar from '../component/Sidebar.astro'
+import TocNav from '../component/TocNav.astro'
+
+interface Props {
+    title: string
+    description?: string
+    ogType?: 'website' | 'article'
+    headings?: { depth: number; slug: string; text: string }[]
+    hidden?: boolean
+}
+
+const { title, description, ogType = 'website', headings = [], hidden = false } = Astro.props
+
+// Derive the OG image URL from the current page path.
+// Convention: /open-graph/<slug>.png mirrors the public URL.
+const getOgImagePath = (pathname: string): string => {
+    let slug = pathname.replace(/^\//, '').replace(/\/$/, '');
+    if (slug === '') slug = 'index';
+    return `/open-graph/${slug}.png`;
+};
+
+const ogImagePath = getOgImagePath(Astro.url.pathname);
+const ogImageUrl = new URL(ogImagePath, Astro.url.origin).href;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).href;
+---
+
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {description && <meta name="description" content={description} />}
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Ember Nexus API" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <title>{title}</title>
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <!-- Suppress transitions immediately so panels don't animate into position on first paint. -->
+    <script is:inline>document.documentElement.classList.add('no-transitions');</script>
+    <script defer src="https://analytics.webserver.ember-nexus.dev/script.js" data-website-id="dcc00c41-5a1a-48db-8e4f-59ce8a7fada7"></script>
+</head>
+
+<body class="min-h-screen bg-white text-gray-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+<a
+    href="#main-content"
+    id="skip-to-main-content"
+    class="fixed left-4 top-4 z-[60] -translate-y-[calc(100%+2rem)] rounded-lg border border-gray-200
+           bg-white px-4 py-2.5 text-sm font-medium text-gray-900 shadow-xl outline-none
+           transition-transform duration-200 ease-out
+           focus:translate-y-0 focus:ring-2 focus:ring-[var(--color-focus)]
+           focus:ring-offset-2 focus:ring-offset-white
+           dark:border-zinc-800 dark:bg-black dark:text-zinc-100 dark:focus:ring-offset-black"
+>
+    Skip to main content
+</a>
+<Header />
+<Sidebar />
+
+{headings.length > 0 && (
+    <OverlayPanel id="toc-panel" side="right" label="Table of contents">
+        <TocNav headings={headings} />
+    </OverlayPanel>
+)}
+
+
+<div
+    id="main-content"
+    tabindex="-1"
+    class="flex min-h-screen flex-col pt-14 transition-[padding] duration-200 ease-in-out pl-0 sm:pt-16 focus:outline-none"
+>
+    {headings.length > 0 && (
+        /* Desktop fixed TOC — position:fixed takes it out of normal flow on screen,
+           so placing it inside #main-content has zero layout impact there.
+           On print (position:static) it flows naturally after the title block. */
+        <aside class="toc-sidebar" aria-label="Table of contents">
+            <TocNav headings={headings} />
+        </aside>
+    )}
+    <main class="content-grid" data-pagefind-body>
+        <slot />
+        <PageNav currentPath={Astro.url.pathname} hidden={hidden} />
+    </main>
+</div>
+
+<script>
+    // Lazy-load the Lit/G6 bundle only on pages that actually contain
+    // <g6-graph> or <json-table> custom elements.
+    //
+    // Strategy:
+    //   1. If neither element is present in the DOM → nothing to upgrade on
+    //      this page, but see warmCacheInBackground() below.
+    //   2. If elements exist but none are visible yet → load when the browser is
+    //      idle (requestIdleCallback) so the heavy bundle doesn't compete with
+    //      first-paint rendering.
+    //   3. If an element is already in the viewport → load immediately via a
+    //      dynamic import so it upgrades as fast as possible.
+    //
+    // The same logic re-runs on Astro view-transition navigations via
+    // `astro:page-load`, which fires after the new page's DOM is ready.
+
+    const LIT_SELECTORS = 'g6-graph, json-table';
+
+    function loadLitBundle() {
+        return import('../component/Lit/index.ts');
+    }
+
+    // The bundle (~1.5MB) is only ever fetched by a page that actually
+    // renders a graph. A visitor who never lands on such a page — then goes
+    // offline, or hits the site again when the server is unreachable — has
+    // simply never cached it, so it silently fails to load and every graph
+    // renders blank. This isn't fixable via response headers alone (a
+    // Cache-Control policy can't make the browser cache a request it never
+    // made), so instead: warm the cache in the background, once per session,
+    // on every OTHER page too — during idle time, and only on a connection
+    // that isn't metered/slow, so it doesn't cost mobile data proactively.
+    let warmed = false;
+
+    function warmCacheInBackground() {
+        if (warmed) return;
+        warmed = true;
+
+        const connection = (navigator as any).connection;
+        if (connection?.saveData) return;
+        if (connection?.effectiveType && /2g/.test(connection.effectiveType)) return;
+
+        const schedule =
+            'requestIdleCallback' in window
+                ? (fn: () => void) => requestIdleCallback(fn, { timeout: 10000 })
+                : (fn: () => void) => setTimeout(fn, 3000);
+
+        schedule(() => {
+            loadLitBundle();
+        });
+    }
+
+    let loaded = false;
+
+    function maybeLoad() {
+        if (loaded) return;
+
+        const elements = document.querySelectorAll(LIT_SELECTORS);
+        if (elements.length === 0) {
+            warmCacheInBackground();
+            return; // This page needs no Lit components of its own.
+        }
+
+        // Check if any element is already intersecting the viewport.
+        const anyVisible = Array.from(elements).some((el) => {
+            const rect = el.getBoundingClientRect();
+            return rect.top < window.innerHeight && rect.bottom > 0;
+        });
+
+        if (anyVisible) {
+            // Load immediately — user can already see the placeholder.
+            loaded = true;
+            loadLitBundle();
+            return;
+        }
+
+        // Elements exist but are below the fold. Load during idle time so the
+        // bundle is ready before the user scrolls to them.
+        const scheduleLoad = () => {
+            loaded = true;
+            loadLitBundle();
+        };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(scheduleLoad, { timeout: 2000 });
+        } else {
+            // Safari fallback: use a short timeout.
+            setTimeout(scheduleLoad, 200);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', maybeLoad);
+    } else {
+        maybeLoad();
+    }
+    // Re-evaluate after Astro view-transition navigations.
+    document.addEventListener('astro:page-load', () => {
+        // Reset so a new page that contains components can trigger a load.
+        // If the bundle is already downloaded it will be served from the
+        // module cache instantly — no extra network round trip.
+        loaded = false;
+        maybeLoad();
+    });
+</script>
+
+<script>
+    // TOC scroll-aware positioning:
+    // - At scrollY=0 the TOC starts below the title block (visually grouped with content).
+    // - As the page scrolls, the TOC moves up with the content until it hits the
+    //   header bottom, then stays stuck there (classic "sticky after threshold").
+    //
+    // Strategy: position:fixed, update `top` on every scroll frame.
+    //   top = clamp(headerH, initialTop - scrollY, initialTop)
+    //   where initialTop = document-bottom of title block + row-gap.
+
+    let tocInitialTop = 0; // document-absolute px of the element top — recomputed on load/resize
+    let headerH = 64;      // px — recomputed on load/resize
+
+    // Gap between header bottom and first TOC link when the TOC is fully stuck.
+    // Must match the padding-top on .toc-sidebar in grid.css.
+    const TOC_PADDING_TOP = 16;
+
+    function measureToc() {
+        const header = document.querySelector('header');
+        const titleBlock = document.querySelector('.page-title-block');
+        headerH = header ? header.getBoundingClientRect().height : 64;
+
+        const rowGap = 24; // 1.5rem — matches content-grid row-gap
+        if (titleBlock instanceof HTMLElement) {
+            // document-absolute bottom of title block + row-gap = where the first link should start.
+            // Subtract padding-top so the element top is that far above the first link.
+            const firstLinkDocY = titleBlock.getBoundingClientRect().bottom + window.scrollY + rowGap;
+            tocInitialTop = firstLinkDocY - TOC_PADDING_TOP;
+        } else {
+            tocInitialTop = headerH + rowGap - TOC_PADDING_TOP;
+        }
+
+        applyTocTop();
+    }
+
+    function applyTocTop() {
+        // When sticky: element top = headerH, first link lands at headerH + TOC_PADDING_TOP.
+        const top = Math.max(headerH, tocInitialTop - window.scrollY);
+        const maxH = window.innerHeight - top;
+        const toc = document.querySelector<HTMLElement>('.toc-sidebar');
+        if (toc) {
+            toc.style.top = `${top}px`;
+            toc.style.maxHeight = `${maxH}px`;
+        }
+    }
+
+    function initTocPosition() {
+        measureToc();
+        window.addEventListener('scroll', applyTocTop, { passive: true });
+        window.addEventListener('resize', measureToc, { passive: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTocPosition);
+    } else {
+        initTocPosition();
+    }
+    document.addEventListener('astro:page-load', initTocPosition);
+</script>
+
+<script is:inline>
+    // Apply the correct TOC top position synchronously before first paint to prevent
+    // layout shift. Mirrors the measureToc() / applyTocTop() logic above, but runs
+    // inline so the browser can apply it before rendering the sidebar.
+    (function () {
+        var TOC_PADDING_TOP = 16;
+        var toc = document.querySelector('.toc-sidebar');
+        if (!toc) return;
+        var header = document.querySelector('header');
+        var titleBlock = document.querySelector('.page-title-block');
+        var headerH = header ? header.getBoundingClientRect().height : 64;
+        var rowGap = 24;
+        var tocInitialTop;
+        if (titleBlock) {
+            var firstLinkDocY = titleBlock.getBoundingClientRect().bottom + window.scrollY + rowGap;
+            tocInitialTop = firstLinkDocY - TOC_PADDING_TOP;
+        } else {
+            tocInitialTop = headerH + rowGap - TOC_PADDING_TOP;
+        }
+        var top = Math.max(headerH, tocInitialTop - window.scrollY);
+        toc.style.top = top + 'px';
+        toc.style.maxHeight = (window.innerHeight - top) + 'px';
+    })();
+</script>
+
+<script>
+    // TOC links: header-aware smooth scroll on all viewports.
+    // On mobile, also close the TOC overlay first via the event system.
+    // Active-section highlighting is handled inside TocNav.astro.
+    function initTocClicks() {
+        const tocLinks = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+        if (!tocLinks.length) return;
+
+        const getHeaderHeight = (): number => {
+            const header = document.querySelector('header');
+            return header ? header.getBoundingClientRect().height : 56;
+        };
+
+        tocLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                if (isMobile) {
+                    window.dispatchEvent(new CustomEvent('overlay-close', { detail: { id: 'toc-panel' } }));
+                }
+
+                const href = link.getAttribute('href');
+                if (!href) return;
+                const target = document.getElementById(href.slice(1));
+                if (!target) return;
+
+                history.pushState(null, '', href);
+
+                requestAnimationFrame(() => {
+                    const top = target.getBoundingClientRect().top + window.scrollY - getHeaderHeight() - 16;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                });
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTocClicks);
+    } else {
+        initTocClicks();
+    }
+    document.addEventListener('astro:page-load', initTocClicks);
+</script>
+
+<script>
+    // Print: relocate .toc-sidebar so it renders between the page title block
+    // and the main prose content.  On screen the aside is position:fixed (out of
+    // flow), so its DOM position is irrelevant.  For print (position:static) we
+    // move it programmatically just before the browser lays out the print page,
+    // then restore it afterwards so the live page is unaffected.
+
+    let tocOriginalParent: Element | null = null;
+    let tocOriginalNextSibling: Element | null = null;
+
+    function relocateTocForPrint() {
+        const toc = document.querySelector<HTMLElement>('.toc-sidebar');
+        const titleBlock = document.querySelector<HTMLElement>('.page-title-block');
+        if (!toc || !titleBlock) return;
+
+        // Record original position so we can restore after printing.
+        tocOriginalParent = toc.parentElement;
+        tocOriginalNextSibling = toc.nextElementSibling;
+
+        // Insert immediately after the title block.
+        titleBlock.after(toc);
+    }
+
+    function restoreTocAfterPrint() {
+        const toc = document.querySelector<HTMLElement>('.toc-sidebar');
+        if (!toc || !tocOriginalParent) return;
+
+        if (tocOriginalNextSibling) {
+            tocOriginalParent.insertBefore(toc, tocOriginalNextSibling);
+        } else {
+            tocOriginalParent.appendChild(toc);
+        }
+
+        tocOriginalParent = null;
+        tocOriginalNextSibling = null;
+    }
+
+    function initPrintToc() {
+        window.addEventListener('beforeprint', relocateTocForPrint);
+        window.addEventListener('afterprint',  restoreTocAfterPrint);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPrintToc);
+    } else {
+        initPrintToc();
+    }
+    document.addEventListener('astro:page-load', initPrintToc);
+</script>
+
+<script>
+    // Move focus to the main content area for keyboard users when the skip link is activated.
+    function initSkipLink() {
+        const skipLink = document.getElementById('skip-to-main-content');
+        if (!skipLink) return;
+
+        skipLink.addEventListener('click', (event) => {
+            const target = document.getElementById('main-content');
+            if (!target) return;
+
+            event.preventDefault();
+            target.focus({ preventScroll: true });
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSkipLink);
+    } else {
+        initSkipLink();
+    }
+    document.addEventListener('astro:page-load', initSkipLink);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+---
+type: guide
+title: Search
+---
+
+## General search process
+
+Every search request is written in **search steps** - smaller execution units, which are specialized for one specific
+database or technology. Results of earlier search steps are available to later search steps as input parameters,
+allowing **cross-database search logic**.
+
+Ember Nexus currently offers three search steps: an Elasticsearch query for full text and explorative search, a
+Cypher path query for structural, relation-aware search, and an element hydration step that turns raw ids into full
+elements. See [choosing a search step](/guide/search/choosing-a-search-step) for guidance on which one (or
+combination) fits your use case, and the [reference page](/reference/search) for the full technical details and
+security constraints of each.
+
+## Guides
+
+- [Choosing a search step](/guide/search/choosing-a-search-step)
+- [Writing an Elasticsearch query](/guide/search/writing-an-elasticsearch-query)
+- [Writing a Cypher query](/guide/search/writing-a-cypher-query)
+- [Parameters and expressions](/guide/search/parameters-and-expressions)
+
+## A first example
+
+import simpleFullTextSearch from '../assets/simple-full-text-search.json';
+import simpleFullTextSearchHeader from '../assets/simple-full-text-search.txt?raw';
+
+In this example, only Elasticsearch is queried for all elements, whose `description`-property contains the word
+`lily`.  
+The `element-hydration`-step only makes sure, that the results from Elasticsearch are correctly hydrated and returned.
+
+See also [Elasticsearch's documentation about the match query clause](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query).
+
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "debug": true,
+        "steps": [
+          {
+            "type": "elasticsearch-query-dsl-mixin",
+            "query": {
+              "match": {
+                "description": {
+                  "query": "lily"
+                }
+              }
+            }
+          },
+          {
+            "type": "element-hydration"
+          }
+        ]
+      }' \
+  https://api.example.com/search
+```
+
+<SearchResponseCard
+    responseBody={simpleFullTextSearch}
+    responseHeaders={simpleFullTextSearchHeader}
+    graphLayout="grid"
+></SearchResponseCard>
+
+As Elasticsearch only returns individual elements, no paths can be observed.
+
+For more examples - including structural Cypher searches and requests that combine both databases in one pipeline -
+see the [reference examples](/reference/search#examples).

@@ -1,0 +1,26 @@
+---
+endpoint: get-error-405-method-not-allowed
+group: error
+method: get
+name: 405 method not allowed
+endpointUrl: /error/405/method-not-allowed
+swaggerUrl: /error/405/method-not-allowed
+---
+
+General error response. As this endpoint is static, it can not return specific details or logs for a previously sent
+error response.
+
+Returned when the route exists but does not support the used HTTP method, e.g. `POST /upload/<uuid>`.
+
+Example problem response body (`application/problem+json`):
+
+```json
+{
+  "type": "https://api.example.com/error/405/method-not-allowed",
+  "title": "Method Not Allowed",
+  "status": 405,
+  "detail": "The requested route exists, but does not support the used HTTP method."
+}
+```
+
+TODO: the response currently lacks the `Allow` header required by RFC 9110 - undecided.

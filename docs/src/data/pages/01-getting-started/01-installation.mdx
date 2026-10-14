@@ -1,0 +1,60 @@
+---
+type: guide
+title: Installation
+---
+
+Ember Nexus is available on [Docker](https://hub.docker.com/r/embernexus/api) for AMD and ARM architectures.
+
+Additional architectures like RISC V are planned to be supported at some point in the future, but require additional
+work in upstream dependencies.
+
+## Requirements
+
+**Hardware requirements**: Normal deployments require at least 8 GB of RAM, 4+ vCPUs, and 10 GB of SSD storage, because
+both Neo4j and Elasticsearch - mandatory components of the Ember Nexus deployment - are Java based and can consume a
+lot of memory.
+
+**Software requirements**: Docker is required.
+
+## Dependencies
+
+Ember Nexus requires several databases to be available:
+
+- [Neo4j](https://neo4j.com)
+- [MongoDB](https://www.mongodb.com)
+- [Elasticsearch](https://www.elastic.co/elasticsearch)
+- [S3](https://aws.amazon.com/s3) compatible storage API, e.g. [MinIO](https://www.min.io)
+- [Redis](https://redis.io)
+- [RabbitMQ](https://www.rabbitmq.com)
+
+All the dependencies can be operated as Docker containers as well.
+
+## Docker Compose
+
+import dockerCompose from "../../../../public/docker-compose.yml?raw"
+
+<Code code={dockerCompose} lang="yaml" />
+
+This file can be <Link link={{ url: '/docker-compose.yml', name: 'downloaded directly' }} download />.
+
+## Reverse proxy
+
+Ember Nexus is designed to be used behind a reverse proxy like [Traefik](https://traefik.io/traefik) or
+[Caddy](https://caddyserver.com/), and for that reason, it does not offer options to configure TLS and similar settings
+itself.
+
+### Traefik example configuration
+
+import dockerComposeTraefik from "../../../../public/docker-compose.traefik.yml?raw"
+
+<Code code={dockerComposeTraefik} lang="yaml" collapse={["27-96"]} mark={["yourEmail@example.com", "api.your-domain.com"]} />
+
+This file can be <Link link={{ url: '/docker-compose.traefik.yml', name: 'downloaded directly' }} download />.
+
+## High-availability setup (HA)
+
+Ember Nexus can be scaled up without any further configuration. Simply add additional containers with the same database
+access, configuration and ENV variables, and everything works out of the box :D
+
+The database services can be scaled up independently as well. Both community and enterprise editions are compatible with
+Ember Nexus.

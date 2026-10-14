@@ -1,0 +1,90 @@
+{
+  "paths": {
+    "/error/409/conflict": {
+      "get": {
+        "summary": "Get error 409 conflict",
+        "description": "Static informational page for the `https://api.example.com/error/409/conflict` problem type, explaining why the error is thrown.",
+        "operationId": "get-error-409-conflict",
+        "tags": [
+          "Error"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/error/409/conflict",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a static, human-readable explanation of the error.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "409_conflict": {
+                    "value": " Error 409 - Conflict\n\n The HTTP 409 Conflict client error response status code indicates a request conflict with the current state of the\n target resource.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 409 error code: https://http.dev/409\n\n"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

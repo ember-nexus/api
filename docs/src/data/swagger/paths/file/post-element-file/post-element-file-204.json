@@ -1,0 +1,64 @@
+{
+  "paths": {
+    "/{uuid}/file": {
+      "post": {
+        "responses": {
+          "204": {
+            "description": "A resumable upload (`Upload-Complete: ?0`) was created successfully. Its URL is returned in the `Location` header - continue it with `PATCH`, inspect it with `HEAD`, or abort it with `DELETE` against that URL.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "Location": {
+                "$ref": "#/components/headers/Location-created"
+              },
+              "Upload-Complete": {
+                "$ref": "#/components/headers/Upload-Complete"
+              },
+              "Upload-Offset": {
+                "$ref": "#/components/headers/Upload-Offset"
+              },
+              "Upload-Length": {
+                "$ref": "#/components/headers/Upload-Length"
+              },
+              "Upload-Limit": {
+                "$ref": "#/components/headers/Upload-Limit"
+              },
+              "Expires": {
+                "$ref": "#/components/headers/Expires"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/204",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/204",
+                "name": "HTTP.dev"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

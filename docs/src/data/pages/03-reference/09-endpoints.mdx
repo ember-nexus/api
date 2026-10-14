@@ -1,0 +1,56 @@
+---
+type: reference
+title: Endpoints
+---
+
+List of all endpoints, organized by group.
+
+## Element
+
+Core CRUD operations for nodes and relations in the graph.
+Elements are the primary building blocks of the data model and can be nodes or
+relations. Use these endpoints to create, read, update, and delete any element
+you have access to.
+
+<EndpointGroupList group="element" />
+
+## File and upload
+
+Endpoints for attaching binary files to elements and managing resumable uploads.
+Resumable uploads let you reliably transfer large files in chunks, even over
+unreliable connections.
+
+<EndpointGroupList group="file-and-upload" />
+
+## Search
+
+Full-text and structured search across the graph.
+See the [search tutorial](/guide/search) for a detailed guide on building search
+queries.
+
+<EndpointGroupList group="search" />
+
+## User
+
+Authentication and account management endpoints.
+Use these endpoints to register, log in, manage tokens, and retrieve
+information about the currently authenticated user.
+
+<EndpointGroupList group="user" />
+
+## System
+
+Instance-level introspection endpoints.
+These endpoints expose configuration parameters, the graph's type structure,
+and standard security disclosure files for the running instance.
+
+<EndpointGroupList group="system" />
+
+## Error
+
+Canonical error response pages.
+Each error endpoint returns a static, machine-readable error response for a
+specific HTTP status code. They are useful for understanding the error format
+returned by all other endpoints.
+
+<EndpointGroupList group="error" />

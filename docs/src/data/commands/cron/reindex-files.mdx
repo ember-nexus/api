@@ -1,0 +1,21 @@
+---
+command: cron:reindex-files
+name: cron:reindex-files
+helpCommand: php bin/console cron:reindex-files --help
+helpOutput: cron-reindex-files-help.html
+exampleCommand: php bin/console cron:reindex-files
+exampleOutput: cron-reindex-files.html
+---
+
+Re-syncs an element's `file` metadata (see the [file reference](/reference/file#metadata)) into
+Elasticsearch for elements whose file was changed since the last time it was indexed there.
+
+Takes no arguments or options. Elements become eligible for reindexing as a side effect of
+uploading, replacing, or deleting a file - the affected element is queued internally, and this
+command drains that queue, re-merging each element so all three backing stores (Cypher, MongoDB,
+Elasticsearch) agree on its `file`/`hasFile` properties again. An element that was deleted in the
+meantime before being reindexed is skipped, since there is nothing left to sync.
+
+<Note>
+    Normally run as part of [`cron`](/command/cron), not invoked directly.
+</Note>

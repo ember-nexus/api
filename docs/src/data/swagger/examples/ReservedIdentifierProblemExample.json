@@ -1,0 +1,15 @@
+{
+  "components": {
+    "examples": {
+      "ReservedIdentifierProblemExample": {
+        "summary": "The unique user identifier is already used by another account.",
+        "value": {
+          "type": "https://api.example.com/error/400/reserved-identifier",
+          "title": "Reserved identifier",
+          "status": 400,
+          "detail": "The requested identifier 'test@example.com' is reserved and can not be used."
+        }
+      }
+    }
+  }
+}

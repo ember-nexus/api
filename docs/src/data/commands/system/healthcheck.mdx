@@ -1,0 +1,17 @@
+---
+command: healthcheck
+name: healthcheck
+helpCommand: php bin/console healthcheck --help
+helpOutput: system-healthcheck-help.html
+exampleCommand: php bin/console healthcheck
+exampleOutput: system-healthcheck.html
+---
+
+Checks that the API instance and all of its dependent services are online and reports their
+versions, useful for diagnosing connectivity issues or confirming what's actually deployed.
+
+Takes no arguments or options. It connects to Neo4j, MongoDB, Elasticsearch, Redis, and RabbitMQ
+and reports each service's version, verifies the S3 storage and upload buckets are reachable,
+reports the Alpine, Caddy, FrankenPHP, and PHP versions of the running container, and finally makes
+an HTTP request to the API's own index endpoint, expecting a `200` or `429` response. If any check
+fails, the command throws and exits with a non-zero status instead of printing a partial report.

@@ -1,0 +1,26 @@
+---
+type: guide
+title: Find nested elements
+---
+import searchQuery from './02-find-nested-elements/query.sh?raw';
+import searchResultBody from './02-find-nested-elements/result.json';
+import searchResultHeaders from './02-find-nested-elements/header.txt?raw';
+
+This example uses a **variable length path** (`[:IS_MEMBER_OF*..]`) to find every `Plant` that is a member of the
+taxon "Liliales", directly or through any number of intermediate taxonomic ranks, and limits the result to `5` matches
+using Cypher's own `LIMIT` clause.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+<Code code={searchQuery} lang="bash" mark="IS_MEMBER_OF*.." />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="antv-dagre-LR"
+></SearchResponseCard>
+
+Because the path length is unbounded, the resulting graph includes every intermediate taxon between each matching
+plant and "Liliales" - not just the plants and the root taxon themselves.
+
+**Note**: `LIMIT` restricts how many *paths* Cypher returns, which is not the same as `pageSize` on the Elasticsearch
+query step - Cypher path query does not currently support pagination parameters of its own.

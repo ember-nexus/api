@@ -1,0 +1,41 @@
+---
+endpoint: get-related
+group: element
+method: get
+name: Get related
+endpointUrl: /<uuid>/related
+swaggerUrl: /{uuid}/related
+---
+
+Endpoint returns all nodes directly connected to a given central node, as well as the relations between the central and
+outer nodes, regardless of type.
+
+In the following example the id of the `Center {.hl-1}`-node is used in the `/<uuid>/related` endpoint, which will return the
+following elements in the endpoint's response:
+
+- the nodes `Parent {.hl-2}`, `Child {.hl-2}`, `Outer 1 {.hl-2}` and `Outer 2 {.hl-2}`
+- both `OWNS {.hl-2}`-relations
+- both `RELATED {.hl-2}`-relations
+
+<g6-graph mode="manual" layout="antv-dagre-LR">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "center", "type": "Data", "data": { "name": "Center", "hl": "1" }},
+            { "id": "parent", "type": "Data", "data": { "name": "Parent", "hl": "2" }},
+            { "id": "child", "type": "Data", "data": { "name": "Child", "hl": "2" }},
+            { "id": "outer1", "type": "Data", "data": { "name": "Outer 1", "hl": "2" }},
+            { "id": "outer2", "type": "Data", "data": { "name": "Outer 2", "hl": "2" }},
+            { "id": "owns1", "type": "OWNS", "start": "parent", "end": "center", "data": { "hl": "2" }},
+            { "id": "owns2", "type": "OWNS", "start": "center", "end": "child", "data": { "hl": "2" }},
+            { "id": "related1", "type": "RELATED", "start": "outer1", "end": "center", "data": { "hl": "2" }},
+            { "id": "related2", "type": "RELATED", "start": "center", "end": "outer2", "data": { "hl": "2" }}
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+As the get related endpoint returns all nodes and relations regardless of type, it means that it can be considered to be
+a **superset** of the get children and get parents endpoint. However, as this endpoint returns _every_ element directly
+connected, the overall number of elements can be way higher.  
+Use the specialized get children and get parents endpoint in situations, where only the ownership relation is relevant.

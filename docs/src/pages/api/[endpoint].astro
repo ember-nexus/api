@@ -1,0 +1,93 @@
+---
+import SwaggerParser from '@apidevtools/swagger-parser';
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+
+import { htmlComponents } from '../../component/registry.html.ts';
+import RequestBodyCard from "../../component/RequestBodyCard.astro";
+import RequestCard from '../../component/RequestCard.astro';
+import RequestHeaderCard from '../../component/RequestHeaderCard.astro';
+import RequestParameterCard from '../../component/RequestParameterCard.astro';
+import ResponseCard from '../../component/ResponseCard.astro';
+import ResponseHeaderCard from '../../component/ResponseHeaderCard.astro';
+import Default from '../../layouts/Default.astro';
+import { endpointParam } from '../../lib/index.ts';
+import {
+    extractHarExamples,
+    extractRequestBody,
+    extractRequestHeaders,
+    extractRequestParameters,
+    extractResponseExamples,
+    extractResponseHeaders,
+} from '../../util/index.ts';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+    const entries = await getCollection('endpoints');
+    return entries.map((entry) => ({
+        params: { endpoint: endpointParam(entry.data.endpoint) },
+        props: { entry },
+    }));
+};
+
+const { entry } = Astro.props;
+const { Content, headings: contentHeadings } = await render(entry);
+const { method, endpointUrl, swaggerUrl, name, description } = entry.data;
+
+const spec = await SwaggerParser.dereference('./src/data/swagger.json');
+
+const path = swaggerUrl ?? '/';
+const method2 = swaggerUrl === undefined ? 'get' : method;
+
+const requests = extractHarExamples(spec, path, method2);
+const requestParameters = extractRequestParameters(spec, path, method2);
+const requestHeaders = extractRequestHeaders(spec, path, method2);
+const requestBody = extractRequestBody(spec, path, method2);
+const responseHeaders = extractResponseHeaders(spec, path, method2);
+const responseExamples = extractResponseExamples(spec, path, method2);
+
+const titleSlug = name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
+const cardHeadings: { depth: number; slug: string; text: string }[] = [
+    { depth: 1, slug: titleSlug, text: name },
+    ...contentHeadings,
+    { depth: 2, slug: 'request',            text: 'Request' },
+    { depth: 2, slug: 'response',           text: 'Response' },
+    { depth: 2, slug: 'request-parameters', text: 'Request Parameters' },
+    { depth: 2, slug: 'request-header',     text: 'Request Header' },
+    ...(requestBody ? [{ depth: 2, slug: 'request-body', text: 'Request Body' }] : []),
+    { depth: 2, slug: 'response-header',    text: 'Response Header' },
+];
+---
+
+<Default title={`${name} endpoint`} description={description} ogType="article" headings={cardHeadings}>
+    <div id={titleSlug} class="page-title-block" style={`--c: var(--method-${method.toLowerCase()}, var(--method-put))`}>
+        <p class="page-title-text is-code">
+            <span class="uppercase text-(--c)">{method}</span> {endpointUrl}
+        </p>
+        <p class="page-title-subtitle">{name}</p>
+        <div class="page-title-divider"></div>
+    </div>
+    
+    <div class="prose dark:prose-invert">
+        <Content components={htmlComponents} />
+    </div>
+
+    <RequestCard requests={requests} id="request" />
+    <ResponseCard examples={responseExamples} id="response" method={method} />
+    <RequestParameterCard parameters={requestParameters} id="request-parameters" />
+    <RequestHeaderCard headers={requestHeaders} id="request-header" />
+    {requestBody && <RequestBodyCard body={requestBody} id="request-body" />}
+    <ResponseHeaderCard headers={responseHeaders} id="response-header" />
+</Default>
+
+<style>
+    .prose,
+    .api-doc {
+        max-width: 76rem;
+        width: 100%;
+        margin-inline: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+</style>

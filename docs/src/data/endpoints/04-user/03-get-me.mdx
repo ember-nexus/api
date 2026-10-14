@@ -1,0 +1,14 @@
+---
+endpoint: get-me
+group: user
+method: get
+name: Get me
+endpointUrl: /me
+swaggerUrl: /me
+---
+
+Alias endpoint, returns the current user's node. This is equivalent to `GET /<uuid>` for the authenticated user's own
+`id`, and is especially useful to find out that `id`, e.g. to use it when creating new relations, without already
+knowing it.
+
+If no token is supplied, the request is treated as the default anonymous user.

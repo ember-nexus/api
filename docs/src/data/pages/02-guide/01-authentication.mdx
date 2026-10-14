@@ -1,0 +1,59 @@
+---
+type: guide
+title: Authentication
+---
+
+Every API request can either include an `Authorization` header or not.
+
+If the header is missing, the request is executed with the permissions of the anonymous user - see the
+[configuration reference](/reference/configuration) for the `ANONYMOUS_USER_UUID` environment variable that controls
+which user that is.
+
+The `Authorization` header carries a bearer token, e.g.:
+
+```txt
+Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv
+```
+
+## How to get a token
+
+Tokens can be created in three ways:
+
+1. Through the [`POST /token`](/api/post-token) endpoint.
+2. Through the [`token:create`](/command/token-create) CLI command.
+3. Tokens without an expiration date can be created by removing the `expirationDate` property from a token object
+   directly in the Neo4j database or in a backup file.
+
+<Note title="Discouraged in production">
+Creating tokens without an expiration date by editing the database directly is highly discouraged for any
+production system - prefer the endpoint or the CLI command, which both issue tokens with a proper lifetime.
+</Note>
+
+## Example
+
+```bash
+curl \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "Token",
+        "uniqueUserIdentifier": "test@localhost.dev",
+        "password": "1234"
+      }' \
+  https://api.example.com/token
+```
+
+Response:
+
+```json
+{
+  "type": "_TokenResponse",
+  "token": "secret-token:M3WHIDj4q62EY0XiZFMLnv"
+}
+```
+
+The value of `$.token` is the new bearer token, ready to be sent in the `Authorization` header of subsequent
+requests. See [first API requests](/getting-started/first-api-requests) for a full walkthrough.
+
+Tokens have a limited lifetime and must be recreated once they expire; see the `token.*` settings in the
+[configuration reference](/reference/configuration) for the configurable minimum, default and maximum lifetimes. A
+user may hold an unlimited number of active tokens at the same time.

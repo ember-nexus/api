@@ -1,0 +1,60 @@
+# Project-specific dictionary for cspell.
+# One word per line. Lines starting with # are comments.
+
+# Ember Nexus / project vocabulary
+hypergraph
+backlinks
+
+# placeholder marker used on unwritten stub pages (not a real word — see
+# guide/*.mdx pages whose entire body is just "blub"; whitelisted so the
+# spellcheck stays green, but those pages still need real content)
+blub
+
+# WebDAV / HTTP methods and specs
+PROPFIND
+PROPPATCH
+MKCOL
+httpbis
+
+# tools & libraries
+antv
+dagre
+healthcheck
+Symfony
+
+# CPU architectures (hardware requirements reference)
+ppc64le
+s390x
+mips64le
+riscv64
+vCPUs
+
+# graph database vendors / variants mentioned in hardware requirements
+openCypher
+AuraDB
+Memgraph
+SaaS
+
+# valid English words missing from the base dictionary
+explorative
+Geospatial
+lilytree
+colour
+parameterizing
+
+# Expr Lang builtin function names
+bitnot
+bitshl
+bitshr
+
+# technologies / grammar tooling
+FrankenPHP
+ANTLR
+
+# reference-dataset botanical terms
+Liliales
+
+# markdown-bold parsing artifacts (e.g. "**c**reate, **r**ead, **u**pdate, **d**elete")
+reate
+pdate
+elete

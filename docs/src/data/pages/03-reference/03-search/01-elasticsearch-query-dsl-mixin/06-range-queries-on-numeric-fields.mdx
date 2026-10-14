@@ -1,0 +1,27 @@
+---
+type: guide
+title: Range queries on numeric fields
+---
+import searchQuery from './06-range-queries-on-numeric-fields/query.sh?raw';
+import searchResultBody from './06-range-queries-on-numeric-fields/result.json';
+import searchResultHeaders from './06-range-queries-on-numeric-fields/header.txt?raw';
+
+This example uses Elasticsearch's [`range` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-range-query)
+to find all elements created on or after a given point in time. Every element automatically has `created` and `updated`
+properties, which Elasticsearch maps as dates internally - dates support the same `gte`/`gt`/`lte`/`lt` comparators as
+numeric fields, so this pattern works identically for e.g. `price` or `age` properties on your own data.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+<Code code={searchQuery} lang="bash" mark="range" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+Only elements created at or after `2025-09-25T18:35:27+00:00` are returned - in this dataset, that separates the
+`Plant` elements (created slightly later during seeding) from the `Taxon` elements (created slightly earlier).
+
+**Note**: no explicit index mapping is required for this to work - Elasticsearch's dynamic mapping already detects
+well-formed numbers and ISO 8601 dates and maps them to comparable numeric/date field types automatically.

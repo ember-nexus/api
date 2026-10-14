@@ -1,0 +1,49 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+
+import { htmlComponents } from '../component/registry.html.ts';
+import Default from '../layouts/Default.astro';
+import { pageRouteParam } from '../lib/index.ts';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+    const pages = await getCollection('pages');
+    return pages.map((entry) => ({
+        // Same helper the markdown route set uses -> routes & links can't drift.
+        params: { slug: pageRouteParam(entry.id) },
+        props: { entry },
+    }));
+};
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+// Generate a slug for the page title h1 the same way Astro slugifies markdown
+// headings: lowercase, collapse whitespace to hyphens, strip non-word chars.
+const titleSlug = entry.data.title
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '');
+
+const allHeadings = [
+    { depth: 1, slug: titleSlug, text: entry.data.title },
+    ...headings,
+];
+
+// Guides/tutorials are "article", everything else is "website".
+const ogType = (entry.data.type === 'tutorial' || entry.data.type === 'guide')
+    ? 'article'
+    : 'website';
+---
+
+<Default title={entry.data.title} description={entry.data.description} ogType={ogType} headings={allHeadings} hidden={entry.data.hidden ?? false}>
+    <div class="page-title-block">
+        <h1 id={titleSlug} class="page-title-text">{entry.data.title}</h1>
+        <div class="page-title-divider"></div>
+    </div>
+
+    <div class="prose dark:prose-invert">
+        <Content components={htmlComponents} />
+    </div>
+</Default>

@@ -1,0 +1,58 @@
+{
+  "paths": {
+    "/token": {
+      "post": {
+        "responses": {
+          "400": {
+            "description": "General issues with the user provided request, e.g. missing properties, malformed properties, failing validation logic etc.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/400",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                },
+                "examples": {
+                  "missingProperty": {
+                    "$ref": "#/components/examples/MissingPropertyProblemExample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "components": {
+    "headers": {
+      "Content-Range": {
+        "description": "Byte range actually returned, plus the total size of the file: `bytes [start]-[end]/[total]`, e.g. `bytes 0-99/138937`. Only present on a `206 Partial Content` response.",
+        "schema": {
+          "type": "string",
+          "example": "bytes 0-99/138937"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Range",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/content-range",
+            "name": "HTTP.dev"
+          }
+        ],
+        "x-ember-nexus-important": true,
+        "required": true
+      }
+    }
+  }
+}

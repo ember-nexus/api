@@ -1,0 +1,13 @@
+---
+interface Props {
+    title: string;
+    id?: string;
+}
+
+const { title, id } = Astro.props;
+---
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+    <h3 class="api-block-title" id={id}>{title}</h3>
+
+    <slot />
+</div>

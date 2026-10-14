@@ -1,0 +1,20 @@
+---
+endpoint: post-token
+group: user
+method: post
+name: Post token
+endpointUrl: /token
+swaggerUrl: /token
+---
+
+Endpoint for creating new tokens for the current user.
+
+The user is identified by `uniqueUserIdentifier` and `password`, not by the request's bearer token; this endpoint can
+therefore also be called anonymously to obtain a first token.
+
+The optional `lifetimeInSeconds` property is silently clamped to the server-configured `token.minLifetimeInSeconds`
+and `token.maxLifetimeInSeconds` bounds. If omitted, `token.defaultLifetimeInSeconds` is used.
+
+**Note**: The response is not an [Element](/openapi-schema/element), it only contains the new token in the `token` property.
+Store it securely; it can not be retrieved again afterwards. Use [`GET /token`](/api/get-token) or
+[`GET /me`](/api/get-me) to inspect the resulting elements instead.

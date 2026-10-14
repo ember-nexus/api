@@ -1,0 +1,88 @@
+---
+import { marked } from 'marked';
+
+import type { RequestParameter } from "../type";
+import CardTitle from "./CardTitle.astro";
+import Link from "./Link.astro";
+
+interface Props {
+    parameters: RequestParameter[];
+    id?: string;
+}
+
+const { parameters, id } = Astro.props;
+
+// Sort by location ("type"), then name.
+const LOCATION_ORDER: Record<RequestParameter["location"], number> = {
+    path: 0,
+    query: 1,
+    cookie: 2,
+};
+
+const sorted = [...parameters].sort(
+    (a, b) =>
+        LOCATION_ORDER[a.location] - LOCATION_ORDER[b.location] ||
+        a.name.localeCompare(b.name),
+);
+
+const pathCount = parameters.filter((p) => p.location === "path").length;
+const queryCount = parameters.filter((p) => p.location === "query").length;
+---
+{parameters.length > 0 && (
+<div class="request-parameter-card">
+    <CardTitle title="Request Parameters" id={id}>
+            <span slot="meta" class="text-sm text-gray-400">
+                {pathCount} path · {queryCount} query
+            </span>
+    </CardTitle>
+    <div class="api-card divide-y divide-hairline">
+        {sorted.map((param) => (
+            <div class="flex flex-col gap-2 px-4 py-3">
+                <div class="flex items-center justify-between mb-1">
+                    <p class="font-mono text-sm font-medium">{param.name}</p>
+                    <p class="text-xs font-semibold tracking-wider uppercase text-gray-400">
+                        {param.presence}
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                        <span class="font-mono rounded-md bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 text-gray-500 dark:text-zinc-400">
+                            {param.location}
+                        </span>
+                    {param.type && (
+                        <span class="font-mono rounded-md bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 text-gray-500 dark:text-zinc-400">
+                                {param.type}
+                            </span>
+                    )}
+                    {param.format && (
+                        <span class="font-mono rounded-md bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 text-gray-500 dark:text-zinc-400">
+                                {param.format}
+                            </span>
+                    )}
+                    {param.constraints.map((chip) => (
+                        <span class="font-mono rounded-md bg-gray-100 dark:bg-zinc-800 px-1.5 py-0.5 text-gray-500 dark:text-zinc-400">
+                                {chip}
+                            </span>
+                    ))}
+                </div>
+
+                {param.description && (
+                    <div class="text-sm text-gray-600 dark:text-gray-400" set:html={marked.parse(param.description)}></div>
+                )}
+
+                {param.example !== null && (
+                    <p class="text-xs text-gray-400">
+                        Example: <span class="font-mono text-gray-500 dark:text-gray-400">{param.example}</span>
+                    </p>
+                )}
+
+                {param.links.length > 0 && (
+                    <div class="flex gap-4 text-sm">
+                        {param.links.map((link) => <Link link={link} />)}
+                    </div>
+                )}
+            </div>
+        ))}
+    </div>
+</div>
+    )}

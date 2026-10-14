@@ -1,0 +1,92 @@
+{
+  "paths": {
+    "/token": {
+      "post": {
+        "summary": "Post token",
+        "description": "Creates a new token for the current user.",
+        "operationId": "post-token",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "uniqueUserIdentifier",
+                  "password"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Must be `Token`. No other values are currently possible.",
+                    "enum": [
+                      "Token"
+                    ],
+                    "example": "Token"
+                  },
+                  "uniqueUserIdentifier": {
+                    "type": "string",
+                    "description": "Some attribute uniquely identifying a user, normally an email address. The property name used to store it can be configured server-side.",
+                    "example": "test@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The plain text password of the user.",
+                    "example": "1234"
+                  },
+                  "lifetimeInSeconds": {
+                    "type": "integer",
+                    "description": "Optional requested token lifetime, in seconds. Silently clamped to the server-configured minimum/maximum lifetime. Defaults to the server-configured default lifetime if omitted.",
+                    "example": 3600
+                  },
+                  "data": {
+                    "type": "object",
+                    "description": "Optional, arbitrary properties stored on the new token element.",
+                    "additionalProperties": true,
+                    "example": {
+                      "key": "value"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/token",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"type\": \"Token\", \"uniqueUserIdentifier\": \"test@example.com\", \"password\": \"1234\"}"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

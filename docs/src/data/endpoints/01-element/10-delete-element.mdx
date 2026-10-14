@@ -1,0 +1,24 @@
+---
+endpoint: delete-element
+group: element
+method: delete
+name: Delete element
+endpointUrl: /<uuid>
+swaggerUrl: /{uuid}
+---
+
+Deletes the referenced element, as well as its file (if it has one) and relations directly attached to the element (if
+it is a node).
+
+<Note>
+    Any resumable upload still in progress that targets this element (started via [`POST /<uuid>/file`](/api/post-element-file) or
+    [`PUT /<uuid>/file`](/api/put-element-file)) is aborted and its uploaded chunks are discarded as part of the deletion. There is
+    no way to recover it - resume the upload against a new element instead.
+</Note>
+
+<Note>
+    Since access to a node is granted through its `OWNS`-relations, deleting a parent before its children leaves those
+    children without an owner. They are not deleted themselves, but become unreachable through the API, as there is no
+    longer any element the current user has access to that owns them. To avoid this, delete children first, or attach
+    them to another parent before deleting the current one.
+</Note>

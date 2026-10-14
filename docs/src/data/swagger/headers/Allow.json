@@ -1,0 +1,24 @@
+{
+  "components": {
+    "headers": {
+      "Allow": {
+        "description": "Lists the HTTP methods supported by the endpoint; returned alongside a `405 Method Not Allowed` response.",
+        "schema": {
+          "type": "string",
+          "example": "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Allow",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/allow",
+            "name": "HTTP.dev"
+          }
+        ],
+        "required": true
+      }
+    }
+  }
+}

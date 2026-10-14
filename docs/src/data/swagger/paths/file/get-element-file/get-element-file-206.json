@@ -1,0 +1,69 @@
+{
+  "paths": {
+    "/{uuid}/file": {
+      "get": {
+        "responses": {
+          "206": {
+            "description": "Partial file content returned, matching the requested `Range`. The end of an open-ended or overlong range is clamped to the file's actual length rather than rejected.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Accept-Ranges": {
+                "$ref": "#/components/headers/Accept-Ranges"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "Content-Disposition": {
+                "$ref": "#/components/headers/Content-Disposition"
+              },
+              "Content-Range": {
+                "$ref": "#/components/headers/Content-Range"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/ETag"
+              },
+              "Repr-Digest": {
+                "$ref": "#/components/headers/Repr-Digest"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/206",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/206",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+---
+type: guide
+title: Exact keyword matching
+---
+import searchQuery from './02-exact-keyword-matching/query.sh?raw';
+import searchResultBody from './02-exact-keyword-matching/result.json';
+import searchResultHeaders from './02-exact-keyword-matching/header.txt?raw';
+
+This example uses Elasticsearch's [`term` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-term-query)
+to retrieve all elements whose `name` has the exact same content as the provided query, "Bluebell", and are accessible
+to the user.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+**Note**: Instead of querying the Elasticsearch property `name` directly, we use `name.keyword` for a more efficient
+lookup. The `.keyword` suffix is part of Elasticsearch's automatic schema generation process. Manually managed schemas
+might differ. See [their documentation](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword)
+for details.
+
+<Code code={searchQuery} lang="bash" mark="term" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+As only a single element has the name "Bluebell", the search response is almost empty.

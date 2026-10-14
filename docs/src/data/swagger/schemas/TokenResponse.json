@@ -1,0 +1,28 @@
+{
+  "components": {
+    "schemas": {
+      "TokenResponse": {
+        "type": "object",
+        "description": "Response returned after successfully creating a new token. Unlike other endpoints, this is not an Element.",
+        "required": [
+          "type",
+          "token"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "_TokenResponse"
+            ],
+            "example": "_TokenResponse"
+          },
+          "token": {
+            "type": "string",
+            "description": "The newly created token, in the RFC 8959 `secret-token:` scheme. It is only ever shown once; use `GET /token` or `GET /me` afterwards to inspect the resulting elements instead.",
+            "example": "secret-token:PIPeJGUt7c00ENn8a5uDlc"
+          }
+        }
+      }
+    }
+  }
+}

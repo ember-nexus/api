@@ -1,0 +1,221 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+    /** Unique id for this panel — used for the overlay-open event and HTML id */
+    id: string;
+    /** Which edge the panel slides in from */
+    side?: 'left' | 'right';
+    /** aria-label for the <aside> */
+    label?: string;
+    /**
+     * Extra classes applied only on sm: and above.
+     * Use this to thread desktop-only styles (e.g. permanent sidebar widths/borders)
+     * into a panel that is also an overlay on mobile.
+     */
+    desktopClass?: string;
+    /**
+     * Hide the close (X) button on sm: and above.
+     * Use for panels that are permanently visible on desktop (e.g. the sidebar).
+     */
+    hideCloseOnDesktop?: boolean;
+}
+
+const {
+    id,
+    side = 'right',
+    label,
+    desktopClass = '',
+    hideCloseOnDesktop = false,
+} = Astro.props;
+
+const hasTitle = Astro.slots.has('title');
+
+// Translate classes based on side
+const startPos = side === 'right' ? 'translate-x-full'  : '-translate-x-full';
+const anchorX  = side === 'right' ? 'right-0'           : 'left-0';
+
+const closeBtn = "shrink-0 inline-flex cursor-pointer items-center justify-center rounded-md p-2 text-gray-700 transition hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] dark:text-zinc-200 dark:hover:bg-zinc-800";
+---
+
+<aside
+    id={id}
+    data-overlay-panel={id}
+    data-overlay-side={side}
+    class:list={[
+        "fixed bottom-0 top-14 z-40 flex h-[calc(100dvh-3.5rem)] w-full flex-col bg-white",
+        "transition-transform duration-200 ease-in-out",
+        "dark:bg-zinc-950 print:hidden",
+        anchorX,
+        startPos,
+        desktopClass,
+    ]}
+    aria-label={label}
+>
+    {hasTitle ? (
+        /* ── Title slot: header row with title content + X button, body below ── */
+        <>
+            <div class="flex shrink-0 items-center gap-2 border-b border-gray-200 px-3 py-2 dark:border-zinc-800">
+                <div class="min-w-0 flex-1">
+                    <slot name="title" />
+                </div>
+                <button
+                    type="button"
+                    data-overlay-close={id}
+                    aria-label="Close"
+                    class:list={[closeBtn, hideCloseOnDesktop && 'sm:hidden']}
+                >
+                    <Icon name="x" class="size-4" />
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto overscroll-contain p-4">
+                <slot />
+            </div>
+        </>
+    ) : (
+        /* ── Default: scrollable content fills, X button floats on top ── */
+        <>
+            <div class="flex-1 overflow-y-auto overscroll-contain p-4">
+                <slot />
+            </div>
+            <button
+                type="button"
+                data-overlay-close={id}
+                aria-label="Close"
+                class:list={[
+                    "absolute top-4 right-4 z-50",
+                    closeBtn,
+                    hideCloseOnDesktop && 'sm:hidden',
+                ]}
+            >
+                <Icon name="x" class="size-4" />
+            </button>
+        </>
+    )}
+</aside>
+
+<script>
+    // Track which panel ids have already had their window listeners registered,
+    // so re-initialisation on astro:page-load doesn't pile up duplicate listeners.
+    const _registeredPanels = new Set<string>();
+    // Dedup close-button click listeners (new DOM nodes after navigation are not in this set).
+    const _registeredCloseBtns = new WeakSet<HTMLElement>();
+
+    function initOverlayPanel(panel: HTMLElement) {
+        const panelId    = panel.dataset.overlayPanel!;
+        const side       = (panel.dataset.overlaySide ?? 'right') as 'left' | 'right';
+        const openClass  = '!translate-x-0';
+        const closeClass = side === 'right' ? '!translate-x-full' : '!-translate-x-full';
+
+        // Close buttons live inside the panel DOM — attach once per element instance.
+        panel.querySelectorAll<HTMLElement>(`[data-overlay-close="${panelId}"]`).forEach(btn => {
+            if (_registeredCloseBtns.has(btn)) return;
+            _registeredCloseBtns.add(btn);
+            btn.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('overlay-close', { detail: { id: panelId } }));
+            });
+        });
+
+        // Window listeners are permanent — only register once per panel id.
+        if (_registeredPanels.has(panelId)) return;
+        _registeredPanels.add(panelId);
+
+        window.addEventListener('overlay-open', (e: Event) => {
+            const el = document.querySelector<HTMLElement>(`[data-overlay-panel="${panelId}"]`);
+            if (!el) return;
+            const { id } = (e as CustomEvent<{ id: string }>).detail;
+            if (id === panelId) {
+                el.classList.remove(closeClass);
+                el.classList.add(openClass);
+                if (panelId === 'sidebar') {
+                    document.getElementById('main-content')?.classList.add('sm:pl-64');
+                }
+            } else {
+                el.classList.remove(openClass);
+                el.classList.add(closeClass);
+            }
+        });
+
+        window.addEventListener('overlay-close', (e: Event) => {
+            const el = document.querySelector<HTMLElement>(`[data-overlay-panel="${panelId}"]`);
+            if (!el) return;
+            const { id } = (e as CustomEvent<{ id: string }>).detail;
+            if (id === panelId) {
+                el.classList.remove(openClass);
+                el.classList.add(closeClass);
+                if (panelId === 'sidebar') {
+                    document.getElementById('main-content')?.classList.remove('sm:pl-64');
+                }
+            }
+        });
+
+        window.addEventListener('overlay-toggle', (e: Event) => {
+            const el = document.querySelector<HTMLElement>(`[data-overlay-panel="${panelId}"]`);
+            if (!el) return;
+            const { id } = (e as CustomEvent<{ id: string }>).detail;
+            if (id !== panelId) return;
+            const isOpen = el.classList.contains(openClass);
+            window.dispatchEvent(new CustomEvent(
+                isOpen ? 'overlay-close' : 'overlay-open',
+                { detail: { id: panelId } }
+            ));
+        });
+    }
+
+    // Wire every [data-overlay-toggle] button to the event bus.
+    // Re-runs on page-load; dedup guard lives on the DOM element.
+    const _registeredToggles = new WeakSet<HTMLElement>();
+    function initToggles() {
+        document.querySelectorAll<HTMLElement>('[data-overlay-toggle]').forEach(btn => {
+            if (_registeredToggles.has(btn)) return;
+            _registeredToggles.add(btn);
+            btn.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('overlay-toggle', { detail: { id: btn.dataset.overlayToggle! } }));
+            });
+        });
+    }
+
+    function syncPanelStateFromCSS() {
+        // The sidebar is opened on desktop via a CSS @media query (no JS involved).
+        // Sync the JS open/close classes to match what CSS has already rendered,
+        // so the event system is in sync before transitions are re-enabled.
+        //
+        // Only the sidebar gets special treatment — all other panels start closed.
+        const isDesktop = window.matchMedia('(min-width: 640px)').matches;
+
+        document.querySelectorAll<HTMLElement>('[data-overlay-panel]').forEach(panel => {
+            const panelId    = panel.dataset.overlayPanel!;
+            const side       = (panel.dataset.overlaySide ?? 'right') as 'left' | 'right';
+            const openClass  = '!translate-x-0';
+            const closeClass = side === 'right' ? '!translate-x-full' : '!-translate-x-full';
+
+            const shouldBeOpen = panelId === 'sidebar' && isDesktop;
+
+            if (shouldBeOpen) {
+                panel.classList.add(openClass);
+                panel.classList.remove(closeClass);
+                document.getElementById('main-content')?.classList.add('sm:pl-64');
+            } else {
+                panel.classList.remove(openClass);
+                panel.classList.add(closeClass);
+            }
+        });
+    }
+
+    function init() {
+        document.querySelectorAll<HTMLElement>('[data-overlay-panel]').forEach(initOverlayPanel);
+        initToggles();
+        syncPanelStateFromCSS();
+        // Re-enable transitions now that JS state matches what's on screen.
+        requestAnimationFrame(() => {
+            document.documentElement.classList.remove('no-transitions');
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    document.addEventListener('astro:page-load', init);
+</script>

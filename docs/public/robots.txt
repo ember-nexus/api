@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://next-doc.ember-nexus.dev/sitemap-index.xml

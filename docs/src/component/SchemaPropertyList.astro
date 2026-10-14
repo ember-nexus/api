@@ -1,0 +1,117 @@
+---
+import SchemaPropertyRow from './SchemaPropertyRow.astro';
+import { schemaPath } from '../lib/routes.ts';
+import { schemaParam } from '../util/index.ts';
+
+interface Props {
+    schema: unknown;
+}
+
+const { schema } = Astro.props;
+
+const raw = (schema !== null && schema !== undefined && typeof schema === 'object' ? schema : {}) as Record<string, unknown>;
+
+const requiredNames = new Set<string>(
+    Array.isArray(raw.required) ? (raw.required as string[]) : [],
+);
+
+const properties: [string, unknown][] =
+    raw.type === 'object' && raw.properties && typeof raw.properties === 'object'
+        ? Object.entries(raw.properties as Record<string, unknown>)
+        : [];
+
+const composition = (['oneOf', 'anyOf', 'allOf'] as const).find(k => Array.isArray(raw[k]));
+
+function parseRef(ref: unknown): string | null {
+    if (typeof ref !== 'string') return null;
+    const m = /#\/components\/schemas\/(.+)$/.exec(ref);
+    return m ? m[1] : null;
+}
+
+interface Variant { name: string; slug: string }
+
+const variants: Variant[] = [];
+
+const extendsRefs: Variant[] = [];
+const allOfProperties: [string, unknown][] = [];
+const allOfRequired = new Set<string>();
+
+if (composition === 'oneOf' || composition === 'anyOf') {
+    for (const entry of raw[composition] as unknown[]) {
+        const name = parseRef((entry as Record<string, unknown>)?.$ref);
+        if (name) variants.push({ name, slug: schemaParam(name) });
+    }
+} else if (composition === 'allOf') {
+    for (const entry of raw.allOf as unknown[]) {
+        const e = entry as Record<string, unknown>;
+        const refName = parseRef(e.$ref);
+        if (refName) {
+            extendsRefs.push({ name: refName, slug: schemaParam(refName) });
+        } else if (e.type === 'object' || e.properties) {
+            if (Array.isArray(e.required)) {
+                for (const r of e.required as string[]) allOfRequired.add(r);
+            }
+            if (e.properties && typeof e.properties === 'object') {
+                for (const pair of Object.entries(e.properties as Record<string, unknown>)) {
+                    allOfProperties.push(pair);
+                }
+            }
+        }
+    }
+}
+
+const mergedProperties = [...properties, ...allOfProperties];
+const mergedRequired = new Set([...requiredNames, ...allOfRequired]);
+
+const hasContent =
+    mergedProperties.length > 0 ||
+    variants.length > 0 ||
+    extendsRefs.length > 0;
+---
+
+{hasContent && (
+    <div class="api-card overflow-hidden divide-y divide-hairline">
+        {/* extends refs (allOf) shown at top as a subtle note */}
+        {extendsRefs.length > 0 && (
+            <div class="px-4 py-2.5 flex flex-wrap items-center gap-2 bg-gray-50 dark:bg-zinc-950">
+                <span class="text-xs text-gray-400">extends</span>
+                {extendsRefs.map((r) => (
+                    <a
+                        href={schemaPath(r.slug)}
+                        class="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline border border-hairline rounded px-2 py-0.5 bg-white dark:bg-black"
+                    >
+                        {r.name} ↗
+                    </a>
+                ))}
+            </div>
+        )}
+
+        {/* properties */}
+        {mergedProperties.map(([name, node]) => (
+            <SchemaPropertyRow
+                name={name}
+                node={node}
+                required={mergedRequired.has(name)}
+                depth={0}
+            />
+        ))}
+
+        {variants.length > 0 && (
+            <div class="px-4 py-3 flex flex-col gap-2">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {composition} of — each has its own schema page:
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    {variants.map((v) => (
+                        <a
+                            href={schemaPath(v.slug)}
+                            class="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline border border-hairline rounded-md px-3 py-1.5 bg-gray-50 dark:bg-zinc-900"
+                        >
+                            {v.name} ↗
+                        </a>
+                    ))}
+                </div>
+            </div>
+        )}
+    </div>
+)}

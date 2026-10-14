@@ -1,0 +1,71 @@
+---
+type: reference
+title: Anonymous user
+---
+
+For situations where basic access to the Ember Nexus API without special authorization management is required, the
+anonymous user can be used. This is just a regular user, which will be used automatically by all API calls which do not
+have any `Authorization`-header present.
+
+## Enabling the anonymous user
+
+First create a user account, either through the [`POST /register`](/api/post-register) API endpoint or the
+[`user:create`](/command/user-create) command.
+
+Then set the environment variable `ANONYMOUS_USER_UUID` to the UUID of the created user:
+
+```yml
+# docker-compose.yml
+services:
+
+  api:
+    container_name: api
+    volumes:
+      - ./well-known-security.txt:/well-known-security.txt
+    environment:
+      - ANONYMOUS_USER_UUID=521def67-6016-45e1-bb30-6a4977713e3b
+    ports:
+      - "80:80"
+```
+
+The API container then needs to be restarted:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+All API requests should now work without the `Authorization`-header.
+
+## Testing the anonymous user
+
+To verify that the anonymous user is actually being used, you can query the [`GET /me`](/api/get-me) endpoint:
+
+```bash
+curl \
+  https://api.example.com/me
+```
+
+```json /521def67-6016-45e1-bb30-6a4977713e3b/
+{
+  "type": "User",
+  "id": "521def67-6016-45e1-bb30-6a4977713e3b",
+  "data": {
+    "created": "2026-07-27T10:39:51+00:00",
+    "updated": "2026-07-27T10:39:51+00:00",
+    "name": "Anonymous user"
+  }
+}
+```
+
+## Notes
+
+- As the anonymous user is still a regular user, he **can create, change and delete data**. Disabling write-access is a
+  [planned feature](https://github.com/ember-nexus/api/issues/231).
+- Other users can grant the anonymous user access to private data, thereby making it public.
+  - In sensitive situations, the anonymous user should not be enabled, or should be heavily restricted and monitored.
+- It is not possible for a normal user to be implicitly granted all permissions the anonymous user has. As a workaround
+  you can simply directly give the normal user access to the relevant elements or use groups to manage access.
+- Similarly, an API request with an invalid or expired token is not downgraded to an anonymous request. If a request
+  includes a token, it only ever executes in the context of that token's owner - an invalid token simply returns the
+  API's regular error codes.

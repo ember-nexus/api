@@ -1,0 +1,41 @@
+---
+type: guide
+title: Parameters and expressions
+---
+
+Search steps can pass data to each other, and clients can inject their own values without string-concatenating
+queries by hand. Both mechanisms are built on the same concept: a per-step `parameters` object that each step can read
+from while it runs.
+
+## Where parameters come from
+
+A step's `parameters` object is assembled from three sources, each able to override the previous one:
+
+1. Results of earlier steps, available as `stepResults`.
+2. Global `parameters`, set once on the request body and shared by every step.
+3. Step-local `parameters`, set on the individual step definition.
+
+See [how parameters are resolved](/reference/search#how-parameters-are-resolved) for the exact priority order. In
+practice this means you can set a default globally and override it for a single step, or forward an earlier step's
+output under a name of your choosing.
+
+## Using parameters inside a step
+
+How a step reads its `parameters` depends on the step itself, since each one talks to a different database:
+
+- The [Cypher path query](/reference/search/cypher-path-subset) step exposes them as native Cypher query
+  variables, e.g. `$parameterName` - see [writing a Cypher query](/guide/search/writing-a-cypher-query).
+- The [Elasticsearch query](/reference/search/elasticsearch-query-dsl-mixin) step has no native concept of
+  parameters, so Ember Nexus lets you embed `{{expression}}` placeholders anywhere in the query, evaluated with the
+  [Expr Lang](/reference/expr-lang) language - see
+  [writing an Elasticsearch query](/guide/search/writing-an-elasticsearch-query#parameterized-elasticsearch-queries).
+- The [Element hydration](/reference/search/element-hydration) step does not define explicit parameters, but its
+  `elementIds` input accepts an expression too, commonly used to forward ids collected by earlier steps.
+
+## Chaining steps
+
+Because previous results are just another parameter source, you can feed the output of one step into the query of the
+next, regardless of which database each step targets. The
+[combined full text and path search](/reference/search#combined-full-text-and-path-search) and
+[Cypher-first polyglot search](/reference/search#cypher-first-polyglot-search) examples both do exactly this - one
+narrows down a set of elements, and the next step's query uses `stepResults` to restrict itself to those elements.

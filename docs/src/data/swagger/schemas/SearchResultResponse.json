@@ -1,0 +1,37 @@
+{
+  "components": {
+    "schemas": {
+      "SearchResultResponse": {
+        "type": "object",
+        "required": ["type", "results"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["_SearchResultResponse"]
+          },
+          "results": {
+            "description": "The result of the last executed search step. If the last step is an `element-hydration` step, this is a plain array of hydrated elements. Otherwise, its shape depends on the last step's type (e.g. `{ elements, totalHits, maxScore }` for `elasticsearch-query-dsl-mixin`, or `{ paths }` for `cypher-path-subset`).",
+            "oneOf": [
+              {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Element" }
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              }
+            ]
+          },
+          "debug": {
+            "type": "array",
+            "description": "Only present if the request body's `debug` property was set to true. Contains one entry per executed search step, with step-specific timing and query information.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

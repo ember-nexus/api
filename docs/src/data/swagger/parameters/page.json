@@ -1,0 +1,24 @@
+{
+  "components": {
+    "parameters": {
+      "page": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "example": 1,
+        "description": "Index of the page to be accessed. First page / index is 1.",
+        "x-ember-nexus-links": [
+          {
+            "url": "/guide/pagination",
+            "name": "Pagination tutorial"
+          }
+        ],
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      }
+    }
+  }
+}

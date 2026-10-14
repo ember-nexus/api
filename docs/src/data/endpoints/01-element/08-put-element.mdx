@@ -1,0 +1,15 @@
+---
+endpoint: put-element
+group: element
+method: put
+name: Put element
+endpointUrl: /<uuid>
+swaggerUrl: /{uuid}
+---
+
+Replaces the data of the specified element.
+
+**Note**: A handful of properties are reserved and can not be set through this request - see
+[Reserved properties](/reference/security#reserved-properties).
+
+**Note**: Changes take up to a second before they become searchable in Elasticsearch.

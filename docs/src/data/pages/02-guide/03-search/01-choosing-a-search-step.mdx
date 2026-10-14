@@ -1,0 +1,35 @@
+---
+type: guide
+title: Choosing a search step
+---
+
+A [`POST /search`](/api/post-search) request is a pipeline of **search steps**, each specialized for one database.
+Picking the right step (or combination of steps) depends on what you're looking for.
+
+## Full text or explorative search → Elasticsearch query
+
+Use the [Elasticsearch query](/reference/search/elasticsearch-query-dsl-mixin) step when you're searching by content:
+free text with fuzziness, exact keyword matches, numeric or date ranges, and similar document-level lookups. It only
+ever returns a flat list of elements - it has no notion of relations between them.  
+See [writing an Elasticsearch query](/guide/search/writing-an-elasticsearch-query).
+
+## Structural, relation-aware search → Cypher path query
+
+Use the [Cypher path query](/reference/search/cypher-path-subset) step when the question is about how elements relate
+to each other, e.g. "all comments on blog post X" or "all plants tagged blue". It queries the graph directly and
+returns paths, which is the only step able to reflect relations in the result.  
+See [writing a Cypher query](/guide/search/writing-a-cypher-query).
+
+## Converting ids to full elements → Element hydration
+
+Both steps above only return element ids (plus a bit of metadata like Elasticsearch's score). Add an
+[Element hydration](/reference/search/element-hydration) step - typically last in the pipeline - to turn those ids
+into a full collection response with all element properties included.
+
+## Combining steps
+
+Steps run in order and can pass their results on to later steps, so you're not limited to a single database per
+request. A common pattern is to narrow candidates structurally with a Cypher step, then re-rank or filter that set by
+content with an Elasticsearch step (or the other way around), before hydrating the final result.  
+See [parameters and expressions](/guide/search/parameters-and-expressions) for how results flow between steps, and the
+[reference examples](/reference/search#examples) for complete request/response pairs of several such combinations.

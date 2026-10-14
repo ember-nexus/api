@@ -1,0 +1,196 @@
+{
+  "paths": {
+    "/{uuid}/children": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Children found. Returns a collection.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/ETag-optional"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartialCollection"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Parent element found and returning its children in a collection response.",
+                    "value": {
+                      "type": "_PartialCollection",
+                      "id": "/56fda20c-b238-4034-b555-1df47c47e17a/children",
+                      "totalNodes": 6,
+                      "links": {
+                        "first": "/56fda20c-b238-4034-b555-1df47c47e17a/children",
+                        "previous": null,
+                        "next": null,
+                        "last": "/56fda20c-b238-4034-b555-1df47c47e17a/children"
+                      },
+                      "nodes": [
+                        {
+                          "type": "Tag",
+                          "id": "45482998-274a-43d0-a466-f31d0b24cc0a",
+                          "data": {
+                            "created": "2025-09-27T10:39:51+00:00",
+                            "name": "Yellow",
+                            "updated": "2025-09-27T10:39:51+00:00",
+                            "color": "#FFC835"
+                          }
+                        },
+                        {
+                          "type": "Tag",
+                          "id": "6b8341ca-851a-4e98-8194-e57b87d30519",
+                          "data": {
+                            "created": "2025-09-27T10:39:51+00:00",
+                            "name": "Red",
+                            "updated": "2025-09-27T10:39:51+00:00",
+                            "color": "#BD002A"
+                          }
+                        },
+                        {
+                          "type": "Tag",
+                          "id": "6d1ccab4-559b-4086-92ac-370e30e40946",
+                          "data": {
+                            "created": "2025-09-27T10:39:51+00:00",
+                            "name": "Magenta",
+                            "updated": "2025-09-27T10:39:51+00:00",
+                            "color": "#ff00ff"
+                          }
+                        },
+                        {
+                          "type": "Tag",
+                          "id": "9f69f280-68ec-4dac-9ff3-c5608562060f",
+                          "data": {
+                            "created": "2025-09-27T10:39:51+00:00",
+                            "name": "Cyan",
+                            "updated": "2025-09-27T10:39:51+00:00",
+                            "color": "#00ffff"
+                          }
+                        },
+                        {
+                          "type": "Tag",
+                          "id": "aee9e678-42fa-48cf-85e3-33638bebf0b1",
+                          "data": {
+                            "created": "2025-09-27T10:39:51+00:00",
+                            "name": "Green",
+                            "updated": "2025-09-27T10:39:51+00:00",
+                            "color": "#006D23"
+                          }
+                        },
+                        {
+                          "type": "Tag",
+                          "id": "ce8abdea-2e6c-41d4-b779-87b803f77836",
+                          "data": {
+                            "created": "2025-09-27T10:39:51+00:00",
+                            "name": "Blue",
+                            "updated": "2025-09-27T10:39:51+00:00",
+                            "color": "#0059C8"
+                          }
+                        }
+                      ],
+                      "relations": [
+                        {
+                          "type": "OWNS",
+                          "id": "bc1ba1ad-5866-4c23-a58e-15282994c72c",
+                          "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+                          "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
+                          "data": {
+                            "created": "2025-09-27T10:39:58+00:00",
+                            "updated": "2025-09-27T10:39:58+00:00"
+                          }
+                        },
+                        {
+                          "type": "OWNS",
+                          "id": "94ab04d8-c7a0-408c-aea7-59c66018b242",
+                          "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+                          "end": "6b8341ca-851a-4e98-8194-e57b87d30519",
+                          "data": {
+                            "created": "2025-09-27T10:39:58+00:00",
+                            "updated": "2025-09-27T10:39:58+00:00"
+                          }
+                        },
+                        {
+                          "type": "OWNS",
+                          "id": "feb5bd9b-32e7-43f2-8b7e-9f6b7f0a0390",
+                          "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+                          "end": "6d1ccab4-559b-4086-92ac-370e30e40946",
+                          "data": {
+                            "created": "2025-09-27T10:39:58+00:00",
+                            "updated": "2025-09-27T10:39:58+00:00"
+                          }
+                        },
+                        {
+                          "type": "OWNS",
+                          "id": "284d2787-9cae-42e4-98bb-aff84dcbfef8",
+                          "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+                          "end": "9f69f280-68ec-4dac-9ff3-c5608562060f",
+                          "data": {
+                            "created": "2025-09-27T10:39:58+00:00",
+                            "updated": "2025-09-27T10:39:58+00:00"
+                          }
+                        },
+                        {
+                          "type": "OWNS",
+                          "id": "ca8266a9-4864-4ab7-9a9e-64a454af4a7d",
+                          "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+                          "end": "aee9e678-42fa-48cf-85e3-33638bebf0b1",
+                          "data": {
+                            "created": "2025-09-27T10:39:58+00:00",
+                            "updated": "2025-09-27T10:39:58+00:00"
+                          }
+                        },
+                        {
+                          "type": "OWNS",
+                          "id": "eb5d2879-c5e6-43a6-b8ce-2a1188ca7073",
+                          "start": "56fda20c-b238-4034-b555-1df47c47e17a",
+                          "end": "ce8abdea-2e6c-41d4-b779-87b803f77836",
+                          "data": {
+                            "created": "2025-09-27T10:39:58+00:00",
+                            "updated": "2025-09-27T10:39:58+00:00"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

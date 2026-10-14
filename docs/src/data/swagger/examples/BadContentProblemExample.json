@@ -1,0 +1,15 @@
+{
+  "components": {
+    "examples": {
+      "BadContentProblemExample": {
+        "summary": "A provided property has the wrong type or fails a validation rule.",
+        "value": {
+          "type": "https://api.example.com/error/400/bad-content",
+          "title": "Bad content",
+          "status": 400,
+          "detail": "Endpoint expects property 'newPassword' to be password which is not identical to the old password, got string '<redacted>'."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+---
+type: guide
+title: Writing a Cypher query
+---
+
+The [Cypher path query](/reference/search/cypher-path-subset) step lets you query the internal Neo4j database directly
+with a **subset of Cypher 25**. This guide walks through building and running a query; see the
+[reference page](/reference/search/cypher-path-subset) for the exact grammar and security constraints.
+
+## Constraints to keep in mind
+
+- The query must be **readonly** - no writes, no side effects.
+- The query can only return a single variable named `paths`, of type
+  [Path](https://neo4j.com/docs/cypher-manual/current/patterns/reference/#path-patterns).
+- Function calls and existence clauses are not supported.
+
+If you are not already familiar with Cypher, the [Neo4j Cypher manual](https://neo4j.com/docs/cypher-manual/current/)
+is a good starting point, in particular its section on
+[patterns](https://neo4j.com/docs/cypher-manual/current/patterns/).
+
+## Building your query
+
+As small errors can break the whole query, it is recommended to build your query up slowly, e.g. first inside the
+[Neo4j Browser](https://neo4j.com/docs/browser-manual/current/) or `cypher-shell` if you have direct access to the
+database, before running it through [`POST /search`](/api/post-search).
+
+As the base of your query you can use one of the provided [examples](/reference/search/cypher-path-subset#examples).
+
+Generative AI like Claude and its competitors are usually experienced enough to help with Cypher query generation.
+
+Parameters passed via the step's `parameters` object are available inside the query as `$parameterName` - see
+[parameters and expressions](/guide/search/parameters-and-expressions) for details. Unlike the Elasticsearch query step,
+`{{...}}`-expressions are not supported here.
+
+## Example
+
+### Request
+
+```json
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "cypher-path-subset",
+      "query": "MATCH path=((:Plant)-[:HAS_TAG]->(:Tag {name: \"blue\"})) RETURN path"
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}
+```
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  -H 'Content-Type: application/json' \
+  --data-binary @payload.json \
+  https://api.example.com/search
+```
+
+### Response
+
+import simplePathSearch from '../../03-reference/03-search/assets/simple-path-search.json';
+import simplePathSearchHeader from '../../03-reference/03-search/assets/simple-path-search.txt?raw';
+
+<SearchResponseCard
+    responseBody={simplePathSearch}
+    responseHeaders={simplePathSearchHeader}
+    graphLayout="force"
+></SearchResponseCard>

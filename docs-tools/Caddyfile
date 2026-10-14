@@ -1,0 +1,136 @@
+{
+	# Runtime/error logs
+	log {
+		output stderr
+		format json
+	}
+}
+
+:80 {
+	# Access log, one JSON object per request.
+	log {
+		output stdout
+		format json
+	}
+
+	root * /srv
+	file_server
+
+	# Canonical URLs are slash-free; try_files resolves `/foo` to
+	# `foo/index.html` directly, so collapse `/foo/` into it. Mirrors
+	# core/src/plugins/trailingSlashRedirect.ts. Two rules because `redir`
+	# can't conditionally append "?{query}".
+	@trailing_slash_query {
+		path_regexp trailing ^(.+)/$
+		expression {http.request.uri.query} != ""
+	}
+	redir @trailing_slash_query {re.trailing.1}?{query} permanent
+	@trailing_slash path_regexp trailing2 ^(.+)/$
+	redir @trailing_slash {re.trailing2.1} permanent
+
+	try_files {path} {path}/index.html
+
+	encode {
+		zstd better
+		gzip 6
+		minimum_length 256
+	}
+
+	header /_astro/* Cache-Control "public, max-age=31536000, immutable"
+	header /fonts/* Cache-Control "public, max-age=31536000, immutable"
+	header /pagefind/pagefind-*.* Cache-Control "public, max-age=31536000, immutable"
+	header /pagefind/* ?Cache-Control "public, max-age=3600"
+	header /open-graph/* ?Cache-Control "public, max-age=604800"
+	header /*.ico ?Cache-Control "public, max-age=604800"
+	header /*.png ?Cache-Control "public, max-age=604800"
+	header /*.svg ?Cache-Control "public, max-age=604800"
+	header /*.webmanifest ?Cache-Control "public, max-age=604800"
+
+	# .txt is plain text, unconditionally.
+	header /*.txt Content-Type "text/plain; charset=utf-8"
+
+	# Every HTML page has a `*.md` twin (see [...slug].md.ts) for LLM/agent
+	# consumption. Same content as the HTML page, so `Link: rel="canonical"`
+	# points search engines back at the HTML and lets them collapse the
+	# duplicate.
+	#
+	# Deliberately NO `X-Robots-Tag: noindex` here. Gemini's grounding is
+	# index-backed, so noindex would hide the twins from Gemini as well as
+	# from search results. Canonical is the tool for de-duplication;
+	# noindex is the tool for suppression, and we only want the former.
+	#
+	# text/plain is the default Content-Type; the two rules below upgrade to
+	# text/markdown based on Accept.
+	@markdown path_regexp md ^(.*)\.md$
+	header @markdown {
+		Content-Type "text/plain; charset=utf-8"
+		Link "<{http.regexp.md.1}>; rel=\"canonical\""
+	}
+
+	# "index.md" is the twin of "/", not "/index".
+	header /index.md Link "</>; rel=\"canonical\""
+
+	# Upgrade to text/markdown when the client asks for markdown, or accepts
+	# anything (`*/*`), or sends no Accept header at all. Everything else —
+	# notably a bare `Accept: text/plain` — keeps the text/plain default.
+	#
+	# Two matchers because a named matcher ANDs its conditions and this needs
+	# an OR. `[*]/[*]` rather than `\*/\*` avoids Caddyfile backslash escaping.
+	# Both must follow the @markdown block: same-name directives keep
+	# Caddyfile order.
+	@md_wants_markdown {
+		path *.md
+		header_regexp Accept "(?i)(text/markdown|[*]/[*])"
+	}
+	header @md_wants_markdown Content-Type "text/markdown; charset=utf-8"
+
+	@md_no_accept {
+		path *.md
+		not header Accept *
+	}
+	header @md_no_accept Content-Type "text/markdown; charset=utf-8"
+
+	# Response now varies by Accept. `+` appends so encode's
+	# `Vary: Accept-Encoding` survives.
+	@md_paths path *.md
+	header @md_paths +Vary "Accept"
+
+	header {
+		?Cache-Control "public, max-age=0, must-revalidate"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	handle_errors 404 {
+		# Unresolved `*.md` gets the markdown 404 (see 404.md.ts), so agents
+		# fetching a bad path get markdown back, not HTML.
+		@error_md path_regexp errormd \.md$
+		handle @error_md {
+			# Same plain-by-default / markdown-on-request negotiation as above.
+			header Content-Type "text/plain; charset=utf-8"
+
+			@err_wants_markdown {
+				header_regexp Accept "(?i)(text/markdown|[*]/[*])"
+			}
+			header @err_wants_markdown Content-Type "text/markdown; charset=utf-8"
+
+			@err_no_accept {
+				not header Accept *
+			}
+			header @err_no_accept Content-Type "text/markdown; charset=utf-8"
+
+			header +Vary "Accept"
+
+			# Error pages genuinely should stay out of the index.
+			header X-Robots-Tag "noindex, nofollow"
+
+			rewrite * /404.md
+			file_server
+		}
+		handle {
+			rewrite * /404.html
+			file_server
+		}
+	}
+}

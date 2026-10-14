@@ -64,3 +64,61 @@ tasks:
         echo "mkdir -p ./volumes/api"
         echo "chmod 777 -R ./volumes"
         echo "docker compose up -d"
+
+  docs:dev:build:
+    cmds:
+      - docker compose -f ./docs-tools/docker-compose.yml build
+
+  docs:dev:up:
+    cmds:
+      - docker compose -f ./docs-tools/docker-compose.yml up -d --remove-orphans
+
+  docs:dev:down:
+    cmds:
+      - docker compose -f ./docs-tools/docker-compose.yml down
+
+  docs:dev:cli:
+    cmds:
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core /bin/bash
+
+  docs:check:all:
+    desc: Run every docs check (build, tests, lint, spellcheck, e2e) in the order the build depends on.
+    cmds:
+      - task: docs:check:build
+      - task: docs:check:test
+      - task: docs:check:lint
+      - task: docs:check:spellcheck
+      - task: docs:check:e2e
+
+  docs:check:build:
+    cmds:
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run build"
+
+  docs:check:test:
+    cmds:
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run test"
+
+  docs:check:lint:
+    cmds:
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run cs"
+
+  docs:check:spellcheck:
+    cmds:
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run spellcheck"
+
+  docs:check:e2e:
+    desc: Run Playwright e2e tests (Chromium, in the separate `e2e` container) against a preview server of docs/dist.
+    cmds:
+      - sh ./docs-tools/run-e2e.sh
+
+  docs:prod:build:
+    cmds:
+      - docker build -f docs-tools/Dockerfile --target production -t ember-nexus-api-docs:latest .
+
+  docs:prod:run:
+    cmds:
+      - docker run -p 80:80 ember-nexus-api-docs:latest
+
+  docs:swagger:generate:
+    cmds:
+      - find ./docs/src/data/swagger -name '*.json' -print0 | sort -z | xargs -0 jq -s 'reduce .[1:][] as $x (.[0]; . * $x)' > ./docs/src/data/swagger.json

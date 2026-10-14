@@ -1,0 +1,39 @@
+---
+type: guide
+title: Grammar
+---
+
+Cypher Path Subset is defined as its own [ANTLR](https://www.antlr.org/) parser grammar, derived from Neo4j's Cypher
+25 grammar. The railroad diagram below is generated directly from that grammar and shows every rule the parser
+accepts.
+
+<Iframe
+    src="/antlr/cypher-path-subset.html"
+    title="Cypher Path Subset ANTLR railroad diagram"
+    height={600}
+/>
+
+[Open in new tab](/antlr/cypher-path-subset.html)
+
+## How it differs from Cypher 25
+
+Cypher Path Subset keeps only what is needed to describe a path pattern and return it - most of Cypher 25's surface
+area is removed:
+
+- **No write access**: `CREATE`, `INSERT`, `DELETE`, `SET`, `REMOVE` and `MERGE` are all gone - a query can only read.
+- **No function calls or existence checks**: `functionInvocation`, `existsExpression` and `countExpression` are not
+  part of the grammar, which rules out arbitrary computation and nested sub-queries inside the query itself.
+- **No procedures or sub-queries**: `CALL` (both standalone and as a subquery), `LOAD CSV`, `FOREACH` and `USE` are
+  removed.
+- **A single, non-chainable pipeline**: a query is exactly one optional `UNWIND` followed by one `MATCH` followed by
+  one `RETURN` - there's no `WITH` clause to chain multiple stages, and no `UNION` to combine queries.
+- **A fixed, minimal `RETURN`**: `returnItem` only allows a bare variable, not arbitrary expressions or `AS` aliases -
+  the query can only return the variable `paths` (see [step reference](/reference/search/cypher-path-subset)).
+
+`ORDER BY`, `SKIP` and `LIMIT` on the result, as well as `WHERE` filters on patterns, are still fully supported -
+see the [Cypher path query examples](/reference/search/cypher-path-subset#examples) for both in use.
+
+## See also
+
+- [Cypher 25 railroad diagram](/antlr/cypher-25.html) - the full grammar Cypher Path Subset is derived from.
+- [openCypher 9 railroad diagram](/antlr/open-cypher-9.html) - the standardized core Cypher 25 itself extends.

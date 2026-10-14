@@ -1,0 +1,164 @@
+---
+type: reference
+title: Transfer of ownership
+---
+
+In order to transfer ownership over a specific element and its children, two things must happen:
+
+- The new owner receives ownership.
+- The old owner removes their ownership.
+
+## Initial state
+
+The current owner has ownership over the element, while the new owner has not:
+
+<g6-graph mode="manual" layout="antv-dagre-LR">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "ownerOld", "type": "User", "data": { "name": "Old owner" }},
+            { "id": "ownerNew", "type": "User", "data": { "name": "New owner" }},
+            { "id": "element", "type": "Data", "data": { "name": "Element" }},
+            { "id": "ownsOld", "type": "OWNS", "start": "ownerOld", "end": "element"}
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+## Adding new owners
+
+The new owner is granted explicit ownership of the element by creating an `OWNS`-relation:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "OWNS",
+        "start": "<uuid of new owner>",
+        "end": "<uuid of element"
+      }' \
+  https://api.example.com/
+```
+
+<g6-graph mode="manual" layout="antv-dagre-LR">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "ownerOld", "type": "User", "data": { "name": "Old owner" }},
+            { "id": "ownerNew", "type": "User", "data": { "name": "New owner" }},
+            { "id": "element", "type": "Data", "data": { "name": "Element" }},
+            { "id": "ownsOld", "type": "OWNS", "start": "ownerOld", "end": "element"},
+            { "id": "ownsNew", "type": "OWNS", "start": "ownerNew", "end": "element", "data": { "hl": "1" }}
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+## Removing old owners
+
+First find out which ownership claims exist:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  'https://api.example.com/<uuid of element>/parents'
+```
+
+```bash /0c4cabca-a519-4ace-9b7b-2f4d57c31259/
+{
+  "type": "_PartialCollection",
+  "id": "/<uuid of element>/parents",
+  "totalNodes": 1,
+  "links": {
+    "first": "/<uuid of element>/parents",
+    "previous": null,
+    "next": null,
+    "last": "/<uuid of element>/parents"
+  },
+  "nodes": [
+    {
+      "type": "User",
+      "id": "<uuid of old user>",
+      "data": {
+        "created": "2025-09-27T10:26:49+00:00",
+        "updated": "2025-09-27T10:26:49+00:00"
+      }
+    },
+    {
+      "type": "User",
+      "id": "<uuid of new user>",
+      "data": {
+        "created": "2026-07-27T10:26:49+00:00",
+        "updated": "2026-07-27T10:26:49+00:00"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "type": "OWNS",
+      "id": "0c4cabca-a519-4ace-9b7b-2f4d57c31259",
+      "start": "<uuid of old owner>",
+      "end": "<uuid of element>",
+      "data": {
+        "created": "2025-09-27T10:26:49+00:00",
+        "updated": "2025-09-27T10:26:49+00:00"
+      }
+    },
+    {
+      "type": "OWNS",
+      "id": "0d1817ab-9c6e-4052-8a1c-6913163cfff3",
+      "start": "<uuid of new owner>",
+      "end": "<uuid of element>",
+      "data": {
+        "created": "2026-07-27T10:26:49+00:00",
+        "updated": "2026-07-27T10:26:49+00:00"
+      }
+    }
+  ]
+}
+```
+
+You then look for the `uuid` of the `OWNS`-relation between the old owner and the element, in this case it is
+`0c4cabca-a519-4ace-9b7b-2f4d57c31259`.
+
+This relation can then be deleted:
+
+```bash
+curl -X DELETE \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  https://api.example.com/0c4cabca-a519-4ace-9b7b-2f4d57c31259
+```
+
+The graph will then look like this:
+
+<g6-graph mode="manual" layout="antv-dagre-LR">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "ownerOld", "type": "User", "data": { "name": "Old owner" }},
+            { "id": "ownerNew", "type": "User", "data": { "name": "New owner" }},
+            { "id": "element", "type": "Data", "data": { "name": "Element" }},
+            { "id": "ownsNew", "type": "OWNS", "start": "ownerNew", "end": "element"}
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+And the old owner can no longer access the element - unless he has access to it through alternative paths.
+
+## Notes
+
+- In order to remove ownership claims, you need to have enough permissions to a) read the ownership claim in the first
+  place and b) have write permissions to delete it.
+- If you want to transfer ownership from you to someone else, you have to remove your claim _after_ you transferred it.
+  Otherwise, you do not have enough permissions to complete the transfer.
+- Removing the last owner from an element can result in dangling sub-graphs, which are no longer accessible by any user.
+  These elements can only be rescued by interacting with the underlying database directly, i.e. adding new `OWNS`-
+  relations with all the required data (id). Only administrators can do this, but even then this approach is not
+  recommended.
+- Removal of an `OWNS`-relation does not necessarily mean that one user can no longer access the element, as there might
+  be alternative paths to access the element:
+  - Access through different groups, parallel `OWNS`-relations etc.
+  - Limited access through non-ownership-permissions, e.g. `HAS_READ_ACCESS`.
+  - Limited access through `CREATED`-relations.

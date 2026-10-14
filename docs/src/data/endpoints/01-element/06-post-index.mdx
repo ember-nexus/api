@@ -1,0 +1,53 @@
+---
+endpoint: post-index
+group: element
+method: post
+name: Post index
+endpointUrl: /
+swaggerUrl: /
+---
+
+Creates a new element - either a new root level element which is directly owned by the current user, or a new relation,
+which is created between any two nodes.
+
+<TwoColumn>
+    <ComparisonCard title="Node">
+        <g6-graph mode="manual" layout="antv-dagre-LR">
+            <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "node", "type": "Data", "data": { "name": "Node", "hl": "1" }},
+            { "id": "owns", "type": "OWNS", "start": "user", "end": "node"},
+            { "id": "created", "type": "CREATED", "start": "user", "end": "node"}
+        ]
+    }
+  `}</script>
+        </g6-graph>
+    </ComparisonCard>
+    <ComparisonCard title="Relation">
+        <g6-graph mode="manual" layout="antv-dagre-LR">
+            <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "start", "type": "Data", "data": { "name": "Start" }},
+            { "id": "end", "type": "Data", "data": { "name": "End" }},
+            { "id": "relation", "type": "RELATION", "start": "start", "end": "end", "data": { "hl": "1" }}
+        ]
+    }
+  `}</script>
+        </g6-graph>
+    </ComparisonCard>
+</TwoColumn>
+
+To create a relation, both `start` and `end` must be provided together - supplying only one of them is rejected. The two
+properties are also checked asymmetrically: the current user needs `HAS_CREATE_ACCESS` on the `start` node (a new
+relation is being attached to it), but only `HAS_READ_ACCESS` on the `end` node. Both `start` and `end` must reference nodes; using
+the id of an existing relation for either property is rejected.
+
+<Note>
+    A handful of types are reserved for internal use (`User`, `Token`, `Upload`) and can not be used as the `type` of a
+    newly created element, and a handful of properties can not be set directly either - see
+    [Reserved data types](/reference/security#reserved-data-types) and
+    [Reserved properties](/reference/security#reserved-properties).
+</Note>

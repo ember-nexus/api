@@ -1,0 +1,48 @@
+---
+endpoint: get-element-file
+group: file-and-upload
+method: get
+name: Get element file
+endpointUrl: /<uuid>/file
+swaggerUrl: /{uuid}/file
+---
+
+Returns the binary file attached to an element as a stream, together with a `Content-Disposition` header describing
+the original filename.
+
+The filename is built from the element's `name` property, if it has one and it is a string, falling back to the
+element's id otherwise. The extension is taken from the file that was actually uploaded (see
+[`POST /<uuid>/file`](/api/post-element-file)), or `bin` if none could be determined.
+
+<Note>
+    Returns `404` both when the element does not exist (or is not accessible to the current user) and when the
+    element exists but has no file attached - the two cases cannot be told apart from the response alone.
+</Note>
+
+Like most other element endpoints, this endpoint supports conditional requests via `If-Match` and `If-None-Match`,
+using an `ETag` derived from the file's content. `If-Match: *` and `If-None-Match: *` are supported; `If-Match` on an
+element without file answers `412`, and without the required access conditional requests answer `404`.
+
+The response also carries a `Repr-Digest` header with the file's SHA-256 hash, in
+[RFC 9530](https://datatracker.ietf.org/doc/html/rfc9530) structured-field format (`sha-256=:[base64]:`), letting the
+client verify the download's integrity without a separate request. It is omitted for files uploaded before this
+header existed, since no hash was stored for them yet.
+
+## Partial downloads with `Range`
+
+This endpoint accepts a `Range` header to download part of a file instead of the whole thing, e.g. to resume an
+interrupted download or stream a large file. See the [file reference](/reference/file#partial-downloads-with-range)
+for the exact supported syntax and error cases, or the
+[managing big files guide](/guide/managing-big-files#downloading-part-of-a-file) for a worked example.
+
+A satisfiable range responds with `206 Partial Content` and a `Content-Range` header describing what was returned. An
+end beyond the file's actual length is clamped rather than rejected. `Accept-Ranges: bytes` is always present, even on
+a full, non-ranged response, so clients can detect range support ahead of time.
+
+<Note>
+    Only a single range is supported - `bytes=[start]-[end]`, `bytes=[start]-` or `bytes=-[suffixLength]`, e.g.
+    `bytes=0-1048575` for the first megabyte. A comma-separated list of ranges fails with `400 Bad Request`. A range
+    whose start is beyond the end of the file, or that spans zero bytes, fails with `416 Range Not Satisfiable` (any range on a zero-byte file too).
+</Note>
+
+TODO: `405` responses lack an `Allow` header and `416` lacks `Content-Range: bytes */<length>` (RFC 9110) - undecided.

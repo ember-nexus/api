@@ -1,0 +1,16 @@
+{
+  "components": {
+    "examples": {
+      "RangeNotSatisfiableProblemExample": {
+        "value": {
+          "type": "https://api.example.com/error/416/range-not-satisfiable",
+          "title": "Range Not Satisfiable",
+          "status": 416,
+          "detail": "Requested range start (200000) is beyond the end of the resource (138937 bytes long).",
+          "requested-start": 200000,
+          "total-length": 138937
+        }
+      }
+    }
+  }
+}

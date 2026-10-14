@@ -1,0 +1,24 @@
+---
+type: example
+title: Full text search
+---
+import searchQuery from './01-full-text-search/query.sh?raw';
+import searchResultBody from './01-full-text-search/result.json';
+import searchResultHeaders from './01-full-text-search/header.txt?raw';
+
+This example uses Elasticsearch's [`match` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query)
+to perform a full text search of the word "lily" against the property `description` of all elements accessible to the
+user.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+<Code code={searchQuery} lang="bash" mark="match" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+Every result contains the term "lily" somewhere in its description, including plants that are not lilies botanically -
+Magnolia ("lilytree"), Daffodil ("Lent lily"), Desert Rose ("impala lily"). The Debug tab shows the relevance score of
+each element; results are ordered by it, from 4.57 down to 1.44.

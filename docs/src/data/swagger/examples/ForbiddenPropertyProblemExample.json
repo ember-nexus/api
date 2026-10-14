@@ -1,0 +1,14 @@
+{
+  "components": {
+    "examples": {
+      "ForbiddenPropertyProblemExample": {
+        "value": {
+          "type": "https://api.example.com/error/400/forbidden-property",
+          "title": "Forbidden property",
+          "status": 400,
+          "detail": "Endpoint does not accept setting the property 'created' in the request."
+        }
+      }
+    }
+  }
+}
