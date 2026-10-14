@@ -19,29 +19,6 @@ class AuditLogTest extends BaseRequestTestCase
 
     private const string ACTIVE_TOKEN = 'secret-token:VWPtCCQskD6uQnf0CHdNjY';
 
-    private function getAuditLogPath(): string
-    {
-        return __DIR__.'/../../../var/log/audit.log';
-    }
-
-    private function getAuditLogSize(): int
-    {
-        return is_file($this->getAuditLogPath()) ? (int) filesize($this->getAuditLogPath()) : 0;
-    }
-
-    private function getAuditLogContentsSince(int $offset): string
-    {
-        if (!is_file($this->getAuditLogPath())) {
-            return '';
-        }
-        $handle = fopen($this->getAuditLogPath(), 'rb');
-        fseek($handle, $offset);
-        $contents = stream_get_contents($handle);
-        fclose($handle);
-
-        return false !== $contents ? $contents : '';
-    }
-
     public function testAccessDeniedRequestIsAuditLogged(): void
     {
         $auditLogOffset = $this->getAuditLogSize();
@@ -50,8 +27,7 @@ class AuditLogTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 404);
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
-        $this->assertStringContainsString('Access to element was denied.', $auditLogEntry);
+        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Access to element was denied.');
         $this->assertStringContainsString(self::FORBIDDEN_DATA, $auditLogEntry);
         $this->assertStringContainsString('"accessType":"READ"', $auditLogEntry);
     }
@@ -64,8 +40,7 @@ class AuditLogTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($response, 'User');
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
-        $this->assertStringContainsString('User/token endpoint was called.', $auditLogEntry);
+        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'User/token endpoint was called.');
         $this->assertStringContainsString('"route":"get-me"', $auditLogEntry);
     }
 
@@ -77,8 +52,7 @@ class AuditLogTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($response, 'Token');
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
-        $this->assertStringContainsString('User/token endpoint was called.', $auditLogEntry);
+        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'User/token endpoint was called.');
         $this->assertStringContainsString('"route":"get-token"', $auditLogEntry);
     }
 }

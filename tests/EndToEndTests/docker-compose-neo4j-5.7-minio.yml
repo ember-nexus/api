@@ -29,9 +29,13 @@ services:
       - "80"
     environment:
       DISABLE_CRON: 'true'
+      # path audit-log-collector forwards api-prod's audit channel (stderr) to; a dedicated volume, kept well away
+      # from the repository bind mount above to avoid any collision with its own var/log files
+      AUDIT_CONTAINER_LOG_PATH: /shared-logs/audit.log
     volumes:
       - ../../:/var/www/html
       - ./well-known-security.txt:/well-known-security.txt
+      - audit-log:/shared-logs:ro
 
   api-prod:
     container_name: api-prod
@@ -49,6 +53,19 @@ services:
     volumes:
       # the repository is deliberately not mounted: the production image is tested as it is shipped
       - ./well-known-security.txt:/well-known-security.txt
+
+  # api-prod's audit channel logs to stderr (its production config, left untouched); this forwards that container's
+  # logs into a file on a dedicated volume so end-to-end tests (running inside api-dev) can read them, without
+  # giving api-dev itself access to the docker socket
+  audit-log-collector:
+    container_name: audit-log-collector
+    image: docker:27-cli
+    depends_on:
+      - api-prod
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - audit-log:/shared-logs
+    command: sh -c "docker logs -f api-prod >> /shared-logs/audit.log 2>&1"
 
   neo4j:
     container_name: neo4j
@@ -129,3 +146,6 @@ services:
 
       echo 'MinIO buckets and user configured';
       "
+
+volumes:
+  audit-log:

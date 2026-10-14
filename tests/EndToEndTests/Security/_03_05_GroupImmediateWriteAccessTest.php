@@ -16,29 +16,6 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 
     private const string GROUP = '67f8978f-6205-4e95-a20c-e82fa3367f6a';
 
-    private function getAuditLogPath(): string
-    {
-        return __DIR__.'/../../../var/log/audit.log';
-    }
-
-    private function getAuditLogSize(): int
-    {
-        return is_file($this->getAuditLogPath()) ? (int) filesize($this->getAuditLogPath()) : 0;
-    }
-
-    private function getAuditLogContentsSince(int $offset): string
-    {
-        if (!is_file($this->getAuditLogPath())) {
-            return '';
-        }
-        $handle = fopen($this->getAuditLogPath(), 'rb');
-        fseek($handle, $offset);
-        $contents = stream_get_contents($handle);
-        fclose($handle);
-
-        return false !== $contents ? $contents : '';
-    }
-
     public function testGetIndex(): void
     {
         $response = $this->runGetRequest('/', self::TOKEN_MEMBER);
@@ -159,8 +136,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $this->assertSame('Group updated through PATCH by its owner', $body['data']['name']);
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
-        $this->assertStringContainsString('Group node was updated.', $auditLogEntry);
+        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Group node was updated.');
         $this->assertStringContainsString(self::GROUP, $auditLogEntry);
     }
 
@@ -183,8 +159,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $this->assertSame('Group updated through PUT by its owner', $body['data']['name']);
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
-        $this->assertStringContainsString('Group node was updated.', $auditLogEntry);
+        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Group node was updated.');
         $this->assertStringContainsString(self::GROUP, $auditLogEntry);
     }
 
@@ -208,8 +183,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $this->assertSame('Group updated through PATCH via explicit update access', $body['data']['name']);
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
-        $this->assertStringContainsString('Group node was updated.', $auditLogEntry);
+        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Group node was updated.');
         $this->assertStringContainsString(self::GROUP, $auditLogEntry);
     }
 
@@ -224,8 +198,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 404);
 
         $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertStringContainsString('audit.NOTICE', $auditLogEntry);
-        $this->assertStringContainsString('Group node was deleted.', $auditLogEntry);
+        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Group node was deleted.');
         $this->assertStringContainsString(self::GROUP, $auditLogEntry);
     }
 }

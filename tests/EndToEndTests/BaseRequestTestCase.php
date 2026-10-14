@@ -659,4 +659,62 @@ abstract class BaseRequestTestCase extends TestCase
 
         return $hash;
     }
+
+    /**
+     * In the end-to-end matrix, requests go to api-prod, a separate container from the one running this test; its
+     * audit channel is forwarded by audit-log-collector into a file on a dedicated volume, whose path is given via
+     * AUDIT_CONTAINER_LOG_PATH. Falls back to this environment's own audit.log, used by plain single-container dev
+     * setups where this test and the server it talks to are the same process.
+     */
+    public function getAuditLogPath(): string
+    {
+        $containerLogPath = getenv('AUDIT_CONTAINER_LOG_PATH');
+        if (false !== $containerLogPath && '' !== $containerLogPath) {
+            return $containerLogPath;
+        }
+
+        return __DIR__.'/../../var/log/audit.log';
+    }
+
+    public function getAuditLogSize(): int
+    {
+        return is_file($this->getAuditLogPath()) ? (int) filesize($this->getAuditLogPath()) : 0;
+    }
+
+    public function getAuditLogContentsSince(int $offset): string
+    {
+        if (!is_file($this->getAuditLogPath())) {
+            return '';
+        }
+        $handle = fopen($this->getAuditLogPath(), 'rb');
+        fseek($handle, $offset);
+        $contents = stream_get_contents($handle);
+        fclose($handle);
+
+        return false !== $contents ? $contents : '';
+    }
+
+    /**
+     * Matches both the dev environment's LineFormatter output (e.g. "audit.NOTICE: Access to element was denied.")
+     * and api-prod's JSON-formatted stderr output, which encodes channel and level as separate fields instead of
+     * joining them with a dot.
+     */
+    public function assertAuditLogContains(string $logContent, string $channel, string $level, string $message): void
+    {
+        $matchesLineFormat = str_contains($logContent, sprintf('%s.%s: %s', $channel, $level, $message));
+        $matchesJsonFormat = str_contains($logContent, sprintf('"channel":"%s"', $channel))
+            && str_contains($logContent, sprintf('"level_name":"%s"', $level))
+            && str_contains($logContent, sprintf('"message":"%s"', $message));
+
+        $this->assertTrue(
+            $matchesLineFormat || $matchesJsonFormat,
+            sprintf(
+                "Expected audit log to contain a %s.%s entry with message '%s', got:\n\n%s",
+                $channel,
+                $level,
+                $message,
+                $logContent
+            )
+        );
+    }
 }
