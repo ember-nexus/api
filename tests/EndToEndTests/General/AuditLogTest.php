@@ -21,38 +21,41 @@ class AuditLogTest extends BaseRequestTestCase
 
     public function testAccessDeniedRequestIsAuditLogged(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runGetRequest(sprintf('/%s', self::FORBIDDEN_DATA), self::TOKEN_WITHOUT_ACCESS);
         $this->assertIsProblemResponse($response, 404);
 
-        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Access to element was denied.');
-        $this->assertStringContainsString(self::FORBIDDEN_DATA, $auditLogEntry);
-        $this->assertStringContainsString('"accessType":"READ"', $auditLogEntry);
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $this->assertAuditLogContains($containerLogContent, 'audit', 'NOTICE', 'Access to element was denied.');
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringContainsString(self::FORBIDDEN_DATA, $auditLogLines);
+        $this->assertStringContainsString('"accessType":"READ"', $auditLogLines);
     }
 
     public function testGetMeEndpointIsAuditLogged(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runGetRequest('/me', self::ACTIVE_TOKEN);
         $this->assertIsNodeResponse($response, 'User');
 
-        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'User/token endpoint was called.');
-        $this->assertStringContainsString('"route":"get-me"', $auditLogEntry);
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $this->assertAuditLogContains($containerLogContent, 'audit', 'NOTICE', 'User/token endpoint was called.');
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringContainsString('"route":"get-me"', $auditLogLines);
     }
 
     public function testGetTokenEndpointIsAuditLogged(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runGetRequest('/token', self::ACTIVE_TOKEN);
         $this->assertIsNodeResponse($response, 'Token');
 
-        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'User/token endpoint was called.');
-        $this->assertStringContainsString('"route":"get-token"', $auditLogEntry);
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $this->assertAuditLogContains($containerLogContent, 'audit', 'NOTICE', 'User/token endpoint was called.');
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringContainsString('"route":"get-token"', $auditLogLines);
     }
 }

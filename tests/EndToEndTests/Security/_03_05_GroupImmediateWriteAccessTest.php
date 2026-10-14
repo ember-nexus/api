@@ -24,7 +24,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 
     public function testCreateChildNodeDirectlyOnGroup(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runPostRequest(
             sprintf('/%s', self::GROUP),
@@ -39,7 +39,9 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $this->assertIsCreatedResponse($response);
 
         // creating a child node is not itself a write against the group node, so it must not be audit-logged
-        $this->assertStringNotContainsString(self::GROUP, $this->getAuditLogContentsSince($auditLogOffset));
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringNotContainsString(self::GROUP, $auditLogLines);
     }
 
     public function testCreateOwnsRelationStartingAtGroup(): void
@@ -71,7 +73,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 
     public function testMemberCannotUpdateGroupThroughPatch(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runPatchRequest(
             sprintf('/%s', self::GROUP),
@@ -87,8 +89,9 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $body = json_decode((string) $response->getBody(), true);
         $this->assertSame('Group', $body['data']['name']);
 
-        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertStringNotContainsString('Group node was updated.', $auditLogEntry);
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringNotContainsString('Group node was updated.', $auditLogLines);
     }
 
     public function testMemberCannotUpdateGroupThroughPut(): void
@@ -119,7 +122,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 
     public function testOwnerCanUpdateGroupThroughPatch(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runPatchRequest(
             sprintf('/%s', self::GROUP),
@@ -135,14 +138,15 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $body = json_decode((string) $response->getBody(), true);
         $this->assertSame('Group updated through PATCH by its owner', $body['data']['name']);
 
-        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Group node was updated.');
-        $this->assertStringContainsString(self::GROUP, $auditLogEntry);
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $this->assertAuditLogContains($containerLogContent, 'audit', 'NOTICE', 'Group node was updated.');
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringContainsString(self::GROUP, $auditLogLines);
     }
 
     public function testOwnerCanUpdateGroupThroughPut(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runPutRequest(
             sprintf('/%s', self::GROUP),
@@ -158,14 +162,15 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $body = json_decode((string) $response->getBody(), true);
         $this->assertSame('Group updated through PUT by its owner', $body['data']['name']);
 
-        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Group node was updated.');
-        $this->assertStringContainsString(self::GROUP, $auditLogEntry);
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $this->assertAuditLogContains($containerLogContent, 'audit', 'NOTICE', 'Group node was updated.');
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringContainsString(self::GROUP, $auditLogLines);
     }
 
     public function testAccessUserCanUpdateGroupThroughPatch(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runPatchRequest(
             sprintf('/%s', self::GROUP),
@@ -182,14 +187,15 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $body = json_decode((string) $response->getBody(), true);
         $this->assertSame('Group updated through PATCH via explicit update access', $body['data']['name']);
 
-        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Group node was updated.');
-        $this->assertStringContainsString(self::GROUP, $auditLogEntry);
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $this->assertAuditLogContains($containerLogContent, 'audit', 'NOTICE', 'Group node was updated.');
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringContainsString(self::GROUP, $auditLogLines);
     }
 
     public function testAccessUserCanDeleteGroup(): void
     {
-        $auditLogOffset = $this->getAuditLogSize();
+        $containerLogOffset = $this->getContainerLogSize();
 
         $response = $this->runDeleteRequest(sprintf('/%s', self::GROUP), self::TOKEN_ACCESS);
         $this->assertIsDeletedResponse($response);
@@ -197,8 +203,9 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
         $response = $this->runGetRequest(sprintf('/%s', self::GROUP), self::TOKEN_ACCESS);
         $this->assertIsProblemResponse($response, 404);
 
-        $auditLogEntry = $this->getAuditLogContentsSince($auditLogOffset);
-        $this->assertAuditLogContains($auditLogEntry, 'audit', 'NOTICE', 'Group node was deleted.');
-        $this->assertStringContainsString(self::GROUP, $auditLogEntry);
+        $containerLogContent = $this->getContainerLogContentsSince($containerLogOffset);
+        $this->assertAuditLogContains($containerLogContent, 'audit', 'NOTICE', 'Group node was deleted.');
+        $auditLogLines = $this->extractChannelLogLines($containerLogContent, 'audit');
+        $this->assertStringContainsString(self::GROUP, $auditLogLines);
     }
 }

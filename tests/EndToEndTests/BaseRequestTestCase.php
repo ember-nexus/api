@@ -661,14 +661,15 @@ abstract class BaseRequestTestCase extends TestCase
     }
 
     /**
-     * In the end-to-end matrix, requests go to api-prod, a separate container from the one running this test; its
-     * audit channel is forwarded by audit-log-collector into a file on a dedicated volume, whose path is given via
-     * AUDIT_CONTAINER_LOG_PATH. Falls back to this environment's own audit.log, used by plain single-container dev
-     * setups where this test and the server it talks to are the same process.
+     * In the end-to-end matrix, requests go to api-prod, a separate container from the one running this test;
+     * container-log-collector forwards that whole container's log (not just its audit channel - also e.g. the
+     * webserver's own HTTP access log) into a file on a dedicated volume, whose path is given via
+     * API_PROD_CONTAINER_LOG_PATH. Falls back to this environment's own audit.log, used by plain single-container
+     * dev setups where this test and the server it talks to are the same process.
      */
-    public function getAuditLogPath(): string
+    public function getContainerLogPath(): string
     {
-        $containerLogPath = getenv('AUDIT_CONTAINER_LOG_PATH');
+        $containerLogPath = getenv('API_PROD_CONTAINER_LOG_PATH');
         if (false !== $containerLogPath && '' !== $containerLogPath) {
             return $containerLogPath;
         }
@@ -676,17 +677,17 @@ abstract class BaseRequestTestCase extends TestCase
         return __DIR__.'/../../var/log/audit.log';
     }
 
-    public function getAuditLogSize(): int
+    public function getContainerLogSize(): int
     {
-        return is_file($this->getAuditLogPath()) ? (int) filesize($this->getAuditLogPath()) : 0;
+        return is_file($this->getContainerLogPath()) ? (int) filesize($this->getContainerLogPath()) : 0;
     }
 
-    public function getAuditLogContentsSince(int $offset): string
+    public function getContainerLogContentsSince(int $offset): string
     {
-        if (!is_file($this->getAuditLogPath())) {
+        if (!is_file($this->getContainerLogPath())) {
             return '';
         }
-        $handle = fopen($this->getAuditLogPath(), 'rb');
+        $handle = fopen($this->getContainerLogPath(), 'rb');
         fseek($handle, $offset);
         $contents = stream_get_contents($handle);
         fclose($handle);
@@ -695,25 +696,45 @@ abstract class BaseRequestTestCase extends TestCase
     }
 
     /**
-     * Matches both the dev environment's LineFormatter output (e.g. "audit.NOTICE: Access to element was denied.")
-     * and api-prod's JSON-formatted stderr output, which encodes channel and level as separate fields instead of
+     * Picks out only the lines belonging to the given Monolog channel from a container's full log output, which
+     * (in the end-to-end matrix) also contains unrelated noise, e.g. the webserver's own HTTP access log - whose
+     * entries can otherwise coincidentally contain a request's element id, being mistaken for that id having been
+     * audit-logged. Matches both the dev environment's LineFormatter output (e.g. "audit.NOTICE: ...") and
+     * api-prod's JSON-formatted stderr output, which encodes channel and level as separate fields instead of
      * joining them with a dot.
      */
-    public function assertAuditLogContains(string $logContent, string $channel, string $level, string $message): void
+    public function extractChannelLogLines(string $containerLogContent, string $channel): string
     {
-        $matchesLineFormat = str_contains($logContent, sprintf('%s.%s: %s', $channel, $level, $message));
-        $matchesJsonFormat = str_contains($logContent, sprintf('"channel":"%s"', $channel))
-            && str_contains($logContent, sprintf('"level_name":"%s"', $level))
-            && str_contains($logContent, sprintf('"message":"%s"', $message));
+        $matchingLines = array_filter(
+            explode("\n", $containerLogContent),
+            static fn (string $line): bool => str_contains($line, sprintf('"channel":"%s"', $channel))
+                || 1 === preg_match(sprintf('/\b%s\.[A-Z]+: /', preg_quote($channel, '/')), $line)
+        );
+
+        return implode("\n", $matchingLines);
+    }
+
+    /**
+     * Requires the channel and level to belong to the same log line, and the message to appear on one of that
+     * channel's lines - stricter than checking the whole (possibly multi-entry, noise-containing) buffer for each
+     * substring independently.
+     */
+    public function assertAuditLogContains(string $containerLogContent, string $channel, string $level, string $message): void
+    {
+        $channelLines = $this->extractChannelLogLines($containerLogContent, $channel);
+
+        $matchesLineFormat = str_contains($channelLines, sprintf('%s.%s: %s', $channel, $level, $message));
+        $matchesJsonFormat = str_contains($channelLines, sprintf('"level_name":"%s"', $level))
+            && str_contains($channelLines, sprintf('"message":"%s"', $message));
 
         $this->assertTrue(
             $matchesLineFormat || $matchesJsonFormat,
             sprintf(
-                "Expected audit log to contain a %s.%s entry with message '%s', got:\n\n%s",
+                "Expected the '%s' channel's log lines to contain a %s entry with message '%s', got:\n\n%s",
                 $channel,
                 $level,
                 $message,
-                $logContent
+                $channelLines
             )
         );
     }
