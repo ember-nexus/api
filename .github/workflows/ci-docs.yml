@@ -1,0 +1,200 @@
+name: 'CI Docs'
+
+# Temporary: until this branch is merged, run on both main and this branch directly so the pipeline
+# gets exercised before merge. Narrow back down to `main` only once gh-495 is merged.
+on:
+  push:
+    branches:
+      - main
+      - feature/gh-495-integrate-next-doc
+
+jobs:
+
+  build-dist:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: 'Build dist'
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/build-docker-image-docs
+        with:
+          target: development
+          arch: amd
+          artifact-name: docker-image-docs-ci-dev-amd
+          artifact-retention-days: 1
+      - uses: ./.github/actions/load-docker-image-docs
+        with:
+          artifact-name: docker-image-docs-ci-dev-amd
+          tar-filename: docs-dev-amd.tar.gz
+      - name: Build dist
+        run: |
+          docker run -v $(pwd)/docs:/core --user "$(id -u):$(id -g)" docs:dev sh -c "cd /core && pnpm install && pnpm run build"
+      - name: Archive dist
+        run: tar -czf docs-dist.tar.gz -C docs dist
+      - uses: actions/upload-artifact@v6
+        with:
+          name: docs-dist
+          path: docs-dist.tar.gz
+          retention-days: 7
+
+  build-image-amd:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: 'Build Docker Image - AMD'
+    timeout-minutes: 15
+    needs:
+      - build-dist
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-dist
+          path: /tmp
+      - name: Extract dist
+        run: mkdir -p /tmp/dist && tar -xzf /tmp/docs-dist.tar.gz -C /tmp/dist
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          version: latest
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build Docker image - AMD
+        run: |
+          docker buildx build \
+            --provenance=false \
+            --sbom=false \
+            --build-context dist=/tmp/dist/dist \
+            --build-context caddyconfig=./docs-tools \
+            -f ./docs-tools/Dockerfile.ci \
+            -t docs:ci-amd \
+            --load \
+            .
+          docker save docs:ci-amd | gzip > docs-ci-amd.tar.gz
+      - uses: actions/upload-artifact@v6
+        with:
+          name: docker-image-docs-ci-amd
+          path: docs-ci-amd.tar.gz
+          retention-days: 7
+
+  build-image-arm:
+    runs-on: gh-4vcpu-ubuntu-latest-arm
+    name: 'Build Docker Image - ARM'
+    timeout-minutes: 15
+    needs:
+      - build-dist
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-dist
+          path: /tmp
+      - name: Extract dist
+        run: mkdir -p /tmp/dist && tar -xzf /tmp/docs-dist.tar.gz -C /tmp/dist
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          version: latest
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build Docker image - ARM
+        run: |
+          docker buildx build \
+            --provenance=false \
+            --sbom=false \
+            --build-context dist=/tmp/dist/dist \
+            --build-context caddyconfig=./docs-tools \
+            -f ./docs-tools/Dockerfile.ci \
+            -t docs:ci-arm \
+            --load \
+            .
+          docker save docs:ci-arm | gzip > docs-ci-arm.tar.gz
+      - uses: actions/upload-artifact@v6
+        with:
+          name: docker-image-docs-ci-arm
+          path: docs-ci-arm.tar.gz
+          retention-days: 7
+
+  combine-multiarch:
+    runs-on: ubuntu-26.04
+    name: 'Combine multi arch image'
+    timeout-minutes: 15
+    needs:
+      - build-image-amd
+      - build-image-arm
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # No real registry has been chosen yet for this image (Docker Hub vs GHCR is still an open
+      # question), and combining single-arch images into a multi-arch manifest fundamentally
+      # requires one (neither `docker buildx imagetools` nor `docker manifest` operate on local
+      # tarballs). A throwaway local registry sidesteps that decision for now - nothing here is
+      # pushed anywhere external, and the only end result we keep is the OCI archive artifact.
+      - name: Start local registry
+        run: docker run -d --name local-registry -p 5000:5000 registry:2
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: docker-image-docs-ci-amd
+          path: /tmp/docker
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: docker-image-docs-ci-arm
+          path: /tmp/docker
+
+      - name: Load and push arch images to local registry
+        run: |
+          docker load < /tmp/docker/docs-ci-amd.tar.gz
+          docker load < /tmp/docker/docs-ci-arm.tar.gz
+          docker tag docs:ci-amd localhost:5000/docs:ci-amd
+          docker tag docs:ci-arm localhost:5000/docs:ci-arm
+          docker push localhost:5000/docs:ci-amd
+          docker push localhost:5000/docs:ci-arm
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          version: latest
+          driver-opts: network=host
+
+      - name: Create multi arch manifest in local registry
+        run: |
+          docker buildx imagetools create \
+            -t localhost:5000/docs:ci-multiarch \
+            localhost:5000/docs:ci-amd \
+            localhost:5000/docs:ci-arm
+
+      - name: Export combined image as a single OCI archive artifact
+        run: |
+          mkdir -p /tmp/out
+          cat <<'EOF' > /tmp/registries.conf
+          [[registry]]
+          location = "localhost:5000"
+          insecure = true
+          EOF
+          docker run --rm --network host \
+            -v /tmp/registries.conf:/etc/containers/registries.conf:ro \
+            -v /tmp/out:/out \
+            quay.io/skopeo/stable:v1 \
+            copy --all docker://localhost:5000/docs:ci-multiarch oci-archive:/out/docs-ci-multiarch.tar:docs:ci-multiarch
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: docker-image-docs-ci-multiarch
+          path: /tmp/out/docs-ci-multiarch.tar
+          retention-days: 7
+
+      - name: Stop local registry
+        if: always()
+        run: docker rm -f local-registry || true
