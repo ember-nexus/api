@@ -8,7 +8,7 @@
   "register": {
     "enabled": true,
     "uniqueIdentifier": "email",
-    "uniqueIdentifierRegex": false
+    "uniqueIdentifierRegex": "/^[^\\s@]+@[^\\s@]+$/"
   },
   "expression": {
     "enabled": true,

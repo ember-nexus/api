@@ -23,7 +23,7 @@ ember_nexus:
     uniqueIdentifier: email
 
     # Either false or a regex for checking the identifier content. Defaults to a loose check for an "@" sign, since the identifier is an email address by default.
-    uniqueIdentifierRegex: /^[^\s@]+@[^\s@]+$/
+    uniqueIdentifierRegex: '/^[^\s@]+@[^\s@]+$/'
 
   # Configures settings related to the execution of expressions
   expression:
