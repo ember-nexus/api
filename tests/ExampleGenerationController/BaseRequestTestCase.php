@@ -31,7 +31,7 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
      * hardcoded. Documentation examples should still look consistent with those generated against the default
      * instance, so the different domain is normalized away here.
      */
-    private const string DIFFERENT_CONFIGURATION_DOMAIN = 'http://api-different-configuration';
+    private const string DIFFERENT_CONFIGURATION_DOMAIN = 'http://api-different-configuration-1';
     private const string DEFAULT_DOMAIN = 'http://api';
 
     /**

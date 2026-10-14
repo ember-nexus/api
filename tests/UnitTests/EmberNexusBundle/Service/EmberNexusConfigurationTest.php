@@ -9,6 +9,7 @@ use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
+use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Processor;
 
@@ -91,5 +92,74 @@ class EmberNexusConfigurationTest extends TestCase
         $this->expectExceptionMessage('Expression timeout must be null or at least 100 milliseconds.');
 
         $emberNexusConfiguration->setExpressionTimeoutInMilliseconds(99);
+    }
+
+    public function testRegisterUniqueIdentifierRegexDefaultsToLooseEmailCheck(): void
+    {
+        $emberNexusConfiguration = $this->createFromConfig([]);
+
+        $this->assertSame('/^[^\s@]+@[^\s@]+$/', $emberNexusConfiguration->getRegisterUniqueIdentifierRegex());
+    }
+
+    public function testRegisterUniqueIdentifierRegexCanBeDisabled(): void
+    {
+        $emberNexusConfiguration = $this->createFromConfig([
+            EmberNexusConfiguration::REGISTER => [
+                EmberNexusConfiguration::REGISTER_UNIQUE_IDENTIFIER_REGEX => false,
+            ],
+        ]);
+
+        $this->assertFalse($emberNexusConfiguration->getRegisterUniqueIdentifierRegex());
+    }
+
+    public function testRegisterUniqueIdentifierRegexCanBeOverwritten(): void
+    {
+        $emberNexusConfiguration = $this->createFromConfig([
+            EmberNexusConfiguration::REGISTER => [
+                EmberNexusConfiguration::REGISTER_UNIQUE_IDENTIFIER_REGEX => '/^[0-9]+$/',
+            ],
+        ]);
+
+        $this->assertSame('/^[0-9]+$/', $emberNexusConfiguration->getRegisterUniqueIdentifierRegex());
+    }
+
+    #[WithoutErrorHandler]
+    public function testInvalidRegisterUniqueIdentifierRegexIsRejectedDuringConfigurationCreation(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Unique identifier regex '/this is not valid(/' is not a valid regular expression.");
+
+        $this->createFromConfig([
+            EmberNexusConfiguration::REGISTER => [
+                EmberNexusConfiguration::REGISTER_UNIQUE_IDENTIFIER_REGEX => '/this is not valid(/',
+            ],
+        ]);
+    }
+
+    public function testSetRegisterUniqueIdentifierRegexAcceptsFalse(): void
+    {
+        $emberNexusConfiguration = new EmberNexusConfiguration();
+        $emberNexusConfiguration->setRegisterUniqueIdentifierRegex(false);
+
+        $this->assertFalse($emberNexusConfiguration->getRegisterUniqueIdentifierRegex());
+    }
+
+    public function testSetRegisterUniqueIdentifierRegexAcceptsValidPattern(): void
+    {
+        $emberNexusConfiguration = new EmberNexusConfiguration();
+        $emberNexusConfiguration->setRegisterUniqueIdentifierRegex('/^[0-9]+$/');
+
+        $this->assertSame('/^[0-9]+$/', $emberNexusConfiguration->getRegisterUniqueIdentifierRegex());
+    }
+
+    #[WithoutErrorHandler]
+    public function testSetRegisterUniqueIdentifierRegexRejectsInvalidPattern(): void
+    {
+        $emberNexusConfiguration = new EmberNexusConfiguration();
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Unique identifier regex '/this is not valid(/' is not a valid regular expression.");
+
+        $emberNexusConfiguration->setRegisterUniqueIdentifierRegex('/this is not valid(/');
     }
 }

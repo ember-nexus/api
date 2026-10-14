@@ -43,8 +43,8 @@ services:
       # the repository is deliberately not mounted: the production image is tested as it is shipped
       - ./well-known-security.txt:/well-known-security.txt
 
-  # second API instance, only differs in its configuration file; targeted via API_DOMAIN=http://api-different-configuration
-  api-different-configuration:
+  # second API instance, only differs in its configuration file; targeted via API_DOMAIN=http://api-different-configuration-1
+  api-different-configuration-1:
     image: api:prod-amd
     depends_on:
       - neo4j
@@ -57,7 +57,25 @@ services:
       - "80"
     environment: *api-environment
     volumes:
-      - ../ExampleGenerationControllerWithDifferentConfiguration/configuration.yml:/var/www/html/config/packages/ember_nexus.yaml:ro
+      - ../ExampleGenerationControllerWithDifferentConfiguration1/configuration.yml:/var/www/html/config/packages/ember_nexus.yaml:ro
+      - ./well-known-security.txt:/well-known-security.txt
+
+  # third API instance, for configuration options which don't fit the other two instances' setups; targeted via
+  # API_DOMAIN=http://api-different-configuration-2
+  api-different-configuration-2:
+    image: api:prod-amd
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
+    expose:
+      - "80"
+    environment: *api-environment
+    volumes:
+      - ../ExampleGenerationControllerWithDifferentConfiguration2/configuration.yml:/var/www/html/config/packages/ember_nexus.yaml:ro
       - ./well-known-security.txt:/well-known-security.txt
 
   neo4j:

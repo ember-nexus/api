@@ -135,7 +135,7 @@ jobs:
   test-mutant:
     runs-on: ubuntu-26.04
     name: 'Mutant Test'
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs:
       - build-docker-image
     continue-on-error: true
@@ -251,7 +251,7 @@ jobs:
           prepare-script: ./bin/test-end-to-end-prepare
       - name: Controller Example Generation Test
         run: |
-          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api\" && echo \$API_DOMAIN && composer test:example-generation-controller && composer test:example-generation-controller:with-different-configuration"
+          docker exec --user "$(id -u):$(id -g)" api-dev bash -c "export API_DOMAIN=\"http://api\" && echo \$API_DOMAIN && composer test:example-generation-controller && composer test:example-generation-controller:with-different-configuration-1 && composer test:example-generation-controller:with-different-configuration-2"
       - uses: ./.github/actions/collect-docker-logs
         if: always()
         with:
@@ -297,7 +297,7 @@ jobs:
   test-server:
     runs-on: ubuntu-26.04
     name: 'Server Test'
-    timeout-minutes: 20
+    timeout-minutes: 15
     needs:
       - test-unit
       - phpstan
