@@ -21,6 +21,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\Log\NullLogger;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -57,6 +58,7 @@ class ElementManagerGetElementOrFailTest extends TestCase
             $this->prophesize(EventDispatcherInterface::class)->reveal(),
             $notFoundFactory->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            new NullLogger(),
         ];
 
         return new class(...$arguments) extends ElementManager {

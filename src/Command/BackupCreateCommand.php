@@ -15,6 +15,7 @@ use App\Style\EmberNexusStyle;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
@@ -61,6 +62,7 @@ class BackupCreateCommand extends Command
         private S3Service $s3Service,
         private S3OperationFactory $s3OperationFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private LoggerInterface $logger,
     ) {
         parent::__construct();
     }
@@ -302,6 +304,15 @@ class BackupCreateCommand extends Command
             }
 
             $fileOperation = $this->s3OperationFactory->createFileOperationFromElement($element);
+            if (!$this->s3Service->existsFile($fileOperation)) {
+                $this->logger->notice(sprintf(
+                    "Element with id '%s' is missing its file in S3, skipping it in the backup.",
+                    $elementId->toString()
+                ));
+                ++$this->skippedFileCount;
+                $progressBar?->advance();
+                continue;
+            }
             $resource = $this->s3Service->getFileAsResource($fileOperation);
             $extension = $this->elementService->getFileNameExtension($element);
 

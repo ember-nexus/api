@@ -25,6 +25,7 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -62,15 +63,18 @@ class BackupCreateCommandTest extends TestCase
     }
 
     /**
-     * @param array<string, string> $fileContents      element id => content of its file in S3; ids missing from the
-     *                                                 element manager can be added to $missingElementIds
+     * @param array<string, string> $fileContents            element id => content of its file in S3; ids missing from
+     *                                                       the element manager can be added to $missingElementIds
      * @param string[]              $missingElementIds
-     * @param int                   $uploadCount       number of unfinished `Upload` nodes reported by the database
+     * @param string[]              $missingFromS3ElementIds element ids which exist, but whose file is missing
+     *                                                       from S3
+     * @param int                   $uploadCount             number of unfinished `Upload` nodes reported by the
+     *                                                       database
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    private function runCommand(array $fileContents, array $input = [], array $missingElementIds = [], int $uploadCount = 0): CommandTester
+    private function runCommand(array $fileContents, array $input = [], array $missingElementIds = [], int $uploadCount = 0, array $missingFromS3ElementIds = []): CommandTester
     {
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(Argument::any())->will(function (array $args) use ($missingElementIds) {
@@ -114,6 +118,9 @@ class BackupCreateCommandTest extends TestCase
         });
 
         $s3Service = $this->prophesize(S3Service::class);
+        $s3Service->existsFile(Argument::any())->will(function (array $args) use ($missingFromS3ElementIds) {
+            return !in_array($args[0]->getKey(), $missingFromS3ElementIds, true);
+        });
         $s3Service->getFileAsResource(Argument::any())->will(function (array $args) use ($fileContents) {
             $resource = fopen('php://memory', 'r+');
             fwrite($resource, $fileContents[$args[0]->getKey()]);
@@ -138,7 +145,8 @@ class BackupCreateCommandTest extends TestCase
             ),
             $s3Service->reveal(),
             $fileOperationFactory->reveal(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            $this->prophesize(LoggerInterface::class)->reveal()
         );
 
         $tester = new CommandTester($command);
@@ -197,6 +205,25 @@ class BackupCreateCommandTest extends TestCase
 
         $this->assertTrue($this->backupStorage->fileExists(sprintf('%s/file/%s.bin', self::BACKUP_NAME, $present)));
         $this->assertFalse($this->backupStorage->fileExists(sprintf('%s/file/%s.bin', self::BACKUP_NAME, $vanished)));
+    }
+
+    public function testFileMissingFromS3IsSkipped(): void
+    {
+        $present = Uuid::uuid4()->toString();
+        $missingFromS3 = Uuid::uuid4()->toString();
+
+        $tester = $this->runCommand(
+            [$present => 'a', $missingFromS3 => 'b'],
+            [],
+            [],
+            0,
+            [$missingFromS3]
+        );
+
+        $this->assertTrue($this->backupStorage->fileExists(sprintf('%s/file/%s.bin', self::BACKUP_NAME, $present)));
+        $this->assertFalse($this->backupStorage->fileExists(sprintf('%s/file/%s.bin', self::BACKUP_NAME, $missingFromS3)));
+        $this->assertSame(1, $this->readSummary()['fileCount']);
+        $this->assertStringContainsString('Successfully backed up 1 files.', $tester->getDisplay());
     }
 
     public function testUnfinishedUploadsTriggerWarning(): void

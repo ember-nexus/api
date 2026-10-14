@@ -1,6 +1,7 @@
 monolog:
   channels:
     - deprecation  # Deprecations are logged in the dedicated "deprecation" channel when it exists
+    - audit  # Security-relevant writes (e.g. Group node changes) are logged in the dedicated "audit" channel
 
 when@dev:
   monolog:
@@ -9,13 +10,20 @@ when@dev:
         type: stream
         path: "%kernel.logs_dir%/dev.log"
         level: debug
-        channels: ["!event", "!request"]
+        channels: ["!event", "!request", "!audit"]
         formatter: monolog_json_formatter
       # only active for commands which run in a terminal, regular requests never use it
       console:
         type: service
         id: App\Logger\TerminalConsoleHandler
         channels: ["!event", "!doctrine", "!console"]
+      # plain stream, not fingers_crossed like "main": audit entries must always be written, never gated on an
+      # error occurring in the same request
+      audit:
+        type: stream
+        path: "%kernel.logs_dir%/audit.log"
+        level: notice
+        channels: ["audit"]
 
 when@test:
   monolog:
@@ -25,11 +33,16 @@ when@test:
         action_level: error
         handler: nested
         excluded_http_codes: [404, 405]
-        channels: ["!event"]
+        channels: ["!event", "!audit"]
       nested:
         type: stream
         path: "%kernel.logs_dir%/test.log"
         level: debug
+      audit:
+        type: stream
+        path: "%kernel.logs_dir%/audit.log"
+        level: notice
+        channels: ["audit"]
 
 when@prod:
   monolog:
@@ -39,13 +52,14 @@ when@prod:
       console:
         type: service
         id: App\Logger\TerminalConsoleHandler
-        channels: ["!event", "!doctrine", "!deprecation"]
+        channels: ["!event", "!doctrine", "!deprecation", "!audit"]
       main:
         type: fingers_crossed
         action_level: error
         handler: nested
         excluded_http_codes: [404, 405]
         buffer_size: 50  # How many messages should be saved? Prevent memory leaks
+        channels: ["!audit"]
       nested:
         type: stream
         path: "php://stderr"
@@ -57,3 +71,11 @@ when@prod:
         level: error
         # without the channel restriction every error would be written a second time in the line format
         channels: ["deprecation"]
+      # see the "audit" handler under when@dev for why this isn't gated behind "main"'s fingers_crossed like
+      # "nested" is
+      audit:
+        type: stream
+        path: "php://stderr"
+        level: notice
+        formatter: monolog.formatter.json
+        channels: ["audit"]

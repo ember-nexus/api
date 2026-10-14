@@ -85,20 +85,19 @@ class MaximumEtagTest extends BaseRequestTestCase
         );
         $this->assertIsCreatedResponse($response);
 
-        // todo: enable test once https://github.com/ember-nexus/api/issues/238 is fixed
-        // $response = $this->runPostRequest(
-        //     '/',
-        //     self::TOKEN,
-        //     [
-        //         'type' => 'OWNS',
-        //         'start' => self::GROUP_UUID,
-        //         'end' => $dataNewCentralNode,
-        //         'data' => [
-        //             'scenario' => 'general.etag.maximum',
-        //         ],
-        //     ]
-        // );
-        // $this->assertIsCreatedResponse($response);
+        $response = $this->runPostRequest(
+            '/',
+            self::TOKEN,
+            [
+                'type' => 'OWNS',
+                'start' => self::GROUP_UUID,
+                'end' => $dataNewCentralNode,
+                'data' => [
+                    'scenario' => 'general.etag.maximum',
+                ],
+            ]
+        );
+        $this->assertIsCreatedResponse($response);
 
         $response = $this->runPostRequest(
             '/',
@@ -133,8 +132,7 @@ class MaximumEtagTest extends BaseRequestTestCase
 
         $this->getEtagOfElement(self::TOKEN, self::GROUP_UUID, '', $initialEtagNodeGroupSelf);
         $this->getEtagOfElement(self::TOKEN, self::GROUP_UUID, '/parents', $initialEtagNodeGroupParents);
-        // todo: enable test once https://github.com/ember-nexus/api/issues/238 is fixed
-        // $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/children');
+        $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/children');
         $this->testEtagOfElementDoesNotExist(self::TOKEN, self::GROUP_UUID, '/related');
 
         $this->getEtagOfElement(self::TOKEN, self::SOME_NODE_UUID, '', $initialEtagNodeSomeNodeSelf);

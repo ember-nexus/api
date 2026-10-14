@@ -15,9 +15,11 @@
   ],
   "relationTypes": [
     "CREATED",
+    "HAS_DELETE_ACCESS",
     "HAS_READ_ACCESS",
     "HAS_SEARCH_ACCESS",
     "HAS_TAG",
+    "HAS_UPDATE_ACCESS",
     "IS_IN_GROUP",
     "IS_LOCATED_IN",
     "IS_MEMBER_OF",

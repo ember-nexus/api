@@ -17,6 +17,12 @@ There are different types of access relations:
 
 !> **Note**: All access rules are recursive, i.e. child nodes will inherit privileges from their parents.
 
+## Writing to Group Nodes
+
+Being a member of a group (via `IS_IN_GROUP`) grants `READ`, `SEARCH` and `CREATE` access to the group node itself,
+but not `UPDATE` or `DELETE` access. A group node can only be updated or deleted by a user with an explicit `OWNS` or
+`HAS_UPDATE_ACCESS`/`HAS_DELETE_ACCESS` relation to that group node, not by virtue of membership alone.
+
 ## Limiting Access to Node Types
 
 The `HAS_X_ACCESS` relationships can be limited to individual node types by setting the `onLabel`-property of the
@@ -72,7 +78,7 @@ Internally the access permissions are checked with the following Cypher query fo
 ```cypher
 MATCH (user:User {id: "<uuid>"})
 MATCH (element {id: "<uuid>"})
-MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_X_ACCESS*1..]->(element)
+MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_X_ACCESS*N..]->(element)
 WHERE
   ALL(relation in relations WHERE
     type(relation) = "OWNS"
@@ -108,15 +114,17 @@ WHERE
 RETURN user, element;
 ```
 
-`HAS_X_ACCESS` is replaced by the requested action, e.g. `HAS_READ_ACCESS`.
+`HAS_X_ACCESS` is replaced by the requested action, e.g. `HAS_READ_ACCESS`. `N` is `0` for `READ`, `SEARCH` and
+`CREATE` (group membership alone is sufficient) and `1` for `UPDATE` and `DELETE` (an explicit `OWNS`/`HAS_X_ACCESS`
+relation to the element is required).
 
 And the following query is used for relationships:
 
 ```cypher
 MATCH (user:User {id: "<uuid>"})
 MATCH (start)-[element {id: "<uuid>"}]->(end)
-MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_X_ACCESS*1..]->(start)
-MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_X_ACCESS*1..]->(end)
+MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_X_ACCESS*N..]->(start)
+MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_X_ACCESS*N..]->(end)
 WHERE
   ALL(startRelation in startRelations WHERE
     type(startRelation) = "OWNS"
