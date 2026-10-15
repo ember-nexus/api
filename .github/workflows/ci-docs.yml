@@ -11,6 +11,7 @@ on:
 permissions:
   contents: read
   packages: write
+  actions: write
   id-token: write
 
 jobs:
@@ -42,6 +43,14 @@ jobs:
         with:
           artifact-name: docker-image-docs-ci-dev-amd
           command: build
+      - name: Delete intermediate dev-image artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          ID="$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --jq '.artifacts[] | select(.name=="docker-image-docs-ci-dev-amd") | .id')"
+          [ -n "$ID" ] && gh api --method DELETE "repos/${{ github.repository }}/actions/artifacts/$ID"
       - name: Archive dist
         run: tar -czf docs-dist.tar.gz -C docs dist
       - uses: actions/upload-artifact@v6
@@ -116,6 +125,25 @@ jobs:
           registry: ghcr.io
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write image summary
+        run: |
+          {
+            echo "### Docs image pushed"
+            echo
+            echo "- Package: https://github.com/ember-nexus/api/pkgs/container/api-docs"
+            echo "- Pull by tag: \`docker pull ghcr.io/ember-nexus/api-docs:${{ needs.compute-version.outputs.version-tag }}\`"
+            echo "- Pull by digest: \`docker pull ghcr.io/ember-nexus/api-docs@${{ steps.push.outputs.digest }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete dist artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          ID="$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --jq '.artifacts[] | select(.name=="docs-dist") | .id')"
+          [ -n "$ID" ] && gh api --method DELETE "repos/${{ github.repository }}/actions/artifacts/$ID"
 
   docs-deploy:
     runs-on: ubuntu-26.04
