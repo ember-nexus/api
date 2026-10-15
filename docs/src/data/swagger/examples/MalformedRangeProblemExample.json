@@ -1,0 +1,10 @@
+{
+  "components": {
+    "examples": {
+      "MalformedRangeProblemExample": {
+        "summary": "The `Range` header could not be parsed, or requests more than one range.",
+        "x-ember-nexus-recording": "api-endpoints/file/get-element-file/400-response-body.json"
+      }
+    }
+  }
+}

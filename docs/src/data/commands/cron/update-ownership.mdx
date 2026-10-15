@@ -1,0 +1,23 @@
+---
+command: cron:update-ownership
+name: cron:update-ownership
+helpCommand: php bin/console cron:update-ownership --help
+helpOutput: cron-update-ownership-help.html
+exampleCommand: php bin/console cron:update-ownership
+exampleOutput: cron-update-ownership.html
+---
+
+Recalculates which users and groups have search access to an element, after an `OWNS`,
+`HAS_SEARCH_ACCESS` or `IS_IN_GROUP` relation affecting it changes (see the
+[access model reference](/reference/access-model)).
+
+Takes no arguments or options. A relation change queues its affected elements internally, and this
+command drains that queue, recalculating each element and, if its access actually changed, queuing
+its children as well - so search access can lag behind the graph by a short delay, bounded by how
+often this command runs.
+
+<Note>
+    Every API instance already schedules this on its own interval (see
+    [Background tasks](/reference/configuration#background-tasks)), so it does not need to be
+    invoked manually.
+</Note>

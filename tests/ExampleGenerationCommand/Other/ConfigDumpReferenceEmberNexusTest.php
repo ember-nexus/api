@@ -19,7 +19,7 @@ class ConfigDumpReferenceEmberNexusTest extends BaseCommandTestCase
         $commandOutput = $this->replaceStartingSpaces($commandOutput);
         $commandOutput = \Safe\preg_replace('/: +/', ': ', $commandOutput);
 
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/example/default-parameters.yaml', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/Recordings/example/default-parameters.yaml', $commandOutput);
     }
 
     public function replaceStartingSpaces(string $inputString): string

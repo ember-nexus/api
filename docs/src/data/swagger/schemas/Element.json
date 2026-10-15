@@ -1,0 +1,50 @@
+{
+  "components": {
+    "schemas": {
+      "Element": {
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "data"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "Data"
+          },
+          "id": {
+            "$ref": "#/components/schemas/ElementId"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "created": "2025-09-27T10:39:51+00:00",
+              "updated": "2025-09-27T10:39:51+00:00",
+              "name": "some name"
+            }
+          },
+          "file": {
+            "type": "object",
+            "additionalProperties": true,
+            "readOnly": true,
+            "example": {
+              "contentLength": 63933,
+              "extension": "jpg",
+              "mimeType": "image/jpeg"
+            }
+          },
+          "start": {
+            "$ref": "#/components/schemas/ElementId",
+            "description": "UUID of the start node. Required if end is present."
+          },
+          "end": {
+            "$ref": "#/components/schemas/ElementId",
+            "description": "UUID of the end node. Required if start is present."
+          }
+        }
+      }
+    }
+  }
+}

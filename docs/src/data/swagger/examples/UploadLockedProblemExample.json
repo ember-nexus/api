@@ -1,0 +1,11 @@
+{
+  "components": {
+    "examples": {
+      "UploadLockedProblemExample": {
+        "summary": "Another request is currently modifying the upload (per-upload lock); retry after a short pause.",
+        "x-ember-nexus-name": "Upload locked",
+        "x-ember-nexus-recording": "api-endpoints/upload/patch-upload/409-locked-response-body.json"
+      }
+    }
+  }
+}

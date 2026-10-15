@@ -1,0 +1,47 @@
+{
+  "paths": {
+    "/me": {
+      "get": {
+        "summary": "Get me",
+        "description": "Alias endpoint, returns the current user's own element.",
+        "operationId": "get-me",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/If-Match"
+          },
+          {
+            "$ref": "#/components/parameters/If-None-Match"
+          }
+        ],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/me",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ]
+      }
+    }
+  }
+}

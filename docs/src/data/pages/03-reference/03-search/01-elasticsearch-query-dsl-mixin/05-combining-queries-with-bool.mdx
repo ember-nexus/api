@@ -1,0 +1,24 @@
+---
+type: guide
+title: Combining queries with bool
+---
+import searchQuery from './05-combining-queries-with-bool/query.sh?raw';
+import searchResultBody from './05-combining-queries-with-bool/result.json';
+import searchResultHeaders from './05-combining-queries-with-bool/header.txt?raw';
+
+This example uses Elasticsearch's [`bool` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-bool-query)
+to combine multiple smaller queries together, in this example using `OR` logic (`should` and `minimum_should_match`
+value of `1`).  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+<Code code={searchQuery} lang="bash" mark="bool" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+Any element which has the word "blue" in its name _or_ its description is returned.  
+Elements which mention the word "blue" in _both_ their name _and_ description have a higher score, and are usually
+sorted towards the beginning of the response collection.

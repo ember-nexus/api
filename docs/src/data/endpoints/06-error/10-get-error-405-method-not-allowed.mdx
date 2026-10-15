@@ -1,0 +1,27 @@
+---
+endpoint: get-error-405-method-not-allowed
+group: error
+method: get
+name: 405 method not allowed
+endpointUrl: /error/405/method-not-allowed
+swaggerUrl: /error/405/method-not-allowed
+---
+
+General error response. As this endpoint is static, it can not return specific details or logs for a previously sent
+error response.
+
+Returned when the route exists but does not support the used HTTP method, e.g. `POST /instance-configuration`.
+
+Example problem response body (`application/problem+json`):
+
+```json
+{
+  "type": "https://api.example.com/error/405/method-not-allowed",
+  "title": "Method not allowed",
+  "status": 405,
+  "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+  "detail": "Endpoint does not support requested method, or you do not have sufficient permissions."
+}
+```
+
+The response also includes an `Allow` header listing the HTTP methods the route does support.

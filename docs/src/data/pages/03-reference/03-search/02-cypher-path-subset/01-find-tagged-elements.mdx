@@ -1,0 +1,23 @@
+---
+type: guide
+title: Find tagged elements
+---
+import searchQuery from './01-find-tagged-elements/query.sh?raw';
+import searchResultBody from './01-find-tagged-elements/result.json';
+import searchResultHeaders from './01-find-tagged-elements/header.txt?raw';
+
+This example finds all `Plant` nodes tagged `blue`, by matching the path `(:Plant)-[:HAS_TAG]->(:Tag {name: "blue"})`
+against the graph in Neo4j.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response - since a
+`Cypher Path` step returns full paths, the tag node itself is part of the result too, not just the tagged plants.
+
+<Code code={searchQuery} lang="bash" mark="HAS_TAG" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="force"
+></SearchResponseCard>
+
+The graph view shows every plant tagged `blue`, all connected through the shared `blue` tag node - the relations
+themselves (`HAS_TAG`) are part of the response as well, since a path always includes its nodes and relations.

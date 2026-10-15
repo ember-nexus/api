@@ -1,0 +1,54 @@
+---
+type: guide
+title: Elements
+---
+
+Ember Nexus is built on top of the property graph database [Neo4j](https://neo4j.com/), which means many of the
+API's own concepts are graph-like too. Understanding a few core graph database concepts makes the rest of the API
+much easier to reason about.
+
+## Nodes and relationships
+
+The core building block of a graph database is the [node](https://neo4j.com/developer/cypher/intro-cypher/#cypher-nodes):
+a record that can carry zero or more types (comparable to labels) and any number of properties. A node can be
+compared to a row in a relational database table.
+
+A [relationship](https://neo4j.com/developer/cypher/intro-cypher/#cypher-relationships) connects exactly two nodes,
+has exactly one type, and can carry properties of its own, just like a node. A relationship can be compared to a
+foreign key in a relational database, except that it's a first-class object with its own identity and data.
+
+<g6-graph mode="manual" layout="antv-dagre-LR">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "start", "type": "Data", "data": { "name": "Node" }},
+            { "id": "end", "type": "Data", "data": { "name": "Node" }},
+            { "id": "related", "type": "RELATED", "start": "start", "end": "end", "data": { "hl": "1" }}
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+## Elements
+
+Ember Nexus combines nodes and relationships into a single concept: the **element**. Every element is either a node
+or a relation, and both are addressed, created and modified through the same set of
+[element endpoints](/reference/endpoints#element).
+
+Every element:
+
+- has at least one `type`, which is a label in the case of a node, and the relation type in the case of a relation;
+- has an `id` property, a random [UUIDv4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random))
+  assigned automatically on creation and never changed afterward;
+- can hold arbitrary additional properties, including nested JSON data — not just flat key/value pairs; and
+- may additionally have up to one file attached, see [working with files](/guide/working-with-files).
+
+Relations additionally reference a `start` and an `end` element, both of which must be nodes.
+
+## Where elements live in the graph
+
+Every element except the root has at least one parent, forming a tree-like ownership structure on top of the graph.
+This structure is what [access control](/reference/access-model) and the
+[`GET /<uuid>/parents`](/api/get-parents) / [`GET /<uuid>/children`](/api/get-children) endpoints are built around,
+while [`GET /<uuid>/related`](/api/get-related) and [search](/reference/search) let you traverse relationships
+directly, independent of that ownership tree.

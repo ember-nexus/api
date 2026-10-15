@@ -1,0 +1,229 @@
+---
+type: reference
+title: Search
+---
+
+## General search process
+
+Every search request is written in **search steps** - smaller execution units, which are specialized for one specific
+database or technology. Results of earlier search steps are available to later search steps as input parameters,
+allowing **cross-database search logic**.
+
+**Note**: Due to security reasons, most search steps are limited in scope. Specific details and workarounds can be found
+on their detail pages. See [choosing a search step](/guide/search/choosing-a-search-step) for guidance on which step
+fits a given use case.
+
+### How parameters are resolved
+
+Every step can read a `parameters` object, which is assembled in the following priority order (later entries win):
+
+1. Results of previous steps (available as `stepResults`).
+2. Global `parameters`, set on the request body.
+3. Step-local `parameters`, set on the individual step definition.
+
+This means step-local parameters always take priority over global parameters, which in turn take priority over
+whatever earlier steps returned - allowing later steps to override values injected by earlier ones.
+
+## Search steps
+
+### Elasticsearch query
+
+Executes search queries against **Elasticsearch**. Great for full text search, explorative search requests, small logic
+etc. Supports (almost) the full [Elasticsearch Query DSL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl).
+See the [detail page](/reference/search/elasticsearch-query-dsl-mixin) for its parameters, security aspects and examples.
+
+### Cypher path query
+
+Executes search queries against **Neo4j**. Great for structural search, e.g. "list all comments on blog post X". Uses a
+restricted subset of Cypher 25 dedicated to path searches only, called Cypher Path Subset.
+See the [detail page](/reference/search/cypher-path-subset) for its parameters, security aspects and examples.
+
+Note that properties are internally split across several databases — see [element schema](/reference/element-schema)
+for how this affects queries targeting Neo4j directly.
+
+### Element hydration
+
+Converts a list of element ids to a collection response, containing elements and all their properties.  
+This step is mostly used to convert results of other search steps to collection responses usable by clients, and is
+therefore commonly used as the last step of a search request.
+See the [detail page](/reference/search/element-hydration) for its parameters and examples.
+
+## Examples
+
+### Simple full text search
+
+import simpleFullTextSearch from '../assets/simple-full-text-search.json';
+import simpleFullTextSearchHeader from '../assets/simple-full-text-search.txt?raw';
+
+In this example, only Elasticsearch is queried for all elements, whose `description`-property contains the word
+`lily`.  
+The `element-hydration`-step only makes sure, that the results from Elasticsearch are correctly hydrated and returned.
+
+See also [Elasticsearch's documentation about the match query clause](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query).
+
+
+```json
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "match": {
+          "description": {
+            "query": "lily"
+          }
+        }
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}
+```
+
+<SearchResponseCard
+    responseBody={simpleFullTextSearch}
+    responseHeaders={simpleFullTextSearchHeader}
+    graphLayout="grid"
+></SearchResponseCard>
+
+As Elasticsearch only returns individual elements, no paths can be observed.
+
+### Simple path search
+
+In this example, only Neo4j is queried for all paths, which satisfy `(:Plant)-[:HAS_TAG]->(:Tag {name: "blue"})` - i.e.
+all plants, which are tagged `blue`.  
+The `element-hydration`-step only makes sure, that the results from Neo4j are correctly hydrated and returned.
+
+import simplePathSearch from '../assets/simple-path-search.json';
+import simplePathSearchHeader from '../assets/simple-path-search.txt?raw';
+
+```json
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "cypher-path-subset",
+      "query": "MATCH path=((:Plant)-[:HAS_TAG]->(:Tag {name: \"blue\"})) RETURN path"
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}
+```
+
+<SearchResponseCard
+    responseBody={simplePathSearch}
+    responseHeaders={simplePathSearchHeader}
+    graphLayout="force"
+></SearchResponseCard>
+
+The graph view can actually display a graph, because we queried relations and all paths share a common node - the tag
+`blue`.
+
+### Combined full text and path search
+
+An example how results from Elasticsearch - all elements whose description contain the word `lily` - are feed as input
+parameters to Neo4j, which then expands the results to the path `(:Plant)-[:IS_MEMBER_OF*..]->(:Taxon)`.  
+Note that because we map Elasticsearch's results to only `:Plant`-nodes, we filter out other results from Elasticsearch,
+e.g. Taxons which also contain the word `lily`.
+
+import combinedFullTextAndPathSearch from '../assets/combined-full-text-and-path-search.json';
+import combinedFullTextAndPathSearchHeader from '../assets/combined-full-text-and-path-search.txt?raw';
+
+```json
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "match": {
+          "description": {
+            "query": "lily"
+          }
+        }
+      }
+    },
+    {
+      "type": "cypher-path-subset",
+      "query": "UNWIND $stepResults[0].elements AS element MATCH path=((plant:Plant)-[:IS_MEMBER_OF*..]->(:Taxon)) WHERE plant.id = element.id RETURN path"
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}
+```
+
+<SearchResponseCard
+    responseBody={combinedFullTextAndPathSearch}
+    responseHeaders={combinedFullTextAndPathSearchHeader}
+></SearchResponseCard>
+
+Due to the unlimited path length, the resulting graph can become quite big.
+
+Duplicated nodes etc. are already filtered out by the API itself, as can be seen in the debug view.
+
+### Cypher-first polyglot search
+
+Polyglot pipelines do not need to start with Elasticsearch - a Cypher step can run first and pass its results on to a
+later Elasticsearch step instead. Here, Neo4j is queried for all plants tagged with a color given as a global
+parameter (`color: "red"`), and the resulting node ids are then combined with a full text search against
+Elasticsearch, further restricting the plants to those whose `description` also mentions the same color.  
+Both the `color` parameter and the previous step's `nodeIds` are substituted into the Elasticsearch query as
+[expressions](/reference/search/elasticsearch-query-dsl-mixin#parameterized-elasticsearch-queries).
+
+import cypherFirstPolyglotSearch from '../assets/cypher-first-polyglot-search.json';
+import cypherFirstPolyglotSearchHeader from '../assets/cypher-first-polyglot-search.txt?raw';
+
+```json
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "cypher-path-subset",
+      "query": "MATCH path=((plant:Plant)-[:HAS_TAG]->(:Tag {name: $color})) RETURN path ORDER BY plant.name"
+    },
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "match": {
+                "description": {
+                  "query": "{{color}}"
+                }
+              }
+            },
+            {
+              "terms": {
+                "_id": "{{map(stepResults[0].paths, #.nodeIds[0])}}"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ],
+  "parameters": {
+    "color": "red"
+  }
+}
+```
+
+<SearchResponseCard
+    responseBody={cypherFirstPolyglotSearch}
+    responseHeaders={cypherFirstPolyglotSearchHeader}
+    graphLayout="grid"
+></SearchResponseCard>
+
+Only plants tagged `red` whose description also contains the word "red" are returned - the Cypher step narrows the
+candidate set structurally, while the Elasticsearch step re-checks the text content of exactly those candidates.

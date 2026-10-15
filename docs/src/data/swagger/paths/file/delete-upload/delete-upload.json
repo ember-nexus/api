@@ -1,0 +1,51 @@
+{
+  "paths": {
+    "/upload/{uuid}": {
+      "delete": {
+        "summary": "Delete upload",
+        "description": "Aborts a resumable upload: already-uploaded chunks are removed from storage and the upload itself ceases to exist. The target element is left untouched. Only the user who created the upload can delete it.",
+        "operationId": "delete-upload",
+        "tags": [
+          "File"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Id of the resumable upload, as returned in the `Location` header of the request that created it."
+          }
+        ],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "DELETE",
+              "url": "https://api.example.com/upload/7b80b203-2b82-40f5-accd-c7089fe6114e",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ]
+      }
+    }
+  }
+}

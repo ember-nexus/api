@@ -1,0 +1,18 @@
+/*
+ * Prose highlight annotation classes.
+ * Color values come from --c-hl-* vars defined in colors.css.
+ * Keep in sync with HIGHLIGHTS in Graph.ts so a node and its inline
+ * reference read as "the same thing".
+ */
+
+.hl-1 {
+    color: var(--c-hl-1);
+}
+
+.hl-2 {
+    color: var(--c-hl-2);
+}
+
+.hl-m {
+    color: var(--c-hl-m);
+}

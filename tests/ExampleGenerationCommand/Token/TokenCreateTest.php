@@ -16,7 +16,7 @@ class TokenCreateTest extends BaseCommandTestCase
             'APP_ENV=prod VERSION=%s php bin/console token:create --ansi --help | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/commands/assets/token-create-help.html', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/Recordings/commands/assets/token-create-help.html', $commandOutput);
     }
 
     public function testTokenCreate(): void
@@ -30,7 +30,7 @@ class TokenCreateTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/token-create.html',
+            'tests/Recordings/commands/assets/token-create.html',
             $commandOutput,
             [
                 'Found user with identifier',

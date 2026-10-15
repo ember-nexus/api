@@ -1,0 +1,111 @@
+---
+type: reference
+title: Elasticsearch query
+---
+
+The Elasticsearch query step allows users to execute queries against the internal Elasticsearch
+database. As Elasticsearch is a document-based database, **only a list of individual elements** can be returned.
+
+## Core features
+
+- [Full-text search](https://www.elastic.co/docs/solutions/search/full-text), including optional fuzziness,
+  singular/plural handling etc.
+- [Keyword search](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword), i.e. searching for
+  exact string matches.
+- [Boolean queries](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-bool-query), which allow
+  multiple smaller queries to be combined.
+- [Range queries](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-range-query), used to
+  compare numeric or date fields. This works out of the box, as Elasticsearch automatically maps well-formed numbers
+  and dates to the appropriate field types.
+- [Vector search](https://www.elastic.co/docs/solutions/search/vector/knn), useful for semantic search.
+  - Ember Nexus does not yet generate vector embeddings itself, i.e. the user or some bot needs to provide vectors. It
+    is a planned feature: [Issue #110](https://github.com/ember-nexus/api/issues/110).
+  - Alternatively Elasticsearch also offers a [semantic search](https://www.elastic.co/docs/solutions/search/semantic-search/semantic-search-semantic-text)
+    feature, where Elasticsearch handles the text-to-vector conversion itself. However, this feature seems to be
+    restricted towards enterprise-customers only.
+- [Geospatial search](https://www.elastic.co/docs/reference/query-languages/query-dsl/geo-queries), i.e. searching for
+  coordinates, lines, polygons, distances to other points, inside/outside polygon checks and more.
+  - As with vector search, this requires elements to be indexed with a dedicated `geo_point` or `geo_shape` field
+    mapping, which Ember Nexus does not yet set up automatically.
+
+**Note**: Elasticsearch indices are currently managed automatically, which works for most use cases. Advanced features
+like vector or geospatial search need manual index setup - this is possible, just not through the Ember Nexus API yet.
+Support for this is planned - see [ticket #477](https://github.com/ember-nexus/api/issues/477).
+
+## Step parameters
+
+In addition to `query`, the step's `parameters` object supports the following options:
+
+- `nodeTypes`: Optional, list of node types. If provided the search is restricted to the provided node types.
+- `relationTypes`: Optional, list of relation types. If provided the search is restricted to the provided relation
+  types.
+- `page`: Optional, int, default is 1. The page of results to return.
+- `pageSize`: Optional, int, default is 25. Limits the number of results per page.
+- `minScore`: Optional, numeric, default is `null`. If set to a numeric value like `1.0`, removes all search results
+  with a lower score.
+
+## Step result
+
+- `elements`: List of search element objects returned by Elasticsearch. Each object contains:
+  - `id`: Element id (UUID).
+  - `type`: Type of the element.
+  - `metadata.score`: Numeric value returned by Elasticsearch. A high score implies a high fit between the query and
+    the element.
+- `totalHits`: Integer, number of total elements found by the query. Can be used to calculate how many pages of
+  results are available. Very high numbers of results might be rounded or estimates by Elasticsearch.
+- `maxScore`: Maximum score achieved by any element, regardless of whether it is part of the current page of results.
+
+## Parameterized Elasticsearch queries
+
+Elasticsearch on its own does not support parameters in their Query DSL language. However, Ember Nexus uses the
+[Expr Lang](/reference/expr-lang) language to integrate expressions directly into the Query DSL query.
+These expressions need to be defined as strings surrounded by two curly brackets, e.g. `{{your_expression}}`, and their
+result will replace the expression string inside the query. The replaced value can be a string itself, but also all
+other JSON data types like numbers, arrays and objects are supported.  
+Expressions will receive the search step's resolved `parameters` object as their only input - see
+[how parameters are resolved](/reference/search#how-parameters-are-resolved) for where those values come from.
+
+See [Expr Lang](/reference/expr-lang) for the language's features and a link to its playground, and
+[parameters and expressions](/guide/search/parameters-and-expressions) for a walkthrough of how parameters flow between
+search steps.
+
+See the [parameterized search example](/reference/search/elasticsearch-query-dsl-mixin/parameterized-search) below.
+
+## Examples
+
+- [Full text search](/reference/search/elasticsearch-query-dsl-mixin/full-text-search)
+- [Exact keyword matching](/reference/search/elasticsearch-query-dsl-mixin/exact-keyword-matching)
+- [Combining queries with bool](/reference/search/elasticsearch-query-dsl-mixin/combining-queries-with-bool)
+- [Range queries on numeric fields](/reference/search/elasticsearch-query-dsl-mixin/range-queries-on-numeric-fields)
+- [Restricting results with minScore](/reference/search/elasticsearch-query-dsl-mixin/restricting-results-with-min-score)
+- [Query string](/reference/search/elasticsearch-query-dsl-mixin/query-string)
+- [Text prefix search](/reference/search/elasticsearch-query-dsl-mixin/text-prefix-search)
+- [Wildcard search](/reference/search/elasticsearch-query-dsl-mixin/wildcard-search)
+- [Parameterized search](/reference/search/elasticsearch-query-dsl-mixin/parameterized-search)
+
+See [writing an Elasticsearch query](/guide/search/writing-an-elasticsearch-query) for a walkthrough of building and
+running a custom query against this step, including how to use Kibana's console and how to parameterize queries.
+
+## Unsupported Elasticsearch features
+
+- Other query languages like ES|QL, PromQL, SQL, EQL and others are not supported.  
+  If there is demand, please open a [feature request ticket on GitHub](https://github.com/ember-nexus/api/issues/new).
+- Aggregations and join-like features are generally not supported - see [security aspects](#security-aspects).
+- Defining a custom sort direction is not yet supported. It is tracked in [GitHub issue #456](https://github.com/ember-nexus/api/issues/456).
+
+## Security aspects
+
+This search step is limited in three ways:
+
+- Elasticsearch search requests are readonly by default.
+- Only elements accessible by the user can be searched.
+- Only accessible element ids are returned.  
+
+While this removes support for aggregated properties and direct property lookups, this approach also disables
+additional dangerous approaches like the [terms lookup query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-terms-query#query-dsl-terms-lookup)
+and [joins](https://www.elastic.co/docs/reference/query-languages/query-dsl/joining-queries). Note that joins are
+considered to be expensive, and are therefore already disabled in normal Elasticsearch deployments.
+
+As there is no way to manipulate or exfiltrate arbitrary data, this search step **is considered safe** and can therefore
+be executed by any user.
+

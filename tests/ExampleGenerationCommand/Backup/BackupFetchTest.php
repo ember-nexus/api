@@ -20,7 +20,7 @@ class BackupFetchTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/backup-fetch-help.html',
+            'tests/Recordings/commands/assets/backup-fetch-help.html',
             $commandOutput,
             [
             ]
@@ -36,7 +36,7 @@ class BackupFetchTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/backup-fetch.html',
+            'tests/Recordings/commands/assets/backup-fetch.html',
             $commandOutput,
             [
                 ' [',

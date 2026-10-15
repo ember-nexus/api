@@ -1,0 +1,19 @@
+curl -X POST \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "debug": true,
+        "steps": [
+          {
+            "type": "element-hydration",
+            "query": {
+              "elementIds": [
+                "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                "3283fd3d-8083-4170-882a-41b1cd152c55",
+                "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+              ]
+            }
+          }
+        ]
+      }' \
+  https://api.example.com/search

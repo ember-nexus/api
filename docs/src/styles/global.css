@@ -1,0 +1,1035 @@
+@import "tailwindcss";
+@import "colors.css";
+@import "grid.css";
+@import "highlight.css";
+@import "terminal-example.css";
+
+@plugin "@tailwindcss/typography";
+
+
+@theme {
+    /* Bridge color tokens into Tailwind's --color-* namespace. */
+    --color-hairline: var(--c-hairline, #e3e3e0);
+    --color-focus:    var(--c-focus, #f97316);
+}
+
+:root {
+    --base-font-size: 18px;
+    --font-mono: "Fira Code", monospace;
+    --ec-codeFontFml: "Fira Code", monospace !important;
+}
+
+html {
+    font-size: var(--base-font-size);
+}
+
+/* Suppress all transitions while the page is initialising so panels snap
+   into their correct positions without a visible slide-in animation. */
+html.no-transitions * {
+    transition: none !important;
+}
+
+/* Open the sidebar and offset main content on desktop via pure CSS so the
+   correct layout is visible from first paint, before any JS runs. */
+@media (min-width: 640px) {
+    #sidebar {
+        transform: translateX(0);
+    }
+    #main-content {
+        padding-left: 16rem; /* 256 px = w-64 */
+    }
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+}
+
+/* Allow Ctrl+A text selection only inside the main content area */
+main.content-grid {
+    user-select: text;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+[data-tab-panel]:not([data-active]) {
+    display: none;
+}
+
+.response-card,
+.request-card,
+.request-body-card,
+.search-response-card,
+.schema-example-block {
+    --ec-frm-frameBoxShdCssVal: '';
+}
+
+/* Expressive Code collapsible section toggle: override browser-default blue with site orange.
+   outline-offset is negative so the ring stays inside the <pre overflow-x:auto> and is never clipped. */
+.expressive-code .ec-section summary:focus {
+    outline: none;
+}
+.expressive-code .ec-section summary:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: -2px;
+}
+
+.schema-example-block .expressive-code pre {
+    border-radius: calc(var(--radius-lg) - 1px);
+    margin: 0;
+}
+
+/* Tabs sit flush above the code block — strip the top radii */
+.response-card .expressive-code pre,
+.request-body-card .expressive-code pre,
+.search-response-card .expressive-code pre {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: calc(var(--radius-xl) - 1px);
+    border-bottom-right-radius: calc(var(--radius-xl) - 1px);
+}
+
+/* request-card has no tab strip — full rounded corners */
+.request-card .expressive-code pre {
+    border-radius: calc(var(--radius-xl) - 1px);
+}
+
+/* Constrain height for response/search code blocks */
+.response-card .expressive-code pre,
+.search-response-card .expressive-code pre {
+    min-height: 250px;
+    max-height: 400px;
+}
+
+/* Fix last-line padding inside constrained code blocks */
+.response-card .expressive-code pre code,
+.search-response-card .expressive-code pre code {
+    padding-bottom: 0 !important;
+}
+
+.response-card .expressive-code pre code .ec-line:last-child,
+.search-response-card .expressive-code pre code .ec-line:last-child {
+    padding-bottom: var(--ec-codePadBlk) !important;
+}
+
+/* Comparison cards: make Expressive Code blocks fill the full height of the card body. */
+.comparison-card .expressive-code,
+.comparison-card .expressive-code figure,
+.comparison-card .expressive-code .frame {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.comparison-card .expressive-code pre {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.font-qanelas-soft-custom {
+    font-family: "Qanelas Soft Custom";
+}
+
+.prose {
+    --prose-gap: 1rem;
+    gap: var(--prose-gap);
+    display: flex;
+    flex-direction: column;
+    
+    > * {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: "Qanelas Soft Custom";
+    }
+    .expressive-code figure {
+        box-shadow: none !important;
+        pre {
+            background: var(--c-code-block-bg);
+        }
+    }
+
+    .expressive-code + .expressive-code {
+        margin-block-start: calc(-1 * var(--prose-gap, 1rem)) !important;
+        figure {
+            border-top: 1px solid var(--c-code-stack-border);
+            border-top-left-radius: 0 !important;
+            border-top-right-radius: 0 !important;
+            pre {
+                border-top-left-radius: 0 !important;
+                border-top-right-radius: 0 !important;
+            }
+        }
+    }
+
+    .expressive-code:has(+ .expressive-code) {
+        figure {
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            pre {
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+            }
+        }
+    }
+
+    a {
+        color: var(--c-link);
+        display: inline;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+        text-decoration-thickness: 1.5px;
+        border-radius: 0.15em;
+        transition: color 0.2s ease, text-decoration-color 0.2s ease;
+        font-weight: inherit;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    a:hover {
+        color: var(--c-link-hover);
+        text-decoration-color: var(--c-link-hover);
+    }
+    a:focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 2px;
+    }
+
+    /* EC schema-ref links inside code blocks must keep the token colour */
+    a.ec-schema-ref,
+    a.ec-schema-ref:hover {
+        color: inherit;
+        text-decoration-color: inherit;
+    }
+
+    a .link-icon-wrap {
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    a .link-icon {
+        display: inline-block;
+        width: 1.33em;
+        height: 1.33em;
+        vertical-align: middle;
+        margin-left: 0.125em;
+        overflow: visible;
+        shape-rendering: geometricPrecision;
+        vector-effect: non-scaling-stroke;
+    }
+
+    /* The inline footnote reference marker (e.g. "[1]") gets its own minimal
+       link style instead of the arrow-icon treatment every other link gets
+       above — linkAugmentation.ts skips it for exactly this reason. The
+       backreference links at the bottom (rebuilt by
+       footnoteBackrefAugmentation.ts into plain numbers) are deliberately
+       left unstyled here so they read as regular inline links. */
+    a[data-footnote-ref] {
+        display: inline-block;
+        /* The `<sup>` wrapper resets line-height to 0 (Tailwind preflight's
+           standard sub/sup fix), which this inline-block inherits — collapsing
+           its own content box to ~0 tall and squashing the vertical padding
+           below. Restore a normal line-height so the padding box is even. */
+        line-height: 1;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.75em;
+        padding: 0.25em;
+        /* Vertical padding is fully offset (no visual shift up/down). Horizontal
+           padding is only half-offset, so the other half becomes a real gap
+           between the marker and the surrounding text. */
+        margin: -0.25em -0.125em;
+    }
+    a[data-footnote-ref]:hover {
+        text-decoration: underline;
+    }
+
+    .footnote-backref-icon {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.15em;
+        color: var(--c-text-muted, currentColor);
+    }
+
+    .footnotes {
+        margin-top: 0.5rem;
+        padding-top: var(--prose-gap);
+        border-top: 1px solid var(--color-hairline);
+        font-size: 0.9em;
+    }
+    .footnotes ol {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+        padding-left: 1.25em;
+    }
+    .footnotes li {
+        margin: 0;
+    }
+    .footnotes li p {
+        margin: 0;
+    }
+
+    /* The "Footnotes" heading is `sr-only` by default (mdast-util-to-hast's
+       GitHub-style default) — this site shows it instead, matching the
+       visible "## Footnotes" heading the markdown twin renders. */
+    #footnote-label {
+        position: static;
+        width: auto;
+        height: auto;
+        padding: 0;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+    }
+
+    .comparison-card {
+        margin-top: 1rem;
+    }
+}
+
+
+/* Dark-mode prose code colors are handled via --c-* vars set in colors.css */
+
+/* Shared card shell: white/black surface with hairline border and subtle shadow.
+   Combine with Tailwind utilities for layout specifics (divide-y, overflow-hidden, etc.) */
+.api-card {
+    background-color: var(--c-surface);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xs);
+}
+
+.api-block-title {
+    font-family: "Qanelas Soft Custom";
+    font-size: 1.2rem;
+    color: inherit;
+    font-weight: normal;
+    line-height: 1.5;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+}
+
+/* Shared page title block — used by all page types (slug, command, api, schema).
+   Provides consistent sizing, font choices, and the hairline divider. */
+.page-title-block {
+    max-width: 76rem;
+    width: 100%;
+    margin-inline: auto;
+}
+
+.page-title-block .page-title-text {
+    font-family: "Qanelas Soft Custom";
+    font-size: 1.875rem; /* text-3xl */
+    line-height: 1.2;
+    font-weight: normal;
+    margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .page-title-block .page-title-text {
+        font-size: 2.25rem; /* sm:text-4xl */
+    }
+}
+
+/* When the title contains a code portion (command/schema names), keep Fira Code
+   for the code part and Qanelas Soft for any surrounding label text. */
+.page-title-block .page-title-text.is-code {
+    font-family: "Fira Code", monospace;
+    font-weight: 500;
+}
+
+.page-title-block .page-title-subtitle {
+    font-family: "Qanelas Soft Custom";
+    font-size: 1.25rem;
+    font-weight: normal;
+    line-height: 1.4;
+    margin-top: 0.25rem;
+    margin-bottom: 0.75rem;
+    color: inherit;
+}
+
+.page-title-block .page-title-divider {
+    width: 100%;
+    border-top: 1px solid var(--color-hairline);
+}
+
+.sidebar-group-title {
+    font-family: "Qanelas Soft Custom";
+    font-size: 1.25rem;
+    color: inherit;
+    font-weight: normal;
+    line-height: 1.5;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+    margin-top: 1.5rem;
+}
+
+    /* Smaller heading for nested sub-groups (commands sub-categories, API endpoint groups) */
+.sidebar-nested-group-title {
+    font-family: "Qanelas Soft Custom";
+    color: inherit;
+    font-weight: normal;
+    line-height: 1.5;
+    padding-top: 0.125em;
+    padding-bottom: 0.125em;
+}
+
+#sidebar nav > ul:first-of-type > li:first-of-type > p {
+    margin-top: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .api-block-title {
+        color: var(--c-text-muted);
+    }
+}
+
+@layer base {
+    .prose code::before,
+    .prose code::after {
+        content: none !important;
+    }
+}
+
+@font-face {
+    font-family: "Qanelas Soft Custom";
+    src: url("/fonts/qanelas-soft-custom-semi-bold.woff") format('woff');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'Fira Code';
+    src: url("/fonts/fira-code-medium.woff2") format("woff2"),
+    url("/fonts/fira-code-medium.woff") format("woff");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fira Code';
+    src: url("/fonts/fira-code-semibold.woff2") format("woff2"),
+    url("/fonts/fira-code-semibold.woff") format("woff");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('/fonts/roboto-italic.woff2') format('woff2'),
+    url('/fonts/roboto-italic.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('/fonts/roboto-regular.woff2') format('woff2'),
+    url('/fonts/roboto-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('/fonts/roboto-bold-italic.woff2') format('woff2'),
+    url('/fonts/roboto-bold-italic.woff') format('woff');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('/fonts/roboto-bold.woff2') format('woff2'),
+    url('/fonts/roboto-bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* ─── Print styles ──────────────────────────────────────────────────────────── */
+
+@media print {
+    /* 1. Base font size: 16px for print (18px for screen) */
+    html {
+        font-size: 16px;
+    }
+
+    /* 2. Hide navigation chrome */
+    header,
+    #sidebar,
+    #toc-panel,
+    .ds-modal {
+        display: none !important;
+    }
+
+    /* 3. Remove screen-layout offsets from the main content wrapper */
+    #main-content {
+        padding-left: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* 4. Collapse the multi-column content grid to a single full-width column */
+    .content-grid {
+        display: block;
+        padding-block: 0;
+    }
+
+    /* 5. TOC: flows between the title block and the main content.
+          .toc-sidebar lives inside #main-content (before .content-grid) in the DOM,
+          so with position:static it naturally lands after the title block (which is
+          the first child of .content-grid) and before the rest of the prose.
+          Three-column layout makes good use of the full print width. */
+    .toc-sidebar {
+        display: block !important;
+        position: static !important;
+        float: none;
+        right: auto;
+        width: 100%;
+        max-height: none !important;
+        overflow: visible;
+        margin: 0;
+        padding: 0.5rem 0 0.75rem 0;
+        border-left: none;
+        font-size: 0.8rem;
+        color: var(--c-print-toc-text);
+    }
+
+    /* "Contents" heading injected via pseudo-element — no HTML change needed */
+    .toc-sidebar::before {
+        content: "Content";
+        display: block;
+        font-family: "Qanelas Soft Custom", sans-serif;
+        font-size: 0.7rem;
+        font-weight: normal;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--c-print-toc-label);
+        margin-bottom: 0.4rem;
+    }
+
+    /* Three-column multi-column layout for the link list */
+    .toc-sidebar .toc-nav ul {
+        columns: 3;
+        column-gap: 2rem;
+        font-size: inherit;
+        line-height: 1.5;
+    }
+
+    /* Prevent a single link from being split across columns */
+    .toc-sidebar .toc-nav li {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        /* Suppress screen indentation — depth is shown via prefix dots instead */
+        margin-left: 0 !important;
+    }
+
+    .toc-sidebar .toc-nav a {
+        padding-block: 0.1rem;
+        padding-inline: 0;
+        color: inherit;
+        text-decoration: none;
+        display: block;
+    }
+
+    /* Depth prefix: depth 1 = no prefix, depth 2 = ". ", depth 3 = ". . ".
+       Full stops sit on the baseline by design. Each level adds one ". " unit. */
+    .toc-sidebar .toc-nav li[data-depth="2"] > a::before { content: ". "; }
+    .toc-sidebar .toc-nav li[data-depth="3"] > a::before { content: ". . "; }
+    .toc-sidebar .toc-nav a::before {
+        display: inline;
+        color: var(--c-print-toc-label);
+    }
+
+    /* Thin rule separating the TOC from the content below */
+    .toc-sidebar .toc-nav {
+        border-bottom: 1px solid var(--c-print-toc-rule);
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    /* 6. Prevent page breaks inside card components */
+    .request-card,
+    .request-body-card,
+    .request-header-card,
+    .request-parameter-card,
+    .response-card,
+    .response-header-card,
+    .search-response-card,
+    .terminal-example,
+    .api-card,
+    g6-graph {
+        break-inside: avoid;
+        page-break-inside: avoid; /* legacy fallback */
+    }
+
+    /* 7. Cards: let the browser break naturally between cards, but never
+          split a card across a page boundary (break-inside:avoid above).
+          break-before:avoid keeps heading + card together as a unit. */
+    .request-card,
+    .request-body-card,
+    .request-header-card,
+    .request-parameter-card,
+    .response-card,
+    .response-header-card,
+    .search-response-card,
+    .terminal-example,
+    .api-card {
+        break-before: avoid;
+        page-break-before: avoid; /* legacy fallback */
+    }
+
+    /* 8. Headings: avoid orphaning a heading at the bottom of a page.
+          break-after:avoid keeps the heading glued to the content that follows it.
+          Omit break-before:page — forcing a new page per heading was the main
+          cause of 60-80% blank-page gaps. */
+    .content-grid h2,
+    .content-grid h3,
+    .content-grid h4,
+    .content-grid h5,
+    .content-grid h6,
+    .prose h2,
+    .prose h3,
+    .prose h4,
+    .prose h5,
+    .prose h6 {
+        break-after: avoid;
+        page-break-after: avoid; /* legacy fallback */
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* 9. Left accent border on all code blocks.
+          Matches the hairline divider color used between stacked prose code blocks
+          (#e5e7eb). Strip all other borders and border-radius so the block sits
+          flush, edge-to-edge, with only the left accent visible. */
+    .expressive-code figure,
+    .expressive-code pre {
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .expressive-code figure {
+        border-left: 2px solid var(--c-print-code-accent) !important;
+    }
+}
+
+.search-response-card-body {
+    /* overflow-hidden lives on the panels wrapper, not here, so tab-bar focus rings are never clipped */
+}
+
+/* Bold-width placeholder trick: prevents layout shift when tab label goes bold on active */
+.search-response-card button::before {
+    content: attr(data-label);
+    display: block;
+    height: 0;
+    visibility: hidden;
+    font-weight: 600;
+    overflow: hidden;
+}
+
+.search-response-card .search-response-card-body g6-graph {
+    display: block;
+    padding: 0;
+    margin: 0;
+    border-bottom-left-radius: calc(var(--radius-xl) - 1px);
+    border-bottom-right-radius: calc(var(--radius-xl) - 1px);
+    overflow: hidden;
+    min-height: 250px;
+}
+
+
+/* ── Status family: bridge component-scoped vars to the global palette ── */
+/* All color values live in colors.css; these classes just plumb them in.  */
+
+.http-status-2xx {
+    --status-color:         var(--c-status-2xx-fg);
+    --status-bg:            var(--c-status-2xx-bg);
+    --status-border:        var(--c-status-2xx-border);
+    --status-active-bg:     var(--c-status-2xx-active);
+    --status-active-color:  #ffffff;
+    --status-active-border: var(--c-status-2xx-active-border);
+}
+
+.http-status-3xx {
+    --status-color:         var(--c-status-3xx-fg);
+    --status-bg:            var(--c-status-3xx-bg);
+    --status-border:        var(--c-status-3xx-border);
+    --status-active-bg:     var(--c-status-3xx-active);
+    --status-active-color:  #ffffff;
+    --status-active-border: var(--c-status-3xx-active-border);
+}
+
+.http-status-4xx {
+    --status-color:         var(--c-status-4xx-fg);
+    --status-bg:            var(--c-status-4xx-bg);
+    --status-border:        var(--c-status-4xx-border);
+    --status-active-bg:     var(--c-status-4xx-active);
+    --status-active-color:  #ffffff;
+    --status-active-border: var(--c-status-4xx-active-border);
+}
+
+.http-status-5xx {
+    --status-color:         var(--c-status-5xx-fg);
+    --status-bg:            var(--c-status-5xx-bg);
+    --status-border:        var(--c-status-5xx-border);
+    --status-active-bg:     var(--c-status-5xx-active);
+    --status-active-color:  #ffffff;
+    --status-active-border: var(--c-status-5xx-active-border);
+}
+
+.http-status-other {
+    --status-color:         var(--c-status-other-fg);
+    --status-bg:            var(--c-status-other-bg);
+    --status-border:        var(--c-status-other-border);
+    --status-active-bg:     var(--c-status-other-active);
+    --status-active-color:  #ffffff;
+    --status-active-border: var(--c-status-other-active-border);
+}
+
+/* ── Request language tabs: bridge to palette ─────────────────────────── */
+
+.request-lang-shell {
+    --lang-color:           var(--c-lang-shell-fg);
+    --lang-bg:              var(--c-lang-shell-bg);
+    --lang-border:          var(--c-lang-shell-border);
+    --lang-active-bg:       var(--c-lang-shell-active);
+    --lang-active-color:    #ffffff;
+    --lang-active-border:   var(--c-lang-shell-active-border);
+}
+
+.request-lang-python {
+    --lang-color:           var(--c-lang-python-fg);
+    --lang-bg:              var(--c-lang-python-bg);
+    --lang-border:          var(--c-lang-python-border);
+    --lang-active-bg:       var(--c-lang-python-active);
+    --lang-active-color:    #ffffff;
+    --lang-active-border:   var(--c-lang-python-active-border);
+}
+
+.request-lang-js {
+    --lang-color:           var(--c-lang-js-fg);
+    --lang-bg:              var(--c-lang-js-bg);
+    --lang-border:          var(--c-lang-js-border);
+    --lang-active-bg:       var(--c-lang-js-active);
+    --lang-active-color:    #ffffff;
+    --lang-active-border:   var(--c-lang-js-active-border);
+}
+
+.request-lang-php {
+    --lang-color:           var(--c-lang-php-fg);
+    --lang-bg:              var(--c-lang-php-bg);
+    --lang-border:          var(--c-lang-php-border);
+    --lang-active-bg:       var(--c-lang-php-active);
+    --lang-active-color:    #ffffff;
+    --lang-active-border:   var(--c-lang-php-active-border);
+}
+
+/* Apply vars to the button */
+.http-status-btn {
+    color: var(--status-color);
+    background-color: var(--status-bg);
+    border-color: var(--status-border);
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.http-status-btn.active {
+    color: var(--status-active-color);
+    background-color: var(--status-active-bg);
+    border-color: var(--status-active-border);
+}
+
+.http-status-btn:focus { outline: none; }
+.http-status-btn:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+.request-lang-btn {
+    color: var(--lang-color);
+    background-color: var(--lang-bg);
+    border-color: var(--lang-border);
+}
+
+.request-lang-btn.active {
+    color: var(--lang-active-color);
+    background-color: var(--lang-active-bg);
+    border-color: var(--lang-active-border);
+}
+
+.request-lang-btn:focus { outline: none; }
+.request-lang-btn:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* Card tab bar row — elevate above the code block so focus outlines are never clipped */
+.card-tab-bar {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+}
+
+/* Card tab buttons (ResponseCard, RequestBodyCard, SearchResponseCard) */
+.card-tab {
+    position: relative;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.15s ease;
+    /* suppress default browser focus ring */
+    outline: none;
+}
+
+/* bottom border on hover and focus */
+.card-tab:hover,
+.card-tab:focus {
+    border-bottom-color: var(--c-tab-hover-border);
+}
+
+/* active tab: bold border using current text color */
+.card-tab.active {
+    font-weight: 600;
+    border-bottom-color: currentColor;
+}
+
+.card-tab.active:hover,
+.card-tab.active:focus {
+    border-bottom-color: currentColor;
+}
+
+/* keyboard focus ring */
+.card-tab:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 0.15em;
+}
+
+/* --method-* aliases are defined in colors.css via --c-method-* */
+
+code:not(pre > code) {
+    padding: 0.25em;
+    border-radius: 0.5em;
+    background-color: var(--c-code-bg);
+}
+
+code span[data-method] {
+    padding: 0.25em;
+    border-top-left-radius: 0.5em;
+    border-bottom-left-radius: 0.5em;
+    margin-left: -0.25em;
+    margin-right: -0.25em;
+}
+
+/* Dark-mode inline code bg is handled via --c-code-bg set in colors.css */
+
+/* Method badge colors — use color-mix() so a single base color works for both modes.
+   The surface variable (--c-surface) is white in light, black in dark, giving a
+   subtle tinted background while the text color stays the full method hue.
+   Dark mode uses 20% to compensate for the near-black surface. */
+
+code[data-method="GET"],    code span[data-method="GET"]    { color: var(--c-method-get);    background-color: color-mix(in srgb, var(--c-method-get)    10%, var(--c-surface)); }
+code[data-method="POST"],   code span[data-method="POST"]   { color: var(--c-method-post);   background-color: color-mix(in srgb, var(--c-method-post)   10%, var(--c-surface)); }
+code[data-method="PUT"],    code span[data-method="PUT"]    { color: var(--c-method-put);    background-color: color-mix(in srgb, var(--c-method-put)    10%, var(--c-surface)); }
+code[data-method="PATCH"],  code span[data-method="PATCH"]  { color: var(--c-method-patch);  background-color: color-mix(in srgb, var(--c-method-patch)  10%, var(--c-surface)); }
+code[data-method="DELETE"], code span[data-method="DELETE"] { color: var(--c-method-delete); background-color: color-mix(in srgb, var(--c-method-delete) 10%, var(--c-surface)); }
+code[data-method="HEAD"],   code span[data-method="HEAD"]   { color: var(--c-method-head);   background-color: color-mix(in srgb, var(--c-method-head)   10%, var(--c-surface)); }
+
+@media (prefers-color-scheme: dark) {
+    code[data-method="GET"],    code span[data-method="GET"]    { background-color: color-mix(in srgb, var(--c-method-get)    20%, var(--c-surface)); }
+    code[data-method="POST"],   code span[data-method="POST"]   { background-color: color-mix(in srgb, var(--c-method-post)   20%, var(--c-surface)); }
+    code[data-method="PUT"],    code span[data-method="PUT"]    { background-color: color-mix(in srgb, var(--c-method-put)    20%, var(--c-surface)); }
+    code[data-method="PATCH"],  code span[data-method="PATCH"]  { background-color: color-mix(in srgb, var(--c-method-patch)  20%, var(--c-surface)); }
+    code[data-method="DELETE"], code span[data-method="DELETE"] { background-color: color-mix(in srgb, var(--c-method-delete) 20%, var(--c-surface)); }
+    code[data-method="HEAD"],   code span[data-method="HEAD"]   { background-color: color-mix(in srgb, var(--c-method-head)   20%, var(--c-surface)); }
+}
+
+/* ─── Desktop search modal ──────────────────────────────────────────────────── */
+
+/* Full-screen overlay */
+.ds-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
+/* Semi-transparent backdrop */
+.ds-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--c-search-backdrop);
+}
+
+/* Floating panel: top-center, grows downward — no overflow so outlines are never clipped */
+.ds-panel {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(600px, calc(100vw - 2rem));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Padding lets the 4px outlines on bar islands paint without clipping */
+    padding: 6px;
+    max-height: calc(var(--vvh, 100dvh) - 100px);
+}
+
+/* Results scroll wrapper — isolated overflow so only this scrolls.
+   padding + negative margin trick: outlines paint into the padding area,
+   which is inside the scroll container so it's never clipped. */
+.ds-results-scroll {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    flex: 1;
+    min-height: 0;
+    padding: 6px;
+    margin: -6px;
+}
+
+/* Search bar row: input island + X island */
+.ds-bar {
+    --ds-input-height: 56px;
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* pagefind-input IS the island — white pill, input fills it edge-to-edge */
+.ds-input {
+    --pf-input-height: var(--ds-input-height); /* island height — input fills it fully */
+    --pf-input-font-size: 16px;
+    --pf-border: transparent;     /* no inner border — island is the frame */
+    --pf-background: transparent; /* island bg shows through */
+    --pf-border-radius: 10px;     /* input corners match island */
+    --pf-outline-focus: var(--color-focus);
+    contain: style;               /* drop layout containment so outlines escape */
+    flex: 1;
+    min-width: 0;
+    display: block;
+    background: var(--c-search-island);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px var(--c-search-island-shadow);
+}
+
+/* Clear button: desktop layout — fill height, flush to inline-end */
+:is(*, #\#):is(*, #\#):is(*, #\#) .ds-input .pf-input-clear {
+    height: 100%;
+    inset-inline-end: 0px;
+    border-radius: 10px; /* matches island / input field */
+}
+
+/* Clear button focus ring — needs :focus-visible to beat the library's own
+   :is(*, #\#):is(*, #\#):is(*, #\#) .pf-input-clear:focus-visible rule (same
+   boost count, but that rule has the pseudo-class so it wins without this). */
+:is(*, #\#):is(*, #\#):is(*, #\#) .ds-input .pf-input-clear:focus-visible {
+    outline-offset: 3px; /* matches .ds-input .pf-input:focus-visible */
+}
+
+/* Clear button: always visible in layout, greyed + inert when empty */
+:is(*, #\#):is(*, #\#):is(*, #\#) .ds-input .pf-input-clear[data-pf-suppressed] {
+    display: block;
+    opacity: 0.3;
+    pointer-events: none;
+    visibility: hidden; /* removes from tab order and AT while keeping layout space */
+}
+
+/* Suppress library's box-shadow focus ring on the inner input (island IS the frame) */
+:is(*, #\#):is(*, #\#):is(*, #\#) .ds-input .pf-input:focus-visible {
+    box-shadow: none;
+    border-color: transparent;
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+}
+
+/* X button island — square, matches input island height via stretch */
+.ds-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    align-self: stretch;
+    width: var(--ds-input-height, 56px);
+    background: var(--c-search-island);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px var(--c-search-island-shadow);
+    border: none;
+    cursor: pointer;
+    color: var(--c-search-close-fg);
+    transition: background 0.15s;
+}
+.ds-close:hover {
+    background: var(--c-search-close-hover);
+}
+.ds-close:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+}
+
+/* Results: each card is its own island — no wrapper background */
+.ds-results {
+    display: block;
+    width: 100%;
+    contain: style;               /* drop layout containment so card outlines escape */
+    --pf-result-title-font-size: 14px;
+    --pf-result-excerpt-font-size: 13px;
+    --pf-background: white;
+    --pf-border: transparent;
+}
+
+/* Give each result card island styling */
+:is(*, #\#):is(*, #\#):is(*, #\#) .ds-results .pf-result-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 16px var(--c-search-result-shadow);
+    border: none;
+}
+
+/* Amber focus outline floating clear of the card */
+:is(*, #\#):is(*, #\#):is(*, #\#) .ds-results .pf-result-card:has(.pf-result-link:focus-visible) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+    box-shadow: 0 4px 16px var(--c-search-result-shadow);
+}
+
+/* Dark-mode search: --c-search-* vars set in colors.css handle islands/shadows.
+   Pagefind-specific vars still need explicit dark overrides here. */
+@media (prefers-color-scheme: dark) {
+    .ds-input {
+        --pf-text: #e4e4e7;
+        --pf-text-muted: #71717a;
+    }
+    .ds-results {
+        --pf-text: #e4e4e7;
+        --pf-background: var(--c-search-island);
+        --pf-border: transparent;
+        --pf-border-focus: #3f3f46;
+        --pf-hover: #27272a;
+        --pf-skeleton: #27272a;
+        --pf-skeleton-shine: #3f3f46;
+        --pf-text-secondary: #a1a1aa;
+        --pf-text-muted: #71717a;
+    }
+    :is(*, #\#):is(*, #\#):is(*, #\#) .ds-results .pf-result-card {
+        background: var(--c-search-island);
+    }
+}
+
+
+

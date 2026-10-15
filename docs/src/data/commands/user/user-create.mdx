@@ -1,0 +1,19 @@
+---
+command: user:create
+name: user:create
+helpCommand: php bin/console user:create --help
+helpOutput: user-create-help.html
+exampleCommand: php bin/console user:create command-test@localhost.dev 1234
+exampleOutput: user-create.html
+---
+
+Creates a new user directly from the CLI - useful for bootstrapping the first account on a fresh
+instance, or scripting test users, without going through the registration endpoint.
+
+Both arguments are required: `identifier` is the user's unique identifier (typically their email,
+depending on the instance's configured unique identifier field) and must not already be in use,
+and `password` is the user's plaintext password, which is hashed before being stored. On success,
+the command prints the new user's UUID.
+
+The command exits with a failure status if a user with the given identifier already exists; it
+does not update or merge into an existing account.

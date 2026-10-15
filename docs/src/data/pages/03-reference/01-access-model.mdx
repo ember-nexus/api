@@ -1,0 +1,282 @@
+---
+type: reference
+title: Access model
+---
+
+<g6-graph>
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "group", "type": "Group", "data": { "name": "Group" }},
+            { "id": "data1", "type": "Data", "data": { "name": "Data 1" }},
+            { "id": "data2", "type": "Data", "data": { "name": "Data 2" }},
+            { "id": "isInGroup", "type": "IS_IN_GROUP", "start": "user", "end": "group" },
+            { "id": "owns", "type": "OWNS", "start": "group", "end": "data1" },
+            { "id": "hasReadAccess", "type": "HAS_READ_ACCESS", "start": "group", "end": "data2" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+Ember Nexus uses a **graph based access model** with optional attributes for more nuanced access.
+This means that individual users are not assigned a global role, but instead receive **explicit ownership or access to
+specific elements**.
+
+These permissions are **applied recursively**, i.e. if you own some element, then you also own all the element's
+children:
+
+<g6-graph>
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "data1", "type": "Data", "data": { "name": "Data 1" }},
+            { "id": "data2", "type": "Data", "data": { "name": "Data 2" }},
+            { "id": "data3", "type": "Data", "data": { "name": "Data 3" }},
+            { "id": "owns1", "type": "OWNS", "start": "user", "end": "data1" },
+            { "id": "owns2", "type": "OWNS", "start": "data1", "end": "data2" },
+            { "id": "owns3", "type": "OWNS", "start": "data2", "end": "data3" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+As ownership and access data are stored inside the same graph as relations, the access model is explicit, can be queried
+separately, and becomes a natural part of your data.
+
+Access is split between individual access operations (read, create, update, delete and search) for quite granular
+permissions, as well as "ownership" (OWNS), which grants the owner full access.
+
+### How access is determined
+
+For a user being able to interact with some element at all, an access path between the user and element must exist.  
+If no path can be found, or the element to be accessed is completely isolated, then the API responds to the user as if
+the element does not exist (404 error codes etc.):
+
+<g6-graph layout="grid" >
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "data", "type": "Data", "data": { "name": "Data" }}
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+Within a single specific path, the lowest overall access wins, e.g. in the following example `HAS_READ_ACCESS` is the
+lowest common access permission across the path, therefore the user only has read access:
+
+<g6-graph>
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "data1", "type": "Data", "data": { "name": "Data 1" }},
+            { "id": "data2", "type": "Data", "data": { "name": "Data 2" }},
+            { "id": "hasReadAccess", "type": "HAS_READ_ACCESS", "start": "user", "end": "data1" },
+            { "id": "owns", "type": "OWNS", "start": "data1", "end": "data2" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+When multiple parallel paths exist, the path with the highest access wins. In the following example, a full `OWNS`-path
+exists, therefore lower access operations are ignored:
+
+<g6-graph>
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "data1", "type": "Data", "data": { "name": "Data 1" }},
+            { "id": "data2", "type": "Data", "data": { "name": "Data 2" }},
+            { "id": "hasReadAccess", "type": "HAS_READ_ACCESS", "start": "user", "end": "data1" },
+            { "id": "owns1", "type": "OWNS", "start": "user", "end": "data1" },
+            { "id": "owns2", "type": "OWNS", "start": "data1", "end": "data2" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+
+### Access to nodes
+
+Nodes can be directly owned, as `OWNS`-relations can directly point to them:
+
+<g6-graph>
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "data", "type": "Data", "data": { "name": "Data" }},
+            { "id": "owns", "type": "OWNS", "start": "user", "end": "data" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+### Access to relations
+
+Relations can not be directly owned, as relations can not point to other relations - the underlying storage is a regular graph, not a hypergraph.
+
+Instead, a relation is "owned", when the user owns the relation's start and end nodes.  
+In the following example, the user has `OWNS`-access to both the start and end nodes, and therefore he also has
+`OWNS`-access to the `RELATION`:
+
+<g6-graph layout="force">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "start", "type": "Data", "data": { "name": "Start" }},
+            { "id": "end", "type": "Data", "data": { "name": "End" }},
+            { "id": "relation", "type": "RELATION", "start": "start", "end": "end" },
+            { "id": "owns1", "type": "OWNS", "start": "user", "end": "start" },
+            { "id": "owns2", "type": "OWNS", "start": "user", "end": "end" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+Accessing a relation requires the same access operation to be granted on both its start node and its end node separately.
+Read access to a relation, for instance, requires read access to both the start and end nodes.
+
+The access paths for both the start and end nodes do not have to share any elements. They can, but they are not required to.
+
+### Groups for delegating access
+
+Instead of giving many users direct access to some element, a group can be used to delegate access.
+
+This will look then like this:
+
+<g6-graph>
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user1", "type": "User", "data": { "name": "User 1" }},
+            { "id": "user2", "type": "User", "data": { "name": "User 2" }},
+            { "id": "group", "type": "Group", "data": { "name": "Group" }},
+            { "id": "data", "type": "Data", "data": { "name": "Data" }},
+            { "id": "isInGroup1", "type": "IS_IN_GROUP", "start": "user1", "end": "group" },
+            { "id": "isInGroup2", "type": "IS_IN_GROUP", "start": "user2", "end": "group" },
+            { "id": "owns", "type": "OWNS", "start": "group", "end": "data" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+To model more complex situations, a group can also be part of another group:
+
+<g6-graph>
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "group1", "type": "Group", "data": { "name": "Group 1" }},
+            { "id": "group2", "type": "Group", "data": { "name": "Group 2" }},
+            { "id": "data", "type": "Data", "data": { "name": "Data" }},
+            { "id": "isInGroup1", "type": "IS_IN_GROUP", "start": "user", "end": "group1" },
+            { "id": "isInGroup2", "type": "IS_IN_GROUP", "start": "group1", "end": "group2" },
+            { "id": "owns", "type": "OWNS", "start": "group2", "end": "data" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+Important: For a user to be considered part of a group, there must exist a direct path of solely `IS_IN_GROUP`-relations between the user and the group.
+Using `OWNS`- and `HAS_X_ACCESS`-relations between the user and the group has other semantic meanings, and should be avoided unless explicitly required.
+
+### Writing to group nodes
+
+Being a member of a group (via `IS_IN_GROUP`) grants `READ`, `SEARCH` and `CREATE` access to the group node itself,
+but not `UPDATE` or `DELETE` access. A group node can only be updated or deleted by a user with an explicit `OWNS` or
+`HAS_UPDATE_ACCESS`/`HAS_DELETE_ACCESS` relation to that group node, not by virtue of membership alone.
+
+### Access operations
+
+The following access operations exist:
+
+- `OWNS`: Full permissions.
+
+- `HAS_READ_ACCESS`: Only grants read permissions to the element. If you want to grant this access operation, you will likely want to grant `HAS_SEARCH_ACCESS` as well.
+
+- `HAS_CREATE_ACCESS`: Grants the permission to create new child nodes underneath the element.
+
+- `HAS_UPDATE_ACCESS`: Grants the permission to change the element.
+
+- `HAS_DELETE_ACCESS`: Grants the permission to delete the element and its children.
+
+- `HAS_SEARCH_ACCESS`: Grants the permission to search the element. Similar to `HAS_READ_ACCESS`, but explicitly
+  relevant for search operations.
+
+### Limitations and Exceptions
+
+Regardless of access operations, overall permissions etc., there are a few element types and properties which can not be accessed, read or changed. These are usually only relevant for the API itself, or are dangerous to be changed by any user.
+
+When user try to change these properties, relevant exceptions are being thrown and the current request is being canceled.
+
+Other properties like `created` and `updated` are automatically set by the API, and can not be changed by the user as well.
+
+Users always have full access to their own user element.
+
+### Performance considerations
+
+Permission lists, i.e. which users and groups have access to each element, are calculated and cached in the background.
+
+Adding new users to a group does only update a few cache entries internally, while giving a user direct access to a big tree of elements requires a somewhat expensive re-calculation of the whole tree. While this is done asynchronously in the background, it should be avoided.
+
+Therefore, you should always use a group as a proxy object for bigger trees you might want to share with others in the future.
+
+### Conditional access
+
+The following optional properties can be set on `HAS_X_ACCESS`:
+
+- `onLabel`: Limits access to a specific type of nodes.
+- `onParentLabel`: Limits access to children of a specific type of nodes.
+- `onCreatedByUser`: Requires that the element was created by the current user, i.e. the relation `CREATED` exists between the user and the element.
+- `onState`: Limits access to elements which currently have a given workflow state.
+
+#### Limiting access by workflow state
+
+You can model workflows by creating your own `State` nodes and connecting an element to its current state with a
+`HAS_STATE` relation. Setting `onState` on a `HAS_X_ACCESS` relation to the `id` of a `State` node then restricts that
+access grant to elements which have that state set somewhere along their `OWNS`-chain:
+
+<g6-graph>
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "admin", "type": "User", "data": { "name": "Admin" }},
+            { "id": "anonymous", "type": "User", "data": { "name": "Anonymous" }},
+            { "id": "blog", "type": "Data", "data": { "name": "Blog" }},
+            { "id": "post1", "type": "Data", "data": { "name": "Post 1" }},
+            { "id": "post2", "type": "Data", "data": { "name": "Post 2" }},
+            { "id": "state", "type": "State", "data": { "name": "Active" }},
+            { "id": "ownsBlog", "type": "OWNS", "start": "admin", "end": "blog" },
+            { "id": "ownsPost1", "type": "OWNS", "start": "blog", "end": "post1" },
+            { "id": "ownsPost2", "type": "OWNS", "start": "blog", "end": "post2" },
+            { "id": "hasState", "type": "HAS_STATE", "start": "post1", "end": "state" },
+            { "id": "readAccess", "type": "HAS_READ_ACCESS", "start": "anonymous", "end": "blog", "data": { "name": "onState: Active (id)" } }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+Here the anonymous user only ends up with read access to Post 1, since it is the only element with the `Active` state set -
+Post 2 and the Blog node itself are not covered by the grant.
+
+The check walks the `OWNS`-chain upward from the element being accessed to look for a matching `HAS_STATE` relation,
+so it is repeated for every element the grant would otherwise cover. Prefer setting the state as close as possible to
+the elements it should actually restrict, rather than on a distant ancestor, to keep this cheap.
+
+### Metadata and timing attacks
+
+Note that even with all security measures in place, some data can still be accessed by other users:
+
+- General graph structure, e.g. the types of nodes and relations present in the global graph, through the [`GET /graph-structure`](/api/get-graph-structure)
+  endpoint.
+- Timing data. Databases can and will act differently for elements which exist but need to be filtered out, as well as
+  elements which are truly missing from the database. While these small differences are usually not enough to leak
+  useful data, a persistent actor might be able to learn general patterns.

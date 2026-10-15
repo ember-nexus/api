@@ -1,0 +1,166 @@
+---
+import { Code } from 'astro-expressive-code/components';
+import { Icon } from 'astro-icon/components';
+import { HTTPSnippet, type TargetId } from "httpsnippet";
+
+import type { RequestExample } from "../type";
+import CardTitle from "./CardTitle.astro";
+import { curlfmt } from "../util/curl-fmt.ts";
+
+interface Props {
+    requests: RequestExample[];
+    id?: string;
+}
+
+const { requests, id } = Astro.props;
+
+const LANGUAGES = [
+    { lang: 'shell', library: 'curl', astroLang: 'bash', label: 'cli', sublabel: 'curl' },
+    { lang: 'python', library: 'requests', astroLang: 'python', label: 'python', sublabel: 'requests' },
+    { lang: 'javascript', library: 'fetch', astroLang: 'js', label: 'js', sublabel: 'fetch' },
+    { lang: 'php', library: 'guzzle', astroLang: 'php', label: 'php', sublabel: 'guzzle' },
+];
+
+const opts = { indent: '\t' };
+
+// One set of language-tab examples (curl/python/js/php) per request example.
+const requestBlocks = requests.map((request) => {
+    const snippet = new HTTPSnippet(request.har);
+    const examples = LANGUAGES.map(l => {
+        const raw = snippet.convert(l.lang as unknown as TargetId, l.library, opts) as string;
+        const example = l.library === 'curl'
+            ? curlfmt(raw, { headerPriority: ['Authorization', 'Content-Type', 'Accept'] })
+            : raw;
+        return { ...l, example };
+    });
+    return { name: request.name, examples };
+});
+
+const isSingle = requestBlocks.length <= 1;
+---
+
+{isSingle && requestBlocks.map((block) => (
+    <div x-data={`{
+		open: false,
+		tab: '${block.examples[0].library}',
+		get current() {
+			return ${JSON.stringify(block.examples)}.find(e => e.library === this.tab)
+		}
+	}`}>
+        <CardTitle title="Request" id={id}>
+            <div class="relative w-full sm:w-auto">
+                <button
+                    @click="open = !open"
+                    @keydown.escape="open = false"
+                    class="flex w-full sm:w-auto items-center justify-between sm:justify-start gap-2 px-3 py-1.5 rounded-xl sm:rounded-lg border border-hairline text-sm font-medium cursor-pointer transition-colors"
+                >
+					<span class="flex items-center gap-2">
+						<span x-text="current.label" class="text-gray-500 dark:text-gray-400"></span>
+						<span class="text-gray-300 dark:text-gray-600">/</span>
+						<span x-text="current.sublabel"></span>
+					</span>
+                    <Icon name="chevron-down" class="size-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" aria-hidden="true" />
+                </button>
+
+                <div
+                    x-show="open"
+                    x-cloak
+                    @click.outside="open = false"
+                    x-transition
+                    class="absolute right-0 mt-1 w-full sm:w-44 bg-white dark:bg-black border border-hairline rounded-xl sm:rounded-lg shadow-md overflow-hidden z-10"
+                >
+                    {block.examples.map(e => (
+                        <button
+                            @click={`tab = '${e.library}'; open = false`}
+                            :class={`tab === '${e.library}' ? 'bg-gray-100 dark:bg-zinc-900' : 'hover:bg-gray-50 dark:hover:bg-zinc-950'`}
+                            class="w-full flex justify-between items-center px-3 py-2 text-sm cursor-pointer transition-colors"
+                        >
+                            <span class="text-gray-500 dark:text-gray-400">{e.label}</span>
+                            <span class="font-medium">{e.sublabel}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </CardTitle>
+
+        <div class="request-card api-card block overflow-hidden">
+            {block.examples.map((e, i) => (
+                <div
+                    x-show={`tab === '${e.library}'`}
+                    x-cloak={i !== 0 || undefined}
+                    class="text-gray-800 font-mono"
+                >
+                    <Code code={e.example} lang={e.astroLang} frame="none" class="not-prose rounded-xl text-[0.875rem]" />
+                </div>
+            ))}
+        </div>
+    </div>
+))}
+
+{!isSingle && (
+    <>
+        <CardTitle title="Request" id={id}></CardTitle>
+
+        <div class="request-card api-card block overflow-hidden divide-y divide-gray-200 dark:divide-zinc-800">
+            {requestBlocks.map((block, blockIndex) => (
+                <div
+                    x-data={`{
+						open: false,
+						tab: '${block.examples[0].library}',
+						get current() {
+							return ${JSON.stringify(block.examples)}.find(e => e.library === this.tab)
+						}
+					}`}
+                    class="p-4 flex flex-col gap-3"
+                >
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-sm font-medium">{block.name ?? `Example ${blockIndex + 1}`}</p>
+                        <div class="relative w-full sm:w-auto">
+                            <button
+                                @click="open = !open"
+                                @keydown.escape="open = false"
+                                class="flex w-full sm:w-auto items-center justify-between sm:justify-start gap-2 px-3 py-1.5 rounded-xl sm:rounded-lg border border-hairline text-sm font-medium cursor-pointer transition-colors"
+                            >
+								<span class="flex items-center gap-2">
+									<span x-text="current.label" class="text-gray-500 dark:text-gray-400"></span>
+									<span class="text-gray-300 dark:text-gray-600">/</span>
+									<span x-text="current.sublabel"></span>
+								</span>
+                                <Icon name="chevron-down" class="size-4 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" aria-hidden="true" />
+                            </button>
+
+                            <div
+                                x-show="open"
+                                x-cloak
+                                @click.outside="open = false"
+                                x-transition
+                                class="absolute right-0 mt-1 w-full sm:w-44 bg-white dark:bg-black border border-hairline rounded-xl sm:rounded-lg shadow-md overflow-hidden z-10"
+                            >
+                                {block.examples.map(e => (
+                                    <button
+                                        @click={`tab = '${e.library}'; open = false`}
+                                        :class={`tab === '${e.library}' ? 'bg-gray-100 dark:bg-zinc-900' : 'hover:bg-gray-50 dark:hover:bg-zinc-950'`}
+                                        class="w-full flex justify-between items-center px-3 py-2 text-sm cursor-pointer transition-colors"
+                                    >
+                                        <span class="text-gray-500 dark:text-gray-400">{e.label}</span>
+                                        <span class="font-medium">{e.sublabel}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {block.examples.map((e, i) => (
+                        <div
+                            x-show={`tab === '${e.library}'`}
+                            x-cloak={i !== 0 || undefined}
+                            class="text-gray-800 font-mono"
+                        >
+                            <Code code={e.example} lang={e.astroLang} frame="none" class="not-prose rounded-xl text-[0.875rem]" />
+                        </div>
+                    ))}
+                </div>
+            ))}
+        </div>
+    </>
+)}

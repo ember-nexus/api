@@ -1,0 +1,9 @@
+{
+  "components": {
+    "examples": {
+      "GoneProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/upload/patch-upload/410-response-body.json"
+      }
+    }
+  }
+}

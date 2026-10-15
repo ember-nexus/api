@@ -1,0 +1,35 @@
+---
+command: token:revoke
+name: token:revoke
+helpCommand: php bin/console token:revoke --help
+helpOutput: token-revoke-help.html
+exampleCommand: php bin/console token:revoke -f
+exampleOutput: token-revoke.html
+---
+
+Revokes active authentication tokens, optionally restricted by user, group, or issue date. Run
+without any filter options, it targets **every** currently active token.
+
+Filters (combine as needed; a token must match all given filters to be revoked):
+
+- `-u`, `--user=` - only tokens owned by a given user, identified by UUID (takes precedence) or the
+  configured unique identifier.
+- `-g`, `--group=` - only tokens owned by users belonging to a given group, identified by UUID.
+- `-b`, `--issued-before=` / `-a`, `--issued-after=` - only tokens issued before/after a given
+  point in time, formatted `YYYY-MM-DD HH:MM` in UTC. Combining both requires `--issued-after` to
+  be earlier than `--issued-before`, otherwise the command errors out.
+- `--issued-with-expiration-date` / `--issued-without-expiration-date` - only tokens that do (or
+  don't) have an explicit expiration date. These two are mutually exclusive.
+
+Other options:
+
+- `-f`, `--force` - skips the interactive confirmation prompt before revoking.
+- `--dry-run` - lists every token that would be affected, without revoking anything and without
+  prompting.
+- `-l`, `--list-all-affected-tokens` - shows the full list of affected tokens in the confirmation
+  table. Without it, the table is capped at the first 10 tokens once more than 10 would match (the
+  full set is still revoked, only the preview is capped).
+
+If no tokens match, the command exits successfully without asking for confirmation. Revoking marks
+each matching token as revoked in the graph database and expires its corresponding Redis session
+key.

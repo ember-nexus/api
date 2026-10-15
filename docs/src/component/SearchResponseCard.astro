@@ -1,0 +1,122 @@
+---
+import {Code} from 'astro-expressive-code/components';
+import {Icon} from 'astro-icon/components';
+
+interface Props {
+    responseBody: object;
+    responseHeaders: string;
+    graphLayout?: string;
+}
+
+const {responseBody, responseHeaders, graphLayout = "antv-dagre-LR"} = Astro.props;
+
+const body = responseBody as any;
+const results = body?.results;
+const debugSteps = Array.isArray(body?.debug) ? body.debug : [];
+const lastDebugStep = debugSteps[debugSteps.length - 1];
+const hasGraph = lastDebugStep?.input?.type === "element-hydration";
+
+const tabLabels: Record<string, string> = {
+    'graph': 'Graph',
+    'table': 'Table',
+    'debug': 'Debug',
+    'body': 'Body',
+    'header': 'Headers',
+};
+
+const tabs = [...(hasGraph ? ['graph'] : []), 'table', 'debug', 'body', 'header'];
+const firstTab = tabs[0];
+
+const prettyBody = JSON.stringify(responseBody, null, 2);
+const prettyDebug = JSON.stringify(body?.debug ?? {}, null, 2);
+const graphElements = JSON.stringify({elements: body?.results ?? []});
+
+const tabEntries = tabs.map(t => ({key: t, label: tabLabels[t] ?? t}));
+---
+
+<div
+    class="search-response-card mt-4"
+    x-data={`{ tab: '${firstTab}', open: false, get currentLabel() { return ${JSON.stringify(tabEntries)}.find(t => t.key === this.tab)?.label ?? this.tab } }`}
+    data-pagefind-ignore="all"
+>
+    <div class="sm:hidden relative w-full mb-2">
+        <button
+            @click="open = !open"
+            @keydown.escape="open = false"
+            class="flex w-full items-center justify-between gap-2 px-3 py-1.5 rounded-xl border border-hairline text-sm font-medium cursor-pointer transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-focus)]"
+        >
+            <span x-text="currentLabel" class="text-gray-800 dark:text-gray-200 text-left flex-1"></span>
+            <Icon name="chevron-down" class="size-4 text-gray-400 transition-transform duration-200 shrink-0"
+                  :class="open ? 'rotate-180' : ''" aria-hidden="true"/>
+        </button>
+
+        <div
+            x-show="open"
+            @click.outside="open = false"
+            x-transition
+            class="absolute left-0 right-0 mt-1 bg-white dark:bg-black border border-hairline rounded-xl shadow-md overflow-hidden z-10"
+        >
+            {tabEntries.map(({key, label}) => (
+                <button
+                    @click={`tab = '${key}'; open = false`}
+                    :class={`tab === '${key}' ? 'bg-gray-100 dark:bg-zinc-900' : 'hover:bg-gray-50 dark:hover:bg-zinc-950'`}
+                    class="w-full flex items-center px-3 py-2 text-sm cursor-pointer transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-[var(--color-focus)]"
+                >
+                    <span class="font-medium">{label}</span>
+                </button>
+            ))}
+        </div>
+    </div>
+
+    <div
+        class="search-response-card-body api-card flex flex-col divide-y divide-gray-200 dark:divide-zinc-800">
+        <!-- Tab bar: desktop only -->
+        <div class="card-tab-bar hidden sm:flex border-b border-gray-200 dark:border-zinc-800 px-3">
+            {tabEntries.map(({key, label}) => (
+                <button
+                    @click={`tab = '${key}'`}
+                    :class={`tab === '${key}' ? 'active' : ''`}
+                    class="card-tab"
+                    data-label={label}
+                >
+                    {label}
+                </button>
+            ))}
+        </div>
+
+        <!-- Tab panels -->
+        <div class="relative overflow-hidden rounded-b-xl">
+            {hasGraph && (
+                <div
+                    :class={`tab === 'graph' ? '' : 'invisible absolute inset-0 pointer-events-none overflow-hidden'`}
+                    class="min-h-[250px]"
+                >
+                    <g6-graph layout={graphLayout}>
+                        <script type="application/json" set:html={graphElements}/>
+                    </g6-graph>
+                </div>
+            )}
+
+            <div x-show="tab === 'table'" x-cloak class="p-4 min-h-[250px]">
+                <json-table id="json-table-results">
+                    <script
+                        type="application/json"
+                        set:html={JSON.stringify(results)}
+                    ></script>
+                </json-table>
+            </div>
+
+            <div x-show="tab === 'debug'" x-cloak>
+                <Code code={prettyDebug} lang="json" class="not-prose rounded-b-xl text-[0.875rem]"/>
+            </div>
+
+            <div x-show="tab === 'body'" x-cloak>
+                <Code code={prettyBody} lang="json" class="not-prose rounded-b-xl text-[0.875rem]"/>
+            </div>
+
+            <div x-show="tab === 'header'" x-cloak>
+                <Code code={responseHeaders} lang="http" class="not-prose rounded-b-xl text-[0.875rem]"/>
+            </div>
+        </div>
+    </div>
+</div>

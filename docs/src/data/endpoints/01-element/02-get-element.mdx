@@ -1,0 +1,35 @@
+---
+endpoint: get-element
+group: element
+method: get
+name: Get element
+endpointUrl: /<uuid>
+swaggerUrl: /{uuid}
+---
+
+Endpoint returns a single element, which can be a node:
+
+<g6-graph mode="manual" layout="antv-dagre-TB">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "data", "type": "Data", "data": { "name": "Data", "hl": "1" }}
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+Or a relation:
+
+<g6-graph mode="manual" layout="antv-dagre-LR">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "start", "type": "Data", "data": { "name": "Start" }},
+            { "id": "end", "type": "Data", "data": { "name": "End" }},
+            { "id": "related", "type": "RELATED", "start": "start", "end": "end", "data": { "hl": "1" }}
+        ]
+    }
+  `}</script>
+</g6-graph>
+

@@ -1,0 +1,27 @@
+---
+command: backup:fetch
+name: backup:fetch
+helpCommand: php bin/console backup:fetch --help
+helpOutput: backup-fetch-help.html
+exampleCommand: php bin/console backup:fetch reference-dataset https://github.com/ember-nexus/reference-dataset/archive/refs/tags/0.0.12.zip
+exampleOutput: backup-fetch.html
+---
+
+Downloads a backup archive from a remote HTTP(S) URL and extracts it into local backup storage
+under `name`, so it can subsequently be restored with `backup:load`.
+
+Both arguments are required: `name` is the local name to store the backup under, `source` is the
+URL of a ZIP archive (as produced by zipping a `backup:create` output folder). The command
+downloads the archive to a temporary file, prints its size and SHA1 checksum, then searches the
+archive for the `summary.json` that marks the backup's root folder and verifies the `node`,
+`relation`, and `file` folders exist there before extracting - it fails if any of these checks do
+not pass.
+
+Options:
+
+- `-f`, `--force` - overwrites a local backup with the same `name` if one already exists. Without
+  it, the command aborts when the name is already taken.
+
+The temporary archive is removed again once extraction finishes successfully; if the command fails
+before that point (for example because required folders are missing from the archive), the
+downloaded temporary file is left behind on disk.

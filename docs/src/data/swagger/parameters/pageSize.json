@@ -1,0 +1,24 @@
+{
+  "components": {
+    "parameters": {
+      "pageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "example": 25,
+        "description": "Number of elements to be returned in a single page.",
+        "x-ember-nexus-links": [
+          {
+            "url": "/guide/pagination",
+            "name": "Pagination tutorial"
+          }
+        ],
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 25
+        }
+      }
+    }
+  }
+}

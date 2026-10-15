@@ -1,0 +1,24 @@
+{
+  "components": {
+    "headers": {
+      "Access-Control-Expose-Headers": {
+        "description": "Lists the response headers that browsers are allowed to access from JavaScript beyond the default restricted set.",
+        "schema": {
+          "type": "string",
+          "example": "ETag, Location"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Expose-Headers",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/access-control-expose-headers",
+            "name": "HTTP.dev"
+          }
+        ],
+        "required": true
+      }
+    }
+  }
+}

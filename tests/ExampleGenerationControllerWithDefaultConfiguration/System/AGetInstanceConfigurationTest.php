@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\ExampleGenerationControllerWithDefaultConfiguration\System;
+
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
+
+class AGetInstanceConfigurationTest extends BaseRequestTestCase
+{
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
+
+    public function testGetInstanceConfigurationSuccess(): void
+    {
+        $response = $this->runGetRequest('/instance-configuration', null);
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/system/get-instance-configuration/200-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/system/get-instance-configuration/200-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response,
+            true,
+            [
+                'version',
+            ]
+        );
+    }
+}

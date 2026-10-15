@@ -1,0 +1,294 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Taxon",
+      "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+      "data": {
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Gloriosa",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Colchicaceae/Gloriosa",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_(plant)",
+        "description": "Gloriosa is a genus of 12 species in the plant family Colchicaceae, and includes the formerly recognised genus Littonia. They are native in tropical and southern Africa to Asia, and naturalised in Australia and the Pacific as well as being widely cultivated. The most common English names are flame lily, fire lily, gloriosa lily, glory lily, superb lily, climbing lily, and creeping lily.\nThe leaf tips are modified to form tendrils\n\nThey are tender, tuberous rooted deciduous perennials, adapted to monsoon rainfall with a dormant dry season. All parts of the plant contain colchicine and related alkaloids and are therefore dangerously toxic if ingested, and contact with the stems and leaves can cause skin irritation. Various preparations of the plant are used in traditional medicines for a variety of complaints in both Africa and India. Plants have leaf tip tendrils."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "data": {
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flame_lily.png",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flame_lily.png/500px-Flame_lily.png",
+            "link": "https://en.wikipedia.org/wiki/File:Flame_lily.png"
+          },
+          {
+            "description": "Gloriosa superba at Mabvuku, Harare, Zimbabwe",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Gloriosa_superba_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gloriosa_superba_1.jpg/960px-Gloriosa_superba_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Flame Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "G. superba",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
+        "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include flame lily, climbing lily, creeping lily, glory lily,[3] gloriosa lily, tiger claw,[4] and fire lily.[5]"
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+      "data": {
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Lilieae",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae/Lilieae",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Lilieae",
+        "description": "The Lilieae are a monophyletic tribe of monocotyledon perennial, herbaceous mainly bulbous flowering plants in the lily family (Liliaceae)."
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "63bcbffb-29a3-45b5-8cc1-8c41281bcae3",
+      "data": {
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Kniphofia",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Asparagales/Asphodelaceae/Asphodeloideae/Kniphofia",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Kniphofia",
+        "description": "Kniphofia (/n\u026ap\u02c8ho\u028afi\u0259/, /n\u026a\u02c8fo\u028afi\u0259/) is a genus of perennial flowering plants in the family Asphodelaceae, first described as a genus in 1794. All species of Kniphofia are native to Africa. Common names include tritoma, red hot poker, torch lily and poker plant."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "f8179dfc-5578-44de-adc0-d6b613eb7a32",
+      "data": {
+        "images": [
+          {
+            "description": "Red-hot poker plants (Kniphofia uvaria) on the shore of Lake Jindabyne, New South Wales, Australia.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Kniphofia_uvaria_close.JPG",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Kniphofia_uvaria_close.JPG/960px-Kniphofia_uvaria_close.JPG",
+            "link": "https://en.wikipedia.org/wiki/File:Kniphofia_uvaria_close.JPG"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Red Hot Poker",
+        "scenario": "general.botanicExample",
+        "scientificName": "K. uvaria",
+        "link": "https://en.wikipedia.org/wiki/Kniphofia_uvaria",
+        "description": "Kniphofia uvaria is a species of flowering plant in the family Asphodelaceae, commonly known as tritomea, torch lily, or red hot poker, due to the shape and color of its inflorescence. The leaves are reminiscent of a lily, and the flowerhead can reach up to 1.5 m (5 ft) in height. There are many varieties of torch lily, and they bloom at different times during the growing season. The flowers are red, orange, and yellow."
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+      "data": {
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Lilioideae",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Lilioideae",
+        "description": "The Lilioideae are a subfamily of monocotyledonous perennial, herbaceous mainly bulbous flowering plants in the lily family, Liliaceae. They are found predominantly in the temperate and colder regions of the Northern Hemisphere, particularly East Asia and North America. The subfamily includes two tribes. They are of economic importance, particularly the lilies and tulips."
+      }
+    },
+    {
+      "type": "Taxon",
+      "id": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+      "data": {
+        "created": "2025-09-25T18:35:26+00:00",
+        "updated": "2025-09-25T18:35:26+00:00",
+        "name": "Trillium",
+        "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Melanthiaceae/Trillium",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Trillium",
+        "description": "Trillium (trillium, wakerobin, toadshade, tri flower, birthroot, birthwort, and sometimes \"wood lily\") is a genus of about fifty flowering plant species in the family Melanthiaceae. Trillium species are native to temperate regions of North America and Asia, with the greatest diversity of species found in the southern Appalachian Mountains in the southeastern United States."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+      "data": {
+        "images": [
+          {
+            "description": "Lilium candidum, Israel",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg/500px-ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:ShoshanTzachor-2-wiki-Zachi-Evenor.jpg"
+          },
+          {
+            "description": "Photo of Lilium candidum at VanDusen Botanical Garden",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/30/Lilium_candidum_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Lilium_candidum_1.jpg/960px-Lilium_candidum_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Lilium_candidum_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "L. candidum",
+        "link": "https://en.wikipedia.org/wiki/Lilium_candidum",
+        "description": "Lilium candidum, the Madonna lily[2][3] or white lily,[4] is a plant in the true lily family. It is native to the Balkans and Middle East, and naturalized in other parts of Europe, including France, Italy, and Ukraine, and in North Africa, the Canary Islands, Mexico, and other regions.[1][5] It has been cultivated since antiquity, for at least 3,000 years,[6] and has great symbolic value since then for many cultures. It is susceptible to several virus diseases common to lilies, and especially to Botrytis fungus. One technique to avoid problems with viruses is to grow plants from seed instead of bulblets."
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "match": {
+            "description": {
+              "query": "lily"
+            }
+          }
+        },
+        "parameters": {
+          "minScore": 3.0,
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1758825391.222043,
+      "indices": "*",
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 25,
+        "min_score": 3.0,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "match": {
+                  "description": {
+                    "query": "lily"
+                  }
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "end": 1758825391.252388,
+      "duration": 0.030345
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "elements": [
+                {
+                  "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 4.5739636
+                  }
+                },
+                {
+                  "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.9976888
+                  }
+                },
+                {
+                  "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 3.7564187
+                  }
+                },
+                {
+                  "id": "63bcbffb-29a3-45b5-8cc1-8c41281bcae3",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 3.431453
+                  }
+                },
+                {
+                  "id": "f8179dfc-5578-44de-adc0-d6b613eb7a32",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.2730358
+                  }
+                },
+                {
+                  "id": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 3.269838
+                  }
+                },
+                {
+                  "id": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 3.2443726
+                  }
+                },
+                {
+                  "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.021591
+                  }
+                }
+              ],
+              "totalHits": 8,
+              "maxScore": 4.5739636
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758825391.25256,
+      "accessibleElementIds": [
+        "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+        "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+        "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+        "63bcbffb-29a3-45b5-8cc1-8c41281bcae3",
+        "f8179dfc-5578-44de-adc0-d6b613eb7a32",
+        "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+        "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+        "23508e6c-632a-496d-9bd6-8c62a03216af"
+      ],
+      "end": 1758825391.322722,
+      "duration": 0.070162
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+name: 'Run a pnpm command against the docs site, in Docker'
+description: >
+  Loads a previously built docs dev Docker image artifact and runs `pnpm install` plus a pnpm
+  script inside it, entirely in Docker (matching how the rest of this repo's checks run). Always
+  pins HOME to a writable directory and disables Astro's telemetry - without that, running as
+  `--user "$(id -u):$(id -g)"` only gets a working $HOME when the runner's host uid happens to
+  match the image's baked-in `astro` user (uid 1000); on a CI runner where it doesn't, $HOME falls
+  back to `/`, which isn't writable, and e.g. Astro's telemetry fails outright trying to create
+  `/.config/astro` (EACCES).
+inputs:
+  artifact-name:
+    description: 'Name of the docs dev Docker image artifact (produced by build-docker-image-docs)'
+    required: true
+  tar-filename:
+    description: 'Filename of the tar.gz inside that artifact'
+    required: false
+    default: 'docs-dev-amd.tar.gz'
+  command:
+    description: 'pnpm script to run after `pnpm install` (e.g. build, cs, test, spellcheck)'
+    required: true
+  version:
+    description: >
+      API version to bake into the build via the VERSION env var (see docs/src/lib/version.ts),
+      matching what the production Dockerfile target passes as a build-arg. Left empty for regular
+      CI (falls back to "dev"); the release pipeline passes the newly bumped version here so the
+      released docs site/dist shows it instead of "dev".
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - uses: ./.github/actions/load-docker-image-docs
+      with:
+        artifact-name: ${{ inputs.artifact-name }}
+        tar-filename: ${{ inputs.tar-filename }}
+
+    - name: pnpm ${{ inputs.command }}
+      shell: bash
+      run: |
+        VERSION_ARGS=()
+        if [ -n "${{ inputs.version }}" ]; then
+          VERSION_ARGS+=(-e "VERSION=${{ inputs.version }}")
+        fi
+
+        docker run -v "$(pwd)/docs":/docs -v "$(pwd)/tests/Recordings":/tests/Recordings:ro -w /docs \
+          --user "$(id -u):$(id -g)" \
+          -e HOME=/tmp \
+          -e ASTRO_TELEMETRY_DISABLED=1 \
+          "${VERSION_ARGS[@]}" \
+          docs:dev sh -c "pnpm install && pnpm run ${{ inputs.command }}"

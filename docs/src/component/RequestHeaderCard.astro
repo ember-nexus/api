@@ -1,0 +1,25 @@
+---
+import type { RequestHeader } from "../type";
+import CardTitle from "./CardTitle.astro";
+import HeaderRow from "./HeaderRow.astro";
+
+interface Props {
+    headers: RequestHeader[];
+    id?: string;
+}
+
+const { headers, id } = Astro.props;
+---
+<div class="request-header-card">
+    <CardTitle title="Request Header" id={id}></CardTitle>
+    <div class="api-card divide-y divide-hairline">
+        {headers.map((header) => (
+            <HeaderRow
+                name={header.header}
+                presence={header.presence}
+                description={header.description}
+                links={header.links}
+            />
+        ))}
+    </div>
+</div>

@@ -1,0 +1,95 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\ExampleGenerationControllerWithDefaultConfiguration\User;
+
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
+
+class PostTokenTest extends BaseRequestTestCase
+{
+    private const string EMAIL = 'user@postToken.user.endpoint.localhost.dev';
+    private const string PASSWORD = '1234';
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
+
+    public function testTokenSuccess(): void
+    {
+        $response = $this->runPostRequest(
+            '/token',
+            null,
+            [
+                'type' => 'Token',
+                'uniqueUserIdentifier' => self::EMAIL,
+                'password' => self::PASSWORD,
+            ]
+        );
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/user/post-token/201-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/user/post-token/201-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response,
+            // the response body embeds a freshly generated secret token, whose Base58-encoded length varies by a
+            // character between runs, which would otherwise make Content-Length flaky
+            ['Content-Length']
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response,
+            true,
+            [
+                'token',
+            ]
+        );
+    }
+
+    public function testTokenFailure400(): void
+    {
+        $response = $this->runPostRequest(
+            '/token',
+            null,
+            [
+                'type' => 'Token',
+                'uniqueUserIdentifier' => self::EMAIL,
+            ]
+        );
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/user/post-token/400-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/user/post-token/400-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response
+        );
+    }
+
+    public function testTokenFailure401(): void
+    {
+        $response = $this->runPostRequest(
+            '/token',
+            null,
+            [
+                'type' => 'Token',
+                'uniqueUserIdentifier' => self::EMAIL,
+                'password' => 'wrongPassword',
+            ]
+        );
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/user/post-token/401-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/user/post-token/401-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response
+        );
+    }
+}

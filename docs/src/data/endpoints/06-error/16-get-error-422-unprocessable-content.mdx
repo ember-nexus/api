@@ -1,0 +1,28 @@
+---
+endpoint: get-error-422-unprocessable-content
+group: error
+method: get
+name: 422 unprocessable content
+endpointUrl: /error/422/unprocessable-content
+swaggerUrl: /error/422/unprocessable-content
+---
+
+General error response. As this endpoint is static, it can not return specific details or logs for a previously sent
+error response.
+
+Returned when the request content was syntactically valid, but could not be processed due to a configured resource
+limit - currently only an [expression](/reference/expr-lang) (Go Expr Lang) query exceeding its configured
+`expression.timeoutInMilliseconds`, e.g. inside the [element hydration](/reference/search/element-hydration) search
+step's `elementIds`.
+
+Example problem response body (`application/problem+json`):
+
+```json
+{
+  "type": "https://api.example.com/error/422/unprocessable-content",
+  "title": "Unprocessable content",
+  "status": 422,
+  "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+  "detail": "Query execution timed out after 5000 ms."
+}
+```

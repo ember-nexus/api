@@ -1,0 +1,16 @@
+---
+endpoint: get-instance-configuration
+group: system
+method: get
+name: Get instance configuration
+endpointUrl: /instance-configuration
+swaggerUrl: /instance-configuration
+---
+
+Returns configuration parameters of the current API instance, e.g. limits.
+
+**Note**: This endpoint can be disabled via the `instanceConfiguration.enabled` configuration option, in which case a
+`403 Forbidden` response is returned instead. It should therefore be considered optional.
+
+The `version` field can additionally be hidden by the administrator (`instanceConfiguration.showVersion`), in which
+case it is returned as `null`.

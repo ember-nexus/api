@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\ExampleGenerationControllerWithDifferentConfiguration1\System;
 
-use App\Tests\ExampleGenerationController\BaseRequestTestCase;
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
 
 class GetInstanceConfigurationTest extends BaseRequestTestCase
 {
@@ -13,8 +13,8 @@ class GetInstanceConfigurationTest extends BaseRequestTestCase
     public function testGetInstanceConfigurationFailure403(): void
     {
         $response = $this->runGetRequest('/instance-configuration', null);
-        $documentationHeadersPath = 'docs/api-endpoints/system/get-instance-configuration/403-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/system/get-instance-configuration/403-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/system/get-instance-configuration/403-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/system/get-instance-configuration/403-response-body.json';
         $this->assertIsProblemResponse($response, 403);
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,

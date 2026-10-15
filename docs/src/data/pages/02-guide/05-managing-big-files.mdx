@@ -1,0 +1,123 @@
+---
+type: guide
+title: Managing big files
+---
+
+For bigger files (100+ MB), or when the network is unreliable and individual requests might fail and need to be
+repeated, upload the file in multiple smaller requests instead of one - a **resumable upload**. See the
+[upload reference](/reference/upload) for the exact limits, expiry behavior and what happens behind the scenes.
+
+## Downloading part of a file
+
+A `Range` header downloads a byte range instead of the whole file - useful for resuming an interrupted download, or
+streaming media:
+
+```bash
+curl -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  -H 'Range: bytes=0-1048575' \
+  -o download.jpg.part \
+  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+```
+
+A satisfiable range responds with `206 Partial Content` and a `Content-Range` header; only a single range per request
+is supported. See the [file reference](/reference/file#partial-downloads-with-range) for the full set of error cases.
+
+## Uploading a file in multiple chunks (resumable upload)
+
+The resumable upload process implements the upcoming web standard
+["Resumable Uploads for HTTP"](https://datatracker.ietf.org/doc/draft-ietf-httpbis-resumable-upload/) IETF draft.
+
+It works in the following way:
+
+- Create a new resumable upload object.
+- Upload chunks of data until finished.
+- If any chunk uploads failed, query the current upload offset, and resume your upload.
+- Finish the upload. This merges all chunks to a single file, which is then associated with your element. The resumable
+  upload object is then destroyed automatically.
+
+### Splitting the file into chunks
+
+The following command can be used to split a single file into multiple smaller chunks with a numeric index:
+
+```bash
+split -b 10M -d image.jpg image.jpg. --additional-suffix=.part
+```
+
+### Creating a resumable upload object
+
+Similar to a direct upload, both `POST` and `PUT` can be used.
+
+The important detail for resumable upload creation is, that the header `Upload-Complete` with the value `?0` is sent.
+`?0` is ["boolean false"](https://www.ietf.org/rfc/rfc8941#name-booleans), and it has the meaning that the upload is
+incomplete, thereby creating a resumable upload.
+
+```bash
+curl -X PUT -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  -H 'Content-Disposition: inline; filename=image.jpg' \
+  -H 'Content-Type: image/jpeg' \
+  -H 'Upload-Complete: ?0' \
+  --data-binary @./image.jpg.01.part \
+  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+```
+
+The response then contains the `location` header, which is the location of the newly created resumable upload object.
+
+### Uploading a chunk
+
+Using the location of the resumable upload object, new chunks can be uploaded using the `PATCH` operation:
+
+```bash
+curl -X PATCH -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  -H 'Content-Type: application/partial-upload' \
+  -H 'Upload-Complete: ?0' \
+  -H 'Upload-Offset: 10485760' \
+  --data-binary @./image.jpg.02.part \
+  https://api.example.com/upload/98e795bc-cbe8-49d2-a5ce-e6977b877139
+```
+
+### Querying the current upload offset
+
+`HEAD` returns the current upload offset, as well as additional metadata, if available:
+
+```bash
+curl -I -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  https://api.example.com/upload/ec19e774-b54d-43d7-b167-e3c35441b6fa
+```
+
+### Sending the last chunk
+
+To complete the resumable upload, you have to send the HTTP header `Upload-Complete` with the value `?1` (boolean true).
+
+```bash
+curl -X PATCH -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  -H 'Content-Type: application/partial-upload' \
+  -H 'Upload-Complete: ?1' \
+  -H 'Upload-Offset: 20971520' \
+  --data-binary @./image.jpg.03.part \
+  https://api.example.com/upload/93c842b6-60a7-419e-aa39-17b31d504b90
+```
+
+### Canceling a resumable upload
+
+```bash
+curl -X DELETE -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  https://api.example.com/upload/93c842b6-60a7-419e-aa39-17b31d504b90
+```
+
+### Limitations and side effects
+
+Every request body - a single-request upload as well as each chunk - is limited to `file.uploadMaxChunkSizeInBytes`
+(default 101 MiB); files larger than that must use a resumable upload. Non-final chunks must be at least
+`file.uploadMinChunkSizeInBytes`. `Upload-Complete` is required on every `PATCH`. Parallel `PATCH`/`DELETE` requests on
+the same upload get `409 Conflict`.
+
+
+A resumable upload has to happen sequentially, must complete before it expires, and can only be used by the user who
+created it. See the [upload reference](/reference/upload) for the complete rules, including expiry, chunk size and
+count limits, access control and what happens if multiple resumable uploads target the same element concurrently.

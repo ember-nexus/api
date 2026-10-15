@@ -1,0 +1,520 @@
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  colors.css — Single source of truth for all site-wide color tokens
+ *
+ *  Sections:
+ *    1.  UI chrome         — surfaces, borders, focus ring
+ *    2.  Prose             — links, inline code, code blocks
+ *    3.  TOC navigation    — link states
+ *    4.  Print             — hardcoded grayscale overrides
+ *    5.  Search modal      — overlay, input island, result cards
+ *    6.  HTTP method verbs — GET / POST / PUT / PATCH / DELETE / HEAD
+ *    7.  HTTP status families — 2xx / 3xx / 4xx / 5xx / other
+ *    8.  Request language tabs — shell / python / js / php
+ *    9.  Terminal ANSI     — 8-color palette, light + dark
+ *   10.  Graph nodes       — type-color palette (referenced by graphTypes.ts)
+ *   11.  Graph chrome      — edges, labels, tooltips (referenced by Graph.ts)
+ *   12.  Graph highlights  — manual hl-mode colors (referenced by Graph.ts)
+ *   13.  JSON table        — syntax-highlight palette (referenced by JsonTable.ts)
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+
+/* ─── 1. UI chrome ──────────────────────────────────────────────────────── */
+
+:root {
+    /* Hairline borders / dividers throughout the UI */
+    --c-hairline:               #e3e3e0;
+
+    /* Universal keyboard focus ring (orange-500) */
+    --c-focus:                  #f97316;
+
+    /* Card surfaces */
+    --c-surface:                #ffffff;
+
+    /* Muted label text (zinc-600, used e.g. api-block-title in dark) */
+    --c-text-muted:             #9ca3af;
+
+    /* Card-tab hover/focus bottom border */
+    --c-tab-hover-border:       #d1d5db;  /* gray-300 */
+    
+    --c-primary:                #ff073a;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-hairline:           #2a2a2a;
+        --c-surface:            #000000;
+        --c-tab-hover-border:   #52525b;  /* zinc-600 */
+    }
+}
+
+
+/* ─── 2. Prose ──────────────────────────────────────────────────────────── */
+
+:root {
+    /* Inline code background */
+    --c-code-bg:                #f4f4f5;  /* zinc-100 */
+
+    /* Code block background inside prose (Expressive Code) */
+    --c-code-block-bg:          #fafafa;
+
+    /* Hairline between stacked prose code blocks */
+    --c-code-stack-border:      #e5e7eb;  /* gray-200 */
+
+    /* Prose link colors */
+    --c-link:                   var(--color-blue-700);
+    --c-link-hover:             var(--color-violet-600);
+
+    /* Highlight annotation colors — kept in sync with Graph.ts HIGHLIGHTS */
+    --c-hl-1:                   var(--c-primary); /* hl-1: orange */
+    --c-hl-2:                   var(--color-blue-600);   /* hl-2: blue */
+    --c-hl-m:                   var(--color-zinc-700);   /* hl-m: muted */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-code-bg:            #27272a;  /* zinc-800 */
+        --c-code-block-bg:      #18181b;  /* zinc-900 */
+        --c-code-stack-border:  #27272a;  /* zinc-800 */
+
+        /* Prose link color — one step brighter than light mode for legibility on near-black */
+        --c-link:               var(--color-blue-500);
+    }
+}
+
+
+/* ─── 3. TOC navigation ─────────────────────────────────────────────────── */
+
+:root {
+    --c-toc:                    #71717a;  /* zinc-500 — default link */
+    --c-toc-hover:              #3f3f46;  /* zinc-700 */
+    --c-toc-active:             #18181b;  /* zinc-900 */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-toc:                #71717a;  /* zinc-500 (same — dark bg shifts perception) */
+        --c-toc-hover:          #a1a1aa;  /* zinc-400 */
+        --c-toc-active:         #e4e4e7;  /* zinc-200 */
+    }
+}
+
+
+/* ─── 2b. Note callout (Note.astro) ─────────────────────────────────────── */
+
+:root {
+    --c-note-bg:                #ffffff;
+    --c-note-border:            #ef4444;  /* red-500 */
+    --c-note-icon:              #ef4444;  /* red-500 */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-note-bg:            #18181b;  /* zinc-900, keeps the note visibly lighter than the near-black surface */
+        --c-note-border:        #fca5a5;  /* red-300 */
+        --c-note-icon:          #fca5a5;  /* red-300 */
+    }
+}
+
+
+/* ─── 3b. List-link cards (EndpointGroupList, CommandGroupList, SchemaList) ─ */
+/*
+ *  These share a common pattern: a hairline-bordered card with a subtle
+ *  alpha-overlay hover.  Light text (zinc-900) / dark text (zinc-100).
+ */
+
+:root {
+    --c-list-link-fg:              #111827;  /* gray-900 — body text on white */
+    --c-list-link-hover-bg:        rgba(0, 0, 0, 0.04);
+    --c-list-link-hover-bg-strong: rgba(0, 0, 0, 0.05);  /* EndpointGroupList */
+    --c-list-code-fg:              #3f3f46;  /* zinc-700 */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-list-link-fg:              #f4f4f5;  /* zinc-100 */
+        --c-list-link-hover-bg:        rgba(255, 255, 255, 0.05);
+        --c-list-link-hover-bg-strong: rgba(255, 255, 255, 0.06);  /* EndpointGroupList */
+        --c-list-code-fg:              #d4d4d8;  /* zinc-300 */
+    }
+}
+
+
+/* ─── 4. Print (hardcoded grayscale — not theme-sensitive) ─────────────── */
+
+:root {
+    --c-print-toc-text:         #52525b;  /* zinc-600 */
+    --c-print-toc-label:        #a1a1aa;  /* zinc-400 */
+    --c-print-toc-rule:         #e4e4e7;  /* zinc-200 */
+    --c-print-code-accent:      #e5e7eb;  /* gray-200 */
+}
+
+
+/* ─── 5. Search modal ───────────────────────────────────────────────────── */
+
+:root {
+    --c-search-backdrop:        rgba(0, 0, 0, 0.55);
+    --c-search-island:          #ffffff;
+    --c-search-island-shadow:   rgba(0, 0, 0, 0.3);
+    --c-search-close-fg:        #374151;  /* gray-700 */
+    --c-search-close-hover:     #f3f4f6;  /* gray-100 */
+    --c-search-result-shadow:   rgba(0, 0, 0, 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-search-island:          #18181b;  /* zinc-900 */
+        --c-search-island-shadow:   rgba(0, 0, 0, 0.6);
+        --c-search-close-fg:        #e4e4e7;  /* zinc-200 */
+        --c-search-close-hover:     #27272a;  /* zinc-800 */
+        --c-search-result-shadow:   rgba(0, 0, 0, 0.5);
+    }
+}
+
+
+/* ─── 6. HTTP method verb colors ────────────────────────────────────────── */
+/*
+ *  Design rationale:
+ *    GET    → blue-600    read-only, informational — pure, unmistakable blue
+ *    POST   → green-600   create / positive action
+ *    PUT    → orange-400  full replace — light orange, clearly "caution"
+ *    PATCH  → orange-400  partial update — same color as PUT (both modify a resource)
+ *    DELETE → red-600     destructive — unambiguous danger red
+ *    HEAD   → violet-600  metadata / secondary — solid purple
+ *    other  → violet-600  unknown verbs share HEAD's purple (secondary feel)
+ *
+ *  Dark mode: one step brighter (−600 → −500) for legibility on near-black.
+ *  Light mode: one step darker (−600 → −700) for AA contrast on white.
+ *  Backgrounds are derived with color-mix() at the call site.
+ */
+
+/* Default (dark-mode-friendly base, used when no data-theme is set) */
+:root {
+    --c-method-get:             #2563eb;  /* blue-600 */
+    --c-method-post:            #16a34a;  /* green-600 */
+    --c-method-put:             #fb923c;  /* orange-400 */
+    --c-method-patch:           #fb923c;  /* orange-400 — same as PUT */
+    --c-method-delete:          #dc2626;  /* red-600 */
+    --c-method-head:            #7c3aed;  /* violet-600 */
+    --c-method-other:           #7c3aed;  /* violet-600 — same as HEAD */
+}
+
+/* Dark mode: shift to brighter tones for legibility on near-black */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-method-get:         #3b82f6;  /* blue-500 */
+        --c-method-post:        #22c55e;  /* green-500 */
+        --c-method-put:         #fdba74;  /* orange-300 */
+        --c-method-patch:       #fdba74;  /* orange-300 — same as PUT */
+        --c-method-delete:      #ef4444;  /* red-500 */
+        --c-method-head:        #8b5cf6;  /* violet-500 */
+        --c-method-other:       #8b5cf6;  /* violet-500 */
+    }
+}
+
+/* Light mode: shift to darker tones for AA contrast on white */
+:root[data-theme="light"] {
+    --c-method-get:             #1d4ed8;  /* blue-700 */
+    --c-method-post:            #15803d;  /* green-700 */
+    --c-method-put:             #f97316;  /* orange-500 */
+    --c-method-patch:           #f97316;  /* orange-500 — same as PUT */
+    --c-method-delete:          #b91c1c;  /* red-700 */
+    --c-method-head:            #6d28d9;  /* violet-700 */
+    --c-method-other:           #6d28d9;  /* violet-700 */
+}
+
+/* Backward-compat aliases so existing code using --method-* still works */
+:root {
+    --method-get:    var(--c-method-get);
+    --method-post:   var(--c-method-post);
+    --method-put:    var(--c-method-put);
+    --method-patch:  var(--c-method-patch);
+    --method-delete: var(--c-method-delete);
+    --method-head:   var(--c-method-head);
+    --method-other:  var(--c-method-other);
+}
+
+
+/* ─── 7. HTTP status code families ─────────────────────────────────────── */
+/*
+ *  Each family uses three tiers:
+ *    --c-status-NNN-fg      readable text on a light/dark tinted background
+ *    --c-status-NNN-bg      subtle tinted surface (inactive state)
+ *    --c-status-NNN-border  hairline around the inactive badge/pill
+ *    --c-status-NNN-active  solid fill color for the active/selected state
+ *    --c-status-NNN-active-border  border for the active state
+ *
+ *  Color families (mirrors method verb palette for clear cross-context meaning):
+ *    2xx  green   (success)
+ *    3xx  blue    (redirect — same blue family as GET)
+ *    4xx  red     (client error)
+ *    5xx  red     (server error — same red family as 4xx; status number differentiates)
+ *    other zinc   (informational / unknown — intentionally muted/undefined)
+ */
+
+/* Light mode */
+:root {
+    /* 2xx — green */
+    --c-status-2xx-fg:              #14532d;  /* green-900 */
+    --c-status-2xx-bg:              #dcfce7;  /* green-100 */
+    --c-status-2xx-border:          #86efac;  /* green-300 */
+    --c-status-2xx-active:          #16a34a;  /* green-600 */
+    --c-status-2xx-active-border:   #15803d;  /* green-700 */
+
+    /* 3xx — blue (redirect) */
+    --c-status-3xx-fg:              #1e3a8a;  /* blue-900 */
+    --c-status-3xx-bg:              #dbeafe;  /* blue-100 */
+    --c-status-3xx-border:          #93c5fd;  /* blue-300 */
+    --c-status-3xx-active:          #2563eb;  /* blue-600 */
+    --c-status-3xx-active-border:   #1d4ed8;  /* blue-700 */
+
+    /* 4xx — red (client error) */
+    --c-status-4xx-fg:              #7f1d1d;  /* red-900 */
+    --c-status-4xx-bg:              #fee2e2;  /* red-100 */
+    --c-status-4xx-border:          #fca5a5;  /* red-300 */
+    --c-status-4xx-active:          #dc2626;  /* red-600 */
+    --c-status-4xx-active-border:   #b91c1c;  /* red-700 */
+
+    /* 5xx — red (server error — same family as 4xx) */
+    --c-status-5xx-fg:              #7f1d1d;  /* red-900 */
+    --c-status-5xx-bg:              #fee2e2;  /* red-100 */
+    --c-status-5xx-border:          #fca5a5;  /* red-300 */
+    --c-status-5xx-active:          #dc2626;  /* red-600 */
+    --c-status-5xx-active-border:   #b91c1c;  /* red-700 */
+
+    /* other — zinc (intentionally muted/neutral) */
+    --c-status-other-fg:            #374151;  /* gray-700 */
+    --c-status-other-bg:            #f3f4f6;  /* gray-100 */
+    --c-status-other-border:        #d1d5db;  /* gray-300 */
+    --c-status-other-active:        #4b5563;  /* gray-600 */
+    --c-status-other-active-border: #374151;  /* gray-700 */
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* 2xx */
+        --c-status-2xx-fg:              #86efac;  /* green-300 */
+        --c-status-2xx-bg:              #052e16;  /* green-950 */
+        --c-status-2xx-border:          #166534;  /* green-800 */
+
+        /* 3xx */
+        --c-status-3xx-fg:              #93c5fd;  /* blue-300 */
+        --c-status-3xx-bg:              #172554;  /* blue-950 */
+        --c-status-3xx-border:          #1e40af;  /* blue-800 */
+
+        /* 4xx */
+        --c-status-4xx-fg:              #fca5a5;  /* red-300 */
+        --c-status-4xx-bg:              #2d0a0a;  /* deep red */
+        --c-status-4xx-border:          #991b1b;  /* red-800 */
+
+        /* 5xx */
+        --c-status-5xx-fg:              #fca5a5;  /* red-300 */
+        --c-status-5xx-bg:              #2d0a0a;  /* deep red */
+        --c-status-5xx-border:          #991b1b;  /* red-800 */
+
+        /* other */
+        --c-status-other-fg:            #d4d4d8;  /* zinc-300 */
+        --c-status-other-bg:            #27272a;  /* zinc-800 */
+        --c-status-other-border:        #3f3f46;  /* zinc-700 */
+        --c-status-other-active:        #52525b;  /* zinc-600 */
+        --c-status-other-active-border: #71717a;  /* zinc-500 */
+    }
+}
+
+
+/* ─── 8. Request language tabs ──────────────────────────────────────────── */
+/*
+ *  shell  — zinc    (neutral terminal feel)
+ *  python — sky     (shares the sky family with 3xx for a coherent blue range;
+ *                    distinct from the blue used for links/hl-1)
+ *  js     — yellow  (JavaScript's own brand color)
+ *  php    — violet  (PHP elephant / violet brand)
+ *
+ *  Note: php shares the violet family with --c-method-head intentionally —
+ *  both are "secondary/meta" concepts. sky for python mirrors 3xx sky.
+ */
+
+/* Light mode */
+:root {
+    --c-lang-shell-fg:              #374151;  /* gray-700 */
+    --c-lang-shell-bg:              #f3f4f6;  /* gray-100 */
+    --c-lang-shell-border:          #d1d5db;  /* gray-300 */
+    --c-lang-shell-active:          #4b5563;  /* gray-600 */
+    --c-lang-shell-active-border:   #374151;  /* gray-700 */
+
+    --c-lang-python-fg:             #075985;  /* sky-800 */
+    --c-lang-python-bg:             #e0f2fe;  /* sky-100 */
+    --c-lang-python-border:         #7dd3fc;  /* sky-300 */
+    --c-lang-python-active:         #0284c7;  /* sky-600 */
+    --c-lang-python-active-border:  #0369a1;  /* sky-700 */
+
+    --c-lang-js-fg:                 #854d0e;  /* yellow-800 */
+    --c-lang-js-bg:                 #fef9c3;  /* yellow-100 */
+    --c-lang-js-border:             #fde047;  /* yellow-300 */
+    --c-lang-js-active:             #ca8a04;  /* yellow-600 */
+    --c-lang-js-active-border:      #a16207;  /* yellow-700 */
+
+    --c-lang-php-fg:                #5b21b6;  /* violet-800 */
+    --c-lang-php-bg:                #ede9fe;  /* violet-100 */
+    --c-lang-php-border:            #c4b5fd;  /* violet-300 */
+    --c-lang-php-active:            #7c3aed;  /* violet-600 */
+    --c-lang-php-active-border:     #6d28d9;  /* violet-700 */
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-lang-shell-fg:              #d4d4d8;  /* zinc-300 */
+        --c-lang-shell-bg:              #27272a;  /* zinc-800 */
+        --c-lang-shell-border:          #3f3f46;  /* zinc-700 */
+
+        --c-lang-python-fg:             #7dd3fc;  /* sky-300 */
+        --c-lang-python-bg:             #082f49;  /* sky-950 */
+        --c-lang-python-border:         #075985;  /* sky-800 */
+
+        --c-lang-js-fg:                 #fde047;  /* yellow-300 */
+        --c-lang-js-bg:                 #1a1500;  /* deep yellow */
+        --c-lang-js-border:             #854d0e;  /* yellow-800 */
+
+        --c-lang-php-fg:                #c4b5fd;  /* violet-300 */
+        --c-lang-php-bg:                #1e0a3c;  /* deep violet */
+        --c-lang-php-border:            #5b21b6;  /* violet-800 */
+    }
+}
+
+
+/* ─── 9. Terminal ANSI colors ───────────────────────────────────────────── */
+
+:root {
+    /* Light mode: muted tones readable on white */
+    --c-term-bg:                #ffffff;
+    --c-term-fg:                #212121;
+    --c-term-line:              #e5e7eb;  /* gray-200 */
+    --c-ansi-dim:               #6b7280;  /* gray-500 */
+    --c-ansi-red:               #d32f2f;
+    --c-ansi-green:             #77cc00;
+    --c-ansi-yellow:            #f29718;
+    --c-ansi-blue:              #6871ff;
+    --c-ansi-purple:            #9966cc;
+    --c-ansi-cyan:              #4dbf99;
+    --c-ansi-white:             #b0b0b0;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Dark mode: vivid classic console palette */
+        --c-term-bg:            #1f1f1f;
+        --c-term-fg:            #e6e6e6;
+        --c-term-line:          #3a3a3a;
+        --c-ansi-dim:           #8a8a8a;
+        --c-ansi-red:           #ff5555;
+        --c-ansi-green:         #55ff55;
+        --c-ansi-yellow:        #ffff55;
+        --c-ansi-blue:          #5555ff;
+        --c-ansi-purple:        #ff55ff;
+        --c-ansi-cyan:          #55ffff;
+        --c-ansi-white:         #ffffff;
+    }
+}
+
+
+/* ─── 10. Graph node type colors ─────────────────────────────────────────── */
+/*
+ *  Referenced by graphTypes.ts as string literals.  Keep in sync.
+ *
+ *  Grouping:
+ *    Identity  — User (red), Group (amber), Token (fuchsia)
+ *    Search    — Search (indigo)
+ *    Data      — Data (blue), Collection (green), File (cyan)
+ *    Taxonomy  — Taxon (gray), Plant (green — same as Collection)
+ */
+
+:root {
+    /* Identity */
+    --c-node-user:              #ef4444;  /* red-500 */
+    --c-node-group:             #f59e0b;  /* amber-400 */
+    --c-node-token:             #d946ef;  /* fuchsia-500 */
+
+    /* Search */
+    --c-node-search:            #6366f1;  /* indigo-500 */
+
+    /* Data */
+    --c-node-data:              #2563eb;  /* blue-600 */
+    --c-node-collection:        #16a34a;  /* green-600 */
+    --c-node-file:              #22d3ee;  /* cyan-400 */
+
+    /* Taxonomy */
+    --c-node-taxon:             #6b7280;  /* gray-500 */
+    --c-node-plant:             #16a34a;  /* green-600 (same as Collection) */
+
+    /* Fallback for unknown types */
+    --c-node-default:           #6b7280;  /* gray-500 */
+
+    /* Node label contrast thresholds (used in readableOn() in Graph.ts) */
+    --c-node-label-dark:        #18181b;  /* zinc-900 — for light fills */
+    --c-node-label-light:       #ffffff;  /* white    — for dark/saturated fills */
+}
+
+
+/* ─── 11. Graph chrome (edges, labels, tooltips) ─────────────────────────── */
+
+:root {
+    --c-graph-edge:             #8b949e;
+    --c-graph-edge-label:       #3f3f46;  /* zinc-700 */
+    --c-graph-edge-label-bg:    rgba(255, 255, 255, 0.9);
+    --c-graph-tooltip-bg:       #1f2430;
+    --c-graph-tooltip-fg:       #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --c-graph-edge:             #6e7681;
+        --c-graph-edge-label:       #e6edf3;
+        --c-graph-edge-label-bg:    rgba(22, 27, 34, 0.92);
+        --c-graph-tooltip-bg:       #0d1117;
+        --c-graph-tooltip-fg:       #e6edf3;
+    }
+}
+
+
+/* ─── 12. Graph highlight mode (manual hl colors) ────────────────────────── */
+/*
+ *  Mirrors highlight.css (.hl-1 / .hl-2 / .hl-m) and HIGHLIGHTS in Graph.ts.
+ *  Keep all three in sync.
+ *
+ *  hl-m → muted (zinc-700 light / zinc-400 dark)
+ *  hl-1 → blue  (blue-600 light / blue-500 dark)   — same as --c-hl-1
+ *  hl-2 → orange (orange-600 light / orange-500 dark) — same as --c-hl-2
+ */
+
+:root {
+    --c-hl-graph-m-light:       #3f3f46;  /* zinc-700 */
+    --c-hl-graph-m-dark:        #a1a1aa;  /* zinc-400 */
+    --c-hl-graph-1-light:       #2563eb;  /* blue-600 */
+    --c-hl-graph-1-dark:        #3b82f6;  /* blue-500 */
+    --c-hl-graph-2-light:       #ff073a;  /* orange-600 */
+    --c-hl-graph-2-dark:        #ff073a;  /* orange-500 */
+}
+
+
+/* ─── 13. JSON table syntax palette ─────────────────────────────────────── */
+/*
+ *  JsonTable.ts renders dark-themed by default (slate surface).
+ *  These vars are consumed as fallbacks inside the Lit component's
+ *  shadow CSS; override them on :host if you ever embed a light variant.
+ */
+
+:root {
+    --c-json-bg:                #1e293b;  /* slate-800 */
+    --c-json-type-badge-bg:     #334155;  /* slate-700 */
+    --c-json-type-badge-fg:     #e2e8f0;  /* slate-200 */
+    --c-json-id:                #94a3b8;  /* slate-400 */
+    --c-json-fg:                #e2e8f0;  /* slate-200 */
+    --c-json-key:               #7dd3fc;  /* sky-300 */
+    --c-json-str:               #86efac;  /* green-300 */
+    --c-json-num:               #fbbf24;  /* amber-400 */
+    --c-json-bool:              #f472b6;  /* pink-400 */
+    --c-json-null:              #94a3b8;  /* slate-400 */
+}

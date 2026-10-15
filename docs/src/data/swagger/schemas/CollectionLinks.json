@@ -1,0 +1,35 @@
+{
+  "components": {
+    "schemas": {
+      "CollectionLinks": {
+        "type": "object",
+        "required": [
+          "first",
+          "previous",
+          "next",
+          "last"
+        ],
+        "properties": {
+          "first": {
+            "type": "string",
+            "description": "URL to the collection's first page."
+          },
+          "previous": {
+            "type": "string",
+            "description": "URL to the collection's previous page, relative to the current page.",
+            "nullable": true
+          },
+          "next": {
+            "type": "string",
+            "description": "URL to the collection's next page, relative to the current page.",
+            "nullable": true
+          },
+          "last": {
+            "type": "string",
+            "description": "URL to the collection's last page."
+          }
+        }
+      }
+    }
+  }
+}

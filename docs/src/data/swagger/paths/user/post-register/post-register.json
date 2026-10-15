@@ -1,0 +1,87 @@
+{
+  "paths": {
+    "/register": {
+      "post": {
+        "summary": "Post register",
+        "description": "Registers a new user account.",
+        "operationId": "post-register",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "password",
+                  "uniqueUserIdentifier"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Must be `User`. No other values are currently possible.",
+                    "enum": [
+                      "User"
+                    ],
+                    "example": "User"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The plain text password of the new user. Any string is accepted and is hashed internally; no password complexity check is performed. Leading/trailing whitespace is preserved, though discouraged.",
+                    "example": "1234"
+                  },
+                  "uniqueUserIdentifier": {
+                    "type": "string",
+                    "description": "Some attribute uniquely identifying a user, normally an email address. The property name used to store it can be configured server-side.",
+                    "example": "test@example.com"
+                  },
+                  "data": {
+                    "type": "object",
+                    "description": "Optional, arbitrary properties stored on the new user element.",
+                    "additionalProperties": true,
+                    "example": {
+                      "key": "value"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/register",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"type\": \"User\", \"password\": \"1234\", \"uniqueUserIdentifier\": \"test@example.com\"}"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

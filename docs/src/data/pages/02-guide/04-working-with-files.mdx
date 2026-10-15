@@ -1,0 +1,70 @@
+---
+type: guide
+title: Working with files
+---
+
+Every node and relation can be assigned a single file. All access rules from the element itself transfer to its
+file as well - i.e. if a user can read the element, then the same user can also read the element's file. See the
+[file reference](/reference/file) for exact size limits and everything that happens behind the scenes.
+
+Files can be either uploaded directly in a single request, as shown below, or using multiple smaller requests in a
+resumable upload - see [managing big files](/guide/managing-big-files) for that.
+
+Some metadata of files is automatically stored as special element properties, e.g. the file's name (if provided) and
+size of the file in bytes. These metadata properties can not be manually changed by the user, unless he replaces the
+file.
+
+## Uploading a file directly
+
+```bash
+curl -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  -H 'Content-Disposition: inline; filename=image.jpg' \
+  --data-binary @./image.jpg \
+  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+```
+
+**Note**: A file upload using `POST` will fail, if the element already has a file.
+
+**Note**: The filename is set through the `Content-Disposition`-header. In simple cases like the example, the filename
+can be directly written as-is, however filenames with non-ASCII characters need to be encoded. See
+[MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Disposition#filename) and
+[http.dev](https://http.dev/content-disposition#filename) for details.
+
+## Replacing a file directly
+
+Similar to the previous `POST` operation, the `PUT` upload endpoint can be used to upload a new file. However, this
+endpoint does not care whether the element already has an associated file - it either writes it, or replaces it.
+
+```bash
+curl -X PUT -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  -H 'Content-Disposition: inline; filename=image.jpg' \
+  --data-binary @./image.jpg \
+  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+```
+
+## Downloading a file
+
+```bash
+curl -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  -o download.jpg \
+  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+```
+
+### Verifying file integrity
+
+Every download's response includes a `Repr-Digest` header with the file's SHA-256 hash
+([RFC 9530](https://datatracker.ietf.org/doc/html/rfc9530) format), so a client can verify the downloaded bytes
+without a separate request or checksum file. The same mechanism works in reverse on upload: sending a `Repr-Digest`
+header lets the server verify the uploaded bytes and reject a corrupted upload with `400 Bad Request` before it is
+stored - see the [file reference](/reference/file#verifying-integrity) for the full mechanics.
+
+## Deleting a file
+
+```bash
+curl -X DELETE -v \
+  -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
+  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+```

@@ -1,0 +1,83 @@
+{
+  "paths": {
+    "/search": {
+      "post": {
+        "summary": "Post search",
+        "description": "Executes a search request.",
+        "operationId": "post-search",
+        "tags": [
+          "Search"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "steps"
+                ],
+                "properties": {
+                  "steps": {
+                    "type": "array",
+                    "description": "List of search steps, which should be executed sequentially.",
+                    "items": {
+                      "$ref": "#/components/schemas/SearchStep"
+                    }
+                  },
+                  "parameters": {
+                    "type": "object",
+                    "description": "Arbitrary data, injected as global parameters to the individual search steps during execution; useful to provide static data.",
+                    "additionalProperties": true,
+                    "example": {
+                      "query": "some custom query content"
+                    }
+                  },
+                  "debug": {
+                    "type": "boolean",
+                    "description": "If true, search response will include additional debug and meta data.",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ember-nexus-har-example": [
+          {
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/simple-full-text-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

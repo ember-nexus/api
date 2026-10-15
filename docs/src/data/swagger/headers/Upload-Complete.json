@@ -1,0 +1,25 @@
+{
+  "components": {
+    "headers": {
+      "Upload-Complete": {
+        "description": "Structured boolean indicating whether the upload is finished: `?1` for complete, `?0` for still in progress.",
+        "schema": {
+          "type": "string",
+          "example": "?0"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://datatracker.ietf.org/doc/draft-ietf-httpbis-resumable-upload/",
+            "name": "IETF draft"
+          },
+          {
+            "url": "https://http.dev/upload-complete",
+            "name": "HTTP.dev"
+          }
+        ],
+        "x-ember-nexus-important": true,
+        "required": true
+      }
+    }
+  }
+}

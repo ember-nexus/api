@@ -1,0 +1,321 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "data": {
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flame_lily.png",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flame_lily.png/500px-Flame_lily.png",
+            "link": "https://en.wikipedia.org/wiki/File:Flame_lily.png"
+          },
+          {
+            "description": "Gloriosa superba at Mabvuku, Harare, Zimbabwe",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Gloriosa_superba_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gloriosa_superba_1.jpg/960px-Gloriosa_superba_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Flame Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "G. superba",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
+        "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include flame lily, climbing lily, creeping lily, glory lily,[3] gloriosa lily, tiger claw,[4] and fire lily.[5]"
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "f8179dfc-5578-44de-adc0-d6b613eb7a32",
+      "data": {
+        "images": [
+          {
+            "description": "Red-hot poker plants (Kniphofia uvaria) on the shore of Lake Jindabyne, New South Wales, Australia.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Kniphofia_uvaria_close.JPG",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Kniphofia_uvaria_close.JPG/960px-Kniphofia_uvaria_close.JPG",
+            "link": "https://en.wikipedia.org/wiki/File:Kniphofia_uvaria_close.JPG"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Red Hot Poker",
+        "scenario": "general.botanicExample",
+        "scientificName": "K. uvaria",
+        "link": "https://en.wikipedia.org/wiki/Kniphofia_uvaria",
+        "description": "Kniphofia uvaria is a species of flowering plant in the family Asphodelaceae, commonly known as tritomea, torch lily, or red hot poker, due to the shape and color of its inflorescence. The leaves are reminiscent of a lily, and the flowerhead can reach up to 1.5 m (5 ft) in height. There are many varieties of torch lily, and they bloom at different times during the growing season. The flowers are red, orange, and yellow."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+      "data": {
+        "images": [
+          {
+            "description": "Lilium candidum, Israel",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg/500px-ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:ShoshanTzachor-2-wiki-Zachi-Evenor.jpg"
+          },
+          {
+            "description": "Photo of Lilium candidum at VanDusen Botanical Garden",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/30/Lilium_candidum_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Lilium_candidum_1.jpg/960px-Lilium_candidum_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Lilium_candidum_1.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Lily",
+        "scenario": "general.botanicExample",
+        "scientificName": "L. candidum",
+        "link": "https://en.wikipedia.org/wiki/Lilium_candidum",
+        "description": "Lilium candidum, the Madonna lily[2][3] or white lily,[4] is a plant in the true lily family. It is native to the Balkans and Middle East, and naturalized in other parts of Europe, including France, Italy, and Ukraine, and in North Africa, the Canary Islands, Mexico, and other regions.[1][5] It has been cultivated since antiquity, for at least 3,000 years,[6] and has great symbolic value since then for many cultures. It is susceptible to several virus diseases common to lilies, and especially to Botrytis fungus. One technique to avoid problems with viruses is to grow plants from seed instead of bulblets."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "3283fd3d-8083-4170-882a-41b1cd152c55",
+      "data": {
+        "images": [
+          {
+            "description": "Flower of Nelumbo nucifera, bean of India.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Sacred_lotus_Nelumbo_nucifera.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Sacred_lotus_Nelumbo_nucifera.jpg/960px-Sacred_lotus_Nelumbo_nucifera.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Sacred_lotus_Nelumbo_nucifera.jpg"
+          },
+          {
+            "description": "Nelumbo nucifera",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/34/Nelumbo_nucifera1romainguy.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Nelumbo_nucifera1romainguy.jpg/500px-Nelumbo_nucifera1romainguy.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Nelumbo_nucifera1romainguy.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Lotus",
+        "scenario": "general.botanicExample",
+        "scientificName": "N. nucifera",
+        "link": "https://en.wikipedia.org/wiki/Nelumbo_nucifera",
+        "description": "Nelumbo nucifera, also known as Padma (Sanskrit: \\u092a\\u0926\\u094d\\u092e, romanized: Padm\\u0101, lit.\\u2009'Lotus') or Kamala (Sanskrit: \\u0915\\u092e\\u0932, lit. 'Lotus'), sacred lotus, pink lotus, Indian lotus,[1] or simply lotus, is one of two extant species of aquatic plant in the family Nelumbonaceae. It is sometimes colloquially called a water lily, though this more often refers to members of the family Nymphaeaceae.[2] The lotus belongs in the order Proteales."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "74023bac-88ea-4031-b4a5-68d861ea2e91",
+      "data": {
+        "images": [
+          {
+            "description": "Saucer Magnolia -- Magnolia \u00d7 soulangeana 'Rustica Rubra' found in Houston, Texas",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Saucer_Magnolia_--_Magnolia_%C3%97_soulangeana.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Saucer_Magnolia_--_Magnolia_%C3%97_soulangeana.jpg/960px-Saucer_Magnolia_--_Magnolia_%C3%97_soulangeana.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Saucer_Magnolia_--_Magnolia_%C3%97_soulangeana.jpg"
+          },
+          {
+            "description": "Yulan Magnolia (Magnolia denudata)",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/62/Yulan_1.JPG",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/62/Yulan_1.JPG",
+            "link": "https://en.wikipedia.org/wiki/File:Yulan_1.JPG"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Magnolia",
+        "scenario": "general.botanicExample",
+        "scientificName": "M. denudata",
+        "link": "https://en.wikipedia.org/wiki/Magnolia_denudata",
+        "description": "Magnolia denudata, the lilytree[2] or Yulan magnolia (simplified Chinese: \\u7389\\u5170\\u82b1; traditional Chinese: \\u7389\\u862d\\u82b1; pinyin: y\\u00f9l\\u00e1nhu\\u0101; lit. 'jade orchid/lily'), is native to central and eastern China.[3] It has been cultivated in Chinese Buddhist temple gardens since 600 AD. Its flowers were regarded as a symbol of purity in the Tang dynasty and it was planted in the grounds of the emperor's palace. It is the official city flower of Shanghai."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "de004523-5165-4f10-872b-92eb9637a5d1",
+      "data": {
+        "images": [
+          {
+            "description": "Adenium obesum (desert rose), macro of a flower, side view showing calyx, corolla and styles. Focus stack of 7 images. Uthandi, Chennai",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg/960px-Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg"
+          },
+          {
+            "description": "Ra Chi Nee Pan Dok's mother plant",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7e/RCN_Mother.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/7e/RCN_Mother.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:RCN_Mother.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Desert Rose",
+        "scenario": "general.botanicExample",
+        "scientificName": "A. obesum",
+        "link": "https://en.wikipedia.org/wiki/Adenium_obesum",
+        "description": "Adenium obesum, more commonly known as a desert rose, is a poisonous species of flowering plant belonging to the tribe Nerieae of the subfamily Apocynoideae of the dogbane family, Apocynaceae.[3] It is native to the Sahel regions south of the Sahara (from Mauritania and Senegal to Sudan), tropical and subtropical eastern and southern Africa, as well as the Arabian Peninsula. Other names for the flower include Sabi star, kudu, mock azalea, and impala lily. Adenium obesum is a popular houseplant and bonsai in temperate regions."
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "c3b3dcf9-4947-43b3-b877-7a337eea5fda",
+      "data": {
+        "images": [
+          {
+            "description": "Narcissus pseudonarcissus",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Narcissus_pseudonarcissus_flower_300303.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Narcissus_pseudonarcissus_flower_300303.jpg/960px-Narcissus_pseudonarcissus_flower_300303.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Narcissus_pseudonarcissus_flower_300303.jpg"
+          }
+        ],
+        "created": "2025-09-25T18:35:28+00:00",
+        "updated": "2025-09-25T18:35:28+00:00",
+        "name": "Daffodil",
+        "scenario": "general.botanicExample",
+        "scientificName": "N. pseudonarcissus",
+        "link": "https://en.wikipedia.org/wiki/Narcissus_pseudonarcissus",
+        "description": "Narcissus pseudonarcissus, commonly named the wild daffodil or Lent lily (Welsh: Cennin Pedr), is a perennial flowering plant.[1][2][3][4][5][6]\n\nThis species has pale yellow tepals, with a darker central trumpet. The long, narrow leaves are slightly greyish green in colour and rise from the base of the stem. The plant grows from a bulb. The flowers produce seeds which, when germinated, take five to seven years to produce a flowering plant. (Sexual seed reproduction mixes the traits of both parent flowers, so if garden hybrid cultivars are planted close to wild populations of Narcissus pseudonarcissus, there is a danger that the new seedlings, having hybrid vigour, could out-compete the wild plants.)[7]"
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "range": {
+            "created": {
+              "gte": "2025-09-25T18:35:27+00:00"
+            }
+          }
+        },
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1758825500.0,
+      "indices": "*",
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 25,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "range": {
+                  "created": {
+                    "gte": "2025-09-25T18:35:27+00:00"
+                  }
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "end": 1758825500.03,
+      "duration": 0.03
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "elements": [
+                {
+                  "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.9976888
+                  }
+                },
+                {
+                  "id": "f8179dfc-5578-44de-adc0-d6b613eb7a32",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.2730358
+                  }
+                },
+                {
+                  "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.021591
+                  }
+                },
+                {
+                  "id": "3283fd3d-8083-4170-882a-41b1cd152c55",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.152007
+                  }
+                },
+                {
+                  "id": "74023bac-88ea-4031-b4a5-68d861ea2e91",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.1088712
+                  }
+                },
+                {
+                  "id": "de004523-5165-4f10-872b-92eb9637a5d1",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.02761
+                  }
+                },
+                {
+                  "id": "c3b3dcf9-4947-43b3-b877-7a337eea5fda",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 1.7868379
+                  }
+                }
+              ],
+              "totalHits": 7,
+              "maxScore": 3.9976888
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1758825500.03,
+      "accessibleElementIds": [
+        "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+        "f8179dfc-5578-44de-adc0-d6b613eb7a32",
+        "23508e6c-632a-496d-9bd6-8c62a03216af",
+        "3283fd3d-8083-4170-882a-41b1cd152c55",
+        "74023bac-88ea-4031-b4a5-68d861ea2e91",
+        "de004523-5165-4f10-872b-92eb9637a5d1",
+        "c3b3dcf9-4947-43b3-b877-7a337eea5fda"
+      ],
+      "end": 1758825500.09,
+      "duration": 0.06
+    }
+  ]
+}

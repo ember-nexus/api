@@ -1,0 +1,25 @@
+{
+  "components": {
+    "headers": {
+      "Location-created": {
+        "description": "URL of the newly created resource.",
+        "schema": {
+          "type": "string",
+          "example": "/455a89b9-4ec7-4b02-b023-bcfbcbba9a9f"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Location",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/location",
+            "name": "HTTP.dev"
+          }
+        ],
+        "x-ember-nexus-important": true,
+        "required": true
+      }
+    }
+  }
+}

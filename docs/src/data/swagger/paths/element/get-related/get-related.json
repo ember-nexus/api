@@ -1,0 +1,62 @@
+{
+  "paths": {
+    "/{uuid}/related": {
+      "get": {
+        "summary": "Get related elements",
+        "description": "Retrieves all related elements of the specified node.",
+        "operationId": "get-related",
+        "tags": [
+          "Element"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          },
+          {
+            "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "$ref": "#/components/parameters/If-Match"
+          },
+          {
+            "$ref": "#/components/parameters/If-None-Match"
+          }
+        ],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac/related",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ]
+      }
+    }
+  }
+}

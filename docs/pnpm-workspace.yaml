@@ -1,0 +1,8 @@
+allowBuilds:
+  '@vaadin/vaadin-usage-statistics': false
+  esbuild: true
+  sharp: true
+  unrs-resolver: false
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

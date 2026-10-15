@@ -1,0 +1,40 @@
+{
+  "paths": {
+    "/.well-known/security.txt": {
+      "get": {
+        "summary": "Get well-known security.txt",
+        "description": "Returns a text document containing security disclosure information.",
+        "operationId": "get-well-known-security",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/.well-known/security.txt",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ]
+      }
+    }
+  }
+}

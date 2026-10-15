@@ -1,0 +1,48 @@
+---
+type: guide
+title: Writing an Elasticsearch query
+---
+
+The [Elasticsearch query](/reference/search/elasticsearch-query-dsl-mixin) step lets you run
+[Query DSL](https://www.elastic.co/docs/reference/query-languages/query-dsl) queries against the internal
+Elasticsearch database. This guide walks through building and running a query; see the
+[reference page](/reference/search/elasticsearch-query-dsl-mixin) for the full list of supported features and security
+constraints.
+
+## With access to Kibana
+
+If you have access to the Elasticsearch database and Kibana, then you can use [Kibana's console](https://www.elastic.co/docs/explore-analyze/query-filter/tools/console)
+to experiment and test custom queries, as well as explore the data schemas of Elasticsearch.  
+Note that **Kibana's console requires a full query**, while Ember Nexus API's [`POST /search`](/api/post-search)
+endpoint only accepts the **content of the `query` property**:
+
+import emberNexusQuery from "../../03-reference/03-search/01-elasticsearch-query-dsl-mixin/ember-nexus-query.txt?raw"
+import kibanaConsoleQuery from "../../03-reference/03-search/01-elasticsearch-query-dsl-mixin/kibana-console-query.txt?raw"
+
+<TwoColumn>
+    <ComparisonCard title="Ember Nexus">
+        <Code code={emberNexusQuery} lang="bash" />
+    </ComparisonCard>
+    <ComparisonCard title="Kibana's console">
+        <Code code={kibanaConsoleQuery} lang="txt" />
+    </ComparisonCard>
+</TwoColumn>
+
+## Without access to Kibana
+
+If you do not have direct access, you need to build the query blindly. As small errors can break the whole query, it is
+recommended to slowly build your query up, and to test it frequently.
+
+As the base of your query you can use one of the provided [examples](/reference/search/elasticsearch-query-dsl-mixin#examples).
+
+Generative AI like Claude and its competitors are usually experienced enough to help with Elasticsearch query
+generation.
+
+## Parameterized Elasticsearch queries
+
+Elasticsearch's Query DSL has no native concept of parameters. To still let client-provided data flow into a query,
+Ember Nexus lets you write `{{your_expression}}` anywhere inside the `query` object; the expression is evaluated
+against the step's parameters and its result replaces the placeholder before the query reaches Elasticsearch.  
+See [parameters and expressions](/guide/search/parameters-and-expressions) for how parameters flow between search
+steps, the [reference page](/reference/search/elasticsearch-query-dsl-mixin#parameterized-elasticsearch-queries) for a
+worked example, and [Expr Lang](/reference/expr-lang) for the full expression syntax.

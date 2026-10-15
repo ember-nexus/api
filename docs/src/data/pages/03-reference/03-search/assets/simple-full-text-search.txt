@@ -1,0 +1,10 @@
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: OPTIONS, POST
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: OPTIONS, POST
+Cache-Control: no-cache, private
+Content-Type: application/json; charset=utf-8
+Date: Sat, 06 Sep 2025 14:57:35 GMT
+Transfer-Encoding: chunked
+X-Powered-By: Ember Nexus API

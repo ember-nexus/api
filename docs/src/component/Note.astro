@@ -1,0 +1,75 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+    title?: string;
+}
+
+const { title } = Astro.props;
+---
+<div class="note">
+    {title ? (
+        <>
+            <div class="note-header">
+                <Icon name="triangle-alert" class="note-icon" aria-hidden="true" />
+                <p class="note-title">{title}</p>
+            </div>
+            <div class="note-content">
+                <slot />
+            </div>
+        </>
+    ) : (
+        <div class="note-inline">
+            <Icon name="triangle-alert" class="note-icon" aria-hidden="true" />
+            <div class="note-content">
+                <slot />
+            </div>
+        </div>
+    )}
+</div>
+
+<style>
+    .note {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        border: 2px solid var(--c-note-border);
+        background: var(--c-note-bg);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem 0.55rem;
+        margin-block: 1.5rem;
+    }
+    .note-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .note-inline {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .note-icon {
+        width: 1.1em;
+        height: 1.1em;
+        flex-shrink: 0;
+        color: var(--c-note-icon);
+    }
+    .note-inline .note-icon {
+        margin-top: 0.15em;
+    }
+    .note-title {
+        font-weight: 600;
+        margin: 0;
+        color: var(--tw-prose-headings);
+    }
+    .note-content {
+        font-size: 0.9375rem;
+    }
+    .note-content :global(> :first-child) {
+        margin-top: 0;
+    }
+    .note-content :global(> :last-child) {
+        margin-bottom: 0;
+    }
+</style>

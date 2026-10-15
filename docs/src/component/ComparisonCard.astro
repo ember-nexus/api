@@ -1,0 +1,52 @@
+---
+import { Icon } from 'astro-icon/components';
+
+type Variant = "good" | "bad" | "neutral";
+
+interface Props {
+    variant?: Variant;
+    title: string;
+}
+
+const { variant = "neutral", title } = Astro.props;
+
+const icons: Record<Variant, string | null> = {
+    good: "check",
+    bad: "x",
+    neutral: null,
+};
+
+const styles: Record<Variant, { border: string; bg: string; text: string }> = {
+    good: {
+        border: "border-green-500 dark:border-green-700",
+        bg: "bg-green-50 dark:bg-green-950",
+        text: "text-green-800 dark:text-green-300",
+    },
+    bad: {
+        border: "border-red-500 dark:border-red-700",
+        bg: "bg-red-50 dark:bg-red-950",
+        text: "text-red-800 dark:text-red-200",
+    },
+    neutral: {
+        border: "border-gray-200 dark:border-gray-700",
+        bg: "bg-gray-100 dark:bg-gray-800",
+        text: "text-gray-700 dark:text-gray-300",
+    },
+};
+
+const icon = icons[variant];
+const style = styles[variant];
+---
+
+<div class={`comparison-card rounded-lg border ${style.border} overflow-hidden flex flex-col`}>
+    <header class={`px-4 py-2 font-medium ${style.bg} ${style.text}`}>
+        {icon && <Icon
+            name={icon}
+            class="inline-block size-4 align-text-bottom mr-1.5"
+            aria-hidden="true"
+        />}<span>{title}</span>
+    </header>
+    <div class="flex flex-col flex-1">
+        <slot />
+    </div>
+</div>

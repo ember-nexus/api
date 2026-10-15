@@ -1,0 +1,29 @@
+---
+import { marked } from 'marked';
+
+import type { Link } from "../type";
+import LinkComponent from "./Link.astro";
+
+interface Props {
+    name: string;
+    presence: string;
+    description: string;
+    links: Link[];
+}
+
+const { name, presence, description, links } = Astro.props;
+---
+<div class="flex flex-col gap-2 px-4 py-3">
+    <div class="flex items-center justify-between mb-1">
+        <p class="font-mono text-sm font-medium" translate="no">{name}</p>
+        <p class={`text-xs font-semibold tracking-wider uppercase text-gray-400`}>
+            {presence}
+        </p>
+    </div>
+    <div class="text-sm text-gray-600 dark:text-gray-400" set:html={marked.parse(description)}></div>
+    {links.length > 0 && (
+        <div class="flex gap-4 flex-wrap text-sm">
+            {links.map((link) => <LinkComponent link={link} />)}
+        </div>
+    )}
+</div>

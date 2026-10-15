@@ -1,0 +1,114 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\ExampleGenerationControllerWithDefaultConfiguration\User;
+
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
+
+class PostChangePasswordTest extends BaseRequestTestCase
+{
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
+
+    public function testChangePasswordSuccess(): void
+    {
+        $response = $this->runPostRequest(
+            '/change-password',
+            null,
+            [
+                'type' => 'ActionChangePassword',
+                'currentPassword' => '1234',
+                'newPassword' => 'abcd',
+                'uniqueUserIdentifier' => 'user@changePassword.user.endpoint.localhost.dev',
+            ]
+        );
+        $this->assertNoContentResponse($response);
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/user/post-change-password/204-response-header.txt';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+    }
+
+    public function testChangePasswordError400(): void
+    {
+        $response = $this->runPostRequest(
+            '/change-password',
+            null,
+            [
+                'type' => 'NotActionChangePassword',
+                'currentPassword' => '1234',
+                'newPassword' => 'abcd',
+                'uniqueUserIdentifier' => 'user@changePassword.user.endpoint.localhost.dev',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 400);
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/user/post-change-password/400-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/user/post-change-password/400-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response
+        );
+    }
+
+    public function testChangePasswordError401(): void
+    {
+        $response = $this->runPostRequest(
+            '/change-password',
+            null,
+            [
+                'type' => 'ActionChangePassword',
+                'currentPassword' => '1234',
+                'newPassword' => 'abcd',
+                'uniqueUserIdentifier' => 'this-user-does-not-exist@localhost.dev',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 401);
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/user/post-change-password/401-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/user/post-change-password/401-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response
+        );
+    }
+
+    public function testChangePasswordError403(): void
+    {
+        $response = $this->runPostRequest(
+            '/change-password',
+            null,
+            [
+                'type' => 'ActionChangePassword',
+                'currentPassword' => '1234',
+                'newPassword' => 'abcd',
+                'uniqueUserIdentifier' => 'anonymous-user@localhost.dev',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 403);
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/user/post-change-password/403-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/user/post-change-password/403-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response
+        );
+    }
+}

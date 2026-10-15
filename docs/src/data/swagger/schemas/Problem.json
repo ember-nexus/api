@@ -1,0 +1,31 @@
+{
+  "components": {
+    "schemas": {
+      "Problem": {
+        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+        "type": "object",
+        "description": "RFC 7807 Problem Details object.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri",
+            "description": "URN uniquely identifying the request that produced this problem, as `urn:uuid:<uuid>`."
+          }
+        }
+      }
+    }
+  }
+}

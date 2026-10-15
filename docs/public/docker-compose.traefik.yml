@@ -1,0 +1,155 @@
+services:
+
+  api:
+    container_name: api
+    image: embernexus/api:latest
+    volumes:
+      - ./well-known-security.txt:/well-known-security.txt:ro
+    expose:
+      - 80
+    environment:
+      - APP_ENV=prod
+      - CYPHER_AUTH=bolt://neo4j:password@neo4j
+      - MONGO_AUTH=mongodb://mongodb:password@mongodb:27017
+      - ELASTIC_AUTH=elasticsearch:9200
+      - REDIS_AUTH=tcp://redis?password=redis-password
+      - RABBITMQ_AUTH=amqp://user:password@rabbitmq:5672
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY_ID=ROOTNAME
+      - S3_SECRET_ACCESS_KEY=CHANGEME123
+    depends_on:
+      - minio-init
+    networks:
+      - default   # to reach neo4j, mongodb, elasticsearch, redis, rabbitmq, minio
+      - traefik   # to be reachable by traefik
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.services.ember-nexus.loadbalancer.server.port=80'
+      - 'traefik.http.routers.ember-nexus.rule=Host(`api.your-domain.com`)'
+      - 'traefik.http.routers.ember-nexus.entrypoints=websecure'
+      - 'traefik.http.routers.ember-nexus.tls.certresolver=le'
+
+  neo4j:
+    container_name: neo4j
+    image: neo4j:5
+    expose:
+      - 7474
+      - 7687
+    volumes:
+      - ../volumes/neo4j/data:/data
+      - ../volumes/neo4j/logs:/logs
+    environment:
+      - NEO4J_AUTH=neo4j/password
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:8
+    expose:
+      - 27017
+    volumes:
+      - ../volumes/mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      # see https://github.com/docker-library/mongo/discussions/748#discussioncomment-15927486
+      - GLIBC_TUNABLES=glibc.cpu.hwcaps=-SHSTK
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:8.19.17
+    expose:
+      - 9200
+    volumes:
+      - ../volumes/elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+
+  redis:
+    container_name: redis
+    image: redis:8
+    expose:
+      - 6379
+    volumes:
+      - ../volumes/redis:/data
+    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:4-management
+    expose:
+      - 5672
+      - 15672
+    volumes:
+      - ../volumes/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+
+  minio:
+    container_name: minio
+    image: quay.io/minio/minio:latest
+    expose:
+      - 9000
+      - 9001
+    volumes:
+      - ../volumes/minio:/data
+    environment:
+      - MINIO_ROOT_USER=ROOTNAME
+      - MINIO_ROOT_PASSWORD=CHANGEME123
+    command: server /data --console-address ":9001"
+
+  # one-shot container that creates the two S3 buckets Ember Nexus expects (file.S3StorageBucket
+  # and file.S3UploadBucket, see the configuration reference) and then exits; minio does not create
+  # these on its own
+  minio-init:
+    container_name: minio-init
+    image: quay.io/minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ROOTNAME CHANGEME123; do sleep 1; done;
+      mc mb --ignore-existing local/api-storage;
+      mc mb --ignore-existing local/api-upload;
+      "
+
+  traefik:
+    container_name: traefik
+    image: traefik:v3
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --providers.docker
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.network=traefik
+      - --api.dashboard=true
+      - --certificatesresolvers.le.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.le.acme.email=yourEmail@example.com
+      - --certificatesresolvers.le.acme.storage=/acme/acme.json
+      - --certificatesresolvers.le.acme.tlschallenge=true
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+      - '../volumes/traefik/acme:/acme'
+    networks:
+      - traefik
+    labels:
+      - 'traefik.enable=true'
+
+      # dashboard
+      - 'traefik.http.routers.traefik.rule=Host(`traefik.your-domain.com`)'
+      - 'traefik.http.routers.traefik.service=api@internal'
+      - 'traefik.http.routers.traefik.entrypoints=websecure'
+      - 'traefik.http.routers.traefik.tls.certresolver=le'
+      - 'traefik.http.routers.traefik.middlewares=authtraefik'
+      # hash can be generated with: echo $(htpasswd -nB "username") | sed -e s/\\$/\\$\\$/g
+      - 'traefik.http.middlewares.authtraefik.basicauth.users=username:$$algorithm$$settings$$hash'
+
+networks:
+  traefik:
+    name: traefik

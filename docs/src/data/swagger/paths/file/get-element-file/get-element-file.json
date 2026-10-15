@@ -1,0 +1,66 @@
+{
+  "paths": {
+    "/{uuid}/file": {
+      "get": {
+        "summary": "Get element file",
+        "description": "Retrieves the binary file attached to a specific element. Supports partial downloads via the `Range` header.",
+        "operationId": "get-element-file",
+        "tags": [
+          "File"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/If-Match"
+          },
+          {
+            "$ref": "#/components/parameters/If-None-Match"
+          },
+          {
+            "name": "Range",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "bytes=0-99"
+            },
+            "description": "Requests a single byte range of the file instead of the full content: `bytes=[start]-[end]`, `bytes=[start]-` (open-ended) or `bytes=-[suffixLength]` (last N bytes) - e.g. `bytes=0-1048575` for the first megabyte. Multiple comma-separated ranges are not supported and fail with `400 Bad Request`."
+          }
+        ],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac/file",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ]
+      }
+    }
+  }
+}

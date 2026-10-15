@@ -1,0 +1,122 @@
+{
+  "paths": {
+    "/": {
+      "post": {
+        "summary": "Post index",
+        "description": "Creates a new element - either a new root level element, or a new relation.",
+        "operationId": "post-index",
+        "tags": [
+          "Element"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "data"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The type of element to be created.",
+                    "example": "Demo"
+                  },
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The element's UUID. Auto-generated if not provided.",
+                    "example": "f9a619e1-f3f5-4fbf-a80e-fa8f7dd88103"
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The start node's UUID. Required for relations.",
+                    "example": "f9a619e1-f3f5-4fbf-a80e-fa8f7dd88103"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The end node's UUID. Required for relations.",
+                    "example": "ecfe46ff-d3c7-4ca7-9b41-9be5476d36e0"
+                  },
+                  "data": {
+                    "type": "object",
+                    "description": "Arbitrary data related to the element.",
+                    "additionalProperties": true,
+                    "example": {
+                      "hello": "world :D"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ember-nexus-har-example": [
+          {
+            "name": "Node request",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"type\": \"Demo\", \"data\": {\"hello\": \"world :D\"}}"
+              }
+            }
+          },
+          {
+            "name": "Relation request",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"type\": \"RELATION\", \"start\": \"f9a619e1-f3f5-4fbf-a80e-fa8f7dd88103\", \"end\": \"ecfe46ff-d3c7-4ca7-9b41-9be5476d36e0\", \"data\": {\"hello\": \"world :D\"}}"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

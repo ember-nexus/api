@@ -1,0 +1,27 @@
+---
+type: guide
+title: Parameterized element ids
+---
+import searchQuery from './02-parameterized-element-ids/query.sh?raw';
+import searchResultBody from './02-parameterized-element-ids/result.json';
+import searchResultHeaders from './02-parameterized-element-ids/header.txt?raw';
+
+Since `elementIds` accepts an [expression](/reference/search/elasticsearch-query-dsl-mixin#parameterized-elasticsearch-queries)
+string instead of a literal array, the list of ids to hydrate can be computed from the step's parameters. This example
+receives a list of `elements` objects, each carrying an arbitrary `score`, and uses [Expr Lang](/reference/expr-lang)'s
+`filter`, `sortBy` and `map` functions to keep only elements scoring above `1.0`, sort them by score descending, and
+extract just their `id`s - all without a prior search step.
+
+<Code code={searchQuery} lang="bash" mark="filter" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+The element scoring `0.9` is filtered out, and the remaining three are hydrated in descending score order - even
+though they were listed in a different order in the input `elements` parameter.
+
+**Note**: this same technique commonly appears as the last step of a multi-step pipeline, filtering or reordering the
+`stepResults` of an earlier step rather than a client-supplied parameter.

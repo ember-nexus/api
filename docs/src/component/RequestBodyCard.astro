@@ -1,0 +1,77 @@
+---
+import { Code } from 'astro-expressive-code/components';
+import { marked } from 'marked';
+
+import type { RequestBody } from "../type";
+import CardTitle from "./CardTitle.astro";
+
+interface Props {
+    body: RequestBody;
+    id?: string;
+}
+
+const { body, id } = Astro.props;
+
+const multiple = body.contents.length > 1;
+---
+{body.contents.length > 0 && (
+<div class="request-body-card">
+    <CardTitle title="Request Body" id={id}>
+        <span slot="meta" class={`text-xs font-semibold tracking-wider uppercase ${body.required ? 'text-red-500' : 'text-gray-400'}`}>
+            {body.required ? 'required' : 'optional'}
+        </span>
+    </CardTitle>
+
+    <div
+        x-data="{ componentId: 'example' }"
+        class="api-card flex flex-col divide-y divide-gray-200 dark:divide-zinc-800"
+    >
+        {body.description && (
+            <div class="text-sm p-4 text-gray-600 dark:text-gray-400" set:html={marked.parse(body.description)} />
+        )}
+
+        <div class="card-tab-bar flex border-b border-gray-200 dark:border-zinc-800 px-3">
+            <button @click="componentId = 'example'" :class="componentId === 'example' ? 'active' : ''" class="card-tab before:block before:h-0 before:invisible before:font-semibold before:content-['Example']">Example</button>
+            <button @click="componentId = 'schema'" :class="componentId === 'schema' ? 'active' : ''" class="card-tab before:block before:h-0 before:invisible before:font-semibold before:content-['Schema']">Schema</button>
+        </div>
+
+        <div>
+            <!-- Example tab: every content type stacked -->
+            <div x-show="componentId === 'example'" class="text-gray-800 dark:text-zinc-300 font-mono divide-y divide-hairline">
+                {body.contents.map((c) => (
+                    <div>
+                        {multiple && (
+                            <p class="px-4 pt-3 text-xs text-gray-400">{c.mimeType}</p>
+                        )}
+                        {c.example !== null ? (
+                            <Code code={c.example.content} lang={c.example.type} class="not-prose rounded-b-xl text-[0.875rem]" />
+                        ) : (
+                            <div class="p-4 min-h-[120px]">
+                                <p class="text-sm">no example available</p>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            <!-- Schema tab: every content type stacked -->
+            <div x-show="componentId === 'schema'" x-cloak class="text-gray-800 dark:text-zinc-300 font-mono divide-y divide-hairline">
+                {body.contents.map((c) => (
+                    <div>
+                        {multiple && (
+                            <p class="px-4 pt-3 text-xs text-gray-400">{c.mimeType}</p>
+                        )}
+                        {c.schema !== null ? (
+                            <Code code={c.schema} lang="json" class="not-prose rounded-b-xl text-[0.875rem]" />
+                        ) : (
+                            <div class="p-4 min-h-[120px]">
+                                <p class="text-sm">no schema available</p>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+</div>
+    )}

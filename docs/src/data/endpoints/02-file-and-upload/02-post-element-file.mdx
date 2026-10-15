@@ -1,0 +1,65 @@
+---
+endpoint: post-element-file
+group: file-and-upload
+method: post
+name: Post element file
+endpointUrl: /<uuid>/file
+swaggerUrl: /{uuid}/file
+---
+
+Uploads a file to the referenced element. Fails with `409 Conflict` if the element already has a file attached - use
+[`PUT /<uuid>/file`](/api/put-element-file) to replace an existing file instead.
+
+The endpoint supports two upload modes, selected through the `Upload-Complete` request header:
+
+- **Direct upload** - `Upload-Complete: ?1`, or the header omitted entirely (optional on this endpoint, unlike on `PATCH /upload/<uuid>`). The request body is the complete file, and is capped at `file.uploadMaxChunkSizeInBytes` (default 101 MiB) - `400 Bad Request` above it, also without `Content-Length`; larger files need a resumable upload.
+  On success, the endpoint responds with `201 Created` and no body.
+- **Resumable upload** - `Upload-Complete: ?0`. Starts a resumable upload instead of attaching a file right away; any
+  data sent in this first request is stored as the upload's first chunk. On success, the endpoint responds with
+  `204 No Content`, and a `Location` header pointing at the new resumable upload's URL under `/upload/<uuid>`.
+  Continue it with [`PATCH /upload/<uuid>`](/api/patch-upload), inspect it with
+  [`HEAD /upload/<uuid>`](/api/head-upload), or abort it with [`DELETE /upload/<uuid>`](/api/delete-upload).
+
+Both modes use the same request headers:
+
+- `Content-Disposition: attachment; filename="<name>"` (optional) - determines the file's extension, which is stored
+  and later used to reconstruct the `Content-Disposition` header on [`GET /<uuid>/file`](/api/get-element-file). Falls back to
+  `bin` if omitted, or if no extension can be parsed from the filename.
+- `Upload-Length` (optional, resumable uploads only) - total size in bytes of the finished file, once all chunks have
+  been appended.
+
+<Note title="Resumable uploads follow the IETF draft, not tus.io">
+    The header names (`Upload-Offset`, `Upload-Length`, `Upload-Complete`, `Upload-Limit`) come from the
+    [IETF "resumable uploads for HTTP" draft](https://datatracker.ietf.org/doc/draft-ietf-httpbis-resumable-upload/),
+    not the older tus.io protocol - there is no `Tus-Resumable` header, and `Upload-Complete` uses the structured
+    boolean values `?0`/`?1` rather than a plain string.
+</Note>
+
+Whenever a resumable upload is created (or continued via [`PATCH /upload/<uuid>`](/api/patch-upload)), the response includes an
+`Upload-Limit` header describing the current server limits: how long an unfinished upload is kept alive, the maximum
+total file size, and the minimum and maximum size of an individual chunk. A chunk smaller than the minimum is
+rejected with `400 Bad Request`, unless it is the upload's last chunk (`Upload-Complete: ?1`) or has exactly zero length. A
+direct upload's `201 Created` response carries none of these headers, since there is no ongoing upload to describe.
+
+<Note>
+    Since a zero-length chunk is accepted as a no-op, `Upload-Complete: ?0` with an empty body can be used purely to
+    create the resumable upload and read back its `Upload-Limit`, before deciding on a chunking strategy.
+</Note>
+
+## Conditional requests
+
+`If-Match: *` and `If-None-Match: *` are supported; `If-None-Match: *` makes this create-only. A failing precondition
+answers `412 Precondition Failed`, evaluated **before** the `409 Conflict` for an existing file. `If-Match` on an
+element without file answers `412`. Without the required access, conditional requests answer `404`.
+
+## Verifying upload integrity
+
+A direct upload (`Upload-Complete: ?1`, or the header omitted) can optionally carry a `Repr-Digest` header with the
+SHA-256 digest of the file, in [RFC 9530](https://datatracker.ietf.org/doc/html/rfc9530) structured-field format
+(`sha-256=:[base64]:`). Once the upload finishes, the server recomputes the digest and compares it; a mismatch fails
+with `400 Bad Request` and the file is not stored. `Content-Digest` is accepted as a fallback header name.
+
+<Note>
+    This only verifies a direct upload's complete body. For a resumable upload, send the digest on the completing
+    [`PATCH /upload/<uuid>`](/api/patch-upload) request instead, once the full file has been reassembled server-side.
+</Note>

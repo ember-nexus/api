@@ -1,0 +1,75 @@
+---
+type: reference
+title: Element hydration
+---
+
+The element hydration search step is a single task, executable within [`POST /search`](/api/post-search) requests.
+
+The hydration step converts a list of element ids to a collection response, containing elements and all their
+properties. This step is mostly used to convert results of other search steps to collection responses usable by clients.
+
+## Security aspects
+
+As all element ids are internally checked for access by the current user and only accessible elements are hydrated and
+returned, this search step **is considered safe** and can therefore be executed by any user.
+
+## Input parameters
+
+This search step does not have explicit parameters defined. Parameters are available within expressions.
+
+## Input query
+
+The query must be an object containing the following properties:
+
+- `elementIds`: List of element ids (string) or a single string containing an expression, which returns a list of
+element ids (string).
+
+## Step result
+
+List of hydrated elements.
+
+## Examples
+
+- [Explicit element ids](/reference/search/element-hydration/explicit-element-ids)
+- [Parameterized element ids](/reference/search/element-hydration/parameterized-element-ids)
+
+## Example
+
+### Request
+
+```json
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "element-hydration",
+      "query": {
+        "elementIds": [
+          "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+          "3283fd3d-8083-4170-882a-41b1cd152c55",
+          "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+        ]
+      }
+    }
+  ]
+}
+```
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
+  -H 'Content-Type: application/json' \
+  --data-binary @payload.json \
+  https://api.example.com/search
+```
+
+### Response
+
+import explicitElementIds from './03-element-hydration/01-explicit-element-ids/result.json';
+import explicitElementIdsHeader from './03-element-hydration/01-explicit-element-ids/header.txt?raw';
+
+<SearchResponseCard
+    responseBody={explicitElementIds}
+    responseHeaders={explicitElementIdsHeader}
+    graphLayout="grid"
+></SearchResponseCard>

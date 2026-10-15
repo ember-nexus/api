@@ -1,0 +1,18 @@
+{
+    "version": "0.2",
+    "language": "en-US",
+    "files": ["src/data/**/*.mdx"],
+    "dictionaryDefinitions": [
+        {
+            "name": "project-words",
+            "path": "./tests/quality/spellcheck/project-words.txt",
+            "addWords": true
+        }
+    ],
+    "dictionaries": ["project-words"],
+    "ignorePaths": ["src/data/swagger.json"],
+    "ignoreRegExpList": [
+        "/secret-token:\\S+/g",
+        "/(ETag|If-Match|If-None-Match): ?\"[^\"]+\"/gi"
+    ]
+}

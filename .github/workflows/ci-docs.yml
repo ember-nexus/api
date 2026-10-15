@@ -1,0 +1,154 @@
+name: 'CI Docs'
+
+# Temporary: until this branch is merged, run on both main and this branch directly so the pipeline
+# gets exercised before merge. Narrow back down to `main` only once gh-495 is merged.
+on:
+  push:
+    branches:
+      - main
+      - feature/gh-495-integrate-next-doc
+
+permissions:
+  contents: read
+  packages: write
+  actions: write
+  id-token: write
+
+jobs:
+
+  build-dist:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: 'Build dist'
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/build-docker-image-docs
+        with:
+          target: development
+          arch: amd
+          artifact-name: docker-image-docs-ci-dev-amd
+          artifact-retention-days: 1
+      - uses: ./.github/actions/run-docs-pnpm-command
+        with:
+          artifact-name: docker-image-docs-ci-dev-amd
+          command: build
+      - name: Delete intermediate dev-image artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          ID="$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --jq '.artifacts[] | select(.name=="docker-image-docs-ci-dev-amd") | .id')"
+          [ -n "$ID" ] && gh api --method DELETE "repos/${{ github.repository }}/actions/artifacts/$ID"
+      - name: Archive dist
+        run: tar -czf docs-dist.tar.gz -C docs dist
+      - uses: actions/upload-artifact@v6
+        with:
+          name: docs-dist
+          path: docs-dist.tar.gz
+          retention-days: 7
+
+  build-image-amd:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: 'Build Docker Image - AMD'
+    timeout-minutes: 15
+    needs:
+      - build-dist
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: build
+        uses: ./.github/actions/build-push-docs-image
+        with:
+          arch: amd
+          dist-artifact-name: docs-dist
+          ghcr-image-name: ember-nexus/api-docs
+          github-actor: ${{ github.actor }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  build-image-arm:
+    runs-on: gh-4vcpu-ubuntu-latest-arm
+    name: 'Build Docker Image - ARM'
+    timeout-minutes: 15
+    needs:
+      - build-dist
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: build
+        uses: ./.github/actions/build-push-docs-image
+        with:
+          arch: arm
+          dist-artifact-name: docs-dist
+          ghcr-image-name: ember-nexus/api-docs
+          github-actor: ${{ github.actor }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  push-multiarch-ghcr:
+    runs-on: ubuntu-26.04
+    name: 'Push multi arch image to GHCR'
+    timeout-minutes: 15
+    needs:
+      - build-image-amd
+      - build-image-arm
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+      version-tag: ${{ steps.version.outputs.version-tag }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: version
+        run: echo "version-tag=$(date -u +%Y%m%d)-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - id: push
+        uses: ./.github/actions/combine-multiarch-image
+        with:
+          image-ref: ghcr.io/ember-nexus/api-docs
+          amd-digest: ${{ needs.build-image-amd.outputs.digest }}
+          arm-digest: ${{ needs.build-image-arm.outputs.digest }}
+          tags: ${{ steps.version.outputs.version-tag }}
+          registry: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write image summary
+        run: |
+          {
+            echo "### Docs image pushed"
+            echo
+            echo "- Package: https://github.com/ember-nexus/api/pkgs/container/api-docs"
+            echo "- Pull by tag: \`docker pull ghcr.io/ember-nexus/api-docs:${{ steps.version.outputs.version-tag }}\`"
+            echo "- Pull by digest: \`docker pull ghcr.io/ember-nexus/api-docs@${{ steps.push.outputs.digest }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete dist artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          ID="$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --jq '.artifacts[] | select(.name=="docs-dist") | .id')"
+          [ -n "$ID" ] && gh api --method DELETE "repos/${{ github.repository }}/actions/artifacts/$ID"
+
+  docs-deploy:
+    runs-on: ubuntu-26.04
+    name: 'Docs deploy'
+    timeout-minutes: 5
+    needs:
+      - push-multiarch-ghcr
+    # Disabled until a deploy target domain/webhook secret has been set up: flip the
+    # `DOCS_DEPLOY_ENABLED` repo/environment variable to 'true' once that's ready. Narrowing to
+    # `main` (instead of also this branch) is left for when this is enabled for real.
+    if: vars.DOCS_DEPLOY_ENABLED == 'true'
+    environment:
+      name: production
+      url: https://api.docs.ember-nexus.dev/
+    steps:
+      - name: Deploy (wip)
+        run: echo "deploying ghcr.io/ember-nexus/api-docs:${{ needs.push-multiarch-ghcr.outputs.version-tag }} (wip)"

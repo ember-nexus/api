@@ -1,0 +1,47 @@
+{
+  "components": {
+    "schemas": {
+      "GraphStructure": {
+        "type": "object",
+        "description": "The node and relation types currently present in the graph.",
+        "required": [
+          "nodeTypes",
+          "relationTypes"
+        ],
+        "properties": {
+          "nodeTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Collection",
+              "Comment",
+              "Data",
+              "Group",
+              "Location",
+              "Tag",
+              "Token",
+              "User"
+            ]
+          },
+          "relationTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "HAS_READ_ACCESS",
+              "HAS_SEARCH_ACCESS",
+              "HAS_TAG",
+              "IS_IN_GROUP",
+              "IS_MEMBER_OF",
+              "OWNS",
+              "RELATED"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

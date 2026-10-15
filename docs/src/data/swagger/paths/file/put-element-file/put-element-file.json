@@ -1,0 +1,156 @@
+{
+  "paths": {
+    "/{uuid}/file": {
+      "put": {
+        "summary": "Put element file",
+        "description": "Creates or replaces the file of an element, either by uploading the complete file directly or by starting a resumable upload. Unlike `POST`, this succeeds even if the element already has a file attached - the existing file is replaced.",
+        "operationId": "put-element-file",
+        "tags": [
+          "File"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Id of the element whose file is to be created or replaced."
+          },
+          {
+            "$ref": "#/components/parameters/If-Match"
+          },
+          {
+            "name": "Upload-Complete",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "?1"
+            },
+            "description": "`?1` uploads the request body as the complete, final file. `?0` starts a resumable upload instead - the request body, if any, is stored as the first chunk. Omitting the header behaves like `?1`."
+          },
+          {
+            "name": "Upload-Length",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 20971520
+            },
+            "description": "Total size in bytes of the finished file. Only read when starting a resumable upload (`Upload-Complete: ?0`); optional even then."
+          },
+          {
+            "name": "Content-Disposition",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "attachment; filename=\"report.pdf\""
+            },
+            "description": "Original filename of the uploaded file, used to derive the file's extension. Falls back to `bin` if omitted or if no extension can be parsed."
+          },
+          {
+            "name": "Repr-Digest",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "sha-256=:X4a4pOezhox2tI5PXW8UAd7NAdOKPjE3wYlYs+eTt7Y=:"
+            },
+            "description": "Cryptographic digest of the complete file, checked against the uploaded content once the direct upload finishes. Only `sha-256` is supported. A mismatch fails with `400 Bad Request` and the existing file (if any) is left untouched. `Content-Digest` is accepted as a fallback if `Repr-Digest` is absent. Only meaningful for a complete (non-resumable) upload; for a resumable upload, verify the digest on the completing `PATCH` request instead."
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "x-ember-nexus-har-example": [
+          {
+            "name": "Create file directly",
+            "har": {
+              "method": "PUT",
+              "url": "https://api.example.com/7b80b203-2b82-40f5-accd-c7089fe6114e/file",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/octet-stream"
+                },
+                {
+                  "name": "Content-Disposition",
+                  "value": "attachment; filename=\"report.pdf\""
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/octet-stream",
+                "text": "@report.pdf"
+              }
+            }
+          },
+          {
+            "name": "Create resumable upload",
+            "har": {
+              "method": "PUT",
+              "url": "https://api.example.com/7b80b203-2b82-40f5-accd-c7089fe6114e/file",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/octet-stream"
+                },
+                {
+                  "name": "Content-Disposition",
+                  "value": "attachment; filename=\"report.pdf\""
+                },
+                {
+                  "name": "Upload-Complete",
+                  "value": "?0"
+                },
+                {
+                  "name": "Upload-Length",
+                  "value": "20971520"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/octet-stream",
+                "text": "@report.pdf.part1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

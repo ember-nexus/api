@@ -1,0 +1,10 @@
+{
+  "components": {
+    "examples": {
+      "BadContentProblemExample": {
+        "summary": "A provided property has the wrong type or fails a validation rule.",
+        "x-ember-nexus-recording": "api-endpoints/user/post-change-password/400-response-body.json"
+      }
+    }
+  }
+}

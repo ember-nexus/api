@@ -1,0 +1,67 @@
+---
+import { Icon } from "astro-icon/components";
+
+import DesktopSearch from "./DesktopSearch.astro";
+import SidebarToggle from "./SidebarToggle.astro";
+import { apiVersion, markdownPath } from "../lib/index.ts";
+
+const version = apiVersion();
+
+const markdownHref = markdownPath(Astro.url.pathname);
+
+const iconBtn =
+    "inline-flex cursor-pointer items-center justify-center rounded-md p-2 text-gray-700 transition hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] dark:text-zinc-200 dark:hover:bg-zinc-800";
+---
+
+<header
+    class="fixed inset-x-0 top-0 z-50 flex h-14 items-center gap-2 border-b border-gray-200 bg-white px-3 sm:h-16 sm:px-4 dark:border-zinc-800 dark:bg-black"
+>
+    <SidebarToggle icon="panel-left" />
+
+    <a
+        href="/"
+        aria-label="Ember Nexus API — home"
+        class="flex items-center gap-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)]"
+    >
+        <img src="/logo.svg" alt="" class="size-6 sm:size-7" />
+        <span class="hidden text-2xl font-qanelas-soft-custom tracking-tight text-gray-900 sm:inline dark:text-gray-100" translate="no">
+      Ember Nexus API
+    </span>
+    </a>
+
+    {version && (
+        <span class="hidden font-mono text-md text-gray-500 sm:inline dark:text-gray-400" translate="no">
+      {version}
+    </span>
+    )}
+
+    <div class="ml-auto flex items-center gap-1">
+        <DesktopSearch />
+
+        <a href={markdownHref} target="_blank" rel="noreferrer" aria-label="View this page as Markdown" title="View this page as Markdown" class:list={["hidden sm:inline-flex", iconBtn]}>
+            <Icon name="markdown" class="size-5" />
+        </a>
+        <a href="/swagger.json" download="swagger.json" aria-label="Download OpenAPI / Swagger spec" title="Download OpenAPI / Swagger spec" class:list={["hidden sm:inline-flex", iconBtn]}>
+            <Icon name="swagger" class="size-5" />
+        </a>
+        <a href="https://discord.gg/qbQFBrJrRC" target="_blank" rel="noreferrer" aria-label="Discord" title="Discord" class:list={["hidden sm:inline-flex", iconBtn]}>
+            <Icon name="discord" class="size-5" />
+        </a>
+        <a href="https://github.com/ember-nexus/api" target="_blank" rel="noreferrer" aria-label="GitHub" title="GitHub" class:list={["hidden sm:inline-flex", iconBtn]}>
+            <Icon name="github" class="size-5" />
+        </a>
+        <a href="https://hub.docker.com/r/embernexus/api" target="_blank" rel="noreferrer" aria-label="Docker Hub" title="Docker Hub" class:list={["hidden sm:inline-flex", iconBtn]}>
+            <Icon name="docker" class="size-5" />
+        </a>
+
+        <button
+            type="button"
+            aria-label="Toggle table of contents"
+            aria-controls="toc-panel"
+            data-overlay-toggle="toc-panel"
+            class:list={["sm:hidden", iconBtn]}
+        >
+            <Icon name="menu" class="size-5" />
+        </button>
+    </div>
+</header>

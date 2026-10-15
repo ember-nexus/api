@@ -1,0 +1,165 @@
+---
+import { buildNavItems, findPrevNext } from '../lib/pageNav.ts';
+
+interface Props {
+    currentPath: string;
+    hidden?: boolean;
+}
+
+const { currentPath, hidden = false } = Astro.props;
+
+if (hidden) {
+    return null;
+}
+
+const { prev, next } = findPrevNext(await buildNavItems(), currentPath);
+
+if (!prev && !next) {
+    return null;
+}
+---
+
+<nav aria-label="Page navigation" class="pn-nav">
+    <div class="pn-grid">
+        {prev ? (
+            <a href={prev.url} class="pn-card pn-prev">
+                <span class="pn-label">Previous</span>
+                {prev.method ? (
+                    <>
+                        <p class="pn-mono pn-truncate" style={`--c: var(--method-${prev.method}, var(--method-put))`} translate="no">
+                            <b class="pn-method">{prev.method}</b>
+                            {" "}{prev.endpointUrl}
+                        </p>
+                        <p class="pn-name">{prev.name}</p>
+                    </>
+                ) : (
+                    <p class="pn-title">{prev.name}</p>
+                )}
+            </a>
+        ) : (
+            <div class="pn-placeholder" aria-hidden="true"></div>
+        )}
+        {next ? (
+            <a href={next.url} class="pn-card pn-next">
+                <span class="pn-label">Next</span>
+                {next.method ? (
+                    <>
+                        <p class="pn-mono pn-truncate" style={`--c: var(--method-${next.method}, var(--method-put))`} translate="no">
+                            <b class="pn-method">{next.method}</b>
+                            {" "}{next.endpointUrl}
+                        </p>
+                        <p class="pn-name">{next.name}</p>
+                    </>
+                ) : (
+                    <p class="pn-title">{next.name}</p>
+                )}
+            </a>
+        ) : (
+            <div class="pn-placeholder" aria-hidden="true"></div>
+        )}
+    </div>
+</nav>
+
+<style>
+    .pn-nav {
+        max-width: 76rem;
+        width: 100%;
+        margin-inline: auto;
+        padding-top: 2rem;
+        margin-top: 2rem;
+        border-top: 1px solid var(--color-hairline);
+    }
+
+    .pn-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+        .pn-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .pn-prev {
+            justify-self: start;
+        }
+
+        .pn-next {
+            justify-self: end;
+        }
+    }
+
+    .pn-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0.375rem;
+        border: 1px solid var(--color-hairline);
+        padding: 0.75rem;
+        text-decoration: none;
+        color: var(--c-list-link-fg);
+        transition: background-color 0.15s ease;
+    }
+
+    .pn-card:hover {
+        background-color: var(--c-list-link-hover-bg);
+    }
+
+    .pn-card:focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 2px;
+    }
+
+    .pn-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        color: var(--c-text-muted);
+    }
+
+    .pn-title {
+        margin: 0;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        line-height: 1.25;
+    }
+
+    .pn-name {
+        margin: 0;
+        font-size: 0.8125rem;
+        line-height: 1.25;
+    }
+
+    .pn-mono {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
+        line-height: 1.25;
+    }
+
+    .pn-method {
+        font-weight: 600;
+        color: var(--c);
+        text-transform: uppercase;
+    }
+
+    .pn-truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .pn-placeholder {
+        display: none;
+    }
+
+    @media (min-width: 640px) {
+        .pn-placeholder {
+            display: block;
+        }
+    }
+</style>

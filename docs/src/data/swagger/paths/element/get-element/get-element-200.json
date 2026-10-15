@@ -1,0 +1,100 @@
+{
+  "paths": {
+    "/{uuid}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Element found. Returns either a node or a relationship.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Indicates which HTTP methods are permitted for cross-origin requests, typically returned in preflight responses.",
+                "schema": {
+                  "type": "string"
+                },
+                "x-ember-nexus-recording": "api-endpoints/element/get-element/200-node-response-header.txt",
+                "x-ember-nexus-recording-header-name": "Access-Control-Allow-Methods",
+                "x-ember-nexus-links": [
+                  {
+                    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Methods",
+                    "name": "MDN"
+                  },
+                  {
+                    "url": "https://http.dev/access-control-allow-methods",
+                    "name": "HTTP.dev"
+                  }
+                ],
+                "required": true
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "description": "Lists the HTTP methods supported by the endpoint; returned alongside a `Method Not Allowed` response.",
+                "schema": {
+                  "type": "string"
+                },
+                "x-ember-nexus-recording": "api-endpoints/element/get-element/200-node-response-header.txt",
+                "x-ember-nexus-recording-header-name": "Allow",
+                "x-ember-nexus-links": [
+                  {
+                    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Allow",
+                    "name": "MDN"
+                  },
+                  {
+                    "url": "https://http.dev/allow",
+                    "name": "HTTP.dev"
+                  }
+                ],
+                "required": true
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/ETag"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Element"
+                },
+                "examples": {
+                  "node": {
+                    "summary": "Element found, which happens to be a node.",
+                    "x-ember-nexus-name": "Node",
+                    "x-ember-nexus-recording": "api-endpoints/element/get-element/200-node-response-body.json"
+                  },
+                  "relationship": {
+                    "summary": "Element found, which happens to be a relation.\n\n**Note**: The properties `start` and `end` are defined, as they are required for relations.",
+                    "x-ember-nexus-name": "Relation",
+                    "x-ember-nexus-recording": "api-endpoints/element/get-element/200-relation-response-body.json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

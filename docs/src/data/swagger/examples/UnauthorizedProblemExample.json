@@ -1,0 +1,9 @@
+{
+  "components": {
+    "examples": {
+      "UnauthorizedProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/element/get-element/401-response-body.json"
+      }
+    }
+  }
+}

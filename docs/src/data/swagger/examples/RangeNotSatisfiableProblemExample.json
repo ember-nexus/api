@@ -1,0 +1,9 @@
+{
+  "components": {
+    "examples": {
+      "RangeNotSatisfiableProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/file/get-element-file/416-response-body.json"
+      }
+    }
+  }
+}

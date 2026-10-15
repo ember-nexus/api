@@ -1,0 +1,131 @@
+{
+  "components": {
+    "schemas": {
+      
+      "SearchStep": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/CypherPathSubsetStep" },
+          { "$ref": "#/components/schemas/ElasticsearchQueryDslMixinStep" },
+          { "$ref": "#/components/schemas/ElementHydrationStep" }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "cypher-path-subset":            "#/components/schemas/CypherPathSubsetStep",
+            "elasticsearch-query-dsl-mixin": "#/components/schemas/ElasticsearchQueryDslMixinStep",
+            "element-hydration":             "#/components/schemas/ElementHydrationStep"
+          }
+        }
+      },
+
+      "BaseStep": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Step-local parameters. Overwrites global parameters for this step."
+          }
+        }
+      },
+
+      "CypherPathSubsetStep": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseStep" },
+          {
+            "type": "object",
+            "required": ["type", "query"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["cypher-path-subset"]
+              },
+              "query": {
+                "type": "string",
+                "description": "A Cypher query string returning paths.",
+                "example": "MATCH path=((:Plant)-[:HAS_TAG]->(:Tag {name: \"blue\"})) RETURN path"
+              }
+            }
+          }
+        ]
+      },
+
+      "ElasticsearchQueryDslMixinStep": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseStep" },
+          {
+            "type": "object",
+            "required": ["type", "query"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["elasticsearch-query-dsl-mixin"]
+              },
+              "query": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "An Elasticsearch Query DSL object.",
+                "example": {
+                  "match": {
+                    "description": { "query": "lily" }
+                  }
+                }
+              },
+              "parameters": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Step-local parameters. In addition to arbitrary values used by expressions inside `query`, this step recognizes the following well-known keys.",
+                "properties": {
+                  "nodeTypes": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Restricts the search to the given node types."
+                  },
+                  "relationTypes": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Restricts the search to the given relation types."
+                  },
+                  "page": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "Page of results to return."
+                  },
+                  "pageSize": {
+                    "type": "integer",
+                    "default": 25,
+                    "description": "Number of results per page."
+                  },
+                  "minScore": {
+                    "type": "number",
+                    "nullable": true,
+                    "default": null,
+                    "description": "If set, removes all results with a lower Elasticsearch relevance score."
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+
+      "ElementHydrationStep": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseStep" },
+          {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["element-hydration"]
+              },
+              "query": { "not": {} }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

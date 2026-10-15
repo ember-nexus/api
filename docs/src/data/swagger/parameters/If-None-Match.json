@@ -1,0 +1,30 @@
+{
+  "components": {
+    "parameters": {
+      "If-None-Match": {
+        "name": "If-None-Match",
+        "in": "header",
+        "required": false,
+        "example": "\"YgbFC4u5EgC\"",
+        "description": "Used primarily for caching — skips re-downloading an unchanged resource by returning `304 Not Modified` if the resource's `ETag` matches the provided value.",
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/if-none-match",
+            "name": "HTTP.dev"
+          },
+          {
+            "url": "/guide/caching-and-conditional-requests",
+            "name": "Caching guide"
+          }
+        ],
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

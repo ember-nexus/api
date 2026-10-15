@@ -1,0 +1,90 @@
+{
+  "paths": {
+    "/token": {
+      "get": {
+        "responses": {
+          "401": {
+            "description": "The provided token is either invalid or expired.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Indicates which HTTP methods are permitted for cross-origin requests, typically returned in preflight responses.",
+                "schema": {
+                  "type": "string"
+                },
+                "x-ember-nexus-recording": "api-endpoints/user/get-token/401-response-header.txt",
+                "x-ember-nexus-recording-header-name": "Access-Control-Allow-Methods",
+                "x-ember-nexus-links": [
+                  {
+                    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Methods",
+                    "name": "MDN"
+                  },
+                  {
+                    "url": "https://http.dev/access-control-allow-methods",
+                    "name": "HTTP.dev"
+                  }
+                ],
+                "required": true
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "description": "Lists the HTTP methods supported by the endpoint; returned alongside a `Method Not Allowed` response.",
+                "schema": {
+                  "type": "string"
+                },
+                "x-ember-nexus-recording": "api-endpoints/user/get-token/401-response-header.txt",
+                "x-ember-nexus-recording-header-name": "Allow",
+                "x-ember-nexus-links": [
+                  {
+                    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Allow",
+                    "name": "MDN"
+                  },
+                  {
+                    "url": "https://http.dev/allow",
+                    "name": "HTTP.dev"
+                  }
+                ],
+                "required": true
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/401",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "$ref": "#/components/examples/UnauthorizedProblemExample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+---
+command: backup:load
+name: backup:load
+helpCommand: php bin/console backup:load --help
+helpOutput: backup-load-help.html
+exampleCommand: php bin/console backup:load reference-dataset
+exampleOutput: backup-load.html
+---
+
+Loads a previously created local backup into the database, restoring its nodes, relations, and
+files.
+
+The `name` argument is required and must match an existing backup folder containing a
+`summary.json` (as created by `backup:create` or `backup:fetch`). Nodes and relations are imported
+in batches, files are re-uploaded to object storage, and a final pass re-dispatches update events
+for every imported node and relation so that dependent systems (such as the search index) pick up
+the restored data; the Redis cache is flushed at the end of the process.
+
+Options:
+
+- `--skip-verify` - skips verifying file contents against their stored `file.hash` values. Without it, files that
+  fail verification are skipped and reported as errors on the console and in the logs; the element keeps
+  `hasFile=true` and the command's exit code stays `0`.
+
+<Note>
+    The target database must be empty - the command checks for existing nodes or relations up
+    front and refuses to run otherwise. Loading into a non-empty database is not supported.
+</Note>

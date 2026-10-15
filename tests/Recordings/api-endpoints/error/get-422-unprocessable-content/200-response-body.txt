@@ -1,0 +1,15 @@
+  _____           _                 _   _                          _    ____ ___
+ | ____|_ __ ___ | |__   ___ _ __  | \ | | _____  ___   _ ___     / \  |  _ \_ _|
+ |  _| | '_ ` _ \| '_ \ / _ \ '__| |  \| |/ _ \ \/ / | | / __|   / _ \ | |_) | |
+ | |___| | | | | | |_) |  __/ |    | |\  |  __/⟩  ⟨| |_| \__ \  / ___ \|  __/| |
+ |_____|_| |_| |_|_.__/ \___|_|    |_| \_|\___/_/\_\\__,_|___/ /_/   \_\_|  |___|
+
+
+ Error 422 - Unprocessable Content
+
+ The request content was syntactically valid, but could not be processed due to a configured resource limit, e.g. an
+ expression (Go Expr Lang) query exceeding its configured timeout.
+
+ Link to the documentation: https://ember-nexus.github.io/api
+
+ Link to http.dev's explanation of the 422 error code: https://http.dev/422

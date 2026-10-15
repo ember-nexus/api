@@ -1,0 +1,7 @@
+{
+  "type": "http://api/error/400/reserved-identifier",
+  "title": "Reserved identifier",
+  "status": 400,
+  "instance": "urn:uuid:3a118285-fd0e-4a69-b4c2-d05c14c2e51e",
+  "detail": "The requested identifier 'user@postToken.user.endpoint.localhost.dev' is reserved and can not be used."
+}

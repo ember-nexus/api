@@ -1,0 +1,61 @@
+---
+import { Icon } from 'astro-icon/components';
+
+import type { ResponseHeader } from "../type";
+import CardTitle from "./CardTitle.astro";
+import HeaderRow from "./HeaderRow.astro";
+
+interface Props {
+    headers: ResponseHeader[];
+    id?: string;
+}
+
+const { headers, id } = Astro.props;
+
+const important = headers.filter(h => h.important);
+const others = headers.filter(h => !h.important);
+---
+<div class="response-header-card">
+    <CardTitle title="Response Header" id={id}>
+        <span slot="meta" class="text-sm text-gray-400">
+            {important.length} relevant · {others.length} others
+        </span>
+    </CardTitle>
+    <div class="api-card">
+        <div class="divide-y divide-hairline">
+            {important.map((header) => (
+                <HeaderRow
+                    name={header.header}
+                    presence={header.presence}
+                    description={header.description}
+                    links={header.links}
+                />
+            ))}
+        </div>
+        {others.length > 0 && (
+            <div x-data="{ open: false }">
+                <div class="flex items-center gap-3 py-2">
+                    <div class="flex-1 h-px bg-hairline"></div>
+                    <button
+                        @click="open = !open"
+                        class="flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer whitespace-nowrap"
+                    >
+                        Other Headers
+                        <Icon name="chevron-down" class="size-4 transition-transform" :class="{ 'rotate-180': open }" aria-hidden="true" />
+                    </button>
+                    <div class="flex-1 h-px bg-hairline"></div>
+                </div>
+                <div x-show="open" class="divide-y divide-hairline">
+                    {others.map((header) => (
+                        <HeaderRow
+                            name={header.header}
+                            presence={header.presence}
+                            description={header.description}
+                            links={header.links}
+                        />
+                    ))}
+                </div>
+            </div>
+        )}
+    </div>
+</div>

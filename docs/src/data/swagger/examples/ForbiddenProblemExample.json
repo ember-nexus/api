@@ -1,0 +1,9 @@
+{
+  "components": {
+    "examples": {
+      "ForbiddenProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/system/get-instance-configuration/403-response-body.json"
+      }
+    }
+  }
+}

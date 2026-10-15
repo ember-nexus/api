@@ -1,0 +1,122 @@
+{
+  "paths": {
+    "/error/410/gone": {
+      "get": {
+        "summary": "Get error 410 gone",
+        "description": "Static informational page for the `https://api.example.com/error/410/gone` problem type, explaining why the error is thrown.",
+        "operationId": "get-error-410-gone",
+        "tags": [
+          "Error"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/error/410/gone",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a static, human-readable explanation of the error.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Indicates which HTTP methods are permitted for cross-origin requests, typically returned in preflight responses.",
+                "schema": {
+                  "type": "string"
+                },
+                "x-ember-nexus-recording": "api-endpoints/error/get-410-gone/200-response-header.txt",
+                "x-ember-nexus-recording-header-name": "Access-Control-Allow-Methods",
+                "x-ember-nexus-links": [
+                  {
+                    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Methods",
+                    "name": "MDN"
+                  },
+                  {
+                    "url": "https://http.dev/access-control-allow-methods",
+                    "name": "HTTP.dev"
+                  }
+                ],
+                "required": true
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "description": "Lists the HTTP methods supported by the endpoint; returned alongside a `Method Not Allowed` response.",
+                "schema": {
+                  "type": "string"
+                },
+                "x-ember-nexus-recording": "api-endpoints/error/get-410-gone/200-response-header.txt",
+                "x-ember-nexus-recording-header-name": "Allow",
+                "x-ember-nexus-links": [
+                  {
+                    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Allow",
+                    "name": "MDN"
+                  },
+                  {
+                    "url": "https://http.dev/allow",
+                    "name": "HTTP.dev"
+                  }
+                ],
+                "required": true
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "410_gone": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-410-gone/200-response-body.txt"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

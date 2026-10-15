@@ -1,0 +1,18 @@
+{
+  "type": "Data",
+  "id": "7ac83b11-3c48-4ecd-930c-97e9dbf47ef3",
+  "data": {
+    "created": "2025-09-27T10:39:51+00:00",
+    "updated": "2025-11-03T08:12:04+00:00",
+    "name": "image.jpg",
+    "hasFile": true
+  },
+  "file": {
+    "contentLength": 63933,
+    "extension": "jpg",
+    "mimeType": "image/jpeg",
+    "hash": {
+      "sha256": "3a7bd3e2360a3d8f2f7929d2e83beb2b5b9e5b0e3e6b4c9a1a0e3c1b0e4d3f2b"
+    }
+  }
+}

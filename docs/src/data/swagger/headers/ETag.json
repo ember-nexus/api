@@ -1,0 +1,29 @@
+{
+  "components": {
+    "headers": {
+      "ETag": {
+        "description": "Entity tag used for caching and optimistic concurrency control.",
+        "schema": {
+          "type": "string",
+          "example": "\"YgbFC4u5EgC\""
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/etag",
+            "name": "HTTP.dev"
+          },
+          {
+            "url": "/guide/caching-and-conditional-requests",
+            "name": "Caching guide"
+          }
+        ],
+        "x-ember-nexus-important": true,
+        "required": true
+      }
+    }
+  }
+}

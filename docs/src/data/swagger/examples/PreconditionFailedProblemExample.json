@@ -1,0 +1,10 @@
+{
+  "components": {
+    "examples": {
+      "PreconditionFailedProblemExample": {
+        "summary": "Precondition failed. `If-Match` or `If-None-Match` condition not met.",
+        "x-ember-nexus-recording": "api-endpoints/element/get-element/412-response-body.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,355 @@
+---
+type: guide
+title: First API requests
+---
+
+## Prerequisites
+
+The following CLI tools should be available: `curl`, `jq`.
+You should have access to an Ember Nexus API instance. If not, you can read the [installation guide](/getting-started/installation).
+
+## Preparation: Auth
+
+Ember Nexus can be used without a user account, but in most cases, you would want to store your own data in a private and secure manner. In this case, you will need to create a user account first.
+
+### Creating a new user account
+
+Execute the following curl command - just with the URL of your own Ember Nexus API instance and your email and password.
+
+You must choose the password - this will be your account's password going forward.
+
+```bash
+curl \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "User",
+        "password": "superSecurePassword",
+        "uniqueUserIdentifier": "your-email-address@example.com"
+      }' \
+  https://api.example.com/register
+```
+
+The request should not return anything, unless an error happened.
+
+### Creating a new token
+
+Then create a new API token, which is later included in all following requests:
+
+```bash
+curl \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "Token",
+        "uniqueUserIdentifier": "your-email-address@example.com",
+        "password": "superSecurePassword"
+      }' \
+  https://api.example.com/token \
+  | jq
+```
+
+Which should give you a response like this:
+
+```json
+{
+  "type": "_TokenResponse",
+  "token": "secret-token:4pKMAMcI0LlGBuqZDKQEUP"
+}
+```
+
+The value of `$.token`, i.e. `secret-token:4pKMAMcI0LlGBuqZDKQEUP`, is your new API token.
+
+Note: The token has a limited lifetime, i.e. has to be recreated every so often. The number of active tokens per user is unlimited.
+
+Note: The registration endpoint can be disabled via the `register.enabled` configuration option, in which case use the
+[`user:create`](/command/user-create) CLI command instead to bootstrap the first account on a fresh instance.
+
+## CRUD & element properties
+
+CRUD, standing for **c**reate, **r**ead, **u**pdate and **d**elete, is used to present the minimal steps required to interact with the API in a productive manner.
+
+CRUD is always being used in the context of some data - which in Ember Nexus' case are elements, which can either be nodes, or relations (connecting one node to some other node).
+
+**Elements** have these following attributes:
+
+- `id`: The element's globally unique id, an UUID.
+- `type`: A string which represents the identity of the element, e.g. `User`, `Group`, `Token` or even more generic like `Data`.
+  Node-types are usually written in `SnakeCase`, while relation-types are written as `SCREAMING_SNAKE_CASE`, e.g. `OWNS` and `HAS_READ_ACCESS`.
+- `data`: An object containing the user's data. A few properties like `created` and `updated` are automatically generated, a few others are reserved for internal usage, but in general you are free to define and use your own properties. The properties' type, i.e. number, string, boolean, list or object, can be freely chosen. Once a type is used, all other types should use a similar, compatible schema.
+  The property value `null` has a special meaning: Such property values are not stored, but instead the property will be deleted during update requests.
+- `start` and `end`: Element ids, i.e. UUIDs. They are mandatory for relationships only.
+- `file`: Optional meta data when an element has an associated file. See [working with files](/guide/working-with-files) for details.
+
+**Important**: The `id` and `type` of elements, as well as `start` and `end` ids of relations, can not be changed after creation. However, you can recreate the element with the old properties and new id/type/start/end-attributes, and then delete the old element.
+
+## Node examples
+
+## Creating an element
+
+In Ember Nexus you have two options for creating a new element:
+
+- `POST /`: A post request against `/`, i.e. root. This endpoint is required for creating new top level elements, as well as relations in general.
+- `POST /<id>`: A post request against an existing node, referenced by its id. This endpoint can only be used to create new nodes, which are automatically stored as child nodes of the referenced node. This endpoint should be preferred for organizational reasons, when possible. See [organizing and sharing data](/guide/organizing-and-sharing-data) for details.
+
+As we do not yet have a top level element, we create one first:
+
+```bash
+curl -v \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "Data",
+        "data": {
+          "hello": "world :D"
+        }
+      }' \
+  https://api.example.com/
+```
+
+Which will return a response like this:
+
+```txt /location:.*/ collapse={2-7}
+< HTTP/2 201
+< access-control-allow-headers: *
+< access-control-allow-methods: GET, HEAD, OPTIONS, POST
+< access-control-allow-origin: *
+< access-control-expose-headers: ETag, Location
+< allow: GET, HEAD, OPTIONS, POST
+< cache-control: no-cache, private
+< date: Mon, 04 May 2026 08:48:27 GMT
+< location: /4030e226-086d-41c8-95dd-b4080af9d883
+< x-powered-by: Ember Nexus API
+< content-length: 0
+<
+* Connection #0 to host api.example.com:443 left intact
+```
+
+Note that the response headers include a `location`-header: This absolute path includes the id of the newly created element.
+
+## Retrieving an element
+
+The just created element can be retrieved in a single API call using `GET`:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  https://api.example.com/4030e226-086d-41c8-95dd-b4080af9d883 \
+  | jq
+```
+
+Which will return a response like this:
+
+```json
+{
+  "type": "Data",
+  "id": "4030e226-086d-41c8-95dd-b4080af9d883",
+  "data": {
+    "created": "2026-05-04T08:48:26+00:00",
+    "updated": "2026-05-04T08:48:26+00:00",
+    "hello": "world :D"
+  }
+}
+```
+
+## Updating an element's data
+
+For updating an element, you will usually chose the `PATCH` operation - all provided properties are replaced, properties not mentioned in the request body are kept as they are. For replacing all properties of an element, use the `PUT` operation.
+
+**Important**: As only the data-attribute of an element can be modified after creation, the update-requests skip the element-data-wrapper. The full request payload will be used as the new data object.
+
+```bash
+curl -X PATCH \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "hello": "sea :]"
+      }' \
+  https://api.example.com/4030e226-086d-41c8-95dd-b4080af9d883
+```
+
+After execution, you can read the new data object back:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  https://api.example.com/4030e226-086d-41c8-95dd-b4080af9d883 \
+  | jq
+```
+
+Which will show, that the `hello`-property no longer shows `"world :D"`, but instead `"sea :]"`:
+
+```json /.hello.: .sea :]./
+{
+  "type": "Data",
+  "id": "4030e226-086d-41c8-95dd-b4080af9d883",
+  "data": {
+    "created": "2026-05-04T08:48:26+00:00",
+    "updated": "2026-05-04T08:59:13+00:00",
+    "hello": "sea :]"
+  }
+}
+```
+
+## Replacing an element's data
+
+For replacing an element's data, use the `PUT` operation instead of `PATCH`:
+
+```bash
+curl -X PUT \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "hi": "world :D"
+      }' \
+  https://api.example.com/4030e226-086d-41c8-95dd-b4080af9d883
+```
+
+After executing, you can then again query the current representation of the element:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  https://api.example.com/4030e226-086d-41c8-95dd-b4080af9d883 \
+  | jq
+```
+
+The response will now not include `hello`, but instead the new `hi`-property:
+
+```json /.hi.: .world :D./
+{
+  "type": "Data",
+  "id": "4030e226-086d-41c8-95dd-b4080af9d883",
+  "data": {
+    "created": "2026-05-04T08:48:26+00:00",
+    "updated": "2026-05-04T09:02:25+00:00",
+    "hi": "world :D"
+  }
+}
+```
+
+**Note**: Some properties like `created` can not be replaced or be set back.
+
+## Deleting an element
+
+Once you no longer need an element, you can delete it using the `DELETE` method:
+
+```bash
+curl -X DELETE \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  https://api.example.com/4030e226-086d-41c8-95dd-b4080af9d883
+```
+
+When you now query the API for the deleted element, you will receive an 404 element not found problem response:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  https://api.example.com/4030e226-086d-41c8-95dd-b4080af9d883 \
+  | jq
+```
+
+```json
+{
+  "type": "https://api.example.com/error/404/not-found",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "Requested element was not found."
+}
+```
+
+**Note**: If you delete a node, then all relations connected to the node are also being deleted.
+
+## Relation examples
+
+In general the interactions with relations is the same as with nodes - you only need to define the `start` and `end` attributes during creation.
+
+Before we can create such a relation, we need to create two nodes first:
+
+```bash
+curl -v \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "Data",
+        "data": {
+          "name": "start node"
+        }
+      }' \
+  https://api.example.com/
+```
+
+```txt
+< location: /baa03f88-6e1c-4185-9520-c020a61b4214
+```
+
+And the second node:
+
+```bash
+curl -v \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "Data",
+        "data": {
+          "name": "end node"
+        }
+      }' \
+  https://api.example.com/
+```
+
+```txt
+< location: /354f204b-bdba-473a-a55b-ae7df36f3b9a
+```
+
+Then you can create the relation:
+
+```bash
+curl -v \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "type": "RELATION",
+        "start": "baa03f88-6e1c-4185-9520-c020a61b4214",
+        "end": "354f204b-bdba-473a-a55b-ae7df36f3b9a",
+        "data": {
+          "name": "relation"
+        }
+      }' \
+  https://api.example.com/
+```
+
+```txt
+< location: /74c7f6a9-1439-4252-8ca0-4ec4e5f36029
+```
+
+Finally, you can retrieve the relation's representation using the already explained `GET` method:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:4pKMAMcI0LlGBuqZDKQEUP' \
+  https://api.example.com/74c7f6a9-1439-4252-8ca0-4ec4e5f36029 \
+  | jq
+```
+
+```json
+{
+  "type": "RELATION",
+  "id": "74c7f6a9-1439-4252-8ca0-4ec4e5f36029",
+  "start": "baa03f88-6e1c-4185-9520-c020a61b4214",
+  "end": "354f204b-bdba-473a-a55b-ae7df36f3b9a",
+  "data": {
+    "created": "2026-05-04T09:15:55+00:00",
+    "name": "relation",
+    "updated": "2026-05-04T09:15:55+00:00"
+  }
+}
+```
+
+All other operations, i.e. `PATCH`, `PUT` and `DELETE`, are identical.
+
+## Next Steps
+
+From here, two guides build directly on what you've just done:
+
+- [Organizing and sharing data](/guide/organizing-and-sharing-data) - use relations to group elements into
+  collections, share them with other users, and build shortcuts between them.
+- [Search](/guide/search) - query the data you've created instead of fetching it node by node.

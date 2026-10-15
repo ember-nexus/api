@@ -1,0 +1,25 @@
+{
+  "components": {
+    "headers": {
+      "Expires": {
+        "description": "Point in time after which the unfinished resumable upload is discarded, if it is not completed before then.",
+        "schema": {
+          "type": "string",
+          "example": "Sat, 22 Aug 2026 21:22:07 GMT"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Expires",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/expires",
+            "name": "HTTP.dev"
+          }
+        ],
+        "x-ember-nexus-important": true,
+        "required": true
+      }
+    }
+  }
+}

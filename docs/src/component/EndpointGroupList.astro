@@ -1,0 +1,92 @@
+---
+import { endpointsInGroup, prime } from '../lib/collections.ts';
+import { endpointPath } from '../lib/routes.ts';
+
+interface Props {
+    /** The `group` frontmatter value to filter on, e.g. "element" or "file-and-upload". */
+    group: string;
+}
+
+const { group } = Astro.props;
+
+await prime();
+const entries = endpointsInGroup(group);
+---
+<ul class="not-prose egl-list">
+    {entries.map((e) => (
+        <li>
+            <a
+                href={endpointPath(e.data.endpoint)}
+                style={`--c: var(--method-${e.data.method.toLowerCase()}, var(--method-put))`}
+                class="egl-link"
+            >
+                <p class="egl-url">
+                    <b class="egl-method">{e.data.method.toUpperCase()}</b>
+                    {" "}{e.data.endpointUrl}
+                </p>
+                <p class="egl-name">{e.data.name}</p>
+            </a>
+        </li>
+    ))}
+</ul>
+
+<style>
+    .egl-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .egl-list li {
+        margin: 0;
+        padding: 0;
+    }
+
+    .egl-link {
+        display: block;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--color-hairline);
+        text-decoration: none;
+        color: var(--c-list-link-fg);
+        transition: background-color 0.15s ease;
+    }
+
+    .egl-link:hover,
+    .egl-link:visited {
+        color: var(--c-list-link-fg);
+        background-color: var(--c-list-link-hover-bg-strong);
+    }
+
+    .egl-link:focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 2px;
+    }
+
+    .egl-url {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .egl-method {
+        font-weight: 600;
+        color: var(--c);
+        text-transform: uppercase;
+    }
+
+    .egl-name {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
+        color: var(--c-list-link-fg);
+    }
+
+    /* Dark-mode list-link colors are handled via --c-list-* vars in colors.css */
+</style>

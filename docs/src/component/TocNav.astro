@@ -1,0 +1,101 @@
+---
+interface Props {
+    headings: { depth: number; slug: string; text: string }[]
+}
+
+const { headings } = Astro.props
+const filtered = headings.filter(h => h.depth <= 3)
+---
+
+<nav class="toc-nav">
+    <ul>
+        {filtered.map(h => (
+            <li style={`margin-left: ${(h.depth - 1) * 0.75}rem`} data-depth={h.depth}>
+                <a href={`#${h.slug}`} class="toc-link" data-toc-slug={h.slug}>{h.text}</a>
+            </li>
+        ))}
+    </ul>
+</nav>
+
+<script>
+    // Active-section highlighting via IntersectionObserver.
+    // Watches all heading elements referenced by the TOC and marks the
+    // topmost currently-visible one as active.  No URL hash changes.
+
+    function initTocObserver() {
+        const links = document.querySelectorAll<HTMLAnchorElement>('.toc-link[data-toc-slug]');
+        if (!links.length) return;
+
+        // Map slug → all toc anchors with that slug (desktop + mobile both render links)
+        const linksBySlug = new Map<string, HTMLAnchorElement[]>();
+        links.forEach(link => {
+            const slug = link.dataset.tocSlug!;
+            if (!linksBySlug.has(slug)) linksBySlug.set(slug, []);
+            linksBySlug.get(slug)!.push(link);
+        });
+
+        const slugs = [...linksBySlug.keys()];
+        const headingEls = slugs
+            .map(slug => document.getElementById(slug))
+            .filter((el): el is HTMLElement => el !== null);
+
+        if (!headingEls.length) return;
+
+        const getHeaderHeight = (): number => {
+            const header = document.querySelector('header');
+            return header ? header.getBoundingClientRect().height : 64;
+        };
+
+        const setActive = (slug: string) => {
+            linksBySlug.forEach((els, s) => {
+                els.forEach(el => el.classList.toggle('toc-link--active', s === slug));
+            });
+        };
+
+        // Pick the topmost heading whose top edge has passed the header.
+        // Falls back to the last heading if we've scrolled past everything.
+        const updateActive = () => {
+            const threshold = getHeaderHeight() + 24; // px from viewport top
+            let best: HTMLElement | null = null;
+
+            for (const el of headingEls) {
+                const top = el.getBoundingClientRect().top;
+                if (top <= threshold) {
+                    best = el; // keep updating — last one above threshold wins
+                } else {
+                    break; // headings are in document order; stop early
+                }
+            }
+
+            // If nothing has crossed the threshold yet, highlight the first entry
+            if (!best && headingEls.length) best = headingEls[0];
+            if (best) setActive(best.id);
+        };
+
+        // Use IntersectionObserver as the scroll-change trigger (efficient),
+        // but always re-evaluate all headings to find the correct active one.
+        const observer = new IntersectionObserver(
+            () => updateActive(),
+            {
+                rootMargin: `-${getHeaderHeight() + 1}px 0px -60% 0px`,
+                threshold: 0,
+            }
+        );
+
+        headingEls.forEach(el => observer.observe(el));
+
+        // Also run on scroll for cases where the header height changes (resize).
+        window.addEventListener('scroll', updateActive, { passive: true });
+
+        // Initial call
+        updateActive();
+    }
+
+    // Run after DOM is ready; also handles Astro view transitions if used.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTocObserver);
+    } else {
+        initTocObserver();
+    }
+    document.addEventListener('astro:page-load', initTocObserver);
+</script>

@@ -1,0 +1,14 @@
+---
+endpoint: get-graph-structure
+group: system
+method: get
+name: Get graph structure
+endpointUrl: /graph-structure
+swaggerUrl: /graph-structure
+---
+
+Returns metadata about the graph structure and its node and relation types.
+
+**Note**: This endpoint shares the `instanceConfiguration.enabled` configuration option with the
+[`GET /instance-configuration`](/api/get-instance-configuration) endpoint and can therefore be disabled by the
+administrator, in which case a `403 Forbidden` response is returned instead.

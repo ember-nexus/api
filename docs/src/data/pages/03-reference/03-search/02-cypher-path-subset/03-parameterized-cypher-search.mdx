@@ -1,0 +1,25 @@
+---
+type: guide
+title: Parameterized cypher search
+---
+import searchQuery from './03-parameterized-cypher-search/query.sh?raw';
+import searchResultBody from './03-parameterized-cypher-search/result.json';
+import searchResultHeaders from './03-parameterized-cypher-search/header.txt?raw';
+
+This example shows how to pass parameters into a Cypher path query, as [query variables](/reference/search/cypher-path-subset#input-parameters)
+rather than string interpolation. Cypher path query does not support expressions like the Elasticsearch query
+step does - instead, any step or global parameter is directly available inside the query as a `$variable`.  
+Here, `$taxonNames` restricts the search to plants belonging to any of the given taxa, and Cypher's own `IN` operator
+performs the membership check.
+
+<Code code={searchQuery} lang="bash" mark="taxonNames" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+Passing a list with more than one taxon name would widen the search to plants belonging to any of them, without
+changing the query string itself - useful for building search forms where the set of matched taxa is chosen by the
+end user.

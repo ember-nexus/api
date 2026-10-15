@@ -1,0 +1,9 @@
+{
+  "components": {
+    "examples": {
+      "NotFoundProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/element/get-element/404-response-body.json"
+      }
+    }
+  }
+}

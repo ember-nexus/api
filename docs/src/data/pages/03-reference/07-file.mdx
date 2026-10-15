@@ -1,0 +1,116 @@
+---
+type: reference
+title: File
+---
+
+Every node and relation can have at most one file attached, addressed through the element's own id at `/<uuid>/file`
+(see the [file endpoints](/reference/endpoints#file-and-upload)). There is no separate identity for the file itself -
+it exists only as long as the element it is attached to exists, and is deleted automatically as a side effect of
+[`DELETE /<uuid>`](/api/delete-element).
+
+## Access
+
+A file has no access rules of its own. All access operations (read, create, update, delete) resolve to whatever
+access the current user has on the owning element - see the [access model](/reference/access-model) for how that is
+determined.
+
+## Size limits
+
+A file can be anywhere from zero bytes up to `file.maxFileSizeInBytes`, an operator-configured setting (see the
+[configuration reference](/reference/configuration)) that defaults to 10 GiB.
+
+This setting is bounded by the storage backend in use. Ember Nexus currently supports S3-compatible storage only,
+and S3 imposes its own hard technical maximum object size of 5 TiB, on top of separate hard limits on chunk size and
+count that only matter for resumable uploads - see [Limits](/reference/upload#limits) in the upload reference for
+those. Operator configuration is validated against all of these technical limits at server startup, and a
+configuration that violates any of them is a startup error, not a runtime one - the server refuses to start rather
+than accept requests it can't actually service.
+
+A request whose body (direct upload) or declared/reassembled length (resumable upload) exceeds `maxFileSizeInBytes`
+is rejected with `400 Bad Request`. Independently, every single request body is capped at
+`file.uploadMaxChunkSizeInBytes` (default 101 MiB) - larger files require a resumable upload.
+
+## Metadata
+
+Uploading a file sets two properties on the owning element automatically: a `hasFile` boolean, and a `file` object
+holding everything else. Here is a `Data` node with a file attached, as returned by
+[`GET /<uuid>`](/api/get-element):
+
+import exampleFileElement from '../assets/example-file-element.json';
+
+<Code code={JSON.stringify(exampleFileElement, null, 2)} lang="json" />
+
+<Note>
+    This example happens to be a node, but relations carry a file exactly the same way - `hasFile` and `file` are
+    ordinary element properties, and every endpoint on this page works identically regardless of whether `<uuid>`
+    addresses a node or a relation.
+</Note>
+
+The `file` object itself - the same shape shown above, collapsed to just that property:
+
+<Code code={JSON.stringify(exampleFileElement.file, null, 2)} lang="json" />
+
+- `contentLength` - the file's size in bytes.
+- `extension` - taken from the filename in the `Content-Disposition` request header the file was uploaded with, or
+  `bin` if none could be determined. There is no separately stored filename:
+  [`GET /<uuid>/file`](/api/get-element-file) reconstructs the downloaded file's `Content-Disposition` header from
+  the element's own `name` property (or its id, if the element has none) plus this extension.
+- `mimeType` - the content type detected from the uploaded bytes.
+- `hash.sha256` - the file's SHA-256 hash as a lowercase hex string (see [Verifying integrity](#verifying-integrity)
+  below - the `Repr-Digest` header uses a different encoding of the same hash).
+
+`hasFile` and `file` can not be set or changed directly through the element's own `data` - only replacing the file
+(or deleting it, which removes both properties again) changes them, as a side effect.
+
+## Conditional requests
+
+File endpoints support `If-Match` and `If-None-Match` against an `ETag` derived from the file's content, the same
+mechanism used by [element endpoints](/reference/endpoints#element) - see the
+[caching and conditional requests guide](/guide/caching-and-conditional-requests) for how `ETag`s behave in general.
+[`PUT /<uuid>/file`](/api/put-element-file) is the endpoint where this matters most in practice, since it silently
+replaces an existing file - `If-Match` lets a concurrent writer detect that the file changed since it was last read.
+
+`If-Match: *` and `If-None-Match: *` are supported (`If-None-Match: *` on `POST`/`PUT` succeeds only if the element has
+no file yet). On write endpoints a failing precondition answers `412 Precondition Failed`, evaluated **before** any
+`409 Conflict`. `If-Match` on a file endpoint of an element without file answers `412`. A user without the required
+access gets `404` for conditional requests as well. Weak (`W/`) tags never match `If-Match`.
+
+## Verifying integrity
+
+Every download's response includes a `Repr-Digest` header with the file's SHA-256 hash, in
+[RFC 9530](https://datatracker.ietf.org/doc/html/rfc9530) structured-field format (`sha-256=:[base64]:`), letting a
+client verify the downloaded bytes without a separate request or checksum file. It is omitted for files uploaded
+before this header existed, since no hash was stored for them at the time.
+
+The same mechanism works in reverse on upload: a client can send a `Repr-Digest` header (or `Content-Digest`, as a
+fallback name) with the expected SHA-256 digest. For a direct upload
+([`POST /<uuid>/file`](/api/post-element-file)/[`PUT /<uuid>/file`](/api/put-element-file)), the server hashes the request body
+before writing anything to storage and compares it to the supplied digest; a mismatch fails with `400 Bad Request`
+and nothing is written or replaced. For a resumable upload, the digest is checked on the completing
+[`PATCH /upload/<uuid>`](/api/patch-upload) request against the hash of the fully reassembled file - see the
+[upload reference](/reference/upload#verifying-integrity) for how that hash is computed incrementally across chunks.
+
+Only SHA-256 is supported; a digest header naming a different algorithm is rejected the same way as a mismatched
+hash.
+
+## Partial downloads with `Range`
+
+[`GET /<uuid>/file`](/api/get-element-file) accepts a `Range` header to download part of a file instead of the whole
+thing, following [RFC 9110 §14](https://www.rfc-editor.org/rfc/rfc9110#name-range-requests). Only a single byte range
+is supported per request, in one of three forms: `bytes=<start>-<end>`, `bytes=<start>-` (from `start` to the end of
+the file), or `bytes=-<suffixLength>` (the last `suffixLength` bytes).
+
+A satisfiable range responds with `206 Partial Content` and a `Content-Range` header describing what was actually
+returned. An `end` beyond the file's actual length is clamped to the file's length rather than rejected.
+`Accept-Ranges: bytes` is always present on responses from this endpoint, even a full, non-ranged `200 OK`, so a
+client can detect range support ahead of time without a prior request.
+
+A comma-separated list of ranges (multi-range requests) is not supported and fails with `400 Bad Request`. A range
+whose start lies beyond the end of the file, or that spans zero bytes, fails with `416 Range Not Satisfiable`; this includes any range on a zero-byte file.
+
+## Ambiguous 404s
+
+[`GET /<uuid>/file`](/api/get-element-file) responds with `404 Not Found` both when the element does not exist (or
+is not accessible to the current user) and when the element exists but simply has no file attached - the two cases
+are indistinguishable from the response alone, by design, so that the existence of an element can't be inferred from
+whether it happens to have a file.

@@ -5,3 +5,4 @@ ember_nexus:
     enabled: false
   file:
     maxFileSizeInBytes: 1024
+    uploadExpiresAfterFirstRequestInSeconds: 3

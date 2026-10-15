@@ -1,0 +1,164 @@
+---
+type: reference
+title: Upload
+---
+
+Ember Nexus supports two ways of getting a file onto an element: a **direct upload**, where the request body is the
+complete file, and a **resumable upload**, where the file is sent as a sequence of chunks across multiple requests.
+Both are started the same way, through [`POST /<uuid>/file`](/api/post-element-file) or
+[`PUT /<uuid>/file`](/api/put-element-file), and selected via the `Upload-Complete` request header.
+
+The resumable upload mechanism implements the
+[IETF "Resumable Uploads for HTTP" draft](https://datatracker.ietf.org/doc/draft-ietf-httpbis-resumable-upload/) -
+not the older tus.io protocol. There is no `Tus-Resumable` header, and
+`Upload-Complete` uses the [structured boolean](https://www.ietf.org/rfc/rfc8941#name-booleans) values `?0`/`?1`
+rather than a plain string.
+
+## Headers
+
+- `Upload-Complete` - `?1` for a direct upload or the final chunk of a resumable upload, `?0` for a chunk that is not
+  yet the last one. Optional on `POST`/`PUT /<uuid>/file` (absent means a complete single-request upload), but
+  **required** on [`PATCH /upload/<uuid>`](/api/patch-upload), which answers `400 Bad Request` without it (IETF draft
+  §4.4.1).
+- `Upload-Offset` (required on [`PATCH /upload/<uuid>`](/api/patch-upload)) - the number of bytes already stored for
+  the upload. On a request it must match the upload's current offset exactly; a mismatch fails with `409 Conflict`,
+  and the problem response's details include both the expected and the provided value so the client can
+  re-synchronize.
+- `Upload-Length` (optional) - the total size in bytes the finished file will have, once all chunks are appended.
+  Can be omitted when the total size isn't known ahead of time. Once set on creation, it can not be changed or
+  removed on a later request.
+- `Upload-Limit` (response only) - a structured field describing the server's current limits for the upload:
+  `max-age` (the upload's remaining lifetime in seconds), `max-size` (maximum total
+  file size in bytes), `min-append-size` (minimum size of a non-final chunk) and `max-append-size` (maximum size of
+  a single chunk). Sent on every response that creates or continues a resumable upload
+  ([`POST /<uuid>/file`](/api/post-element-file)/[`PUT /<uuid>/file`](/api/put-element-file) with
+  `Upload-Complete: ?0`, [`PATCH /upload/<uuid>`](/api/patch-upload), [`HEAD /upload/<uuid>`](/api/head-upload)).
+  A direct upload's
+  `201 Created` carries none of these headers, since there is no ongoing upload to describe.
+
+## Lifecycle
+
+1. **Create** - `POST` or `PUT` with `Upload-Complete: ?0`. Any data sent in this first request is stored as the
+   upload's first chunk (a zero-length body is valid, and can be used purely to create the upload and read back its
+   `Upload-Limit` before deciding on a chunking strategy). The response is `204 No Content` with a `Location` header
+   pointing at the new upload's URL under `/upload/<uuid>`.
+2. **Append** - [`PATCH /upload/<uuid>`](/api/patch-upload) with `Content-Type: application/partial-upload`,
+   `Upload-Offset` equal to the current offset, and `Upload-Complete: ?0` (the header is required on `PATCH`). Chunks must be sent in order - the
+   upload's offset only ever advances by exactly the size of the chunk just accepted, so an out-of-order or
+   overlapping chunk is rejected via the offset check rather than silently reordered.
+3. **Inspect** (optional) - [`HEAD /upload/<uuid>`](/api/head-upload) returns the current `Upload-Offset`,
+   `Upload-Length`, `Upload-Complete`, `Upload-Limit` and `Expires` as headers with no body, e.g. after reconnecting
+   from a dropped connection.
+4. **Complete** - a `PATCH` with `Upload-Complete: ?1` (its body may be empty). This triggers the merge (see below);
+   on success the upload object stops existing - subsequent requests against its URL respond `404`.
+5. **Cancel** (optional) - [`DELETE /upload/<uuid>`](/api/delete-upload) removes an in-progress upload and its
+   already-uploaded chunks before it completes. Explicit cancellation is optional; an upload that is simply abandoned
+   is cleaned up automatically once it expires (see [Expiry](#expiry) below).
+
+## Behind the scenes
+
+### Chunk storage
+
+A resumable upload's chunks are written to temporary storage as they arrive, and only moved to permanent storage
+once the upload completes successfully (see [Merge on completion](#merge-on-completion) below) - an upload that
+never finishes never touches permanent storage at all. See the
+[configuration reference](/reference/configuration#file-storage-buckets) for the operator-facing details behind
+this (the two S3 buckets involved, and why).
+
+### Merge on completion
+
+When the completing chunk is accepted, the server does not re-upload the assembled bytes - it uses a genuine S3
+**multipart upload**: a multipart upload is created against the target key in the storage bucket, each previously
+stored chunk is attached to it via a server-side part-copy (an intra-S3 copy from the upload bucket, not a
+client-driven re-transfer), and the multipart upload is then completed. If any part-copy or the completion step
+fails, the multipart upload is aborted and the request fails - the target element's existing file (if any) is left
+untouched, since the replacement only takes effect once the multipart upload actually completes. Once merged, the
+individual chunk objects are deleted from the upload bucket, and - if this upload replaces an existing file - the
+previous storage object is deleted as well.
+
+<Note>
+    A **direct** upload (the request body is the complete file, `Upload-Complete: ?1` on the very first request)
+    does not go through this multipart path at all - the body is written directly to the upload bucket and then
+    copied into the storage bucket as a single object. The chunked multipart merge only happens for resumable
+    uploads.
+</Note>
+
+### Verifying integrity
+
+The SHA-256 hash of the file is computed incrementally as chunks arrive, rather than by re-reading the assembled
+file from storage after the fact: each chunk is hashed locally as it's received, and the running hash state is
+persisted on the upload between requests so it can be resumed on the next chunk. On the completing `PATCH`, the hash
+is finalized and, if a `Repr-Digest` header was supplied, compared against it before the merge
+is carried out (`Content-Digest` only describes the body of a single request, i.e. the last chunk, so it is ignored here) - the same [RFC 9530](https://datatracker.ietf.org/doc/html/rfc9530) structured-field format used for
+direct uploads and downloads, described in the [file reference](/reference/file#verifying-integrity). A mismatch
+fails with `400 Bad Request`; the target element keeps whatever file it had before (if any) - a failed completion
+never leaves an element with a partially-written file.
+
+## Limits
+
+The chunk-size and count limits ultimately come from the storage backend and the operator's configuration together -
+see [Size limits](/reference/file#size-limits) in the file reference for how those two interact and are validated
+against each other at startup. In terms of the values actually reported to clients via `Upload-Limit`:
+
+- `min-append-size` (`file.uploadMinChunkSizeInBytes`, default 5 MiB - the S3 backend's own hard minimum) - every
+  chunk except the last must be at least this large. A smaller chunk is rejected with `400 Bad Request`, unless it
+  is the completing chunk (`Upload-Complete: ?1`) or has **exactly** zero length - an empty chunk is accepted as a
+  no-op (effectively a status check) regardless of this minimum.
+- `max-append-size` (`file.uploadMaxChunkSizeInBytes`, default 101 MiB, matching the Caddy/PHP body limit) - the
+  maximum size of **every** request body, single-request uploads and chunks alike. A larger body is rejected with
+  `400 Bad Request`, also when no `Content-Length` header was sent. Files that do not fit into one request must use a
+  resumable upload.
+- The maximum number of chunks is derived from `file.uploadChunkDigitsLength` (default 4 digits) as 10 raised to
+  that many digits - 10,000 chunks by default, matching the S3 backend's own hard maximum.
+- `max-size` (`file.maxFileSizeInBytes`, default 10 GiB) - the maximum size of the finished file, the same setting
+  described in [Size limits](/reference/file#size-limits) in the file reference. A completing upload whose
+  reassembled length exceeds this is rejected with `400 Bad Request`.
+- The total number of bytes on completion must equal `Upload-Length`, if one was declared; otherwise the request fails
+  with `409 Conflict` and the upload is deleted.
+
+## Expiry
+
+An upload's `expires` timestamp is set once, on creation, to the first request's time plus
+`file.uploadExpiresInSecondsAfterFirstRequest` (default 3 hours / `10800`) - it is **not** extended by later chunks,
+so the entire upload, from first byte to the completing chunk, must fit inside that window regardless of how many
+requests it takes. Reported to the client as the `Expires` header and as `max-age` inside `Upload-Limit`, which is the
+*remaining* lifetime in seconds at the time of the response.
+
+Once `expires` has passed, further [`PATCH /upload/<uuid>`](/api/patch-upload) requests against the upload fail with `410 Gone` -
+the upload has to be recreated from scratch via `POST` or `PUT`.
+
+An expired upload isn't deleted the instant it expires: `file.expiredUploadCanBeDeletedAfterExpirationInSeconds`
+(default 1 hour / `3600`) is a grace period added on top of `expires` before the upload becomes eligible for
+cleanup, giving a client that was right at the boundary a little leeway. Actual deletion (freeing the chunks already stored in the upload bucket, and removing the upload) is performed by
+the [`cron:delete-expired-uploads`](/command/cron-delete-expired-uploads) task, which every API instance already
+schedules automatically - see [Background tasks](/reference/configuration#background-tasks) in the configuration
+reference. It skips uploads that
+were already removed, whether by an explicit
+[`DELETE /upload/<uuid>`](/api/delete-upload) or because the upload's target element was deleted in the meantime.
+
+## Access control
+
+- Only the user who created a resumable upload can continue it, inspect it, or delete it -
+  [`PATCH /upload/<uuid>`](/api/patch-upload), [`HEAD /upload/<uuid>`](/api/head-upload) and
+  [`DELETE /upload/<uuid>`](/api/delete-upload) all respond `404` for a user other than the creator, even one with
+  full access to the upload's target element.
+- An upload is not transferable to another user.
+- Should the creator lose `UPDATE` access to the upload's target element while the upload is still in progress, the
+  upload is canceled and deleted as a side effect.
+
+Implementation note: cancellation is event-driven (deleted/changed `OWNS`, `IS_IN_GROUP`, `HAS_UPDATE_ACCESS`
+relations, deleted users and groups; reviewed at the end of the request) and lazy (`HEAD`/`PATCH` detect the lost access
+and answer `404`). Changes made outside the API (CLI, backup load) only trigger the lazy path.
+
+## Concurrency
+
+Requests that modify the **same** upload ([`PATCH /upload/<uuid>`](/api/patch-upload) and
+[`DELETE /upload/<uuid>`](/api/delete-upload)) are serialized by a per-upload lock held in Redis (the IETF draft
+requires servers to prevent such races). While the lock is held, a second request answers `409 Conflict`; the client
+should retry after a short pause. As a second line of defense, every chunk is written under its own unique object key,
+and the upload's offset is updated with a compare-and-set; a request which lost such a race answers `409 Conflict`
+as well and removes its chunk again.
+
+Multiple resumable uploads can target the same element in parallel (this is discouraged, but not prevented). Each
+proceeds independently; whichever one finishes its completing `PATCH` last is the one whose file ends up attached to
+the element, silently replacing whatever the earlier-finishing upload had just written.

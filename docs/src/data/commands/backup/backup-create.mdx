@@ -1,0 +1,30 @@
+---
+command: backup:create
+name: backup:create
+helpCommand: php bin/console backup:create --help
+helpOutput: backup-create-help.html
+exampleCommand: php bin/console backup:create test
+exampleOutput: backup-create.html
+---
+
+Creates a new backup of the current database state - all nodes, all relations, and (unless
+disabled) any stored files - and writes it to `var/backup/<name>` on local storage.
+
+The `name` argument is optional and defaults to the current timestamp (`YmdHis`). The name can not
+be empty, `.`, or `..`, and the command fails if a backup with the same name already exists; use
+`backup:load` to restore, or `backup:fetch` to import one from a remote source.
+
+Options:
+
+- `-p`, `--pretty` - pretty-prints the exported JSON files. Off by default, since it makes backups
+  noticeably larger.
+- `--no-files` - skips exporting files, only backing up nodes and relations.
+
+A `summary.json` is written alongside the backup with the node/relation/file counts, hostname, and
+API version - this is what `backup:list` reads to populate its table.
+
+<Note>
+    The command counts nodes and relations up front and pages through them while exporting, so it
+    can take a while on large graphs. It does not lock the database, so changes made while a backup
+    is running are not guaranteed to be captured consistently.
+</Note>

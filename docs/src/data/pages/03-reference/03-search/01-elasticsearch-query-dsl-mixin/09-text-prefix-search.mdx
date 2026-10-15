@@ -1,0 +1,25 @@
+---
+type: guide
+title: Text prefix search
+---
+import searchQuery from './09-text-prefix-search/query.sh?raw';
+import searchResultBody from './09-text-prefix-search/result.json';
+import searchResultHeaders from './09-text-prefix-search/header.txt?raw';
+
+This example uses Elasticsearch's [`prefix` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-prefix-query)
+to find all elements whose `name` starts with the string `blu`, and are accessible to the user.  
+Results are then [hydrated](/reference/search/element-hydration), i.e. transformed into a collection response.
+
+**Note**: `prefix` is a term-level query, so it is matched against the exact indexed value rather than an analyzed
+text field - similar to [exact keyword matching](/reference/search/elasticsearch-query-dsl-mixin/exact-keyword-matching),
+`name.keyword` should be preferred over `name` for reliable prefix matches on `text` fields.
+
+<Code code={searchQuery} lang="bash" mark="prefix" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+Both results have a `name` starting with "blu" - the tag "blue" and the plant "Bluebell".

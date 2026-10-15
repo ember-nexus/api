@@ -1,0 +1,10 @@
+{
+  "components": {
+    "examples": {
+      "ReservedIdentifierProblemExample": {
+        "summary": "The unique user identifier is already used by another account.",
+        "x-ember-nexus-recording": "api-endpoints/user/post-register/400-reserved-identifier-response-body.json"
+      }
+    }
+  }
+}

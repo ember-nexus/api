@@ -1,0 +1,11 @@
+---
+// Inline "this cell applies" marker for comparison tables, e.g. the
+// property-type/database matrix on the element schema reference page.
+// Markdown counterpart: `src/mdmx/registry/Check.ts` (renders `✓`).
+import { Icon } from 'astro-icon/components';
+---
+<Icon
+    name="check"
+    class="inline-block size-4 align-text-bottom text-green-600 dark:text-green-500"
+    aria-label="yes"
+/>

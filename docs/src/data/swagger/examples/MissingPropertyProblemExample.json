@@ -1,0 +1,9 @@
+{
+  "components": {
+    "examples": {
+      "MissingPropertyProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/element/post-element/400-response-body.json"
+      }
+    }
+  }
+}

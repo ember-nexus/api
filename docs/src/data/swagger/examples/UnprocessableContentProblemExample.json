@@ -1,0 +1,10 @@
+{
+  "components": {
+    "examples": {
+      "UnprocessableContentProblemExample": {
+        "summary": "An expression (Go Expr Lang) query exceeded its configured timeout.",
+        "x-ember-nexus-recording": "api-endpoints/search/post-search/422-response-body.json"
+      }
+    }
+  }
+}

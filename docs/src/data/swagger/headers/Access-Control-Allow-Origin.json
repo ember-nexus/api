@@ -1,0 +1,24 @@
+{
+  "components": {
+    "headers": {
+      "Access-Control-Allow-Origin": {
+        "description": "Specifies which origin(s) may access the resource.",
+        "schema": {
+          "type": "string",
+          "example": "*"
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Origin",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/access-control-allow-origin",
+            "name": "HTTP.dev"
+          }
+        ],
+        "required": true
+      }
+    }
+  }
+}

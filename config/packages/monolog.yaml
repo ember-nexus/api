@@ -18,11 +18,11 @@ when@dev:
         id: App\Logger\TerminalConsoleHandler
         channels: ["!event", "!doctrine", "!console"]
       # plain stream, not fingers_crossed like "main": audit entries must always be written, never gated on an
-      # error occurring in the same request
+      # error occurring in the same request. Flushed explicitly (see App\Logger\FlushingStreamHandler) so a
+      # record is visible on disk as soon as it is written, not only once PHP's stream buffer fills up.
       audit:
-        type: stream
-        path: "%kernel.logs_dir%/audit.log"
-        level: notice
+        type: service
+        id: App\Logger\FlushingStreamHandler
         channels: ["audit"]
 
 when@test:
@@ -39,9 +39,8 @@ when@test:
         path: "%kernel.logs_dir%/test.log"
         level: debug
       audit:
-        type: stream
-        path: "%kernel.logs_dir%/audit.log"
-        level: notice
+        type: service
+        id: App\Logger\FlushingStreamHandler
         channels: ["audit"]
 
 when@prod:
@@ -72,10 +71,9 @@ when@prod:
         # without the channel restriction every error would be written a second time in the line format
         channels: ["deprecation"]
       # see the "audit" handler under when@dev for why this isn't gated behind "main"'s fingers_crossed like
-      # "nested" is
+      # "nested" is; formatter is set directly on the service (see services.yaml) since "type: service" handlers
+      # can't be reformatted here
       audit:
-        type: stream
-        path: "php://stderr"
-        level: notice
-        formatter: monolog.formatter.json
+        type: service
+        id: App\Logger\FlushingStreamHandler
         channels: ["audit"]

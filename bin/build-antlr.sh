@@ -1,9 +1,9 @@
 #/bin/sh
 
-rm -rf antlr/dist/*
+rm -rf lib/Antlr/dist/*
 (
   echo "cleaning old PHP files"
-  cd antlr/src
+  cd lib/Antlr/src
   echo "building PHP files from grammar definitions"
   java org.antlr.v4.Tool -Dlanguage=PHP -o ../dist Cypher25Lexer.g4
   java org.antlr.v4.Tool -Dlanguage=PHP -o ../dist CypherPathSubset.g4
@@ -17,13 +17,13 @@ rm -rf antlr/dist/*
   echo "generating documentation pages from grammar definitions"
   mkdir -p /tmp/tmp-generate-antlr-docs
   cd /tmp/tmp-generate-antlr-docs
-  java -jar /usr/local/lib/rrd-antlr4-0.1.2.jar /var/www/html/antlr/src/CypherPathSubset.g4
-  java -jar /usr/local/lib/rrd-antlr4-0.1.2.jar /var/www/html/antlr/src/Cypher25Parser.g4
-  java -jar /usr/local/lib/rrd-antlr4-0.1.2.jar /var/www/html/antlr/src/openCypher9.g4
-  rm -f /var/www/html/docs/antlr/*
-  mv output/Cypher25Parser/index.html /var/www/html/docs/antlr/cypher-25.html
-  mv output/CypherPathSubset/index.html /var/www/html/docs/antlr/cypher-path-subset.html
-  mv output/openCypher9/index.html /var/www/html/docs/antlr/open-cypher-9.html
+  java -jar /usr/local/lib/rrd-antlr4-0.1.2.jar /var/www/html/lib/Antlr/src/CypherPathSubset.g4
+  java -jar /usr/local/lib/rrd-antlr4-0.1.2.jar /var/www/html/lib/Antlr/src/Cypher25Parser.g4
+  java -jar /usr/local/lib/rrd-antlr4-0.1.2.jar /var/www/html/lib/Antlr/src/openCypher9.g4
+  rm -f /var/www/html/docs/public/antlr/*
+  mv output/Cypher25Parser/index.html /var/www/html/docs/public/antlr/cypher-25.html
+  mv output/CypherPathSubset/index.html /var/www/html/docs/public/antlr/cypher-path-subset.html
+  mv output/openCypher9/index.html /var/www/html/docs/public/antlr/open-cypher-9.html
   cd ../
   rm -rf /tmp/tmp-generate-antlr-docs
   echo "updated documentation pages"

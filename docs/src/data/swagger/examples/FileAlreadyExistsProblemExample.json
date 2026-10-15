@@ -1,0 +1,9 @@
+{
+  "components": {
+    "examples": {
+      "FileAlreadyExistsProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/file/post-element-file/409-response-body.json"
+      }
+    }
+  }
+}

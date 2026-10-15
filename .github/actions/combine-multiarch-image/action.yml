@@ -1,0 +1,82 @@
+name: 'Combine arch-tagged Docker images into a multi-arch manifest'
+description: >
+  Combines two already-pushed, digest-only images (the caller builds and pushes each one itself, untagged,
+  e.g. via `docker buildx build --output type=image,push=true`) into one or more multi-arch manifest tags via
+  `docker buildx imagetools create`. Referencing the arch images by digest, rather than a throwaway tag, means
+  there's nothing to clean up afterwards. Registry-agnostic (Docker Hub or GHCR, or anything else `docker login`
+  understands), so the combine logic only lives in one place for both the API image and the docs image.
+inputs:
+  image-ref:
+    description: >
+      Full repository reference, including registry host for anything other than Docker Hub (e.g.
+      ghcr.io/ember-nexus/api-docs, or embernexus/api for Docker Hub)
+    required: true
+  amd-digest:
+    description: 'Digest (sha256:...) that the amd image was already pushed under'
+    required: true
+  arm-digest:
+    description: 'Digest (sha256:...) that the arm image was already pushed under'
+    required: true
+  tags:
+    description: 'Comma-separated list of tags to publish the combined multi-arch manifest under'
+    required: true
+  registry:
+    description: 'Registry host to log in to; leave empty for Docker Hub'
+    required: false
+    default: ''
+  registry-username:
+    description: 'Username used to log in to the registry'
+    required: true
+  registry-password:
+    description: 'Password/token used to log in to the registry'
+    required: true
+outputs:
+  digest:
+    description: 'Digest of the last tag in `tags` after the multi-arch manifest was created'
+    value: ${{ steps.combine.outputs.digest }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Login to registry
+      if: inputs.registry != ''
+      uses: docker/login-action@v4
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.registry-username }}
+        password: ${{ inputs.registry-password }}
+
+    - name: Login to Docker Hub
+      if: inputs.registry == ''
+      uses: docker/login-action@v4
+      with:
+        username: ${{ inputs.registry-username }}
+        password: ${{ inputs.registry-password }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+      with:
+        version: latest
+
+    - name: Create multi-arch manifests
+      id: combine
+      shell: bash
+      run: |
+        set -eu
+        AMD_REF="${{ inputs.image-ref }}@${{ inputs.amd-digest }}"
+        ARM_REF="${{ inputs.image-ref }}@${{ inputs.arm-digest }}"
+
+        IFS=',' read -ra TAGS <<< "${{ inputs.tags }}"
+        LAST_TAG=""
+        for tag in "${TAGS[@]}"; do
+          tag="$(echo "$tag" | xargs)"
+          [ -z "$tag" ] && continue
+          FULL_TAG="${{ inputs.image-ref }}:$tag"
+          echo "Creating and pushing multi-arch image $FULL_TAG"
+          docker buildx imagetools create \
+            -t "$FULL_TAG" \
+            "$AMD_REF" \
+            "$ARM_REF"
+          LAST_TAG="$FULL_TAG"
+        done
+        DIGEST="$(docker buildx imagetools inspect "$LAST_TAG" --format '{{json .Manifest}}' | jq -r '.digest')"
+        echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"

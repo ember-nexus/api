@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\ExampleGenerationControllerWithDifferentConfiguration1\User;
 
-use App\Tests\ExampleGenerationController\BaseRequestTestCase;
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
 
 class PostRegisterTest extends BaseRequestTestCase
 {
@@ -22,8 +22,8 @@ class PostRegisterTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 403);
-        $documentationHeadersPath = 'docs/api-endpoints/user/post-register/403-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/post-register/403-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/user/post-register/403-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/user/post-register/403-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

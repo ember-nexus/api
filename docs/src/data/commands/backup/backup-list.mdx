@@ -1,0 +1,17 @@
+---
+command: backup:list
+name: backup:list
+helpCommand: php bin/console backup:list --help
+helpOutput: backup-list-help.html
+exampleCommand: php bin/console backup:list
+exampleOutput: backup-list.html
+---
+
+Lists all backups available in local backup storage, sorted by creation date descending (most
+recent first).
+
+Takes no arguments or options. For each backup folder that contains a `summary.json` (written by
+`backup:create` or `backup:fetch`), it prints the backup name, hostname, API version, creation
+date, and node/relation/file counts read from that file. Folders without a `summary.json` are
+skipped and logged, not shown in the table - they are typically leftovers from an interrupted
+`backup:create` or `backup:fetch` run.

@@ -1,0 +1,280 @@
+---
+type: guide
+title: Caching and conditional requests
+---
+
+This page handles client side caching through the usage of the `ETag` header. Other forms of caching exist, e.g. inside
+the internal databases, in a proxy between the user and the API etc., but are outside the scope of this article.
+
+## Other caching layers
+
+Besides client-side `ETag` caching, two other cache-related aspects exist:
+
+- The internal databases Ember Nexus depends on, e.g. Neo4j and Elasticsearch, have their own caches. They may show
+  slower "cold start" performance until their own caches are warmed up.
+- Ember Nexus itself stores/caches computed `ETag` values. They can be cleared and recalculated with the
+  [`cache:clear:etag`](/command/cache-clear-etag) command.
+
+Collections larger than the configured `cache.etagUpperLimitInCollectionEndpoints` (see the
+[configuration reference](/reference/configuration)) do not receive an `ETag` at all, as computing one for very large
+collections would cause performance problems.
+
+## What is the `ETag` header?
+
+The `ETag` header, short for "entity tag", is an identifier for a version of an element. It is sent in `HEAD` and `GET`
+responses, and can be used in later requests to determine whether content has changed or stayed the same, i.e. whether
+data cached by the client is still valid.
+
+Furthermore, the `ETag` can be used to craft **conditional requests** - do action x only if the element y has not
+changed.
+
+See also:
+
+- `ETag` header: [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag), [http.dev](https://http.dev/etag).
+- `If-Match` header: [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-Match), [http.dev](https://http.dev/if-match).
+- `If-None-Match` header: [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/If-None-Match), [http.dev](https://http.dev/if-none-match).
+
+## How Ember Nexus calculates the ETag
+
+The value of the `Etag` header is calculated as the [XXH3 hash](https://xxhash.com/) from the identifiers and
+`updatedAt` timestamps of all involved elements, as well as the instance's ETag seed (config value `cache.etagSeed`, see
+[documentation](/reference/configuration)).
+
+We use the XXH3 hash due to its performance benefits.
+
+As the `updatedAt` timestamp uses microsecond precision, the resulting `Etag` will be different as long as updates
+happen at least one microsecond apart.
+
+`If-Match: *` and `If-None-Match: *` are supported as well. On write endpoints a failing precondition answers `412`
+before any `409 Conflict` is evaluated, and without the required access a conditional request answers `404`. See the
+[file reference](/reference/file#conditional-requests) for the file-specific rules.
+
+## Using `If-None-Match` to avoid a second request
+
+### Initial request
+
+As we do not yet know the `ETag` value associated with the first request, we simply execute the request normally:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
+  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+```
+
+The response then contains the `Etag`-header.
+
+```http /Etag:.*/
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Cache-Control: no-cache, private
+Content-Type: application/json; charset=utf-8
+Date: Tue, 25 Aug 2026 11:53:42 GMT
+Etag: "6JM8JahrCeu"
+Transfer-Encoding: chunked
+X-Powered-By: Ember Nexus API
+```
+
+```json
+{
+  "type": "Data",
+  "id": "35cd3b18-0d0c-4e98-876e-898b930797f2",
+  "data": {
+    "created": "2020-01-01T00:00:00+00:00",
+    "updated": "2020-01-01T00:00:00+00:00",
+    "name": "Data",
+    "scenario": "general.if-match"
+  }
+}
+```
+
+**Note**: The ETag value itself contains quotes; they are part of the ETag.
+
+### Cached request
+
+As we now know the `ETag` value of the request, we can send a second request with the `If-None-Match` header and the
+`ETag` as its value.
+
+If the element has stayed the same, the API will respond with a `304 not modified` response, which does not have a
+response body.  
+Should the element have changed, the API returns the up-to-date data in its response, as well as its new `ETag` in the
+response headers.
+
+```bash /If-None-Match: .\w+./
+curl \
+  -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
+  -H 'If-None-Match: "6JM8JahrCeu"' \
+  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+```
+
+Response:
+
+```http /Etag:.*/
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Cache-Control: no-cache, private
+Date: Tue, 25 Aug 2026 11:53:50 GMT
+Etag: "6JM8JahrCeu"
+X-Powered-By: Ember Nexus API
+```
+
+The not modified response does not contain a response body.
+
+### Cached request with invalid Etag
+
+We can lastly modify the `Etag` value to another string, effectively invalidating it. The API will then see the mismatch
+and return up-to-date data for the endpoint:
+
+```bash /If-None-Match: .\w+./
+curl \
+  -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
+  -H 'If-None-Match: "invalid"' \
+  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+```
+
+Response:
+
+```http /Etag:.*/
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Cache-Control: no-cache, private
+Content-Type: application/json; charset=utf-8
+Date: Tue, 25 Aug 2026 11:54:05 GMT
+Etag: "6JM8JahrCeu"
+Transfer-Encoding: chunked
+X-Powered-By: Ember Nexus API
+```
+
+```json
+{
+  "type": "Data",
+  "id": "35cd3b18-0d0c-4e98-876e-898b930797f2",
+  "data": {
+    "created": "2020-01-01T00:00:00+00:00",
+    "updated": "2020-01-01T00:00:00+00:00",
+    "name": "Data",
+    "scenario": "general.if-match"
+  }
+}
+```
+
+## Using `If-Match` to create conditional requests
+
+Conditional requests are useful to avoid lost updates, i.e. when you only want a change to be executed when you know
+that no other person has changed it in the meantime.
+
+### Initial request
+
+Similarly to the `If-None-Match`-header, we first need to find out the `ETag` of the element to be updated:
+
+```bash
+curl \
+  -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
+  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+```
+
+The response then contains the `Etag`-header.
+
+```http /Etag:.*/
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Cache-Control: no-cache, private
+Content-Type: application/json; charset=utf-8
+Date: Tue, 25 Aug 2026 11:54:15 GMT
+Etag: "6JM8JahrCeu"
+Transfer-Encoding: chunked
+X-Powered-By: Ember Nexus API
+```
+
+```json
+{
+  "type": "Data",
+  "id": "35cd3b18-0d0c-4e98-876e-898b930797f2",
+  "data": {
+    "created": "2020-01-01T00:00:00+00:00",
+    "updated": "2020-01-01T00:00:00+00:00",
+    "name": "Data",
+    "scenario": "general.if-match"
+  }
+}
+```
+
+### Sending a conditional successful request
+
+If the element has not been changed in the meantime, a conditional request will be successful:
+
+```bash /If-Match: .\w+./
+curl -X PATCH \
+  -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
+  -H 'Content-Type: application/json' \
+  -H 'If-Match: "6JM8JahrCeu"' \
+  -d '{
+        "key": "some update to the element"
+      }' \
+  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+```
+
+The condition matches, so the update is applied and the response is `204 No Content` - the element's `ETag` has now
+changed as a side effect, so this same `If-Match` value can not be reused for a second update.
+
+```http
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Cache-Control: no-cache, private
+Date: Tue, 25 Aug 2026 12:52:00 GMT
+X-Powered-By: Ember Nexus API
+```
+
+### Sending a conditional invalid request
+
+If we repeat the same request with the old `ETag`, which is no longer valid, as we have just updated the element, the
+request will fail:
+
+
+```bash /If-Match: .\w+./
+curl -X PATCH \
+  -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
+  -H 'Content-Type: application/json' \
+  -H 'If-Match: "6JM8JahrCeu"' \
+  -d '{
+        "key": "some update to the element"
+      }' \
+  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+```
+
+```http
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, Location
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+Cache-Control: no-cache, private
+Content-Type: application/problem+json; charset=utf-8
+Date: Tue, 25 Aug 2026 12:52:05 GMT
+Transfer-Encoding: chunked
+X-Powered-By: Ember Nexus API
+```
+
+```json
+{
+  "type": "https://api.example.com/error/412/precondition-failed",
+  "title": "Precondition Failed",
+  "status": 412,
+  "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+  "detail": "Precondition does not match."
+}
+```

@@ -1,0 +1,7 @@
+{
+  "type": "http://api/error/400/forbidden-property",
+  "title": "Forbidden property",
+  "status": 400,
+  "instance": "urn:uuid:e374f513-e000-490d-b911-49111e462142",
+  "detail": "Endpoint does not accept setting the property 'created' in the request."
+}

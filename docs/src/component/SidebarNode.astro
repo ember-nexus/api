@@ -1,0 +1,180 @@
+---
+import { Icon } from 'astro-icon/components';
+
+import type { SidebarItem } from '../type';
+
+interface Props {
+    item: SidebarItem;
+    currentPath: string;
+    level?: number;
+}
+
+const { item, currentPath, level = 0 } = Astro.props;
+
+const isActive = (url: string): boolean =>
+    currentPath === url || currentPath === `${url}/`;
+
+/** Recursively checks whether the current page is inside a subtree. */
+const hasActiveChild = (items: SidebarItem[]): boolean =>
+    items.some((child) =>
+        (child.type === 'link' && isActive(child.url)) ||
+        (child.type === 'endpoint' && isActive(child.url)) ||
+        (child.type === 'link-group' && (isActive(child.url) || hasActiveChild(child.items))) ||
+        (child.type === 'group' && hasActiveChild(child.items))
+    );
+
+const nextLevel = level + 1;
+const panelId = crypto.randomUUID();
+
+const btnClass =
+    'shrink-0 inline-flex cursor-pointer items-center justify-center rounded-md p-1 text-zinc-600 transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] dark:text-zinc-400 dark:hover:bg-white/[0.06]';
+---
+
+{/* ── Top-level section heading (bold title, no click) ──────────────────────── */}
+{item.type === 'group' && item.variant === 'section' && (
+<li>
+    <p class="sidebar-group-title mt-4 px-3">{item.name}</p>
+    <ul class="flex flex-col gap-0.5">
+        {item.items.map((child) => (
+            <Astro.self item={child} currentPath={currentPath} level={nextLevel} />
+        ))}
+    </ul>
+</li>
+)}
+
+{/* ── Nested group heading (smaller, with left-border indented children) ─────── */}
+{item.type === 'group' && item.variant === 'nested' && level < 2 && (
+<li>
+    <p class="sidebar-nested-group-title mt-2 px-3">{item.name}</p>
+    <ul class="flex flex-col gap-0.5 border-l border-zinc-200 dark:border-zinc-700 ml-3 pl-2">
+        {item.items.map((child) => (
+            <Astro.self item={child} currentPath={currentPath} level={nextLevel} />
+        ))}
+    </ul>
+</li>
+)}
+
+{item.type === 'group' && item.variant === 'nested' && level >= 2 && (
+<li x-data={`{ open: ${hasActiveChild(item.items)} }`}>
+    <div class="mt-2 flex items-center gap-1 px-3">
+        <p class="sidebar-nested-group-title min-w-0 flex-1">{item.name}</p>
+        <button
+            type="button"
+            class={btnClass}
+            @click="open = !open"
+            :aria-expanded="open.toString()"
+            aria-controls={panelId}
+        >
+            <Icon
+                name="chevron-down"
+                class="size-4 transition-transform duration-200"
+                :class="open ? 'rotate-180' : ''"
+                aria-hidden="true"
+            />
+            <span class="sr-only">Toggle {item.name}</span>
+        </button>
+    </div>
+    <ul
+        id={panelId}
+        x-show="open"
+        x-cloak={hasActiveChild(item.items) ? undefined : true}
+        class="flex flex-col gap-0.5 border-l border-zinc-200 dark:border-zinc-700 ml-3 pl-2"
+        :aria-hidden="(!open).toString()"
+        :inert="!open"
+    >
+        {item.items.map((child) => (
+            <Astro.self item={child} currentPath={currentPath} level={nextLevel} />
+        ))}
+    </ul>
+</li>
+)}
+
+{/* ── Plain link ─────────────────────────────────────────────────────────────── */}
+{item.type === 'link' && (
+<li>
+    <a
+        href={item.url}
+        aria-current={isActive(item.url) ? 'page' : undefined}
+        class="block rounded-md px-3 py-1.5 text-[0.8125rem] no-underline text-zinc-900 dark:text-zinc-100 hover:bg-black/5 dark:hover:bg-white/[0.06] aria-[current]:bg-black/[0.06] dark:aria-[current]:bg-white/[0.09] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)]"
+    >
+        {item.name}
+    </a>
+</li>
+)}
+
+{/* ── Link with nested children (left-border indented sub-list) ──────────────── */}
+{item.type === 'link-group' && level < 2 && (
+<li>
+    <a
+        href={item.url}
+        aria-current={isActive(item.url) ? 'page' : undefined}
+        class="block rounded-md px-3 py-1.5 text-[0.8125rem] no-underline text-zinc-900 dark:text-zinc-100 hover:bg-black/5 dark:hover:bg-white/[0.06] aria-[current]:bg-black/[0.06] dark:aria-[current]:bg-white/[0.09] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)]"
+    >
+        {item.name}
+    </a>
+    <ul class="flex flex-col gap-0.5 border-l border-zinc-200 dark:border-zinc-700 mt-0.5 ml-3 pl-2">
+        {item.items.map((child) => (
+            <Astro.self item={child} currentPath={currentPath} level={nextLevel} />
+        ))}
+    </ul>
+</li>
+)}
+
+{item.type === 'link-group' && level >= 2 && (
+<li x-data={`{ open: ${isActive(item.url) || hasActiveChild(item.items)} }`}>
+    <div class="flex items-center gap-1">
+        <a
+            href={item.url}
+            aria-current={isActive(item.url) ? 'page' : undefined}
+            class="min-w-0 flex-1 block rounded-md px-3 py-1.5 text-[0.8125rem] no-underline text-zinc-900 dark:text-zinc-100 hover:bg-black/5 dark:hover:bg-white/[0.06] aria-[current]:bg-black/[0.06] dark:aria-[current]:bg-white/[0.09] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)]"
+        >
+            {item.name}
+        </a>
+        <button
+            type="button"
+            class={btnClass}
+            @click="open = !open"
+            :aria-expanded="open.toString()"
+            aria-controls={panelId}
+        >
+            <Icon
+                name="chevron-down"
+                class="size-4 transition-transform duration-200"
+                :class="open ? 'rotate-180' : ''"
+                aria-hidden="true"
+            />
+            <span class="sr-only">Toggle {item.name}</span>
+        </button>
+    </div>
+    <ul
+        id={panelId}
+        x-show="open"
+        x-cloak={isActive(item.url) || hasActiveChild(item.items) ? undefined : true}
+        class="flex flex-col gap-0.5 border-l border-zinc-200 dark:border-zinc-700 mt-0.5 ml-3 pl-2"
+        :aria-hidden="(!open).toString()"
+        :inert="!open"
+    >
+        {item.items.map((child) => (
+            <Astro.self item={child} currentPath={currentPath} level={nextLevel} />
+        ))}
+    </ul>
+</li>
+)}
+
+{/* ── API endpoint link (method badge + endpoint URL + name) ─────────────────── */}
+{item.type === 'endpoint' && (
+<li>
+    <a
+        href={item.url}
+        aria-current={isActive(item.url) ? 'page' : undefined}
+        style={`--c: var(--method-${item.method}, var(--method-put))`}
+        class="block rounded-md px-3 py-1.5 text-[0.8125rem] no-underline text-zinc-900 dark:text-zinc-100 hover:bg-black/5 dark:hover:bg-white/[0.06] aria-[current]:bg-black/[0.06] dark:aria-[current]:bg-white/[0.09] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)]"
+    >
+        <p class="m-0 font-mono truncate" title={item.endpointUrl} translate="no">
+            <b class="font-semibold text-[var(--c)] uppercase">{item.method}</b>
+            {" "}{item.endpointUrl}
+        </p>
+        <p class="mb-0 font-mono text-zinc-900 dark:text-zinc-100">{item.name}</p>
+    </a>
+</li>
+)}

@@ -1,0 +1,116 @@
+name: 'Build and push the docs site Docker image for one arch'
+description: >
+  Downloads a previously built `dist/` artifact, packages it into the docs site Docker image
+  (docker/docs/Dockerfile.ci) for one arch, and pushes it straight to GHCR under no tag at all (digest-only, no
+  tag ever created - see combine-multiarch-image for why). Optionally also exports a loadable tar.gz artifact
+  for callers that need one (the release pipeline, for its GitHub release attachment) - the regular CI pipeline
+  doesn't, since it has nothing to attach it to.
+inputs:
+  arch:
+    description: 'Architecture suffix used for local tags/tarball names (amd or arm)'
+    required: true
+  dist-artifact-name:
+    description: 'Name of the artifact containing the already-built docs-dist.tar.gz'
+    required: true
+  ghcr-image-name:
+    description: 'Image name under ghcr.io, without registry prefix (e.g. ember-nexus/api-docs)'
+    required: true
+  github-actor:
+    description: 'Actor used to authenticate against GHCR'
+    required: true
+  github-token:
+    description: 'Token used to authenticate against GHCR'
+    required: true
+  dockerhub-username:
+    description: 'Docker Hub username, used to log in before building (avoids anonymous pull rate limits)'
+    required: false
+    default: ''
+  dockerhub-password:
+    description: 'Docker Hub password/token, used to log in before building'
+    required: false
+    default: ''
+  save-tarball:
+    description: 'Also export a loadable tar.gz artifact (needed when attaching the image to a GitHub release)'
+    required: false
+    default: 'false'
+  tarball-artifact-name:
+    description: 'Name of the uploaded tarball artifact (required when save-tarball is true)'
+    required: false
+    default: ''
+  tarball-filename:
+    description: 'Filename of the tar.gz inside the uploaded artifact (required when save-tarball is true)'
+    required: false
+    default: ''
+  tarball-retention-days:
+    description: 'Retention in days for the uploaded tarball artifact'
+    required: false
+    default: '7'
+outputs:
+  digest:
+    description: 'Digest the image was pushed under'
+    value: ${{ steps.build.outputs.digest }}
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.dist-artifact-name }}
+        path: /tmp
+
+    - name: Extract dist
+      shell: bash
+      run: mkdir -p /tmp/dist && tar -xzf /tmp/docs-dist.tar.gz -C /tmp/dist
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+      with:
+        version: latest
+
+    - name: Login to Docker Hub
+      if: inputs.dockerhub-username != ''
+      uses: docker/login-action@v4
+      with:
+        username: ${{ inputs.dockerhub-username }}
+        password: ${{ inputs.dockerhub-password }}
+
+    - name: Login to GHCR
+      uses: docker/login-action@v4
+      with:
+        registry: ghcr.io
+        username: ${{ inputs.github-actor }}
+        password: ${{ inputs.github-token }}
+
+    - name: Build and push docs Docker image - ${{ inputs.arch }}
+      id: build
+      shell: bash
+      run: |
+        set -eu
+        RAW_TAR="/tmp/docs-${{ inputs.arch }}.tar"
+
+        OUTPUT_ARGS=(--output "type=image,name=ghcr.io/${{ inputs.ghcr-image-name }},push=true")
+        if [ "${{ inputs.save-tarball }}" = "true" ]; then
+          OUTPUT_ARGS+=(--output "type=docker,dest=$RAW_TAR,name=docs:${{ inputs.arch }}")
+        fi
+
+        docker buildx build \
+          --provenance=false \
+          --sbom=false \
+          --build-context dist=/tmp/dist/dist \
+          --build-context caddyconfig=./docker/docs \
+          -f ./docker/docs/Dockerfile.ci \
+          "${OUTPUT_ARGS[@]}" \
+          --metadata-file /tmp/metadata.json \
+          .
+
+        echo "digest=$(jq -r '."containerimage.digest"' /tmp/metadata.json)" >> "$GITHUB_OUTPUT"
+
+        if [ "${{ inputs.save-tarball }}" = "true" ]; then
+          gzip -c "$RAW_TAR" > "${{ inputs.tarball-filename }}"
+        fi
+
+    - uses: actions/upload-artifact@v6
+      if: inputs.save-tarball == 'true'
+      with:
+        name: ${{ inputs.tarball-artifact-name }}
+        path: ${{ inputs.tarball-filename }}
+        retention-days: ${{ inputs.tarball-retention-days }}

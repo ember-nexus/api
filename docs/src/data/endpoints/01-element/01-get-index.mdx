@@ -1,0 +1,29 @@
+---
+endpoint: get-index
+group: element
+method: get
+name: Get index
+endpointUrl: /
+swaggerUrl: /
+---
+
+Endpoint returns all elements the `User {.hl-1}` has direct ownership of.
+In the following example, the response would include the nodes `Data 1 {.hl-2}`, `Data 2 {.hl-2}` and `Token {.hl-2}`:
+
+<g6-graph mode="manual" layout="antv-dagre-TB">
+    <script type="application/json">{`
+    {
+        "elements": [
+            { "id": "user", "type": "User", "data": { "name": "User", "hl": "1" }},
+            { "id": "data1", "type": "Data", "data": { "name": "Data 1", "hl": "2" }},
+            { "id": "data2", "type": "Data", "data": { "name": "Data 2", "hl": "2" }},
+            { "id": "token", "type": "Token", "data": { "name": "Token", "hl": "2" }},
+            { "id": "owns1", "type": "OWNS", "start": "user", "end": "data1"},
+            { "id": "owns2", "type": "OWNS", "start": "user", "end": "data2" },
+            { "id": "owns3", "type": "OWNS", "start": "user", "end": "token" }
+        ]
+    }
+  `}</script>
+</g6-graph>
+
+Relations are explicitly not returned, as they are not being considered "top level elements".

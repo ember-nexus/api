@@ -1,0 +1,78 @@
+---
+import { commandsInGroup, prime } from '../lib/collections.ts';
+import { commandPath } from '../lib/routes.ts';
+
+interface Props {
+    /**
+     * The command group / namespace to filter on.
+     * Matches the prefix before the first colon in the `command` frontmatter,
+     * e.g. "backup", "cache", "user".
+     * Commands without a colon (e.g. "healthcheck") belong to group "system".
+     */
+    group: string;
+}
+
+const { group } = Astro.props;
+
+await prime();
+const entries = commandsInGroup(group);
+---
+<ul class="not-prose cgl-list">
+    {entries.map((e) => (
+        <li>
+            <a href={commandPath(e.data.command)} class="cgl-link">
+                <code class="cgl-command">php bin/console {e.data.command}</code>
+            </a>
+        </li>
+    ))}
+</ul>
+
+<style>
+    .cgl-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .cgl-list li {
+        margin: 0;
+        padding: 0;
+    }
+
+    .cgl-link {
+        display: block;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--color-hairline);
+        text-decoration: none;
+        color: inherit;
+        transition: background-color 0.15s ease;
+    }
+
+    .cgl-link:hover {
+        background-color: var(--c-list-link-hover-bg);
+    }
+
+    .cgl-link:focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 2px;
+    }
+
+    .cgl-command {
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
+        color: var(--c-list-code-fg);
+        background: none;
+        padding: 0;
+        border: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
+    /* Dark-mode list-link colors are handled via --c-list-* vars in colors.css */
+</style>

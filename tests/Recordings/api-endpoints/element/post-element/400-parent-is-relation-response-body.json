@@ -1,0 +1,7 @@
+{
+  "type": "http://api/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "instance": "urn:uuid:4b295623-41f1-476a-ab67-4fd6296ba75d",
+  "detail": "Endpoint expects property 'id' to be id of a node, got string 'id of a relation'."
+}

@@ -1,0 +1,9 @@
+{
+  "components": {
+    "examples": {
+      "ForbiddenPropertyProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/element/patch-element/400-response-body.json"
+      }
+    }
+  }
+}
