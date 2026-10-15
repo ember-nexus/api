@@ -79,7 +79,7 @@ curl \
 
 <div class="code-title auto-refresh">Response Headers</div>
 
-[Response Body](./post-index/204-response-header.txt ':include :type=code')
+[Response Body](./post-index/201-response-header.txt ':include :type=code')
 
 Success response does not have a response body.  
 Note that the UUID of the created element is written in the `Location`-header.
@@ -113,16 +113,6 @@ Note that the UUID of the created element is written in the `Location`-header.
 <div class="code-title auto-refresh">Response Body</div>
 
 [Response Body](./post-index/404-response-body.json ':include :type=code problem+json')
-
-### **🔴 Error 429**
-
-<div class="code-title">Response Headers</div>
-
-[Response Body](./post-index/429-response-header.txt ':include :type=code')
-
-<div class="code-title">Response Body</div>
-
-[Response Body](./post-index/429-response-body.json ':include :type=code problem+json')
 
 <!-- tabs:end -->
 

@@ -86,7 +86,7 @@ runs:
           "${BUILD_ARG_ARGS[@]}" \
           --load \
           -t "$TAG" \
-          -f ./docker/Dockerfile \
+          -f ./docker/api/Dockerfile \
           .
 
         docker save "$TAG" | gzip > "$TARBALL"

@@ -23,7 +23,7 @@
 //
 // Path resolution is relative to this file, so it works unmodified both on the host (repo
 // checkout) and inside the docs dev container, as long as the container also mounts
-// tests/recordings at the same relative location (see docs-tools/docker-compose.yml).
+// tests/recordings at the same relative location (see tools/docker-compose.yml).
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -117,6 +117,26 @@ function normalizeProblemRecording(parsed) {
   };
 }
 
+// Pulls a single header's value out of a recorded `*-response-header.txt` file (one "Name:
+// value" pair per line). Lets a header object source its `example` from the real response instead
+// of a hand-copied, endpoint-agnostic constant - this is what keeps e.g.
+// `Access-Control-Allow-Methods`/`Allow` correct per endpoint (they legitimately differ: a
+// sub-resource like `/element/{id}/children` only allows `GET, HEAD, OPTIONS`, resumable uploads
+// allow `DELETE, HEAD, OPTIONS, PATCH`, etc.) without duplicating that knowledge by hand.
+function extractRecordedHeaderValue(raw, headerName, recordingPath) {
+  const prefix = `${headerName.toLowerCase()}:`;
+  for (const line of raw.split('\n')) {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex === -1) {
+      continue;
+    }
+    if (line.slice(0, colonIndex).trim().toLowerCase() === headerName.toLowerCase()) {
+      return line.slice(colonIndex + 1).trim();
+    }
+  }
+  throw new Error(`Header "${headerName}" not found in recording ${recordingPath}`);
+}
+
 function injectRecordings(node) {
   if (Array.isArray(node)) {
     node.forEach(injectRecordings);
@@ -130,7 +150,12 @@ function injectRecordings(node) {
   if (typeof recordingPath === 'string') {
     const absolutePath = join(recordingsRoot, recordingPath);
     const raw = readFileSync(absolutePath, 'utf8');
-    if (node.har?.postData) {
+    const recordingHeaderName = node['x-ember-nexus-recording-header-name'];
+    if (typeof recordingHeaderName === 'string') {
+      // A header object sourcing its `example` from one line of a recorded header dump, rather
+      // than the whole file becoming the value (see below).
+      node.example = extractRecordedHeaderValue(raw, recordingHeaderName, recordingPath);
+    } else if (node.har?.postData) {
       node.har.postData.text = minifyJson(raw);
     } else {
       // A JSON recording becomes a structured example value; anything else (e.g. the .txt

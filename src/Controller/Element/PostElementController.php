@@ -53,13 +53,15 @@ class PostElementController extends AbstractController
         $userId = $this->authProvider->getUserId();
 
         $parentType = $this->accessChecker->getElementType($parentElementId);
-        if (ElementType::NODE !== $parentType) {
-            // relations can not own nodes
+
+        if (!$this->accessChecker->hasAccessToElement($userId, $parentElementId, AccessType::CREATE)) {
+            // covers both a non-existent parent and a parent the user has no create access to
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
-        if (!$this->accessChecker->hasAccessToElement($userId, $parentElementId, AccessType::CREATE)) {
-            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        if (ElementType::NODE !== $parentType) {
+            // the user has access to the parent, but it is a relation, not a node - relations can not own nodes
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('id', 'id of a node', 'id of a relation');
         }
 
         $body = \Safe\json_decode($this->requestContentService->getContent($request), true);

@@ -98,7 +98,7 @@ runs:
           "${BUILD_ARG_ARGS[@]}" \
           "${OUTPUT_ARGS[@]}" \
           --metadata-file /tmp/metadata.json \
-          -f ./docker/Dockerfile \
+          -f ./docker/api/Dockerfile \
           .
 
         gzip -c "$RAW_TAR" > "$TARBALL"

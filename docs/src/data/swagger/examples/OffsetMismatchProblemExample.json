@@ -2,6 +2,8 @@
   "components": {
     "examples": {
       "OffsetMismatchProblemExample": {
+        "summary": "The `Upload-Offset` does not match the upload's current offset.",
+        "x-ember-nexus-name": "Offset mismatch",
         "x-ember-nexus-recording": "api-endpoints/upload/patch-upload/409-response-body.json"
       }
     }

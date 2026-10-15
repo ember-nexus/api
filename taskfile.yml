@@ -4,16 +4,20 @@ tasks:
 
   caddy:fmt:
     cmds:
-      - docker run --rm -v $(pwd)/docker:/data -w /data caddy:2.11.6-alpine caddy fmt --overwrite Caddyfile
-      - docker run --rm -v $(pwd)/docker:/data -w /data caddy:2.11.6-alpine caddy fmt --overwrite Caddyfile.dev
+      - docker run --rm -v $(pwd)/docker/api:/data -w /data caddy:2.11.6-alpine caddy fmt --overwrite Caddyfile
+      - docker run --rm -v $(pwd)/docker/api:/data -w /data caddy:2.11.6-alpine caddy fmt --overwrite Caddyfile.dev
 
   dev:build:
     cmds:
       - docker compose -f ./tools/docker-compose.yml build
 
   dev:up:
+    desc: Start the full dev stack (api, docs, databases, ...), with VERSION taken from composer.json (shown in the docs sidebar and markdown pages).
+    vars:
+      VERSION:
+        sh: "grep -m1 '\"version\"' composer.json | sed -E 's/.*\"version\": *\"([^\"]+)\".*/\\1/'"
     cmds:
-      - docker compose -f ./tools/docker-compose.yml up -d  --remove-orphans
+      - VERSION={{.VERSION}} docker compose -f ./tools/docker-compose.yml up -d --remove-orphans
 
   dev:down:
     cmds:
@@ -26,7 +30,7 @@ tasks:
   dev:docs:serve:
     desc: Run the Astro dev server interactively inside the `docs` container started by dev:up (installs dependencies first).
     cmds:
-      - docker compose -f ./tools/docker-compose.yml exec docs sh -c "cd /docs && pnpm install && pnpm run dev -- --host"
+      - docker compose -f ./tools/docker-compose.yml exec docs sh -c "cd /docs && pnpm install && pnpm exec astro dev --ignore-lock --host"
 
   dev:k6:
     cmds:
@@ -47,7 +51,7 @@ tasks:
       COMPOSE_OUTPUT_FILE:
         sh: echo "docker-compose.yml"
     cmds:
-      - docker build -f ./docker/Dockerfile --target production --build-arg VERSION={{.VERSION}} -t {{.TAG}} .
+      - docker build -f ./docker/api/Dockerfile --target production --build-arg VERSION={{.VERSION}} -t {{.TAG}} .
       - docker save {{.TAG}} > ~/Downloads/{{.OUTPUT_FILE}}
       - chown $(id -u):$(id -g) ~/Downloads/{{.OUTPUT_FILE}}
       - sed "s|__EMBER_NEXUS_API_IMAGE__|{{.TAG}}|" ./tools/docker-compose.demo.tmpl.yml > ~/Downloads/{{.COMPOSE_OUTPUT_FILE}}
@@ -70,21 +74,9 @@ tasks:
         echo "chmod 777 -R ./volumes"
         echo "docker compose up -d"
 
-  docs:dev:build:
-    cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml build
-
-  docs:dev:up:
-    cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml up -d --remove-orphans
-
-  docs:dev:down:
-    cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml down
-
   docs:dev:cli:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs /bin/bash
+      - docker compose -f ./tools/docker-compose.yml exec --user astro docs /bin/bash
 
   docs:check:all:
     desc: Run every docs check (build, tests, lint, spellcheck, e2e) in the order the build depends on.
@@ -97,28 +89,28 @@ tasks:
 
   docs:check:build:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run build"
+      - docker compose -f ./tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run build"
 
   docs:check:test:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run test"
+      - docker compose -f ./tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run test"
 
   docs:check:lint:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run cs"
+      - docker compose -f ./tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run cs"
 
   docs:check:spellcheck:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run spellcheck"
+      - docker compose -f ./tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run spellcheck"
 
   docs:check:e2e:
     desc: Run Playwright e2e tests (Chromium, in the separate `e2e` container) against a preview server of docs/dist.
     cmds:
-      - sh ./docs-tools/run-e2e.sh
+      - sh ./tests/DocsEndToEndTests/run-e2e.sh
 
   docs:prod:build:
     cmds:
-      - docker build -f docs-tools/Dockerfile --target production -t ember-nexus-api-docs:latest .
+      - docker build -f docker/docs/Dockerfile --target production -t ember-nexus-api-docs:latest .
 
   docs:prod:run:
     cmds:
@@ -127,4 +119,4 @@ tasks:
   docs:swagger:generate:
     desc: Regenerate docs/src/data/swagger.json from its fragments, with examples pulled live from tests/recordings.
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run swagger:generate"
+      - docker compose -f ./tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run swagger:generate"

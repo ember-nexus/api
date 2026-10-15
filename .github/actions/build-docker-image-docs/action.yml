@@ -1,6 +1,6 @@
 name: 'Build docs Docker image'
 description: >
-  Builds the docs site Docker image (docs-tools/Dockerfile) for a given target/arch via Buildx,
+  Builds the docs site Docker image (docker/docs/Dockerfile) for a given target/arch via Buildx,
   saves it to a tar.gz and uploads it as an artifact. Always disables provenance/SBOM
   attestations, since those cause Buildx to emit an OCI image index (manifest list) even for a
   single-arch --load build, which later breaks `docker manifest create --amend` /
@@ -73,7 +73,7 @@ runs:
           "${BUILD_ARG_ARGS[@]}" \
           --load \
           -t "$TAG" \
-          -f ./docs-tools/Dockerfile \
+          -f ./docker/docs/Dockerfile \
           .
 
         docker save "$TAG" | gzip > "$TARBALL"

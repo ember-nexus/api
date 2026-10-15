@@ -1,0 +1,20 @@
+# Only the Playwright (Chromium) container used to run the docs e2e tests. The `docs` container
+# itself (preview server target) lives in the main dev stack (../../tools/docker-compose.yml) -
+# this file attaches to that stack's network so `e2e` can reach it by container name.
+name: docs-e2e
+
+services:
+  e2e:
+    container_name: e2e
+    image: mcr.microsoft.com/playwright:v1.62.1-noble
+    tty: true
+    volumes:
+      - ../../docs:/docs
+    working_dir: /docs
+    environment:
+      BASE_URL: http://docs:4322
+
+networks:
+  default:
+    name: dev_default
+    external: true

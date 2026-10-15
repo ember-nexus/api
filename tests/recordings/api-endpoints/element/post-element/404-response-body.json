@@ -1,0 +1,7 @@
+{
+  "type": "http://api/error/404/not-found",
+  "title": "Not found",
+  "status": 404,
+  "instance": "urn:uuid:606bff22-4fa7-4e44-9a57-b881bd2f4736",
+  "detail": "Requested element was not found."
+}

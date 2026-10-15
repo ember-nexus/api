@@ -388,7 +388,12 @@ export function extractResponseHeaders(
       important:
         (header["x-ember-nexus-important"] as boolean | undefined) ?? false,
       description: header.description ?? "",
-      example: stringifyValue(headerSchema?.example) ?? "",
+      // A header's own top-level `example` (OpenAPI Header Object) takes precedence over its
+      // schema's `example` - the former is what `x-ember-nexus-recording`/
+      // `x-ember-nexus-recording-header-name` markers populate per-endpoint (e.g. `Allow`,
+      // `Access-Control-Allow-Methods`); the latter is still used by the handful of headers that
+      // only ever had a constant, schema-level example.
+      example: stringifyValue(header.example ?? headerSchema?.example) ?? "",
       links: (header["x-ember-nexus-links"] as Link[] | undefined) ?? [],
     };
   });
@@ -437,9 +442,16 @@ export function extractResponseExamples(
         const headerOrRef = response.headers?.[name];
         let example = "";
         if (headerOrRef && !isReferenceObject(headerOrRef)) {
-          const headerSchema = headerOrRef.schema;
-          if (headerSchema && !isReferenceObject(headerSchema)) {
-            example = String(headerSchema.example ?? "");
+          // Prefer the header's own top-level `example` (OpenAPI Header Object) - what
+          // `x-ember-nexus-recording`/`x-ember-nexus-recording-header-name` markers populate per
+          // endpoint - falling back to the schema-level example used by constant headers.
+          if (headerOrRef.example !== undefined) {
+            example = String(headerOrRef.example);
+          } else {
+            const headerSchema = headerOrRef.schema;
+            if (headerSchema && !isReferenceObject(headerSchema)) {
+              example = String(headerSchema.example ?? "");
+            }
           }
         }
         return `${name}: ${example}`;

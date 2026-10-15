@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\ExampleGenerationControllerWithDifferentConfiguration2\Search;
 
-use App\Tests\ExampleGenerationController\BaseRequestTestCase;
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
 
 /**
  * Runs with `expression.timeoutInMilliseconds` set to 100 (the configured minimum), so an expression can be driven

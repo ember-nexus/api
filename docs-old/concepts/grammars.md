@@ -23,7 +23,7 @@ Links:
 
 - [Project website](https://opencypher.org/)
 - [openCypher grammar resources (original)](https://opencypher.org/resources/)
-- [openCypher ANTLR grammar (copy)](https://github.com/ember-nexus/api/tree/main/antlr/src/openCypher9.g4)
+- [openCypher ANTLR grammar (copy)](https://github.com/ember-nexus/api/tree/main/lib/Antlr/src/openCypher9.g4)
 - [openCypher railroad diagram (copy)](https://ember-nexus.github.io/api/antlr/open-cypher-9.html)
 
 ### Cypher 25
@@ -35,7 +35,7 @@ Links:
 
 - [Cypher documentation](https://neo4j.com/docs/getting-started/cypher/)
 - [Cypher 25 railroad diagram (copy)](https://ember-nexus.github.io/api/antlr/cypher-25.html)
-- [Cypher 25 ANTLR grammar (copy)](https://github.com/ember-nexus/api/tree/main/antlr/src/Cypher25Parser.g4)
+- [Cypher 25 ANTLR grammar (copy)](https://github.com/ember-nexus/api/tree/main/lib/Antlr/src/Cypher25Parser.g4)
 - [Cypher 25 ANTLR grammar (original)](https://github.com/neo4j/neo4j/tree/release/5.26.0/community/cypher/front-end/parser/v25/parser/src/main/antlr4/org/neo4j/cypher/internal/parser/v25)
 
 ### Cypher Path Subset
@@ -49,7 +49,7 @@ The Cypher Path Subset might be aligned to be more database agnostic in the futu
 Links:
 
 - [Cypher Path Subset railroad diagram](https://ember-nexus.github.io/api/antlr/cypher-path-subset.html)
-- [Cypher Path Subset ANTLR grammar](https://github.com/ember-nexus/api/tree/main/antlr/src/CypherPathSubset.g4)
+- [Cypher Path Subset ANTLR grammar](https://github.com/ember-nexus/api/tree/main/lib/Antlr/src/CypherPathSubset.g4)
 
 ### GQL
 

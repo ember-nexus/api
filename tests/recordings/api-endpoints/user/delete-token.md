@@ -36,16 +36,6 @@ This error can only be thrown if the token is invalid or if there is no default 
 
 [Response Body](./delete-token/401-response-body.json ':include :type=code problem+json')
 
-### **🔴 Error 429**
-
-<div class="code-title">Response Headers</div>
-
-[Response Body](./delete-token/429-response-header.txt ':include :type=code')
-
-<div class="code-title">Response Body</div>
-
-[Response Body](./delete-token/429-response-body.json ':include :type=code problem+json')
-
 <!-- tabs:end -->
 
 <!-- div:right-panel -->

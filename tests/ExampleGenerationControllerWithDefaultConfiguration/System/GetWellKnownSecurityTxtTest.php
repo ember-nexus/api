@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\ExampleGenerationControllerWithDefaultConfiguration\System;
+
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
+
+class GetWellKnownSecurityTxtTest extends BaseRequestTestCase
+{
+    private const string PATH_TO_ROOT = __DIR__.'/../../../';
+
+    public function testGetWellKnownSecurityTxtSuccess(): void
+    {
+        $response = $this->runGetRequest('/.well-known/security.txt', null);
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/system/get-well-known-security-txt/200-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/system/get-well-known-security-txt/200-response-body.txt';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response,
+            false,
+            [
+                'Expires',
+            ]
+        );
+    }
+}

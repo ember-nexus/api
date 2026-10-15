@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\ServerTests;
 
-use App\Tests\ExampleGenerationController\BaseRequestTestCase;
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
 use Psr\Http\Message\ResponseInterface;
 use Ramsey\Uuid\Uuid;
 

@@ -46,8 +46,8 @@ export const GET: APIRoute = async ({ props: { entry } }) => {
 
   const [body, help, example] = await Promise.all([
     renderMd(entry),
-    readTerminalOutput(`src/data/command-output/${helpOutput}`),
-    readTerminalOutput(`src/data/command-output/${exampleOutput}`),
+    readTerminalOutput(`../tests/recordings/commands/assets/${helpOutput}`),
+    readTerminalOutput(`../tests/recordings/commands/assets/${exampleOutput}`),
   ]);
 
   const md = serialize([

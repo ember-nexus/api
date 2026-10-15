@@ -9,7 +9,7 @@
             "type": "string",
             "nullable": true,
             "description": "API version. `null` if the administrator has disabled exposing it via `instanceConfiguration.showVersion`.",
-            "example": "0.1.31"
+            "example": "0.1.32"
           },
           "pageSize": {
             "type": "object",

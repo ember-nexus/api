@@ -51,6 +51,39 @@ function stripExamplesFromResponses(obj: unknown): unknown {
     return result
 }
 
+/**
+ * Recursively delete the `x-ember-nexus-recording` / `x-ember-nexus-recording-header-name`
+ * marker pair from response header objects (e.g. `Allow`, `Access-Control-Allow-Methods`).
+ *
+ * These markers point `generate-swagger.mjs` at a recorded `*-response-header.txt` file to source
+ * that header's real example value. The referenced file is picked per-operation, not per-status
+ * (methods are a property of the route, not of a given status code), so when a documented status
+ * has no recording of its own, the marker legitimately points at a differently-numbered file (e.g.
+ * a `412` response's `Allow` header sourced from that same operation's `204-response-header.txt`).
+ * That path is unrelated recorded data, same rationale as stripping `content.*.examples` above, so
+ * it's dropped before scanning for stray 3-digit codes.
+ */
+function stripHeaderRecordingMarkers(obj: unknown): unknown {
+    if (obj === null || typeof obj !== 'object') return obj
+    if (Array.isArray(obj)) return obj.map(stripHeaderRecordingMarkers)
+
+    const record = obj as Record<string, unknown>
+    if ('x-ember-nexus-recording-header-name' in record) {
+        const {
+            'x-ember-nexus-recording': _recording,
+            'x-ember-nexus-recording-header-name': _headerName,
+            ...rest
+        } = record
+        return Object.fromEntries(
+            Object.entries(rest).map(([key, value]) => [key, stripHeaderRecordingMarkers(value)]),
+        )
+    }
+
+    return Object.fromEntries(
+        Object.entries(record).map(([key, value]) => [key, stripHeaderRecordingMarkers(value)]),
+    )
+}
+
 const testCases = readdirSync(PATHS_DIR, { recursive: true })
     .filter(filename => (filename as string).endsWith('.json'))
     // The `error/` group documents static `/error/<code>/<slug>` pages (e.g. get-error-500-...json).
@@ -74,7 +107,7 @@ describe('Swagger path files — status code integrity', () => {
 
         // 1. Parse as JSON and strip examples blocks to avoid false matches
         const parsed = JSON.parse(raw)
-        const cleaned = stripExamplesFromResponses(parsed)
+        const cleaned = stripHeaderRecordingMarkers(stripExamplesFromResponses(parsed))
 
         // 2. Re-encode to string, then replace all UUIDs before scanning for 3-digit numbers
         const withoutUuids = JSON.stringify(cleaned).replace(UUID_PATTERN, '<uuid>')

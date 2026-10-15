@@ -4,22 +4,23 @@
 
 Astro (static output) + MDX content collections, built with `pnpm` inside a Docker Compose
 container, orchestrated via the repo's root `taskfile.yml` (`docs:*` tasks). App root is `docs/`
-itself; the container-facing tooling (Dockerfile, Caddyfile, docker-compose.yml) lives in
-`docs-tools/` at the repo root, one level up.
+itself; the container-facing tooling (Dockerfile, Caddyfile) lives in `docker/docs/` at the repo
+root, one level up. The `docs` service itself is defined in the repo's single dev compose file,
+`tools/docker-compose.yml`, alongside the `api` service and the backing databases.
 
 ## Running commands
 
-The `core` container is normally already up (`task docs:dev:up`). Run project commands inside it
-via `docker compose -f docs-tools/docker-compose.yml exec`.
+The `docs` container is normally already up (`task dev:up`). Run project commands inside it via
+`docker compose -f tools/docker-compose.yml exec`.
 
 **Always pass `--user astro`.** The container's default exec user is `root` (uid 0); the host bind
-mount (`../docs:/core`) is meant to be owned by `astro` (uid 1000, set up in `docs-tools/Dockerfile`).
+mount (`../docs:/docs`) is meant to be owned by `astro` (uid 1000, set up in `docker/docs/Dockerfile`).
 Running `pnpm install` / `pnpm run dev` / `pnpm run build` etc. as root writes root-owned files
 into `node_modules/.vite`, `dist`, and similar caches — the next `astro dev` run as `astro` then
 fails with `EACCES: permission denied, unlink ...` because it can't clean up files it doesn't own.
 
 ```bash
-docker compose -f docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run build"
+docker compose -f tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run build"
 ```
 
 `task docs:dev:cli` opens an interactive shell in the container already as `--user astro` — prefer
@@ -28,14 +29,14 @@ that for anything interactive.
 If root-owned files already leaked in (symptom: `EACCES ... unlink` on `pnpm run dev`), fix with:
 
 ```bash
-docker compose -f docs-tools/docker-compose.yml exec core sh -c "chown -R astro:astro /core"
+docker compose -f tools/docker-compose.yml exec docs sh -c "chown -R astro:astro /docs"
 ```
 
 ## Taskfile shortcuts
 
-- `task docs:dev:build` — build the dev image
-- `task docs:dev:up` / `task docs:dev:down` — start/stop the container
-- `task docs:dev:cli` — shell into the container as `astro`
+- `task dev:build` / `task dev:up` / `task dev:down` — build/start/stop the whole dev stack (api,
+  docs, databases, ...); there's no docs-only variant, the `docs` service just rides along
+- `task docs:dev:cli` — shell into the `docs` container as `astro`
 - `task docs:check:all` — build, test, lint, spellcheck, e2e, in dependency order
 - `task docs:prod:build` / `task docs:prod:run` — build/run the production image (Caddy serving `dist/`)
 - `task docs:swagger:generate` — regenerate `docs/src/data/swagger.json` from `docs/src/data/swagger/**/*.json`

@@ -64,6 +64,7 @@ jobs:
       - yml-lint
       - markdown-lint
       - caddyfile-fmt-check
+      - docs-swagger-up-to-date
     steps:
       - uses: actions/checkout@v5
       - id: version
@@ -95,6 +96,7 @@ jobs:
       - yml-lint
       - markdown-lint
       - caddyfile-fmt-check
+      - docs-swagger-up-to-date
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/build-docker-image-docs
@@ -163,7 +165,7 @@ jobs:
       - name: Build and start preview server
         run: |
           docker run -d --name docs-preview --network host \
-            -v $(pwd)/docs:/docs -w /docs \
+            -v $(pwd)/docs:/docs -v $(pwd)/tests/recordings:/tests/recordings:ro -w /docs \
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
             -e ASTRO_TELEMETRY_DISABLED=1 \
@@ -368,7 +370,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: ./.github/actions/compose-stack-up
         with:
-          compose-file: ./tests/ExampleGenerationController/docker-compose.yml
+          compose-file: ./tests/ExampleGenerationControllerWithDefaultConfiguration/docker-compose.yml
           exec-container: api-dev
           prepare-script: ./bin/test-end-to-end-prepare
       - name: Controller Example Generation Test
@@ -377,7 +379,7 @@ jobs:
       - uses: ./.github/actions/collect-docker-logs
         if: always()
         with:
-          compose-file: ./tests/ExampleGenerationController/docker-compose.yml
+          compose-file: ./tests/ExampleGenerationControllerWithDefaultConfiguration/docker-compose.yml
           artifact-name: docker-logs-example-generation-controller
 
 

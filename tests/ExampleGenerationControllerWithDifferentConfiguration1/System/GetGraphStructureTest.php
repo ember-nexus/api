@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\ExampleGenerationControllerWithDifferentConfiguration1\System;
 
-use App\Tests\ExampleGenerationController\BaseRequestTestCase;
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
 
 class GetGraphStructureTest extends BaseRequestTestCase
 {

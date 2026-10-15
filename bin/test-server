@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Runs the server tests (tests/ServerTests) one scenario after another against the production image, which is
-# recreated with lower limits for every scenario, see docker/Caddyfile. Requires the images api:dev and api:prod.
+# recreated with lower limits for every scenario, see docker/api/Caddyfile. Requires the images api:dev and api:prod.
 # Destructive: all databases of the started stack are reset, the stack is removed afterwards (KEEP_STACK=1 keeps it).
 # Update expected responses in docs/server with FIX_CONTROLLER_OUTPUT=1.
 

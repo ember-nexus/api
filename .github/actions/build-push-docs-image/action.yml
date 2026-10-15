@@ -1,7 +1,7 @@
 name: 'Build and push the docs site Docker image for one arch'
 description: >
   Downloads a previously built `dist/` artifact, packages it into the docs site Docker image
-  (docs-tools/Dockerfile.ci) for one arch, and pushes it straight to GHCR under no tag at all (digest-only, no
+  (docker/docs/Dockerfile.ci) for one arch, and pushes it straight to GHCR under no tag at all (digest-only, no
   tag ever created - see combine-multiarch-image for why). Optionally also exports a loadable tar.gz artifact
   for callers that need one (the release pipeline, for its GitHub release attachment) - the regular CI pipeline
   doesn't, since it has nothing to attach it to.
@@ -96,8 +96,8 @@ runs:
           --provenance=false \
           --sbom=false \
           --build-context dist=/tmp/dist/dist \
-          --build-context caddyconfig=./docs-tools \
-          -f ./docs-tools/Dockerfile.ci \
+          --build-context caddyconfig=./docker/docs \
+          -f ./docker/docs/Dockerfile.ci \
           "${OUTPUT_ARGS[@]}" \
           --metadata-file /tmp/metadata.json \
           .

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\ExampleGenerationControllerWithDifferentConfiguration1\Upload;
 
-use App\Tests\ExampleGenerationController\BaseRequestTestCase;
+use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
 
 /**
  * Runs with `file.uploadExpiresAfterFirstRequestInSeconds` set to 3, so an upload can be driven past its expiry

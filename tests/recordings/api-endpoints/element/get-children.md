@@ -100,16 +100,6 @@ Error 412 is thrown if the request header `If-Match` or `If-None-Match` is prese
 
 [Response Body](./delete-element/412-response-body.json ':include :type=code problem+json')
 
-### **🔴 Error 429**
-
-<div class="code-title">Response Headers</div>
-
-[Response Body](./get-children/429-response-header.txt ':include :type=code')
-
-<div class="code-title">Response Body</div>
-
-[Response Body](./get-children/429-response-body.json ':include :type=code problem+json')
-
 <!-- tabs:end -->
 
 <!-- div:right-panel -->

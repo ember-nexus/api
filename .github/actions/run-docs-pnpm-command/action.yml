@@ -29,7 +29,7 @@ runs:
     - name: pnpm ${{ inputs.command }}
       shell: bash
       run: |
-        docker run -v "$(pwd)/docs":/docs -w /docs \
+        docker run -v "$(pwd)/docs":/docs -v "$(pwd)/tests/recordings":/tests/recordings:ro -w /docs \
           --user "$(id -u):$(id -g)" \
           -e HOME=/tmp \
           -e ASTRO_TELEMETRY_DISABLED=1 \

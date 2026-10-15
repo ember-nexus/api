@@ -6,11 +6,11 @@ services:
     container_name: api
     build:
       context: ..
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/api/Dockerfile
       target: development
     volumes:
       - ..:/var/www/html
-      - ../volumes/well-known-security.txt:/well-known-security.txt
+      - ./volumes/well-known-security.txt:/well-known-security.txt
     ports:
       - "80:80"
 
@@ -20,12 +20,17 @@ services:
     container_name: docs
     build:
       context: ..
-      dockerfile: ./docs-tools/Dockerfile
+      dockerfile: ./docker/docs/Dockerfile
       target: development
     tty: true
     volumes:
       - ../docs:/docs
+      # Mounted one level above /docs so relative paths from docs/scripts/ (../../tests/recordings)
+      # resolve the same way here as they do from a plain repo checkout on the host.
+      - ../tests/recordings:/tests/recordings:ro
     working_dir: /docs
+    environment:
+      VERSION: ${VERSION:-dev}
     ports:
       - "4321:4321"
 
@@ -99,7 +104,7 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - ../volumes/minio:/data
+      - ./volumes/minio:/data
     environment:
       - MINIO_ROOT_USER=ROOTNAME
       - MINIO_ROOT_PASSWORD=CHANGEME123
@@ -139,10 +144,10 @@ services:
   k6:
     container_name: k6
     build:
-      context: ../tools/k6
+      context: ../tests/LoadTests
     volumes:
-      - ../tools/k6:/app
-      - ../volumes/k6-reports:/app/tmp
+      - ../tests/LoadTests:/app
+      - ./volumes/k6-reports:/app/tmp
     environment:
       - API_BASE_URL=http://api
       - API_TOKEN=secret-token:1nc1pFdBO2QLYRMMvULgtQ

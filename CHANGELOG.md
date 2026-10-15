@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update reference dataset to version 0.0.36.
 
 ### Fixed
+- Bugfix: `POST /<uuid>` now answers `400` (not `404`) when the referenced parent is a relation the user has
+  `CREATE` access to; `404` is reserved for a parent the user has no access to at all, including because it does not
+  exist.
 - Being a direct member of a `Group` (via `IS_IN_GROUP`) now also grants `CREATE` access to the group node itself,
   not just `READ`/`SEARCH` access, closes #238.
 - Deleting an element whose Elasticsearch document was already missing no longer fails with a 500 error.

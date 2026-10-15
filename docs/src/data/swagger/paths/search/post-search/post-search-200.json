@@ -10,7 +10,23 @@
                 "$ref": "#/components/headers/Access-Control-Allow-Headers"
               },
               "Access-Control-Allow-Methods": {
-                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+                "description": "Indicates which HTTP methods are permitted for cross-origin requests, typically returned in preflight responses.",
+                "schema": {
+                  "type": "string"
+                },
+                "x-ember-nexus-recording": "api-endpoints/search/post-search/422-response-header.txt",
+                "x-ember-nexus-recording-header-name": "Access-Control-Allow-Methods",
+                "x-ember-nexus-links": [
+                  {
+                    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Methods",
+                    "name": "MDN"
+                  },
+                  {
+                    "url": "https://http.dev/access-control-allow-methods",
+                    "name": "HTTP.dev"
+                  }
+                ],
+                "required": true
               },
               "Access-Control-Allow-Origin": {
                 "$ref": "#/components/headers/Access-Control-Allow-Origin"
@@ -19,7 +35,23 @@
                 "$ref": "#/components/headers/Access-Control-Expose-Headers"
               },
               "Allow": {
-                "$ref": "#/components/headers/Allow"
+                "description": "Lists the HTTP methods supported by the endpoint; returned alongside a `Method Not Allowed` response.",
+                "schema": {
+                  "type": "string"
+                },
+                "x-ember-nexus-recording": "api-endpoints/search/post-search/422-response-header.txt",
+                "x-ember-nexus-recording-header-name": "Allow",
+                "x-ember-nexus-links": [
+                  {
+                    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Allow",
+                    "name": "MDN"
+                  },
+                  {
+                    "url": "https://http.dev/allow",
+                    "name": "HTTP.dev"
+                  }
+                ],
+                "required": true
               },
               "Cache-Control": {
                 "$ref": "#/components/headers/Cache-Control"
@@ -44,20 +76,9 @@
                   "$ref": "#/components/schemas/SearchResultResponse"
                 },
                 "examples": {
-                  "elasticsearchQueryDslMixinKeywordSearch": {
-                    "summary": "Elasticsearch keyword search, hydrated into a collection of elements.",
-                    "x-ember-nexus-name": "Keyword Search",
-                    "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/keyword-search/response-body.json"
-                  },
-                  "elementHydrationExplicitElementIdsHydration": {
-                    "summary": "Explicit list of elementIds, hydrated into a collection of elements.",
-                    "x-ember-nexus-name": "Explicit ElementIds Hydration",
-                    "x-ember-nexus-recording": "search/example/element-hydration/explicit-elementids-hydration/response-body.json"
-                  },
-                  "cypherPathSubsetFindTaggedElements": {
-                    "summary": "Cypher path subset search for tagged elements, hydrated into a collection of elements.",
-                    "x-ember-nexus-name": "Find Tagged Elements",
-                    "x-ember-nexus-recording": "search/example/cypher-path-subset/find-tagged-elements/response-body.json"
+                  "elasticsearchQueryDslMixinSimpleFullTextSearch": {
+                    "summary": "Elasticsearch full-text search, hydrated into a collection of elements.",
+                    "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/simple-full-text-search/response-body.json"
                   }
                 }
               }

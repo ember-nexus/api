@@ -80,16 +80,6 @@ new password.
 
 [Response Body](./post-change-password/403-response-body.json ':include :type=code problem+json')
 
-### **🔴 Error 429**
-
-<div class="code-title">Response Headers</div>
-
-[Response Body](./post-change-password/429-response-header.txt ':include :type=code')
-
-<div class="code-title">Response Body</div>
-
-[Response Body](./post-change-password/429-response-body.json ':include :type=code problem+json')
-
 <!-- tabs:end -->
 
 <!-- div:right-panel -->
