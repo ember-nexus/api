@@ -4,6 +4,12 @@
 # node/pnpm/pnpm install) - the Astro build itself is architecture-independent static output and
 # only needs to happen once.
 FROM caddy:2.11.4-alpine
+LABEL org.opencontainers.image.vendor="Ember Nexus" \
+    org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
+    org.opencontainers.image.licenses="LicenseRef-Source-First-License-1.1" \
+    org.opencontainers.image.source="https://github.com/ember-nexus/api" \
+    org.opencontainers.image.title="API Docs" \
+    org.opencontainers.image.description="Knowledge Graph API documentation."
 COPY --from=dist . /srv
 COPY --from=caddyconfig Caddyfile /etc/caddy/Caddyfile
 EXPOSE 80
