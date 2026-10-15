@@ -18,7 +18,7 @@ class BackupListTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/backup-list-help.html',
+            'tests/recordings/commands/assets/backup-list-help.html',
             $commandOutput,
             [
             ]
@@ -33,7 +33,7 @@ class BackupListTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/backup-list.html',
+            'tests/recordings/commands/assets/backup-list.html',
             $commandOutput,
             [
                 'test',

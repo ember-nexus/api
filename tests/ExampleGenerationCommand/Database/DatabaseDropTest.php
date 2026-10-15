@@ -16,7 +16,7 @@ class DatabaseDropTest extends BaseCommandTestCase
             'APP_ENV=prod VERSION=%s php bin/console database:drop --ansi --help | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/commands/assets/database-drop-help.html', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/recordings/commands/assets/database-drop-help.html', $commandOutput);
     }
 
     public function testDatabaseDrop(): void
@@ -27,7 +27,7 @@ class DatabaseDropTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/database-drop.html',
+            'tests/recordings/commands/assets/database-drop.html',
             $commandOutput,
             [
             ]

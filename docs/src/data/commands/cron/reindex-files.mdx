@@ -17,5 +17,7 @@ Elasticsearch) agree on its `file`/`hasFile` properties again. An element that w
 meantime before being reindexed is skipped, since there is nothing left to sync.
 
 <Note>
-    Normally run as part of [`cron`](/command/cron), not invoked directly.
+    Every API instance already schedules this on its own interval (see
+    [Background tasks](/reference/configuration#background-tasks)), so it does not need to be
+    invoked manually.
 </Note>

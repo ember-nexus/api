@@ -16,8 +16,8 @@ class GetTokenTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest('/token', self::TOKEN);
         $this->assertIsNodeResponse($response, 'Token');
-        $documentationHeadersPath = 'docs/api-endpoints/user/get-token/200-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/get-token/200-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/get-token/200-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/get-token/200-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -39,8 +39,8 @@ class GetTokenTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest('/token', 'tokenDoesNotExist');
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/user/get-token/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/get-token/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/get-token/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/get-token/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -57,8 +57,8 @@ class GetTokenTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest('/token', null);
         $this->assertIsProblemResponse($response, 403);
-        $documentationHeadersPath = 'docs/api-endpoints/user/get-token/403-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/get-token/403-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/get-token/403-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/get-token/403-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

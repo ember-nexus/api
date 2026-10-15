@@ -109,11 +109,11 @@ Which will return a response like this:
 
 ```txt /location:.*/ collapse={2-7}
 < HTTP/2 201
-< access-control-allow-headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
-< access-control-allow-methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+< access-control-allow-headers: *
+< access-control-allow-methods: GET, HEAD, OPTIONS, POST
 < access-control-allow-origin: *
 < access-control-expose-headers: ETag, Location
-< allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+< allow: GET, HEAD, OPTIONS, POST
 < cache-control: no-cache, private
 < date: Mon, 04 May 2026 08:48:27 GMT
 < location: /4030e226-086d-41c8-95dd-b4080af9d883

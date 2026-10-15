@@ -16,7 +16,7 @@ class ReindexFilesTest extends BaseCommandTestCase
             'APP_ENV=prod VERSION=%s php bin/console cron:reindex-files --ansi --help | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/commands/assets/cron-reindex-files-help.html', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/recordings/commands/assets/cron-reindex-files-help.html', $commandOutput);
     }
 
     public function testReindexFiles(): void
@@ -27,7 +27,7 @@ class ReindexFilesTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/cron-reindex-files.html',
+            'tests/recordings/commands/assets/cron-reindex-files.html',
             $commandOutput
         );
     }

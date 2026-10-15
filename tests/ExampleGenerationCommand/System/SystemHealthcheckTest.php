@@ -16,7 +16,7 @@ class SystemHealthcheckTest extends BaseCommandTestCase
             'APP_ENV=prod VERSION=%s php bin/console healthcheck --ansi --help | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/commands/assets/system-healthcheck-help.html', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/recordings/commands/assets/system-healthcheck-help.html', $commandOutput);
     }
 
     public function testSystemHealthcheck(): void
@@ -27,7 +27,7 @@ class SystemHealthcheckTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/system-healthcheck.html',
+            'tests/recordings/commands/assets/system-healthcheck.html',
             $commandOutput,
             [
                 'Neo4j version:',

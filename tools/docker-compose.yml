@@ -14,14 +14,20 @@ services:
     ports:
       - "80:80"
 
+  # Stays idle (tty, no command) so `dev:up` doesn't itself run `pnpm install`/the dev server -
+  # use `task dev:docs:serve` to run it interactively, so a crash or missing install is visible.
   docs:
     container_name: docs
-    image: sujaykumarh/docsify:latest
-    ports:
-      - "3000:3000"
+    build:
+      context: ..
+      dockerfile: ./docs-tools/Dockerfile
+      target: development
+    tty: true
     volumes:
       - ../docs:/docs
-    command: serve
+    working_dir: /docs
+    ports:
+      - "4321:4321"
 
   neo4j:
     container_name: neo4j

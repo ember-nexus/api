@@ -52,6 +52,8 @@
         },
         "x-ember-nexus-har-example": [
           {
+            "name": "Find Nested Elements",
+            "x-ember-nexus-recording": "search/example/cypher-path-subset/find-nested-elements/request-payload.json",
             "har": {
               "method": "POST",
               "url": "https://api.example.com/search",
@@ -60,7 +62,7 @@
               "headers": [
                 {
                   "name": "Authorization",
-                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
                 },
                 {
                   "name": "Content-Type",
@@ -71,8 +73,397 @@
               "headersSize": -1,
               "bodySize": -1,
               "postData": {
-                "mimeType": "application/json",
-                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"match\":{\"description\":{\"query\":\"lily\"}}}},{\"type\":\"element-hydration\"}]}"
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Find Tagged Elements",
+            "x-ember-nexus-recording": "search/example/cypher-path-subset/find-tagged-elements/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Parameterized Cypher Search",
+            "x-ember-nexus-recording": "search/example/cypher-path-subset/parameterized-cypher-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Advanced Full Text Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/advanced-full-text-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Keyword Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/keyword-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Parameterized Elasticsearch Query DSL Mixin Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/parameterized-elasticsearch-query-dsl-mixin-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Query String Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/query-string-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Simple Full Text Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/simple-full-text-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Text Prefix Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/text-prefix-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Wildcard Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/wildcard-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Explicit ElementIds Hydration",
+            "x-ember-nexus-recording": "search/example/element-hydration/explicit-elementids-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Implicit Elements Hydration",
+            "x-ember-nexus-recording": "search/example/element-hydration/implicit-elements-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Implicit Paths Hydration",
+            "x-ember-nexus-recording": "search/example/element-hydration/implicit-paths-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Parameterized ElementIds Hydration",
+            "x-ember-nexus-recording": "search/example/element-hydration/parameterized-elementids-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Cypher -> Elasticsearch -> Hydration",
+            "x-ember-nexus-recording": "search/example/polyglot/cypher-path-es-query-dsl-mixin-element-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
+              }
+            }
+          },
+          {
+            "name": "Elasticsearch -> Cypher -> Hydration",
+            "x-ember-nexus-recording": "search/example/polyglot/es-query-dsl-mixin-cypher-path-element-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json"
               }
             }
           }

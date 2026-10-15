@@ -58,6 +58,7 @@ const DOMAIN_WHITELIST: string[] = [
     'ember-nexus.github.io',
     'opengql.github.io',
     'en.wikipedia.org',
+    'upload.wikimedia.org',
     'www.php.net'
 ]
 

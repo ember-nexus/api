@@ -1,22 +1,22 @@
-FROM alpine:3.24 AS core
+FROM alpine:3.24 AS docs
 
 RUN apk add nodejs npm pnpm git && \
     addgroup -S astro && adduser -S astro -G astro -u 1000 && \
-    mkdir /core && \
-    chmod 777 /core
+    mkdir /docs && \
+    chmod 777 /docs
 
-FROM core AS development
+FROM docs AS development
 RUN apk add bash
 
-FROM core AS production-build
+FROM docs AS production-build
 ARG VERSION=dev
-WORKDIR /core
+WORKDIR /docs
 COPY docs .
 ENV CI=true
 ENV VERSION=${VERSION}
 RUN pnpm install && pnpm run build
 
 FROM caddy:2.11.4-alpine AS production
-COPY --from=production-build /core/dist /srv
+COPY --from=production-build /docs/dist /srv
 COPY ./docs-tools/Caddyfile /etc/caddy/Caddyfile
 EXPOSE 80

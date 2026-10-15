@@ -77,7 +77,7 @@
                 },
                 "examples": {
                   "416_range_not_satisfiable": {
-                    "value": " Error 416 - Range Not Satisfiable\n\n The HTTP 416 Range Not Satisfiable client error response status code indicates that a server can not serve the\n requested ranges. The most likely reason is that the document does not contain such ranges, or that the range\n header is invalid.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 416 error code: https://http.dev/416\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-416-range-not-satisfiable/200-response-body.txt"
                   }
                 }
               }

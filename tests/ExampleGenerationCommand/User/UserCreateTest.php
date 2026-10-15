@@ -16,7 +16,7 @@ class UserCreateTest extends BaseCommandTestCase
             'APP_ENV=prod VERSION=%s php bin/console user:create --ansi --help | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/commands/assets/user-create-help.html', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/recordings/commands/assets/user-create-help.html', $commandOutput);
     }
 
     public function testUserCreate(): void
@@ -27,7 +27,7 @@ class UserCreateTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/user-create.html',
+            'tests/recordings/commands/assets/user-create.html',
             $commandOutput,
             [
                 'Created user with email',

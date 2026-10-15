@@ -3,122 +3,161 @@
     "examples": {
       "BadContentProblemExample": {
         "summary": "A provided property has the wrong type or fails a validation rule.",
+        "x-ember-nexus-recording": "api-endpoints/user/post-change-password/400-response-body.json",
         "value": {
           "type": "https://api.example.com/error/400/bad-content",
           "title": "Bad content",
           "status": 400,
-          "detail": "Endpoint expects property 'newPassword' to be password which is not identical to the old password, got string '<redacted>'."
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+          "detail": "Endpoint expects property 'type' to be ActionChangePassword, got string 'NotActionChangePassword'."
         }
       },
       "FileAlreadyExistsProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/file/post-element-file/409-response-body.json",
         "value": {
           "type": "https://api.example.com/error/409/conflict",
           "title": "Conflict",
           "status": 409,
-          "detail": "Element with id '7b80b203-2b82-40f5-accd-c7089fe6114e' already has an associated file; can not create new file. Delete existing file first or replace it with PUT."
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+          "detail": "Element with id '6b1c2d3e-4f5a-4b6c-8d9e-0f1a2b3c4d5e' already has an associated file; can not create new file. Delete existing file first or replace it with PUT."
         }
       },
       "ForbiddenProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/system/get-instance-configuration/403-response-body.json",
         "value": {
           "type": "https://api.example.com/error/403/forbidden",
           "title": "Forbidden",
           "status": 403,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
           "detail": "Requested endpoint, element or action is forbidden."
         }
       },
       "ForbiddenPropertyProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/element/patch-element/400-response-body.json",
         "value": {
           "type": "https://api.example.com/error/400/forbidden-property",
           "title": "Forbidden property",
           "status": 400,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
           "detail": "Endpoint does not accept setting the property 'created' in the request."
         }
       },
       "GoneProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/upload/patch-upload/410-response-body.json",
         "value": {
           "type": "https://api.example.com/error/410/gone",
           "title": "Gone",
           "status": 410,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
           "detail": "Requested resource is no longer available and is expected to soon be permanently deleted."
         }
       },
       "MalformedRangeProblemExample": {
         "summary": "The `Range` header could not be parsed, or requests more than one range.",
+        "x-ember-nexus-recording": "api-endpoints/file/get-element-file/400-response-body.json",
         "value": {
           "type": "https://api.example.com/error/400/bad-content",
           "title": "Bad content",
           "status": 400,
-          "detail": "Could not parse 'Range' header: 'bytes=0-10,20-30'. Only a single range of the form 'bytes=<start>-<end>', 'bytes=<start>-' or 'bytes=-<suffixLength>' is supported."
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+          "detail": "Could not parse 'Range' header: 'bytes=not-a-valid-range'. Only a single range of the form 'bytes=<start>-<end>', 'bytes=<start>-' or 'bytes=-<suffixLength>' is supported."
         }
       },
       "MissingPropertyProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/element/post-element/400-response-body.json",
         "value": {
           "type": "https://api.example.com/error/400/missing-property",
           "title": "Missing property",
           "status": 400,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
           "detail": "Endpoint requires that the request contains property 'type' to be set to a valid type."
         }
       },
       "NotFoundProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/element/get-element/404-response-body.json",
         "value": {
           "type": "https://api.example.com/error/404/not-found",
-          "title": "Not Found",
+          "title": "Not found",
           "status": 404,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
           "detail": "Requested element was not found."
         }
       },
       "OffsetMismatchProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/upload/patch-upload/409-response-body.json",
         "value": {
           "type": "https://api.example.com/error/409/conflict",
           "title": "Conflict",
           "status": 409,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
           "detail": "Offset from request does not match offset of resource.",
-          "expected-offset": 20971520,
-          "provided-offset": 10485760
+          "expectedOffset": 5242880,
+          "providedOffset": 5242881
         }
       },
       "PreconditionFailedProblemExample": {
         "summary": "Precondition failed. `If-Match` or `If-None-Match` condition not met.",
+        "x-ember-nexus-recording": "api-endpoints/element/get-element/412-response-body.json",
         "value": {
           "type": "https://api.example.com/error/412/precondition-failed",
           "title": "Precondition Failed",
           "status": 412,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
           "detail": "Precondition does not match."
         }
       },
       "RangeNotSatisfiableProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/file/get-element-file/416-response-body.json",
         "value": {
           "type": "https://api.example.com/error/416/range-not-satisfiable",
           "title": "Range Not Satisfiable",
           "status": 416,
-          "detail": "Requested range start (200000) is beyond the end of the resource (138937 bytes long).",
-          "requested-start": 200000,
-          "total-length": 138937
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+          "detail": "Requested range start (999999999) is beyond the end of the resource (138937 bytes long).",
+          "requestedStart": 999999999,
+          "totalLength": 138937
         }
       },
       "ReservedIdentifierProblemExample": {
         "summary": "The unique user identifier is already used by another account.",
+        "x-ember-nexus-recording": "api-endpoints/user/post-register/400-reserved-identifier-response-body.json",
         "value": {
           "type": "https://api.example.com/error/400/reserved-identifier",
           "title": "Reserved identifier",
           "status": 400,
-          "detail": "The requested identifier 'test@example.com' is reserved and can not be used."
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+          "detail": "The requested identifier 'user@postToken.user.endpoint.localhost.dev' is reserved and can not be used."
         }
       },
       "UnauthorizedProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/element/get-element/401-response-body.json",
         "value": {
           "type": "https://api.example.com/error/401/unauthorized",
           "title": "Unauthorized",
           "status": 401,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
           "detail": "Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted)."
         }
       },
+      "UnprocessableContentProblemExample": {
+        "summary": "An expression (Go Expr Lang) query exceeded its configured timeout.",
+        "x-ember-nexus-recording": "api-endpoints/search/post-search/422-response-body.json",
+        "value": {
+          "type": "https://api.example.com/error/422/unprocessable-content",
+          "title": "Unprocessable content",
+          "status": 422,
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+          "detail": "Query execution timed out after 100 ms."
+        }
+      },
       "UploadLockedProblemExample": {
+        "x-ember-nexus-recording": "api-endpoints/upload/patch-upload/409-locked-response-body.json",
         "value": {
           "type": "https://api.example.com/error/409/conflict",
           "title": "Conflict",
           "status": 409,
-          "detail": "Another request is currently modifying this upload."
+          "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+          "detail": "Another request is currently modifying this upload, please retry once it has finished."
         }
       }
     },
@@ -144,7 +183,7 @@
         "description": "Specifies which HTTP headers can be used during a cross-origin request, returned in preflight responses.",
         "schema": {
           "type": "string",
-          "example": "Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method"
+          "example": "*"
         },
         "x-ember-nexus-links": [
           {
@@ -162,7 +201,7 @@
         "description": "Indicates which HTTP methods are permitted for cross-origin requests, typically returned in preflight responses.",
         "schema": {
           "type": "string",
-          "example": "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+          "example": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
         },
         "x-ember-nexus-links": [
           {
@@ -216,7 +255,7 @@
         "description": "Lists the HTTP methods supported by the endpoint; returned alongside a `405 Method Not Allowed` response.",
         "schema": {
           "type": "string",
-          "example": "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+          "example": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
         },
         "x-ember-nexus-links": [
           {
@@ -286,29 +325,6 @@
         "x-ember-nexus-important": true,
         "required": true
       },
-      "ETag": {
-        "description": "Entity tag used for caching and optimistic concurrency control.",
-        "schema": {
-          "type": "string",
-          "example": "\"YgbFC4u5EgC\""
-        },
-        "x-ember-nexus-links": [
-          {
-            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag",
-            "name": "MDN"
-          },
-          {
-            "url": "https://http.dev/etag",
-            "name": "HTTP.dev"
-          },
-          {
-            "url": "/guide/caching-and-conditional-requests",
-            "name": "Caching guide"
-          }
-        ],
-        "x-ember-nexus-important": true,
-        "required": true
-      },
       "ETag-optional": {
         "description": "Entity tag used for caching and optimistic concurrency control.\n\n**Note**: ETag is not included for collections which are too big.",
         "schema": {
@@ -331,6 +347,29 @@
         ],
         "x-ember-nexus-important": true,
         "required": false
+      },
+      "ETag": {
+        "description": "Entity tag used for caching and optimistic concurrency control.",
+        "schema": {
+          "type": "string",
+          "example": "\"YgbFC4u5EgC\""
+        },
+        "x-ember-nexus-links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/ETag",
+            "name": "MDN"
+          },
+          {
+            "url": "https://http.dev/etag",
+            "name": "HTTP.dev"
+          },
+          {
+            "url": "/guide/caching-and-conditional-requests",
+            "name": "Caching guide"
+          }
+        ],
+        "x-ember-nexus-important": true,
+        "required": true
       },
       "Expires": {
         "description": "Point in time after which the unfinished resumable upload is discarded, if it is not completed before then.",
@@ -620,12 +659,6 @@
           }
         }
       },
-      "ElementId": {
-        "type": "string",
-        "format": "uuid",
-        "example": "00000000-0000-0000-0000-000000000000",
-        "description": "Global unique identifier for any element"
-      },
       "Element": {
         "type": "object",
         "required": [
@@ -669,6 +702,12 @@
             "description": "UUID of the end node. Required if start is present."
           }
         }
+      },
+      "ElementId": {
+        "type": "string",
+        "format": "uuid",
+        "example": "00000000-0000-0000-0000-000000000000",
+        "description": "Global unique identifier for any element"
       },
       "GraphStructure": {
         "type": "object",
@@ -750,9 +789,19 @@
                 "example": "email"
               },
               "uniqueIdentifierRegex": {
-                "type": "boolean",
-                "nullable": true,
-                "example": false
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "boolean",
+                    "enum": [
+                      false
+                    ]
+                  }
+                ],
+                "description": "Either `false` or a regex for checking the identifier content.",
+                "example": "/^[^\\s@]+@[^\\s@]+$/"
               }
             }
           },
@@ -776,7 +825,7 @@
                 "type": "integer",
                 "example": 10737418240
               },
-              "uploadExpiresInSecondsAfterFirstRequest": {
+              "uploadExpiresAfterFirstRequestInSeconds": {
                 "type": "integer",
                 "example": 10800
               },
@@ -848,6 +897,11 @@
           },
           "detail": {
             "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri",
+            "description": "URN uniquely identifying the request that produced this problem, as `urn:uuid:<uuid>`."
           }
         }
       },
@@ -1347,20 +1401,22 @@
                   "node": {
                     "summary": "Element found, which happens to be a node.",
                     "x-ember-nexus-name": "Node",
+                    "x-ember-nexus-recording": "api-endpoints/element/get-element/200-node-response-body.json",
                     "value": {
                       "type": "Comment",
                       "id": "74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac",
                       "data": {
                         "created": "2025-09-27T10:39:51+00:00",
-                        "updated": "2025-09-27T10:39:51+00:00",
                         "name": "Blue",
-                        "content": "Blue is one of the three primary colours in the RYB colour model...\n"
+                        "updated": "2025-09-27T10:39:51+00:00",
+                        "content": "Blue is one of the three primary colours in the RYB colour model (traditional colour theory), as well as in the RGB (additive) colour model. It lies between violet and cyan on the spectrum of visible light. The eye perceives blue when observing light with a dominant wavelength between approximately 450 and 495 nanometres. Most blues contain a slight mixture of other colours; azure contains some green, while ultramarine contains some violet. The clear daytime sky and the deep sea appear blue because of an optical effect known as Rayleigh scattering. An optical effect called the Tyndall effect explains blue eyes. Distant objects appear more blue because of another optical effect called aerial perspective."
                       }
                     }
                   },
                   "relationship": {
                     "summary": "Element found, which happens to be a relation.\n\n**Note**: The properties `start` and `end` are defined, as they are required for relations.",
                     "x-ember-nexus-name": "Relation",
+                    "x-ember-nexus-recording": "api-endpoints/element/get-element/200-relation-response-body.json",
                     "value": {
                       "type": "OWNS",
                       "id": "eb5d2879-c5e6-43a6-b8ce-2a1188ca7073",
@@ -2523,6 +2579,7 @@
                 "examples": {
                   "default": {
                     "summary": "Parent element found and returning its children in a collection response.",
+                    "x-ember-nexus-recording": "api-endpoints/element/get-children/200-response-body.json",
                     "value": {
                       "type": "_PartialCollection",
                       "id": "/56fda20c-b238-4034-b555-1df47c47e17a/children",
@@ -2953,6 +3010,7 @@
                 "examples": {
                   "default": {
                     "summary": "Returning root nodes in a collection response.",
+                    "x-ember-nexus-recording": "api-endpoints/element/get-index/200-response-body.json",
                     "value": {
                       "type": "_PartialCollection",
                       "id": "/",
@@ -3533,6 +3591,7 @@
                 "examples": {
                   "default": {
                     "summary": "Child element found and returning its parents in a collection response.",
+                    "x-ember-nexus-recording": "api-endpoints/element/get-parents/200-response-body.json",
                     "value": {
                       "type": "_PartialCollection",
                       "id": "/45482998-274a-43d0-a466-f31d0b24cc0a/parents",
@@ -3861,6 +3920,7 @@
                 "examples": {
                   "default": {
                     "summary": "Center element found and returning its related elements in a collection response.",
+                    "x-ember-nexus-recording": "api-endpoints/element/get-related/200-response-body.json",
                     "value": {
                       "type": "_PartialCollection",
                       "id": "/45482998-274a-43d0-a466-f31d0b24cc0a/related",
@@ -3876,9 +3936,9 @@
                           "type": "Comment",
                           "id": "251654a1-588e-4dc4-836f-b1e334d91aae",
                           "data": {
-                            "created": "2025-09-27T10:39:51+00:00",
+                            "created": "2026-10-02T22:16:07+00:00",
                             "name": "Yellow",
-                            "updated": "2025-09-27T10:39:51+00:00",
+                            "updated": "2026-10-02T22:16:07+00:00",
                             "content": "Yellow is the color between green and orange on the spectrum of light. It is evoked by light with a dominant wavelength of roughly 575–585 nm. It is a primary color in subtractive color systems, used in painting or color printing. In the RGB color model, used to create colors on television and computer screens, yellow is a secondary color made by combining red and green at equal intensity. Carotenoids give the characteristic yellow color to autumn leaves, corn, canaries, daffodils, and lemons, as well as egg yolks, buttercups, and bananas. They absorb light energy and protect plants from photo damage in some cases. Sunlight has a slight yellowish hue when the Sun is near the horizon, due to atmospheric scattering of shorter wavelengths (green, blue, and violet)."
                           }
                         },
@@ -3886,18 +3946,18 @@
                           "type": "Sphere",
                           "id": "56fda20c-b238-4034-b555-1df47c47e17a",
                           "data": {
-                            "created": "2025-09-27T10:39:51+00:00",
+                            "created": "2026-10-02T22:16:07+00:00",
                             "name": "Tag",
-                            "updated": "2025-09-27T10:39:51+00:00"
+                            "updated": "2026-10-02T22:16:07+00:00"
                           }
                         },
                         {
                           "type": "Comment",
                           "id": "5bd2a18a-6d26-4fcd-99a7-9705794b63fc",
                           "data": {
-                            "created": "2025-09-27T10:39:51+00:00",
+                            "created": "2026-10-02T22:16:07+00:00",
                             "name": "Additive color model",
-                            "updated": "2025-09-27T10:39:51+00:00",
+                            "updated": "2026-10-02T22:16:07+00:00",
                             "content": "Additive color or additive mixing is a property of a color model that predicts the appearance of colors made by coincident component lights, i.e. the perceived color can be predicted by summing the numeric representations of the component colors. Modern formulations of Grassmann's laws describe the additivity in the color perception of light mixtures in terms of algebraic equations. Additive color predicts perception and not any sort of change in the photons of light themselves. These predictions are only applicable in the limited scope of color matching experiments where viewers match small patches of uniform color isolated against a grey or black background."
                           }
                         }
@@ -3909,8 +3969,8 @@
                           "start": "251654a1-588e-4dc4-836f-b1e334d91aae",
                           "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
                           "data": {
-                            "created": "2025-09-27T10:39:58+00:00",
-                            "updated": "2025-09-27T10:39:58+00:00"
+                            "created": "2026-10-02T22:16:15+00:00",
+                            "updated": "2026-10-02T22:16:15+00:00"
                           }
                         },
                         {
@@ -3919,8 +3979,8 @@
                           "start": "56fda20c-b238-4034-b555-1df47c47e17a",
                           "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
                           "data": {
-                            "created": "2025-09-27T10:39:58+00:00",
-                            "updated": "2025-09-27T10:39:58+00:00"
+                            "created": "2026-10-02T22:16:15+00:00",
+                            "updated": "2026-10-02T22:16:15+00:00"
                           }
                         },
                         {
@@ -3929,8 +3989,8 @@
                           "start": "5bd2a18a-6d26-4fcd-99a7-9705794b63fc",
                           "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
                           "data": {
-                            "created": "2025-09-27T10:39:58+00:00",
-                            "updated": "2025-09-27T10:39:58+00:00"
+                            "created": "2026-10-02T22:16:15+00:00",
+                            "updated": "2026-10-02T22:16:15+00:00"
                           }
                         }
                       ]
@@ -4257,6 +4317,7 @@
                 },
                 "examples": {
                   "400_bad_content": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-400-bad-content/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 400 - Bad Content\n\n This error is thrown, when a required request property is set, but does not contain a valid value.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 400 error code: https://http.dev/400\n\n"
                   }
                 }
@@ -4343,6 +4404,7 @@
                 },
                 "examples": {
                   "400_forbidden_property": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-400-forbidden-property/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 400 - Forbidden Property\n\n This error is thrown when the request body contains a property, which is either generally not allowed or can not be\n changed manually.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 400 error code: https://http.dev/400\n\n"
                   }
                 }
@@ -4429,6 +4491,7 @@
                 },
                 "examples": {
                   "400_incomplete_mutual_dependency": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-400-incomplete-mutual-dependency/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 400 - Incomplete Mutual Dependency\n\n This error is thrown when there are properties which depend on ech other, i.e. must be all defined, but at least one\n is missing from the request body. Try to add the missing properties.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 400 error code: https://http.dev/400\n\n"
                   }
                 }
@@ -4515,6 +4578,7 @@
                 },
                 "examples": {
                   "400_missing_property": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-400-missing-property/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 400 - Missing Property\n\n This error is thrown when the request body does not contain a required property.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 400 error code: https://http.dev/400\n\n"
                   }
                 }
@@ -4601,6 +4665,7 @@
                 },
                 "examples": {
                   "400_reserved_identifier": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-400-reserved-identifier/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 400 - Reserved Identifier\n\n The exception is thrown when an identifier is used which is already in use or reserved.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 400 error code: https://http.dev/400\n\n"
                   }
                 }
@@ -4687,6 +4752,7 @@
                 },
                 "examples": {
                   "400_reserved_type": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-400-reserved-type/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 400 - Reserved Type\n\n The exception is thrown when a reserved type is used.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 400 error code: https://http.dev/400\n\n"
                   }
                 }
@@ -4773,6 +4839,7 @@
                 },
                 "examples": {
                   "401_unauthorized": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-401-unauthorized/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 401 - Unauthorized\n\n Request does not contain valid token, or anonymous user is disabled.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 401 error code: https://http.dev/401\n\n"
                   }
                 }
@@ -4859,6 +4926,7 @@
                 },
                 "examples": {
                   "403_forbidden": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-403-forbidden/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 403 - Forbidden\n\n This error is thrown when the requested endpoint, element or action is forbidden.\n\n There are a few things you can check:\n\n - Is the endpoint available via the GET method?\n - Do you have access to the endpoint?\n - Is the endpoint disabled in the configuration?\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 403 error code: https://http.dev/403\n\n"
                   }
                 }
@@ -4945,6 +5013,7 @@
                 },
                 "examples": {
                   "404_not_found": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-404-not-found/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 404 - Not Found\n\n The requested element was not found.\n\n This can happen due to multiple reasons:\n\n - The requested route does not exist.\n - The requested element did never exist.\n - There is a typo within the element's UUID.\n - You do not have access to the element.\n - You do not have the correct type of access to the element.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 404 error code: https://http.dev/404\n\n"
                   }
                 }
@@ -5031,7 +5100,95 @@
                 },
                 "examples": {
                   "405_method_not_allowed": {
-                    "value": " Error 405 - Method Not Allowed\n\n The requested route exists, but does not support the used HTTP method.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 405 error code: https://http.dev/405\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-405-method-not-allowed/200-response-body.txt",
+                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 405 - Method Not Allowed\n\n The requested route exists, but does not support the used HTTP method.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 405 error code: https://http.dev/405\n"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/error/408/request-timeout": {
+      "get": {
+        "summary": "Get error 408 request timeout",
+        "description": "Static informational page for the `https://api.example.com/error/408/request-timeout` problem type, explaining why the error is thrown.",
+        "operationId": "get-error-408-request-timeout",
+        "tags": [
+          "Error"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/error/408/request-timeout",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a static, human-readable explanation of the error.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "408_request_timeout": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-408-request-timeout/200-response-body.txt",
+                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 408 - Request Timeout\n\n The HTTP 408 Request Timeout client error response status code indicates that the server did not receive the complete\n request body, e.g. because the connection was interrupted or because the request body was not sent within the time\n limit of the server. Retry the request, if necessary with a smaller request body, e.g. by uploading smaller chunks.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 408 error code: https://http.dev/408\n"
                   }
                 }
               }
@@ -5117,7 +5274,8 @@
                 },
                 "examples": {
                   "409_conflict": {
-                    "value": " Error 409 - Conflict\n\n The HTTP 409 Conflict client error response status code indicates a request conflict with the current state of the\n target resource.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 409 error code: https://http.dev/409\n\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-409-conflict/200-response-body.txt",
+                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 409 - Conflict\n\n The HTTP 409 Conflict client error response status code indicates a request conflict with the current state of the\n target resource.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 409 error code: https://http.dev/409\n\n"
                   }
                 }
               }
@@ -5203,7 +5361,8 @@
                 },
                 "examples": {
                   "410_gone": {
-                    "value": " Error 410 - Gone\n\n The HTTP 410 Gone client error response status code indicates that the target resource is no longer available at the\n origin server and that this condition is likely to be permanent.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 410 error code: https://http.dev/410\n\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-410-gone/200-response-body.txt",
+                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 410 - Gone\n\n The HTTP 410 Gone client error response status code indicates that the target resource is no longer available at the\n origin server and that this condition is likely to be permanent.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 410 error code: https://http.dev/410\n\n"
                   }
                 }
               }
@@ -5289,6 +5448,7 @@
                 },
                 "examples": {
                   "412_precondition_failed": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-412-precondition-failed/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 412 - Precondition Failed\n\n Precondition does not match.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 412 error code: https://http.dev/412\n\n"
                   }
                 }
@@ -5375,7 +5535,95 @@
                 },
                 "examples": {
                   "416_range_not_satisfiable": {
-                    "value": " Error 416 - Range Not Satisfiable\n\n The HTTP 416 Range Not Satisfiable client error response status code indicates that a server can not serve the\n requested ranges. The most likely reason is that the document does not contain such ranges, or that the range\n header is invalid.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 416 error code: https://http.dev/416\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-416-range-not-satisfiable/200-response-body.txt",
+                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 416 - Range Not Satisfiable\n\n The HTTP 416 Range Not Satisfiable client error response status code indicates that a server can not serve the\n requested ranges. The most likely reason is that the document does not contain such ranges, or that the range\n header is invalid.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 416 error code: https://http.dev/416\n"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/error/422/unprocessable-content": {
+      "get": {
+        "summary": "Get error 422 unprocessable content",
+        "description": "Static informational page for the `https://api.example.com/error/422/unprocessable-content` problem type, explaining why the error is thrown.",
+        "operationId": "get-error-422-unprocessable-content",
+        "tags": [
+          "Error"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/error/422/unprocessable-content",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a static, human-readable explanation of the error.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "422_unprocessable_content": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-422-unprocessable-content/200-response-body.txt",
+                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 422 - Unprocessable Content\n\n The request content was syntactically valid, but could not be processed due to a configured resource limit, e.g. an\n expression (Go Expr Lang) query exceeding its configured timeout.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 422 error code: https://http.dev/422\n"
                   }
                 }
               }
@@ -5461,6 +5709,7 @@
                 },
                 "examples": {
                   "500_internal_server_error": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-500-internal-server-error/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 500 - Internal Server Error\n\n The server has some internal problem. You can try to repeat your request at a later time.\n Should the problem persist, contact this site's administrator.\n\n As an administrator, you should be able to find the cause in the server's logs.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 500 error code: https://http.dev/500\n\n"
                   }
                 }
@@ -5547,7 +5796,95 @@
                 },
                 "examples": {
                   "501_not_implemented": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-501-not-implemented/200-response-body.txt",
                     "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 501 - Not Implemented\n\n Endpoint is currently not implemented. Try upgrading the software.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 501 error code: https://http.dev/501\n\n"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/error/503/service-unavailable": {
+      "get": {
+        "summary": "Get error 503 service unavailable",
+        "description": "Static informational page for the `https://api.example.com/error/503/service-unavailable` problem type, explaining why the error is thrown.",
+        "operationId": "get-error-503-service-unavailable",
+        "tags": [
+          "Error"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [],
+        "x-ember-nexus-har-example": [
+          {
+            "har": {
+              "method": "GET",
+              "url": "https://api.example.com/error/503/service-unavailable",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a static, human-readable explanation of the error.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/200",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "503_service_unavailable": {
+                    "x-ember-nexus-recording": "api-endpoints/error/get-503-service-unavailable/200-response-body.txt",
+                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 503 - Service Unavailable\n\n The HTTP 503 Service Unavailable server error response status code indicates that the server is not ready to handle\n the request, e.g. because it is overloaded or because a component of the service is not reachable. Retry the request\n after a short pause.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 503 error code: https://http.dev/503\n"
                   }
                 }
               }
@@ -8019,8 +8356,147 @@
                   "$ref": "#/components/schemas/SearchResultResponse"
                 },
                 "examples": {
-                  "default": {
-                    "summary": "Full text search, hydrated into a collection of elements.",
+                  "elasticsearchQueryDslMixinKeywordSearch": {
+                    "summary": "Elasticsearch keyword search, hydrated into a collection of elements.",
+                    "x-ember-nexus-name": "Keyword Search",
+                    "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/keyword-search/response-body.json",
+                    "value": {
+                      "type": "_SearchResultResponse",
+                      "results": [
+                        {
+                          "type": "Plant",
+                          "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                          "data": {
+                            "created": "2026-09-24T19:04:03+00:00",
+                            "images": [
+                              {
+                                "description": "Mertensia virginica Virginia Bluebell seen in Brooklyn Botanic Garden",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/31/Mertensia_virginica.bbg.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Mertensia_virginica.bbg.jpg/960px-Mertensia_virginica.bbg.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Mertensia_virginica.bbg.jpg"
+                              },
+                              {
+                                "description": "Virginia Bluebells along the Rocky River in Berea, OH. Photo by Geoffrey A. Landis",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Virginia_Bluebells_at_Rocky_River.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Virginia_Bluebells_at_Rocky_River.jpg/960px-Virginia_Bluebells_at_Rocky_River.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Virginia_Bluebells_at_Rocky_River.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "Bluebell",
+                            "updated": "2026-09-24T19:04:03+00:00",
+                            "scientificName": "M. virginica",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Mertensia_virginica",
+                            "description": "Mertensia virginica (common names Virginia bluebells, Virginia cowslip, lungwort oysterleaf, Roanoke bells) is a spring ephemeral plant in the Boraginaceae (borage) family with bell-shaped sky-blue flowers, native to eastern North America."
+                          },
+                          "file": {
+                            "contentLength": 82651,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "527fa0ca5006ae3c888c06c3e208db64aa0214b31ce9f26a1ccd5fa7cdf91c3b"
+                            }
+                          }
+                        }
+                      ],
+                      "debug": [
+                        {
+                          "input": {
+                            "type": "elasticsearch-query-dsl-mixin",
+                            "query": {
+                              "term": {
+                                "name.keyword": {
+                                  "value": "Bluebell"
+                                }
+                              }
+                            },
+                            "parameters": {
+                              "stepResults": []
+                            }
+                          },
+                          "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+                          "start": 1790276705.894463,
+                          "indices": "*",
+                          "combinedQuery": {
+                            "_source": [
+                              "_id"
+                            ],
+                            "from": 0,
+                            "size": 25,
+                            "query": {
+                              "bool": {
+                                "must": [
+                                  {
+                                    "term": {
+                                      "name.keyword": {
+                                        "value": "Bluebell"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "bool": {
+                                      "should": [
+                                        {
+                                          "terms": {
+                                            "_groupsWithSearchAccess.keyword": []
+                                          }
+                                        },
+                                        {
+                                          "term": {
+                                            "_usersWithSearchAccess.keyword": {
+                                              "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                                            }
+                                          }
+                                        }
+                                      ],
+                                      "minimum_should_match": 1
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "end": 1790276705.906694,
+                          "duration": 0.012231
+                        },
+                        {
+                          "input": {
+                            "type": "element-hydration",
+                            "query": null,
+                            "parameters": {
+                              "stepResults": [
+                                {
+                                  "elements": [
+                                    {
+                                      "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                                      "type": "Plant",
+                                      "metadata": {
+                                        "score": 3.9060724
+                                      }
+                                    }
+                                  ],
+                                  "totalHits": 1,
+                                  "maxScore": 3.9060724
+                                }
+                              ]
+                            }
+                          },
+                          "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+                          "start": 1790276705.906997,
+                          "accessibleElementIds": [
+                            "83b35321-4a91-4e9f-a49b-66d718c32ba7"
+                          ],
+                          "end": 1790276705.9172,
+                          "duration": 0.010203
+                        }
+                      ]
+                    }
+                  },
+                  "elementHydrationExplicitElementIdsHydration": {
+                    "summary": "Explicit list of elementIds, hydrated into a collection of elements.",
+                    "x-ember-nexus-name": "Explicit ElementIds Hydration",
+                    "x-ember-nexus-recording": "search/example/element-hydration/explicit-elementids-hydration/response-body.json",
                     "value": {
                       "type": "_SearchResultResponse",
                       "results": [
@@ -8028,11 +8504,554 @@
                           "type": "Plant",
                           "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
                           "data": {
-                            "created": "2025-09-25T18:35:28+00:00",
-                            "updated": "2025-09-25T18:35:28+00:00",
+                            "created": "2026-09-24T19:04:01+00:00",
+                            "images": [
+                              {
+                                "description": "",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flame_lily.png",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flame_lily.png/500px-Flame_lily.png",
+                                "link": "https://en.wikipedia.org/wiki/File:Flame_lily.png"
+                              },
+                              {
+                                "description": "Gloriosa superba at Mabvuku, Harare, Zimbabwe",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Gloriosa_superba_1.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gloriosa_superba_1.jpg/960px-Gloriosa_superba_1.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
+                              }
+                            ],
+                            "hasFile": true,
                             "name": "Flame Lily",
-                            "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae."
+                            "updated": "2026-09-24T19:04:01+00:00",
+                            "scientificName": "G. superba",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
+                            "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include flame lily, climbing lily, creeping lily, glory lily, gloriosa lily, tiger claw, and fire lily."
+                          },
+                          "file": {
+                            "contentLength": 90681,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "72e3e3770db795b2f04f0b5bb0be43e74df70de4faa0bf83a706bbde29e4ea0b"
+                            }
                           }
+                        },
+                        {
+                          "type": "Plant",
+                          "id": "3283fd3d-8083-4170-882a-41b1cd152c55",
+                          "data": {
+                            "created": "2026-09-24T19:04:03+00:00",
+                            "images": [
+                              {
+                                "description": "Flower of Nelumbo nucifera, bean of India.",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Sacred_lotus_Nelumbo_nucifera.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Sacred_lotus_Nelumbo_nucifera.jpg/960px-Sacred_lotus_Nelumbo_nucifera.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Sacred_lotus_Nelumbo_nucifera.jpg"
+                              },
+                              {
+                                "description": "Nelumbo nucifera",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/34/Nelumbo_nucifera1romainguy.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Nelumbo_nucifera1romainguy.jpg/500px-Nelumbo_nucifera1romainguy.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Nelumbo_nucifera1romainguy.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "Lotus",
+                            "updated": "2026-09-24T19:04:03+00:00",
+                            "scientificName": "N. nucifera",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Nelumbo_nucifera",
+                            "description": "Nelumbo nucifera, also known as Padma (Sanskrit: \\u092a\\u0926\\u094d\\u092e, romanized: Padm\\u0101, lit.\\u2009'Lotus') or Kamala (Sanskrit: \\u0915\\u092e\\u0932, lit. 'Lotus'), sacred lotus, pink lotus, Indian lotus, or simply lotus, is one of two extant species of aquatic plant in the family Nelumbonaceae. It is sometimes colloquially called a water lily, though this more often refers to members of the family Nymphaeaceae. The lotus belongs in the order Proteales."
+                          },
+                          "file": {
+                            "contentLength": 63295,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "a46657ef9ece1a7e0939ee5edcc4358f23a3b8b7871c6eba4ad2ce0f30cf4e9f"
+                            }
+                          }
+                        },
+                        {
+                          "type": "Plant",
+                          "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+                          "data": {
+                            "created": "2026-09-24T19:04:01+00:00",
+                            "images": [
+                              {
+                                "description": "in Seoul Forest, South Korea",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Tulips_in_Seoul_Forest%2C_South_Korea1.jpg/500px-Tulips_in_Seoul_Forest%2C_South_Korea1.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Tulips_in_Seoul_Forest,_South_Korea1.jpg"
+                              },
+                              {
+                                "description": "A Yonina cultivar (Division 6) tulip at the Tulip Fest in Albany, New York, United States.",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Yonina_Tulip.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Yonina_Tulip.jpg/960px-Yonina_Tulip.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Yonina_Tulip.jpg"
+                              },
+                              {
+                                "description": "Tulipa orphanidea, garden plant",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c4/Tulipa_orphanidea_060506.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Tulipa_orphanidea_060506.jpg/500px-Tulipa_orphanidea_060506.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Tulipa_orphanidea_060506.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "Tulip",
+                            "updated": "2026-09-24T19:04:01+00:00",
+                            "scientificName": "Tulipa",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Tulip",
+                            "description": "Tulips are spring-blooming perennial herbaceous bulbiferous geophytes in the Tulipa genus. Their flowers are usually large, showy, and brightly coloured, generally red, orange, pink, yellow, or white. They often have a different coloured blotch at the base of the tepals, internally. Because of a degree of variability within the populations and a long history of cultivation, classification has been complex and controversial. The tulip is a member of the lily family, Liliaceae, along with 14 other genera, where it is most closely related to Amana, Erythronium, and Gagea in the tribe Lilieae."
+                          },
+                          "file": {
+                            "contentLength": 105488,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "c4c242897c43a74e9e4a8b5bf89e6b2cb1cbd99f8d621f33eea175cbf6dfab97"
+                            }
+                          }
+                        }
+                      ],
+                      "debug": [
+                        {
+                          "input": {
+                            "type": "element-hydration",
+                            "query": {
+                              "elementIds": [
+                                "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                                "3283fd3d-8083-4170-882a-41b1cd152c55",
+                                "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+                              ]
+                            },
+                            "parameters": {
+                              "stepResults": []
+                            }
+                          },
+                          "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+                          "start": 1790276706.547772,
+                          "accessibleElementIds": [
+                            "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                            "3283fd3d-8083-4170-882a-41b1cd152c55",
+                            "8940d70b-5b6f-43b7-bee4-41d073396ff8"
+                          ],
+                          "end": 1790276706.56921,
+                          "duration": 0.021438
+                        }
+                      ]
+                    }
+                  },
+                  "cypherPathSubsetFindTaggedElements": {
+                    "summary": "Cypher path subset search for tagged elements, hydrated into a collection of elements.",
+                    "x-ember-nexus-name": "Find Tagged Elements",
+                    "x-ember-nexus-recording": "search/example/cypher-path-subset/find-tagged-elements/response-body.json",
+                    "value": {
+                      "type": "_SearchResultResponse",
+                      "results": [
+                        {
+                          "type": "Plant",
+                          "id": "78dd0a4d-2b94-4997-b4a4-353de854047c",
+                          "data": {
+                            "created": "2026-09-24T19:04:01+00:00",
+                            "images": [
+                              {
+                                "description": "Strelitzia reginae or Bird of Paradise",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/5/55/Bird_of_Paradise_flower.JPG",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Bird_of_Paradise_flower.JPG/960px-Bird_of_Paradise_flower.JPG",
+                                "link": "https://en.wikipedia.org/wiki/File:Bird_of_Paradise_flower.JPG"
+                              },
+                              {
+                                "description": "Portugal, Madeira, Botanical garden in Funchal",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/68/2010-03-05_13_16_21_Portugal-Jardim_Bot%C3%A2nico_da_Madeira.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/2010-03-05_13_16_21_Portugal-Jardim_Bot%C3%A2nico_da_Madeira.jpg/500px-2010-03-05_13_16_21_Portugal-Jardim_Bot%C3%A2nico_da_Madeira.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:2010-03-05_13_16_21_Portugal-Jardim_Bot%C3%A2nico_da_Madeira.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "Bird of Paradise",
+                            "updated": "2026-09-24T19:04:01+00:00",
+                            "scientificName": "S. reginae",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Strelitzia_reginae",
+                            "description": "Strelitzia reginae, commonly known as the crane flower, bird of paradise, or isigude in Nguni, is a species of flowering plant native to the Cape Provinces and KwaZulu-Natal in South Africa. An evergreen perennial, it is widely cultivated for its dramatic flowers. In temperate areas it is a popular houseplant."
+                          },
+                          "file": {
+                            "contentLength": 63663,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "b2a4e02335603478ee1c5e9d551708e3d2f41cfc1e27059bf891409ca4e771df"
+                            }
+                          }
+                        },
+                        {
+                          "type": "Tag",
+                          "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                          "data": {
+                            "created": "2026-09-24T19:04:01+00:00",
+                            "description": "Blue is one of the three primary colours in the RGB (additive) colour model, as well as in the RYB colour model (traditional colour theory). It lies between violet and cyan on the spectrum of visible light. The term blue generally describes colours perceived by humans observing light with a dominant wavelength that's between approximately 450 and 495 nanometres. The clear daytime sky and the deep sea appear blue because of an optical effect known as Rayleigh scattering. An optical effect called the Tyndall effect explains blue eyes. Distant objects appear more blue because of another optical effect called aerial perspective.\n\nBlue has been an important colour in art and decoration since ancient times. The semi-precious stone lapis lazuli was used in ancient Egypt for jewellery and ornament and later, in the Renaissance, to make the pigment ultramarine, the most expensive of all pigments. In the eighth century Chinese artists used cobalt blue to colour fine blue and white porcelain. In the Middle Ages, European artists used it in the windows of cathedrals. Europeans wore clothing coloured with the vegetable dye woad until it was replaced by the finer indigo from America. In the 19th century, synthetic blue dyes and pigments gradually replaced organic dyes and mineral pigments. Dark blue became a common colour for military uniforms and later, in the late 20th century, for business suits. Because blue has commonly been associated with harmony, it was chosen as the colour of the flags of the United Nations and the European Union.\n\nIn the United States and Europe, blue is the colour that both men and women are most likely to choose as their favourite, with at least one recent survey showing the same across several other countries, including China, Malaysia, and Indonesia. Past surveys in the US and Europe have found that blue is the colour most commonly associated with harmony, confidence, masculinity, knowledge, intelligence, calmness, distance, infinity, the imagination, cold, and sadness.",
+                            "name": "blue",
+                            "updated": "2026-09-24T19:04:01+00:00",
+                            "color": "#4363d8",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Blue"
+                          }
+                        },
+                        {
+                          "type": "Plant",
+                          "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                          "data": {
+                            "created": "2026-09-24T19:04:03+00:00",
+                            "images": [
+                              {
+                                "description": "Mertensia virginica Virginia Bluebell seen in Brooklyn Botanic Garden",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/31/Mertensia_virginica.bbg.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Mertensia_virginica.bbg.jpg/960px-Mertensia_virginica.bbg.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Mertensia_virginica.bbg.jpg"
+                              },
+                              {
+                                "description": "Virginia Bluebells along the Rocky River in Berea, OH. Photo by Geoffrey A. Landis",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Virginia_Bluebells_at_Rocky_River.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Virginia_Bluebells_at_Rocky_River.jpg/960px-Virginia_Bluebells_at_Rocky_River.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Virginia_Bluebells_at_Rocky_River.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "Bluebell",
+                            "updated": "2026-09-24T19:04:03+00:00",
+                            "scientificName": "M. virginica",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Mertensia_virginica",
+                            "description": "Mertensia virginica (common names Virginia bluebells, Virginia cowslip, lungwort oysterleaf, Roanoke bells) is a spring ephemeral plant in the Boraginaceae (borage) family with bell-shaped sky-blue flowers, native to eastern North America."
+                          },
+                          "file": {
+                            "contentLength": 82651,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "527fa0ca5006ae3c888c06c3e208db64aa0214b31ce9f26a1ccd5fa7cdf91c3b"
+                            }
+                          }
+                        },
+                        {
+                          "type": "Plant",
+                          "id": "884dd581-bcdd-43f1-9dab-11524578d9e2",
+                          "data": {
+                            "created": "2026-09-24T19:04:01+00:00",
+                            "images": [
+                              {
+                                "description": "Centaurea cyanus (introduced species) near Peshastin, Chelan County Washington",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Centaurea_cyanus_3.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Centaurea_cyanus_3.jpg/960px-Centaurea_cyanus_3.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Centaurea_cyanus_3.jpg"
+                              },
+                              {
+                                "description": "Photograph of a Bachelor's button, (Centaurea cyanus), that was captured using the digital macro mode, in the neighborhood called Capitol Hill, Denver, Colorado USA.",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/39/Bachelor%27s_button%2C_Basket_flower%2C_Boutonniere_flower%2C_Cornflower_-_3.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Bachelor%27s_button%2C_Basket_flower%2C_Boutonniere_flower%2C_Cornflower_-_3.jpg/960px-Bachelor%27s_button%2C_Basket_flower%2C_Boutonniere_flower%2C_Cornflower_-_3.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Bachelor%27s_button,_Basket_flower,_Boutonniere_flower,_Cornflower_-_3.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "Cornflower",
+                            "updated": "2026-09-24T19:04:01+00:00",
+                            "scientificName": "C. cyanus",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Centaurea_cyanus",
+                            "description": "Centaurea cyanus, commonly known as cornflower or bachelor's button (among other names[note 1]), is an annual flowering plant in the family Asteraceae native to Europe. In the past, it often grew as a weed in cornfields (in the broad sense of \"corn\", referring to grains, such as wheat, barley, rye, or oats), hence its name. It is now endangered in its native habitat by agricultural intensification, particularly by over-use of herbicides. However, Centaurea cyanus is now also naturalised in many other parts of the world, including North America and parts of Australia through introduction as an ornamental plant in gardens and as a seed contaminant in crop seeds."
+                          },
+                          "file": {
+                            "contentLength": 88765,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "c8ff4f7ef5afa6903c09b84e1824a1e296cfeae09f21a154536e562e9b7950c9"
+                            }
+                          }
+                        },
+                        {
+                          "type": "HAS_TAG",
+                          "id": "9200e5be-fbd6-4592-86bd-fdf40125a712",
+                          "start": "78dd0a4d-2b94-4997-b4a4-353de854047c",
+                          "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                          "data": {
+                            "created": "2026-09-24T19:04:12+00:00",
+                            "updated": "2026-09-24T19:04:12+00:00",
+                            "scenario": "general.botanicExample"
+                          }
+                        },
+                        {
+                          "type": "Plant",
+                          "id": "ad80a619-2b53-4f27-a4bd-56a316c15251",
+                          "data": {
+                            "created": "2026-09-24T19:04:03+00:00",
+                            "images": [
+                              {
+                                "description": "Jacarandas in New Farm Park October 2006",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/f3/New_Farm_Park_Jacaranda-001%2B_%28273298097%29.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/New_Farm_Park_Jacaranda-001%2B_%28273298097%29.jpg/960px-New_Farm_Park_Jacaranda-001%2B_%28273298097%29.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:New_Farm_Park_Jacaranda-001%2B_(273298097).jpg"
+                              },
+                              {
+                                "description": "Jacaranda tree in flower in Whakatāne, New Zealand",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Jacaranda1212.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Jacaranda1212.jpg/960px-Jacaranda1212.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Jacaranda1212.jpg"
+                              },
+                              {
+                                "description": "trees are in bloom in Cyprus",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Jacaranda_mimosifolia_5334.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Jacaranda_mimosifolia_5334.jpg/960px-Jacaranda_mimosifolia_5334.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Jacaranda_mimosifolia_5334.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "Jacaranda",
+                            "updated": "2026-09-24T19:04:03+00:00",
+                            "scientificName": "J. mimosifolia",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Jacaranda_mimosifolia",
+                            "description": "Jacaranda mimosifolia is a sub-tropical tree native to south-central South America that has been widely planted elsewhere because of its attractive and long-lasting violet-colored flowers. It is also known as the jacaranda, blue jacaranda, black poui, Nupur or fern tree. Older sources call it J. acutifolia, but modern authorities usually classify it as J. mimosifolia. In scientific usage, the name \"jacaranda\" refers to the genus Jacaranda, which has many other members, but in horticultural and everyday usage, it nearly always means the blue jacaranda.\n\nIn its native range in the wild, J. mimosifolia is listed as Vulnerable by the IUCN."
+                          },
+                          "file": {
+                            "contentLength": 174162,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "dc87ed191952b8a4bfec69ff9af4103c93d52f81e43c343bc8be1a2ddb61aa20"
+                            }
+                          }
+                        },
+                        {
+                          "type": "HAS_TAG",
+                          "id": "cae5b040-b013-4cb3-9ecd-62fd6e30e46e",
+                          "start": "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+                          "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                          "data": {
+                            "created": "2026-09-24T19:04:12+00:00",
+                            "updated": "2026-09-24T19:04:12+00:00",
+                            "scenario": "general.botanicExample"
+                          }
+                        },
+                        {
+                          "type": "Plant",
+                          "id": "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+                          "data": {
+                            "created": "2026-09-24T19:04:01+00:00",
+                            "images": [
+                              {
+                                "description": "Anchusa capensis in the San Francisco Botanical Garden",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/a/a6/Anchusa_capensis_kz1.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Anchusa_capensis_kz1.jpg/500px-Anchusa_capensis_kz1.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Anchusa_capensis_kz1.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "Cape Forget-me-not",
+                            "updated": "2026-09-24T19:04:01+00:00",
+                            "scientificName": "A. capensis",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Anchusa_capensis",
+                            "description": "Anchusa capensis, is a species of flowering plant in the family Boraginaceae, native to Namibia, South Africa and Lesotho. The genus Anchusa is from the Greek word anchousa, which makes reference to its use as a dye base for cosmetic paint obtained from the roots of another plant in the genus Anchusa tinctoria. The species capensis translates to \\u2018from the Cape\\u2019 referring to South Africa\n\nA. capensis typically reaches about 60 cm (24 in) tall, and grows best in full sun. In summer, red buds open to reveal small, bright cobalt blue flowers with five petals and five white scales protecting the stigma and anthers.\n\nIn the US, it grows well in zones 8\\u201311. Cultivars include 'Dawn', with white, pink, mauve and blue flowers, 'Blue Angel', with dark blue flowers, and 'Blue Bird', taller and with indigo blue flowers."
+                          },
+                          "file": {
+                            "contentLength": 75801,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "853580a14affe615f6fecbd2c16e8f6805ba53867669b3a220209a7b8d002cf1"
+                            }
+                          }
+                        },
+                        {
+                          "type": "Plant",
+                          "id": "ef54daa7-f62c-47ea-8762-fae02bd44485",
+                          "data": {
+                            "created": "2026-09-24T19:04:01+00:00",
+                            "images": [
+                              {
+                                "description": "My wonderful Saintpaulia",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Saintpaulia_ionantha.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Saintpaulia_ionantha.jpg/960px-Saintpaulia_ionantha.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:Saintpaulia_ionantha.jpg"
+                              },
+                              {
+                                "description": "African-violet",
+                                "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/ec/2007-04-20Saintpaulia_ionantha03.jpg",
+                                "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/2007-04-20Saintpaulia_ionantha03.jpg/960px-2007-04-20Saintpaulia_ionantha03.jpg",
+                                "link": "https://en.wikipedia.org/wiki/File:2007-04-20Saintpaulia_ionantha03.jpg"
+                              }
+                            ],
+                            "hasFile": true,
+                            "name": "African Violet",
+                            "updated": "2026-09-24T19:04:01+00:00",
+                            "scientificName": "S. sect. Saintpaulia",
+                            "scenario": "general.botanicExample",
+                            "link": "https://en.wikipedia.org/wiki/Streptocarpus_sect._Saintpaulia",
+                            "description": "Streptocarpus sect. Saintpaulia is a section within Streptocarpus subgenus Streptocarpella consisting of about ten species of herbaceous perennial flowering plants in the family Gesneriaceae, native to Tanzania and adjacent southeastern Kenya in eastern tropical Africa. The section was previously treated as a separate genus, Saintpaulia, but molecular phylogenetic studies showed that it was nested within the genus Streptocarpus.\n\nSpecies and cultivars are commonly called African violets (although they are not closely related to true violets) or saintpaulias. They are commonly sold as house plants."
+                          },
+                          "file": {
+                            "contentLength": 128977,
+                            "extension": "jpg",
+                            "mimeType": "image/jpeg",
+                            "hash": {
+                              "sha256": "d3e05a199cc6bba407eb6f91604c5a1cc1945a82fdf07f42a3f24d3834902406"
+                            }
+                          }
+                        },
+                        {
+                          "type": "HAS_TAG",
+                          "id": "f096b595-d67b-4600-9b88-a0255d55db32",
+                          "start": "ad80a619-2b53-4f27-a4bd-56a316c15251",
+                          "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                          "data": {
+                            "created": "2026-09-24T19:04:12+00:00",
+                            "updated": "2026-09-24T19:04:12+00:00",
+                            "scenario": "general.botanicExample"
+                          }
+                        },
+                        {
+                          "type": "HAS_TAG",
+                          "id": "f4391558-41f8-4d43-9b8d-01dd638192af",
+                          "start": "ef54daa7-f62c-47ea-8762-fae02bd44485",
+                          "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                          "data": {
+                            "created": "2026-09-24T19:04:12+00:00",
+                            "updated": "2026-09-24T19:04:12+00:00",
+                            "scenario": "general.botanicExample"
+                          }
+                        },
+                        {
+                          "type": "HAS_TAG",
+                          "id": "f63ef383-ad99-48c6-9699-9d71c7c9cd16",
+                          "start": "884dd581-bcdd-43f1-9dab-11524578d9e2",
+                          "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                          "data": {
+                            "created": "2026-09-24T19:04:12+00:00",
+                            "updated": "2026-09-24T19:04:12+00:00",
+                            "scenario": "general.botanicExample"
+                          }
+                        },
+                        {
+                          "type": "HAS_TAG",
+                          "id": "f8d6e90d-455c-46d8-b02d-430ad02217ee",
+                          "start": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                          "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                          "data": {
+                            "created": "2026-09-24T19:04:14+00:00",
+                            "updated": "2026-09-24T19:04:14+00:00",
+                            "scenario": "general.botanicExample"
+                          }
+                        }
+                      ],
+                      "debug": [
+                        {
+                          "input": {
+                            "type": "cypher-path-subset",
+                            "query": "MATCH path=((:Plant)-[:HAS_TAG]->(:Tag {name: \"blue\"})) RETURN path",
+                            "parameters": {
+                              "stepResults": []
+                            }
+                          },
+                          "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
+                          "start": 1790276705.139105,
+                          "end": 1790276705.562573,
+                          "duration": 0.42346787452697754
+                        },
+                        {
+                          "input": {
+                            "type": "element-hydration",
+                            "query": null,
+                            "parameters": {
+                              "stepResults": [
+                                {
+                                  "paths": [
+                                    {
+                                      "nodeIds": [
+                                        "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                                        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                                      ],
+                                      "relationIds": [
+                                        "f8d6e90d-455c-46d8-b02d-430ad02217ee"
+                                      ]
+                                    },
+                                    {
+                                      "nodeIds": [
+                                        "78dd0a4d-2b94-4997-b4a4-353de854047c",
+                                        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                                      ],
+                                      "relationIds": [
+                                        "9200e5be-fbd6-4592-86bd-fdf40125a712"
+                                      ]
+                                    },
+                                    {
+                                      "nodeIds": [
+                                        "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+                                        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                                      ],
+                                      "relationIds": [
+                                        "cae5b040-b013-4cb3-9ecd-62fd6e30e46e"
+                                      ]
+                                    },
+                                    {
+                                      "nodeIds": [
+                                        "ad80a619-2b53-4f27-a4bd-56a316c15251",
+                                        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                                      ],
+                                      "relationIds": [
+                                        "f096b595-d67b-4600-9b88-a0255d55db32"
+                                      ]
+                                    },
+                                    {
+                                      "nodeIds": [
+                                        "ef54daa7-f62c-47ea-8762-fae02bd44485",
+                                        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                                      ],
+                                      "relationIds": [
+                                        "f4391558-41f8-4d43-9b8d-01dd638192af"
+                                      ]
+                                    },
+                                    {
+                                      "nodeIds": [
+                                        "884dd581-bcdd-43f1-9dab-11524578d9e2",
+                                        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                                      ],
+                                      "relationIds": [
+                                        "f63ef383-ad99-48c6-9699-9d71c7c9cd16"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+                          "start": 1790276705.562889,
+                          "element-hydration:redundantElementIds": {
+                            "message": "Removed 5 redundant elementIds.",
+                            "removedElementIds": [
+                              "79ca27e5-93bb-43e6-a76b-096ea45e2e8e"
+                            ]
+                          },
+                          "accessibleElementIds": [
+                            "78dd0a4d-2b94-4997-b4a4-353de854047c",
+                            "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                            "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                            "884dd581-bcdd-43f1-9dab-11524578d9e2",
+                            "9200e5be-fbd6-4592-86bd-fdf40125a712",
+                            "ad80a619-2b53-4f27-a4bd-56a316c15251",
+                            "cae5b040-b013-4cb3-9ecd-62fd6e30e46e",
+                            "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
+                            "ef54daa7-f62c-47ea-8762-fae02bd44485",
+                            "f096b595-d67b-4600-9b88-a0255d55db32",
+                            "f4391558-41f8-4d43-9b8d-01dd638192af",
+                            "f63ef383-ad99-48c6-9699-9d71c7c9cd16",
+                            "f8d6e90d-455c-46d8-b02d-430ad02217ee"
+                          ],
+                          "end": 1790276705.636983,
+                          "duration": 0.074094
                         }
                       ]
                     }
@@ -8136,6 +9155,54 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "The request content was syntactically valid, but could not be processed due to a configured resource limit, e.g. an expression (Go Expr Lang) query exceeding its configured timeout.",
+            "headers": {
+              "Access-Control-Allow-Headers": {
+                "$ref": "#/components/headers/Access-Control-Allow-Headers"
+              },
+              "Access-Control-Allow-Methods": {
+                "$ref": "#/components/headers/Access-Control-Allow-Methods"
+              },
+              "Access-Control-Allow-Origin": {
+                "$ref": "#/components/headers/Access-Control-Allow-Origin"
+              },
+              "Access-Control-Expose-Headers": {
+                "$ref": "#/components/headers/Access-Control-Expose-Headers"
+              },
+              "Allow": {
+                "$ref": "#/components/headers/Allow"
+              },
+              "Cache-Control": {
+                "$ref": "#/components/headers/Cache-Control"
+              },
+              "X-Powered-By": {
+                "$ref": "#/components/headers/X-Powered-By"
+              }
+            },
+            "x-ember-nexus-links": [
+              {
+                "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/422",
+                "name": "MDN"
+              },
+              {
+                "url": "https://http.dev/422",
+                "name": "HTTP.dev"
+              }
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                },
+                "examples": {
+                  "expressionTimeout": {
+                    "$ref": "#/components/examples/UnprocessableContentProblemExample"
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Post search",
@@ -8188,6 +9255,8 @@
         },
         "x-ember-nexus-har-example": [
           {
+            "name": "Find Nested Elements",
+            "x-ember-nexus-recording": "search/example/cypher-path-subset/find-nested-elements/request-payload.json",
             "har": {
               "method": "POST",
               "url": "https://api.example.com/search",
@@ -8196,7 +9265,196 @@
               "headers": [
                 {
                   "name": "Authorization",
-                  "value": "Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc"
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"cypher-path-subset\",\"query\":\"MATCH path=((:Plant)-[:IS_MEMBER_OF*..]->(:Taxon {name: \\\"Liliales\\\"})) RETURN path LIMIT 5\"},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Find Tagged Elements",
+            "x-ember-nexus-recording": "search/example/cypher-path-subset/find-tagged-elements/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"cypher-path-subset\",\"query\":\"MATCH path=((:Plant)-[:HAS_TAG]->(:Tag {name: \\\"blue\\\"})) RETURN path\"},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Parameterized Cypher Search",
+            "x-ember-nexus-recording": "search/example/cypher-path-subset/parameterized-cypher-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"cypher-path-subset\",\"query\":\"MATCH path=((:Plant)-[:IS_MEMBER_OF*..]->(t:Taxon)) WHERE t.name IN $taxonNames RETURN path LIMIT 5\",\"parameters\":{\"taxonNames\":[\"Liliales\"]}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Advanced Full Text Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/advanced-full-text-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"bool\":{\"should\":[{\"match\":{\"name\":{\"query\":\"blue\",\"fuzziness\":\"AUTO\",\"boost\":10.0}}},{\"match\":{\"description\":{\"query\":\"blue\"}}}],\"minimum_should_match\":1}}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Keyword Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/keyword-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"term\":{\"name.keyword\":{\"value\":\"Bluebell\"}}}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Parameterized Elasticsearch Query DSL Mixin Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/parameterized-elasticsearch-query-dsl-mixin-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"terms\":{\"_id\":\"{{someElementIds}}\"}},\"parameters\":{\"someElementIds\":[\"258c0dfe-b1d8-4839-beed-d00d1b544a96\",\"23508e6c-632a-496d-9bd6-8c62a03216af\",\"8940d70b-5b6f-43b7-bee4-41d073396ff8\"]}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Query String Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/query-string-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"query_string\":{\"query\":\"+blue -red\",\"default_field\":\"description\"}}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Simple Full Text Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/simple-full-text-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
                 },
                 {
                   "name": "Content-Type",
@@ -8209,6 +9467,222 @@
               "postData": {
                 "mimeType": "application/json",
                 "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"match\":{\"description\":{\"query\":\"lily\"}}}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Text Prefix Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/text-prefix-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"prefix\":{\"name\":{\"value\":\"blu\"}}}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Wildcard Search",
+            "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/wildcard-search/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"wildcard\":{\"description\":{\"value\":\"colo*r\"}}},\"parameters\":{\"pageSize\":5}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Explicit ElementIds Hydration",
+            "x-ember-nexus-recording": "search/example/element-hydration/explicit-elementids-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"element-hydration\",\"query\":{\"elementIds\":[\"258c0dfe-b1d8-4839-beed-d00d1b544a96\",\"3283fd3d-8083-4170-882a-41b1cd152c55\",\"8940d70b-5b6f-43b7-bee4-41d073396ff8\"]}}]}"
+              }
+            }
+          },
+          {
+            "name": "Implicit Elements Hydration",
+            "x-ember-nexus-recording": "search/example/element-hydration/implicit-elements-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"match\":{\"description\":{\"query\":\"lily\"}}}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Implicit Paths Hydration",
+            "x-ember-nexus-recording": "search/example/element-hydration/implicit-paths-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"match\":{\"description\":{\"query\":\"lily\"}}}},{\"type\":\"element-hydration\"}]}"
+              }
+            }
+          },
+          {
+            "name": "Parameterized ElementIds Hydration",
+            "x-ember-nexus-recording": "search/example/element-hydration/parameterized-elementids-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"element-hydration\",\"query\":{\"elementIds\":\"{{map(sortBy(filter(elements, #.score > 1.0), .score, \\\"desc\\\"), #.id)}}\"},\"parameters\":{\"elements\":[{\"id\":\"d747bfe6-0d52-4119-87c6-1fc37ed9395b\",\"score\":0.9},{\"id\":\"70965ab5-bc3e-4bbe-aacf-1b7e12b76110\",\"score\":4.0},{\"id\":\"b133d1d5-a24c-4409-955f-99b53b3f2a73\",\"score\":1.4},{\"id\":\"4a335e0b-e6bf-4c64-8c28-2a17bd6f0dec\",\"score\":3.2}]}}]}"
+              }
+            }
+          },
+          {
+            "name": "Cypher -> Elasticsearch -> Hydration",
+            "x-ember-nexus-recording": "search/example/polyglot/cypher-path-es-query-dsl-mixin-element-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"cypher-path-subset\",\"query\":\"MATCH path=((plant:Plant)-[:HAS_TAG]->(:Tag {name: $color})) RETURN path ORDER BY plant.name\"},{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"bool\":{\"must\":[{\"match\":{\"description\":{\"query\":\"{{color}}\"}}},{\"terms\":{\"_id\":\"{{map(stepResults[0].paths, #.nodeIds[0])}}\"}}]}}},{\"type\":\"element-hydration\"}],\"parameters\":{\"color\":\"red\"}}"
+              }
+            }
+          },
+          {
+            "name": "Elasticsearch -> Cypher -> Hydration",
+            "x-ember-nexus-recording": "search/example/polyglot/es-query-dsl-mixin-cypher-path-element-hydration/request-payload.json",
+            "har": {
+              "method": "POST",
+              "url": "https://api.example.com/search",
+              "httpVersion": "HTTP/1.1",
+              "cookies": [],
+              "headers": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "queryString": [],
+              "headersSize": -1,
+              "bodySize": -1,
+              "postData": {
+                "mimeType": "application/json",
+                "text": "{\"debug\":true,\"steps\":[{\"type\":\"elasticsearch-query-dsl-mixin\",\"query\":{\"match\":{\"description\":{\"query\":\"lily\"}}}},{\"type\":\"cypher-path-subset\",\"query\":\"UNWIND $stepResults[0].elements AS element MATCH path=((plant:Plant)-[:IS_MEMBER_OF*..]->(:Taxon)) WHERE plant.id = element.id RETURN path\"},{\"type\":\"element-hydration\"}]}"
               }
             }
           }
@@ -8462,8 +9936,9 @@
                 },
                 "examples": {
                   "instanceConfiguration": {
+                    "x-ember-nexus-recording": "api-endpoints/system/get-instance-configuration/200-response-body.json",
                     "value": {
-                      "version": "0.1.31",
+                      "version": "0.1.32",
                       "pageSize": {
                         "min": 5,
                         "default": 25,
@@ -8472,7 +9947,7 @@
                       "register": {
                         "enabled": true,
                         "uniqueIdentifier": "email",
-                        "uniqueIdentifierRegex": false
+                        "uniqueIdentifierRegex": "/^[^\\s@]+@[^\\s@]+$/"
                       },
                       "expression": {
                         "enabled": true,
@@ -8480,7 +9955,7 @@
                       },
                       "file": {
                         "maxFileSizeInBytes": 10737418240,
-                        "uploadExpiresInSecondsAfterFirstRequest": 10800,
+                        "uploadExpiresAfterFirstRequestInSeconds": 10800,
                         "uploadMinChunkSizeInBytes": 5242880,
                         "uploadMaxChunkSizeInBytes": 105906176
                       }
@@ -8666,6 +10141,7 @@
                 },
                 "examples": {
                   "securityTxt": {
+                    "x-ember-nexus-recording": "api-endpoints/system/get-well-known-security-txt/200-response-body.txt",
                     "value": "Contact: https://ember-nexus.dev/contact\nExpires: 2026-01-01T00:00:00.000Z\n"
                   }
                 }
@@ -9067,14 +10543,16 @@
                 },
                 "examples": {
                   "node": {
+                    "x-ember-nexus-recording": "api-endpoints/user/get-token/200-response-body.json",
                     "value": {
                       "type": "Token",
-                      "id": "74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac",
+                      "id": "2f8e245a-ff14-4f3c-b2c9-b8f7a61e55d6",
                       "data": {
                         "created": "2025-09-27T10:39:51+00:00",
                         "updated": "2025-09-27T10:39:51+00:00",
-                        "name": "Blue",
-                        "content": "Blue is one of the three primary colours in the RYB colour model...\n"
+                        "note": "Token contains token only due to testing purposes.",
+                        "scenario": "endpoint.user.getToken",
+                        "state": "ACTIVE"
                       }
                     }
                   }
@@ -9542,14 +11020,18 @@
                 },
                 "examples": {
                   "default": {
+                    "x-ember-nexus-recording": "api-endpoints/user/get-me/200-response-body.json",
                     "value": {
                       "type": "User",
-                      "id": "74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac",
+                      "id": "2d376349-c5e2-42c8-8ce0-d6f525256cf7",
                       "data": {
-                        "created": "2025-09-27T10:39:51+00:00",
-                        "updated": "2025-09-27T10:39:51+00:00",
-                        "name": "Blue",
-                        "content": "Blue is one of the three primary colours in the RYB colour model...\n"
+                        "created": "2025-09-27T10:39:54+00:00",
+                        "name": "User",
+                        "updated": "2025-09-27T10:39:54+00:00",
+                        "email": "anonymous-user@localhost.dev",
+                        "note": "User contains password only due to testing purposes.",
+                        "password": "1234",
+                        "scenario": "general.anonymousUser"
                       }
                     }
                   }

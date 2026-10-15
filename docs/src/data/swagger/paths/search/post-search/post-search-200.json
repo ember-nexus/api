@@ -44,23 +44,20 @@
                   "$ref": "#/components/schemas/SearchResultResponse"
                 },
                 "examples": {
-                  "default": {
-                    "summary": "Full text search, hydrated into a collection of elements.",
-                    "value": {
-                      "type": "_SearchResultResponse",
-                      "results": [
-                        {
-                          "type": "Plant",
-                          "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
-                          "data": {
-                            "created": "2025-09-25T18:35:28+00:00",
-                            "updated": "2025-09-25T18:35:28+00:00",
-                            "name": "Flame Lily",
-                            "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae."
-                          }
-                        }
-                      ]
-                    }
+                  "elasticsearchQueryDslMixinKeywordSearch": {
+                    "summary": "Elasticsearch keyword search, hydrated into a collection of elements.",
+                    "x-ember-nexus-name": "Keyword Search",
+                    "x-ember-nexus-recording": "search/example/elasticsearch-query-dsl-mixin/keyword-search/response-body.json"
+                  },
+                  "elementHydrationExplicitElementIdsHydration": {
+                    "summary": "Explicit list of elementIds, hydrated into a collection of elements.",
+                    "x-ember-nexus-name": "Explicit ElementIds Hydration",
+                    "x-ember-nexus-recording": "search/example/element-hydration/explicit-elementids-hydration/response-body.json"
+                  },
+                  "cypherPathSubsetFindTaggedElements": {
+                    "summary": "Cypher path subset search for tagged elements, hydrated into a collection of elements.",
+                    "x-ember-nexus-name": "Find Tagged Elements",
+                    "x-ember-nexus-recording": "search/example/cypher-path-subset/find-tagged-elements/response-body.json"
                   }
                 }
               }

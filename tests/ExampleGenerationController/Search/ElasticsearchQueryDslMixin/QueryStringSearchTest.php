@@ -13,7 +13,7 @@ class QueryStringSearchTest extends BaseRequestTestCase
 
     public function testSearchRequest(): void
     {
-        $path = \Safe\realpath(__DIR__.'/../../../../docs/search/example/elasticsearch-query-dsl-mixin/query-string-search/request-payload.json');
+        $path = \Safe\realpath(__DIR__.'/../../../../tests/recordings/search/example/elasticsearch-query-dsl-mixin/query-string-search/request-payload.json');
 
         $data = \Safe\file_get_contents($path);
         $data = json_decode($data, true);
@@ -23,8 +23,8 @@ class QueryStringSearchTest extends BaseRequestTestCase
             $data
         );
 
-        $documentationHeadersPath = 'docs/search/example/elasticsearch-query-dsl-mixin/query-string-search/response-header.txt';
-        $documentationBodyPath = 'docs/search/example/elasticsearch-query-dsl-mixin/query-string-search/response-body.json';
+        $documentationHeadersPath = 'tests/recordings/search/example/elasticsearch-query-dsl-mixin/query-string-search/response-header.txt';
+        $documentationBodyPath = 'tests/recordings/search/example/elasticsearch-query-dsl-mixin/query-string-search/response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

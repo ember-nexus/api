@@ -22,8 +22,8 @@ class PostRegisterTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 403);
-        $documentationHeadersPath = 'docs/api-endpoints/user/post-register/403-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/post-register/403-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/post-register/403-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/post-register/403-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

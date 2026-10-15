@@ -63,17 +63,16 @@ curl \
 
 The response then contains the `Etag`-header.
 
-```http /ETag:.*/
-Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+```http /Etag:.*/
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
 Date: Tue, 25 Aug 2026 11:53:42 GMT
-ETag: "6JM8JahrCeu"
-Server: Unit
+Etag: "6JM8JahrCeu"
 Transfer-Encoding: chunked
 X-Powered-By: Ember Nexus API
 ```
@@ -112,16 +111,15 @@ curl \
 
 Response:
 
-```http /ETag:.*/
-Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+```http /Etag:.*/
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Date: Tue, 25 Aug 2026 11:53:50 GMT
-ETag: "6JM8JahrCeu"
-Server: Unit
+Etag: "6JM8JahrCeu"
 X-Powered-By: Ember Nexus API
 ```
 
@@ -141,17 +139,16 @@ curl \
 
 Response:
 
-```http /ETag:.*/
-Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+```http /Etag:.*/
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
 Date: Tue, 25 Aug 2026 11:54:05 GMT
-ETag: "6JM8JahrCeu"
-Server: Unit
+Etag: "6JM8JahrCeu"
 Transfer-Encoding: chunked
 X-Powered-By: Ember Nexus API
 ```
@@ -186,17 +183,16 @@ curl \
 
 The response then contains the `Etag`-header.
 
-```http /ETag:.*/
-Access-Control-Allow-Headers: Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+```http /Etag:.*/
+Access-Control-Allow-Headers: *
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
 Date: Tue, 25 Aug 2026 11:54:15 GMT
-ETag: "6JM8JahrCeu"
-Server: Unit
+Etag: "6JM8JahrCeu"
 Transfer-Encoding: chunked
 X-Powered-By: Ember Nexus API
 ```
@@ -234,10 +230,10 @@ changed as a side effect, so this same `If-Match` value can not be reused for a 
 
 ```http
 Access-Control-Allow-Headers: *
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Date: Tue, 25 Aug 2026 12:52:00 GMT
 X-Powered-By: Ember Nexus API
@@ -262,10 +258,10 @@ curl -X PATCH \
 
 ```http
 Access-Control-Allow-Headers: *
-Access-Control-Allow-Methods: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Access-Control-Allow-Methods: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
-Allow: GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK
+Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Content-Type: application/problem+json; charset=utf-8
 Date: Tue, 25 Aug 2026 12:52:05 GMT
@@ -278,6 +274,7 @@ X-Powered-By: Ember Nexus API
   "type": "https://api.example.com/error/412/precondition-failed",
   "title": "Precondition Failed",
   "status": 412,
+  "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
   "detail": "Precondition does not match."
 }
 ```

@@ -140,8 +140,8 @@ An expired upload isn't deleted the instant it expires: `file.expiredUploadCanBe
 (default 1 hour / `3600`) is a grace period added on top of `expires` before the upload becomes eligible for
 cleanup, giving a client that was right at the boundary a little leeway. Actual deletion (freeing the chunks already stored in the upload bucket, and removing the upload) is performed by
 the [`cron:delete-expired-uploads`](/command/cron-delete-expired-uploads) task, which every API instance already
-runs automatically as part of [`cron`](/command/cron) - see
-[Background tasks](/reference/configuration#background-tasks) in the configuration reference. It skips uploads that
+schedules automatically - see [Background tasks](/reference/configuration#background-tasks) in the configuration
+reference. It skips uploads that
 were already removed, whether by an explicit
 [`DELETE /upload/<uuid>`](/api/delete-upload) or because the upload's target element was deleted in the meantime.
 

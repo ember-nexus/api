@@ -25,7 +25,7 @@ class PostElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsCreatedResponse($response);
-        $documentationHeadersPath = 'docs/api-endpoints/element/post-element/204-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/post-element/204-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -45,8 +45,8 @@ class PostElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 400);
-        $documentationHeadersPath = 'docs/api-endpoints/element/post-element/400-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/post-element/400-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/post-element/400-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/post-element/400-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -72,8 +72,8 @@ class PostElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/element/post-element/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/post-element/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/post-element/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/post-element/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

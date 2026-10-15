@@ -77,7 +77,7 @@
                 },
                 "examples": {
                   "410_gone": {
-                    "value": " Error 410 - Gone\n\n The HTTP 410 Gone client error response status code indicates that the target resource is no longer available at the\n origin server and that this condition is likely to be permanent.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 410 error code: https://http.dev/410\n\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-410-gone/200-response-body.txt"
                   }
                 }
               }

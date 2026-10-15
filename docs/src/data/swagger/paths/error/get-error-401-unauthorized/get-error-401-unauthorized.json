@@ -77,7 +77,7 @@
                 },
                 "examples": {
                   "401_unauthorized": {
-                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 401 - Unauthorized\n\n Request does not contain valid token, or anonymous user is disabled.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 401 error code: https://http.dev/401\n\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-401-unauthorized/200-response-body.txt"
                   }
                 }
               }

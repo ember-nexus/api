@@ -5,7 +5,7 @@
         "description": "Lists the HTTP methods supported by the endpoint; returned alongside a `405 Method Not Allowed` response.",
         "schema": {
           "type": "string",
-          "example": "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+          "example": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
         },
         "x-ember-nexus-links": [
           {

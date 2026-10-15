@@ -84,7 +84,7 @@ class PatchUploadTest extends BaseRequestTestCase
         $this->assertNoContentResponse($response);
         $this->cleanupChunks($chunks);
 
-        $documentationHeadersPath = 'docs/api-endpoints/upload/patch-upload/204-intermediate-chunk-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/patch-upload/204-intermediate-chunk-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -113,7 +113,7 @@ class PatchUploadTest extends BaseRequestTestCase
         $this->assertNoContentResponse($response);
         $this->cleanupChunks($chunks);
 
-        $documentationHeadersPath = 'docs/api-endpoints/upload/patch-upload/204-final-chunk-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/patch-upload/204-final-chunk-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -146,8 +146,8 @@ class PatchUploadTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 400);
         $this->cleanupChunks($chunks);
 
-        $documentationHeadersPath = 'docs/api-endpoints/upload/patch-upload/400-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/upload/patch-upload/400-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/patch-upload/400-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/upload/patch-upload/400-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -182,8 +182,8 @@ class PatchUploadTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 409);
         $this->cleanupChunks($chunks);
 
-        $documentationHeadersPath = 'docs/api-endpoints/upload/patch-upload/409-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/upload/patch-upload/409-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/patch-upload/409-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/upload/patch-upload/409-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -217,8 +217,8 @@ class PatchUploadTest extends BaseRequestTestCase
         $this->assertIsProblemResponse($response, 401);
         $this->cleanupChunks($chunks);
 
-        $documentationHeadersPath = 'docs/api-endpoints/upload/patch-upload/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/upload/patch-upload/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/patch-upload/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/upload/patch-upload/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -248,8 +248,8 @@ class PatchUploadTest extends BaseRequestTestCase
         );
         $this->assertIsProblemResponse($response, 404);
 
-        $documentationHeadersPath = 'docs/api-endpoints/upload/patch-upload/404-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/upload/patch-upload/404-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/patch-upload/404-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/upload/patch-upload/404-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

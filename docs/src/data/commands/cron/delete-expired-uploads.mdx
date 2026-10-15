@@ -19,6 +19,8 @@ or removed automatically because their target element was deleted, are skipped s
 nothing left to clean up.
 
 <Note>
-    Normally run as part of [`cron`](/command/cron), not invoked directly. It's safe to run at any
-    time, though - it only ever touches uploads that are already expired.
+    Every API instance already schedules this on its own interval (see
+    [Background tasks](/reference/configuration#background-tasks)), so it does not need to be
+    invoked manually. It's safe to run at any time, though - it only ever touches uploads that are
+    already expired.
 </Note>

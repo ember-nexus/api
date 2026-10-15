@@ -13,8 +13,8 @@ class Get400ReservedIdentifierTest extends BaseRequestTestCase
     public function testRegisterSuccess(): void
     {
         $response = $this->runGetRequest('/error/400/reserved-identifier', null);
-        $documentationHeadersPath = 'docs/api-endpoints/error/get-400-reserved-identifier/200-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/error/get-400-reserved-identifier/200-response-body.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/error/get-400-reserved-identifier/200-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/error/get-400-reserved-identifier/200-response-body.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

@@ -2,12 +2,7 @@
   "components": {
     "examples": {
       "UnauthorizedProblemExample": {
-        "value": {
-          "type": "https://api.example.com/error/401/unauthorized",
-          "title": "Unauthorized",
-          "status": 401,
-          "detail": "Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted)."
-        }
+        "x-ember-nexus-recording": "api-endpoints/element/get-element/401-response-body.json"
       }
     }
   }

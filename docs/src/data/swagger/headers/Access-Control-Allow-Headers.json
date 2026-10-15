@@ -5,7 +5,7 @@
         "description": "Specifies which HTTP headers can be used during a cross-origin request, returned in preflight responses.",
         "schema": {
           "type": "string",
-          "example": "Authorization, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method"
+          "example": "*"
         },
         "x-ember-nexus-links": [
           {

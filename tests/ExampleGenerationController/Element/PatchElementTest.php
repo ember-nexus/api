@@ -23,7 +23,7 @@ class PatchElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertNoContentResponse($response);
-        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/204-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/patch-element/204-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -41,8 +41,8 @@ class PatchElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/patch-element/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/patch-element/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -65,8 +65,32 @@ class PatchElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 404);
-        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/404-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/404-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/patch-element/404-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/patch-element/404-response-body.json';
+        $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationHeadersPath,
+            $response
+        );
+        $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
+            self::PATH_TO_ROOT,
+            $documentationBodyPath,
+            $response
+        );
+    }
+
+    public function testPatchElementError400ForbiddenProperty(): void
+    {
+        $response = $this->runPatchRequest(
+            sprintf('/%s', self::ELEMENT),
+            self::TOKEN,
+            [
+                'created' => '2020-01-01T00:00:00+00:00',
+            ]
+        );
+        $this->assertIsProblemResponse($response, 400);
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/patch-element/400-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/patch-element/400-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -92,8 +116,8 @@ class PatchElementTest extends BaseRequestTestCase
             ]
         );
         $this->assertIsProblemResponse($response, 412);
-        $documentationHeadersPath = 'docs/api-endpoints/element/patch-element/412-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/patch-element/412-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/patch-element/412-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/patch-element/412-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

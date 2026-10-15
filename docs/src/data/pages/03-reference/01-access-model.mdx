@@ -188,6 +188,12 @@ To model more complex situations, a group can also be part of another group:
 Important: For a user to be considered part of a group, there must exist a direct path of solely `IS_IN_GROUP`-relations between the user and the group.
 Using `OWNS`- and `HAS_X_ACCESS`-relations between the user and the group has other semantic meanings, and should be avoided unless explicitly required.
 
+### Writing to group nodes
+
+Being a member of a group (via `IS_IN_GROUP`) grants `READ`, `SEARCH` and `CREATE` access to the group node itself,
+but not `UPDATE` or `DELETE` access. A group node can only be updated or deleted by a user with an explicit `OWNS` or
+`HAS_UPDATE_ACCESS`/`HAS_DELETE_ACCESS` relation to that group node, not by virtue of membership alone.
+
 ### Access operations
 
 The following access operations exist:

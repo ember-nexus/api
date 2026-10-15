@@ -40,9 +40,19 @@
                 "example": "email"
               },
               "uniqueIdentifierRegex": {
-                "type": "boolean",
-                "nullable": true,
-                "example": false
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "boolean",
+                    "enum": [
+                      false
+                    ]
+                  }
+                ],
+                "description": "Either `false` or a regex for checking the identifier content.",
+                "example": "/^[^\\s@]+@[^\\s@]+$/"
               }
             }
           },
@@ -66,7 +76,7 @@
                 "type": "integer",
                 "example": 10737418240
               },
-              "uploadExpiresInSecondsAfterFirstRequest": {
+              "uploadExpiresAfterFirstRequestInSeconds": {
                 "type": "integer",
                 "example": 10800
               },

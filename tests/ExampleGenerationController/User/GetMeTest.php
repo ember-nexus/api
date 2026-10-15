@@ -14,8 +14,8 @@ class GetMeTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest('/me', null);
         $this->assertIsNodeResponse($response, 'User');
-        $documentationHeadersPath = 'docs/api-endpoints/user/get-me/200-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/get-me/200-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/get-me/200-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/get-me/200-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -37,8 +37,8 @@ class GetMeTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest('/me', 'tokenDoesNotExist');
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/user/get-me/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/get-me/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/get-me/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/get-me/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

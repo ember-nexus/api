@@ -13,8 +13,8 @@ class Get501NotImplementedTest extends BaseRequestTestCase
     public function testRegisterSuccess(): void
     {
         $response = $this->runGetRequest('/error/501/not-implemented', null);
-        $documentationHeadersPath = 'docs/api-endpoints/error/get-501-not-implemented/200-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/error/get-501-not-implemented/200-response-body.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/error/get-501-not-implemented/200-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/error/get-501-not-implemented/200-response-body.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

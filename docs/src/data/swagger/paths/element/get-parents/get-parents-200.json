@@ -49,40 +49,7 @@
                 "examples": {
                   "default": {
                     "summary": "Child element found and returning its parents in a collection response.",
-                    "value": {
-                      "type": "_PartialCollection",
-                      "id": "/45482998-274a-43d0-a466-f31d0b24cc0a/parents",
-                      "totalNodes": 1,
-                      "links": {
-                        "first": "/45482998-274a-43d0-a466-f31d0b24cc0a/parents",
-                        "previous": null,
-                        "next": null,
-                        "last": "/45482998-274a-43d0-a466-f31d0b24cc0a/parents"
-                      },
-                      "nodes": [
-                        {
-                          "type": "Sphere",
-                          "id": "56fda20c-b238-4034-b555-1df47c47e17a",
-                          "data": {
-                            "created": "2025-09-27T10:26:49+00:00",
-                            "name": "Tag",
-                            "updated": "2025-09-27T10:26:49+00:00"
-                          }
-                        }
-                      ],
-                      "relations": [
-                        {
-                          "type": "OWNS",
-                          "id": "bc1ba1ad-5866-4c23-a58e-15282994c72c",
-                          "start": "56fda20c-b238-4034-b555-1df47c47e17a",
-                          "end": "45482998-274a-43d0-a466-f31d0b24cc0a",
-                          "data": {
-                            "created": "2025-09-27T10:26:49+00:00",
-                            "updated": "2025-09-27T10:26:49+00:00"
-                          }
-                        }
-                      ]
-                    }
+                    "x-ember-nexus-recording": "api-endpoints/element/get-parents/200-response-body.json"
                   }
                 }
               }

@@ -13,8 +13,8 @@ class Get408RequestTimeoutTest extends BaseRequestTestCase
     public function testRegisterSuccess(): void
     {
         $response = $this->runGetRequest('/error/408/request-timeout', null);
-        $documentationHeadersPath = 'docs/api-endpoints/error/get-408-request-timeout/200-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/error/get-408-request-timeout/200-response-body.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/error/get-408-request-timeout/200-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/error/get-408-request-timeout/200-response-body.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

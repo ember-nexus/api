@@ -3,12 +3,7 @@
     "examples": {
       "ReservedIdentifierProblemExample": {
         "summary": "The unique user identifier is already used by another account.",
-        "value": {
-          "type": "https://api.example.com/error/400/reserved-identifier",
-          "title": "Reserved identifier",
-          "status": 400,
-          "detail": "The requested identifier 'test@example.com' is reserved and can not be used."
-        }
+        "x-ember-nexus-recording": "api-endpoints/user/post-register/400-reserved-identifier-response-body.json"
       }
     }
   }

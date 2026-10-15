@@ -77,7 +77,7 @@
                 },
                 "examples": {
                   "404_not_found": {
-                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 404 - Not Found\n\n The requested element was not found.\n\n This can happen due to multiple reasons:\n\n - The requested route does not exist.\n - The requested element did never exist.\n - There is a typo within the element's UUID.\n - You do not have access to the element.\n - You do not have the correct type of access to the element.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 404 error code: https://http.dev/404\n\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-404-not-found/200-response-body.txt"
                   }
                 }
               }

@@ -77,7 +77,7 @@
                 },
                 "examples": {
                   "403_forbidden": {
-                    "value": "  _____           _                 _   _                          _    ____ ___\n | ____|_ __ ___ | |__   ___ _ __  | \\ | | _____  ___   _ ___     / \\  |  _ \\_ _|\n |  _| | '_ ` _ \\| '_ \\ / _ \\ '__| |  \\| |/ _ \\ \\/ / | | / __|   / _ \\ | |_) | |\n | |___| | | | | | |_) |  __/ |    | |\\  |  __/⟩  ⟨| |_| \\__ \\  / ___ \\|  __/| |\n |_____|_| |_| |_|_.__/ \\___|_|    |_| \\_|\\___/_/\\_\\\\__,_|___/ /_/   \\_\\_|  |___|\n\n\n Error 403 - Forbidden\n\n This error is thrown when the requested endpoint, element or action is forbidden.\n\n There are a few things you can check:\n\n - Is the endpoint available via the GET method?\n - Do you have access to the endpoint?\n - Is the endpoint disabled in the configuration?\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 403 error code: https://http.dev/403\n\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-403-forbidden/200-response-body.txt"
                   }
                 }
               }

@@ -18,8 +18,8 @@ class GetElementTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s', self::NODE_UUID), self::TOKEN);
         $this->assertIsNodeResponse($response, 'Comment');
-        $documentationHeadersPath = 'docs/api-endpoints/element/get-element/200-node-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/get-element/200-node-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-element/200-node-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-element/200-node-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -41,8 +41,8 @@ class GetElementTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s', self::RELATION_UUID), self::TOKEN);
         $this->assertIsRelationResponse($response, 'OWNS');
-        $documentationHeadersPath = 'docs/api-endpoints/element/get-element/200-relation-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/get-element/200-relation-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-element/200-relation-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-element/200-relation-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -66,7 +66,7 @@ class GetElementTest extends BaseRequestTestCase
         $etag = $response->getHeader('ETag');
         $response = $this->runGetRequest(sprintf('/%s', self::NODE_UUID), self::TOKEN, ['If-None-Match' => $etag]);
         $this->assertNotModifiedResponse($response);
-        $documentationHeadersPath = 'docs/api-endpoints/element/get-element/304-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-element/304-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -78,8 +78,8 @@ class GetElementTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s', self::NODE_UUID), 'thisTokenDoesNotExist');
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/element/get-element/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/get-element/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-element/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-element/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -101,8 +101,8 @@ class GetElementTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
-        $documentationHeadersPath = 'docs/api-endpoints/element/get-element/404-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/get-element/404-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-element/404-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-element/404-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -124,8 +124,8 @@ class GetElementTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s', self::NODE_UUID), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
         $this->assertIsProblemResponse($response, 412);
-        $documentationHeadersPath = 'docs/api-endpoints/element/get-element/412-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/get-element/412-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-element/412-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-element/412-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

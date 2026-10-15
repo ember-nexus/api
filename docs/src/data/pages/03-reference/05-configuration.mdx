@@ -35,12 +35,14 @@ for details.
 
 ## Background tasks
 
-Every API container instance runs the [`cron`](/command/cron) command automatically, every 5 minutes, for as long as
-the container is up - there is nothing to schedule externally, and running multiple instances in parallel is safe
-since the individual tasks (e.g. [`cron:reindex-files`](/command/cron-reindex-files)) consume their work from a
-shared RabbitMQ queue, so the same item is never processed twice regardless of how many instances happen to poll at
-once. Set the `DISABLE_CRON` environment variable to `true` on an instance to opt it out, e.g. to run `cron` on a
-different schedule yourself instead.
+Every API container instance schedules
+[`cron:update-ownership`](/command/cron-update-ownership),
+[`cron:reindex-files`](/command/cron-reindex-files) and
+[`cron:delete-expired-uploads`](/command/cron-delete-expired-uploads) internally, each on its own interval, for as
+long as the container is up - there is nothing to schedule externally, and running multiple instances in parallel is
+safe since the individual tasks consume their work from a shared RabbitMQ queue, so the same item is never processed
+twice regardless of how many instances happen to poll at once. Set the `DISABLE_CRON` environment variable to `true`
+on an instance to opt it out, e.g. to run these commands on a different schedule yourself instead.
 
 ## File storage buckets
 

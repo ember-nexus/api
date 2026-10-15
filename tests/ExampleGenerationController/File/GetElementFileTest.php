@@ -22,7 +22,7 @@ class GetElementFileTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), self::TOKEN);
         $this->assertIsBinaryStreamResponse($response, 'image/jpeg');
-        $documentationHeadersPath = 'docs/api-endpoints/file/get-element-file/200-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/file/get-element-file/200-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -38,7 +38,7 @@ class GetElementFileTest extends BaseRequestTestCase
             ['Range' => 'bytes=0-99']
         );
         $this->assertSame(206, $response->getStatusCode());
-        $documentationHeadersPath = 'docs/api-endpoints/file/get-element-file/206-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/file/get-element-file/206-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -54,8 +54,8 @@ class GetElementFileTest extends BaseRequestTestCase
             ['Range' => 'bytes=not-a-valid-range']
         );
         $this->assertIsProblemResponse($response, 400);
-        $documentationHeadersPath = 'docs/api-endpoints/file/get-element-file/400-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/file/get-element-file/400-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/file/get-element-file/400-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/file/get-element-file/400-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -72,8 +72,8 @@ class GetElementFileTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::ROSE_ID), 'thisTokenDoesNotExist');
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/file/get-element-file/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/file/get-element-file/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/file/get-element-file/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/file/get-element-file/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -90,8 +90,8 @@ class GetElementFileTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s/file', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
-        $documentationHeadersPath = 'docs/api-endpoints/file/get-element-file/404-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/file/get-element-file/404-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/file/get-element-file/404-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/file/get-element-file/404-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -112,8 +112,8 @@ class GetElementFileTest extends BaseRequestTestCase
             ['Range' => 'bytes=999999999-']
         );
         $this->assertIsProblemResponse($response, 416);
-        $documentationHeadersPath = 'docs/api-endpoints/file/get-element-file/416-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/file/get-element-file/416-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/file/get-element-file/416-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/file/get-element-file/416-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -173,12 +173,12 @@ class GetElementFileTest extends BaseRequestTestCase
         $this->assertSame('Ember', (string) $response->getBody());
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
-            'docs/api-endpoints/file/get-element-file/206-if-range-match-response-header.txt',
+            'tests/recordings/api-endpoints/file/get-element-file/206-if-range-match-response-header.txt',
             $response
         );
         $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
             self::PATH_TO_ROOT,
-            'docs/api-endpoints/file/get-element-file/206-if-range-match-response-body.txt',
+            'tests/recordings/api-endpoints/file/get-element-file/206-if-range-match-response-body.txt',
             $response,
             false
         );
@@ -200,12 +200,12 @@ class GetElementFileTest extends BaseRequestTestCase
         $this->assertSame('Hello, Ember Nexus!', (string) $response->getBody());
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
-            'docs/api-endpoints/file/get-element-file/200-if-range-mismatch-response-header.txt',
+            'tests/recordings/api-endpoints/file/get-element-file/200-if-range-mismatch-response-header.txt',
             $response
         );
         $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
             self::PATH_TO_ROOT,
-            'docs/api-endpoints/file/get-element-file/200-if-range-mismatch-response-body.txt',
+            'tests/recordings/api-endpoints/file/get-element-file/200-if-range-mismatch-response-body.txt',
             $response,
             false
         );

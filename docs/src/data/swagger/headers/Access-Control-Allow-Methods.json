@@ -5,7 +5,7 @@
         "description": "Indicates which HTTP methods are permitted for cross-origin requests, typically returned in preflight responses.",
         "schema": {
           "type": "string",
-          "example": "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK"
+          "example": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
         },
         "x-ember-nexus-links": [
           {

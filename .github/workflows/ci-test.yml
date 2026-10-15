@@ -37,6 +37,24 @@ jobs:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/check-caddyfile-fmt
 
+  docs-swagger-up-to-date:
+    runs-on: ubuntu-26.04
+    name: 'Docs: swagger.json up to date'
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Regenerate swagger.json from its fragments and recordings, compare against the committed version
+        run: |
+          beforeHash="$(sha256sum docs/src/data/swagger.json | awk '{print $1}')"
+          node docs/scripts/generate-swagger.mjs
+          afterHash="$(sha256sum docs/src/data/swagger.json | awk '{print $1}')"
+          if [ "$beforeHash" != "$afterHash" ]; then
+            echo "::error::docs/src/data/swagger.json is out of date with its fragments under docs/src/data/swagger/ and/or tests/recordings/. Run 'task docs:swagger:generate' and commit the result."
+            git --no-pager diff -- docs/src/data/swagger.json
+            exit 1
+          fi
+          echo "docs/src/data/swagger.json is up to date (sha256 $beforeHash)."
+
   build-docker-image:
     runs-on: gh-4vcpu-ubuntu-latest-amd
     name: 'Build Docker Image'
@@ -144,8 +162,8 @@ jobs:
           tar-filename: docs-dev-amd.tar.gz
       - name: Build and start preview server
         run: |
-          docker run -d --name docs-core --network host \
-            -v $(pwd)/docs:/core -w /core \
+          docker run -d --name docs-preview --network host \
+            -v $(pwd)/docs:/docs -w /docs \
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
             -e ASTRO_TELEMETRY_DISABLED=1 \
@@ -157,20 +175,20 @@ jobs:
             sleep 1
           done
           echo "preview server did not start in time" >&2
-          docker logs docs-core >&2
+          docker logs docs-preview >&2
           exit 1
       - name: Playwright e2e
         run: |
           docker run --rm --network host \
-            -v $(pwd)/docs:/core -w /core \
+            -v $(pwd)/docs:/docs -w /docs \
             -e BASE_URL=http://localhost:4322 \
             mcr.microsoft.com/playwright:v1.62.1-noble npx playwright test
       - name: Docs container logs
         if: always()
-        run: docker logs docs-core || true
+        run: docker logs docs-preview || true
       - name: Clean up preview server
         if: always()
-        run: docker rm -f docs-core || true
+        run: docker rm -f docs-preview || true
 
   cs-lint:
     runs-on: ubuntu-26.04

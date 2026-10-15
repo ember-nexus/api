@@ -142,7 +142,7 @@ abstract class BaseServerTestCase extends BaseRequestTestCase
     protected function assertResponseMatchesDocumentation(string $directory, ResponseInterface $response, bool $ignoreTypeLine = false, bool $ignoreDetailLine = false): void
     {
         $this->getInstanceOfProblemResponse($response);
-        $prefix = sprintf('docs/server/%s/%d-response-', $directory, $response->getStatusCode());
+        $prefix = sprintf('tests/recordings/server/%s/%d-response-', $directory, $response->getStatusCode());
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $prefix.'header.txt',

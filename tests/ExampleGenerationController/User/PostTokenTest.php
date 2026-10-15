@@ -23,8 +23,8 @@ class PostTokenTest extends BaseRequestTestCase
                 'password' => self::PASSWORD,
             ]
         );
-        $documentationHeadersPath = 'docs/api-endpoints/user/post-token/201-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/post-token/201-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/post-token/201-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/post-token/201-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -54,8 +54,8 @@ class PostTokenTest extends BaseRequestTestCase
                 'uniqueUserIdentifier' => self::EMAIL,
             ]
         );
-        $documentationHeadersPath = 'docs/api-endpoints/user/post-token/400-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/post-token/400-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/post-token/400-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/post-token/400-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -79,8 +79,8 @@ class PostTokenTest extends BaseRequestTestCase
                 'password' => 'wrongPassword',
             ]
         );
-        $documentationHeadersPath = 'docs/api-endpoints/user/post-token/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/post-token/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/post-token/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/post-token/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

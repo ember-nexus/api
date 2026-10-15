@@ -1,3 +1,5 @@
 ember_nexus:
   register:
     uniqueIdentifierRegex: '/^[0-9]+$/'
+  expression:
+    timeoutInMilliseconds: 100

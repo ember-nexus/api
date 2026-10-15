@@ -18,6 +18,11 @@
           },
           "detail": {
             "type": "string"
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri",
+            "description": "URN uniquely identifying the request that produced this problem, as `urn:uuid:<uuid>`."
           }
         }
       }

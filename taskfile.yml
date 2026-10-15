@@ -23,6 +23,11 @@ tasks:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec api /bin/bash
 
+  dev:docs:serve:
+    desc: Run the Astro dev server interactively inside the `docs` container started by dev:up (installs dependencies first).
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml exec docs sh -c "cd /docs && pnpm install && pnpm run dev -- --host"
+
   dev:k6:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec k6 pnpm demo
@@ -79,7 +84,7 @@ tasks:
 
   docs:dev:cli:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core /bin/bash
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs /bin/bash
 
   docs:check:all:
     desc: Run every docs check (build, tests, lint, spellcheck, e2e) in the order the build depends on.
@@ -92,19 +97,19 @@ tasks:
 
   docs:check:build:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run build"
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run build"
 
   docs:check:test:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run test"
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run test"
 
   docs:check:lint:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run cs"
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run cs"
 
   docs:check:spellcheck:
     cmds:
-      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro core sh -c "cd /core && pnpm run spellcheck"
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run spellcheck"
 
   docs:check:e2e:
     desc: Run Playwright e2e tests (Chromium, in the separate `e2e` container) against a preview server of docs/dist.
@@ -120,5 +125,6 @@ tasks:
       - docker run -p 80:80 ember-nexus-api-docs:latest
 
   docs:swagger:generate:
+    desc: Regenerate docs/src/data/swagger.json from its fragments, with examples pulled live from tests/recordings.
     cmds:
-      - find ./docs/src/data/swagger -name '*.json' -print0 | sort -z | xargs -0 jq -s 'reduce .[1:][] as $x (.[0]; . * $x)' > ./docs/src/data/swagger.json
+      - docker compose -f ./docs-tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run swagger:generate"

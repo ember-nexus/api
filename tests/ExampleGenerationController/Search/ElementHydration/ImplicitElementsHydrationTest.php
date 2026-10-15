@@ -13,7 +13,7 @@ class ImplicitElementsHydrationTest extends BaseRequestTestCase
 
     public function testSearchRequest(): void
     {
-        $path = \Safe\realpath(__DIR__.'/../../../../docs/search/example/element-hydration/implicit-elements-hydration/request-payload.json');
+        $path = \Safe\realpath(__DIR__.'/../../../../tests/recordings/search/example/element-hydration/implicit-elements-hydration/request-payload.json');
 
         $data = \Safe\file_get_contents($path);
         $data = json_decode($data, true);
@@ -23,8 +23,8 @@ class ImplicitElementsHydrationTest extends BaseRequestTestCase
             $data
         );
 
-        $documentationHeadersPath = 'docs/search/example/element-hydration/implicit-elements-hydration/response-header.txt';
-        $documentationBodyPath = 'docs/search/example/element-hydration/implicit-elements-hydration/response-body.json';
+        $documentationHeadersPath = 'tests/recordings/search/example/element-hydration/implicit-elements-hydration/response-header.txt';
+        $documentationBodyPath = 'tests/recordings/search/example/element-hydration/implicit-elements-hydration/response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

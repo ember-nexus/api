@@ -2,14 +2,7 @@
   "components": {
     "examples": {
       "OffsetMismatchProblemExample": {
-        "value": {
-          "type": "https://api.example.com/error/409/conflict",
-          "title": "Conflict",
-          "status": 409,
-          "detail": "Offset from request does not match offset of resource.",
-          "expected-offset": 20971520,
-          "provided-offset": 10485760
-        }
+        "x-ember-nexus-recording": "api-endpoints/upload/patch-upload/409-response-body.json"
       }
     }
   }

@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "cs": "eslint ./src",
     "cs:fix": "eslint ./src --fix",
-    "spellcheck": "cspell --config cspell.json --no-progress"
+    "spellcheck": "cspell --config cspell.json --no-progress",
+    "swagger:generate": "node ./scripts/generate-swagger.mjs"
   },
   "dependencies": {
     "@antv/g6": "^5.1.1",

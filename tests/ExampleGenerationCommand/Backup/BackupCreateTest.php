@@ -18,7 +18,7 @@ class BackupCreateTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/backup-create-help.html',
+            'tests/recordings/commands/assets/backup-create-help.html',
             $commandOutput,
             [
                 'Name of the backup, defaults to the current timestamp.',
@@ -34,7 +34,7 @@ class BackupCreateTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/backup-create.html',
+            'tests/recordings/commands/assets/backup-create.html',
             $commandOutput
         );
     }

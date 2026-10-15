@@ -16,7 +16,7 @@ class UpdateOwnershipTest extends BaseCommandTestCase
             'APP_ENV=prod VERSION=%s php bin/console cron:update-ownership --ansi --help | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'docs/commands/assets/cron-update-ownership-help.html', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/recordings/commands/assets/cron-update-ownership-help.html', $commandOutput);
     }
 
     public function testUpdateOwnership(): void
@@ -27,7 +27,7 @@ class UpdateOwnershipTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'docs/commands/assets/cron-update-ownership.html',
+            'tests/recordings/commands/assets/cron-update-ownership.html',
             $commandOutput
         );
     }

@@ -16,17 +16,6 @@ permissions:
 
 jobs:
 
-  compute-version:
-    runs-on: ubuntu-26.04
-    name: 'Compute version tag'
-    timeout-minutes: 3
-    outputs:
-      version-tag: ${{ steps.version.outputs.version-tag }}
-    steps:
-      - uses: actions/checkout@v5
-      - id: version
-        run: echo "version-tag=$(date -u +%Y%m%d)-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
-
   build-dist:
     runs-on: gh-4vcpu-ubuntu-latest-amd
     name: 'Build dist'
@@ -106,14 +95,16 @@ jobs:
     name: 'Push multi arch image to GHCR'
     timeout-minutes: 15
     needs:
-      - compute-version
       - build-image-amd
       - build-image-arm
     outputs:
       digest: ${{ steps.push.outputs.digest }}
-      version-tag: ${{ needs.compute-version.outputs.version-tag }}
+      version-tag: ${{ steps.version.outputs.version-tag }}
     steps:
       - uses: actions/checkout@v5
+
+      - id: version
+        run: echo "version-tag=$(date -u +%Y%m%d)-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       - id: push
         uses: ./.github/actions/combine-multiarch-image
@@ -121,7 +112,7 @@ jobs:
           image-ref: ghcr.io/ember-nexus/api-docs
           amd-digest: ${{ needs.build-image-amd.outputs.digest }}
           arm-digest: ${{ needs.build-image-arm.outputs.digest }}
-          tags: ${{ needs.compute-version.outputs.version-tag }}
+          tags: ${{ steps.version.outputs.version-tag }}
           registry: ghcr.io
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
@@ -132,7 +123,7 @@ jobs:
             echo "### Docs image pushed"
             echo
             echo "- Package: https://github.com/ember-nexus/api/pkgs/container/api-docs"
-            echo "- Pull by tag: \`docker pull ghcr.io/ember-nexus/api-docs:${{ needs.compute-version.outputs.version-tag }}\`"
+            echo "- Pull by tag: \`docker pull ghcr.io/ember-nexus/api-docs:${{ steps.version.outputs.version-tag }}\`"
             echo "- Pull by digest: \`docker pull ghcr.io/ember-nexus/api-docs@${{ steps.push.outputs.digest }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -159,21 +150,5 @@ jobs:
       name: production
       url: https://api.docs.ember-nexus.dev/
     steps:
-      - name: Request deploy webhook OIDC token
-        id: oidc
-        run: |
-          set -eu
-          JWT=$(curl -fsS \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${{ vars.DOCS_DEPLOY_WEBHOOK_AUDIENCE }}" \
-            | jq -r .value)
-          echo "::add-mask::$JWT"
-          echo "jwt=$JWT" >> "$GITHUB_OUTPUT"
-
-      - name: Call deploy webhook
-        run: |
-          set -eu
-          curl -fsS -X POST "${{ vars.DOCS_DEPLOY_WEBHOOK_URL }}" \
-            -H "Authorization: Bearer ${{ steps.oidc.outputs.jwt }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"sha\":\"${GITHUB_SHA}\",\"image\":\"ghcr.io/ember-nexus/api-docs@${{ needs.push-multiarch-ghcr.outputs.digest }}\"}"
+      - name: Deploy (wip)
+        run: echo "deploying ghcr.io/ember-nexus/api-docs:${{ needs.push-multiarch-ghcr.outputs.version-tag }} (wip)"

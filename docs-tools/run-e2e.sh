@@ -1,6 +1,6 @@
 #!/bin/sh
 # Orchestrates the Playwright e2e run: starts a preview server of dist/ inside
-# the `core` container, runs the tests inside the separate `e2e` (Chromium)
+# the `docs` container, runs the tests inside the separate `e2e` (Chromium)
 # container against it, then tears the preview server back down. See
 # `task check:e2e` in taskfile.yml.
 set -e
@@ -25,14 +25,14 @@ if [ ! -d ../docs/dist ]; then
 fi
 
 echo "==> clearing any stale preview server from a previous run"
-$COMPOSE exec --user astro core sh -c "$KILL_PREVIEW"
+$COMPOSE exec --user astro docs sh -c "$KILL_PREVIEW"
 
-echo "==> starting preview server (core:4322)"
-$COMPOSE exec -d --user astro core sh -c \
-    "cd /core && pnpm run preview -- --host 0.0.0.0 --port 4322 > /tmp/preview.log 2>&1"
+echo "==> starting preview server (docs:4322)"
+$COMPOSE exec -d --user astro docs sh -c \
+    "cd /docs && pnpm run preview -- --host 0.0.0.0 --port 4322 > /tmp/preview.log 2>&1"
 
 echo "==> waiting for preview server to come up"
-$COMPOSE exec --user astro core sh -c '
+$COMPOSE exec --user astro docs sh -c '
     for i in $(seq 1 30); do
         wget -q -O /dev/null http://localhost:4322 && exit 0
         sleep 1
@@ -50,6 +50,6 @@ echo "==> running playwright"
 $COMPOSE exec e2e npx playwright test "$@" || status=$?
 
 echo "==> stopping preview server"
-$COMPOSE exec --user astro core sh -c "$KILL_PREVIEW"
+$COMPOSE exec --user astro docs sh -c "$KILL_PREVIEW"
 
 exit $status

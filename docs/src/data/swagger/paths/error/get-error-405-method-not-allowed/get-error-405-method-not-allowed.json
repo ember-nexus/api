@@ -77,7 +77,7 @@
                 },
                 "examples": {
                   "405_method_not_allowed": {
-                    "value": " Error 405 - Method Not Allowed\n\n The requested route exists, but does not support the used HTTP method.\n\n Link to the documentation: https://ember-nexus.github.io/api\n\n Link to http.dev's explanation of the 405 error code: https://http.dev/405\n"
+                    "x-ember-nexus-recording": "api-endpoints/error/get-405-method-not-allowed/200-response-body.txt"
                   }
                 }
               }

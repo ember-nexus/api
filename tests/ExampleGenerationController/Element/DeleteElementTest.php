@@ -18,8 +18,8 @@ class DeleteElementTest extends BaseRequestTestCase
     {
         $response = $this->runDeleteRequest(sprintf('/%s', self::ELEMENT), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
         $this->assertIsProblemResponse($response, 412);
-        $documentationHeadersPath = 'docs/api-endpoints/element/delete-element/412-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/delete-element/412-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/delete-element/412-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/delete-element/412-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -36,7 +36,7 @@ class DeleteElementTest extends BaseRequestTestCase
     {
         $response = $this->runDeleteRequest(sprintf('/%s', self::ELEMENT), self::TOKEN);
         $this->assertNoContentResponse($response);
-        $documentationHeadersPath = 'docs/api-endpoints/element/delete-element/204-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/delete-element/204-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -48,8 +48,8 @@ class DeleteElementTest extends BaseRequestTestCase
     {
         $response = $this->runDeleteRequest(sprintf('/%s', self::ELEMENT), 'tokenDoesNotExist');
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/element/delete-element/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/delete-element/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/delete-element/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/delete-element/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -66,8 +66,8 @@ class DeleteElementTest extends BaseRequestTestCase
     {
         $response = $this->runDeleteRequest(sprintf('/%s', self::NON_EXISTENT_ELEMENT), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
-        $documentationHeadersPath = 'docs/api-endpoints/element/delete-element/404-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/element/delete-element/404-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/delete-element/404-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/element/delete-element/404-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

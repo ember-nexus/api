@@ -2,12 +2,7 @@
   "components": {
     "examples": {
       "MissingPropertyProblemExample": {
-        "value": {
-          "type": "https://api.example.com/error/400/missing-property",
-          "title": "Missing property",
-          "status": 400,
-          "detail": "Endpoint requires that the request contains property 'type' to be set to a valid type."
-        }
+        "x-ember-nexus-recording": "api-endpoints/element/post-element/400-response-body.json"
       }
     }
   }

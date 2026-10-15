@@ -16,7 +16,7 @@ class DeleteTokenTest extends BaseRequestTestCase
     {
         $response = $this->runDeleteRequest('/token', self::TOKEN);
         $this->assertNoContentResponse($response);
-        $documentationHeadersPath = 'docs/api-endpoints/user/delete-token/204-response-header.txt';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/delete-token/204-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -28,8 +28,8 @@ class DeleteTokenTest extends BaseRequestTestCase
     {
         $response = $this->runDeleteRequest('/token', 'tokenDoesNotExist');
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'docs/api-endpoints/user/delete-token/401-response-header.txt';
-        $documentationBodyPath = 'docs/api-endpoints/user/delete-token/401-response-body.json';
+        $documentationHeadersPath = 'tests/recordings/api-endpoints/user/delete-token/401-response-header.txt';
+        $documentationBodyPath = 'tests/recordings/api-endpoints/user/delete-token/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

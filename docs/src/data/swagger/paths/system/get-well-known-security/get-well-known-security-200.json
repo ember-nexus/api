@@ -45,7 +45,7 @@
                 },
                 "examples": {
                   "securityTxt": {
-                    "value": "Contact: https://ember-nexus.dev/contact\nExpires: 2026-01-01T00:00:00.000Z\n"
+                    "x-ember-nexus-recording": "api-endpoints/system/get-well-known-security-txt/200-response-body.txt"
                   }
                 }
               }

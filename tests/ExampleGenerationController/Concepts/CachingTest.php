@@ -18,12 +18,12 @@ class CachingTest extends BaseRequestTestCase
         $this->assertIsNodeResponse($response, 'Comment');
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
-            'docs/concepts/caching/initial-request-response-header.txt',
+            'tests/recordings/concepts/caching/initial-request-response-header.txt',
             $response
         );
         $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
             self::PATH_TO_ROOT,
-            'docs/concepts/caching/initial-request-response-body.json',
+            'tests/recordings/concepts/caching/initial-request-response-body.json',
             $response,
             true,
             [
@@ -41,7 +41,7 @@ class CachingTest extends BaseRequestTestCase
         $this->assertNotModifiedResponse($response);
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
-            'docs/concepts/caching/not-modified-response-header.txt',
+            'tests/recordings/concepts/caching/not-modified-response-header.txt',
             $response
         );
     }

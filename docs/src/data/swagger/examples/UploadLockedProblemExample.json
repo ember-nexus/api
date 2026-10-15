@@ -2,12 +2,7 @@
   "components": {
     "examples": {
       "UploadLockedProblemExample": {
-        "value": {
-          "type": "https://api.example.com/error/409/conflict",
-          "title": "Conflict",
-          "status": 409,
-          "detail": "Another request is currently modifying this upload."
-        }
+        "x-ember-nexus-recording": "api-endpoints/upload/patch-upload/409-locked-response-body.json"
       }
     }
   }
