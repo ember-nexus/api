@@ -8,7 +8,23 @@ on:
       - main
       - feature/gh-495-integrate-next-doc
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
 jobs:
+
+  compute-version:
+    runs-on: ubuntu-26.04
+    name: 'Compute version tag'
+    timeout-minutes: 3
+    outputs:
+      version-tag: ${{ steps.version.outputs.version-tag }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: version
+        run: echo "version-tag=$(date -u +%Y%m%d)-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
   build-dist:
     runs-on: gh-4vcpu-ubuntu-latest-amd
@@ -40,40 +56,20 @@ jobs:
     timeout-minutes: 15
     needs:
       - build-dist
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v8
+      - id: build
+        uses: ./.github/actions/build-push-docs-image
         with:
-          name: docs-dist
-          path: /tmp
-      - name: Extract dist
-        run: mkdir -p /tmp/dist && tar -xzf /tmp/docs-dist.tar.gz -C /tmp/dist
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-        with:
-          version: latest
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build Docker image - AMD
-        run: |
-          docker buildx build \
-            --provenance=false \
-            --sbom=false \
-            --build-context dist=/tmp/dist/dist \
-            --build-context caddyconfig=./docs-tools \
-            -f ./docs-tools/Dockerfile.ci \
-            -t docs:ci-amd \
-            --load \
-            .
-          docker save docs:ci-amd | gzip > docs-ci-amd.tar.gz
-      - uses: actions/upload-artifact@v6
-        with:
-          name: docker-image-docs-ci-amd
-          path: docs-ci-amd.tar.gz
-          retention-days: 7
+          arch: amd
+          dist-artifact-name: docs-dist
+          ghcr-image-name: ember-nexus/api-docs
+          github-actor: ${{ github.actor }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
   build-image-arm:
     runs-on: gh-4vcpu-ubuntu-latest-arm
@@ -81,117 +77,75 @@ jobs:
     timeout-minutes: 15
     needs:
       - build-dist
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v8
+      - id: build
+        uses: ./.github/actions/build-push-docs-image
         with:
-          name: docs-dist
-          path: /tmp
-      - name: Extract dist
-        run: mkdir -p /tmp/dist && tar -xzf /tmp/docs-dist.tar.gz -C /tmp/dist
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-        with:
-          version: latest
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build Docker image - ARM
-        run: |
-          docker buildx build \
-            --provenance=false \
-            --sbom=false \
-            --build-context dist=/tmp/dist/dist \
-            --build-context caddyconfig=./docs-tools \
-            -f ./docs-tools/Dockerfile.ci \
-            -t docs:ci-arm \
-            --load \
-            .
-          docker save docs:ci-arm | gzip > docs-ci-arm.tar.gz
-      - uses: actions/upload-artifact@v6
-        with:
-          name: docker-image-docs-ci-arm
-          path: docs-ci-arm.tar.gz
-          retention-days: 7
+          arch: arm
+          dist-artifact-name: docs-dist
+          ghcr-image-name: ember-nexus/api-docs
+          github-actor: ${{ github.actor }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  combine-multiarch:
+  push-multiarch-ghcr:
     runs-on: ubuntu-26.04
-    name: 'Combine multi arch image'
+    name: 'Push multi arch image to GHCR'
     timeout-minutes: 15
     needs:
+      - compute-version
       - build-image-amd
       - build-image-arm
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+      version-tag: ${{ needs.compute-version.outputs.version-tag }}
     steps:
       - uses: actions/checkout@v5
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
+      - id: push
+        uses: ./.github/actions/combine-multiarch-image
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          image-ref: ghcr.io/ember-nexus/api-docs
+          amd-digest: ${{ needs.build-image-amd.outputs.digest }}
+          arm-digest: ${{ needs.build-image-arm.outputs.digest }}
+          tags: ${{ needs.compute-version.outputs.version-tag }}
+          registry: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
-      # No real registry has been chosen yet for this image (Docker Hub vs GHCR is still an open
-      # question), and combining single-arch images into a multi-arch manifest fundamentally
-      # requires one (neither `docker buildx imagetools` nor `docker manifest` operate on local
-      # tarballs). A throwaway local registry sidesteps that decision for now - nothing here is
-      # pushed anywhere external, and the only end result we keep is the OCI archive artifact.
-      - name: Start local registry
-        run: docker run -d --name local-registry -p 5000:5000 registry:2
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: docker-image-docs-ci-amd
-          path: /tmp/docker
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: docker-image-docs-ci-arm
-          path: /tmp/docker
-
-      - name: Load and push arch images to local registry
+  docs-deploy:
+    runs-on: ubuntu-26.04
+    name: 'Docs deploy'
+    timeout-minutes: 5
+    needs:
+      - push-multiarch-ghcr
+    # Disabled until a deploy target domain/webhook secret has been set up: flip the
+    # `DOCS_DEPLOY_ENABLED` repo/environment variable to 'true' once that's ready. Narrowing to
+    # `main` (instead of also this branch) is left for when this is enabled for real.
+    if: vars.DOCS_DEPLOY_ENABLED == 'true'
+    environment:
+      name: production
+      url: https://api.docs.ember-nexus.dev/
+    steps:
+      - name: Request deploy webhook OIDC token
+        id: oidc
         run: |
-          docker load < /tmp/docker/docs-ci-amd.tar.gz
-          docker load < /tmp/docker/docs-ci-arm.tar.gz
-          docker tag docs:ci-amd localhost:5000/docs:ci-amd
-          docker tag docs:ci-arm localhost:5000/docs:ci-arm
-          docker push localhost:5000/docs:ci-amd
-          docker push localhost:5000/docs:ci-arm
+          set -eu
+          JWT=$(curl -fsS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${{ vars.DOCS_DEPLOY_WEBHOOK_AUDIENCE }}" \
+            | jq -r .value)
+          echo "::add-mask::$JWT"
+          echo "jwt=$JWT" >> "$GITHUB_OUTPUT"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-        with:
-          version: latest
-          driver-opts: network=host
-
-      - name: Create multi arch manifest in local registry
+      - name: Call deploy webhook
         run: |
-          docker buildx imagetools create \
-            -t localhost:5000/docs:ci-multiarch \
-            localhost:5000/docs:ci-amd \
-            localhost:5000/docs:ci-arm
-
-      - name: Export combined image as a single OCI archive artifact
-        run: |
-          mkdir -p /tmp/out
-          cat <<'EOF' > /tmp/registries.conf
-          [[registry]]
-          location = "localhost:5000"
-          insecure = true
-          EOF
-          docker run --rm --network host \
-            -v /tmp/registries.conf:/etc/containers/registries.conf:ro \
-            -v /tmp/out:/out \
-            quay.io/skopeo/stable:v1 \
-            copy --all docker://localhost:5000/docs:ci-multiarch oci-archive:/out/docs-ci-multiarch.tar:docs:ci-multiarch
-
-      - uses: actions/upload-artifact@v6
-        with:
-          name: docker-image-docs-ci-multiarch
-          path: /tmp/out/docs-ci-multiarch.tar
-          retention-days: 7
-
-      - name: Stop local registry
-        if: always()
-        run: docker rm -f local-registry || true
+          set -eu
+          curl -fsS -X POST "${{ vars.DOCS_DEPLOY_WEBHOOK_URL }}" \
+            -H "Authorization: Bearer ${{ steps.oidc.outputs.jwt }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"sha\":\"${GITHUB_SHA}\",\"image\":\"ghcr.io/ember-nexus/api-docs@${{ needs.push-multiarch-ghcr.outputs.digest }}\"}"

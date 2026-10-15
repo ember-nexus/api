@@ -35,7 +35,7 @@ It just works :D
 ## What can you find where?
 
 - [GitHub Repository](https://github.com/ember-nexus/api): Keep up to date with new releases, post issues and more.
-- [API Documentation](https://ember-nexus.github.io/api/#/): For everyone who wants to develop own apps on top of
+- [API Documentation](https://api.docs.ember-nexus.dev/): For everyone who wants to develop own apps on top of
   Ember Nexus.
 - [Docker Hub](https://hub.docker.com/r/embernexus/api): Ready to use container images for AMD and ARM architectures.
 - [Demo API](https://reference-dataset.ember-nexus.dev/): Instance which can be used for quick testing. It is reset

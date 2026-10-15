@@ -7,6 +7,7 @@ on:
         required: true
 permissions:
   contents: write
+  packages: write
 jobs:
 
   actionlint:
@@ -138,13 +139,16 @@ jobs:
     name: Build Docker Image - AMD
     timeout-minutes: 30
     needs: checkout-repo-and-bump-version
+    outputs:
+      digest: ${{ steps.production.outputs.digest }}
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/download-release-artifacts
       # Production is built first, pristine (--no-cache, no GHA cache), so the released image is always built
       # from scratch. Development is built right after in the same job/builder and reuses production's just-built
       # layers (shared ancestor stages such as php_base/frankenphp_builder/php) via the local Buildx builder cache.
-      - uses: ./.github/actions/build-docker-image-release
+      - id: production
+        uses: ./.github/actions/build-docker-image-release
         with:
           target: production
           arch: amd
@@ -152,6 +156,8 @@ jobs:
           artifact-name: docker-image-api-prod-amd
           dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          push: 'true'
+          dockerhub-repository: embernexus/api
       - uses: ./.github/actions/build-docker-image-release
         with:
           target: development
@@ -165,10 +171,13 @@ jobs:
     name: Build Docker Image - ARM
     timeout-minutes: 30
     needs: checkout-repo-and-bump-version
+    outputs:
+      digest: ${{ steps.production.outputs.digest }}
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/download-release-artifacts
-      - uses: ./.github/actions/build-docker-image-release
+      - id: production
+        uses: ./.github/actions/build-docker-image-release
         with:
           target: production
           arch: arm
@@ -176,6 +185,8 @@ jobs:
           artifact-name: docker-image-api-prod-arm
           dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          push: 'true'
+          dockerhub-repository: embernexus/api
       - uses: ./.github/actions/build-docker-image-release
         with:
           target: development
@@ -184,6 +195,99 @@ jobs:
           dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+
+  build-docs-dist:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: 'Build docs dist'
+    timeout-minutes: 15
+    needs: checkout-repo-and-bump-version
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/download-release-artifacts
+      - uses: ./.github/actions/build-docker-image-docs
+        with:
+          target: development
+          arch: amd
+          artifact-name: docker-image-docs-release-dev-amd
+          artifact-retention-days: 1
+      - uses: ./.github/actions/run-docs-pnpm-command
+        with:
+          artifact-name: docker-image-docs-release-dev-amd
+          command: build
+      - name: Archive dist
+        run: tar -czf docs-dist.tar.gz -C docs dist
+      - uses: actions/upload-artifact@v6
+        with:
+          name: docs-dist-release
+          path: docs-dist.tar.gz
+          retention-days: 7
+
+  build-docs-image-amd:
+    runs-on: gh-4vcpu-ubuntu-latest-amd
+    name: 'Build docs Docker Image - AMD'
+    timeout-minutes: 15
+    needs: build-docs-dist
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: build
+        uses: ./.github/actions/build-push-docs-image
+        with:
+          arch: amd
+          dist-artifact-name: docs-dist-release
+          ghcr-image-name: ember-nexus/api-docs
+          github-actor: ${{ github.actor }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          save-tarball: 'true'
+          tarball-artifact-name: docker-image-docs-release-amd
+          tarball-filename: docs-release-amd.tar.gz
+
+  build-docs-image-arm:
+    runs-on: gh-4vcpu-ubuntu-latest-arm
+    name: 'Build docs Docker Image - ARM'
+    timeout-minutes: 15
+    needs: build-docs-dist
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: build
+        uses: ./.github/actions/build-push-docs-image
+        with:
+          arch: arm
+          dist-artifact-name: docs-dist-release
+          ghcr-image-name: ember-nexus/api-docs
+          github-actor: ${{ github.actor }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          save-tarball: 'true'
+          tarball-artifact-name: docker-image-docs-release-arm
+          tarball-filename: docs-release-arm.tar.gz
+
+  push-docs-multiarch-ghcr:
+    runs-on: ubuntu-26.04
+    name: 'Push docs multi arch image to GHCR'
+    timeout-minutes: 15
+    needs:
+      - checkout-repo-and-bump-version
+      - build-docs-image-amd
+      - build-docs-image-arm
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/download-release-artifacts
+      - uses: ./.github/actions/combine-multiarch-image
+        with:
+          image-ref: ghcr.io/ember-nexus/api-docs
+          amd-digest: ${{ needs.build-docs-image-amd.outputs.digest }}
+          arm-digest: ${{ needs.build-docs-image-arm.outputs.digest }}
+          tags: ${{ env.NEW_VERSION }}
+          registry: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   e2e-test-amd:
     runs-on: gh-4vcpu-ubuntu-latest-amd
@@ -263,13 +367,31 @@ jobs:
     name: Publish release
     timeout-minutes: 10
     needs:
+      - build-docker-image-amd
+      - build-docker-image-arm
       - e2e-test-amd
       - e2e-test-arm
+      - push-docs-multiarch-ghcr
     steps:
 
       - uses: actions/checkout@v5
 
       - uses: ./.github/actions/download-release-artifacts
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: docker-image-docs-release-amd
+          path: /tmp/docker
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: docker-image-docs-release-arm
+          path: /tmp/docker
+
+      - name: Rename docs images for release attachment
+        run: |
+          mv /tmp/docker/docs-release-amd.tar.gz "/tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-amd.tar.gz"
+          mv /tmp/docker/docs-release-arm.tar.gz "/tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-arm.tar.gz"
 
       - name: Debug version
         run: |
@@ -310,67 +432,24 @@ jobs:
           tar-filename: prod-arm.tar.gz
           rename-to: api:prod-arm
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-        with:
-          version: latest
-
-      - name: Create multi arch Docker image
-        shell: bash
+      - name: Save per-arch release tarballs
         run: |
           mkdir -p /tmp/docker
 
-          docker tag api:prod-amd embernexus/api:tmp-latest-amd
-          docker tag api:prod-arm embernexus/api:tmp-latest-arm
           docker tag api:prod-amd embernexus/api:${{ env.NEW_VERSION }}-amd
           docker tag api:prod-arm embernexus/api:${{ env.NEW_VERSION }}-arm
           docker save embernexus/api:${{ env.NEW_VERSION }}-amd | gzip > /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-amd.tar.gz
           docker save embernexus/api:${{ env.NEW_VERSION }}-arm | gzip > /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
-          docker push embernexus/api:tmp-latest-amd
-          docker push embernexus/api:tmp-latest-arm
 
-          # docker buildx imagetools create both creates and pushes the multi-arch manifest in one step, and -
-          # unlike `docker manifest create --amend` - correctly composes inputs that are themselves image indexes
-          # (e.g. carrying provenance/SBOM attestation manifests), so it has no "is a manifest list" failure mode.
-          echo "Creating and pushing multi arch image embernexus/api:latest"
-          docker buildx imagetools create \
-            -t embernexus/api:latest \
-            embernexus/api:tmp-latest-amd \
-            embernexus/api:tmp-latest-arm
-
-          echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION }}"
-          docker buildx imagetools create \
-            -t embernexus/api:${{ env.NEW_VERSION }} \
-            embernexus/api:tmp-latest-amd \
-            embernexus/api:tmp-latest-arm
-
-          echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }}"
-          docker buildx imagetools create \
-            -t embernexus/api:${{ env.NEW_VERSION_WITHOUT_PATCH }} \
-            embernexus/api:tmp-latest-amd \
-            embernexus/api:tmp-latest-arm
-
-          echo "Creating and pushing multi arch image embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }}"
-          docker buildx imagetools create \
-            -t embernexus/api:${{ env.NEW_VERSION_WITHOUT_MINOR }} \
-            embernexus/api:tmp-latest-amd \
-            embernexus/api:tmp-latest-arm
-
-          echo "Creating temporary JWT key for Docker Hub"
-          export TMP_DOCKERHUB_JWT_TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${{ secrets.DOCKERHUB_USERNAME}}'", "password": "'${{ secrets.DOCKERHUB_TOKEN }}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
-          echo "Deleting Docker Hub tag embernexus/api:tmp-latest-amd"
-          curl -s -X DELETE -H "Authorization: JWT ${TMP_DOCKERHUB_JWT_TOKEN}" https://hub.docker.com/v2/repositories/embernexus/api/tags/tmp-latest-amd
-          echo "Deleting Docker Hub tag embernexus/api:tmp-latest-arm"
-          curl -s -X DELETE -H "Authorization: JWT ${TMP_DOCKERHUB_JWT_TOKEN}" https://hub.docker.com/v2/repositories/embernexus/api/tags/tmp-latest-arm
-          echo "Unsetting temporary Docker Hub JWT key"
-          unset TMP_DOCKERHUB_JWT_TOKEN
-          echo "Finished"
+      # Each arch's image was already pushed, digest-only (no tag), straight from its build job.
+      - uses: ./.github/actions/combine-multiarch-image
+        with:
+          image-ref: embernexus/api
+          amd-digest: ${{ needs.build-docker-image-amd.outputs.digest }}
+          arm-digest: ${{ needs.build-docker-image-arm.outputs.digest }}
+          tags: latest,${{ env.NEW_VERSION }},${{ env.NEW_VERSION_WITHOUT_PATCH }},${{ env.NEW_VERSION_WITHOUT_MINOR }}
+          registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push repository changes
         env:
@@ -396,3 +475,5 @@ jobs:
           files: |
             /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-amd.tar.gz
             /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
+            /tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-amd.tar.gz
+            /tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-arm.tar.gz

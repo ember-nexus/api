@@ -8,6 +8,11 @@ description: >
   as php_base/frankenphp_builder/php) from the local Buildx builder cache. Always disables provenance/SBOM
   attestations, since those cause Buildx to emit an OCI image index (manifest list) even for a single-arch --load
   build, which later breaks `docker manifest create --amend`.
+
+  When `push` is true, the same build also pushes straight to Docker Hub under no tag at all (a bare,
+  content-addressable push - digest only, no tag ever created), via a second `--output`. That digest is what the
+  caller later feeds into `docker buildx imagetools create` to assemble the multi-arch manifest, so there's never
+  a throwaway tag to clean up afterwards.
 inputs:
   target:
     description: 'Dockerfile build target (development or production)'
@@ -34,6 +39,18 @@ inputs:
     description: 'Docker Hub password/token, used to log in before building'
     required: false
     default: ''
+  push:
+    description: 'Also push the built image to dockerhub-repository under no tag (digest-only)'
+    required: false
+    default: 'false'
+  dockerhub-repository:
+    description: 'Docker Hub repository to push to when push is true (e.g. embernexus/api)'
+    required: false
+    default: ''
+outputs:
+  digest:
+    description: 'Digest of the pushed image (only set when push is true)'
+    value: ${{ steps.build.outputs.digest }}
 runs:
   using: 'composite'
   steps:
@@ -50,11 +67,13 @@ runs:
         password: ${{ inputs.dockerhub-password }}
 
     - name: Build and save Docker image - ${{ inputs.target }} ${{ inputs.arch }}
+      id: build
       shell: bash
       run: |
         set -eu
         TAG="api:${{ inputs.target == 'development' && 'dev' || 'prod' }}"
         TARBALL="${{ inputs.target == 'development' && 'dev' || 'prod' }}-${{ inputs.arch }}.tar.gz"
+        RAW_TAR="/tmp/$(basename "$TARBALL" .tar.gz).tar"
 
         CACHE_ARGS=()
         if [ "${{ inputs.target }}" = "production" ]; then
@@ -66,19 +85,29 @@ runs:
           BUILD_ARG_ARGS+=(--build-arg "VERSION=${{ inputs.version }}")
         fi
 
+        OUTPUT_ARGS=(--output "type=docker,dest=$RAW_TAR,name=$TAG")
+        if [ "${{ inputs.push }}" = "true" ]; then
+          OUTPUT_ARGS+=(--output "type=image,name=${{ inputs.dockerhub-repository }},push=true")
+        fi
+
         docker buildx build \
           --target "${{ inputs.target }}" \
           --provenance=false \
           --sbom=false \
           "${CACHE_ARGS[@]}" \
           "${BUILD_ARG_ARGS[@]}" \
-          --load \
-          -t "$TAG" \
+          "${OUTPUT_ARGS[@]}" \
+          --metadata-file /tmp/metadata.json \
           -f ./docker/Dockerfile \
           .
 
-        docker save "$TAG" | gzip > "$TARBALL"
+        gzip -c "$RAW_TAR" > "$TARBALL"
         echo "TARBALL_PATH=$TARBALL" >> "$GITHUB_ENV"
+
+        if [ "${{ inputs.push }}" = "true" ]; then
+          DIGEST="$(jq -r '."containerimage.digest"' /tmp/metadata.json)"
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+        fi
 
     - uses: actions/upload-artifact@v6
       with:

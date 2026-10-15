@@ -130,7 +130,7 @@ export default defineConfig({
     // the preview server as http://core:4322, so it needs to pass Astro/Vite's Host check too.
     allowedHosts: ['localhost', 'astro', 'ember-nexus-org-astro', 'core']
   },
-  site: 'https://api.ember-nexus.dev',
+  site: 'https://api.docs.ember-nexus.dev',
   integrations: [
     trailingSlashRedirect(),
     mdRobotsHeaders(),
