@@ -11778,7 +11778,7 @@
               "type": "string",
               "example": "sha-256=:X4a4pOezhox2tI5PXW8UAd7NAdOKPjE3wYlYs+eTt7Y=:"
             },
-            "description": "Cryptographic digest of the complete (reassembled) file. Only read on the chunk that sets `Upload-Complete: ?1`, and checked against the merged file once assembled. Only `sha-256` is supported. A mismatch fails with `400 Bad Request`; the upload's target element keeps its previous file, if any (TODO: the upload is currently deleted on a failed completion - undecided). `Content-Digest` is accepted as a fallback if `Repr-Digest` is absent."
+            "description": "Cryptographic digest of the complete (reassembled) file. Only read on the chunk that sets `Upload-Complete: ?1`, and checked against the merged file once assembled. Only `sha-256` is supported. A mismatch fails with `400 Bad Request`; the upload's target element keeps its previous file, if any `Content-Digest` is accepted as a fallback if `Repr-Digest` is absent."
           }
         ],
         "requestBody": {

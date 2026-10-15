@@ -10,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"]],
   use: {
-    baseURL: process.env.BASE_URL ?? "http://localhost:4322",
+    baseURL: process.env.BASE_URL ?? "http://127.0.0.1:4322",
     trace: "retain-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],

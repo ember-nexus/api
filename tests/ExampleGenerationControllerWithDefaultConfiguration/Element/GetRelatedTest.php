@@ -17,8 +17,8 @@ class GetRelatedTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_UUID), self::TOKEN);
         $this->assertIsCollectionResponse($response, 3);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-related/200-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-related/200-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/element/get-related/200-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/element/get-related/200-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -42,7 +42,7 @@ class GetRelatedTest extends BaseRequestTestCase
         $etag = $response->getHeader('ETag');
         $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_UUID), self::TOKEN, ['If-None-Match' => $etag]);
         $this->assertNotModifiedResponse($response);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-related/304-response-header.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/element/get-related/304-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -54,8 +54,8 @@ class GetRelatedTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_WHICH_DOES_NOT_EXIST), 'thisTokenDoesNotExist');
         $this->assertIsProblemResponse($response, 401);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-related/401-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-related/401-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/element/get-related/401-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/element/get-related/401-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -77,8 +77,8 @@ class GetRelatedTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_WHICH_DOES_NOT_EXIST), self::TOKEN);
         $this->assertIsProblemResponse($response, 404);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-related/404-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-related/404-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/element/get-related/404-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/element/get-related/404-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -107,8 +107,8 @@ class GetRelatedTest extends BaseRequestTestCase
     {
         $response = $this->runGetRequest(sprintf('/%s/related', self::ELEMENT_UUID), self::TOKEN, ['If-Match' => '"etagDoesNotExist"']);
         $this->assertIsProblemResponse($response, 412);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/element/get-related/412-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/element/get-related/412-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/element/get-related/412-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/element/get-related/412-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

@@ -13,7 +13,7 @@ class WildcardSearchTest extends BaseRequestTestCase
 
     public function testSearchRequest(): void
     {
-        $path = \Safe\realpath(__DIR__.'/../../../../tests/recordings/search/example/elasticsearch-query-dsl-mixin/wildcard-search/request-payload.json');
+        $path = \Safe\realpath(__DIR__.'/../../../../tests/Recordings/search/example/elasticsearch-query-dsl-mixin/wildcard-search/request-payload.json');
 
         $data = \Safe\file_get_contents($path);
         $data = json_decode($data, true);
@@ -23,8 +23,8 @@ class WildcardSearchTest extends BaseRequestTestCase
             $data
         );
 
-        $documentationHeadersPath = 'tests/recordings/search/example/elasticsearch-query-dsl-mixin/wildcard-search/response-header.txt';
-        // $documentationBodyPath = 'tests/recordings/search/example/elasticsearch-query-dsl-mixin/wildcard-search/response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/search/example/elasticsearch-query-dsl-mixin/wildcard-search/response-header.txt';
+        // $documentationBodyPath = 'tests/Recordings/search/example/elasticsearch-query-dsl-mixin/wildcard-search/response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

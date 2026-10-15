@@ -13,8 +13,8 @@ class Get405MethodNotAllowedTest extends BaseRequestTestCase
     public function testRegisterSuccess(): void
     {
         $response = $this->runGetRequest('/error/405/method-not-allowed', null);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/error/get-405-method-not-allowed/200-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/error/get-405-method-not-allowed/200-response-body.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/error/get-405-method-not-allowed/200-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/error/get-405-method-not-allowed/200-response-body.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

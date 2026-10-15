@@ -104,8 +104,11 @@ jobs:
           echo "NEW_VERSION=$newVersion" >> $GITHUB_ENV
           cat /tmp/ci-env/NEW_VERSION.txt
           echo "Update version in command examples within documentation"
-          find ./tests/recordings/api-endpoints -type f -exec sed -i "s/$version/$newVersion/g" {} \;
-          find ./tests/recordings/commands/assets -type f -exec sed -i "s/$version/$newVersion/g" {} \;
+          find ./tests/Recordings/api-endpoints -type f -exec sed -i "s/$version/$newVersion/g" {} \;
+          find ./tests/Recordings/commands/assets -type f -exec sed -i "s/$version/$newVersion/g" {} \;
+
+          echo "Regenerate docs/src/data/swagger.json so it reflects the bumped recordings"
+          node docs/scripts/generate-swagger.mjs
 
       - name: Update changelog unreleased section with new version
         uses: superfaceai/release-changelog-action@v3
@@ -214,6 +217,7 @@ jobs:
         with:
           artifact-name: docker-image-docs-release-dev-amd
           command: build
+          version: ${{ env.NEW_VERSION }}
       - name: Archive dist
         run: tar -czf docs-dist.tar.gz -C docs dist
       - uses: actions/upload-artifact@v6
@@ -393,6 +397,9 @@ jobs:
           mv /tmp/docker/docs-release-amd.tar.gz "/tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-amd.tar.gz"
           mv /tmp/docker/docs-release-arm.tar.gz "/tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-arm.tar.gz"
 
+      - name: Copy OpenAPI/Swagger spec for release attachment
+        run: cp docs/src/data/swagger.json "/tmp/docker/openapi-ember-nexus-api-${{ env.NEW_VERSION }}.json"
+
       - name: Debug version
         run: |
           echo "${{ env.NEW_VERSION }}"
@@ -477,3 +484,4 @@ jobs:
             /tmp/docker/docker-image-ember-nexus-api-${{ env.NEW_VERSION }}-arm.tar.gz
             /tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-amd.tar.gz
             /tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-arm.tar.gz
+            /tmp/docker/openapi-ember-nexus-api-${{ env.NEW_VERSION }}.json

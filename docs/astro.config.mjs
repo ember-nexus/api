@@ -126,9 +126,9 @@ export default defineConfig({
   },
   server: {
     host: true,
-    // 'core' is the docker-compose service name — the `e2e` (Playwright) container reaches
-    // the preview server as http://core:4322, so it needs to pass Astro/Vite's Host check too.
-    allowedHosts: ['localhost', 'astro', 'ember-nexus-org-astro', 'core']
+    // 'docs' is the docker-compose service name — the `e2e` (Playwright) container reaches
+    // the preview server as http://docs:4322, so it needs to pass Astro/Vite's Host check too.
+    allowedHosts: ['localhost', 'docs']
   },
   site: 'https://api.docs.ember-nexus.dev',
   integrations: [

@@ -34,13 +34,13 @@ interface CategoryBoundary {
 const BOUNDARIES: Record<string, CategoryBoundary> = {
   page: {
     first: { url: "/", title: "Ember Nexus: Knowledge Graph API" },
-    last: { url: "/reference/schemas", title: "Schemas" },
+    last: { url: "/reference/openapi-schemas", title: "OpenAPI schemas" },
   },
   endpoint: {
     first: { url: "/api/get-index", title: "Get index endpoint" },
     last: {
-      url: "/api/get-error-501-not-implemented",
-      title: "501 not implemented endpoint",
+      url: "/api/get-error-503-service-unavailable",
+      title: "503 service unavailable endpoint",
     },
   },
   command: {

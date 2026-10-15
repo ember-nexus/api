@@ -117,6 +117,6 @@ tasks:
       - docker run -p 80:80 ember-nexus-api-docs:latest
 
   docs:swagger:generate:
-    desc: Regenerate docs/src/data/swagger.json from its fragments, with examples pulled live from tests/recordings.
+    desc: Regenerate docs/src/data/swagger.json from its fragments, with examples pulled live from tests/Recordings.
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec --user astro docs sh -c "cd /docs && pnpm run swagger:generate"

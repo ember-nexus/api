@@ -13,8 +13,8 @@ class AGetInstanceConfigurationTest extends BaseRequestTestCase
     public function testGetInstanceConfigurationSuccess(): void
     {
         $response = $this->runGetRequest('/instance-configuration', null);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/system/get-instance-configuration/200-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/system/get-instance-configuration/200-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/system/get-instance-configuration/200-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/system/get-instance-configuration/200-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

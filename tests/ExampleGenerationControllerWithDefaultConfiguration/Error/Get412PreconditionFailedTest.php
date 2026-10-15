@@ -13,8 +13,8 @@ class Get412PreconditionFailedTest extends BaseRequestTestCase
     public function testRegisterSuccess(): void
     {
         $response = $this->runGetRequest('/error/412/precondition-failed', null);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/error/get-412-precondition-failed/200-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/error/get-412-precondition-failed/200-response-body.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/error/get-412-precondition-failed/200-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/error/get-412-precondition-failed/200-response-body.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

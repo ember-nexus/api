@@ -51,8 +51,8 @@ class PatchUploadGoneTest extends BaseRequestTestCase
         );
         $this->assertIsProblemResponse($response, 410);
 
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/patch-upload/410-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/upload/patch-upload/410-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/upload/patch-upload/410-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/upload/patch-upload/410-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

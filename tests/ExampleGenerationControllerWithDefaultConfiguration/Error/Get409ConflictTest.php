@@ -13,8 +13,8 @@ class Get409ConflictTest extends BaseRequestTestCase
     public function testRegisterSuccess(): void
     {
         $response = $this->runGetRequest('/error/409/conflict', null);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/error/get-409-conflict/200-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/error/get-409-conflict/200-response-body.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/error/get-409-conflict/200-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/error/get-409-conflict/200-response-body.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

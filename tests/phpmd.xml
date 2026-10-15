@@ -34,4 +34,5 @@
         <exclude name="LongMethodName"/>
     </rule>
     <rule ref="rulesets/unusedcode.xml"/>
+    <exclude-pattern>*/lib/Antlr/dist/*</exclude-pattern>
 </ruleset>

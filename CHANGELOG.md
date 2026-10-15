@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- Add a new documentation site, replacing the previous one, closes #495. Built with Astro, containerized with its own
+  Docker image, and covered by its own CI pipeline (build, lint, spellcheck, Playwright e2e tests) and test suite.
+- Every documentation page is now also available as plain Markdown (append `.md` to any page's URL), and the full
+  site is indexed at `/llms.txt`, making the documentation directly consumable by LLMs and AI coding assistants.
+- Add an OpenAPI / Swagger specification at `/swagger.json` (and per-schema pages under `/openapi-schema/`),
+  generated from fragments and kept in sync with the actual recorded HTTP traffic. Each GitHub release now also
+  attaches this spec as a standalone, versioned asset (`openapi-ember-nexus-api-<version>.json`).
 - Add configurable timeout for expression (Go Expr Lang) execution via `expression.timeoutInMilliseconds` (default
   5000ms), so a slow or runaway expression can no longer block a request indefinitely, closes #482.
 - Add dedicated `audit` log channel, always flushed regardless of request errors, logging `Group` node writes

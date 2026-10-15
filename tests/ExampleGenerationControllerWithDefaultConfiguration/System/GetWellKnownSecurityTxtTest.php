@@ -13,8 +13,8 @@ class GetWellKnownSecurityTxtTest extends BaseRequestTestCase
     public function testGetWellKnownSecurityTxtSuccess(): void
     {
         $response = $this->runGetRequest('/.well-known/security.txt', null);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/system/get-well-known-security-txt/200-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/system/get-well-known-security-txt/200-response-body.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/system/get-well-known-security-txt/200-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/system/get-well-known-security-txt/200-response-body.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

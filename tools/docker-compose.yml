@@ -25,9 +25,9 @@ services:
     tty: true
     volumes:
       - ../docs:/docs
-      # Mounted one level above /docs so relative paths from docs/scripts/ (../../tests/recordings)
+      # Mounted one level above /docs so relative paths from docs/scripts/ (../../tests/Recordings)
       # resolve the same way here as they do from a plain repo checkout on the host.
-      - ../tests/recordings:/tests/recordings:ro
+      - ../tests/Recordings:/tests/Recordings:ro
     working_dir: /docs
     environment:
       VERSION: ${VERSION:-dev}

@@ -13,8 +13,8 @@ class Get416RangeNotSatisfiableTest extends BaseRequestTestCase
     public function testRegisterSuccess(): void
     {
         $response = $this->runGetRequest('/error/416/range-not-satisfiable', null);
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/error/get-416-range-not-satisfiable/200-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/error/get-416-range-not-satisfiable/200-response-body.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/error/get-416-range-not-satisfiable/200-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/error/get-416-range-not-satisfiable/200-response-body.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

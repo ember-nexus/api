@@ -11,6 +11,7 @@
     "build": "astro build && ./build-summary.sh",
     "preview": "astro preview",
     "astro": "astro",
+    "pretest": "node ./scripts/sync-content-store.mjs",
     "test": "vitest run quality",
     "test:e2e": "playwright test",
     "cs": "eslint ./src",

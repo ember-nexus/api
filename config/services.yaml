@@ -199,3 +199,18 @@ services:
   AsyncAws\S3\S3Client:
     factory: ['@App\Factory\S3ClientFactory', 'createS3Client']
     class: AsyncAws\S3\S3Client
+
+  # backs the "audit" Monolog handler (see monolog.yaml); default path is for dev/test, overridden for prod below
+  App\Logger\FlushingStreamHandler:
+    arguments:
+      $stream: '%kernel.logs_dir%/audit.log'
+      $level: 'notice'
+
+when@prod:
+  services:
+    App\Logger\FlushingStreamHandler:
+      arguments:
+        $stream: 'php://stderr'
+        $level: 'notice'
+      calls:
+        - setFormatter: ['@monolog.formatter.json']

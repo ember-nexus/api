@@ -50,7 +50,7 @@ class HeadUploadTest extends BaseRequestTestCase
         $response = $this->runHeadRequest(sprintf('/upload/%s', $uploadId), self::TOKEN);
         $this->assertSame(204, $response->getStatusCode());
 
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/head-upload/204-response-header.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/upload/head-upload/204-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -72,7 +72,7 @@ class HeadUploadTest extends BaseRequestTestCase
         $this->assertSame(401, $response->getStatusCode());
         $this->assertSame('application/problem+json; charset=utf-8', $response->getHeader('content-type')[0]);
 
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/head-upload/401-response-header.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/upload/head-upload/401-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
@@ -88,7 +88,7 @@ class HeadUploadTest extends BaseRequestTestCase
         $this->assertSame(404, $response->getStatusCode());
         $this->assertSame('application/problem+json; charset=utf-8', $response->getHeader('content-type')[0]);
 
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/head-upload/404-response-header.txt';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/upload/head-upload/404-response-header.txt';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

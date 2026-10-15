@@ -44,5 +44,3 @@ a full, non-ranged response, so clients can detect range support ahead of time.
     `bytes=0-1048575` for the first megabyte. A comma-separated list of ranges fails with `400 Bad Request`. A range
     whose start is beyond the end of the file, or that spans zero bytes, fails with `416 Range Not Satisfiable` (any range on a zero-byte file too).
 </Note>
-
-TODO: `405` responses lack an `Allow` header and `416` lacks `Content-Range: bytes */<length>` (RFC 9110) - undecided.

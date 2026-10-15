@@ -41,7 +41,7 @@ docker compose -f tools/docker-compose.yml exec docs sh -c "chown -R astro:astro
 - `task docs:prod:build` / `task docs:prod:run` — build/run the production image (Caddy serving `dist/`)
 - `task docs:swagger:generate` — regenerate `docs/src/data/swagger.json` from `docs/src/data/swagger/**/*.json`
   (runs `docs/scripts/generate-swagger.mjs` in the dev container). Fragments can embed an
-  `x-ember-nexus-recording` marker (a path relative to `tests/recordings/`) instead of a literal
+  `x-ember-nexus-recording` marker (a path relative to `tests/Recordings/`) instead of a literal
   example value/HAR body; the script injects that file's real, current content, so examples track
   the actual recorded HTTP traffic instead of a hand-copied duplicate. CI
   (`docs-swagger-up-to-date` in `ci-test.yml`) regenerates and hashes the output to fail if

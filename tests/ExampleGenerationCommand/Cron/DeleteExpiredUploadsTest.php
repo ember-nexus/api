@@ -16,7 +16,7 @@ class DeleteExpiredUploadsTest extends BaseCommandTestCase
             'APP_ENV=prod VERSION=%s php bin/console cron:delete-expired-uploads --ansi --help | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/recordings/commands/assets/cron-delete-expired-uploads-help.html', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/Recordings/commands/assets/cron-delete-expired-uploads-help.html', $commandOutput);
     }
 
     public function testDeleteExpiredUploads(): void
@@ -27,7 +27,7 @@ class DeleteExpiredUploadsTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'tests/recordings/commands/assets/cron-delete-expired-uploads.html',
+            'tests/Recordings/commands/assets/cron-delete-expired-uploads.html',
             $commandOutput
         );
     }

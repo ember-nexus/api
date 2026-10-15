@@ -14,7 +14,7 @@ use function Safe\realpath;
 use function Safe\scandir;
 
 /**
- * Every recorded error response body under tests/recordings/ that is named after an HTTP status
+ * Every recorded error response body under tests/Recordings/ that is named after an HTTP status
  * code >= 400 (e.g. `404-response-body.json`) must actually carry that status somewhere in its
  * content. This catches recordings that were renamed, copy-pasted, or hand-authored without
  * re-capturing the real response - e.g. a `429-response-body.json` that still holds a stale `401`
@@ -37,7 +37,7 @@ use function Safe\scandir;
  */
 class RecordingFilenameStatusCodeTest extends TestCase
 {
-    private const string RECORDINGS_ROOT = __DIR__.'/../../recordings';
+    private const string RECORDINGS_ROOT = __DIR__.'/../../Recordings';
 
     /**
      * @return iterable<string, array{string}>

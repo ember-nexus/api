@@ -83,11 +83,6 @@ previous storage object is deleted as well.
     uploads.
 </Note>
 
-TODO: the code also has a third path - direct uploads of at least `multipartUploadThresholdInBytes` (500 MB) skip
-the upload bucket and are streamed as an S3 multipart upload straight into the storage bucket. Because every body is
-capped at `file.uploadMaxChunkSizeInBytes` (101 MiB), only `backup:load` can reach it. Undecided: document it or drop
-the path.
-
 ### Verifying integrity
 
 The SHA-256 hash of the file is computed incrementally as chunks arrive, rather than by re-reading the assembled
@@ -98,9 +93,6 @@ is carried out (`Content-Digest` only describes the body of a single request, i.
 direct uploads and downloads, described in the [file reference](/reference/file#verifying-integrity). A mismatch
 fails with `400 Bad Request`; the target element keeps whatever file it had before (if any) - a failed completion
 never leaves an element with a partially-written file.
-
-TODO: currently a failed completion (digest mismatch, max-size exceeded) **deletes** the upload including its chunks,
-so it is not resumable afterwards. Whether it should instead stay resumable is undecided; align this page then.
 
 ## Limits
 
@@ -120,8 +112,7 @@ against each other at startup. In terms of the values actually reported to clien
   that many digits - 10,000 chunks by default, matching the S3 backend's own hard maximum.
 - `max-size` (`file.maxFileSizeInBytes`, default 10 GiB) - the maximum size of the finished file, the same setting
   described in [Size limits](/reference/file#size-limits) in the file reference. A completing upload whose
-  reassembled length exceeds this is rejected with `400 Bad Request` (see the TODO on failed completion above for what
-  happens to the upload).
+  reassembled length exceeds this is rejected with `400 Bad Request`.
 - The total number of bytes on completion must equal `Upload-Length`, if one was declared; otherwise the request fails
   with `409 Conflict` and the upload is deleted.
 

@@ -16,7 +16,7 @@ class TokenRevokeTest extends BaseCommandTestCase
             'APP_ENV=prod VERSION=%s php bin/console token:revoke --ansi --help | aha -s --black --css "./cli-style.css"',
             $this->getCurrentVersion()
         ));
-        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/recordings/commands/assets/token-revoke-help.html', $commandOutput);
+        $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(self::PATH_TO_ROOT, 'tests/Recordings/commands/assets/token-revoke-help.html', $commandOutput);
     }
 
     public function testTokenRevoke(): void
@@ -29,7 +29,7 @@ class TokenRevokeTest extends BaseCommandTestCase
         ));
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
-            'tests/recordings/commands/assets/token-revoke.html',
+            'tests/Recordings/commands/assets/token-revoke.html',
             $commandOutput,
             [
                 'Found user with identifier',

@@ -12,7 +12,7 @@
 //      of the tree, including every recorded example payload below) is never touched by this and
 //      keeps its natural, readable key order.
 //   2. Walk the merged spec for `x-ember-nexus-recording` markers and inject the *current*
-//      content of the referenced file under tests/recordings/ - this is what keeps examples
+//      content of the referenced file under tests/Recordings/ - this is what keeps examples
 //      sourced from the real recorded HTTP traffic instead of a hand-copied duplicate. A `.json`
 //      recording becomes a structured example `value`; anything else (e.g. the static
 //      text/plain error pages) is used as the literal string value. A marker next to `har`
@@ -23,7 +23,7 @@
 //
 // Path resolution is relative to this file, so it works unmodified both on the host (repo
 // checkout) and inside the docs dev container, as long as the container also mounts
-// tests/recordings at the same relative location (see tools/docker-compose.yml).
+// tests/Recordings at the same relative location (see tools/docker-compose.yml).
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 const docsRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fragmentsDir = join(docsRoot, 'src', 'data', 'swagger');
 const outputFile = join(docsRoot, 'src', 'data', 'swagger.json');
-const recordingsRoot = join(docsRoot, '..', 'tests', 'recordings');
+const recordingsRoot = join(docsRoot, '..', 'tests', 'Recordings');
 
 function collectJsonFiles(dir) {
   const files = [];

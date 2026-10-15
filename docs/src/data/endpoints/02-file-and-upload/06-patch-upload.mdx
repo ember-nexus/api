@@ -44,6 +44,3 @@ with the SHA-256 digest of the complete, reassembled file, in
 [RFC 9530](https://datatracker.ietf.org/doc/html/rfc9530) structured-field format (`sha-256=:[base64]:`), the same as
 for a direct upload on [`POST /<uuid>/file`](/api/post-element-file). A mismatch fails with `400 Bad Request`; the
 upload's target element keeps whatever file it had before (if any).
-
-TODO: a failed completion currently deletes the upload (chunks included) instead of leaving it resumable - undecided,
-see [upload reference](/reference/upload#verifying-integrity).

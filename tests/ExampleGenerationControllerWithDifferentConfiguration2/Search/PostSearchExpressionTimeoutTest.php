@@ -48,8 +48,8 @@ class PostSearchExpressionTimeoutTest extends BaseRequestTestCase
         );
         $this->assertIsProblemResponse($response, 422);
 
-        $documentationHeadersPath = 'tests/recordings/api-endpoints/search/post-search/422-response-header.txt';
-        $documentationBodyPath = 'tests/recordings/api-endpoints/search/post-search/422-response-body.json';
+        $documentationHeadersPath = 'tests/Recordings/api-endpoints/search/post-search/422-response-header.txt';
+        $documentationBodyPath = 'tests/Recordings/api-endpoints/search/post-search/422-response-body.json';
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,

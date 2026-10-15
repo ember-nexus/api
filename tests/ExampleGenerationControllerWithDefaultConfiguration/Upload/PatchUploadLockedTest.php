@@ -52,8 +52,8 @@ class PatchUploadLockedTest extends BaseRequestTestCase
             );
             $this->assertIsProblemResponse($response, 409);
 
-            $documentationHeadersPath = 'tests/recordings/api-endpoints/upload/patch-upload/409-locked-response-header.txt';
-            $documentationBodyPath = 'tests/recordings/api-endpoints/upload/patch-upload/409-locked-response-body.json';
+            $documentationHeadersPath = 'tests/Recordings/api-endpoints/upload/patch-upload/409-locked-response-header.txt';
+            $documentationBodyPath = 'tests/Recordings/api-endpoints/upload/patch-upload/409-locked-response-body.json';
             $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
                 self::PATH_TO_ROOT,
                 $documentationHeadersPath,
