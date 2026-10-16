@@ -1,0 +1,38 @@
+name: BA Stamp pickup
+on:
+  schedule:
+    - cron: '20 */3 * * *'
+  workflow_dispatch: {}
+permissions:
+  contents: write
+  actions: write
+jobs:
+
+  pickup:
+    runs-on: ubuntu-26.04
+    name: 'Attach anchored BA Stamp forensic packets'
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Pick up anchored BA Stamp forensic packets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASTAMP_API_KEY: ${{ secrets.BASTAMP_API_KEY }}
+        run: ./bin/ba-stamp-pickup
+
+  # This workflow runs every 3 hours, every day - its run logs are low-value once they're a bit old, so prune
+  # them down to the last week (8 runs/day * 7 days = 56) instead of letting them pile up indefinitely.
+  cleanup-old-runs:
+    runs-on: ubuntu-26.04
+    name: 'Delete old run logs'
+    timeout-minutes: 5
+    needs: pickup
+    if: always()
+    steps:
+      - uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          workflow: ci-ba-stamp-pickup.yml
+          retain_days: 7
+          keep_minimum_runs: 56

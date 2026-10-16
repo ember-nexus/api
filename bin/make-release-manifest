@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Writes an in-toto Statement v1 listing release files and their digests.
+#
+# Usage: make-release-manifest [-o OUT] [-t PREDICATE_TYPE] [-v VERSION] [-r REPO_URL] [-c COMMIT] FILE...
+#   -o  output path            (default: release-manifest.intoto.json)
+#   -t  predicateType URI      (default: https://ember-nexus.dev/release-manifest/v1)
+#   -v  release version        (optional, recorded in the predicate)
+#   -r  source repository URL  (optional, recorded in the predicate)
+#   -c  source commit          (optional, recorded in the predicate)
+#
+# Subjects are the given files, named by basename, sorted, and must be unique.
+# Each subject carries sha256 (primary) and sha3_512 digests.
+# Requires: bash, jq, openssl >= 1.1.1.
+
+set -euo pipefail
+
+out="release-manifest.intoto.json"
+ptype="https://ember-nexus.dev/release-manifest/v1"
+version="" repo="" commit=""
+
+while getopts "o:t:v:r:c:" opt; do
+  case "$opt" in
+    o) out=$OPTARG ;;
+    t) ptype=$OPTARG ;;
+    v) version=$OPTARG ;;
+    r) repo=$OPTARG ;;
+    c) commit=$OPTARG ;;
+    *) exit 2 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+[ $# -gt 0 ] || {
+  echo "usage: $0 [-o out] [-t predicate-type] [-v version] [-r repo-url] [-c commit] file..." >&2
+  exit 2
+}
+
+openssl dgst -sha3-512 -r </dev/null >/dev/null 2>&1 \
+  || { echo "error: openssl with SHA3-512 support (>= 1.1.1) required" >&2; exit 1; }
+
+# digest OPENSSL_ALGO FILE -> hex digest (reads via stdin so odd filenames can't alter the output)
+digest() { openssl dgst "-$1" -r < "$2" | cut -d' ' -f1; }
+
+subjects='[]'
+for f in "$@"; do
+  [ -f "$f" ] || { echo "error: not a regular file: $f" >&2; exit 1; }
+  subjects=$(jq -c \
+    --arg n "$(basename -- "$f")" \
+    --arg s256 "$(digest sha256 "$f")" \
+    --arg s3 "$(digest sha3-512 "$f")" \
+    '. + [{name: $n, digest: {sha256: $s256, sha3_512: $s3}}]' <<<"$subjects")
+done
+
+jq -n --argjson s "$subjects" --arg t "$ptype" \
+      --arg v "$version" --arg r "$repo" --arg c "$commit" '
+  ($s | sort_by(.name)) as $subj
+  | if ($subj | map(.name) | unique | length) != ($subj | length)
+    then error("duplicate file names among inputs") else . end
+  | {
+      "_type": "https://in-toto.io/Statement/v1",
+      subject: $subj,
+      predicateType: $t,
+      predicate: ({version: $v, repository: $r, commit: $c} | with_entries(select(.value != "")))
+    }' > "$out"
+
+echo "wrote $out"
+echo "sha256: $(digest sha256 "$out")"

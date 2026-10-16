@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add an OpenAPI / Swagger specification at `/swagger.json` (and per-schema pages under `/openapi-schema/`),
   generated from fragments and kept in sync with the actual recorded HTTP traffic. Each GitHub release now also
   attaches this spec as a standalone, versioned asset (`openapi-ember-nexus-api-<version>.json`).
+- Integrate [BA Stamp](https://bastamp.com) blockchain timestamping into the release pipeline, closes #515. Each
+  release now gets an in-toto attestation (`release-manifest-<version>.intoto.json`) covering the hashes of all
+  other release assets, including the GitHub-generated source archives; its hash is submitted to BA Stamp as an
+  optional, non-blocking step. A new scheduled workflow later attaches the anchored forensic packet (certificate,
+  Merkle proof, and verification instructions) to the release once BA Stamp has processed it.
 - Add configurable timeout for expression (Go Expr Lang) execution via `expression.timeoutInMilliseconds` (default
   5000ms), so a slow or runaway expression can no longer block a request indefinitely, closes #482.
 - Add dedicated `audit` log channel, always flushed regardless of request errors, logging `Group` node writes
