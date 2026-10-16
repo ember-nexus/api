@@ -5,30 +5,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.1.33 - 2026-10-16
 ### Added
-- Add a new documentation site, replacing the previous one, closes #495. Built with Astro, containerized with its own
+- Add a new documentation site, replacing the previous one, closes [#495]. Built with Astro, containerized with its own
   Docker image, and covered by its own CI pipeline (build, lint, spellcheck, Playwright e2e tests) and test suite.
 - Every documentation page is now also available as plain Markdown (append `.md` to any page's URL), and the full
   site is indexed at `/llms.txt`, making the documentation directly consumable by LLMs and AI coding assistants.
 - Add an OpenAPI / Swagger specification at `/swagger.json` (and per-schema pages under `/openapi-schema/`),
   generated from fragments and kept in sync with the actual recorded HTTP traffic. Each GitHub release now also
   attaches this spec as a standalone, versioned asset (`openapi-ember-nexus-api-<version>.json`).
-- Integrate [BA Stamp](https://bastamp.com) blockchain timestamping into the release pipeline, closes #515. Each
+- Integrate [BA Stamp](https://bastamp.com) blockchain timestamping into the release pipeline, closes [#515]. Each
   release now gets an in-toto attestation (`release-manifest-<version>.intoto.json`) covering the hashes of all
   other release assets, including the GitHub-generated source archives; its hash is submitted to BA Stamp as an
   optional, non-blocking step. A new scheduled workflow later attaches the anchored forensic packet (certificate,
   Merkle proof, and verification instructions) to the release once BA Stamp has processed it.
 - Add configurable timeout for expression (Go Expr Lang) execution via `expression.timeoutInMilliseconds` (default
-  5000ms), so a slow or runaway expression can no longer block a request indefinitely, closes #482.
+  5000ms), so a slow or runaway expression can no longer block a request indefinitely, closes [#482].
 - Add dedicated `audit` log channel, always flushed regardless of request errors, logging `Group` node writes
-  (`PUT`/`PATCH`/`DELETE`), access-denied requests, and calls to user/token endpoints, closes #347.
+  (`PUT`/`PATCH`/`DELETE`), access-denied requests, and calls to user/token endpoints, closes [#347].
 - Log a notice when an element being deleted or updated is missing its MongoDB or Elasticsearch document, or (on
   delete) its S3 file.
 - The `register.uniqueIdentifierRegex` configuration is now actually enforced on `POST /register`; it defaults to a
-  loose email-shaped pattern, closes #283.
+  loose email-shaped pattern, closes [#283].
 
 ### Changed
-- Update the Go Expr Lang dependency and other Go dependencies used by the `expr-cli` binary, related to #482.
+- Update the Go Expr Lang dependency and other Go dependencies used by the `expr-cli` binary, related to [#482].
 - Update reference dataset to version 0.0.36.
 
 ### Fixed
@@ -36,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `CREATE` access to; `404` is reserved for a parent the user has no access to at all, including because it does not
   exist.
 - Being a direct member of a `Group` (via `IS_IN_GROUP`) now also grants `CREATE` access to the group node itself,
-  not just `READ`/`SEARCH` access, closes #238.
+  not just `READ`/`SEARCH` access, closes [#238].
 - Deleting an element whose Elasticsearch document was already missing no longer fails with a 500 error.
 - `backup:create` no longer fails entirely when an element's file is missing from S3; the file is now skipped and
   logged instead.
