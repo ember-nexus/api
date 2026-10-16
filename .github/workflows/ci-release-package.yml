@@ -140,13 +140,28 @@ jobs:
   build-docker-image-amd:
     runs-on: gh-4vcpu-ubuntu-latest-amd
     name: Build Docker Image - AMD
-    timeout-minutes: 30
+    # GitHub Actions has no way to exempt a composite action's post/cleanup steps (e.g. setup-buildx-action's
+    # builder teardown) from the job's timeout - it's one wall-clock budget for the whole job. The few extra
+    # minutes here are headroom for that cleanup, not slack for the builds themselves.
+    timeout-minutes: 35
     needs: checkout-repo-and-bump-version
     outputs:
       digest: ${{ steps.production.outputs.digest }}
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/download-release-artifacts
+      # Set up once and shared by both calls below: creating a second Buildx builder in between (e.g. by
+      # letting the build-docker-image-release action set one up per call) would hand the development build a
+      # fresh, cache-less builder instead of production's just-built layers - see gh-517.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          version: latest
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       # Production is built first, pristine (--no-cache, no GHA cache), so the released image is always built
       # from scratch. Development is built right after in the same job/builder and reuses production's just-built
       # layers (shared ancestor stages such as php_base/frankenphp_builder/php) via the local Buildx builder cache.
@@ -157,8 +172,6 @@ jobs:
           arch: amd
           version: ${{ env.NEW_VERSION }}
           artifact-name: docker-image-api-prod-amd
-          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
           push: 'true'
           dockerhub-repository: embernexus/api
       - uses: ./.github/actions/build-docker-image-release
@@ -166,19 +179,26 @@ jobs:
           target: development
           arch: amd
           artifact-name: docker-image-api-dev-amd
-          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
   build-docker-image-arm:
     runs-on: gh-4vcpu-ubuntu-latest-arm
     name: Build Docker Image - ARM
-    timeout-minutes: 30
+    timeout-minutes: 35
     needs: checkout-repo-and-bump-version
     outputs:
       digest: ${{ steps.production.outputs.digest }}
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/download-release-artifacts
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          version: latest
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - id: production
         uses: ./.github/actions/build-docker-image-release
         with:
@@ -186,8 +206,6 @@ jobs:
           arch: arm
           version: ${{ env.NEW_VERSION }}
           artifact-name: docker-image-api-prod-arm
-          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
           push: 'true'
           dockerhub-repository: embernexus/api
       - uses: ./.github/actions/build-docker-image-release
@@ -195,8 +213,6 @@ jobs:
           target: development
           arch: arm
           artifact-name: docker-image-api-dev-arm
-          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
 
   build-docs-dist:
