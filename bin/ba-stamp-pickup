@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Polls BA Stamp for any GitHub release whose stamp has anchored but whose certificate and Merkle
+# proof haven't been attached to the release yet.
+#
+# For each release, looks for a `ba-stamp-<tag>.json` asset (written by the release pipeline when
+# it submits the release manifest's hash to BA Stamp). If present and its status is "submitted",
+# polls GET /stamps/{hash}; once anchored, downloads the forensic packet, extracts certificate.pdf
+# and proof.json from it (the verification README is not attached), and uploads both to the
+# release. Anything not ready yet is simply left for the next scheduled run. If the packet comes
+# back without one of those files, that's a real failure (not "not ready yet") and fails the run.
+#
+# Requires: bash, gh (authenticated via GITHUB_TOKEN), jq, curl, unzip.
+# Env: BASTAMP_API_KEY
+
+set -euo pipefail
+
+api_base="https://bastamp.com/api/v1"
+work_dir=$(mktemp -d)
+trap 'rm -rf "$work_dir"' EXIT
+
+: "${BASTAMP_API_KEY:?BASTAMP_API_KEY must be set}"
+
+tags=$(gh release list --limit 100 --json tagName,isDraft -q '.[] | select(.isDraft == false) | .tagName')
+
+for tag in $tags; do
+  echo "::group::$tag"
+
+  assets=$(gh release view "$tag" --json assets -q '.assets[].name')
+
+  if ! grep -qx "ba-stamp-$tag.json" <<<"$assets"; then
+    echo "no ba-stamp-$tag.json asset, skipping"
+    echo "::endgroup::"
+    continue
+  fi
+
+  if grep -qx "ba-stamp-certificate-$tag.pdf" <<<"$assets"; then
+    echo "certificate/proof already attached, skipping"
+    echo "::endgroup::"
+    continue
+  fi
+
+  request_file="$work_dir/ba-stamp-$tag.json"
+  gh release download "$tag" -p "ba-stamp-$tag.json" -O "$request_file" --clobber
+
+  status=$(jq -r '.status' "$request_file")
+  if [ "$status" != "submitted" ]; then
+    echo "request status is '$status', nothing to poll"
+    echo "::endgroup::"
+    continue
+  fi
+
+  content_hash=$(jq -r '.contentHash' "$request_file")
+
+  stamp_response=$(curl -sS -w '\n%{http_code}' "$api_base/stamps/$content_hash" \
+    -H "Authorization: Bearer $BASTAMP_API_KEY")
+  stamp_http_code=$(tail -n1 <<<"$stamp_response")
+  stamp_body=$(sed '$d' <<<"$stamp_response")
+
+  if [ "$stamp_http_code" != "200" ]; then
+    echo "::warning::failed to fetch stamp status for $tag (HTTP $stamp_http_code): $stamp_body"
+    echo "::endgroup::"
+    continue
+  fi
+
+  stamp_status=$(jq -r '.status' <<<"$stamp_body")
+  if [ "$stamp_status" != "anchored" ]; then
+    echo "stamp status is '$stamp_status', not anchored yet"
+    echo "::endgroup::"
+    continue
+  fi
+
+  packet_file="$work_dir/ba-stamp-forensic-packet-$tag.zip"
+  packet_http_code=$(curl -sS -w '%{http_code}' -o "$packet_file" "$api_base/stamps/$content_hash/forensic-packet" \
+    -H "Authorization: Bearer $BASTAMP_API_KEY")
+
+  if [ "$packet_http_code" != "200" ]; then
+    echo "::warning::failed to download forensic packet for $tag (HTTP $packet_http_code)"
+    echo "::endgroup::"
+    continue
+  fi
+
+  extract_dir="$work_dir/$tag"
+  mkdir -p "$extract_dir"
+  unzip -oq "$packet_file" -d "$extract_dir"
+
+  # The packet's contents are a BA Stamp API contract, not something a transient network/API hiccup should
+  # produce in a half-broken shape. If either file is missing, something is wrong with the packet itself
+  # (format change, truncated download, ...) and that must fail the run loudly rather than skip silently.
+  # README.txt (plain-language verification steps) is intentionally not attached - certificate.pdf and
+  # proof.json already cover what's needed.
+  [ -f "$extract_dir/certificate.pdf" ] || { echo "::error::certificate.pdf missing from forensic packet for $tag"; exit 1; }
+  [ -f "$extract_dir/proof.json" ] || { echo "::error::proof.json missing from forensic packet for $tag"; exit 1; }
+
+  certificate_file="$extract_dir/ba-stamp-certificate-$tag.pdf"
+  proof_file="$extract_dir/ba-stamp-proof-$tag.json"
+  mv "$extract_dir/certificate.pdf" "$certificate_file"
+  mv "$extract_dir/proof.json" "$proof_file"
+
+  gh release upload "$tag" "$certificate_file" "$proof_file"
+  echo "attached certificate and proof to $tag"
+  echo "::endgroup::"
+done

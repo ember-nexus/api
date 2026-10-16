@@ -480,6 +480,63 @@ jobs:
         run: |
           git push origin && git push --tags
 
+      # The tag now exists on the remote, so GitHub's auto-generated source archives are fetchable even though
+      # the release itself isn't published yet. Downloaded only to be hashed into the release manifest below -
+      # GitHub already attaches these archives to every release on its own, so they aren't re-uploaded here.
+      - name: Download GitHub source archives
+        run: |
+          repo="${{ github.repository }}"
+          curl -sSL -o /tmp/docker/source-code-${{ env.NEW_VERSION }}.zip \
+            "https://github.com/$repo/archive/refs/tags/${{ env.NEW_VERSION }}.zip"
+          curl -sSL -o /tmp/docker/source-code-${{ env.NEW_VERSION }}.tar.gz \
+            "https://github.com/$repo/archive/refs/tags/${{ env.NEW_VERSION }}.tar.gz"
+
+      - name: Build release manifest
+        run: |
+          ./bin/make-release-manifest \
+            -o /tmp/docker/release-manifest-${{ env.NEW_VERSION }}.intoto.json \
+            -t https://ember-nexus.dev/release-manifest/v1 \
+            -v ${{ env.NEW_VERSION }} \
+            -r https://github.com/${{ github.repository }} \
+            -c $(git rev-parse HEAD) \
+            /tmp/docker/*.tar.gz /tmp/docker/*.json /tmp/docker/*.zip CHANGELOG.md
+
+      # Optional and non-fatal by design: BA Stamp may be down, out of credits, or otherwise unavailable, and
+      # that must never block a release. On success this writes ba-stamp-<version>.json (picked up later by the
+      # scheduled ci-ba-stamp-pickup workflow, which attaches the forensic packet once the stamp has anchored).
+      - name: Submit release manifest hash to BA Stamp
+        continue-on-error: true
+        env:
+          BASTAMP_API_KEY: ${{ secrets.BASTAMP_API_KEY }}
+        run: |
+          set +e
+          manifest="/tmp/docker/release-manifest-${{ env.NEW_VERSION }}.intoto.json"
+          request_file="/tmp/docker/ba-stamp-${{ env.NEW_VERSION }}.json"
+          content_hash="0x$(sha256sum "$manifest" | cut -d' ' -f1)"
+
+          payload=$(jq -n \
+            --arg hash "$content_hash" \
+            --arg name "release-manifest-${{ env.NEW_VERSION }}.intoto.json" \
+            '{contentHash: $hash, fileName: $name, mimeType: "application/vnd.in-toto+json"}')
+
+          response=$(curl -sS -w '\n%{http_code}' https://bastamp.com/api/v1/stamps \
+            -H "Authorization: Bearer $BASTAMP_API_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Idempotency-Key: release-${{ env.NEW_VERSION }}" \
+            -d "$payload")
+          http_code=$(tail -n1 <<<"$response")
+          body=$(sed '$d' <<<"$response")
+
+          if [ "$http_code" = "200" ] || [ "$http_code" = "201" ]; then
+            jq --arg hash "$content_hash" '{status: "submitted", contentHash: $hash, stamp: .stamp}' \
+              <<<"$body" > "$request_file"
+            echo "BA Stamp submission succeeded"
+          else
+            echo "::warning::BA Stamp submission failed (HTTP $http_code): $body"
+            jq -n --arg hash "$content_hash" --arg code "$http_code" --arg body "$body" \
+              '{status: "failed", contentHash: $hash, httpCode: $code, error: $body}' > "$request_file"
+          fi
+
       - name: Read version changelog
         id: get-changelog
         uses: superfaceai/release-changelog-action@v3
@@ -501,3 +558,5 @@ jobs:
             /tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-amd.tar.gz
             /tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-arm.tar.gz
             /tmp/docker/openapi-ember-nexus-api-${{ env.NEW_VERSION }}.json
+            /tmp/docker/release-manifest-${{ env.NEW_VERSION }}.intoto.json
+            /tmp/docker/ba-stamp-${{ env.NEW_VERSION }}.json
