@@ -36,8 +36,8 @@ services:
       - 7474
       - 7687
     volumes:
-      - ../volumes/neo4j/data:/data
-      - ../volumes/neo4j/logs:/logs
+      - ./volumes/neo4j/data:/data
+      - ./volumes/neo4j/logs:/logs
     environment:
       - NEO4J_AUTH=neo4j/password
 
@@ -47,7 +47,7 @@ services:
     expose:
       - 27017
     volumes:
-      - ../volumes/mongodb:/data/db
+      - ./volumes/mongodb:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongodb
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -60,7 +60,7 @@ services:
     expose:
       - 9200
     volumes:
-      - ../volumes/elasticsearch:/usr/share/elasticsearch/data
+      - ./volumes/elasticsearch:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -71,7 +71,7 @@ services:
     expose:
       - 6379
     volumes:
-      - ../volumes/redis:/data
+      - ./volumes/redis:/data
     command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
 
   rabbitmq:
@@ -81,7 +81,7 @@ services:
       - 5672
       - 15672
     volumes:
-      - ../volumes/rabbitmq:/var/lib/rabbitmq
+      - ./volumes/rabbitmq:/var/lib/rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=user
       - RABBITMQ_DEFAULT_PASS=password
@@ -93,7 +93,7 @@ services:
       - 9000
       - 9001
     volumes:
-      - ../volumes/minio:/data
+      - ./volumes/minio:/data
     environment:
       - MINIO_ROOT_USER=ROOTNAME
       - MINIO_ROOT_PASSWORD=CHANGEME123
@@ -135,7 +135,7 @@ services:
       - '443:443'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
-      - '../volumes/traefik/acme:/acme'
+      - './volumes/traefik/acme:/acme'
     networks:
       - traefik
     labels:

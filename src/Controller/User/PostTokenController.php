@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\User;
 
+use App\Attribute\EndpointWithoutAuthentication;
 use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
@@ -34,6 +35,7 @@ class PostTokenController extends AbstractController
         name: 'post-token',
         methods: ['POST']
     )]
+    #[EndpointWithoutAuthentication]
     public function postToken(Request $request): Response
     {
         $body = \Safe\json_decode($this->requestContentService->getContent($request), true);

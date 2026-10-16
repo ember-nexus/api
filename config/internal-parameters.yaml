@@ -1,6 +1,8 @@
 parameters:
   _dev_version: 'dev'
   _false: false
+  _true: true
   version: '%env(default:_dev_version:VERSION)%'
   anonymousUserUUID: '%env(string:ANONYMOUS_USER_UUID)%'
   isCronDisabled: '%env(bool:default:_false:DISABLE_CRON)%'
+  isAnonymousUserReadonly: '%env(bool:default:_true:ANONYMOUS_USER_READONLY)%'

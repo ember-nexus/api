@@ -29,10 +29,10 @@ jobs:
     needs: pickup
     if: always()
     steps:
-      - uses: Mattraks/delete-workflow-runs@v2
+      - uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          workflow: ci-ba-stamp-pickup.yml
+          delete_workflow_pattern: 'BA Stamp pickup'
           retain_days: 7
           keep_minimum_runs: 56

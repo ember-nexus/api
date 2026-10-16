@@ -54,6 +54,46 @@ services:
       # the repository is deliberately not mounted: the production image is tested as it is shipped
       - ./well-known-security.txt:/well-known-security.txt
 
+  # dedicated instance for the explicit ANONYMOUS_USER_READONLY=true end-to-end test scenario (as opposed to the
+  # unset default fallback tested against api-prod above); also exercises the "TRUE" casing of the boolean parsing
+  api-anonymous-readonly-true:
+    container_name: api-anonymous-readonly-true
+    image: api:prod
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
+    expose:
+      - "80"
+    environment:
+      <<: *api-environment
+      ANONYMOUS_USER_READONLY: 'TRUE'
+    volumes:
+      - ./well-known-security.txt:/well-known-security.txt
+
+  # dedicated instance for the explicit ANONYMOUS_USER_READONLY=false end-to-end test scenario, i.e. anonymous
+  # write access restored; also exercises the "false" casing of the boolean parsing
+  api-anonymous-readonly-false:
+    container_name: api-anonymous-readonly-false
+    image: api:prod
+    depends_on:
+      - neo4j
+      - mongodb
+      - elasticsearch
+      - redis
+      - rabbitmq
+      - minio
+    expose:
+      - "80"
+    environment:
+      <<: *api-environment
+      ANONYMOUS_USER_READONLY: 'false'
+    volumes:
+      - ./well-known-security.txt:/well-known-security.txt
+
   # forwards api-prod's full container log (stdout/stderr - its audit channel, but also e.g. the webserver's own
   # HTTP access log) into a file on a dedicated volume, so end-to-end tests (running inside api-dev) can read it,
   # without giving api-dev itself access to the docker socket

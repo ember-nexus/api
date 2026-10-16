@@ -107,7 +107,10 @@ jobs:
           find ./tests/Recordings/api-endpoints -type f -exec sed -i "s/$version/$newVersion/g" {} \;
           find ./tests/Recordings/commands/assets -type f -exec sed -i "s/$version/$newVersion/g" {} \;
 
-          echo "Regenerate docs/src/data/swagger.json so it reflects the bumped recordings"
+          echo "Update the OpenAPI spec's own info.version fragment (not a recording, so the sed calls above don't reach it)"
+          jq --arg newVersion "$newVersion" '.info.version = $newVersion' docs/src/data/swagger/root.json | sponge docs/src/data/swagger/root.json
+
+          echo "Regenerate docs/src/data/swagger.json so it reflects the bumped recordings and info.version"
           node docs/scripts/generate-swagger.mjs
 
       - name: Update changelog unreleased section with new version
@@ -491,10 +494,15 @@ jobs:
           curl -sSL -o /tmp/docker/source-code-${{ env.NEW_VERSION }}.tar.gz \
             "https://github.com/$repo/archive/refs/tags/${{ env.NEW_VERSION }}.tar.gz"
 
+      # Built from github.repository rather than hardcoded, so it stays correct if the repo is ever renamed or
+      # transferred: "owner/repo" (e.g. "ember-nexus/api") becomes "owner-repo" (e.g. "ember-nexus-api").
+      - name: Compute repository slug for asset filenames
+        run: echo "REPO_SLUG=$(echo '${{ github.repository }}' | tr '/' '-')" >> "$GITHUB_ENV"
+
       - name: Build release manifest
         run: |
           ./bin/make-release-manifest \
-            -o /tmp/docker/release-manifest-${{ env.NEW_VERSION }}.intoto.json \
+            -o /tmp/docker/release-manifest-${{ env.REPO_SLUG }}-${{ env.NEW_VERSION }}.in-toto.json \
             -t https://ember-nexus.dev/release-manifest/v1 \
             -v ${{ env.NEW_VERSION }} \
             -r https://github.com/${{ github.repository }} \
@@ -510,13 +518,13 @@ jobs:
           BASTAMP_API_KEY: ${{ secrets.BASTAMP_API_KEY }}
         run: |
           set +e
-          manifest="/tmp/docker/release-manifest-${{ env.NEW_VERSION }}.intoto.json"
+          manifest="/tmp/docker/release-manifest-${{ env.REPO_SLUG }}-${{ env.NEW_VERSION }}.in-toto.json"
           request_file="/tmp/docker/ba-stamp-${{ env.NEW_VERSION }}.json"
           content_hash="0x$(sha256sum "$manifest" | cut -d' ' -f1)"
 
           payload=$(jq -n \
             --arg hash "$content_hash" \
-            --arg name "release-manifest-${{ env.NEW_VERSION }}.intoto.json" \
+            --arg name "release-manifest-${{ env.REPO_SLUG }}-${{ env.NEW_VERSION }}.in-toto.json" \
             '{contentHash: $hash, fileName: $name, mimeType: "application/vnd.in-toto+json"}')
 
           response=$(curl -sS -w '\n%{http_code}' https://bastamp.com/api/v1/stamps \
@@ -558,5 +566,5 @@ jobs:
             /tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-amd.tar.gz
             /tmp/docker/docker-image-ember-nexus-api-docs-${{ env.NEW_VERSION }}-arm.tar.gz
             /tmp/docker/openapi-ember-nexus-api-${{ env.NEW_VERSION }}.json
-            /tmp/docker/release-manifest-${{ env.NEW_VERSION }}.intoto.json
+            /tmp/docker/release-manifest-${{ env.REPO_SLUG }}-${{ env.NEW_VERSION }}.in-toto.json
             /tmp/docker/ba-stamp-${{ env.NEW_VERSION }}.json

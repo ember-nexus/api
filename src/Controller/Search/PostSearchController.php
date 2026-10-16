@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Search;
 
+use App\Attribute\EndpointCanBeUsedByReadonlyAnonymousUser;
 use App\EventSystem\SearchStep\Event\SearchStepEvent;
 use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
@@ -136,6 +137,7 @@ class PostSearchController extends AbstractController
         name: 'post-search',
         methods: ['POST']
     )]
+    #[EndpointCanBeUsedByReadonlyAnonymousUser]
     public function postSearch(Request $request): Response
     {
         $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
