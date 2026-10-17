@@ -13,6 +13,10 @@ A refactoring of the configuration process is planned in [issue #463](https://gi
 Ember Nexus specific variables:
 
 - `ANONYMOUS_USER_UUID`: The UUID of a user, which will be used if no token is supplied.
+- `ANONYMOUS_USER_READONLY`: Set to `false` to allow the anonymous user to also use write endpoints (`POST`,
+`PUT`, `PATCH`, `DELETE`, ...). Defaults to `true`, i.e. anonymous requests are restricted to read-only (`GET`,
+`HEAD`) endpoints, plus a handful of endpoints that do not require authentication by design, such as
+[`POST /token`](/api/post-token), [`POST /register`](/api/post-register) and [`POST /search`](/api/post-search).
 - `CYPHER_AUTH`: Connection string for accessing the OpenCypher database, i.e. Neo4j.
 - `MONGO_AUTH`: Connection string for accessing the Mongo database.
 - `ELASTIC_AUTH`: Connection string for accessing the Elasticsearch database.
@@ -49,11 +53,19 @@ on an instance to opt it out, e.g. to run these commands on a different schedule
 Ember Nexus stores uploaded files in two separate S3-compatible buckets: `file.S3UploadBucket` holds chunks of
 resumable uploads still in progress, and `file.S3StorageBucket` holds files that have been fully attached to an
 element - see [Chunk storage](/reference/upload#chunk-storage) for how a file moves from one
-to the other. Because nothing in the upload bucket is meant to outlive its upload, and Ember Nexus already cleans up
-expired uploads itself (see [Expiry](/reference/upload#expiry) in the upload reference and the
-[background tasks](#background-tasks) above), operators can safely add a short S3 lifecycle/expiration policy to the
-upload bucket as an extra backstop. The storage bucket holds permanently retained files and should not have such a
-policy applied to it.
+to the other. Ember Nexus already cleans up expired uploads itself (see [Expiry](/reference/upload#expiry) and the
+[background tasks](#background-tasks) above), but only while those tasks are actually running. As a backstop,
+operators should also configure an object lifecycle policy directly on the upload bucket: expire objects after
+roughly 24-48 hours, and abort incomplete multipart uploads after a similarly short period. Ember Nexus neither
+creates nor manages this policy - it must be set up on the bucket itself, outside of this repository:
+
+- [AWS S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/intro-lifecycle-rules.html): covers both object
+  expiration and `AbortIncompleteMultipartUpload`.
+- [SeaweedFS](https://github.com/seaweedfs/seaweedfs/wiki/S3-Lifecycle): supports lifecycle expiration rules.
+- [VersityGW](https://github.com/versity/versitygw/wiki/S3-API-reference#recognized-but-not-implemented): lifecycle
+  configuration is recognized but not implemented - keep the background tasks running instead.
+
+The storage bucket holds permanently retained files and should not have such a policy applied to it.
 
 Ember Nexus does not create these buckets itself - they must already exist on the S3-compatible storage before the
 API starts, named exactly as configured (`api-storage` / `api-upload` by default). The

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\User;
 
+use App\Attribute\EndpointWithoutAuthentication;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
@@ -48,6 +49,7 @@ class PostRegisterController extends AbstractController
         name: 'post-register',
         methods: ['POST']
     )]
+    #[EndpointWithoutAuthentication]
     public function postRegister(Request $request): Response
     {
         if (!$this->emberNexusConfiguration->isRegisterEnabled()) {

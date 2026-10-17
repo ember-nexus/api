@@ -3,7 +3,7 @@
 # Writes an in-toto Statement v1 listing release files and their digests.
 #
 # Usage: make-release-manifest [-o OUT] [-t PREDICATE_TYPE] [-v VERSION] [-r REPO_URL] [-c COMMIT] FILE...
-#   -o  output path            (default: release-manifest.intoto.json)
+#   -o  output path            (default: release-manifest.in-toto.json)
 #   -t  predicateType URI      (default: https://ember-nexus.dev/release-manifest/v1)
 #   -v  release version        (optional, recorded in the predicate)
 #   -r  source repository URL  (optional, recorded in the predicate)
@@ -15,7 +15,7 @@
 
 set -euo pipefail
 
-out="release-manifest.intoto.json"
+out="release-manifest.in-toto.json"
 ptype="https://ember-nexus.dev/release-manifest/v1"
 version="" repo="" commit=""
 
