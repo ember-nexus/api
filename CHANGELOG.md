@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   endpoints that do not require authentication by design (`POST /token`, `POST /register`, `POST /search`); set
   the new `ANONYMOUS_USER_READONLY` environment variable to `false` to restore full anonymous write access, closes
   #231.
+- Update PHP from 8.5.11 to 8.5.12, closes #526.
+- Update PHP dependencies, related to #526.
 
 ### Fixed
 - Fix the published `docker-compose.yml` / `docker-compose.traefik.yml` (in the docs and on the installation page)
