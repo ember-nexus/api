@@ -6,24 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.1.34 - 2026-10-21
 ### Added
 - Document recommended S3 lifecycle policy for the upload bucket, as a backstop for `cron:delete-expired-uploads`,
-  closes #480.
+  closes [#480].
 
 ### Changed
 - The anonymous user is now restricted to read-only (`GET`/`HEAD`) endpoints by default, plus a handful of
   endpoints that do not require authentication by design (`POST /token`, `POST /register`, `POST /search`); set
   the new `ANONYMOUS_USER_READONLY` environment variable to `false` to restore full anonymous write access, closes
-  #231.
-- Update PHP from 8.5.11 to 8.5.12, closes #526.
-- Update PHP dependencies, related to #526.
+  [#231].
+- Update PHP from 8.5.11 to 8.5.12, closes [#526].
+- Update PHP dependencies, related to [#526].
 
 ### Fixed
 - Fix the published `docker-compose.yml` / `docker-compose.traefik.yml` (in the docs and on the installation page)
-  using `../volumes/...` bind mounts instead of `./volumes/...`, closes #521.
+  using `../volumes/...` bind mounts instead of `./volumes/...`, closes [#521].
 - Fix the release manifest's filename, which misspelled "in-toto" as "intoto" and omitted the repository name.
 - The OpenAPI spec's `info.version` was a static value in its `root.json` fragment, never updated by a release;
-  the release workflow now bumps it alongside the other version references, closes #520.
+  the release workflow now bumps it alongside the other version references, closes [#520].
 
 ## 0.1.33 - 2026-10-16
 ### Added
