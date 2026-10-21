@@ -13,7 +13,7 @@
 # verbatim from docker-library/php, unmodified.
 
 ARG ALPINE_VERSION='3.23'
-ARG PHP_VERSION='8.5.11'
+ARG PHP_VERSION='8.5.12'
 # 1.12.7 is FrankenPHP's latest stable release as of 2026-10; bumped from 1.12.1 to pick up several
 # crash/stability fixes landed in 1.12.2-1.12.7 (fatal-shutdown prevention, an HTTP/2 crash-on-read-after-
 # finish fix, a path-splitting security fix, and output-handling-after-fastcgi_finish_request() fixes) --
@@ -80,8 +80,8 @@ ENV PHPIZE_DEPS="\
     PHP_VERSION="${PHP_VERSION}" \
     PHP_URL="https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz" \
     PHP_ASC_URL="https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz.asc" \
-# pinned to PHP_VERSION 8.5.11; bump together when bumping the ARG above
-    PHP_SHA256="d9be75c08e8c316f4c8f4194d8fbe1750a15f6a6d9d4e3fe72082abeeb800360"
+# pinned to PHP_VERSION 8.5.12; bump together when bumping the ARG above
+    PHP_SHA256="08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
 
 # persistent / runtime deps
 RUN apk add --no-cache \
