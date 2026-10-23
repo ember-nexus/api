@@ -74,8 +74,37 @@ class AccessChecker
         if (AccessType::READ === $accessType) {
             return $this->hasReadAccessToRelation($userId, $elementId);
         }
+        if (AccessType::UPDATE === $accessType || AccessType::DELETE === $accessType) {
+            return $this->hasWriteAccessToRelation($userId, $elementId, $accessType);
+        }
 
         return $this->hasGeneralAccessToRelation($userId, $elementId, $accessType);
+    }
+
+    /**
+     * Changing or deleting a relation only modifies its start node, therefore the user needs UPDATE/DELETE access to
+     * the start node, but only READ access to the end node. This mirrors creating a relation, which requires CREATE
+     * access to the start node and READ access to the end node.
+     */
+    public function hasWriteAccessToRelation(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            'MATCH (start)-[element {id: $elementId}]->(end) RETURN start.id, end.id',
+            [
+                'elementId' => $elementId->toString(),
+            ]
+        ));
+        if (1 !== $res->count()) {
+            return false;
+        }
+        $rawStartId = $res->first()->get('start.id');
+        $rawEndId = $res->first()->get('end.id');
+        if (!is_string($rawStartId) || !is_string($rawEndId)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return properties start.id and end.id as string, not %s and %s.', get_debug_type($rawStartId), get_debug_type($rawEndId))); // @codeCoverageIgnore
+        }
+
+        return $this->hasGeneralAccessToNode($userId, UuidV4::fromString($rawStartId), $accessType)
+            && $this->hasReadAccessToNode($userId, UuidV4::fromString($rawEndId));
     }
 
     /**
@@ -458,6 +487,35 @@ class AccessChecker
         return true;
     }
 
+    /**
+     * Matching a relation only by its id scans all relations, while the start and end node of an element which was
+     * just read or written are known: anchoring the match on them only expands the relations of those two nodes.
+     */
+    private function getRelationMatchClause(?UuidInterface $startId, ?UuidInterface $endId): string
+    {
+        return sprintf(
+            'MATCH (start%s)-[element {id: $elementId}]->(end%s)',
+            null === $startId ? '' : ' {id: $startId}',
+            null === $endId ? '' : ' {id: $endId}',
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getRelationMatchParameters(UuidInterface $elementId, ?UuidInterface $startId, ?UuidInterface $endId): array
+    {
+        $parameters = ['elementId' => $elementId->toString()];
+        if (null !== $startId) {
+            $parameters['startId'] = $startId->toString();
+        }
+        if (null !== $endId) {
+            $parameters['endId'] = $endId->toString();
+        }
+
+        return $parameters;
+    }
+
     public function getElementType(UuidInterface $elementId): ?ElementType
     {
         $cypherClient = $this->cypherEntityManager->getClient();
@@ -561,10 +619,10 @@ class AccessChecker
      *
      * @return array<UuidInterface>
      */
-    public function getDirectGroupsWithAccessToRelation(UuidInterface $elementId, AccessType $accessType): array
+    public function getDirectGroupsWithAccessToRelation(UuidInterface $elementId, AccessType $accessType, ?UuidInterface $startId = null, ?UuidInterface $endId = null): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            "MATCH (start)-[element {id: \$elementId}]->(end)\n".
+            $this->getRelationMatchClause($startId, $endId)."\n".
             "OPTIONAL MATCH (startGroup:Group)-[startRelations:OWNS|HAS_SEARCH_ACCESS*1..]->(start)\n".
             "OPTIONAL MATCH (endGroup:Group)-[endRelations:OWNS|HAS_READ_ACCESS|HAS_SEARCH_ACCESS*1..]->(end)\n".
             "WHERE\n".
@@ -651,9 +709,7 @@ class AccessChecker
             "    endRelations IS NOT NULL\n".
             "  )\n".
             'RETURN DISTINCT startGroup.id AS group;',
-            [
-                'elementId' => $elementId->toString(),
-            ]
+            $this->getRelationMatchParameters($elementId, $startId, $endId)
         ));
         $groups = [];
         foreach ($res as $row) {
@@ -767,10 +823,10 @@ class AccessChecker
      *
      * @return array<UuidInterface>
      */
-    public function getDirectUsersWithAccessToRelation(UuidInterface $elementId, AccessType $accessType): array
+    public function getDirectUsersWithAccessToRelation(UuidInterface $elementId, AccessType $accessType, ?UuidInterface $startId = null, ?UuidInterface $endId = null): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            "MATCH (start)-[element {id: \$elementId}]->(end)\n".
+            $this->getRelationMatchClause($startId, $endId)."\n".
             "OPTIONAL MATCH (startUser:User)-[startGroups:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_SEARCH_ACCESS*1..]->(start)\n".
             "OPTIONAL MATCH (endUser:User)-[endGroups:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_READ_ACCESS|HAS_SEARCH_ACCESS*1..]->(end)\n".
             "WHERE\n".
@@ -893,9 +949,7 @@ class AccessChecker
             "    endRelations IS NOT NULL\n".
             "  )\n".
             'RETURN DISTINCT startUser.id AS user;',
-            [
-                'elementId' => $elementId->toString(),
-            ]
+            $this->getRelationMatchParameters($elementId, $startId, $endId)
         ));
         $users = [];
         foreach ($res as $row) {

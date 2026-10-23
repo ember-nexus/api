@@ -10,6 +10,10 @@ swaggerUrl: /{uuid}
 Deletes the referenced element, as well as its file (if it has one) and relations directly attached to the element (if
 it is a node).
 
+To delete a relation the current user needs delete access to its start node and read access to its end node, see
+[Access to relations](/reference/access-model#access-to-relations). To delete a node, delete access to the node itself is
+sufficient; its relations are removed with it, regardless of the user's access to them.
+
 <Note>
     Any resumable upload still in progress that targets this element (started via [`POST /<uuid>/file`](/api/post-element-file) or
     [`PUT /<uuid>/file`](/api/put-element-file)) is aborted and its uploaded chunks are discarded as part of the deletion. There is

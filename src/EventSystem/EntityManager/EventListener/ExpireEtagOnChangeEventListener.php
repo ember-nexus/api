@@ -10,6 +10,8 @@ use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\RedisKeyFactory;
+use App\Service\AppStateService;
+use App\Type\AppStateType;
 use App\Type\RedisKey;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
@@ -40,6 +42,7 @@ class ExpireEtagOnChangeEventListener
         private CypherEntityManager $cypherEntityManager,
         private RedisKeyFactory $redisKeyTypeFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
+        private AppStateService $appStateService,
     ) {
     }
 
@@ -85,6 +88,11 @@ class ExpireEtagOnChangeEventListener
      */
     private function handleEvent(ElementPostCreateEvent|ElementPostMergeEvent|ElementPreDeleteEvent $event): void
     {
+        if (AppStateType::LOADING_BACKUP === $this->appStateService->getAppState()) {
+            // loading a backup requires an empty database and flushes Redis once it is done, so there is no cached ETag
+            // which could become stale; looking up each element's neighbours instead is expensive for bulk imports
+            return;
+        }
         $elementId = $event->getElement()->getId();
         if (null === $elementId) {
             throw new Exception('Unable to expire etag for element with no identifier.');

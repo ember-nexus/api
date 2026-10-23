@@ -5,6 +5,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Update the reference dataset from 0.0.36 to 0.0.37, which adds the scenario `security.relationAccessMatrix`, related to
+  #230.
+- `backup:load` is considerably faster for bigger backups: ETag cache invalidation is skipped while a backup is loaded
+  (the cache is flushed at the end anyway), relations are no longer looked up again in the after-backup tasks, and
+  the search access of relations is calculated starting from their start and end nodes. Loading a backup with about
+  8.900 relations went from 9m37s to 3m47s.
+- `backup:load` no longer aborts when a single relation file is broken (e.g. invalid JSON or an invalid id); the error is
+  logged and printed, the relation is skipped and the import continues.
+- The end-to-end tests which need a separate API instance (`anonymous-readonly-true`, `anonymous-readonly-false`) are
+  now excluded by default in `tests/phpunit.end-to-end.xml.dist`, like the `command` group.
+
+### Fixed
+- Updating (`PATCH`, `PUT`) or deleting a relation required update/delete access to both its start and its end node.
+  It now requires update/delete access to the start node and only read access to the end node, which mirrors creating
+  a relation, closes [#230].
+
+### Added
+- End-to-end tests covering the access to relations for all combinations of `OWNS` and `HAS_x_ACCESS` on the start and
+  end node (directly, through a path and through a group), based on the new reference dataset scenario
+  `security.relationAccessMatrix`, related to [#230].
+- Document the access requirements of relations per operation in the access model.
+- New test suite `tests/MetaTests` (`composer test:meta`) for tests which inspect the repository itself and need no
+  running services, and a CI job `Meta Test` which has to pass before the unit test dependent jobs (end-to-end tests,
+  example generation, server tests) start. It guards the generated relation access matrix tests (classes, test methods,
+  data providers and tested pairs) and contains the check of the recordings' status codes, which was moved there from
+  the end-to-end tests.
 
 ## 0.1.34 - 2026-10-21
 ### Added

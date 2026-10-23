@@ -15,6 +15,7 @@
   ],
   "relationTypes": [
     "CREATED",
+    "HAS_CREATE_ACCESS",
     "HAS_DELETE_ACCESS",
     "HAS_READ_ACCESS",
     "HAS_SEARCH_ACCESS",

@@ -140,8 +140,22 @@ In the following example, the user has `OWNS`-access to both the start and end n
   `}</script>
 </g6-graph>
 
-Accessing a relation requires the same access operation to be granted on both its start node and its end node separately.
-Read access to a relation, for instance, requires read access to both the start and end nodes.
+Which access a relation requires depends on the operation. Both nodes are checked separately, and `OWNS` always counts
+as the required access:
+
+| Operation | Start node requires | End node requires |
+|---|---|---|
+| Read the relation (`GET`) | read access | read access |
+| Create a relation (`POST /`) | create access | read access |
+| Update the relation (`PATCH`, `PUT`) | update access | read access |
+| Delete the relation (`DELETE`) | delete access | read access |
+
+Changing or removing a relation only changes the start node's outgoing relations, which is why the end node only has to
+be readable, the same as when the relation is created. `HAS_x_ACCESS` never implies read access: a user who only has
+`HAS_UPDATE_ACCESS` to the end node can not update the relation.
+
+Deleting a node only requires delete access to the node itself. Relations attached to the node are removed together with
+it, regardless of the user's access to them.
 
 The access paths for both the start and end nodes do not have to share any elements. They can, but they are not required to.
 

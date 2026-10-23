@@ -13,6 +13,9 @@ Properties with the value `null` will be deleted.
 
 Already existing properties whose keys are not mentioned in the `PATCH`-request are kept as they are.
 
+**Note**: To change a relation the current user needs update access to its start node and read access to its end node, see
+[Access to relations](/reference/access-model#access-to-relations).
+
 **Note**: A handful of properties are reserved and can not be set through this request - see
 [Reserved properties](/reference/security#reserved-properties).
 
