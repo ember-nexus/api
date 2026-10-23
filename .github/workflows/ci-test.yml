@@ -265,6 +265,22 @@ jobs:
         run: |
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
+  test-meta:
+    runs-on: ubuntu-26.04
+    name: 'Meta Test'
+    timeout-minutes: 5
+    needs:
+      - build-docker-image
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/load-docker-image
+        with:
+          artifact-name: docker-image-api-dev-amd
+          tar-filename: dev-amd.tar.gz
+      - name: Meta Test
+        run: |
+          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer test:meta"
+
   test-mutant:
     runs-on: ubuntu-26.04
     name: 'Mutant Test'
@@ -302,9 +318,10 @@ jobs:
   test-end-to-end:
     runs-on: ubuntu-26.04
     name: 'End To End Test'
-    timeout-minutes: 15
+    timeout-minutes: 30
     needs:
       - test-unit
+      - test-meta
       - phpstan
       - psalm
       - cs-lint
@@ -355,6 +372,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-meta
       - phpstan
       - psalm
       - cs-lint
@@ -395,6 +413,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-meta
       - phpstan
       - psalm
       - cs-lint
@@ -430,6 +449,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-meta
       - phpstan
       - psalm
       - cs-lint

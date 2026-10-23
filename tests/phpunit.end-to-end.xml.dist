@@ -17,6 +17,8 @@
   <groups>
     <exclude>
       <group>command</group>
+      <group>anonymous-readonly-true</group>
+      <group>anonymous-readonly-false</group>
     </exclude>
   </groups>
   <source>

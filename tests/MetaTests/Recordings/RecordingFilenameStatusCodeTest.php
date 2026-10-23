@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\EndToEndTests\Meta;
+namespace App\Tests\MetaTests\Recordings;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -26,9 +26,8 @@ use function Safe\scandir;
  * and a successful file download's body is just the raw file bytes. There is nothing to check the
  * filename against in either case.
  *
- * This is not an end-to-end test in the usual sense (it makes no HTTP request, it inspects files
- * already produced by the example generation / end-to-end tests), but it lives alongside them
- * because it verifies their output and is meant to run in the same suite.
+ * This is a meta test: it makes no HTTP request and needs no running services, it only inspects the recordings
+ * which are committed to the repository.
  *
  * `*-response-header.txt` recordings are deliberately NOT covered here: by design (see
  * BaseRequestTestCase::getHeadersFromRequest()) they only ever capture header key/value pairs,

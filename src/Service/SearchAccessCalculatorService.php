@@ -33,8 +33,8 @@ class SearchAccessCalculatorService
         }
 
         if ($element instanceof RelationElementInterface) {
-            $groups = $this->accessChecker->getDirectGroupsWithAccessToRelation($elementId, AccessType::SEARCH);
-            $users = $this->accessChecker->getDirectUsersWithAccessToRelation($elementId, AccessType::SEARCH);
+            $groups = $this->accessChecker->getDirectGroupsWithAccessToRelation($elementId, AccessType::SEARCH, $element->getStart(), $element->getEnd());
+            $users = $this->accessChecker->getDirectUsersWithAccessToRelation($elementId, AccessType::SEARCH, $element->getStart(), $element->getEnd());
         } else {
             $groups = $this->accessChecker->getDirectGroupsWithAccessToNode($elementId, AccessType::SEARCH);
             $users = $this->accessChecker->getDirectUsersWithAccessToNode($elementId, AccessType::SEARCH);

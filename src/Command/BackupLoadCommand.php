@@ -19,6 +19,7 @@ use App\Service\RawToElementService;
 use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
 use App\Type\AppStateType;
+use App\Type\RelationElement;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
@@ -155,6 +156,7 @@ class BackupLoadCommand extends Command
         $relationFiles = $this->backupStorage->listContents($this->backupName.'/relation/', true);
         $totalCount = 0;
         $pageCount = 0;
+        $skippedCount = 0;
         foreach ($relationFiles as $relationFile) {
             if (!$relationFile->isFile()) {
                 continue;
@@ -162,10 +164,22 @@ class BackupLoadCommand extends Command
             if (!str_ends_with($relationFile->path(), '.json')) {
                 continue;
             }
-            $data = \Safe\json_decode($this->backupStorage->read($relationFile->path()), true);
-            $relationElement = $this->rawToElementService->rawToElement($data, true);
-            unset($data);
-            $this->elementManager->create($relationElement);
+            try {
+                $data = \Safe\json_decode($this->backupStorage->read($relationFile->path()), true);
+                $relationElement = $this->rawToElementService->rawToElement($data, true);
+                unset($data);
+                $this->elementManager->create($relationElement);
+            } catch (Throwable $e) {
+                // one broken relation file, e.g. invalid JSON or an invalid id, must not abort the whole restore
+                ++$skippedCount;
+                $this->reportFileError(sprintf(
+                    'Unable to load relation from %s; skipping relation: %s: %s',
+                    $relationFile->path(),
+                    $e::class,
+                    $e->getMessage()
+                ));
+                continue;
+            }
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {
                 $this->elementManager->flush();
@@ -179,8 +193,9 @@ class BackupLoadCommand extends Command
         $progressBar?->clear();
         $totalCount += $pageCount;
         $this->io->stopSection(sprintf(
-            'Loaded <info>%d</info> relations.',
-            $totalCount
+            'Loaded <info>%d</info> relations%s.',
+            $totalCount,
+            0 === $skippedCount ? '' : sprintf(', skipped <error>%d</error> broken relation files', $skippedCount)
         ));
     }
 
@@ -386,7 +401,7 @@ class BackupLoadCommand extends Command
         $endReached = false;
         while (!$endReached) {
             $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-                'MATCH ()-[r]->() RETURN r.id ORDER BY r.id SKIP $skip LIMIT $limit;',
+                'MATCH (startNode)-[r]->(endNode) RETURN r.id AS id, type(r) AS type, startNode.id AS startId, endNode.id AS endId ORDER BY r.id SKIP $skip LIMIT $limit;',
                 [
                     'skip' => $page * $pageSize,
                     'limit' => $pageSize,
@@ -396,16 +411,21 @@ class BackupLoadCommand extends Command
                 $endReached = true;
             }
             foreach ($res as $row) {
-                $rawId = $row->get('r.id');
-                if (!is_string($rawId)) {
-                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+                $rawId = $row->get('id');
+                $rawType = $row->get('type');
+                $rawStartId = $row->get('startId');
+                $rawEndId = $row->get('endId');
+                if (!is_string($rawId) || !is_string($rawType) || !is_string($rawStartId) || !is_string($rawEndId)) {
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Expected cypher response to return the relation properties id, type, startId and endId as string.'); // @codeCoverageIgnore
                 }
-                $id = UuidV4::fromString($rawId);
-                $element = $this->elementManager->getRelation($id);
-                if ($element) {
-                    $event = new ElementUpdateAfterBackupLoadEvent($element);
-                    $this->eventDispatcher->dispatch($event);
-                }
+                // the listeners of this event only need the relation's identity; fetching the full element would look
+                // up the relation by its id again, which scans all relations
+                $element = (new RelationElement())
+                    ->setId(UuidV4::fromString($rawId))
+                    ->setType($rawType)
+                    ->setStart(UuidV4::fromString($rawStartId))
+                    ->setEnd(UuidV4::fromString($rawEndId));
+                $this->eventDispatcher->dispatch(new ElementUpdateAfterBackupLoadEvent($element));
             }
             $this->elasticEntityManager->flush();
             ++$page;

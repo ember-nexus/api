@@ -15,9 +15,11 @@ use App\Service\FileSizeLimitService;
 use App\Service\RawToElementService;
 use App\Service\S3Service;
 use App\Type\NodeElement;
+use App\Type\RelationElement;
 use App\Type\S3\UploadFileOperation;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
+use InvalidArgumentException;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
@@ -62,6 +64,9 @@ class BackupLoadCommandTest extends TestCase
     /** @var string[] ids of elements for which the upload throws */
     private array $failingIds = [];
 
+    /** @var string[] ids of relations which were created */
+    private array $createdRelationIds = [];
+
     protected function setUp(): void
     {
         $this->storageRoot = sys_get_temp_dir().'/backup-load-command-test-'.bin2hex(random_bytes(6));
@@ -71,6 +76,7 @@ class BackupLoadCommandTest extends TestCase
         $this->elements = [];
         $this->uploadedIds = [];
         $this->failingIds = [];
+        $this->createdRelationIds = [];
     }
 
     /**
@@ -116,6 +122,11 @@ class BackupLoadCommandTest extends TestCase
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->flush()->willReturn($elementManager->reveal());
+        $elementManager->create(Argument::any())->will(function (array $args) use ($test, $elementManager) {
+            $test->createdRelationIds[] = $args[0]->getId()->toString();
+
+            return $elementManager->reveal();
+        });
         $elementManager->getElement(Argument::any())->will(
             fn (array $args) => $test->elements[$args[0]->toString()] ?? null
         );
@@ -170,12 +181,21 @@ class BackupLoadCommandTest extends TestCase
             return 0;
         });
 
+        $rawToElementService = $this->prophesize(RawToElementService::class);
+        $rawToElementService->rawToElement(Argument::any(), true)->will(function (array $args) {
+            if (!is_string($args[0]['id'] ?? null)) {
+                throw new InvalidArgumentException('Relation has no valid id.');
+            }
+
+            return (new RelationElement())->setId(Uuid::fromString($args[0]['id']));
+        });
+
         $command = new BackupLoadCommand(
             $elementManager->reveal(),
             $cypherEntityManager->reveal(),
             $redis,
             $this->backupStorage,
-            $this->prophesize(RawToElementService::class)->reveal(),
+            $rawToElementService->reveal(),
             $this->prophesize(EventDispatcherInterface::class)->reveal(),
             new AppStateService(),
             $elasticEntityManager->reveal(),
@@ -319,5 +339,24 @@ class BackupLoadCommandTest extends TestCase
         $this->assertNotContains($tampered, $this->uploadedIds);
         $this->assertStringContainsString('S3 is down', $tester->getDisplay());
         $this->assertStringContainsString('Loaded 1 files, 2 could not be loaded', $tester->getDisplay());
+    }
+
+    public function testBrokenRelationFilesDoNotAbortRestoreOfOtherRelations(): void
+    {
+        $good1 = Uuid::uuid4()->toString();
+        $good2 = Uuid::uuid4()->toString();
+        $this->backupStorage->write(self::BACKUP_NAME.'/relation/good-1.json', sprintf('{"type":"RELATION","id":"%s"}', $good1));
+        $this->backupStorage->write(self::BACKUP_NAME.'/relation/invalid-json.json', 'this is not json');
+        $this->backupStorage->write(self::BACKUP_NAME.'/relation/without-id.json', '{"type":"RELATION"}');
+        $this->backupStorage->write(self::BACKUP_NAME.'/relation/good-2.json', sprintf('{"type":"RELATION","id":"%s"}', $good2));
+
+        $tester = $this->runCommand();
+
+        $this->assertEqualsCanonicalizing([$good1, $good2], $this->createdRelationIds);
+        // the console wraps long error messages
+        $display = (string) preg_replace('/\s+/', ' ', $tester->getDisplay());
+        $this->assertStringContainsString('relation/invalid-json.json; skipping relation', $display);
+        $this->assertStringContainsString('relation/without-id.json; skipping relation: InvalidArgumentException: Relation has no valid id.', $display);
+        $this->assertStringContainsString('Loaded 2 relations, skipped 2 broken relation files', $display);
     }
 }

@@ -12,6 +12,8 @@ use App\EventSystem\EntityManager\EventListener\ExpireEtagOnChangeEventListener;
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\RedisKeyFactory;
+use App\Service\AppStateService;
+use App\Type\AppStateType;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
 use Exception;
@@ -77,7 +79,8 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
             $redisClient->reveal(),
             $cypherEntityManager->reveal(),
             new RedisKeyFactory(),
-            $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+            $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            new AppStateService()
         );
         $call($listener);
 
@@ -242,13 +245,34 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
         );
     }
 
+    public function testDoesNothingWhileLoadingBackup(): void
+    {
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+        $redisClient = $this->prophesize(Client::class);
+        $redisClient->expire(Argument::cetera())->shouldNotBeCalled();
+
+        $listener = new ExpireEtagOnChangeEventListener(
+            $redisClient->reveal(),
+            $cypherEntityManager->reveal(),
+            new RedisKeyFactory(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            (new AppStateService())->setAppState(AppStateType::LOADING_BACKUP)
+        );
+
+        $listener->onElementPostCreateEvent(new ElementPostCreateEvent($this->createNode()));
+        $listener->onElementPostMergeEvent(new ElementPostMergeEvent($this->createNode()));
+        $listener->onElementPreDeleteEvent(new ElementPreDeleteEvent($this->createNode()));
+    }
+
     public function testElementWithoutIdThrows(): void
     {
         $listener = new ExpireEtagOnChangeEventListener(
             $this->prophesize(Client::class)->reveal(),
             $this->prophesize(CypherEntityManager::class)->reveal(),
             new RedisKeyFactory(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
+            new AppStateService()
         );
 
         $this->expectException(Exception::class);

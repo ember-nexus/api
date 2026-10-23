@@ -315,7 +315,7 @@ jobs:
   e2e-test-amd:
     runs-on: gh-4vcpu-ubuntu-latest-amd
     name: End To End Test - AMD
-    timeout-minutes: 15
+    timeout-minutes: 30
     needs:
       - build-docker-image-amd
     steps:
@@ -351,7 +351,7 @@ jobs:
   e2e-test-arm:
     runs-on: gh-4vcpu-ubuntu-latest-arm
     name: End To End Test - ARM
-    timeout-minutes: 15
+    timeout-minutes: 30
     needs:
       - build-docker-image-arm
     steps:

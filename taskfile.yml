@@ -40,6 +40,11 @@ tasks:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec k6 pnpm load
 
+  test:meta:
+    desc: Run the meta tests (tests/MetaTests) inside the `api` container started by dev:up; they check the repository itself and need no other service.
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml exec api composer test:meta
+
   prod:build:
     vars:
       VERSION:
