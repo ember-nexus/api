@@ -39,3 +39,8 @@ next, regardless of which database each step targets. The
 [combined full text and path search](/reference/search#combined-full-text-and-path-search) and
 [Cypher-first polyglot search](/reference/search#cypher-first-polyglot-search) examples both do exactly this - one
 narrows down a set of elements, and the next step's query uses `stepResults` to restrict itself to those elements.
+
+## Broken expressions
+
+If an expression can not be compiled or evaluated, the response is a `400` containing `expressionError` with the kind,
+message and position of the error. See [understanding search errors](/guide/search/understanding-search-errors#errors-of-expressions).

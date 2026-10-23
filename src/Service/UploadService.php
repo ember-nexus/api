@@ -21,12 +21,12 @@ class UploadService
 {
     public function __construct(
         private ElementManager $elementManager,
-        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private UploadFactory $uploadFactory,
         private CypherEntityManager $cypherEntityManager,
         private DeletionService $deletionService,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 

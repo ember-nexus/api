@@ -35,9 +35,9 @@ class RequestUtilServiceTest extends TestCase
         $client400MissingPropertyExceptionFactory = new Client400MissingPropertyExceptionFactory($urlGenerator);
 
         return new RequestUtilService(
+            new RequestContentService(new Client408RequestTimeoutExceptionFactory($urlGenerator)),
             $client400BadContentExceptionFactory,
             $client400MissingPropertyExceptionFactory,
-            new RequestContentService(new Client408RequestTimeoutExceptionFactory($urlGenerator)),
         );
     }
 

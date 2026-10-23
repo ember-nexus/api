@@ -31,7 +31,8 @@ import kibanaConsoleQuery from "../../03-reference/03-search/01-elasticsearch-qu
 ## Without access to Kibana
 
 If you do not have direct access, you need to build the query blindly. As small errors can break the whole query, it is
-recommended to slowly build your query up, and to test it frequently.
+recommended to slowly build your query up, and to test it frequently. If a query is rejected, the response explains the
+problem, see [understanding search errors](/guide/search/understanding-search-errors).
 
 As the base of your query you can use one of the provided [examples](/reference/search/elasticsearch-query-dsl-mixin#examples).
 

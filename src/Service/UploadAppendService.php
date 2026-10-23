@@ -33,10 +33,10 @@ class UploadAppendService
         private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private IncrementalHashService $incrementalHashService,
-        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private ElementManager $elementManager,
         private ElementService $elementService,
         private Stopwatch $stopwatch,
+        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
     ) {
     }
 

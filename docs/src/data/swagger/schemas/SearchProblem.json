@@ -1,0 +1,81 @@
+{
+  "components": {
+    "schemas": {
+      "SearchProblem": {
+        "$schema": "https://spec.openapis.org/oas/3.0/schema/2021-09-28#/definitions/Schema",
+        "description": "Problem details of a failed search request. In addition to the usual problem properties, it explains which search step failed. See [understanding search errors](/guide/search/understanding-search-errors).",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Problem"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "debug": {
+                "type": "array",
+                "description": "Debug data of all search steps before the failed step, in the same format as the `debug` property of successful requests. Returned for failed steps independent of the `debug` request property, as long as failure explanations are enabled.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "failedStep": {
+                "type": "object",
+                "description": "Explains the search step which failed.",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Zero-based index of the failed step inside `steps`."
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Type of the failed step."
+                  },
+                  "debug": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Debug data of the failed step up to the point of failure."
+                  },
+                  "source": {
+                    "type": "string",
+                    "description": "Technology which was diagnosed, e.g. `neo4j` or `elasticsearch`. Only set if the failure could be diagnosed."
+                  },
+                  "code": {
+                    "type": "string",
+                    "enum": ["invalid-query", "query-execution-failed"],
+                    "description": "Stable code of Ember Nexus."
+                  },
+                  "diagnostics": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Allowlisted data which got passed through from the database, e.g. its error code, its message and the position inside of the query."
+                  }
+                }
+              },
+              "expressionError": {
+                "type": "object",
+                "description": "Explains a failed expression. Only set if the failure was caused by an expression.",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "example": "expr-lang"
+                  },
+                  "code": {
+                    "type": "string",
+                    "enum": ["invalid-query", "query-execution-failed"]
+                  },
+                  "diagnostics": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Kind of error (`compile error` or `runtime error`), its message and, if available, `line` and `column`."
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

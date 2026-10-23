@@ -22,9 +22,9 @@ class AccessChecker
 {
     public function __construct(
         private CypherEntityManager $cypherEntityManager,
-        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private AuthProvider $authProvider,
         private LoggerInterface $logger,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 

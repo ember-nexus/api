@@ -211,6 +211,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
         $parameters = $event->getParameters();
 
         $this->executeExpressionsInQuery($query, $parameters);
+        $event->setResolvedQuery($query);
 
         $page = $this->getPageFromParameters($parameters);
         $pageSize = $this->getPageSizeFromParameters($parameters);

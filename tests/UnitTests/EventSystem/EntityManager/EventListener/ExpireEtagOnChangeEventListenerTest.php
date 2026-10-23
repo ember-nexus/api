@@ -79,8 +79,8 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
             $redisClient->reveal(),
             $cypherEntityManager->reveal(),
             new RedisKeyFactory(),
-            $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
-            new AppStateService()
+            new AppStateService(),
+            $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
         $call($listener);
 
@@ -256,8 +256,8 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
             $redisClient->reveal(),
             $cypherEntityManager->reveal(),
             new RedisKeyFactory(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
-            (new AppStateService())->setAppState(AppStateType::LOADING_BACKUP)
+            (new AppStateService())->setAppState(AppStateType::LOADING_BACKUP),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $listener->onElementPostCreateEvent(new ElementPostCreateEvent($this->createNode()));
@@ -271,8 +271,8 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
             $this->prophesize(Client::class)->reveal(),
             $this->prophesize(CypherEntityManager::class)->reveal(),
             new RedisKeyFactory(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
-            new AppStateService()
+            new AppStateService(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectException(Exception::class);

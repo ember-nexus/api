@@ -48,9 +48,9 @@ class AccessCheckerTest extends TestCase
 
         return new AccessChecker(
             $cypherEntityManager->reveal(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
             $authProvider,
-            $logger
+            $logger,
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
     }
 

@@ -31,13 +31,13 @@ class UploadFinalizationService
         private UploadService $uploadService,
         private DigestService $digestService,
         private FileSizeLimitService $fileSizeLimitService,
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private LoggerInterface $logger,
         private ElementFileDeletionService $elementFileDeletionService,
         private IncrementalHashService $incrementalHashService,
         private ElementService $elementService,
         private FileCreationLockService $fileCreationLockService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
     ) {
     }
 

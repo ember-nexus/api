@@ -145,10 +145,10 @@ class UploadAppendServiceTest extends TestCase
             $this->s3OperationFactory->reveal(),
             $this->s3Service->reveal(),
             $this->incrementalHashService->reveal(),
-            $client409ConflictExceptionFactory->reveal(),
             $this->elementManager->reveal(),
             $this->elementService->reveal(),
             new Stopwatch(),
+            $client409ConflictExceptionFactory->reveal(),
         );
     }
 

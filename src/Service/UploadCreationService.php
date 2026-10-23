@@ -53,11 +53,11 @@ class UploadCreationService
         private UploadService $uploadService,
         private FileSizeLimitService $fileSizeLimitService,
         private UploadBodyLimitService $uploadBodyLimitService,
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private UploadChunkValidator $uploadChunkValidator,
         private ElementFileDeletionService $elementFileDeletionService,
         private ElementService $elementService,
         private Stopwatch $stopwatch,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
 

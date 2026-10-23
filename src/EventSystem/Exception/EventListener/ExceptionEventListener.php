@@ -27,8 +27,8 @@ class ExceptionEventListener
         private UrlGeneratorInterface $urlGenerator,
         private KernelInterface $kernel,
         private LoggerInterface $logger,
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
         private RequestIdService $requestIdService,
+        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
     ) {
     }
 

@@ -111,6 +111,20 @@ class ConfigurationTest extends TestCase
         $this->process([EmberNexusConfiguration::FILE => ['unknownOption' => 1]]);
     }
 
+    public function testSearchDefaults(): void
+    {
+        $config = $this->process([]);
+
+        $this->assertSame([EmberNexusConfiguration::SEARCH_EXPLAIN_FAILURES => true], $config[EmberNexusConfiguration::SEARCH]);
+    }
+
+    public function testSearchExplainFailuresCanBeDisabled(): void
+    {
+        $config = $this->process([EmberNexusConfiguration::SEARCH => [EmberNexusConfiguration::SEARCH_EXPLAIN_FAILURES => false]]);
+
+        $this->assertFalse($config[EmberNexusConfiguration::SEARCH][EmberNexusConfiguration::SEARCH_EXPLAIN_FAILURES]);
+    }
+
     public function testExpressionDefaults(): void
     {
         $config = $this->process([]);

@@ -30,12 +30,12 @@ class PostIndexController extends AbstractController
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
         private UrlGeneratorInterface $router,
+        private CreateElementFromRawDataService $createElementFromRawDataService,
+        private RequestUtilService $requestUtilService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private CreateElementFromRawDataService $createElementFromRawDataService,
-        private RequestUtilService $requestUtilService,
     ) {
     }
 

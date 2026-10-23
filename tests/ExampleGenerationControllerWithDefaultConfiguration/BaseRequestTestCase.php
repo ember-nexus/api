@@ -393,6 +393,135 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
         );
     }
 
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeSearchErrorForComparison(array $data): array
+    {
+        unset($data['instance'], $data['exception']);
+        foreach (array_keys($data['debug'] ?? []) as $index) {
+            unset($data['debug'][$index]['start'], $data['debug'][$index]['end'], $data['debug'][$index]['duration']);
+            $this->removeElasticsearchScores($data['debug'][$index]);
+        }
+        if (array_key_exists('failedStep', $data)) {
+            unset($data['failedStep']['debug']['start'], $data['failedStep']['debug']['end'], $data['failedStep']['debug']['duration']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array<string, mixed> $left
+     * @param array<string, mixed> $right
+     *
+     * @return string[] dotted paths of all values which differ
+     */
+    private function collectDifferingPaths(array $left, array $right, string $prefix = ''): array
+    {
+        $paths = [];
+        foreach (array_unique([...array_keys($left), ...array_keys($right)]) as $key) {
+            $path = '' === $prefix ? (string) $key : $prefix.'.'.$key;
+            if (!array_key_exists($key, $left) || !array_key_exists($key, $right)) {
+                $paths[] = $path;
+                continue;
+            }
+            if (is_array($left[$key]) && is_array($right[$key])) {
+                $paths = [...$paths, ...$this->collectDifferingPaths($left[$key], $right[$key], $path)];
+                continue;
+            }
+            if ($left[$key] !== $right[$key]) {
+                $paths[] = $path;
+            }
+        }
+
+        return $paths;
+    }
+
+    /**
+     * Compares the recorded error response of a failed search step with the real one.
+     *
+     * Everything is compared strictly, except for the data which got passed through from the database
+     * (`failedStep.diagnostics`, `expressionError.diagnostics`): its content depends on the version of the database,
+     * and tests are run against multiple versions of it. Differences there never fail a test and do not change the
+     * exit code, they are only reported on stderr. If FIX_CONTROLLER_OUTPUT is set, the recording gets updated.
+     */
+    public function assertSearchErrorInDocumentationIsSimilarToSearchErrorFromRequest(
+        string $pathToProjectRoot,
+        string $pathToDocumentationFile,
+        ResponseInterface $response,
+    ): void {
+        $rawResponseData = \Safe\json_decode(
+            str_replace(self::DIFFERENT_CONFIGURATION_DOMAIN, self::DEFAULT_DOMAIN, (string) $response->getBody()),
+            true
+        );
+        $responseData = $this->normalizeSearchErrorForComparison($rawResponseData);
+        $documentationData = $this->normalizeSearchErrorForComparison(
+            \Safe\json_decode(\Safe\file_get_contents($pathToProjectRoot.$pathToDocumentationFile), true)
+        );
+
+        $responseDatabaseData = [];
+        $documentationDatabaseData = [];
+        foreach (['failedStep', 'expressionError'] as $key) {
+            $responseDatabaseData[$key] = $responseData[$key]['diagnostics'] ?? null;
+            $documentationDatabaseData[$key] = $documentationData[$key]['diagnostics'] ?? null;
+            unset($responseData[$key]['diagnostics'], $documentationData[$key]['diagnostics']);
+        }
+
+        $prettyPrintedRawResponse = str_replace(
+            '    ',
+            '  ',
+            json_encode(
+                $this->normalizeSearchErrorForRecording($rawResponseData),
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+            )
+        );
+
+        if ($this->isFixControllerOutputEnabled()) {
+            if ($responseData != $documentationData || $responseDatabaseData != $documentationDatabaseData) {
+                $this->fixDocumentationFile($pathToProjectRoot, $pathToDocumentationFile, $prettyPrintedRawResponse);
+
+                return;
+            }
+            $this->assertTrue(true);
+
+            return;
+        }
+
+        $this->assertEquals(
+            $documentationData,
+            $responseData,
+            sprintf(
+                "Content of file %s should be as following:\n\n%s\n",
+                $pathToDocumentationFile,
+                $prettyPrintedRawResponse
+            )
+        );
+
+        $differingPaths = $this->collectDifferingPaths($documentationDatabaseData, $responseDatabaseData);
+        if (count($differingPaths) > 0) {
+            fwrite(STDERR, sprintf(
+                "\nNOTICE: database payload of %s differs from the recording at %s; the database version might differ.\n",
+                $pathToDocumentationFile,
+                implode(', ', $differingPaths)
+            ));
+        }
+        $this->assertTrue(true);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeSearchErrorForRecording(array $data): array
+    {
+        unset($data['exception']);
+
+        return $data;
+    }
+
     public function getFormattedResponseBodyAsJsonString(ResponseInterface $response): string
     {
         $data = json_decode((string) $response->getBody(), true);

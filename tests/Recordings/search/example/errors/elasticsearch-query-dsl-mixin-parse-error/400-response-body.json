@@ -1,0 +1,87 @@
+{
+  "type": "http://api/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "instance": "urn:uuid:8305d8ff-8b58-4a54-8ade-9f1e335a014f",
+  "detail": "Search step 1 (type elasticsearch-query-dsl-mixin) was rejected by elasticsearch, see failedStep.diagnostics for the reason.",
+  "debug": [],
+  "failedStep": {
+    "index": 0,
+    "type": "elasticsearch-query-dsl-mixin",
+    "debug": {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "query": {
+            "match": {
+              "description": {
+                "query": "lily"
+              }
+            }
+          }
+        },
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1792781085.985267,
+      "indices": "*",
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 25,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "query": {
+                  "match": {
+                    "description": {
+                      "query": "lily"
+                    }
+                  }
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "source": "elasticsearch",
+    "code": "invalid-query",
+    "diagnostics": {
+      "code": "x_content_parse_exception",
+      "message": "unknown query [query]; org.elasticsearch.xcontent.NamedObjectNotFoundException: [1:19] unknown field [query]",
+      "status": 400,
+      "rootCauseCodes": [
+        "parsing_exception"
+      ],
+      "validation": {
+        "valid": false,
+        "exception": "org.elasticsearch.common.ParsingException"
+      }
+    }
+  }
+}

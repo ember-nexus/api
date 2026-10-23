@@ -56,9 +56,9 @@ class ElementManagerGetElementOrFailTest extends TestCase
             $this->prophesize(ElementDefragmentizeService::class)->reveal(),
             $this->prophesize(Neo4jClientHelper::class)->reveal(),
             $this->prophesize(EventDispatcherInterface::class)->reveal(),
+            new NullLogger(),
             $notFoundFactory->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
-            new NullLogger(),
         ];
 
         return new class(...$arguments) extends ElementManager {

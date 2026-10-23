@@ -30,11 +30,11 @@ class PostElementController extends AbstractController
         private AccessChecker $accessChecker,
         private ElementManager $elementManager,
         private UrlGeneratorInterface $router,
-        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService,
         private RequestUtilService $requestUtilService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
     ) {
     }
 

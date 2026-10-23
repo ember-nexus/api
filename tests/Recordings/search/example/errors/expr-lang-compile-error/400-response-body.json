@@ -1,0 +1,39 @@
+{
+  "type": "http://api/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "instance": "urn:uuid:a60af62e-41fe-4789-a12f-3a44b0283b78",
+  "detail": "Expression execution failed.\n\ncompile error: unexpected token EOF (1:5)\n |  1 + \n | ....^",
+  "expressionError": {
+    "source": "expr-lang",
+    "code": "invalid-query",
+    "diagnostics": {
+      "kind": "compile error",
+      "message": "compile error: unexpected token EOF (1:5)\n |  1 + \n | ....^",
+      "line": 1,
+      "column": 5
+    }
+  },
+  "debug": [],
+  "failedStep": {
+    "index": 0,
+    "type": "elasticsearch-query-dsl-mixin",
+    "debug": {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "match": {
+            "description": {
+              "query": "{{ 1 + }}"
+            }
+          }
+        },
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1792781086.041577
+    }
+  }
+}

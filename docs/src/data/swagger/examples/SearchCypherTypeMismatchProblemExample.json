@@ -1,0 +1,10 @@
+{
+  "components": {
+    "examples": {
+      "SearchCypherTypeMismatchProblemExample": {
+        "summary": "A Cypher query with a type mismatch is explained with its position inside of the query.",
+        "x-ember-nexus-recording": "search/example/errors/cypher-path-subset-type-mismatch/400-response-body.json"
+      }
+    }
+  }
+}

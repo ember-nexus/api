@@ -142,8 +142,8 @@ class BackupCreateCommandTest extends TestCase
             ),
             $s3Service->reveal(),
             $fileOperationFactory->reveal(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
-            $this->prophesize(LoggerInterface::class)->reveal()
+            $this->prophesize(LoggerInterface::class)->reveal(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $tester = new CommandTester($command);

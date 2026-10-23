@@ -1,0 +1,10 @@
+{
+  "components": {
+    "examples": {
+      "SearchElasticsearchParseErrorProblemExample": {
+        "summary": "An Elasticsearch query which Elasticsearch can not parse is explained by the validation of the query.",
+        "x-ember-nexus-recording": "search/example/errors/elasticsearch-query-dsl-mixin-parse-error/400-response-body.json"
+      }
+    }
+  }
+}

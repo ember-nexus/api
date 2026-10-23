@@ -20,10 +20,10 @@ class PostTokenController extends AbstractController
 {
     public function __construct(
         private TokenGenerator $tokenGenerator,
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
-        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
         private RequestUtilService $requestUtilService,
         private SecurityUtilService $securityUtilService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
     ) {
     }
 

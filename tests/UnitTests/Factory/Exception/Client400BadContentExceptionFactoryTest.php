@@ -170,4 +170,17 @@ class Client400BadContentExceptionFactoryTest extends TestCase
         $result = $method->invokeArgs($factory, [$input]);
         $this->assertSame($result, $output);
     }
+
+    public function testCreateFromDetailWithAdditionalProperties(): void
+    {
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())->willReturn('https://mock.dev/123');
+        $factory = new Client400BadContentExceptionFactory($urlGenerator->reveal());
+
+        $exception = $factory->createFromDetail('detail', null, ['a' => ['b' => 1]]);
+
+        $this->assertSame('detail', $exception->getDetail());
+        $this->assertSame(['a' => ['b' => 1]], $exception->getAdditionalProperties());
+        $this->assertSame([], $factory->createFromDetail('detail')->getAdditionalProperties());
+    }
 }

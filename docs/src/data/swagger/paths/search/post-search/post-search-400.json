@@ -73,11 +73,27 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Problem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SearchProblem"
+                    }
+                  ]
                 },
                 "examples": {
                   "missingProperty": {
                     "$ref": "#/components/examples/MissingPropertyProblemExample"
+                  },
+                  "elasticsearchParseError": {
+                    "$ref": "#/components/examples/SearchElasticsearchParseErrorProblemExample"
+                  },
+                  "cypherTypeMismatch": {
+                    "$ref": "#/components/examples/SearchCypherTypeMismatchProblemExample"
+                  },
+                  "expressionError": {
+                    "$ref": "#/components/examples/SearchExpressionErrorProblemExample"
                   }
                 }
               }

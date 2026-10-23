@@ -50,9 +50,9 @@ class ElementManager
         private ElementDefragmentizeService $elementDefragmentizeService,
         private Neo4jClientHelper $neo4jClientHelper,
         private EventDispatcherInterface $eventDispatcher,
+        private LoggerInterface $logger,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
-        private LoggerInterface $logger,
     ) {
     }
 

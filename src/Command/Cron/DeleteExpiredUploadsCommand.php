@@ -45,9 +45,9 @@ class DeleteExpiredUploadsCommand extends Command
         private UploadFactory $uploadFactory,
         private UploadService $uploadService,
         private DeletionService $deletionService,
-        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private ExpiredUploadDeletionAttemptService $expiredUploadDeletionAttemptService,
         private LoggerInterface $logger,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }

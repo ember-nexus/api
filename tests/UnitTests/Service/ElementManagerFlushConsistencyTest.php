@@ -91,9 +91,9 @@ class ElementManagerFlushConsistencyTest extends TestCase
             $this->prophesize(ElementDefragmentizeService::class)->reveal(),
             $this->prophesize(Neo4jClientHelper::class)->reveal(),
             $this->prophesize(EventDispatcherInterface::class)->reveal(),
+            $this->logger,
             $this->prophesize(Client404NotFoundExceptionFactory::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
-            $this->logger,
         );
     }
 

@@ -12,6 +12,8 @@ use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Client422UnprocessableContentExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\ExpressionService;
+use App\Service\QueryExplanation\ExprLang\ExprLangQueryExplanationService;
+use App\Service\QueryExplanation\QueryExplanationPayloadService;
 use App\Tests\UnitTests\AssertLoggerTrait;
 use Beste\Psr\Log\TestLogger;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -23,6 +25,7 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
+use ReflectionProperty;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -63,7 +66,7 @@ class ExpressionServiceTest extends TestCase
 
         if ($simulateTimeout) {
             // overridden so the timeout branch can be verified without actually waiting on a real clock
-            return new class($authProvider, $emberNexusConfiguration, $logger ?? $this->prophesize(LoggerInterface::class)->reveal(), $client400BadContentExceptionFactory, $client403ForbiddenExceptionFactory, $client422UnprocessableContentExceptionFactory) extends ExpressionService {
+            return new class($authProvider, $emberNexusConfiguration, $logger ?? $this->prophesize(LoggerInterface::class)->reveal(), new ExprLangQueryExplanationService(new QueryExplanationPayloadService()), $client400BadContentExceptionFactory, $client403ForbiddenExceptionFactory, $client422UnprocessableContentExceptionFactory) extends ExpressionService {
                 protected function runProcess(Process $process): void
                 {
                     throw new ProcessTimedOutException($process, ProcessTimedOutException::TYPE_GENERAL);
@@ -75,6 +78,7 @@ class ExpressionServiceTest extends TestCase
             $authProvider,
             $emberNexusConfiguration,
             $logger ?? $this->prophesize(LoggerInterface::class)->reveal(),
+            new ExprLangQueryExplanationService(new QueryExplanationPayloadService()),
             $client400BadContentExceptionFactory,
             $client403ForbiddenExceptionFactory,
             $client422UnprocessableContentExceptionFactory
@@ -259,6 +263,79 @@ class ExpressionServiceTest extends TestCase
         }
         $this->assertInstanceOf(Client400BadContentException::class, $exception);
         $this->assertSame("Expression execution failed.\n\ncompile error: unknown name a (1:5)\n | 1 + a\n | ....^", $exception->getDetail());
+    }
+
+    public function testBrokenExpressionExposesExpressionError(): void
+    {
+        $expressionService = $this->getExpressionService();
+
+        try {
+            $expressionService->runExpression('1 + a');
+            $this->fail('expected exception');
+        } catch (Client400BadContentException $exception) {
+            $this->assertSame(
+                [
+                    'expressionError' => [
+                        'source' => 'expr-lang',
+                        'code' => 'invalid-query',
+                        'diagnostics' => [
+                            'kind' => 'compile error',
+                            'message' => "compile error: unknown name a (1:5)\n | 1 + a\n | ....^",
+                            'line' => 1,
+                            'column' => 5,
+                        ],
+                    ],
+                ],
+                $exception->getAdditionalProperties()
+            );
+        }
+    }
+
+    public function testBrokenExpressionIsNotExplainedIfExplainingFailuresIsDisabled(): void
+    {
+        $emberNexusConfiguration = new EmberNexusConfiguration();
+        $emberNexusConfiguration->setExpressionEnabled(true);
+        $emberNexusConfiguration->setExpressionMaxLength(250);
+        $emberNexusConfiguration->setExpressionWarningLength(100);
+        $emberNexusConfiguration->setSearchExplainFailures(false);
+        $expressionService = $this->getExpressionService(emberNexusConfiguration: $emberNexusConfiguration);
+
+        try {
+            $expressionService->runExpression('1 + a');
+            $this->fail('expected exception');
+        } catch (Client400BadContentException $exception) {
+            $this->assertSame('Expression execution failed.', $exception->getDetail());
+            $this->assertSame([], $exception->getAdditionalProperties());
+        }
+    }
+
+    public function testNonJsonErrorOutputDoesNotCrash(): void
+    {
+        $emberNexusConfiguration = new EmberNexusConfiguration();
+        $emberNexusConfiguration->setExpressionEnabled(true);
+        $emberNexusConfiguration->setExpressionMaxLength(250);
+        $emberNexusConfiguration->setExpressionWarningLength(100);
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())->willReturn('https://mock.dev/123');
+        $authProvider = $this->prophesize(AuthProvider::class);
+        $authProvider->getUserId()->willReturn(Uuid::fromString('3f34b034-bbe4-4461-a023-dc2920c1b1c3'));
+        $expressionService = new class($authProvider->reveal(), $emberNexusConfiguration, $this->prophesize(LoggerInterface::class)->reveal(), new ExprLangQueryExplanationService(new QueryExplanationPayloadService()), new Client400BadContentExceptionFactory($urlGenerator->reveal()), new Client403ForbiddenExceptionFactory($urlGenerator->reveal()), new Client422UnprocessableContentExceptionFactory($urlGenerator->reveal())) extends ExpressionService {
+            protected function runProcess(Process $process): void
+            {
+                // replace the expr cli with a command which fails with non-JSON output
+                $commandLine = new ReflectionProperty(Process::class, 'commandline');
+                $commandLine->setValue($process, ['sh', '-c', 'echo segfault >&2; exit 1']);
+                $process->run();
+            }
+        };
+
+        try {
+            $expressionService->runExpression('1');
+            $this->fail('expected exception');
+        } catch (Client400BadContentException $exception) {
+            $this->assertSame("Expression execution failed.\n\nunknown error", $exception->getDetail());
+            $this->assertSame([], $exception->getAdditionalProperties()['expressionError']['diagnostics']);
+        }
     }
 
     public function testShortQueryWithinTimeoutSucceeds(): void

@@ -34,10 +34,10 @@ class PostRegisterController extends AbstractController
         private EmberNexusConfiguration $emberNexusConfiguration,
         private RequestUtilService $requestUtilService,
         private CreateElementFromRawDataService $createElementFromRawDataService,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
-        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
 

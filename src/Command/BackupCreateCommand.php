@@ -65,8 +65,8 @@ class BackupCreateCommand extends Command
         private StorageService $storageService,
         private S3Service $s3Service,
         private S3OperationFactory $s3OperationFactory,
-        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private LoggerInterface $logger,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }

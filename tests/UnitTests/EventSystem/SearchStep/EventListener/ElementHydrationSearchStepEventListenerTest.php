@@ -60,8 +60,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             $accessChecker,
             $authProvider,
             $expressionService,
-            $client400MissingPropertyExceptionFactory,
-            $client400BadContentExceptionFactory
+            $client400BadContentExceptionFactory,
+            $client400MissingPropertyExceptionFactory
         );
     }
 
