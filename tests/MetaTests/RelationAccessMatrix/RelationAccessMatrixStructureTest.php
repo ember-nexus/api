@@ -70,6 +70,8 @@ class RelationAccessMatrixStructureTest extends TestCase
      * @param array<string, string> $requests request => letter, besides OWNS, which grants access
      *
      * @return array<string, true> the cases which are covered
+     *
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     private function getCoveredCases(array $codes, array $requests): array
     {
