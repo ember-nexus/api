@@ -158,9 +158,9 @@ class HealthcheckCommand extends Command
     private function getCaddyVersion(): string
     {
         $caddyVersion = 'unknown';
-        $caddyVersionOutput = explode(' ', \Safe\shell_exec('frankenphp -v 2>&1') ?? '');
-        if (count($caddyVersionOutput) > 1) {
-            $caddyVersion = \Safe\preg_replace('/[^0-9.]/', '', $caddyVersionOutput[0]);
+        $caddyVersionEnv = getenv('CADDY_VERSION');
+        if (is_string($caddyVersionEnv)) {
+            $caddyVersion = \Safe\preg_replace('/[^0-9.]/', '', $caddyVersionEnv);
         }
 
         /** @var string $caddyVersion */

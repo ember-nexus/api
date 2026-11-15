@@ -16,7 +16,7 @@ ENV CI=true
 ENV VERSION=${VERSION}
 RUN pnpm install && pnpm run build
 
-FROM caddy:2.11.4-alpine AS production
+FROM caddy:2.11.9-alpine AS production
 COPY --from=production-build /docs/dist /srv
 COPY ./docker/docs/Caddyfile /etc/caddy/Caddyfile
 EXPOSE 80

@@ -3,7 +3,7 @@
 # image. Kept separate from the main Dockerfile so each arch's image build is cheap (no
 # node/pnpm/pnpm install) - the Astro build itself is architecture-independent static output and
 # only needs to happen once.
-FROM caddy:2.11.4-alpine
+FROM caddy:2.11.9-alpine
 LABEL org.opencontainers.image.vendor="Ember Nexus" \
     org.opencontainers.image.authors="Sören Klein / Syndesi <soerenklein98@gmail.com>" \
     org.opencontainers.image.licenses="LicenseRef-Source-First-License-1.1" \
