@@ -59,8 +59,11 @@
 	# set by the server, so that clients can not spoof it in the logs
 	request_header X-Request-Id "{http.request.uuid}"
 	log_append request_id {http.request.uuid}
+	# hard backstop for the request body, deliberately 1 MiB above the default `file.uploadMaxChunkSizeInBytes` (101 MiB):
+	# Caddy rejects declared bodies above this limit with a bare 413 before PHP runs, so with equal limits the
+	# application would never get to answer oversized chunks with its descriptive 400 problem json
 	request_body {
-		max_size 101MiB
+		max_size 102MiB
 	}
 	# only endpoints which receive upload data from the client may take up to 15 minutes to receive it: single request
 	# uploads (POST/PUT /<id>/file) and resumable upload chunks (PATCH /upload/<id>); slow clients have to send

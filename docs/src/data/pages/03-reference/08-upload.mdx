@@ -104,7 +104,7 @@ against each other at startup. In terms of the values actually reported to clien
   chunk except the last must be at least this large. A smaller chunk is rejected with `400 Bad Request`, unless it
   is the completing chunk (`Upload-Complete: ?1`) or has **exactly** zero length - an empty chunk is accepted as a
   no-op (effectively a status check) regardless of this minimum.
-- `max-append-size` (`file.uploadMaxChunkSizeInBytes`, default 101 MiB, matching the Caddy/PHP body limit) - the
+- `max-append-size` (`file.uploadMaxChunkSizeInBytes`, default 101 MiB; the Caddy body limit is 1 MiB higher) - the
   maximum size of **every** request body, single-request uploads and chunks alike. A larger body is rejected with
   `400 Bad Request`, also when no `Content-Length` header was sent. Files that do not fit into one request must use a
   resumable upload.
