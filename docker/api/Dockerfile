@@ -23,6 +23,9 @@ ARG WATCHER_VERSION='0.14.5'
 # pinned to a full patch version (not just "1.26") so `golang:${GO_VERSION}-alpine` resolves to the exact
 # same toolchain on every rebuild, matching the Go version FrankenPHP v1.12.7 itself builds with.
 ARG GO_VERSION='1.26.8'
+# expr-cli is an independent, statically linked Go binary (see ./lib/ExprCli) and does not share FrankenPHP's
+# toolchain pin above; it is built with the latest Go release, pinned to a full patch version for reproducibility.
+ARG EXPR_CLI_GO_VERSION='1.27.4'
 # pinned to a full patch version of the xcaddy/caddy-builder image; it only supplies the xcaddy build tool,
 # not the embedded Caddy core (that version comes from Go module resolution instead), so pinning it avoids
 # floating to whatever "2.11" resolves to on a later rebuild.
@@ -332,7 +335,7 @@ RUN CGO_ENABLED=1 \
     && /usr/local/bin/frankenphp version
 
 
-FROM golang:${GO_VERSION}-alpine AS go_builder
+FROM golang:${EXPR_CLI_GO_VERSION}-alpine AS expr_cli_builder
 COPY ./lib/ExprCli /build
 RUN cd /build && \
     apk add upx && \
@@ -401,7 +404,7 @@ ENV GODEBUG=cgocheck=0 \
 COPY ./docker/api/Caddyfile /etc/frankenphp/Caddyfile
 COPY ./docker/api/docker-entrypoint.sh /usr/local/bin/
 COPY ./docker/api/supercronic /etc/crontabs/supercronic
-COPY --from=go_builder /build/expr-cli /usr/local/bin/expr-cli
+COPY --from=expr_cli_builder /build/expr-cli /usr/local/bin/expr-cli
 RUN set -x \
     && mkdir -p /config/caddy /data/caddy \
     && chmod +x /usr/local/bin/docker-entrypoint.sh \
