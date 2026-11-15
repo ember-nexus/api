@@ -7,13 +7,11 @@ namespace App\Controller\User;
 use App\Attribute\EndpointWithoutAuthentication;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
-use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\Response\NoContentResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class PostChangePasswordController extends AbstractController
@@ -23,7 +21,6 @@ class PostChangePasswordController extends AbstractController
         private SecurityUtilService $securityUtilService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client401UnauthorizedExceptionFactory $client401UnauthorizedExceptionFactory,
-        private RequestContentService $requestContentService,
     ) {
     }
 
@@ -33,9 +30,9 @@ class PostChangePasswordController extends AbstractController
         methods: ['POST']
     )]
     #[EndpointWithoutAuthentication]
-    public function postChangePassword(Request $request): Response
+    public function postChangePassword(Request $request): NoContentResponse
     {
-        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
+        $body = $this->requestUtilService->getJsonBodyFromRequest($request);
 
         $this->requestUtilService->validateTypeFromBody('ActionChangePassword', $body);
 

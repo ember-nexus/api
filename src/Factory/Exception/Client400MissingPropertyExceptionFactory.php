@@ -17,7 +17,7 @@ class Client400MissingPropertyExceptionFactory
     /**
      * Returns an exception in the format of: "Endpoint requires that the request contains property '%s' to be set to %s.".
      */
-    public function createFromTemplate(string $propertyName, mixed $propertyValue): Client400MissingPropertyException
+    public function createFromTemplate(string $propertyName, string $propertyValue): Client400MissingPropertyException
     {
         return new Client400MissingPropertyException(
             $this->urlGenerator->generate(

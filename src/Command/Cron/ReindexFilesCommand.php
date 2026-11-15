@@ -68,6 +68,8 @@ class ReindexFilesCommand extends Command
     }
 
     /**
+     * @psalm-suppress MixedAssignment
+     *
      * @param array<string, mixed> $eventData
      */
     private function reindexElementFile(array $eventData): void

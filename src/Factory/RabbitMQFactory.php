@@ -28,6 +28,7 @@ class RabbitMQFactory
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to correctly parse RabbitMQ DSN.');
         }
 
+        /** @var array{user?: string, pass?: string, host?: string, port?: int} $parsed */
         if (!array_key_exists('user', $parsed)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('RabbitMQ DSN requires user.');
         }

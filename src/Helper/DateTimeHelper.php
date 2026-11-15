@@ -28,6 +28,6 @@ class DateTimeHelper
         if ($laudisObject instanceof LocalDateTime) {
             return $laudisObject->toDateTime();
         }
-        throw new Exception(sprintf('Unable to get DateTime from %s.', get_class($laudisObject)));
+        throw new Exception(sprintf('Unable to get DateTime from %s.', get_debug_type($laudisObject)));
     }
 }

@@ -14,7 +14,7 @@ class MimeTypeService
     /**
      * @param resource $resource
      */
-    public function getMimeTypeFromResource($resource): string
+    public function getMimeTypeFromResource(mixed $resource): string
     {
         $bytes = \Safe\stream_get_contents($resource, self::NECESSARY_BYTES_FOR_MIME_TYPE_DETECTION);
 

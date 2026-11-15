@@ -81,7 +81,9 @@ class EmberNexusStyle extends SymfonyStyle
         ));
     }
 
-    /** @phpstan-ignore-next-line */
+    /**
+     * @param string[]|string $message
+     */
     public function finalMessage(array|string $message): void
     {
         if ($this->isInSection) {
@@ -123,6 +125,8 @@ class EmberNexusStyle extends SymfonyStyle
     public function writeln(iterable|string $messages, int $type = self::OUTPUT_NORMAL): void
     {
         if (is_iterable($messages)) {
+            // parent docblock is narrower than its native type
+            // @phpstan-ignore argument.type
             parent::writeln($messages, $type);
 
             return;

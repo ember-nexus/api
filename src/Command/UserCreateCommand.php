@@ -7,6 +7,7 @@ namespace App\Command;
 use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
+use App\Trait\CommandInputTrait;
 use App\Type\NodeElement;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
@@ -25,6 +26,8 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 #[AsCommand(name: 'user:create', description: 'Creates a new user.')]
 class UserCreateCommand extends Command
 {
+    use CommandInputTrait;
+
     private OutputStyle $io;
 
     public function __construct(
@@ -55,7 +58,7 @@ class UserCreateCommand extends Command
 
         $this->io->title('User Create');
 
-        $identifier = $input->getArgument('identifier');
+        $identifier = $this->getStringArgument($input, 'identifier');
 
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
@@ -85,7 +88,7 @@ class UserCreateCommand extends Command
             ->setLabel('User')
             ->addProperties([
                 $this->emberNexusConfiguration->getRegisterUniqueIdentifier() => $identifier,
-                '_passwordHash' => $this->userPasswordHasher->hashPassword($input->getArgument('password')),
+                '_passwordHash' => $this->userPasswordHasher->hashPassword($this->getStringArgument($input, 'password')),
             ])
             ->setId($userId);
 

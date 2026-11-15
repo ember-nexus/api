@@ -14,17 +14,14 @@ use App\Service\CollectionService;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\EtagType;
+use App\Type\Response\CollectionResponse;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\CypherList;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
-/**
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- */
 class GetChildrenController extends AbstractController
 {
     public function __construct(
@@ -46,7 +43,7 @@ class GetChildrenController extends AbstractController
         methods: ['GET']
     )]
     #[EndpointSupportsEtag(EtagType::CHILDREN_COLLECTION)]
-    public function getChildren(string $id): Response
+    public function getChildren(string $id): CollectionResponse
     {
         $parentId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();

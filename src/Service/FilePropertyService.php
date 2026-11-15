@@ -30,6 +30,7 @@ class FilePropertyService
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Expected property 'file' of element %s to be of type array, got %s.", $element->getId()?->toString() ?? 'null', get_debug_type($rawFileProperties)));
         }
 
+        /** @var array<string, mixed> $rawFileProperties */
         $parsedFileProperty->setExtension($this->parseExtensionPropertyFromRawFileProperties($rawFileProperties, $element->getId()));
 
         return $parsedFileProperty;

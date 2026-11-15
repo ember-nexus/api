@@ -18,9 +18,6 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
-/**
- * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
- */
 class ElementHydrationSearchStepEventListener
 {
     public const SearchStepType TYPE = SearchStepType::ELEMENT_HYDRATION;
@@ -54,12 +51,27 @@ class ElementHydrationSearchStepEventListener
         return $stepResults[count($stepResults) - 1];
     }
 
+    private function parseUuid(mixed $rawId, string $propertyPath): UuidInterface
+    {
+        if ($rawId instanceof UuidInterface) {
+            return $rawId;
+        }
+        if (!is_string($rawId)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate($propertyPath, 'string', $rawId);
+        }
+        try {
+            return Uuid::fromString($rawId);
+        } catch (InvalidUuidStringException $exception) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate($propertyPath, 'uuid (string)', $rawId, previous: $exception);
+        }
+    }
+
     /**
      * @return UuidInterface[]
      */
     private function getElementIdsFromElementsResult(mixed $stepResult): ?array
     {
-        if (!array_key_exists('elements', $stepResult)) {
+        if (!is_array($stepResult) || !array_key_exists('elements', $stepResult)) {
             return null;
         }
         $elements = $stepResult['elements'];
@@ -68,36 +80,23 @@ class ElementHydrationSearchStepEventListener
         }
         $elementIds = [];
         foreach ($elements as $i => $element) {
-            if (!array_key_exists('id', $element)) {
+            if (!is_array($element) || !array_key_exists('id', $element)) {
                 continue;
             }
-            $rawElementId = $element['id'];
-            if ($rawElementId instanceof UuidInterface) {
-                $elementIds[] = $rawElementId;
-                continue;
-            }
-            if (!is_string($rawElementId)) {
-                throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elements[%d].id', $i), 'string', $rawElementId);
-            }
-            try {
-                $elementIds[] = Uuid::fromString($rawElementId);
-            } catch (InvalidUuidStringException $exception) {
-                throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elements[%d].id', $i), 'uuid (string)', $rawElementId, previous: $exception);
-            }
+            $elementIds[] = $this->parseUuid($element['id'], sprintf('elements[%d].id', (int) $i));
         }
 
         return $elementIds;
     }
 
     /**
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @psalm-suppress MixedAssignment
      *
      * @return UuidInterface[]
      */
     private function getElementIdsFromPathsResult(mixed $stepResult): ?array
     {
-        if (!array_key_exists('paths', $stepResult)) {
+        if (!is_array($stepResult) || !array_key_exists('paths', $stepResult)) {
             return null;
         }
         $paths = $stepResult['paths'];
@@ -106,35 +105,16 @@ class ElementHydrationSearchStepEventListener
         }
         $elementIds = [];
         foreach ($paths as $i => $path) {
-            if (!array_key_exists('nodeIds', $path) || !array_key_exists('relationIds', $path)) {
+            if (!is_array($path) || !array_key_exists('nodeIds', $path) || !array_key_exists('relationIds', $path)) {
                 continue;
             }
-            foreach ($path['nodeIds'] as $j => $rawNodeId) {
-                if ($rawNodeId instanceof UuidInterface) {
-                    $elementIds[] = $rawNodeId;
+            foreach (['nodeIds', 'relationIds'] as $idType) {
+                $rawIds = $path[$idType];
+                if (!is_array($rawIds)) {
                     continue;
                 }
-                if (!is_string($rawNodeId)) {
-                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('paths[%d].nodeIds[%d]', $i, $j), 'string', $rawNodeId);
-                }
-                try {
-                    $elementIds[] = Uuid::fromString($rawNodeId);
-                } catch (InvalidUuidStringException $exception) {
-                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('paths[%d].nodeIds[%d]', $i, $j), 'uuid (string)', $rawNodeId, previous: $exception);
-                }
-            }
-            foreach ($path['relationIds'] as $j => $rawRelationId) {
-                if ($rawRelationId instanceof UuidInterface) {
-                    $elementIds[] = $rawRelationId;
-                    continue;
-                }
-                if (!is_string($rawRelationId)) {
-                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('paths[%d].relationIds[%d]', $i, $j), 'string', $rawRelationId);
-                }
-                try {
-                    $elementIds[] = Uuid::fromString($rawRelationId);
-                } catch (InvalidUuidStringException $exception) {
-                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('paths[%d].relationIds[%d]', $i, $j), 'uuid (string)', $rawRelationId, previous: $exception);
+                foreach ($rawIds as $j => $rawId) {
+                    $elementIds[] = $this->parseUuid($rawId, sprintf('paths[%d].%s[%d]', (int) $i, $idType, (int) $j));
                 }
             }
         }
@@ -145,8 +125,7 @@ class ElementHydrationSearchStepEventListener
     }
 
     /**
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @psalm-suppress MixedAssignment
      *
      * @return UuidInterface[]
      */
@@ -178,24 +157,15 @@ class ElementHydrationSearchStepEventListener
 
         $elementIds = [];
         foreach ($rawElementIds as $i => $rawElementId) {
-            if ($rawElementId instanceof UuidInterface) {
-                $elementIds[] = $rawElementId;
-            } else {
-                if (!is_string($rawElementId)) {
-                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elementId[%d]', $i), 'string', $rawElementId);
-                }
-                try {
-                    $elementIds[] = Uuid::fromString($rawElementId);
-                } catch (InvalidUuidStringException $exception) {
-                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('elementId[%d]', $i), 'uuid (string)', $rawElementId, previous: $exception);
-                }
-            }
+            $elementIds[] = $this->parseUuid($rawElementId, sprintf('elementId[%d]', (int) $i));
         }
 
         return $elementIds;
     }
 
     /**
+     * @psalm-suppress MixedAssignment
+     *
      * @return UuidInterface[]
      */
     private function parseElementIdsFromEvent(SearchStepEvent $event): array

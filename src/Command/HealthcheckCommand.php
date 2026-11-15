@@ -14,6 +14,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use Laudis\Neo4j\Databags\Statement;
+use MongoDB\Model\BSONDocument;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use Predis\Client as RedisClient;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,9 +28,6 @@ use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
- *
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- * @SuppressWarnings("PHPMD.NPathComplexity")
  */
 #[AsCommand(name: 'healthcheck', description: 'Check the health of the API and required databases.')]
 class HealthcheckCommand extends Command
@@ -41,7 +39,7 @@ class HealthcheckCommand extends Command
         private MongoEntityManager $mongoEntityManager,
         private ElasticEntityManager $elasticEntityManager,
         private RedisClient $redisClient,
-        private AMQPStreamConnection $AMQPStreamConnection,
+        private AMQPStreamConnection $amqpStreamConnection,
         private S3Client $s3Client,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
@@ -81,7 +79,12 @@ class HealthcheckCommand extends Command
         }
         $mongo = $mongoClient->selectDatabase($mongoDatabase)->command(['buildInfo' => 1]);
 
-        return $mongo->toArray()[0]->getArrayCopy()['version'];
+        /** @var array<int, BSONDocument> $documents */
+        $documents = $mongo->toArray();
+        /** @var array{version: string} $buildInfo */
+        $buildInfo = $documents[0]->getArrayCopy();
+
+        return $buildInfo['version'];
     }
 
     private function getElasticVersion(): string
@@ -90,21 +93,31 @@ class HealthcheckCommand extends Command
         $elastic = $elasticClient->sendRequest(new Request('GET', '/'));
 
         /**
+         * @var array{version: array{number: string}} $info
+         *
          * @psalm-suppress PossiblyUndefinedMethod
          *
          * @phpstan-ignore-next-line
          */
-        return $elastic->asArray()['version']['number'];
+        $info = $elastic->asArray();
+
+        return $info['version']['number'];
     }
 
     private function getRedisVersion(): string
     {
-        return $this->redisClient->info()['Server']['redis_version'];
+        /** @var array{Server: array{redis_version: string}} $info */
+        $info = $this->redisClient->info();
+
+        return $info['Server']['redis_version'];
     }
 
     private function getRabbitMqVersion(): string
     {
-        return $this->AMQPStreamConnection->getServerProperties()['version'][1];
+        /** @var array{version: array{1: string}} $properties */
+        $properties = $this->amqpStreamConnection->getServerProperties();
+
+        return $properties['version'][1];
     }
 
     private function getS3Provider(): string

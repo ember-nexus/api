@@ -23,7 +23,7 @@ final readonly class PartialUploadRequest implements PartialUploadRequestInterfa
     /**
      * @return resource
      */
-    public function getContent()
+    public function getContent(): mixed
     {
         return $this->content;
     }

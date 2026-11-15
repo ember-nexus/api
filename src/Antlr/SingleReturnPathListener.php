@@ -15,10 +15,6 @@ use Context\UnescapedLabelSymbolicNameStringContext;
 use Exception;
 use LogicException;
 
-/**
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- * @SuppressWarnings("PHPMD.NPathComplexity")
- */
 class SingleReturnPathListener implements ParseTreeListenerInterface
 {
     private int $numberOfReturnClauses = 0;

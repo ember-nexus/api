@@ -38,7 +38,7 @@ class UploadBodyLimitService
      *
      * @return resource
      */
-    public function boundContent($resource, ?int $declaredContentLength): mixed
+    public function boundContent(mixed $resource, ?int $declaredContentLength): mixed
     {
         $this->assertDeclaredLengthWithinLimit($declaredContentLength);
 

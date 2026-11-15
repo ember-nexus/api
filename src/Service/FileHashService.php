@@ -27,7 +27,7 @@ class FileHashService
      *
      * @return array<string, string> algorithm => lowercase hex digest
      */
-    public function calculateHashesFromResource($resource, array $algorithms): array
+    public function calculateHashesFromResource(mixed $resource, array $algorithms): array
     {
         $contexts = [];
         foreach ($algorithms as $algorithm) {

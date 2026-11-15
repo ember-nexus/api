@@ -43,8 +43,8 @@ class CypherPathSearchStepEventListener
      */
     private function parseRawPathFromRow(CypherMap $row): array
     {
-        $rawPath = $row->get('path');
         /** @var Path $rawPath */
+        $rawPath = $row->get('path');
         $nodeIds = [];
         $relationIds = [];
         foreach ($rawPath->getNodes() as $rawNode) {

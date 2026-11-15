@@ -9,7 +9,6 @@ use App\Service\GraphStructureService;
 use App\Type\Response\JsonResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class GetGraphStructureController extends AbstractController
@@ -26,7 +25,7 @@ class GetGraphStructureController extends AbstractController
         name: 'get-graph-structure',
         methods: ['GET']
     )]
-    public function getGraphStructure(): Response
+    public function getGraphStructure(): JsonResponse
     {
         if (!$this->emberNexusConfiguration->isInstanceConfigurationEnabled()) {
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();

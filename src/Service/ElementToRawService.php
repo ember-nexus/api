@@ -18,6 +18,8 @@ class ElementToRawService
     }
 
     /**
+     * @psalm-suppress MixedAssignment
+     *
      * @param bool $applyPropertyBlacklist Whether to honor the property blacklists collected for the element (e.g.
      *                                     a Token's `hash` or a User's `_passwordHash`), keeping them out of HTTP
      *                                     responses. Callers that need the full, unfiltered data for internal

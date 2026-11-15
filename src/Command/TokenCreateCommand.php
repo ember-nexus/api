@@ -9,6 +9,7 @@ use App\Helper\Regex;
 use App\Security\TokenGenerator;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
+use App\Trait\CommandInputTrait;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
 use Ramsey\Uuid\Uuid;
@@ -28,6 +29,8 @@ use function Safe\preg_match;
 #[AsCommand(name: 'token:create', description: 'Creates a new token for an user.')]
 class TokenCreateCommand extends Command
 {
+    use CommandInputTrait;
+
     private OutputStyle $io;
 
     public function __construct(
@@ -59,7 +62,7 @@ class TokenCreateCommand extends Command
 
         $this->io->title('Token Create');
 
-        $identifier = $input->getArgument('identifier');
+        $identifier = $this->getStringArgument($input, 'identifier');
 
         if (preg_match(Regex::UUID_V4, $identifier)) {
             $identifier = Uuid::fromString($identifier);
@@ -114,7 +117,7 @@ class TokenCreateCommand extends Command
         $this->io->writeln(
             sprintf(
                 "  Found user with identifier '<info>%s</info>', user's UUID is <info>%s</info>.",
-                $input->getArgument('identifier'),
+                $this->getStringArgument($input, 'identifier'),
                 $identifier->toString()
             )
         );
@@ -130,7 +133,7 @@ class TokenCreateCommand extends Command
             return Command::FAILURE;
         }
 
-        if (!password_verify($input->getArgument('password'), $user->getProperty('_passwordHash'))) {
+        if (!password_verify($this->getStringArgument($input, 'password'), $user->getStringProperty('_passwordHash'))) {
             $this->io->finalMessage(sprintf(
                 "Error: Provided password for user with id '%s' is incorrect, unable to login.",
                 $identifier->toString()

@@ -9,7 +9,7 @@ interface PartialUploadRequestInterface
     /**
      * @return resource
      */
-    public function getContent();
+    public function getContent(): mixed;
 
     public function getContentType(): string;
 

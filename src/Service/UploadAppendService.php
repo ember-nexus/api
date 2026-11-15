@@ -9,6 +9,7 @@ use App\Contract\UploadInterface;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
+use App\Helper\StreamHelper;
 use App\Type\FileHashAlgorithm;
 use HashContext;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -45,9 +46,6 @@ class UploadAppendService
      * A completing request without body finishes an upload which already has chunks without storing anything, since
      * S3 does not accept empty parts. This is also how a client retries completing an upload whose finalization
      * failed.
-     *
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     public function append(UploadInterface $upload, PartialUploadRequestInterface $partialUploadRequest, ?string $reprDigestHeaderValue): UploadInterface
     {
@@ -151,7 +149,7 @@ class UploadAppendService
     // the request body is buffered by the request factory, so its size is known even without `Content-Length`
     private function getBufferedContentLength(PartialUploadRequestInterface $partialUploadRequest): int
     {
-        return \Safe\fstat($partialUploadRequest->getContent())['size'];
+        return StreamHelper::getSize($partialUploadRequest->getContent());
     }
 
     /**
@@ -159,7 +157,7 @@ class UploadAppendService
      *
      * @param resource $resource
      */
-    private function closeResource($resource): void
+    private function closeResource(mixed $resource): void
     {
         /** @psalm-suppress RedundantConditionGivenDocblockType */
         if (is_resource($resource)) {

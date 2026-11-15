@@ -44,14 +44,18 @@ class CacheClearEtagCommand extends Command
         $count = 0;
         while (!$cursorIsFinished) {
             $res = $this->redisClient->scan($cursor, ['MATCH' => 'etag:*', 'COUNT' => 100]);
+            if (!is_numeric($res[0])) {
+                throw new Exception(sprintf('Expected Redis scan cursor to be numeric, got %s.', get_debug_type($res[0])));
+            }
             $cursor = intval($res[0]);
             $keys = $res[1];
             if (!is_array($keys)) {
-                throw new Exception(sprintf('Expected Redis keys to be array, got %s.', get_class($keys)));
+                throw new Exception(sprintf('Expected Redis keys to be array, got %s.', get_debug_type($keys)));
             }
             if (0 == $cursor) {
                 $cursorIsFinished = true;
             }
+            /** @var string $key */
             foreach ($keys as $key) {
                 $this->redisClient->expire($key, 0);
                 ++$count;

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <psalm
-    errorLevel="5"
+    errorLevel="1"
     resolveFromConfigFile="true"
     findUnusedBaselineEntry="true"
     findUnusedCode="false"
@@ -11,6 +11,7 @@
 >
     <projectFiles>
         <directory name="../src"/>
+        <directory name="../lib/EmberNexusBundle/src"/>
         <ignoreFiles>
             <directory name="../vendor"/>
         </ignoreFiles>

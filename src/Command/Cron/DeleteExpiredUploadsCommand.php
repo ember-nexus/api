@@ -53,7 +53,6 @@ class DeleteExpiredUploadsCommand extends Command
     }
 
     /**
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.CountInLoopExpression")
      */
     protected function execute(InputInterface $input, OutputInterface $output): int

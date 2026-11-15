@@ -31,7 +31,7 @@ class ExpireTokenOnTokenDeleteEventListener
             return;
         }
 
-        $oldTokenHash = $oldToken->getProperty('hash');
+        $oldTokenHash = $oldToken->getNullableStringProperty('hash');
 
         if (null === $oldTokenHash) {
             $this->logger->critical(

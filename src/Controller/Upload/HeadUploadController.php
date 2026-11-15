@@ -7,8 +7,8 @@ namespace App\Controller\Upload;
 use App\Factory\Type\Response\NoContentResponseFactory;
 use App\Helper\Regex;
 use App\Service\UploadAccessService;
+use App\Type\Response\NoContentResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class HeadUploadController extends AbstractController
@@ -27,7 +27,7 @@ class HeadUploadController extends AbstractController
         ],
         methods: ['HEAD']
     )]
-    public function headUpload(string $id): Response
+    public function headUpload(string $id): NoContentResponse
     {
         return $this->noContentResponseFactory->createNoContentResponseWithResumableUploadHeadersFromUpload(
             $this->uploadAccessService->loadAuthorizedUpload($id)

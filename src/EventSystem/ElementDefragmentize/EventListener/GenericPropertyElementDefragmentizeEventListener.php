@@ -35,6 +35,8 @@ class GenericPropertyElementDefragmentizeEventListener
     }
 
     /**
+     * @psalm-suppress MixedAssignment
+     *
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
      */

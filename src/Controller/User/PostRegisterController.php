@@ -12,7 +12,6 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\UserPasswordHasher;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
-use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Type\Response\CreatedResponse;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -21,7 +20,6 @@ use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -39,7 +37,6 @@ class PostRegisterController extends AbstractController
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
-        private RequestContentService $requestContentService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
     ) {
     }
@@ -50,13 +47,13 @@ class PostRegisterController extends AbstractController
         methods: ['POST']
     )]
     #[EndpointWithoutAuthentication]
-    public function postRegister(Request $request): Response
+    public function postRegister(Request $request): CreatedResponse
     {
         if (!$this->emberNexusConfiguration->isRegisterEnabled()) {
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }
 
-        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
+        $body = $this->requestUtilService->getJsonBodyFromRequest($request);
         $rawData = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('User', $body);

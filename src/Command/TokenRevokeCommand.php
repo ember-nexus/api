@@ -9,6 +9,7 @@ use App\Helper\Regex;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
+use App\Trait\CommandInputTrait;
 use App\Type\TokenRevokeEntry;
 use App\Type\TokenStateType;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -28,19 +29,18 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
+use Throwable;
 
 use function Safe\preg_match;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
- *
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- * @SuppressWarnings("PHPMD.NPathComplexity")
- * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[AsCommand(name: 'token:revoke', description: 'Revoke tokens.')]
 class TokenRevokeCommand extends Command
 {
+    use CommandInputTrait;
+
     private EmberNexusStyle $io;
 
     public const string OPTION_FORCE = 'force';
@@ -144,6 +144,11 @@ class TokenRevokeCommand extends Command
         );
     }
 
+    protected function createInvalidInputException(string $detail): Throwable
+    {
+        return $this->server500LogicErrorExceptionFactory->createFromTemplate($detail);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->io = new EmberNexusStyle($input, $output);
@@ -161,7 +166,7 @@ class TokenRevokeCommand extends Command
 
         $this->printAffectedTokens($tokenRevokeEntries);
 
-        if (true === $input->getOption(self::OPTION_DRY_RUN)) {
+        if (true === $this->isOptionActive($input, self::OPTION_DRY_RUN)) {
             $this->io->finalMessage('Dry run finished.');
 
             return Command::SUCCESS;
@@ -195,23 +200,25 @@ class TokenRevokeCommand extends Command
 
     private function validateInput(InputInterface $input): void
     {
-        $this->isForceActive = $input->getOption(self::OPTION_FORCE);
-        $this->isDryRunActive = $input->getOption(self::OPTION_DRY_RUN);
-        $this->isListAllAffectedTokensActive = $input->getOption(self::OPTION_LIST_ALL_AFFECTED_TOKENS);
+        $this->isForceActive = $this->isOptionActive($input, self::OPTION_FORCE);
+        $this->isDryRunActive = $this->isOptionActive($input, self::OPTION_DRY_RUN);
+        $this->isListAllAffectedTokensActive = $this->isOptionActive($input, self::OPTION_LIST_ALL_AFFECTED_TOKENS);
 
-        $this->isFilterIssuedWithExpirationDateActive = $input->getOption(self::OPTION_ISSUED_WITH_EXPIRATION_DATE);
-        $this->isFilterIssuedWithoutExpirationDateActive = $input->getOption(self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE);
+        $this->isFilterIssuedWithExpirationDateActive = $this->isOptionActive($input, self::OPTION_ISSUED_WITH_EXPIRATION_DATE);
+        $this->isFilterIssuedWithoutExpirationDateActive = $this->isOptionActive($input, self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE);
 
         if ($this->isFilterIssuedWithExpirationDateActive && $this->isFilterIssuedWithoutExpirationDateActive) {
             throw new Exception(sprintf('Using both %s and %s is not possible.', self::OPTION_ISSUED_WITH_EXPIRATION_DATE, self::OPTION_ISSUED_WITHOUT_EXPIRATION_DATE));
         }
 
-        if (null !== $input->getOption(self::OPTION_ISSUED_BEFORE)) {
-            $this->issuedBefore = DateTime::createFromFormat('Y-m-d H:i', $input->getOption(self::OPTION_ISSUED_BEFORE));
+        $rawIssuedBefore = $this->getNullableStringOption($input, self::OPTION_ISSUED_BEFORE);
+        if (null !== $rawIssuedBefore) {
+            $this->issuedBefore = DateTime::createFromFormat('Y-m-d H:i', $rawIssuedBefore);
         }
 
-        if (null !== $input->getOption(self::OPTION_ISSUED_AFTER)) {
-            $this->issuedAfter = DateTime::createFromFormat('Y-m-d H:i', $input->getOption(self::OPTION_ISSUED_AFTER));
+        $rawIssuedAfter = $this->getNullableStringOption($input, self::OPTION_ISSUED_AFTER);
+        if (null !== $rawIssuedAfter) {
+            $this->issuedAfter = DateTime::createFromFormat('Y-m-d H:i', $rawIssuedAfter);
         }
 
         if ($this->issuedBefore && $this->issuedAfter) {
@@ -220,8 +227,8 @@ class TokenRevokeCommand extends Command
             }
         }
 
-        if (null !== $input->getOption(self::OPTION_USER)) {
-            $userIdentifier = $input->getOption(self::OPTION_USER);
+        $userIdentifier = $this->getNullableStringOption($input, self::OPTION_USER);
+        if (null !== $userIdentifier) {
             if (preg_match(Regex::UUID_V4, $userIdentifier)) {
                 $this->userId = Uuid::fromString($userIdentifier);
             } else {
@@ -247,8 +254,9 @@ class TokenRevokeCommand extends Command
             }
         }
 
-        if (null !== $input->getOption(self::OPTION_GROUP)) {
-            $this->groupId = Uuid::fromString($input->getOption(self::OPTION_GROUP));
+        $rawGroupId = $this->getNullableStringOption($input, self::OPTION_GROUP);
+        if (null !== $rawGroupId) {
+            $this->groupId = Uuid::fromString($rawGroupId);
         }
     }
 

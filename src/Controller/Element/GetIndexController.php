@@ -9,11 +9,11 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use App\Type\EtagType;
+use App\Type\Response\CollectionResponse;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\CypherList;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
@@ -33,7 +33,7 @@ class GetIndexController extends AbstractController
         methods: ['GET']
     )]
     #[EndpointSupportsEtag(EtagType::INDEX_COLLECTION)]
-    public function getIndex(): Response
+    public function getIndex(): CollectionResponse
     {
         $userId = $this->authProvider->getUserId();
         $cypherClient = $this->cypherEntityManager->getClient();
@@ -65,6 +65,9 @@ class GetIndexController extends AbstractController
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementIds as CypherList, not %s.', get_debug_type($rawElementIds))); // @codeCoverageIgnore
             }
             foreach ($rawElementIds as $elementId) {
+                if (!is_string($elementId)) {
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementIds as list of strings, got %s.', get_debug_type($elementId))); // @codeCoverageIgnore
+                }
                 $nodeIds[] = UuidV4::fromString($elementId);
             }
         }

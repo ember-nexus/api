@@ -7,10 +7,10 @@ namespace EmberNexusBundle\Service;
 use Exception;
 
 /**
- * @SuppressWarnings(PHPMD.CyclomaticComplexity)
- * @SuppressWarnings(PHPMD.NPathComplexity)
- * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
- * @SuppressWarnings(PHPMD.TooManyFields)
+ * @psalm-suppress MissingConstructor
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ * @SuppressWarnings("PHPMD.TooManyFields")
  */
 class EmberNexusConfiguration
 {
@@ -92,39 +92,136 @@ class EmberNexusConfiguration
     private int $fileS3UploadBucketLevelLength;
     private int $fileS3MaxHostConnections;
 
+    /**
+     * @param array<array-key, mixed> $configuration
+     * @param list<string>            $keyParts
+     *
+     * @psalm-suppress MixedAssignment
+     */
     private static function getValueFromConfig(array $configuration, array $keyParts): mixed
     {
         $currentKeyParts = [];
+        $current = $configuration;
         foreach ($keyParts as $keyPart) {
             $currentKeyParts[] = $keyPart;
-            if (!array_key_exists($keyPart, $configuration)) {
+            if (!is_array($current) || !array_key_exists($keyPart, $current)) {
                 throw new Exception(sprintf("Configuration must contain key '%s'.", implode('.', $currentKeyParts)));
             }
-            $configuration = $configuration[$keyPart];
+            $current = $current[$keyPart];
         }
 
-        return $configuration;
+        return $current;
     }
 
-    public static function createFromConfiguration(array $configuration): static
+    /**
+     * @param list<string> $keyParts
+     */
+    private static function createInvalidTypeException(array $keyParts, string $expectedType, mixed $value): Exception
+    {
+        return new Exception(sprintf("Configuration key '%s' must be %s, got %s.", implode('.', $keyParts), $expectedType, get_debug_type($value)));
+    }
+
+    /**
+     * @param array<array-key, mixed> $configuration
+     * @param list<string>            $keyParts
+     */
+    private static function getIntValueFromConfig(array $configuration, array $keyParts): int
+    {
+        $value = self::getValueFromConfig($configuration, $keyParts);
+        if (!is_int($value) && !is_numeric($value)) {
+            throw self::createInvalidTypeException($keyParts, 'int', $value);
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $configuration
+     * @param list<string>            $keyParts
+     */
+    private static function getNullableIntValueFromConfig(array $configuration, array $keyParts): ?int
+    {
+        $value = self::getValueFromConfig($configuration, $keyParts);
+        if (null === $value) {
+            return null;
+        }
+        if (!is_int($value) && !is_numeric($value)) {
+            throw self::createInvalidTypeException($keyParts, 'int or null', $value);
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $configuration
+     * @param list<string>            $keyParts
+     */
+    private static function getIntOrFalseValueFromConfig(array $configuration, array $keyParts): int|false
+    {
+        $value = self::getValueFromConfig($configuration, $keyParts);
+        if (false === $value) {
+            return false;
+        }
+        if (!is_int($value) && !is_numeric($value)) {
+            throw self::createInvalidTypeException($keyParts, 'int or false', $value);
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $configuration
+     * @param list<string>            $keyParts
+     */
+    private static function getStringValueFromConfig(array $configuration, array $keyParts): string
+    {
+        $value = self::getValueFromConfig($configuration, $keyParts);
+        if (!is_scalar($value)) {
+            throw self::createInvalidTypeException($keyParts, 'string', $value);
+        }
+
+        return (string) $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $configuration
+     * @param list<string>            $keyParts
+     */
+    private static function getStringOrFalseValueFromConfig(array $configuration, array $keyParts): string|false
+    {
+        $value = self::getValueFromConfig($configuration, $keyParts);
+        if (false === $value) {
+            return false;
+        }
+        if (!is_scalar($value)) {
+            throw self::createInvalidTypeException($keyParts, 'string or false', $value);
+        }
+
+        return (string) $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $configuration
+     */
+    public static function createFromConfiguration(array $configuration): self
     {
         $emberNexusConfiguration = new self();
 
-        $emberNexusConfiguration->setPageSizeMin((int) self::getValueFromConfig(
+        $emberNexusConfiguration->setPageSizeMin(self::getIntValueFromConfig(
             $configuration,
             [
                 self::PAGE_SIZE,
                 self::PAGE_SIZE_MIN,
             ]
         ));
-        $emberNexusConfiguration->setPageSizeDefault((int) self::getValueFromConfig(
+        $emberNexusConfiguration->setPageSizeDefault(self::getIntValueFromConfig(
             $configuration,
             [
                 self::PAGE_SIZE,
                 self::PAGE_SIZE_DEFAULT,
             ]
         ));
-        $emberNexusConfiguration->setPageSizeMax((int) self::getValueFromConfig(
+        $emberNexusConfiguration->setPageSizeMax(self::getIntValueFromConfig(
             $configuration,
             [
                 self::PAGE_SIZE,
@@ -149,24 +246,20 @@ class EmberNexusConfiguration
                 self::REGISTER_ENABLED,
             ]
         ));
-        $emberNexusConfiguration->setRegisterUniqueIdentifier((string) self::getValueFromConfig(
+        $emberNexusConfiguration->setRegisterUniqueIdentifier(self::getStringValueFromConfig(
             $configuration,
             [
                 self::REGISTER,
                 self::REGISTER_UNIQUE_IDENTIFIER,
             ]
         ));
-        $value = self::getValueFromConfig(
+        $emberNexusConfiguration->setRegisterUniqueIdentifierRegex(self::getStringOrFalseValueFromConfig(
             $configuration,
             [
                 self::REGISTER,
                 self::REGISTER_UNIQUE_IDENTIFIER_REGEX,
             ]
-        );
-        if (false !== $value) {
-            $value = (string) $value;
-        }
-        $emberNexusConfiguration->setRegisterUniqueIdentifierRegex($value);
+        ));
 
         $emberNexusConfiguration->setExpressionEnabled((bool) self::getValueFromConfig(
             $configuration,
@@ -175,31 +268,27 @@ class EmberNexusConfiguration
                 self::EXPRESSION_ENABLED,
             ]
         ));
-        $emberNexusConfiguration->setExpressionWarningLength((int) self::getValueFromConfig(
+        $emberNexusConfiguration->setExpressionWarningLength(self::getIntValueFromConfig(
             $configuration,
             [
                 self::EXPRESSION,
                 self::EXPRESSION_WARNING_LENGTH,
             ]
         ));
-        $emberNexusConfiguration->setExpressionMaxLength((int) self::getValueFromConfig(
+        $emberNexusConfiguration->setExpressionMaxLength(self::getIntValueFromConfig(
             $configuration,
             [
                 self::EXPRESSION,
                 self::EXPRESSION_MAX_LENGTH,
             ]
         ));
-        $value = self::getValueFromConfig(
+        $emberNexusConfiguration->setExpressionTimeoutInMilliseconds(self::getNullableIntValueFromConfig(
             $configuration,
             [
                 self::EXPRESSION,
                 self::EXPRESSION_TIMEOUT_IN_MILLISECONDS,
             ]
-        );
-        if (null !== $value) {
-            $value = (int) $value;
-        }
-        $emberNexusConfiguration->setExpressionTimeoutInMilliseconds($value);
+        ));
 
         $emberNexusConfiguration->setInstanceConfigurationEnabled((bool) self::getValueFromConfig(
             $configuration,
@@ -216,39 +305,34 @@ class EmberNexusConfiguration
             ]
         ));
 
-        $emberNexusConfiguration->setTokenMinLifetimeInSeconds((int) self::getValueFromConfig(
+        $emberNexusConfiguration->setTokenMinLifetimeInSeconds(self::getIntValueFromConfig(
             $configuration,
             [
                 self::TOKEN,
                 self::TOKEN_MIN_LIFETIME_IN_SECONDS,
             ]
         ));
-        $emberNexusConfiguration->setTokenDefaultLifetimeInSeconds((int) self::getValueFromConfig(
+        $emberNexusConfiguration->setTokenDefaultLifetimeInSeconds(self::getIntValueFromConfig(
             $configuration,
             [
                 self::TOKEN,
                 self::TOKEN_DEFAULT_LIFETIME_IN_SECONDS,
             ]
         ));
-        $value = self::getValueFromConfig(
+        $emberNexusConfiguration->setTokenMaxLifetimeInSeconds(self::getIntOrFalseValueFromConfig(
             $configuration,
             [
                 self::TOKEN,
                 self::TOKEN_MAX_LIFETIME_IN_SECONDS,
             ]
-        );
-        $emberNexusConfiguration->setTokenMaxLifetimeInSeconds($value);
-        $value = self::getValueFromConfig(
+        ));
+        $emberNexusConfiguration->setTokenDeleteExpiredTokensAutomaticallyInSeconds(self::getIntOrFalseValueFromConfig(
             $configuration,
             [
                 self::TOKEN,
                 self::TOKEN_DELETE_EXPIRED_TOKENS_AUTOMATICALLY_IN_SECONDS,
             ]
-        );
-        if (false !== $value) {
-            $value = (int) $value;
-        }
-        $emberNexusConfiguration->setTokenDeleteExpiredTokensAutomaticallyInSeconds($value);
+        ));
 
         if (false !== $emberNexusConfiguration->getTokenMaxLifetimeInSeconds()) {
             if ($emberNexusConfiguration->getTokenMaxLifetimeInSeconds() < $emberNexusConfiguration->getTokenMinLifetimeInSeconds()) {
@@ -262,25 +346,23 @@ class EmberNexusConfiguration
             throw new Exception('token default lifetime must be equal or longer to min lifetime.');
         }
 
-        $value = self::getValueFromConfig(
+        $emberNexusConfiguration->setCacheEtagSeed(self::getStringValueFromConfig(
             $configuration,
             [
                 self::CACHE,
                 self::CACHE_ETAG_SEED,
             ]
-        );
-        $emberNexusConfiguration->setCacheEtagSeed($value);
+        ));
 
-        $value = self::getValueFromConfig(
+        $emberNexusConfiguration->setCacheEtagUpperLimitInCollectionEndpoints(self::getIntValueFromConfig(
             $configuration,
             [
                 self::CACHE,
                 self::CACHE_ETAG_UPPER_LIMIT_IN_COLLECTION_ENDPOINTS,
             ]
-        );
-        $emberNexusConfiguration->setCacheEtagUpperLimitInCollectionEndpoints($value);
+        ));
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -289,7 +371,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileMaxFileSizeInBytes($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -298,7 +380,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileUploadExpiresAfterFirstRequestInSeconds($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -307,7 +389,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileUploadChunkDigitsLength($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -316,7 +398,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileUploadMinChunkSizeInBytes($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -329,7 +411,7 @@ class EmberNexusConfiguration
             throw new Exception(sprintf('%s.%s can not be smaller than %s.%s.', self::FILE, self::FILE_UPLOAD_MAX_CHUNK_SIZE_IN_BYTES, self::FILE, self::FILE_UPLOAD_MIN_CHUNK_SIZE_IN_BYTES));
         }
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -338,7 +420,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileExpiredUploadCanBeDeletedAfterExpirationInSeconds($value);
 
-        $value = (string) self::getValueFromConfig(
+        $value = self::getStringValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -347,7 +429,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileS3StorageBucket($value);
 
-        $value = (string) self::getValueFromConfig(
+        $value = self::getStringValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -356,7 +438,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileS3UploadBucket($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -365,7 +447,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileS3StorageBucketLevels($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -374,7 +456,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileS3StorageBucketLevelLength($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -383,7 +465,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileS3UploadBucketLevels($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -392,7 +474,7 @@ class EmberNexusConfiguration
         );
         $emberNexusConfiguration->setFileS3UploadBucketLevelLength($value);
 
-        $value = (int) self::getValueFromConfig(
+        $value = self::getIntValueFromConfig(
             $configuration,
             [
                 self::FILE,
@@ -462,7 +544,7 @@ class EmberNexusConfiguration
         if (0 === strlen($registerUniqueIdentifier)) {
             throw new Exception('Unique identifier can not be an empty string.');
         }
-        if (!preg_match('/^[A-Za-z0-9_]+$/', $registerUniqueIdentifier)) {
+        if (!\Safe\preg_match('/^[A-Za-z0-9_]+$/', $registerUniqueIdentifier)) {
             throw new Exception("Unique identifier must only contain alphanumeric characters and '_'.");
         }
         $this->registerUniqueIdentifier = $registerUniqueIdentifier;
@@ -598,19 +680,19 @@ class EmberNexusConfiguration
         return $this->tokenMaxLifetimeInSeconds;
     }
 
-    public function setTokenMaxLifetimeInSeconds(bool|int $tokenMaxLifetimeInSeconds): static
+    public function setTokenMaxLifetimeInSeconds(int|false $tokenMaxLifetimeInSeconds): static
     {
         $this->tokenMaxLifetimeInSeconds = $tokenMaxLifetimeInSeconds;
 
         return $this;
     }
 
-    public function getTokenDeleteExpiredTokensAutomaticallyInSeconds(): bool|int
+    public function getTokenDeleteExpiredTokensAutomaticallyInSeconds(): int|false
     {
         return $this->tokenDeleteExpiredTokensAutomaticallyInSeconds;
     }
 
-    public function setTokenDeleteExpiredTokensAutomaticallyInSeconds(bool|int $tokenDeleteExpiredTokensAutomaticallyInSeconds): static
+    public function setTokenDeleteExpiredTokensAutomaticallyInSeconds(int|false $tokenDeleteExpiredTokensAutomaticallyInSeconds): static
     {
         $this->tokenDeleteExpiredTokensAutomaticallyInSeconds = $tokenDeleteExpiredTokensAutomaticallyInSeconds;
 

@@ -7,7 +7,6 @@ namespace App\Controller\System;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Type\Response\TextResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class GetWellKnownSecurityTxtController extends AbstractController
@@ -24,7 +23,7 @@ class GetWellKnownSecurityTxtController extends AbstractController
         name: 'get-well-known-security-txt',
         methods: ['GET']
     )]
-    public function getWellKnownSecurityTxt(): Response
+    public function getWellKnownSecurityTxt(): TextResponse
     {
         if (!file_exists(self::PATH_TO_WELL_KNOWN_SECURITY_TXT)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();

@@ -32,7 +32,7 @@ class IncrementalHashService
      *
      * @param resource $resource
      */
-    public function updateFromResource(HashContext $context, $resource): void
+    public function updateFromResource(HashContext $context, mixed $resource): void
     {
         hash_update_stream($context, $resource);
         \Safe\rewind($resource);

@@ -6,9 +6,6 @@ namespace App\Tests\ExampleGenerationControllerWithDefaultConfiguration;
 
 use Psr\Http\Message\ResponseInterface;
 
-/**
- * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
- */
 abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestTestCase
 {
     /**
@@ -173,9 +170,6 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
             && str_starts_with($response->getHeaderLine('Content-Type'), 'application/problem+json');
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     */
     public function assertBodyInDocumentationIsIdenticalToBodyFromRequest(
         string $pathToProjectRoot,
         string $pathToDocumentationFile,

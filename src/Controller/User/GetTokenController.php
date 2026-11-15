@@ -8,8 +8,8 @@ use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AuthProvider;
 use App\Service\ElementResponseService;
+use App\Type\Response\ElementResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class GetTokenController extends AbstractController
@@ -27,7 +27,7 @@ class GetTokenController extends AbstractController
         name: 'get-token',
         methods: ['GET']
     )]
-    public function getToken(): Response
+    public function getToken(): ElementResponse
     {
         if ($this->authProvider->isAnonymous()) {
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();

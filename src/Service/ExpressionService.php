@@ -14,10 +14,6 @@ use stdClass;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
-/**
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- * @SuppressWarnings("PHPMD.NPathComplexity")
- */
 class ExpressionService
 {
     public function __construct(
@@ -116,8 +112,9 @@ class ExpressionService
             $stdOut = $process->getErrorOutput();
             $detailErrorMessage = 'unknown error';
             if ('' !== $stdOut) {
+                /** @var array<array-key, mixed>|string|int|float|bool|null $tmp */
                 $tmp = \Safe\json_decode($stdOut, true);
-                if (array_key_exists('error', $tmp)) {
+                if (is_array($tmp) && isset($tmp['error']) && is_string($tmp['error'])) {
                     $detailErrorMessage = $tmp['error'];
                 }
             }

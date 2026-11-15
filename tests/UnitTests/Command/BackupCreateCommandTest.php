@@ -70,9 +70,6 @@ class BackupCreateCommandTest extends TestCase
      *                                                       from S3
      * @param int                   $uploadCount             number of unfinished `Upload` nodes reported by the
      *                                                       database
-     *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     private function runCommand(array $fileContents, array $input = [], array $missingElementIds = [], int $uploadCount = 0, array $missingFromS3ElementIds = []): CommandTester
     {

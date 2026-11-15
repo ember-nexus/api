@@ -124,10 +124,7 @@ class EtagCalculatorService
         if (!($rawSortedTuples instanceof CypherList)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
-        foreach ($rawSortedTuples as $idUpdatedPair) {
-            $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
-            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
-        }
+        $this->addSortedTuples($etagCalculator, $rawSortedTuples);
 
         $etag = $etagCalculator->getEtag();
 
@@ -196,10 +193,7 @@ class EtagCalculatorService
         if (!($rawSortedTuples instanceof CypherList)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
-        foreach ($rawSortedTuples as $idUpdatedPair) {
-            $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
-            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
-        }
+        $this->addSortedTuples($etagCalculator, $rawSortedTuples);
 
         $etag = $etagCalculator->getEtag();
 
@@ -267,10 +261,7 @@ class EtagCalculatorService
         if (!($rawSortedTuples instanceof CypherList)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
-        foreach ($rawSortedTuples as $idUpdatedPair) {
-            $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
-            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
-        }
+        $this->addSortedTuples($etagCalculator, $rawSortedTuples);
 
         $etag = $etagCalculator->getEtag();
 
@@ -338,10 +329,7 @@ class EtagCalculatorService
         if (!($rawSortedTuples instanceof CypherList)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property sortedTuples as array, not %s.', get_debug_type($rawSortedTuples))); // @codeCoverageIgnore
         }
-        foreach ($rawSortedTuples as $idUpdatedPair) {
-            $etagCalculator->addUuid(Uuid::fromString($idUpdatedPair[0]));
-            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
-        }
+        $this->addSortedTuples($etagCalculator, $rawSortedTuples);
 
         $etag = $etagCalculator->getEtag();
 
@@ -376,8 +364,7 @@ class EtagCalculatorService
             return null;
         }
 
-        $rawFileProperties = $element->hasProperty('file') ? $element->getProperty('file') : null;
-        $fileHash = $this->extractPreferredHashFromFileProperties($rawFileProperties);
+        $fileHash = $this->extractPreferredHashFromFileProperties($element->hasProperty('file') ? $element->getProperty('file') : null);
 
         $etagCalculator = new EtagCalculator($this->emberNexusConfiguration->getCacheEtagSeed());
         $etagCalculator->addString((string) $elementEtag);
@@ -400,10 +387,25 @@ class EtagCalculatorService
     }
 
     /**
+     * @param CypherList<mixed> $sortedTuples list of [id, updated] pairs
+     */
+    private function addSortedTuples(EtagCalculator $etagCalculator, CypherList $sortedTuples): void
+    {
+        /** @var CypherList<mixed> $idUpdatedPair */
+        foreach ($sortedTuples as $idUpdatedPair) {
+            $rawId = $idUpdatedPair[0];
+            if (!is_string($rawId)) {
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return sortedTuples ids as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+            }
+            $etagCalculator->addUuid(Uuid::fromString($rawId));
+            $etagCalculator->addDateTime(DateTimeHelper::getDateTimeFromLaudisObject($idUpdatedPair[1]));
+        }
+    }
+
+    /**
      * Prefers `sha256`, otherwise uses the alphabetically first algorithm for determinism.
      *
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @psalm-suppress MixedAssignment
      */
     private function extractPreferredHashFromFileProperties(mixed $rawFileProperties): ?string
     {

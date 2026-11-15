@@ -7,7 +7,6 @@ namespace App\Controller\Error;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Type\Response\TextResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 use function Safe\preg_match;
@@ -24,7 +23,7 @@ class ExceptionDetailController extends AbstractController
         name: 'exception-detail',
         methods: ['GET']
     )]
-    public function exceptionDetail(string $code, string $name): Response
+    public function exceptionDetail(string $code, string $name): TextResponse
     {
         if (preg_match('/[^0-9]/', $code)) {
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();

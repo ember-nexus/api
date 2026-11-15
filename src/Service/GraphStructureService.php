@@ -10,10 +10,6 @@ use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
-/**
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- * @SuppressWarnings("PHPMD.NPathComplexity")
- */
 class GraphStructureService
 {
     /**
@@ -75,7 +71,7 @@ class GraphStructureService
         $truncatedElasticIndex = substr($elasticIndex, 5);
         $nodeTypes = $this->getNodeTypes();
 
-        return array_find($nodeTypes, fn ($nodeType) => strtolower($nodeType) === $truncatedElasticIndex);
+        return array_find($nodeTypes, fn (string $nodeType) => strtolower($nodeType) === $truncatedElasticIndex);
     }
 
     public function getRelationTypeFromElasticIndex(string $elasticIndex): ?string
@@ -86,7 +82,7 @@ class GraphStructureService
         $truncatedElasticIndex = substr($elasticIndex, 9);
         $relationTypes = $this->getRelationTypes();
 
-        return array_find($relationTypes, fn ($relationType) => strtolower($relationType) === $truncatedElasticIndex);
+        return array_find($relationTypes, fn (string $relationType) => strtolower($relationType) === $truncatedElasticIndex);
     }
 
     public function loadGraphStructure(): void
@@ -100,7 +96,9 @@ class GraphStructureService
         $nodeTypes = [];
         foreach ($results as $result) {
             /** @var CypherMap $result */
-            $nodeTypes[] = $result->get('label');
+            /** @var string $label */
+            $label = $result->get('label');
+            $nodeTypes[] = $label;
         }
 
         $results = $cypherClient->readTransaction(static function (TransactionInterface $tsx): SummarizedResult {
@@ -110,7 +108,9 @@ class GraphStructureService
         $relationTypes = [];
         foreach ($results as $result) {
             /** @var CypherMap $result */
-            $relationTypes[] = $result->get('relationshipType');
+            /** @var string $relationType */
+            $relationType = $result->get('relationshipType');
+            $relationTypes[] = $relationType;
         }
 
         $this->nodeTypes = $nodeTypes;

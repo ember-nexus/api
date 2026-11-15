@@ -33,10 +33,6 @@ class Client400BadContentExceptionFactory
         );
     }
 
-    /**
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
-     */
     private function getContentSummary(mixed $content): string
     {
         if (is_string($content)) {

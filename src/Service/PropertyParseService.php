@@ -25,10 +25,10 @@ class PropertyParseService
     {
         $uploadLength = null;
         if (array_key_exists('uploadLength', $properties)) {
-            $uploadLength = $properties['uploadLength'];
-            if (!is_int($uploadLength)) {
+            if (!is_int($properties['uploadLength'])) {
                 throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property uploadLength to be either int or to be absent.');
             }
+            $uploadLength = $properties['uploadLength'];
             if ($uploadLength < 0) {
                 throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property uploadLength to be positive int.');
             }
@@ -134,6 +134,7 @@ class PropertyParseService
             }
         }
 
+        /** @var list<string> $chunkIds */
         return $chunkIds;
     }
 

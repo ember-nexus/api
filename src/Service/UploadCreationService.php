@@ -12,9 +12,11 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Factory\Type\Response\NoContentResponseFactory;
 use App\Factory\Type\S3\S3OperationFactory;
+use App\Helper\StreamHelper;
 use App\Security\AuthProvider;
 use App\Type\FileHashAlgorithm;
 use App\Type\Response\CreatedResponse;
+use App\Type\Response\NoContentResponse;
 use App\Type\Upload;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -89,7 +91,7 @@ class UploadCreationService
         NodeElementInterface|RelationElementInterface $element,
         ResumableUploadRequestInterface $resumableUploadRequest,
         array $requestDigestHeaderValues,
-    ): Response {
+    ): CreatedResponse {
         $this->stopwatch->start(self::PROFILER_DIRECT_UPLOAD_LENGTH_CHECK);
         $contentLength = $resumableUploadRequest->getContentLength();
         if (null !== $contentLength) {
@@ -154,7 +156,7 @@ class UploadCreationService
         }
     }
 
-    private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest, bool $targetHadFileAtCreation): Response
+    private function createNewResumableUpload(ResumableUploadRequestInterface $resumableUploadRequest, bool $targetHadFileAtCreation): NoContentResponse
     {
         $uploadLength = $resumableUploadRequest->getUploadLength();
         if (null !== $uploadLength) {
@@ -168,7 +170,7 @@ class UploadCreationService
         $hashState = null;
         $resource = $resumableUploadRequest->getContent();
         // the body is buffered by the request factory, so its size is known even without `Content-Length`
-        $contentLength = $resumableUploadRequest->getContentLength() ?? \Safe\fstat($resource)['size'];
+        $contentLength = $resumableUploadRequest->getContentLength() ?? StreamHelper::getSize($resource);
         if (0 === $contentLength) {
             // an empty first chunk only creates the upload, S3 does not accept empty parts
             /** @psalm-suppress RedundantConditionGivenDocblockType */
