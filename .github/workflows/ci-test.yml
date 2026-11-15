@@ -206,7 +206,7 @@ jobs:
           docker run --rm --network host \
             -v $(pwd)/docs:/docs -w /docs \
             -e BASE_URL=http://127.0.0.1:4322 \
-            mcr.microsoft.com/playwright:v1.62.1-noble npx playwright test
+            mcr.microsoft.com/playwright:v1.65.1-noble npx playwright test
       - name: Docs container logs
         if: always()
         run: docker logs docs-preview || true

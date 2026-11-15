@@ -53,7 +53,11 @@ $E2E_COMPOSE up -d e2e
 
 status=0
 echo "==> running playwright"
-$E2E_COMPOSE exec e2e npx playwright test "$@" || status=$?
+# Run as uid/gid 1000 (the `astro` user the docs container uses, see docker/docs/Dockerfile), not the
+# container's default root: /docs is a bind mount shared with the docs container, and root-owned
+# files left in test-results/ make later `pnpm run test:e2e` runs there fail with EACCES.
+# HOME is pointed at /tmp because uid 1000 has no home directory in the Playwright image (npx cache).
+$E2E_COMPOSE exec --user 1000:1000 -e HOME=/tmp e2e npx playwright test "$@" || status=$?
 
 echo "==> stopping preview server"
 $DOCS_COMPOSE exec --user astro docs sh -c "$KILL_PREVIEW"

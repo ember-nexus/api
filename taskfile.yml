@@ -27,6 +27,10 @@ tasks:
     cmds:
       - docker compose -f ./tools/docker-compose.yml exec api /bin/bash
 
+  dev:docs:cli:
+    cmds:
+      - docker compose -f ./tools/docker-compose.yml exec docs bash
+
   dev:docs:serve:
     desc: Run the Astro dev server interactively inside the `docs` container started by dev:up (installs dependencies first).
     cmds:

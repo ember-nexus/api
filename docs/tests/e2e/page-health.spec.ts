@@ -33,7 +33,12 @@ for (const route of routes) {
   test(`page health — ${route}`, async ({ page }, testInfo) => {
     const consoleErrors: string[] = [];
     page.on("console", (msg) => {
-      if (msg.type() === "error") consoleErrors.push(msg.text());
+      if (msg.type() !== "error") return;
+      // External requests are blocked on purpose (see playwright.config.ts); their
+      // "Failed to load resource" console errors are expected and not a page defect.
+      const url = msg.location().url;
+      if (url && new URL(url).origin !== new URL(page.url()).origin) return;
+      consoleErrors.push(msg.text());
     });
 
     const pageErrors: string[] = [];

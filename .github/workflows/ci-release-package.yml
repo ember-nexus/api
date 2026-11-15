@@ -113,6 +113,9 @@ jobs:
           echo "Regenerate docs/src/data/swagger.json so it reflects the bumped recordings and info.version"
           node docs/scripts/generate-swagger.mjs
 
+          echo "Refresh the committed public copy too: docs/public/swagger.json is tracked in git, but only the docs build's copy-swagger Vite plugin writes it - and that build runs in a separate job whose output never reaches the release commit"
+          cp docs/src/data/swagger.json docs/public/swagger.json
+
       - name: Update changelog unreleased section with new version
         uses: superfaceai/release-changelog-action@v3
         with:
