@@ -6,12 +6,14 @@ namespace App\Tests\EndToEndTests\Endpoint\Upload;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * `Upload.uploadTarget` is a plain property, not a graph edge, so deleting an element does not remove uploads
  * targeting it; this verifies they are cleaned up immediately anyway, both with and without already uploaded
  * chunks.
  */
+#[Group('test')]
 class DeletingElementCleansUpInProgressUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

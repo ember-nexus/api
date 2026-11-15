@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * A file's storage key includes its extension, so replacing a file with one of a different extension writes to a
  * new key. Verifies only the new content and extension are served afterwards.
  */
+#[Group('test')]
 class ReplaceFileWithDifferentExtensionTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\General\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies the download filename in `Content-Disposition`: the element's string 'name' property if set, otherwise
  * its id, with the stored extension appended. An empty extension (e.g. 'Makefile') is downloaded with no
  * extension at all, not even a trailing dot.
  */
+#[Group('test')]
 class FileNameFallbackTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

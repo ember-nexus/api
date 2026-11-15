@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\General\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that a file is removed from storage once the element it was attached to is deleted, even though the
  * file itself was never explicitly deleted through the file endpoint.
  */
+#[Group('test')]
 class FileRemovedWhenElementRemovedTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

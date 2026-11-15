@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\General\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Covers RFC 9530 ("Digest Fields") support: the `Repr-Digest` response header on file downloads, and
  * client-supplied `Repr-Digest` request headers being verified against the uploaded file.
  */
+#[Group('test')]
 class FileDigestTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

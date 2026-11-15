@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\General\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Covers the simplest possible file lifecycle: create an element, attach a file directly with POST, replace it
  * with PUT, delete it, then verify it is gone.
  */
+#[Group('test')]
 class SimpleFileInteractivityTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

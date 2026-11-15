@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\Upload;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that deleting an in-progress resumable upload removes it, so that further HEAD or PATCH requests
  * against it fail.
  */
+#[Group('test')]
 class DeleteUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

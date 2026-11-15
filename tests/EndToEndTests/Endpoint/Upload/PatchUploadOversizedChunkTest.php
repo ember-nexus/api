@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\Upload;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that PATCH chunks above the maximum chunk size are rejected, including the completing chunk, since each
  * chunk becomes one S3 multipart part. The limit is read from the `Upload-Limit` header (`max-append-size`).
  */
+#[Group('test')]
 class PatchUploadOversizedChunkTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

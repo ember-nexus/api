@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\Upload;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that a zero-length file can be created through the resumable upload flow: an empty creation request
  * followed by an empty completing PATCH. This goes through the S3 multipart merge path rather than a direct upload.
  */
+#[Group('test')]
 class ZeroByteResumableUploadTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
