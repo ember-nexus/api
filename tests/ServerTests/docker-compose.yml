@@ -32,6 +32,8 @@ services:
     volumes:
       - ../EndToEndTests/well-known-security.txt:/well-known-security.txt
       - ./ini:/server-test-ini:ro
+      # script which compiles deeply nested expressions in a thread of the web server, see StackSizeTest
+      - ./public/server-test-stack-depth.php:/var/www/html/public/server-test-stack-depth.php:ro
     environment:
       # additional php.ini directory, only used by scenarios which need a different PHP configuration
       - PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:${SERVER_TEST_INI_DIR:-/server-test-ini/default}

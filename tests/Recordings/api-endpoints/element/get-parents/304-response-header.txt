@@ -4,6 +4,7 @@ Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
 Allow: GET, HEAD, OPTIONS
 Cache-Control: no-cache, private
-Date: Fri, 02 Oct 2026 22:37:56 GMT
-Etag: "5eT3LcZFgR0"
+Date: Sun, 15 Nov 2026 20:45:13 GMT
+Etag: "e1oclh8RGUb"
+Vary: Accept-Encoding
 X-Powered-By: Ember Nexus API

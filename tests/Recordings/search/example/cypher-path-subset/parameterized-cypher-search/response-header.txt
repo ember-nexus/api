@@ -5,6 +5,7 @@ Access-Control-Expose-Headers: ETag, Location
 Allow: OPTIONS, POST
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
-Date: Sat, 03 Oct 2026 17:29:29 GMT
+Date: Sun, 15 Nov 2026 20:45:25 GMT
 Transfer-Encoding: chunked
+Vary: Accept-Encoding
 X-Powered-By: Ember Nexus API

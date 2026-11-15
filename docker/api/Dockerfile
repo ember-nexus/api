@@ -316,7 +316,7 @@ WORKDIR /go/src/app
 # https://github.com/dunglas/frankenphp/blob/main/alpine.Dockerfile
 RUN CGO_ENABLED=1 \
     XCADDY_SETCAP=1 \
-    XCADDY_GO_BUILD_FLAGS="-tags=nobadger,nomysql,nopgx -ldflags='-w -s -extldflags \'-Wl,-z,stack-size=0x800000\' -X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ${FRANKENPHP_VERSION} PHP ${PHP_VERSION} Caddy\' -X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\''" \
+    XCADDY_GO_BUILD_FLAGS="-tags=nobadger,nomysql,nopgx -ldflags=\"-w -s -extldflags '-Wl,-z,stack-size=0x800000' -X 'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ${FRANKENPHP_VERSION} PHP ${PHP_VERSION} Caddy' -X 'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy'\"" \
     CGO_CFLAGS="-DFRANKENPHP_VERSION=${FRANKENPHP_VERSION} $(php-config --includes) $PHP_CFLAGS" \
     CGO_CPPFLAGS="$PHP_CPPFLAGS" \
     CGO_LDFLAGS="$(php-config --ldflags) $(php-config --libs) -lssl -lcrypto -lreadline -largon2 -lcurl -lonig -lz $PHP_LDFLAGS" \
@@ -328,7 +328,7 @@ RUN CGO_ENABLED=1 \
         --with github.com/baldinof/caddy-supervisor \
     && setcap cap_net_bind_service=+ep /usr/local/bin/frankenphp \
     && /usr/local/bin/frankenphp version \
-    && /usr/local/bin/frankenphp version | grep -q "^v${CADDY_VERSION} " \
+    && /usr/local/bin/frankenphp version | grep -q "Caddy v${CADDY_VERSION} " \
     && /usr/local/bin/frankenphp build-info \
     && strip --strip-all /usr/local/bin/frankenphp \
     && upx --best --lzma /usr/local/bin/frankenphp \
