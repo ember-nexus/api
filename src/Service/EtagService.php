@@ -41,7 +41,11 @@ class EtagService
             if (!$request->attributes->has('id')) {
                 throw new Exception('Route should have attribute id.');
             }
-            $requestId = Uuid::fromString($request->attributes->get('id'));
+            $rawRequestId = $request->attributes->get('id');
+            if (!is_string($rawRequestId)) {
+                throw new Exception(sprintf('Route attribute id should be string, got %s.', get_debug_type($rawRequestId)));
+            }
+            $requestId = Uuid::fromString($rawRequestId);
             // Conditional requests must not reveal whether an element exists or changed, so the user needs the same
             // access as the controller requires; answers exactly like the controller does without access.
             if (!$this->accessChecker->hasAccessToElement($this->authProvider->getUserId(), $requestId, $this->getRequiredAccessType($request, $etagType))) {

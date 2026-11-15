@@ -20,6 +20,11 @@ trait PropertiesTrait
         return $this;
     }
 
+    /**
+     * @psalm-suppress MixedAssignment
+     *
+     * @param iterable<string, mixed> $properties
+     */
     public function addProperties(iterable $properties): static
     {
         foreach ($properties as $name => $value) {
@@ -41,6 +46,51 @@ trait PropertiesTrait
         }
 
         return $this->properties[$name];
+    }
+
+    /**
+     * @throws Exception if the property does not exist or is not a string
+     */
+    public function getStringProperty(string $name): string
+    {
+        $value = $this->getProperty($name);
+        if (!is_string($value)) {
+            throw new Exception(sprintf('Expected property "%s" to be of type string, got %s.', $name, get_debug_type($value)));
+        }
+
+        return $value;
+    }
+
+    /**
+     * @throws Exception if the property exists but is neither string nor null
+     */
+    public function getNullableStringProperty(string $name): ?string
+    {
+        if (!$this->hasProperty($name)) {
+            return null;
+        }
+        $value = $this->getProperty($name);
+        if (null !== $value && !is_string($value)) {
+            throw new Exception(sprintf('Expected property "%s" to be of type string or null, got %s.', $name, get_debug_type($value)));
+        }
+
+        return $value;
+    }
+
+    /**
+     * @return array<string, mixed>
+     *
+     * @throws Exception if the property does not exist or is not an array
+     */
+    public function getArrayProperty(string $name): array
+    {
+        $value = $this->getProperty($name);
+        if (!is_array($value)) {
+            throw new Exception(sprintf('Expected property "%s" to be of type array, got %s.', $name, get_debug_type($value)));
+        }
+
+        /** @var array<string, mixed> $value */
+        return $value;
     }
 
     /**

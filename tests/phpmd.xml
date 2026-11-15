@@ -12,15 +12,33 @@
         <exclude name="BooleanArgumentFlag"/>
     </rule>
     <rule ref="rulesets/codesize.xml">
+        <exclude name="CyclomaticComplexity"/>
+        <exclude name="NPathComplexity"/>
+        <exclude name="ExcessiveClassComplexity"/>
         <exclude name="ExcessiveMethodLength"/>
         <exclude name="TooManyPublicMethods"/>
         <exclude name="TooManyMethods"/>
         <exclude name="ExcessivePublicCount"/>
         <exclude name="ExcessiveParameterList"/>
     </rule>
+    <!-- Raised limits, so only outliers are flagged. -->
+    <rule ref="rulesets/codesize.xml/CyclomaticComplexity">
+        <properties>
+            <property name="reportLevel" value="15"/>
+        </properties>
+    </rule>
+    <rule ref="rulesets/codesize.xml/NPathComplexity">
+        <properties>
+            <property name="minimum" value="2000"/>
+        </properties>
+    </rule>
+    <rule ref="rulesets/codesize.xml/ExcessiveClassComplexity">
+        <properties>
+            <property name="maximum" value="80"/>
+        </properties>
+    </rule>
     <rule ref="rulesets/controversial.xml">
         <exclude name="CamelCaseClassName"/>
-        <exclude name="CamelCaseParameterName"/>
         <exclude name="Superglobals"/>
     </rule>
     <rule ref="rulesets/design.xml">
@@ -32,6 +50,12 @@
         <exclude name="LongVariable"/>
         <exclude name="LongClassName"/>
         <exclude name="LongMethodName"/>
+    </rule>
+    <!-- Short names only for ids, console style and conventional variables. -->
+    <rule ref="rulesets/naming.xml/ShortVariable">
+        <properties>
+            <property name="exceptions" value="id,io,i,j,a,b,c,d,fh"/>
+        </properties>
     </rule>
     <rule ref="rulesets/unusedcode.xml"/>
     <exclude-pattern>*/lib/Antlr/dist/*</exclude-pattern>

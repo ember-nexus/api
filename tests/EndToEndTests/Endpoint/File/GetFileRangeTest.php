@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Exercises the `Range` header on `GET /<id>/file` against the read-only "Rose" image from the
  * "general.botanicExample" reference dataset scenario (138937 bytes).
  */
+#[Group('test')]
 class GetFileRangeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

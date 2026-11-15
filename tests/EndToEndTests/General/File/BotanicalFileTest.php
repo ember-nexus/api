@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\General\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests file download, replace and delete against images of the "general.botanicExample" reference dataset
  * scenario. Mutating tests only use plants which are not referenced by any other test or documentation example.
  */
+#[Group('test')]
 class BotanicalFileTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

@@ -91,7 +91,7 @@ class S3OperationFactory
      * @param resource $resource
      * @param int|null $contentLength when known, enables a multipart upload for large files
      */
-    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, $resource, ?int $contentLength = null): UploadFileOperationInterface
+    public function createUploadFileOperationFromElementAndResource(NodeElementInterface|RelationElementInterface $element, mixed $resource, ?int $contentLength = null): UploadFileOperationInterface
     {
         $elementId = $element->getId();
         if (null === $elementId) {

@@ -6,10 +6,12 @@ namespace App\Tests\EndToEndTests\General\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
 use DateTime;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that attaching, replacing or deleting a file moves the element's 'updated' timestamp and ETag forward.
  */
+#[Group('test')]
 class FileUploadUpdatesElementTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

@@ -92,12 +92,10 @@ class ExpiredUploadDeletionAttemptService
         if (!is_array($data)) {
             return ['attempts' => 0, 'notBefore' => 0];
         }
-        $attempts = $data['attempts'] ?? 0;
-        $notBefore = $data['notBefore'] ?? 0;
 
         return [
-            'attempts' => is_int($attempts) ? $attempts : 0,
-            'notBefore' => is_int($notBefore) ? $notBefore : 0,
+            'attempts' => isset($data['attempts']) && is_int($data['attempts']) ? $data['attempts'] : 0,
+            'notBefore' => isset($data['notBefore']) && is_int($data['notBefore']) ? $data['notBefore'] : 0,
         ];
     }
 }

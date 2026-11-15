@@ -21,10 +21,6 @@ class IfNoneMatchControllerEventListener
 
     // RFC 9110, Section 13.2.2: If-Match is evaluated first, so this needs a lower priority than
     // IfMatchControllerEventListener
-    /**
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
-     */
     #[AsEventListener(priority: 128)]
     public function onKernelController(ControllerEvent $event): void
     {

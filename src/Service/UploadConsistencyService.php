@@ -34,10 +34,9 @@ class UploadConsistencyService
      */
     public function assertConsistent(NodeElementInterface|RelationElementInterface $uploadElement, UploadInterface $upload): void
     {
-        $storedLastChunkId = $uploadElement->hasProperty('lastChunkId') ? $uploadElement->getProperty('lastChunkId') : null;
-        if (null !== $storedLastChunkId && !is_string($storedLastChunkId)) {
-            $storedLastChunkId = false;
-        }
+        /** @psalm-suppress MixedAssignment */
+        $rawStoredLastChunkId = $uploadElement->hasProperty('lastChunkId') ? $uploadElement->getProperty('lastChunkId') : null;
+        $storedLastChunkId = (null === $rawStoredLastChunkId || is_string($rawStoredLastChunkId)) ? $rawStoredLastChunkId : false;
 
         $chunkIds = $upload->getChunkIds();
         $isConsistent = $storedLastChunkId === $upload->getLastChunkId()

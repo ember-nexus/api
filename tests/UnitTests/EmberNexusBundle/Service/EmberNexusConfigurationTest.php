@@ -162,4 +162,74 @@ class EmberNexusConfigurationTest extends TestCase
 
         $emberNexusConfiguration->setRegisterUniqueIdentifierRegex('/this is not valid(/');
     }
+
+    /**
+     * @return array<array-key, mixed>
+     */
+    private function processDefaultConfiguration(): array
+    {
+        return (new Processor())->processConfiguration(new Configuration(), [[]]);
+    }
+
+    public function testCreateFromConfigurationAcceptsNumericStrings(): void
+    {
+        $configuration = $this->processDefaultConfiguration();
+        $configuration[EmberNexusConfiguration::PAGE_SIZE][EmberNexusConfiguration::PAGE_SIZE_MIN] = '5';
+
+        $emberNexusConfiguration = EmberNexusConfiguration::createFromConfiguration($configuration);
+
+        $this->assertSame(5, $emberNexusConfiguration->getPageSizeMin());
+    }
+
+    public function testCreateFromConfigurationRejectsNonNumericInteger(): void
+    {
+        $configuration = $this->processDefaultConfiguration();
+        $configuration[EmberNexusConfiguration::PAGE_SIZE][EmberNexusConfiguration::PAGE_SIZE_MIN] = 'abc';
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Configuration key 'pageSize.min' must be int, got string.");
+        EmberNexusConfiguration::createFromConfiguration($configuration);
+    }
+
+    public function testCreateFromConfigurationRejectsNonScalarString(): void
+    {
+        $configuration = $this->processDefaultConfiguration();
+        $configuration[EmberNexusConfiguration::CACHE][EmberNexusConfiguration::CACHE_ETAG_SEED] = ['not', 'a', 'string'];
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Configuration key 'cache.etagSeed' must be string, got array.");
+        EmberNexusConfiguration::createFromConfiguration($configuration);
+    }
+
+    public function testCreateFromConfigurationRejectsMissingKey(): void
+    {
+        $configuration = $this->processDefaultConfiguration();
+        unset($configuration[EmberNexusConfiguration::PAGE_SIZE][EmberNexusConfiguration::PAGE_SIZE_MIN]);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Configuration must contain key 'pageSize.min'.");
+        EmberNexusConfiguration::createFromConfiguration($configuration);
+    }
+
+    public function testCreateFromConfigurationRejectsMissingSection(): void
+    {
+        $configuration = $this->processDefaultConfiguration();
+        unset($configuration[EmberNexusConfiguration::PAGE_SIZE]);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Configuration must contain key 'pageSize'.");
+        EmberNexusConfiguration::createFromConfiguration($configuration);
+    }
+
+    public function testCreateFromConfigurationAcceptsFalseForOptionalTokenLifetimes(): void
+    {
+        $configuration = $this->processDefaultConfiguration();
+        $configuration[EmberNexusConfiguration::TOKEN][EmberNexusConfiguration::TOKEN_MAX_LIFETIME_IN_SECONDS] = false;
+        $configuration[EmberNexusConfiguration::TOKEN][EmberNexusConfiguration::TOKEN_DELETE_EXPIRED_TOKENS_AUTOMATICALLY_IN_SECONDS] = false;
+
+        $emberNexusConfiguration = EmberNexusConfiguration::createFromConfiguration($configuration);
+
+        $this->assertFalse($emberNexusConfiguration->getTokenMaxLifetimeInSeconds());
+        $this->assertFalse($emberNexusConfiguration->getTokenDeleteExpiredTokensAutomaticallyInSeconds());
+    }
 }

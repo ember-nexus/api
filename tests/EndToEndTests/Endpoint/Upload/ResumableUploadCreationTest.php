@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\Upload;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that a resumable upload can be created both with an initial chunk and with an empty body
  * (`Upload-Complete: ?0`), as permitted by the resumable upload draft standard.
  */
+#[Group('test')]
 class ResumableUploadCreationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

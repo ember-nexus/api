@@ -24,7 +24,9 @@ class NoRouteFoundExceptionEventListener
     {
         $throwable = $event->getThrowable();
         if ($throwable instanceof MethodNotAllowedHttpException) {
-            throw $this->client405MethodNotAllowedExceptionFactory->createFromTemplate()->setHeaders(array_map(strval(...), $throwable->getHeaders()));
+            /** @var array<string, string> $headers */
+            $headers = $throwable->getHeaders();
+            throw $this->client405MethodNotAllowedExceptionFactory->createFromTemplate()->setHeaders($headers);
         }
         if (!($throwable instanceof NotFoundHttpException)) {
             return;

@@ -18,6 +18,7 @@ use App\Service\FileSizeLimitService;
 use App\Service\RawToElementService;
 use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
+use App\Trait\CommandInputTrait;
 use App\Type\AppStateType;
 use App\Type\RelationElement;
 use Laudis\Neo4j\Databags\Statement;
@@ -42,12 +43,12 @@ use Throwable;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
- *
- * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[AsCommand(name: 'backup:load', description: 'Loads a local backup into the empty database.')]
 class BackupLoadCommand extends Command
 {
+    use CommandInputTrait;
+
     private string $backupName;
     private int $relationCount = 0;
     private int $fileCount = 0;
@@ -83,6 +84,11 @@ class BackupLoadCommand extends Command
         $this->addOption('skip-verify', null, InputOption::VALUE_NONE, "Skip verifying file contents against their stored 'file.hash' values");
     }
 
+    protected function createInvalidInputException(string $detail): Throwable
+    {
+        return $this->server500LogicErrorExceptionFactory->createFromTemplate($detail);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->appStateService->setAppState(AppStateType::LOADING_BACKUP);
@@ -96,8 +102,8 @@ class BackupLoadCommand extends Command
             $this->eventDispatcher->deactivate();
         }
 
-        $this->backupName = $this->checkBackupName($input->getArgument('name'));
-        $this->skipVerify = (bool) $input->getOption('skip-verify');
+        $this->backupName = $this->checkBackupName($this->getStringArgument($input, 'name'));
+        $this->skipVerify = $this->isOptionActive($input, 'skip-verify');
 
         $this->loadSummary();
 
@@ -126,7 +132,7 @@ class BackupLoadCommand extends Command
             if (!str_ends_with($nodeFile->path(), '.json')) {
                 continue;
             }
-            $data = \Safe\json_decode($this->backupStorage->read($nodeFile->path()), true);
+            $data = $this->readJsonObject($nodeFile->path());
             $nodeElement = $this->rawToElementService->rawToElement($data, true);
             unset($data);
             $this->elementManager->create($nodeElement);
@@ -165,7 +171,7 @@ class BackupLoadCommand extends Command
                 continue;
             }
             try {
-                $data = \Safe\json_decode($this->backupStorage->read($relationFile->path()), true);
+                $data = $this->readJsonObject($relationFile->path());
                 $relationElement = $this->rawToElementService->rawToElement($data, true);
                 unset($data);
                 $this->elementManager->create($relationElement);
@@ -361,9 +367,6 @@ class BackupLoadCommand extends Command
         ));
     }
 
-    /**
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     */
     private function afterBackupTasks(): void
     {
         $this->io->startSection('Step 4 of 4: After Backup Tasks');
@@ -459,27 +462,45 @@ class BackupLoadCommand extends Command
         return $backupName;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    private function readJsonObject(string $path): array
+    {
+        $data = \Safe\json_decode($this->backupStorage->read($path), true);
+        if (!is_array($data)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Expected file '%s' of backup to contain a JSON object, got %s.", $path, get_debug_type($data)));
+        }
+
+        /** @var array<string, mixed> $data */
+        return $data;
+    }
+
+    /**
+     * @param array<string, mixed> $summary
+     */
+    private function getCountFromSummary(array $summary, string $key): int
+    {
+        if (!array_key_exists($key, $summary)) {
+            return 0;
+        }
+        $count = $summary[$key];
+        if (!is_numeric($count)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Expected property '%s' of backup summary to be numeric, not %s.", $key, get_debug_type($count)));
+        }
+
+        return (int) $count;
+    }
+
     private function loadSummary(): void
     {
         if (!$this->backupStorage->fileExists($this->backupName.'/summary.json')) {
             throw new LogicException(sprintf("Backup with the name '%s' does not contain a summary.json", $this->backupName));
         }
-        $data = \Safe\json_decode($this->backupStorage->read($this->backupName.'/summary.json'), true);
-        $nodeCount = 0;
-        if (array_key_exists('nodeCount', $data)) {
-            $nodeCount = (int) $data['nodeCount'];
-        }
-        $this->nodeCount = $nodeCount;
-        $relationCount = 0;
-        if (array_key_exists('relationCount', $data)) {
-            $relationCount = (int) $data['relationCount'];
-        }
-        $this->relationCount = $relationCount;
-        $fileCount = 0;
-        if (array_key_exists('fileCount', $data)) {
-            $fileCount = (int) $data['fileCount'];
-        }
-        $this->fileCount = $fileCount;
+        $data = $this->readJsonObject($this->backupName.'/summary.json');
+        $this->nodeCount = $this->getCountFromSummary($data, 'nodeCount');
+        $this->relationCount = $this->getCountFromSummary($data, 'relationCount');
+        $this->fileCount = $this->getCountFromSummary($data, 'fileCount');
     }
 
     private function checkDatabaseIsEmpty(): void

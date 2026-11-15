@@ -10,13 +10,12 @@ use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
-use App\Service\RequestContentService;
+use App\Service\RequestUtilService;
 use App\Type\Response\JsonResponse;
 use App\Type\SearchStepType;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Throwable;
 
@@ -27,11 +26,14 @@ class PostSearchController extends AbstractController
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
-        private RequestContentService $requestContentService,
+        private RequestUtilService $requestUtilService,
     ) {
     }
 
-    private function isDebugFromBody(mixed $body): bool
+    /**
+     * @param array<string, mixed> $body
+     */
+    private function isDebugFromBody(array $body): bool
     {
         if (!array_key_exists('debug', $body)) {
             return false;
@@ -45,26 +47,33 @@ class PostSearchController extends AbstractController
     }
 
     /**
+     * @param array<string, mixed> $body
+     *
      * @return array<string, mixed>
      */
-    private function getGlobalParametersFromBody(mixed $body): array
+    private function getGlobalParametersFromBody(array $body): array
     {
         $globalParameters = [];
         if (!array_key_exists('parameters', $body)) {
+            /** @var array<string, mixed> $globalParameters */
             return $globalParameters;
         }
-        $globalParameters = $body['parameters'];
-        if (!is_array($globalParameters)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('parameters', 'array', $globalParameters);
+        if (!is_array($body['parameters'])) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('parameters', 'array', $body['parameters']);
         }
+
+        /** @var array<string, mixed> $globalParameters */
+        $globalParameters = $body['parameters'];
 
         return $globalParameters;
     }
 
     /**
-     * @return array<int, mixed>
+     * @param array<string, mixed> $body
+     *
+     * @return list<array<string, mixed>>
      */
-    private function getStepsFromBody(mixed $body): array
+    private function getStepsFromBody(array $body): array
     {
         if (!array_key_exists('steps', $body)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('steps', 'array');
@@ -75,7 +84,16 @@ class PostSearchController extends AbstractController
         }
 
         // force non-associative array
-        return array_values($steps);
+        $normalizedSteps = [];
+        foreach (array_values($steps) as $index => $step) {
+            if (!is_array($step)) {
+                throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d]', $index), 'object', $step);
+            }
+            /** @var array<string, mixed> $step */
+            $normalizedSteps[] = $step;
+        }
+
+        return $normalizedSteps;
     }
 
     /**
@@ -103,12 +121,15 @@ class PostSearchController extends AbstractController
     {
         $query = null;
         if (!array_key_exists('query', $step)) {
+            /** @var string|array<string, mixed>|null $query */
             return $query;
         }
-        $query = $step['query'];
-        if (!(is_string($query) || is_array($query) || is_null($query))) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].query', $stepIndex), 'null | string | array', $query);
+        if (!(is_string($step['query']) || is_array($step['query']) || is_null($step['query']))) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].query', $stepIndex), 'null | string | array', $step['query']);
         }
+
+        /** @var string|array<string, mixed>|null $query */
+        $query = $step['query'];
 
         return $query;
     }
@@ -122,12 +143,15 @@ class PostSearchController extends AbstractController
     {
         $stepParameters = [];
         if (!array_key_exists('parameters', $step)) {
+            /** @var array<string, mixed> $stepParameters */
             return $stepParameters;
         }
-        $stepParameters = $step['parameters'];
-        if (!is_array($stepParameters)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].parameters', $stepIndex), 'array', $stepParameters);
+        if (!is_array($step['parameters'])) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('steps[%d].parameters', $stepIndex), 'array', $step['parameters']);
         }
+
+        /** @var array<string, mixed> $stepParameters */
+        $stepParameters = $step['parameters'];
 
         return $stepParameters;
     }
@@ -138,9 +162,9 @@ class PostSearchController extends AbstractController
         methods: ['POST']
     )]
     #[EndpointCanBeUsedByReadonlyAnonymousUser]
-    public function postSearch(Request $request): Response
+    public function postSearch(Request $request): JsonResponse
     {
-        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
+        $body = $this->requestUtilService->getJsonBodyFromRequest($request);
 
         $debug = $this->isDebugFromBody($body);
         $globalParameters = $this->getGlobalParametersFromBody($body);

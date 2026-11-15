@@ -50,7 +50,7 @@ class UpdatedPropertyElementFragmentizeEventListener
             $updated = $updated->toDateTime();
         }
         if (!($updated instanceof DateTimeInterface)) {
-            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from updated property of type '".get_class($updated)."'.", ['updated' => $updated]);
+            throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate("Unable to get datetime info from updated property of type '".get_debug_type($updated)."'.", ['updated' => $updated]);
         }
         $cypherFragment->addProperty('updated', $updated);
         $mongoFragment->addProperty('updated', new UTCDateTime($updated));

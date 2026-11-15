@@ -38,6 +38,7 @@ class BackupListCommand extends Command
 
         $this->logger->notice('Notice :D 789');
 
+        /** @var list<array<int, string>> $rows */
         $rows = [];
         $header = [
             'Name',
@@ -58,25 +59,29 @@ class BackupListCommand extends Command
                 ));
                 continue;
             }
+            /** @var array<array-key, mixed>|string|int|float|bool|null $data */
             $data = \Safe\json_decode($this->backupStorage->read($backupFolder->path().'/summary.json'), true);
-            $backupCreated = $data['backupCreated'] ?? '-';
+            if (!is_array($data)) {
+                $data = [];
+            }
+            $backupCreated = $this->getSummaryValue($data, 'backupCreated');
             if ($this->io->getLineLength() <= 100) {
                 $backupCreated = explode(' ', $backupCreated)[0];
             }
             $rows[] = [
                 $backupFolder->path(),
-                $data['hostname'] ?? '-',
-                $data['version'] ?? '-',
+                $this->getSummaryValue($data, 'hostname'),
+                $this->getSummaryValue($data, 'version'),
                 $backupCreated,
-                $data['nodeCount'] ?? '-',
-                $data['relationCount'] ?? '-',
-                $data['fileCount'] ?? '-',
+                $this->getSummaryValue($data, 'nodeCount'),
+                $this->getSummaryValue($data, 'relationCount'),
+                $this->getSummaryValue($data, 'fileCount'),
             ];
         }
 
         // sort backups by creation date, desc
-        usort($rows, function ($a, $b) {
-            return strcmp($b[3], $a[3]);
+        usort($rows, function (array $a, array $b): int {
+            return strcmp($b[3] ?? '', $a[3] ?? '');
         });
 
         $table = $this->io->createCompactTable();
@@ -88,5 +93,17 @@ class BackupListCommand extends Command
         $this->io->finalMessage('Command finished successfully.');
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param array<array-key, mixed> $summary
+     */
+    private function getSummaryValue(array $summary, string $key): string
+    {
+        if (!isset($summary[$key]) || !is_scalar($summary[$key])) {
+            return '-';
+        }
+
+        return (string) $summary[$key];
     }
 }

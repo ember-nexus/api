@@ -46,7 +46,6 @@ use Symfony\Contracts\HttpClient\ResponseInterface as HttpClientResponseInterfac
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassLength)
- * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[Small]
 #[CoversClass(S3Service::class)]

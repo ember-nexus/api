@@ -21,9 +21,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Throwable;
 
-/**
- * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
- */
 class S3Service
 {
     private const string PROFILER_MERGE_FILE_CHUNKS_CHUNK_MERGE = 'S3Service:mergeFileChunks:chunkMerge';
@@ -188,9 +185,6 @@ class S3Service
      * resolving one file fully before starting the next.
      *
      * @param FileOperationInterface[] $fileOperations
-     *
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     private function deleteFiles(array $fileOperations): void
     {
@@ -335,8 +329,6 @@ class S3Service
     /**
      * Skips the upload bucket, as `copyObject` has the same size limit as a single PUT. Only one part is held in
      * memory at a time.
-     *
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     private function uploadFileViaMultipartUpload(UploadFileOperationInterface $uploadFileOperation, int $contentLength): int
     {
@@ -503,7 +495,7 @@ class S3Service
     /**
      * @return resource
      */
-    public function getFileAsResource(FileOperationInterface $fileOperation)
+    public function getFileAsResource(FileOperationInterface $fileOperation): mixed
     {
         $objectConfig = [
             'Bucket' => $fileOperation->getBucket(),
@@ -518,7 +510,7 @@ class S3Service
     /**
      * @return resource
      */
-    public function getFileRangeAsResource(FileOperationInterface $fileOperation, int $maxContentLength)
+    public function getFileRangeAsResource(FileOperationInterface $fileOperation, int $maxContentLength): mixed
     {
         if ($maxContentLength <= 0) {
             return \Safe\fopen('php://memory', 'r');

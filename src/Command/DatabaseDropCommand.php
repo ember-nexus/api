@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Style\EmberNexusStyle;
+use App\Trait\CommandInputTrait;
 use App\Type\RabbitMQQueueType;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -30,6 +31,8 @@ use Throwable;
 #[AsCommand(name: 'database:drop', description: 'Resets all connected databases.')]
 class DatabaseDropCommand extends Command
 {
+    use CommandInputTrait;
+
     private const int MAX_S3_DELETE_ITERATIONS = 10000;
 
     private EmberNexusStyle $io;
@@ -39,7 +42,7 @@ class DatabaseDropCommand extends Command
         private MongoEntityManager $mongoEntityManager,
         private ElasticEntityManager $elasticEntityManager,
         private Client $redisClient,
-        private AMQPStreamConnection $AMQPStreamConnection,
+        private AMQPStreamConnection $amqpStreamConnection,
         private S3Client $s3Client,
         private EmberNexusConfiguration $emberNexusConfiguration,
     ) {
@@ -70,7 +73,7 @@ class DatabaseDropCommand extends Command
 
         $this->io->title('Database Drop');
 
-        if (!$input->getOption('force')) {
+        if (!$this->isOptionActive($input, 'force')) {
             /**
              * @var QuestionHelper $helper
              */
@@ -88,7 +91,7 @@ class DatabaseDropCommand extends Command
 
         $this->deleteMongo();
 
-        if ($input->getOption('no-files')) {
+        if ($this->isOptionActive($input, 'no-files')) {
             $this->io->startSection('Task 3 of 6: Object Storage');
             $this->io->writeln('Skipping object storage deletion (--no-files).');
             $this->io->stopSection('Skipped object storage deletion.');
@@ -211,8 +214,7 @@ class DatabaseDropCommand extends Command
          *
          * @phpstan-ignore-next-line method.notFound
          */
-        $rawIndices = $this->elasticEntityManager->getClient()->cat()->indices(['index' => '*'])->asString();
-        $rawIndices = explode("\n", $rawIndices);
+        $rawIndices = explode("\n", (string) $this->elasticEntityManager->getClient()->cat()->indices(['index' => '*'])->asString());
         $indices = [];
         foreach ($rawIndices as $rawIndex) {
             $parts = explode(' ', $rawIndex);
@@ -248,7 +250,7 @@ class DatabaseDropCommand extends Command
     {
         $this->io->startSection('Task 6 of 6: RabbitMQ');
         $this->io->writeln('Deleting RabbitMQ data...');
-        $channel = $this->AMQPStreamConnection->channel();
+        $channel = $this->amqpStreamConnection->channel();
         foreach (RabbitMQQueueType::cases() as $queue) {
             $channel->queue_delete($queue->value);
         }

@@ -18,7 +18,6 @@ use App\Type\EtagType;
 use App\Type\Response\NoContentResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class DeleteElementController extends AbstractController
@@ -43,7 +42,7 @@ class DeleteElementController extends AbstractController
         methods: ['DELETE']
     )]
     #[EndpointSupportsEtag(EtagType::ELEMENT)]
-    public function deleteElement(string $id): Response
+    public function deleteElement(string $id): NoContentResponse
     {
         $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();

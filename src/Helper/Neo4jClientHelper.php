@@ -23,9 +23,9 @@ class Neo4jClientHelper
     public function getNodeFromLaudisNode(
         LaudisNode $node,
     ): Node {
-        $newNode = (new Node())
-            ->addLabels($node->getLabels())
-            ->addProperties($node->getProperties());
+        $newNode = new Node();
+        $newNode->addLabels($node->getLabels());
+        $newNode->addProperties($node->getProperties());
         if ($newNode->hasProperty('id')) {
             $newNode->addIdentifier('id');
         }
@@ -38,9 +38,9 @@ class Neo4jClientHelper
         ?LaudisNode $startNode = null,
         ?LaudisNode $endNode = null,
     ): Relation {
-        $newRelation = (new Relation())
-            ->setType($relation->getType())
-            ->addProperties($relation->getProperties());
+        $newRelation = new Relation();
+        $newRelation->setType($relation->getType());
+        $newRelation->addProperties($relation->getProperties());
         if ($newRelation->hasProperty('id')) {
             $newRelation->addIdentifier('id');
         }
@@ -72,9 +72,6 @@ class Neo4jClientHelper
         }
         $startNode = $this->getNodeFromLaudisNode($startNode);
         $endNode = $this->getNodeFromLaudisNode($endNode);
-        /*
-         * @var Relation $newRelation
-         */
         $newRelation->setStartNode($startNode);
         $newRelation->setEndNode($endNode);
 

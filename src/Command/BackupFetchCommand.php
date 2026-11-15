@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Style\EmberNexusStyle;
+use App\Trait\CommandInputTrait;
 use Exception;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemOperator;
@@ -32,6 +33,8 @@ use function Safe\unlink;
 #[AsCommand(name: 'backup:fetch', description: 'Downloads backup from remote source to local storage.')]
 class BackupFetchCommand extends Command
 {
+    use CommandInputTrait;
+
     private EmberNexusStyle $io;
 
     public function __construct(
@@ -54,8 +57,8 @@ class BackupFetchCommand extends Command
 
         $this->io->title('Backup Fetch');
 
-        $this->checkBackupNameIsAvailable($input->getArgument('name'), $input->getOption('force'));
-        $source = $this->checkSourceIsHttpOrHttps($input->getArgument('source'));
+        $this->checkBackupNameIsAvailable($this->getStringArgument($input, 'name'), $this->isOptionActive($input, 'force'));
+        $source = $this->checkSourceIsHttpOrHttps($this->getStringArgument($input, 'source'));
 
         $this->io->startSection('Downloading and inspecting archive');
         $tempFilePath = sprintf(
@@ -79,7 +82,7 @@ class BackupFetchCommand extends Command
         $provider = new FilesystemZipArchiveProvider($tempFilePath);
         $adapter = new ZipArchiveAdapter($provider);
         $filesystem = new Filesystem($adapter);
-        $backupName = $input->getArgument('name');
+        $backupName = $this->getStringArgument($input, 'name');
         $backupLocation = $this->findBackupRootFolder($filesystem);
         if (null === $backupLocation) {
             throw new Exception('Unable to find the file summary.json in backup archive.');

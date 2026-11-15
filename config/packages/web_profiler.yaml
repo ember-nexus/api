@@ -4,8 +4,13 @@ when@dev:
     intercept_redirects: false
 
   framework:
+    # collecting a profile writes several files per request, which makes every request about 3-4x slower under load
+    # (e.g. end to end tests) and fills var/cache/dev/profiler; therefore it is opt-in per request, add the query
+    # parameter `_profiler=1` (or send a `_profiler` cookie) to profile a single request
     profiler:
       only_exceptions: false
+      collect: false
+      collect_parameter: _profiler
 
 when@test:
   web_profiler:

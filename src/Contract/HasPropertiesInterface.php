@@ -17,6 +17,15 @@ interface HasPropertiesInterface
 
     public function getProperty(string $name): mixed;
 
+    public function getStringProperty(string $name): string;
+
+    public function getNullableStringProperty(string $name): ?string;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getArrayProperty(string $name): array;
+
     /**
      * @return array<string, mixed>
      */

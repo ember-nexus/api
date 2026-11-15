@@ -9,6 +9,9 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class GenericNormalizedValueToRawValueEventListener
 {
+    /**
+     * @psalm-suppress MixedAssignment
+     */
     #[AsEventListener(priority: 0)]
     public function onNormalizedValueToRawValueEvent(NormalizedValueToRawValueEvent $event): void
     {

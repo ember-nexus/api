@@ -31,14 +31,14 @@ class QueueService
     private const int MAX_QUEUE_LENGTH = 100_000;
 
     public function __construct(
-        private AMQPStreamConnection $AMQPStreamConnection,
+        private AMQPStreamConnection $amqpStreamConnection,
         private LoggerInterface $logger,
     ) {
     }
 
     public function publishEvent(RabbitMQQueueType $queueType, mixed $eventData): void
     {
-        $channel = $this->AMQPStreamConnection->channel();
+        $channel = $this->amqpStreamConnection->channel();
         $queue = $queueType->value;
         $channel = $this->declareQueue($channel, $queueType);
         $jsonMessage = \Safe\json_encode($eventData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -61,10 +61,12 @@ class QueueService
      * before each fetch for the same reason.
      *
      * Returns the number of successfully processed messages.
+     *
+     * @param callable(array<string, mixed>): void $handler
      */
     public function consumeQueue(RabbitMQQueueType $queueType, callable $handler, ?int $deadline = null): int
     {
-        $channel = $this->AMQPStreamConnection->channel();
+        $channel = $this->amqpStreamConnection->channel();
         $queue = $queueType->value;
         $channel = $this->declareQueue($channel, $queueType);
 
@@ -84,6 +86,7 @@ class QueueService
                 break;
             }
             try {
+                /** @var array<string, mixed> $eventData */
                 $eventData = \Safe\json_decode($message->getBody(), true);
                 $handler($eventData);
                 ++$processedMessages;
@@ -137,9 +140,9 @@ class QueueService
         if (!($headers instanceof AMQPTable)) {
             return 0;
         }
-        $tries = $headers->getNativeData()[self::TRY_COUNT_HEADER] ?? 0;
+        $nativeData = $headers->getNativeData();
 
-        return is_int($tries) ? $tries : 0;
+        return isset($nativeData[self::TRY_COUNT_HEADER]) && is_int($nativeData[self::TRY_COUNT_HEADER]) ? $nativeData[self::TRY_COUNT_HEADER] : 0;
     }
 
     /**
@@ -151,6 +154,7 @@ class QueueService
         if (!$message->has('timestamp')) {
             return 0;
         }
+        /** @psalm-suppress MixedAssignment */
         $timestamp = $message->get('timestamp');
 
         return is_int($timestamp) ? $timestamp : 0;
@@ -185,7 +189,7 @@ class QueueService
                     "Queue '%s' already existed with different arguments; deleting and redeclaring it with the current arguments.",
                     $queue
                 ));
-                $freshChannel = $this->AMQPStreamConnection->channel();
+                $freshChannel = $this->amqpStreamConnection->channel();
                 $freshChannel->queue_delete($queue);
                 $freshChannel->queue_declare($queue, false, true, false, false, false, new AMQPTable([]));
 
@@ -213,7 +217,7 @@ class QueueService
                 "Queue '%s' or its dead-letter queue already existed with different arguments; deleting and redeclaring both with the current arguments.",
                 $queue
             ));
-            $freshChannel = $this->AMQPStreamConnection->channel();
+            $freshChannel = $this->amqpStreamConnection->channel();
             $freshChannel->queue_delete($deadLetterQueue);
             $freshChannel->queue_delete($queue);
             $freshChannel->queue_declare($deadLetterQueue, false, true, false, false, false, new AMQPTable(['x-max-length' => self::MAX_QUEUE_LENGTH]));

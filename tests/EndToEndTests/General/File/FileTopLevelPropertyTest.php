@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\General\File;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that 'file' is a top-level property and 'hasFile' a boolean inside 'data', both for direct fetches and
  * collection responses; that clients can not write either property via POST/PATCH; and that PUT keeps the file.
  */
+#[Group('test')]
 class FileTopLevelPropertyTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

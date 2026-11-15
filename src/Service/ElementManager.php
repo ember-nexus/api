@@ -138,13 +138,24 @@ class ElementManager
         return $this;
     }
 
+    private function requireString(mixed $value, string $name): string
+    {
+        if (!is_string($value)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected %s to be string, not %s.', $name, get_debug_type($value))); // @codeCoverageIgnore
+        }
+
+        return $value;
+    }
+
     /**
      * Returns true if the element's Mongo document did not exist (and logged a notice for it).
      */
     private function logIfMongoDocumentMissing(NodeElementInterface|RelationElementInterface $element, FragmentGroup $fragmentGroup, string $verb): bool
     {
         $mongoFragment = $fragmentGroup->getMongoFragment();
-        if (null !== $this->mongoEntityManager->getOneByIdentifier((string) $mongoFragment->getCollection(), (string) $mongoFragment->getIdentifier())) {
+        $collection = $this->requireString($mongoFragment->getCollection(), 'mongo collection');
+        $identifier = $this->requireString($mongoFragment->getIdentifier(), 'mongo document identifier');
+        if (null !== $this->mongoEntityManager->getOneByIdentifier($collection, $identifier)) {
             return false;
         }
         $this->logger->notice(sprintf(
@@ -163,7 +174,9 @@ class ElementManager
     private function logIfElasticDocumentMissing(NodeElementInterface|RelationElementInterface $element, FragmentGroup $fragmentGroup, string $verb): bool
     {
         $elasticFragment = $fragmentGroup->getElasticFragment();
-        if (null !== $this->elasticEntityManager->getOneByIdentifier((string) $elasticFragment->getIndex(), (string) $elasticFragment->getIdentifier())) {
+        $index = $this->requireString($elasticFragment->getIndex(), 'elasticsearch index');
+        $identifier = $this->requireString($elasticFragment->getIdentifier(), 'elasticsearch document identifier');
+        if (null !== $this->elasticEntityManager->getOneByIdentifier($index, $identifier)) {
             return false;
         }
         $this->logger->notice(sprintf(

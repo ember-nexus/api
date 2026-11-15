@@ -13,7 +13,6 @@ use App\Service\UploadService;
 use App\Type\Response\NoContentResponse;
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class DeleteTokenController extends AbstractController
@@ -33,7 +32,7 @@ class DeleteTokenController extends AbstractController
         name: 'delete-token',
         methods: ['DELETE']
     )]
-    public function deleteToken(): Response
+    public function deleteToken(): NoContentResponse
     {
         if ($this->authProvider->isAnonymous()) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();

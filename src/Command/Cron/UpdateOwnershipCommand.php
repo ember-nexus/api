@@ -90,9 +90,9 @@ class UpdateOwnershipCommand extends Command
     }
 
     /**
-     * @param array<string, mixed> $eventData
+     * @psalm-suppress MixedAssignment
      *
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @param array<string, mixed> $eventData
      */
     private function handleOwnershipChangeMessage(array $eventData): void
     {

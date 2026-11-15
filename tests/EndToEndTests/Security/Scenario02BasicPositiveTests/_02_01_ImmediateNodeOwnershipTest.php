@@ -6,9 +6,6 @@ namespace App\Tests\EndToEndTests\Security\Scenario02BasicPositiveTests;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
 
-/**
- * @SuppressWarnings(PHPMD.UnusedLocalVariable)
- */
 class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:P4VWKNQ2A6UaoaQgGSQXRB';

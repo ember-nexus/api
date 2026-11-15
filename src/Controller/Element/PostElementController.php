@@ -12,7 +12,7 @@ use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
-use App\Service\RequestContentService;
+use App\Service\RequestUtilService;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\RelationElement;
@@ -20,7 +20,6 @@ use App\Type\Response\CreatedResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -35,7 +34,7 @@ class PostElementController extends AbstractController
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private CreateElementFromRawDataService $createElementFromRawDataService,
-        private RequestContentService $requestContentService,
+        private RequestUtilService $requestUtilService,
     ) {
     }
 
@@ -47,7 +46,7 @@ class PostElementController extends AbstractController
         ],
         methods: ['POST']
     )]
-    public function postElement(string $id, Request $request): Response
+    public function postElement(string $id, Request $request): CreatedResponse
     {
         $parentElementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();
@@ -64,7 +63,7 @@ class PostElementController extends AbstractController
             throw $this->client400BadContentExceptionFactory->createFromTemplate('id', 'id of a node', 'id of a relation');
         }
 
-        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
+        $body = $this->requestUtilService->getJsonBodyFromRequest($request);
 
         if (array_key_exists('start', $body)) {
             // owns-relation can only target nodes
@@ -76,7 +75,7 @@ class PostElementController extends AbstractController
         }
 
         if (array_key_exists('id', $body)) {
-            $elementId = UuidV4::fromString($body['id']);
+            $elementId = $this->requestUtilService->getUuidFromBody('id', $body);
         } else {
             $elementId = UuidV4::uuid4();
         }
@@ -84,12 +83,9 @@ class PostElementController extends AbstractController
         if (!array_key_exists('type', $body)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('type', 'a valid type');
         }
-        $type = $body['type'];
+        $type = $this->requestUtilService->getStringFromBody('type', $body);
 
-        $rawData = [];
-        if (array_key_exists('data', $body)) {
-            $rawData = $body['data'];
-        }
+        $rawData = $this->requestUtilService->getDataFromBody($body);
 
         $element = $this->createElementFromRawDataService->createElementFromRawData(
             $elementId,

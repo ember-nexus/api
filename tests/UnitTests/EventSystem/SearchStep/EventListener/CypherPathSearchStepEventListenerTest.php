@@ -31,10 +31,6 @@ use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Stopwatch\StopwatchEvent;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
-/**
- * @SuppressWarnings(PHPMD.ExcessiveClassLength)
- * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
- */
 #[Small]
 #[CoversClass(CypherPathSearchStepEventListener::class)]
 class CypherPathSearchStepEventListenerTest extends TestCase

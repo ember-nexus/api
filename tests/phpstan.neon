@@ -1,9 +1,43 @@
 parameters:
-  level: 8
+  level: 10
   paths:
     - ../src
+    - ../lib/EmberNexusBundle/src
   ignoreErrors:
     -
       identifier: missingType.generics
+    -
+      identifier: function.alreadyNarrowedType
+      paths:
+        - ../src/EventSystem/Controller/EventListener/AnonymousUserReadonlyControllerEventListener.php
+        - ../src/Security/AuthProvider.php
+        - ../src/Service/CronExecutionGateService.php
+        - ../src/Service/SecurityUtilService.php
+    -
+      identifier: typePerfect.narrowReturnObjectType
+      paths:
+        - ../src/Factory/Type/UploadFactory.php
+        - ../src/Factory/Type/S3/S3OperationFactory.php
+        - ../src/Factory/Type/Request/PartialUploadRequestFactory.php
+        - ../src/Factory/Type/Request/ResumableUploadRequestFactory.php
+  symfony:
+    containerXmlPath: ../var/cache/dev/App_KernelDevDebugContainer.xml
+  type_coverage:
+    return: 100
+    param: 100
+    property: 100
+    constant: 100
+  type_perfect:
+    no_isset_on_object: true
+    no_empty_on_object: true
+    no_param_type_removal: true
+    no_mixed_property: true
+    no_mixed_caller: true
+    narrow_param: true
+    narrow_return: true
 includes:
   - ../vendor/thecodingmachine/phpstan-safe-rule/phpstan-safe-rule.neon
+  - ../vendor/phpstan/phpstan-deprecation-rules/rules.neon
+  - ../vendor/phpstan/phpstan-symfony/extension.neon
+  - ../vendor/phpstan/phpstan-symfony/rules.neon
+  - ../vendor/tomasvotruba/type-coverage/config/extension.neon

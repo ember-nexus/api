@@ -14,17 +14,11 @@ class EmberNexusOutputWrapper implements OutputInterface
     ) {
     }
 
-    /**
-     * @phpstan-ignore-next-line
-     */
     public function write(iterable|string $messages, bool $newline = false, int $options = 0): void
     {
         $this->output->write($messages, $newline, $options);
     }
 
-    /**
-     * @phpstan-ignore-next-line
-     */
     public function writeln(iterable|string $messages, int $options = 0): void
     {
         if (is_string($messages)) {

@@ -8,12 +8,16 @@ use App\Exception\Client400BadContentException;
 use App\Exception\Client400MissingPropertyException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
+use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
+use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use Exception;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Small]
@@ -32,7 +36,8 @@ class RequestUtilServiceTest extends TestCase
 
         return new RequestUtilService(
             $client400BadContentExceptionFactory,
-            $client400MissingPropertyExceptionFactory
+            $client400MissingPropertyExceptionFactory,
+            new RequestContentService(new Client408RequestTimeoutExceptionFactory($urlGenerator)),
         );
     }
 
@@ -225,5 +230,100 @@ class RequestUtilServiceTest extends TestCase
         ];
         $password = $requestUtilService->getStringFromBody('password', $body);
         $this->assertSame('1234', $password);
+    }
+
+    public function testGetJsonBodyFromRequest(): void
+    {
+        $requestUtilService = $this->getRequestUtilService();
+
+        $this->assertSame(['type' => 'Test'], $requestUtilService->getJsonBodyFromRequest(new Request(content: '{"type":"Test"}')));
+        $this->assertSame([], $requestUtilService->getJsonBodyFromRequest(new Request(content: '{}')));
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function invalidJsonBodyProvider(): array
+    {
+        return [
+            'string' => ['"text"'],
+            'number' => ['12'],
+            'null' => ['null'],
+            'list' => ['[1, 2]'],
+        ];
+    }
+
+    #[DataProvider('invalidJsonBodyProvider')]
+    public function testGetJsonBodyFromRequestWithNonObject(string $content): void
+    {
+        $requestUtilService = $this->getRequestUtilService();
+
+        $this->expectException(Client400BadContentException::class);
+        $requestUtilService->getJsonBodyFromRequest(new Request(content: $content));
+    }
+
+    public function testGetArrayFromBody(): void
+    {
+        $requestUtilService = $this->getRequestUtilService();
+
+        $this->assertSame(['a' => 1], $requestUtilService->getArrayFromBody('data', ['data' => ['a' => 1]]));
+
+        $this->expectException(Client400BadContentException::class);
+        $requestUtilService->getArrayFromBody('data', ['data' => 'text']);
+    }
+
+    public function testGetArrayFromBodyWithMissingKey(): void
+    {
+        $requestUtilService = $this->getRequestUtilService();
+
+        $this->expectException(Client400MissingPropertyException::class);
+        $requestUtilService->getArrayFromBody('data', []);
+    }
+
+    public function testGetDataFromBodyWithInvalidData(): void
+    {
+        $requestUtilService = $this->getRequestUtilService();
+
+        $this->expectException(Client400BadContentException::class);
+        $requestUtilService->getDataFromBody(['data' => 'text']);
+    }
+
+    public function testGetUuidFromBody(): void
+    {
+        $requestUtilService = $this->getRequestUtilService();
+
+        $uuid = $requestUtilService->getUuidFromBody('id', ['id' => '3d5b3a5a-6a5e-4b0e-9b3c-3c1f6a2b4d5e']);
+        $this->assertSame('3d5b3a5a-6a5e-4b0e-9b3c-3c1f6a2b4d5e', $uuid->toString());
+    }
+
+    /**
+     * @return array<string, array{array<string, mixed>}>
+     */
+    public static function invalidUuidBodyProvider(): array
+    {
+        return [
+            'not a string' => [['id' => 12]],
+            'not a uuid' => [['id' => 'abc']],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     */
+    #[DataProvider('invalidUuidBodyProvider')]
+    public function testGetUuidFromBodyWithInvalidValue(array $body): void
+    {
+        $requestUtilService = $this->getRequestUtilService();
+
+        $this->expectException(Client400BadContentException::class);
+        $requestUtilService->getUuidFromBody('id', $body);
+    }
+
+    public function testGetUuidFromBodyWithMissingKey(): void
+    {
+        $requestUtilService = $this->getRequestUtilService();
+
+        $this->expectException(Client400MissingPropertyException::class);
+        $requestUtilService->getUuidFromBody('id', []);
     }
 }

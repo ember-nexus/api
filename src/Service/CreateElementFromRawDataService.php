@@ -30,10 +30,9 @@ class CreateElementFromRawDataService
     }
 
     /**
-     * @param array<string, mixed> $rawData
+     * @psalm-suppress MixedAssignment
      *
-     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @param array<string, mixed> $rawData
      */
     public function createElementFromRawData(
         UuidInterface $elementId,

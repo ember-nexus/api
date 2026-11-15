@@ -12,24 +12,25 @@
 # Helper scripts in ./php-embed/ (docker-php-source, docker-php-ext-*, docker-php-entrypoint) are copied
 # verbatim from docker-library/php, unmodified.
 
-ARG ALPINE_VERSION='3.23'
+ARG ALPINE_VERSION='3.24'
 ARG PHP_VERSION='8.5.12'
-# 1.12.7 is FrankenPHP's latest stable release as of 2026-10; bumped from 1.12.1 to pick up several
-# crash/stability fixes landed in 1.12.2-1.12.7 (fatal-shutdown prevention, an HTTP/2 crash-on-read-after-
-# finish fix, a path-splitting security fix, and output-handling-after-fastcgi_finish_request() fixes) --
 # see https://github.com/dunglas/frankenphp/releases
-ARG FRANKENPHP_VERSION='1.12.7'
+ARG FRANKENPHP_VERSION='1.13.5'
 ARG WATCHER_VERSION='0.14.5'
 # pinned to a full patch version (not just "1.26") so `golang:${GO_VERSION}-alpine` resolves to the exact
 # same toolchain on every rebuild, matching the Go version FrankenPHP v1.12.7 itself builds with.
-ARG GO_VERSION='1.26.8'
-# pinned to a full patch version of the xcaddy/caddy-builder image; it only supplies the xcaddy build tool,
-# not the embedded Caddy core (that version comes from Go module resolution instead), so pinning it avoids
-# floating to whatever "2.11" resolves to on a later rebuild.
-ARG CADDY_BUILDER_VERSION='2.11.6'
+ARG GO_VERSION='1.27.4'
+# expr-cli is an independent, statically linked Go binary (see ./lib/ExprCli) and does not share FrankenPHP's
+# toolchain pin above; it is built with the latest Go release, pinned to a full patch version for reproducibility.
+ARG EXPR_CLI_GO_VERSION='1.27.4'
+# pinned to a full patch version; used both for the xcaddy/caddy-builder image (which supplies the xcaddy build
+# tool) and passed to `xcaddy build` as the embedded Caddy core version, so the binary's Caddy version is known at
+# build time. It is exposed at runtime as the CADDY_VERSION environment variable, which the healthcheck reads
+# instead of executing the (UPX-packed, slow to start) frankenphp binary.
+ARG CADDY_VERSION='2.11.9'
 
 
-FROM caddy:${CADDY_BUILDER_VERSION}-builder-alpine AS caddy_builder
+FROM caddy:${CADDY_VERSION}-builder-alpine AS caddy_builder
 
 
 FROM golang:${GO_VERSION}-alpine AS golang_base
@@ -261,6 +262,7 @@ RUN docker-php-ext-enable sodium \
 
 FROM php_base AS frankenphp_builder
 ARG FRANKENPHP_VERSION
+ARG CADDY_VERSION
 ARG WATCHER_VERSION
 ARG GO_VERSION
 
@@ -314,11 +316,11 @@ WORKDIR /go/src/app
 # https://github.com/dunglas/frankenphp/blob/main/alpine.Dockerfile
 RUN CGO_ENABLED=1 \
     XCADDY_SETCAP=1 \
-    XCADDY_GO_BUILD_FLAGS="-tags=nobadger,nomysql,nopgx -ldflags='-w -s -extldflags \'-Wl,-z,stack-size=0x800000\' -X \'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ${FRANKENPHP_VERSION} PHP ${PHP_VERSION} Caddy\' -X \'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy\''" \
+    XCADDY_GO_BUILD_FLAGS="-tags=nobadger,nomysql,nopgx -ldflags=\"-w -s -extldflags '-Wl,-z,stack-size=0x800000' -X 'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ${FRANKENPHP_VERSION} PHP ${PHP_VERSION} Caddy' -X 'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy'\"" \
     CGO_CFLAGS="-DFRANKENPHP_VERSION=${FRANKENPHP_VERSION} $(php-config --includes) $PHP_CFLAGS" \
     CGO_CPPFLAGS="$PHP_CPPFLAGS" \
     CGO_LDFLAGS="$(php-config --ldflags) $(php-config --libs) -lssl -lcrypto -lreadline -largon2 -lcurl -lonig -lz $PHP_LDFLAGS" \
-    xcaddy build \
+    xcaddy build "v${CADDY_VERSION}" \
         --output /usr/local/bin/frankenphp \
         --with github.com/dunglas/frankenphp=./ \
         --with github.com/dunglas/frankenphp/caddy=./caddy/ \
@@ -326,13 +328,14 @@ RUN CGO_ENABLED=1 \
         --with github.com/baldinof/caddy-supervisor \
     && setcap cap_net_bind_service=+ep /usr/local/bin/frankenphp \
     && /usr/local/bin/frankenphp version \
+    && /usr/local/bin/frankenphp version | grep -q "Caddy v${CADDY_VERSION} " \
     && /usr/local/bin/frankenphp build-info \
     && strip --strip-all /usr/local/bin/frankenphp \
     && upx --best --lzma /usr/local/bin/frankenphp \
     && /usr/local/bin/frankenphp version
 
 
-FROM golang:${GO_VERSION}-alpine AS go_builder
+FROM golang:${EXPR_CLI_GO_VERSION}-alpine AS expr_cli_builder
 COPY ./lib/ExprCli /build
 RUN cd /build && \
     apk add upx && \
@@ -355,6 +358,8 @@ ARG VERSION=dev
 ENV VERSION=${VERSION}
 ARG FRANKENPHP_VERSION
 ENV FRANKENPHP_VERSION=${FRANKENPHP_VERSION}
+ARG CADDY_VERSION
+ENV CADDY_VERSION=${CADDY_VERSION}
 
 RUN apk add --no-cache \
 		ca-certificates \
@@ -382,7 +387,7 @@ RUN apk add --no-cache \
         pcre-dev \
         pkgconf \
         zlib-dev \
-    && pecl install mongodb-2.1.4 \
+    && pecl install mongodb-2.5.7 \
     && docker-php-ext-configure intl \
     && docker-php-ext-install intl bcmath sockets zip \
     && docker-php-ext-enable mongodb intl bcmath sockets zip \
@@ -401,7 +406,7 @@ ENV GODEBUG=cgocheck=0 \
 COPY ./docker/api/Caddyfile /etc/frankenphp/Caddyfile
 COPY ./docker/api/docker-entrypoint.sh /usr/local/bin/
 COPY ./docker/api/supercronic /etc/crontabs/supercronic
-COPY --from=go_builder /build/expr-cli /usr/local/bin/expr-cli
+COPY --from=expr_cli_builder /build/expr-cli /usr/local/bin/expr-cli
 RUN set -x \
     && mkdir -p /config/caddy /data/caddy \
     && chmod +x /usr/local/bin/docker-entrypoint.sh \
@@ -469,6 +474,8 @@ ARG VERSION=dev
 ENV VERSION=${VERSION}
 ARG FRANKENPHP_VERSION
 ENV FRANKENPHP_VERSION=${FRANKENPHP_VERSION}
+ARG CADDY_VERSION
+ENV CADDY_VERSION=${CADDY_VERSION}
 ENV APP_ENV=prod
 
 COPY --from=production-build / /
@@ -499,7 +506,7 @@ COPY ./docker/api/Caddyfile.dev /etc/frankenphp/Caddyfile
 COPY ./docker/api/php-embed/php.dev.ini "$PHP_INI_DIR/php.ini"
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS judy-dev bsd-compat-headers linux-headers \
-    && pecl install xdebug-3.5.0 \
+    && pecl install xdebug-3.5.3 \
     && docker-php-ext-enable xdebug \
     && apk del --no-network .build-deps \
     && apk add --no-cache judy aha git openssh openjdk21-jdk maven wget bash \

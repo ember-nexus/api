@@ -19,13 +19,9 @@ use App\Type\EtagType;
 use App\Type\Response\NoContentResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-/**
- * @SuppressWarnings("PHPMD.UnusedFormalParameter")
- */
 class DeleteElementFileController extends AbstractController
 {
     public function __construct(
@@ -49,7 +45,7 @@ class DeleteElementFileController extends AbstractController
         methods: ['DELETE']
     )]
     #[EndpointSupportsEtag(EtagType::FILE)]
-    public function deleteElementFile(string $id): Response
+    public function deleteElementFile(string $id): NoContentResponse
     {
         $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();

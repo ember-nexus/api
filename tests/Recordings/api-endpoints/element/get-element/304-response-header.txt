@@ -4,6 +4,7 @@ Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
 Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
-Date: Fri, 02 Oct 2026 22:37:55 GMT
-Etag: "97In06W2lLE"
+Date: Sun, 15 Nov 2026 20:45:11 GMT
+Etag: "Nnk7Jp6vkFq"
+Vary: Accept-Encoding
 X-Powered-By: Ember Nexus API

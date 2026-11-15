@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\Upload;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Verifies that intermediate PATCH chunks below the minimum chunk size are rejected, as S3 requires every
  * multipart part except the last to be at least 5 MiB. The completing chunk (`Upload-Complete: ?1`) is exempt, and
  * so is a chunk of exactly 0 bytes, which is a no-op.
  */
+#[Group('test')]
 class PatchUploadUndersizedIntermediateChunkTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';

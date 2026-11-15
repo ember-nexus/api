@@ -12,6 +12,7 @@ use App\Service\ElementToRawService;
 use App\Service\S3Service;
 use App\Service\StorageService;
 use App\Style\EmberNexusStyle;
+use App\Trait\CommandInputTrait;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
@@ -28,6 +29,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
+use Throwable;
 
 use function Safe\gethostname;
 
@@ -37,6 +39,8 @@ use function Safe\gethostname;
 #[AsCommand(name: 'backup:create', description: 'Creates a new backup.')]
 class BackupCreateCommand extends Command
 {
+    use CommandInputTrait;
+
     private int $nodeCount = 0;
     private int $relationCount = 0;
     private int $fileCount = 0;
@@ -90,13 +94,18 @@ class BackupCreateCommand extends Command
         );
     }
 
+    protected function createInvalidInputException(string $detail): Throwable
+    {
+        return $this->server500LogicErrorExceptionFactory->createFromTemplate($detail);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->io = new EmberNexusStyle($input, $output);
 
-        $this->backupName = $this->checkBackupName($input->getArgument('name'));
-        $this->prettyPrint = $input->getOption('pretty');
-        $this->exportFiles = !$input->getOption('no-files');
+        $this->backupName = $this->checkBackupName($this->getStringArgument($input, 'name'));
+        $this->prettyPrint = $this->isOptionActive($input, 'pretty');
+        $this->exportFiles = !$this->isOptionActive($input, 'no-files');
         $this->io->title('Backup Create');
         $this->createBackupFolders();
         $this->initCount();

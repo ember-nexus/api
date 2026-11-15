@@ -11,9 +11,9 @@ use App\Helper\Regex;
 use App\Service\UploadAccessService;
 use App\Service\UploadAppendService;
 use App\Service\UploadLockService;
+use App\Type\Response\NoContentResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class PatchUploadController extends AbstractController
@@ -36,7 +36,7 @@ class PatchUploadController extends AbstractController
         ],
         methods: ['PATCH']
     )]
-    public function patchUpload(string $id, Request $request): Response
+    public function patchUpload(string $id, Request $request): NoContentResponse
     {
         // cheap checks first, so that only the owner of an upload can block it with the lock
         $upload = $this->uploadAccessService->loadAuthorizedUpload($id);

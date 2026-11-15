@@ -15,7 +15,6 @@ use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
- * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  * @SuppressWarnings("PHPMD.ExcessiveClassLength")
  */
 #[WithMonologChannel('audit')]
@@ -965,7 +964,6 @@ class AccessChecker
 
     /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings("PHPMD.NPathComplexity")
      *
      * @param UuidInterface[] $elementIds
      *
@@ -993,7 +991,7 @@ RETURN
   end.id as endId;
 EOD,
             [
-                'ids' => array_map(fn ($elementId) => $elementId->toString(), $elementIds),
+                'ids' => array_map(fn (UuidInterface $elementId) => $elementId->toString(), $elementIds),
             ]
         ));
 
@@ -1091,7 +1089,7 @@ RETURN element.id AS elementId;
 EOD,
             [
                 'userId' => $userId->toString(),
-                'ids' => array_map(fn ($nodeId) => $nodeId->toString(), $nodeIds),
+                'ids' => array_map(fn (UuidInterface $nodeId) => $nodeId->toString(), $nodeIds),
             ]
         ));
 

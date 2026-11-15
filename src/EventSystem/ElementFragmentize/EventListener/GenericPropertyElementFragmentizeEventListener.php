@@ -39,6 +39,9 @@ class GenericPropertyElementFragmentizeEventListener
         $this->handleEvent($event);
     }
 
+    /**
+     * @psalm-suppress MixedAssignment
+     */
     private function handleEvent(NodeElementFragmentizeEvent|RelationElementFragmentizeEvent $event): void
     {
         $cypherFragment = $event->getCypherFragment();

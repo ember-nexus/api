@@ -73,7 +73,7 @@ class BinaryStreamResponse extends StreamedResponse implements EtagCapableRespon
     /**
      * @param resource $stream
      */
-    private function setStreamCallback($stream): void
+    private function setStreamCallback(mixed $stream): void
     {
         $this->setCallback(function () use ($stream): void {
             while (!feof($stream)) {

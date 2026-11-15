@@ -10,7 +10,7 @@ use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ElementManager;
-use App\Service\RequestContentService;
+use App\Service\RequestUtilService;
 use App\Service\UpdateElementFromRawDataService;
 use App\Type\AccessType;
 use App\Type\EtagType;
@@ -18,7 +18,6 @@ use App\Type\Response\NoContentResponse;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class PatchElementController extends AbstractController
@@ -29,7 +28,7 @@ class PatchElementController extends AbstractController
         private AccessChecker $accessChecker,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private UpdateElementFromRawDataService $updateElementFromRawDataService,
-        private RequestContentService $requestContentService,
+        private RequestUtilService $requestUtilService,
     ) {
     }
 
@@ -42,7 +41,7 @@ class PatchElementController extends AbstractController
         methods: ['PATCH']
     )]
     #[EndpointSupportsEtag(EtagType::ELEMENT)]
-    public function patchElement(string $id, Request $request): Response
+    public function patchElement(string $id, Request $request): NoContentResponse
     {
         $elementId = UuidV4::fromString($id);
         $userId = $this->authProvider->getUserId();
@@ -53,10 +52,7 @@ class PatchElementController extends AbstractController
 
         $element = $this->elementManager->getElementOrFail($elementId);
 
-        /**
-         * @var array<string, mixed> $rawData
-         */
-        $rawData = \Safe\json_decode($this->requestContentService->getContent($request), true);
+        $rawData = $this->requestUtilService->getJsonBodyFromRequest($request);
 
         $element = $this->updateElementFromRawDataService->updateElementFromRawData($element, $rawData);
 

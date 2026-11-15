@@ -104,7 +104,7 @@ class ExceptionEventListener
 
         $event->setResponse(new ProblemJsonResponse(
             $data,
-            $data['status'],
+            $status,
             $extendedException->getHeaders()
         ));
         /**

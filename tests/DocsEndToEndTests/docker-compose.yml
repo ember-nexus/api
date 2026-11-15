@@ -6,7 +6,7 @@ name: docs-e2e
 services:
   e2e:
     container_name: e2e
-    image: mcr.microsoft.com/playwright:v1.62.1-noble
+    image: mcr.microsoft.com/playwright:v1.65.1-noble
     tty: true
     volumes:
       - ../../docs:/docs

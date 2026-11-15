@@ -8,13 +8,34 @@ use App\Exception\Client400BadContentException;
 use App\Exception\Client400MissingPropertyException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
+use Ramsey\Uuid\Exception\InvalidUuidStringException;
+use Ramsey\Uuid\Rfc4122\UuidV4;
+use Ramsey\Uuid\UuidInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class RequestUtilService
 {
     public function __construct(
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
+        private RequestContentService $requestContentService,
     ) {
+    }
+
+    /**
+     * @return array<string, mixed>
+     *
+     * @throws Client400BadContentException
+     */
+    public function getJsonBodyFromRequest(Request $request): array
+    {
+        $body = \Safe\json_decode($this->requestContentService->getContent($request), true);
+        if (!is_array($body) || (count($body) > 0 && array_is_list($body))) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Unable to parse request as JSON object, got %s.', get_debug_type($body)));
+        }
+
+        /** @var array<string, mixed> $body */
+        return $body;
     }
 
     /**
@@ -60,15 +81,54 @@ class RequestUtilService
      * @param array<string, mixed> $body
      *
      * @return array<string, mixed>
+     *
+     * @throws Client400BadContentException
      */
     public function getDataFromBody(array $body): array
     {
-        $data = [];
-        if (array_key_exists('data', $body)) {
-            $data = $body['data'];
+        if (!array_key_exists('data', $body)) {
+            return [];
         }
 
-        return $data;
+        return $this->getArrayFromBody('data', $body);
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     *
+     * @return array<string, mixed>
+     *
+     * @throws Client400BadContentException
+     * @throws Client400MissingPropertyException
+     */
+    public function getArrayFromBody(string $key, array $body): array
+    {
+        if (!array_key_exists($key, $body)) {
+            throw $this->client400MissingPropertyExceptionFactory->createFromTemplate($key, 'object');
+        }
+        $value = $body[$key];
+        if (!is_array($value)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate($key, 'object', $value);
+        }
+
+        /** @var array<string, mixed> $value */
+        return $value;
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     *
+     * @throws Client400BadContentException
+     * @throws Client400MissingPropertyException
+     */
+    public function getUuidFromBody(string $key, array $body): UuidInterface
+    {
+        $value = $this->getStringFromBody($key, $body);
+        try {
+            return UuidV4::fromString($value);
+        } catch (InvalidUuidStringException $exception) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate($key, 'uuid', $value, $exception);
+        }
     }
 
     /**

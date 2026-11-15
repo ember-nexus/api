@@ -118,6 +118,7 @@ class ApiKeyCheckOnKernelRequestEventListener
 
     private function getUserIdAndTokenIdFromTokenObjectFromRedis(string $rawToken): ?UserIdAndTokenIdObject
     {
+        /** @var array<string, string> $data */
         $data = $this->redisClient->hgetall($this->authProvider->getRedisTokenKeyFromRawToken($rawToken));
 
         if (0 === count($data)) {

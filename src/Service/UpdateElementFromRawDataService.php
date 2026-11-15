@@ -20,6 +20,8 @@ class UpdateElementFromRawDataService
     }
 
     /**
+     * @psalm-suppress MixedAssignment
+     *
      * @param array<string, mixed> $rawData
      */
     public function updateElementFromRawData(

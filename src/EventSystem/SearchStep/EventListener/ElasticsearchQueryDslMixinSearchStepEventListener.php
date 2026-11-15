@@ -17,10 +17,6 @@ use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
-/**
- * @SuppressWarnings("PHPMD.CyclomaticComplexity")
- * @SuppressWarnings("PHPMD.NPathComplexity")
- */
 class ElasticsearchQueryDslMixinSearchStepEventListener
 {
     public const SearchStepType TYPE = SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN;
@@ -45,7 +41,10 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
             if (!is_array($rawNodeTypes)) {
                 throw $this->client400BadContentExceptionFactory->createFromTemplate('nodeTypes', 'array', $rawNodeTypes);
             }
-            foreach ($rawNodeTypes as $rawNodeType) {
+            foreach ($rawNodeTypes as $index => $rawNodeType) {
+                if (!is_string($rawNodeType)) {
+                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('nodeTypes[%d]', $index), 'string', $rawNodeType);
+                }
                 $nodeTypes[] = sprintf('node_%s', strtolower($rawNodeType));
             }
         }
@@ -56,7 +55,10 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
             if (!is_array($rawRelationTypes)) {
                 throw $this->client400BadContentExceptionFactory->createFromTemplate('relationTypes', 'array', $rawRelationTypes);
             }
-            foreach ($rawRelationTypes as $rawRelationType) {
+            foreach ($rawRelationTypes as $index => $rawRelationType) {
+                if (!is_string($rawRelationType)) {
+                    throw $this->client400BadContentExceptionFactory->createFromTemplate(sprintf('relationTypes[%d]', $index), 'string', $rawRelationType);
+                }
                 $relationTypes[] = sprintf('relation_%s', strtolower($rawRelationType));
             }
         }
@@ -91,6 +93,8 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     }
 
     /**
+     * @psalm-suppress MixedAssignment
+     *
      * @param array<string, mixed> $array
      * @param array<string, mixed> $parameters
      */
@@ -98,6 +102,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     {
         foreach ($array as $key => &$value) {
             if (is_array($value)) {
+                /** @var array<string, mixed> $value */
                 $this->executeExpressionsInQuery($value, $parameters);
             } elseif (is_string($value)) {
                 if (str_starts_with($value, '{{') && str_ends_with($value, '}}')) {
@@ -109,12 +114,23 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     }
 
     /**
+     * @return array{hits: array{total: array{value: int}, max_score: float|null, hits: list<array{_id: string, _index: string, _score: float|null}>}}
+     */
+    private function getResponseData(Elasticsearch $response): array
+    {
+        /** @var array{hits: array{total: array{value: int}, max_score: float|null, hits: list<array{_id: string, _index: string, _score: float|null}>}} $data */
+        $data = $response->asArray();
+
+        return $data;
+    }
+
+    /**
      * @return array<mixed>
      */
     private function formatElementResults(Elasticsearch $response): array
     {
         $elements = [];
-        foreach ($response->asArray()['hits']['hits'] as $element) {
+        foreach ($this->getResponseData($response)['hits']['hits'] as $element) {
             $elements[] = [
                 'id' => UuidV4::fromString($element['_id']),
                 'type' => $this->graphStructureService->getTypeFromElasticIndex($element['_index']),
@@ -145,16 +161,14 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
      */
     private function getPageFromParameters(array $parameters): int
     {
-        $page = 1;
         if (!array_key_exists('page', $parameters)) {
-            return $page;
+            return 1;
         }
-        $page = $parameters['page'];
-        if (!is_int($page)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('page', 'integer', $page);
+        if (!is_int($parameters['page'])) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('page', 'integer', $parameters['page']);
         }
 
-        return $page;
+        return $parameters['page'];
     }
 
     /**
@@ -162,16 +176,14 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
      */
     private function getPageSizeFromParameters(array $parameters): int
     {
-        $pageSize = 25;
         if (!array_key_exists('pageSize', $parameters)) {
-            return $pageSize;
+            return 25;
         }
-        $pageSize = $parameters['pageSize'];
-        if (!is_int($pageSize)) {
-            throw $this->client400BadContentExceptionFactory->createFromTemplate('pageSize', 'integer', $pageSize);
+        if (!is_int($parameters['pageSize'])) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('pageSize', 'integer', $parameters['pageSize']);
         }
 
-        return $pageSize;
+        return $parameters['pageSize'];
     }
 
     /**
@@ -179,9 +191,8 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
      */
     private function getMinScoreFromParameters(array $parameters): int|float|null
     {
-        $minScore = null;
         if (!array_key_exists('minScore', $parameters)) {
-            return $minScore;
+            return null;
         }
         $minScore = $parameters['minScore'];
         if (!is_int($minScore) && !is_float($minScore) && null !== $minScore) {
@@ -298,8 +309,8 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
 
         $event->setResults([
             'elements' => $this->formatElementResults($response),
-            'totalHits' => $response->asArray()['hits']['total']['value'],
-            'maxScore' => $response->asArray()['hits']['max_score'],
+            'totalHits' => $this->getResponseData($response)['hits']['total']['value'],
+            'maxScore' => $this->getResponseData($response)['hits']['max_score'],
         ]);
 
         $end = microtime(true);

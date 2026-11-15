@@ -391,9 +391,6 @@ class UploadServiceTest extends TestCase
         return ['offset matches' => [true, true], 'concurrently modified' => [false, false]];
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     */
     #[DataProvider('appendChunkResultProvider')]
     public function testAppendChunkIfOffsetMatchesReportsWhetherUploadWasUpdated(bool $rowReturned, bool $expected): void
     {

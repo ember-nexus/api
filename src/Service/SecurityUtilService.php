@@ -45,7 +45,7 @@ class SecurityUtilService
         if (!$userNode->hasProperty('_passwordHash')) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('_passwordHash', 'string');
         }
-        $hashedPassword = $userNode->getProperty('_passwordHash');
+        $hashedPassword = $userNode->getStringProperty('_passwordHash');
         if (true !== $this->userPasswordHasher->verifyPassword($currentPassword, $hashedPassword)) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
