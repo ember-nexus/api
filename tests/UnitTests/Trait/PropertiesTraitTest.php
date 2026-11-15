@@ -6,12 +6,12 @@ namespace App\Tests\UnitTests\Trait;
 
 use App\Trait\PropertiesTrait;
 use Exception;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
 #[Small]
-#[CoversClass(PropertiesTrait::class)]
+#[CoversTrait(PropertiesTrait::class)]
 class PropertiesTraitTest extends TestCase
 {
     private function createSubject(): object
