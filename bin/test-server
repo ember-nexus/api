@@ -52,14 +52,15 @@ FAILED=0
 # check must wait for the exact status the booted container will answer with: plain "curl -s" (or "curl -sf") also
 # treats a 500 returned while the app is still starting up (e.g. warming its cache, connecting to Neo4j) as "ready",
 # so the scenario's tests would start racing a container that looks up but is not actually serving yet; for the
-# boot-failure scenario the container never leaves 500, so that status itself is what "ready" means there.
+# boot-failure scenario the container never leaves 500, so that status itself is what "ready" means there. The
+# production image ships no curl, so the check uses the wget of busybox, which prints the status line with -S.
 run_scenario() {
   local group="$1" ready_status="$2"
   shift 2
   echo
   echo "=== Scenario $group ($*)"
   env "$@" $COMPOSE up -d --force-recreate --no-deps api-prod || { FAILED=1; return; }
-  if ! wait_for "api-prod ready (HTTP $ready_status)" 120 bash -c "status=\$($COMPOSE exec -T api-prod curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/ 2>/dev/null); [ \"\$status\" = \"$ready_status\" ]"; then
+  if ! wait_for "api-prod ready (HTTP $ready_status)" 120 bash -c "status=\$($COMPOSE exec -T api-prod wget -S -O /dev/null http://127.0.0.1/ 2>&1 | sed -n 's|^ *HTTP/[0-9.]* \\([0-9]*\\).*|\\1|p' | head -n 1); [ \"\$status\" = \"$ready_status\" ]"; then
     FAILED=1
     return
   fi
