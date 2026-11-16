@@ -26,20 +26,11 @@ jobs:
         with:
           target: development
           arch: amd
-          artifact-name: docker-image-docs-ci-dev-amd
-          artifact-retention-days: 1
+          upload-artifact: 'false'
       - uses: ./.github/actions/run-docs-pnpm-command
         with:
-          artifact-name: docker-image-docs-ci-dev-amd
+          load-image: 'false'
           command: build
-      - name: Delete intermediate dev-image artifact
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -eu
-          ID="$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
-            --jq '.artifacts[] | select(.name=="docker-image-docs-ci-dev-amd") | .id')"
-          [ -n "$ID" ] && gh api --method DELETE "repos/${{ github.repository }}/actions/artifacts/$ID"
       - name: Archive dist
         run: tar -czf docs-dist.tar.gz -C docs dist
       - uses: actions/upload-artifact@v6

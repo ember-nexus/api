@@ -233,11 +233,10 @@ jobs:
         with:
           target: development
           arch: amd
-          artifact-name: docker-image-docs-release-dev-amd
-          artifact-retention-days: 1
+          upload-artifact: 'false'
       - uses: ./.github/actions/run-docs-pnpm-command
         with:
-          artifact-name: docker-image-docs-release-dev-amd
+          load-image: 'false'
           command: build
           version: ${{ env.NEW_VERSION }}
       - name: Archive dist
