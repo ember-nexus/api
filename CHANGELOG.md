@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   logged and printed, the relation is skipped and the import continues.
 - The end-to-end tests which need a separate API instance (`anonymous-readonly-true`, `anonymous-readonly-false`) are
   now excluded by default in `tests/phpunit.end-to-end.xml.dist`, like the `command` group.
+- Updated PHP, PNPM (docs), Go (ExprCli) and Dockerfile dependencies, closes #540.
+- Optimized Dockerfile, removed unused options, closes #543.
 
 ### Fixed
 - Updating (`PATCH`, `PUT`) or deleting a relation required update/delete access to both its start and its end node.

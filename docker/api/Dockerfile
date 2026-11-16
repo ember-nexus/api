@@ -16,10 +16,11 @@ ARG ALPINE_VERSION='3.24'
 ARG PHP_VERSION='8.5.12'
 # see https://github.com/dunglas/frankenphp/releases
 ARG FRANKENPHP_VERSION='1.13.5'
-ARG WATCHER_VERSION='0.14.5'
 # pinned to a full patch version (not just "1.26") so `golang:${GO_VERSION}-alpine` resolves to the exact
 # same toolchain on every rebuild, matching the Go version FrankenPHP v1.12.7 itself builds with.
 ARG GO_VERSION='1.27.4'
+# composer is only needed while building (dev image, `composer install` of the production image); it is never part of the production image
+ARG COMPOSER_VERSION='2'
 # expr-cli is an independent, statically linked Go binary (see ./lib/ExprCli) and does not share FrankenPHP's
 # toolchain pin above; it is built with the latest Go release, pinned to a full patch version for reproducibility.
 ARG EXPR_CLI_GO_VERSION='1.27.4'
@@ -34,6 +35,9 @@ FROM caddy:${CADDY_VERSION}-builder-alpine AS caddy_builder
 
 
 FROM golang:${GO_VERSION}-alpine AS golang_base
+
+
+FROM composer:${COMPOSER_VERSION} AS composer_bin
 
 
 FROM alpine:${ALPINE_VERSION} AS frankenphp_source
@@ -84,31 +88,16 @@ ENV PHPIZE_DEPS="\
 # pinned to PHP_VERSION 8.5.12; bump together when bumping the ARG above
     PHP_SHA256="08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
 
-# persistent / runtime deps
-RUN apk add --no-cache \
-		ca-certificates \
-		curl \
-		tar \
-		xz
+# persistent / runtime deps; curl, tar and xz are only needed while building and are not installed permanently
+RUN apk add --no-cache ca-certificates
 
-# ensure www-data user exists
+# the container runs as the dedicated `worker` user (created in the `php` stage); there is no www-data user and
+# /var/www/html does not need to be world writable
 RUN set -eux; \
-	adduser -u 82 -D -S -G www-data www-data
-# 82 is the standard uid/gid for "www-data" in Alpine
-# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
-# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
-# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
+	mkdir -p "$PHP_INI_DIR/conf.d" /var/www/html
 
 RUN set -eux; \
-	mkdir -p "$PHP_INI_DIR/conf.d"; \
-# allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
-	[ ! -d /var/www/html ]; \
-	mkdir -p /var/www/html; \
-	chown www-data:www-data /var/www/html; \
-	chmod 1777 /var/www/html
-
-RUN set -eux; \
-	apk add --no-cache --virtual .fetch-deps gnupg; \
+	apk add --no-cache --virtual .fetch-deps curl gnupg; \
 	mkdir -p /usr/src; \
 	cd /usr/src; \
 	curl -fsSL -o php.tar.xz "$PHP_URL"; \
@@ -136,11 +125,12 @@ RUN set -eux; \
 		libsodium-dev \
 		libxml2-dev \
 		linux-headers \
-		oniguruma-dev \
 		openssl-dev \
 		patch \
-		readline-dev \
 		sed \
+		tar \
+		xz \
+		zlib-dev \
 	; \
 # make sure musl's iconv doesn't get used (https://www.php.net/manual/en/intro.iconv.php)
 	rm -vf /usr/include/iconv.h; \
@@ -172,37 +162,45 @@ RUN set -eux; \
 		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
 # make sure invalid --configure-flags are fatal errors instead of just warnings
 		--enable-option-checking=fatal \
-# https://github.com/docker-library/php/issues/439
-		--with-mhash \
+# only the extensions listed below are built, plus the always enabled core ones (Core, date, hash, json, pcre,
+# random, Reflection, SPL, standard, uri, Zend OPcache)
+		--disable-all \
 # https://github.com/docker-library/php/issues/822
 		--with-pic \
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
+# mbregex is not used and would pull in oniguruma
 		--enable-mbstring \
-# opcache is bundled and enabled by default since PHP 7.3, no configure flag needed/accepted anymore
+		--disable-mbregex \
 # https://wiki.php.net/rfc/argon2_password_hash
 		--with-password-argon2 \
 # https://wiki.php.net/rfc/libsodium
 		--with-sodium=shared \
-# this project has no SQL dependency; PDO and all SQL drivers are fully disabled/removed instead of just unused
-		--disable-pdo \
-		--without-sqlite3 \
-		--without-pdo-sqlite \
+# required by symfony/*, phpunit and composer
+		--enable-ctype \
+		--enable-dom \
+		--enable-fileinfo \
+		--enable-filter \
+		--enable-phar \
+		--enable-posix \
+		--enable-simplexml \
+		--enable-tokenizer \
+		--enable-xml \
+		--enable-xmlreader \
+		--enable-xmlwriter \
+		--with-libxml \
 		--with-curl \
 		--with-iconv=/usr \
 		--with-openssl \
-		--with-readline \
 		--with-zlib \
-# https://github.com/docker-library/php/pull/1259
-		--enable-phpdbg \
-		--enable-phpdbg-readline \
 # in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
 		--with-pear \
-# https://github.com/docker-library/php/pull/939#issuecomment-730501748
-		--enable-embed \
-# required by FrankenPHP
-		--enable-zts \
 # https://externals.io/message/118859
 		--disable-zend-signals \
+# required by FrankenPHP; the CGI SAPI is not built at all (FrankenPHP replaces it), nor is phpdbg
+		--enable-embed \
+		--enable-zts \
+		--disable-cgi \
+		--disable-phpdbg \
 # bundled pcre does not support JIT on s390x
 # https://manpages.debian.org/bullseye/libpcre3-dev/pcrejit.3.en.html#AVAILABILITY_OF_JIT_SUPPORT
 		$(test "$gnuArch" = 's390x-linux-musl' && echo '--without-pcre-jit') \
@@ -255,15 +253,13 @@ COPY ./docker/api/php-embed/docker-php-ext-* ./docker/api/php-embed/docker-php-e
 COPY ./docker/api/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
-RUN docker-php-ext-enable sodium \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN docker-php-ext-enable sodium
 
 
 
 FROM php_base AS frankenphp_builder
 ARG FRANKENPHP_VERSION
 ARG CADDY_VERSION
-ARG WATCHER_VERSION
 ARG GO_VERSION
 
 COPY --from=caddy_builder /usr/bin/xcaddy /usr/bin/xcaddy
@@ -272,38 +268,23 @@ ENV PATH="/usr/local/go/bin:${PATH}" \
     GOTOOLCHAIN=local \
     GOBIN=/usr/local/bin
 
-# same build deps as https://github.com/dunglas/frankenphp/blob/main/alpine.Dockerfile's "builder" stage,
-# minus sqlite-dev (this project's php_base has no SQL support to link against)
+# same build deps as https://github.com/dunglas/frankenphp/blob/main/alpine.Dockerfile's "builder" stage, minus
+# sqlite-dev (this project's php_base has no SQL support to link against), cmake/libcap (no watcher, no setcap),
+# brotli-dev (no brotli), readline-dev and oniguruma-dev (PHP is built without them)
 RUN apk add --no-cache --virtual .frankenphp-build-deps \
 		$PHPIZE_DEPS \
 		argon2-dev \
 		bash \
-		brotli-dev \
-		cmake \
 		coreutils \
 		curl-dev \
 		git \
 		gnu-libiconv-dev \
-		libcap \
 		libsodium-dev \
 		libstdc++ \
 		libxml2-dev \
 		linux-headers \
-		oniguruma-dev \
 		openssl-dev \
-		readline-dev \
 		upx
-
-# e-dant/watcher powers FrankenPHP's file watcher; pinned to a release instead of "latest" for reproducible
-# builds (bump alongside FRANKENPHP_VERSION if FrankenPHP requires a newer watcher ABI)
-WORKDIR /usr/local/src/watcher
-RUN set -eux; \
-	curl -fsSL "https://github.com/e-dant/watcher/archive/refs/tags/${WATCHER_VERSION}.tar.gz" -o /tmp/watcher.tar.gz; \
-	tar -xzf /tmp/watcher.tar.gz -C /usr/local/src/watcher --strip-components=1; \
-	rm /tmp/watcher.tar.gz; \
-	cmake -S . -B build -DCMAKE_BUILD_TYPE=Release; \
-	cmake --build build; \
-	cmake --install build
 
 COPY --from=frankenphp_source /usr/local/src/frankenphp /go/src/app
 WORKDIR /go/src/app
@@ -314,19 +295,21 @@ WORKDIR /go/src/app
 
 # see also https://github.com/docker-library/php/blob/master/8.3/alpine3.20/zts/Dockerfile#L53-L55 and
 # https://github.com/dunglas/frankenphp/blob/main/alpine.Dockerfile
+# build tags: nobadger/nomysql/nopgx drop unused storage backends, nomercure drops the (AGPL licensed) Mercure hub,
+# nowatcher drops the file watcher (no worker mode hot reload, so no e-dant/watcher and no libwatcher) and nobrotli
+# drops the brotli dependency (responses are compressed with zstd and gzip only, see the Caddyfiles)
+# no setcap: the container is meant to run with all capabilities dropped; binding to port 80 works through docker's
+# default `net.ipv4.ip_unprivileged_port_start=0`
 RUN CGO_ENABLED=1 \
-    XCADDY_SETCAP=1 \
-    XCADDY_GO_BUILD_FLAGS="-tags=nobadger,nomysql,nopgx -ldflags=\"-w -s -extldflags '-Wl,-z,stack-size=0x800000' -X 'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ${FRANKENPHP_VERSION} PHP ${PHP_VERSION} Caddy' -X 'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy'\"" \
+    XCADDY_GO_BUILD_FLAGS="-tags=nobadger,nomysql,nopgx,nomercure,nowatcher,nobrotli -ldflags=\"-w -s -extldflags '-Wl,-z,stack-size=0x800000' -X 'github.com/caddyserver/caddy/v2.CustomVersion=FrankenPHP ${FRANKENPHP_VERSION} PHP ${PHP_VERSION} Caddy' -X 'github.com/caddyserver/caddy/v2/modules/caddyhttp.ServerHeader=FrankenPHP Caddy'\"" \
     CGO_CFLAGS="-DFRANKENPHP_VERSION=${FRANKENPHP_VERSION} $(php-config --includes) $PHP_CFLAGS" \
     CGO_CPPFLAGS="$PHP_CPPFLAGS" \
-    CGO_LDFLAGS="$(php-config --ldflags) $(php-config --libs) -lssl -lcrypto -lreadline -largon2 -lcurl -lonig -lz $PHP_LDFLAGS" \
+    CGO_LDFLAGS="$(php-config --ldflags) $(php-config --libs) -lssl -lcrypto -largon2 -lcurl -lz $PHP_LDFLAGS" \
     xcaddy build "v${CADDY_VERSION}" \
         --output /usr/local/bin/frankenphp \
         --with github.com/dunglas/frankenphp=./ \
         --with github.com/dunglas/frankenphp/caddy=./caddy/ \
-        --with github.com/dunglas/caddy-cbrotli \
         --with github.com/baldinof/caddy-supervisor \
-    && setcap cap_net_bind_service=+ep /usr/local/bin/frankenphp \
     && /usr/local/bin/frankenphp version \
     && /usr/local/bin/frankenphp version | grep -q "Caddy v${CADDY_VERSION} " \
     && /usr/local/bin/frankenphp build-info \
@@ -361,21 +344,17 @@ ENV FRANKENPHP_VERSION=${FRANKENPHP_VERSION}
 ARG CADDY_VERSION
 ENV CADDY_VERSION=${CADDY_VERSION}
 
+# runtime libraries only: curl, tar, xz, the openssl CLI, pcre and libcap are not needed at runtime (libcurl/libssl/libz
+# are pulled in as dependencies of the compiled extensions). tar and xz are build-only, docker-php-ext-install unpacks
+# the PHP sources with them.
 RUN apk add --no-cache \
-		ca-certificates \
-		curl \
+        ca-certificates \
         icu \
         icu-data-full \
-        libcap \
         libstdc++ \
         libzip \
         mailcap \
-# https://github.com/docker-library/php/issues/494
-		openssl \
-        pcre \
         supercronic \
-		tar \
-        xz \
         zlib \
     && apk add --no-cache --virtual .build-deps \
         ${PHPIZE_DEPS} \
@@ -384,19 +363,17 @@ RUN apk add --no-cache \
         libzip-dev \
         linux-headers \
         openssl-dev \
-        pcre-dev \
-        pkgconf \
+        tar \
+        xz \
         zlib-dev \
-    && pecl install mongodb-2.5.7 \
+# only plain key/document access is used, so client side encryption, snappy, zstd and SASL are not built (TLS and zlib stay)
+    && pecl install -D 'with-mongodb-system-libs="no" with-mongodb-client-side-encryption="no" with-mongodb-snappy="no" with-mongodb-zlib="system" with-mongodb-zstd="no" with-mongodb-sasl="no" with-mongodb-ssl="openssl"' mongodb-2.5.7 \
     && docker-php-ext-configure intl \
     && docker-php-ext-install intl bcmath sockets zip \
     && docker-php-ext-enable mongodb intl bcmath sockets zip \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && apk del .build-deps
 
 COPY --from=frankenphp_builder /usr/local/bin/frankenphp /usr/local/bin/frankenphp
-COPY --from=frankenphp_builder /usr/local/lib/libwatcher* /usr/local/lib/
-RUN ldconfig /usr/local/lib || true
 
 ENV GODEBUG=cgocheck=0 \
     XDG_CONFIG_HOME=/config \
@@ -411,7 +388,6 @@ RUN set -x \
     && mkdir -p /config/caddy /data/caddy \
     && chmod +x /usr/local/bin/docker-entrypoint.sh \
     && adduser -D worker \
-	&& setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp \
 	&& /usr/local/bin/frankenphp version \
 	&& chown -R worker:worker /config/caddy /data/caddy /etc/crontabs/supercronic
 
@@ -437,7 +413,9 @@ COPY ./docker/api/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 COPY composer.json /var/www/html/composer.json
 COPY composer.lock /var/www/html/composer.lock
 COPY LICENSE /var/www/html/LICENSE
-RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-cache \
+# composer is mounted from its own stage for this single step, so it never ends up in an image layer
+RUN --mount=from=composer_bin,source=/usr/bin/composer,target=/usr/local/bin/composer \
+    APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-cache \
     && rm -rf /var/www/html/var/cache \
     && mkdir -p /var/www/html/var/cache \
     && rm -rf /usr/local/include/php \
@@ -447,8 +425,8 @@ RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize
     && mv /usr/local/lib/php_extensions /usr/local/lib/php/extensions \
     && rm -rf /tmp/pear \
     && rm -rf /usr/src \
-    && rm /usr/local/bin/php-cgi \
-    && rm /usr/local/bin/phpdbg \
+    && rm -f /usr/local/bin/pear /usr/local/bin/peardev /usr/local/bin/pecl /usr/local/bin/phar /usr/local/bin/phar.phar \
+        /usr/local/bin/phpize /usr/local/bin/php-config /usr/local/bin/docker-php-source /usr/local/bin/docker-php-ext-* \
     && find /var/www/html/vendor/symfony/emoji/Resources/data -type f -name '*.php' ! -name 'emoji-en.php' -delete \
     && php /var/www/html/vendor/symfony/emoji/Resources/bin/compress \
     && rm -rf /var/cache/apk /var/log /lib/apk/db /root/.composer \
@@ -497,6 +475,8 @@ USER worker
 FROM php AS development
 
 ENV APP_ENV=dev
+
+COPY --from=composer_bin /usr/bin/composer /usr/local/bin/composer
 
 # the dev image has no vendor/ installed by default (it's provided by the mounted source instead), so supercronic's
 # scheduled `php bin/console cron` runs would fail until `composer install` is run manually; the dev Caddyfile drops

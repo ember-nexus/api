@@ -49,7 +49,7 @@
 
 :80 {
 	root * /var/www/html/public
-	encode zstd br gzip
+	encode zstd gzip
 	header {
 		-Server
 		-Set-Cookie
