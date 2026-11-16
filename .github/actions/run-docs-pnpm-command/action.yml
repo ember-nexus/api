@@ -9,8 +9,17 @@ description: >
   `/.config/astro` (EACCES).
 inputs:
   artifact-name:
-    description: 'Name of the docs dev Docker image artifact (produced by build-docker-image-docs)'
-    required: true
+    description: >
+      Name of the docs dev Docker image artifact (produced by build-docker-image-docs). Not needed
+      if load-image is 'false'.
+    required: false
+    default: ''
+  load-image:
+    description: >
+      Set to 'false' when docs:dev is already loaded in the local daemon (i.e. built earlier in
+      the same job), to skip the artifact download.
+    required: false
+    default: 'true'
   tar-filename:
     description: 'Filename of the tar.gz inside that artifact'
     required: false
@@ -29,7 +38,8 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: ./.github/actions/load-docker-image-docs
+    - if: inputs.load-image == 'true'
+      uses: ./.github/actions/load-docker-image-docs
       with:
         artifact-name: ${{ inputs.artifact-name }}
         tar-filename: ${{ inputs.tar-filename }}

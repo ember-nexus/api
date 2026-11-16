@@ -24,9 +24,18 @@ inputs:
     description: 'Whether to write to the GitHub Actions Buildx cache'
     required: false
     default: 'true'
+  upload-artifact:
+    description: >
+      Whether to upload the saved tarball as an artifact. Set to 'false' when the image is only
+      consumed by later steps of the same job - it stays loaded in the local daemon as docs:dev /
+      docs:prod, and a same-job upload-then-download round trip can fail with "Artifact not found"
+      because the artifact listing lags behind the finalized upload.
+    required: false
+    default: 'true'
   artifact-name:
-    description: 'Name of the uploaded artifact'
-    required: true
+    description: 'Name of the uploaded artifact (required if upload-artifact is true)'
+    required: false
+    default: ''
   artifact-retention-days:
     description: 'Retention in days for the uploaded artifact'
     required: false
@@ -79,7 +88,8 @@ runs:
         docker save "$TAG" | gzip > "$TARBALL"
         echo "TARBALL_PATH=$TARBALL" >> "$GITHUB_ENV"
 
-    - uses: actions/upload-artifact@v6
+    - if: inputs.upload-artifact == 'true'
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ env.TARBALL_PATH }}
