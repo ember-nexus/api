@@ -49,9 +49,9 @@ class CypherPathSearchStepEventListener
         $relationIds = [];
         foreach ($rawPath->getNodes() as $rawNode) {
             /**
-             * @phpstan-ignore-next-line greater.alwaysTrue
+             * @psalm-suppress DocblockTypeContradiction
              */
-            if (!($rawNode instanceof Node)) {
+            if (!($rawNode instanceof Node)) { // @phpstan-ignore instanceof.alwaysTrue
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.nodes as Node, not %s.', get_debug_type($rawNode))); // @codeCoverageIgnore
             }
             $rawId = $rawNode->getProperty('id');
@@ -62,9 +62,9 @@ class CypherPathSearchStepEventListener
         }
         foreach ($rawPath->getRelationships() as $rawRelation) {
             /**
-             * @phpstan-ignore-next-line greater.alwaysTrue
+             * @psalm-suppress DocblockTypeContradiction
              */
-            if (!($rawRelation instanceof UnboundRelationship)) {
+            if (!($rawRelation instanceof UnboundRelationship)) { // @phpstan-ignore instanceof.alwaysTrue
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.relationships as UnboundRelationship, not %s.', get_debug_type($rawRelation))); // @codeCoverageIgnore
             }
             $rawId = $rawRelation->getProperty('id');

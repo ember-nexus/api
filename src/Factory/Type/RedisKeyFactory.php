@@ -21,6 +21,7 @@ class RedisKeyFactory
 
     public function getValidatedQueryCypherPathSubsetRedisKey(string $cypherQuery): RedisKey
     {
+        /** @psalm-suppress WeakHash */
         $hashedCypherQuery = sha1($cypherQuery);
 
         return new RedisKey(

@@ -13,7 +13,7 @@
 # verbatim from docker-library/php, unmodified.
 
 ARG ALPINE_VERSION='3.24'
-ARG PHP_VERSION='8.5.12'
+ARG PHP_VERSION='8.5.13'
 # see https://github.com/dunglas/frankenphp/releases
 ARG FRANKENPHP_VERSION='1.13.5'
 # pinned to a full patch version (not just "1.26") so `golang:${GO_VERSION}-alpine` resolves to the exact
@@ -85,8 +85,8 @@ ENV PHPIZE_DEPS="\
     PHP_VERSION="${PHP_VERSION}" \
     PHP_URL="https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz" \
     PHP_ASC_URL="https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz.asc" \
-# pinned to PHP_VERSION 8.5.12; bump together when bumping the ARG above
-    PHP_SHA256="08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
+# pinned to PHP_VERSION 8.5.13; bump together when bumping the ARG above, see https://github.com/docker-library/php
+    PHP_SHA256="607602acaf0c3061818e9916ec44a058e8b3d43959a83862b9cd3ec7bf5b785f"
 
 # persistent / runtime deps; curl, tar and xz are only needed while building and are not installed permanently
 RUN apk add --no-cache ca-certificates
