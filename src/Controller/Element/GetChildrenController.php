@@ -7,10 +7,13 @@ namespace App\Controller\Element;
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Helper\CypherHelper;
+use App\Helper\ReadAccessCypherHelper;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
+use App\Service\ElementTypeService;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\EtagType;
@@ -29,6 +32,7 @@ class GetChildrenController extends AbstractController
         private CollectionService $collectionService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private ElementTypeService $elementTypeService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -58,55 +62,38 @@ class GetChildrenController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
+        $label = $this->elementTypeService->resolveNodeLabel($parentId);
+        if (null === $label) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
         $cypherClient = $this->cypherEntityManager->getClient();
 
+        $escapedLabel = CypherHelper::escapeIdentifier($label);
+        if ($this->accessChecker->hasUnconditionalReadAccessToNode($userId, $parentId, $escapedLabel)) {
+            // the user owns the parent (directly or via groups) or reads it through relations without any condition:
+            // ownership passes that access on to every child, so the children need no access check of their own
+            $accessClause =
+                'MATCH (parent:'.$escapedLabel." {id: \$parentId})\n".
+                "MATCH (parent)-[r:OWNS]->(child)\n".
+                "WITH r, child\n".
+                "ORDER BY child.id, r.id\n";
+        } else {
+            $accessClause =
+                "MATCH (user:User {id: \$userId})\n".
+                'MATCH (parent:'.$escapedLabel." {id: \$parentId})\n".
+                "MATCH (parent)-[r:OWNS]->(child)\n".
+                ReadAccessCypherHelper::readPathMatch('child').
+                "WITH user, r, child, path\n".
+                "ORDER BY child.id, r.id\n".
+                "WHERE\n".
+                "  user.id = child.id\n".
+                "  OR\n".
+                "  path IS NOT NULL\n";
+        }
+
         $res = $cypherClient->runStatement(Statement::create(
-            "MATCH (user:User {id: \$userId})\n".
-            "MATCH (parent {id: \$parentId})\n".
-            "MATCH (parent)-[r:OWNS]->(child)\n".
-            "OPTIONAL MATCH path=(user)-[:IS_IN_GROUP*0..]->()-[:OWNS|HAS_READ_ACCESS*0..]->(child)\n".
-            "WHERE\n".
-            "  user.id = child.id\n".
-            "  OR\n".
-            "  ALL(relation in relationships(path) WHERE\n".
-            "    type(relation) = \"IS_IN_GROUP\"\n".
-            "    OR\n".
-            "    type(relation) = \"OWNS\"\n".
-            "    OR\n".
-            "    (\n".
-            "      type(relation) = \"HAS_READ_ACCESS\"\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onLabel IS NULL\n".
-            "        OR\n".
-            "        relation.onLabel IN labels(child)\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onParentLabel IS NULL\n".
-            "        OR\n".
-            "        relation.onParentLabel IN labels(child)\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onState IS NULL\n".
-            "        OR\n".
-            "        (child)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onCreatedByUser IS NULL\n".
-            "        OR\n".
-            "        (child)<-[:CREATED*]-(user)\n".
-            "      )\n".
-            "    )\n".
-            "  )\n".
-            "WITH user, r, child, path\n".
-            "ORDER BY child.id, r.id\n".
-            "WHERE\n".
-            "  user.id = child.id\n".
-            "  OR\n".
-            "  path IS NOT NULL\n".
+            $accessClause.
             "WITH child, collect(DISTINCT r.id) AS rCol\n".
             "WITH child, collect(child.id) + collect(rCol) AS row\n".
             "WITH collect(DISTINCT row) AS allRows, count(child) AS totalCount\n".

@@ -131,8 +131,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
     }
 
     /**
-     * Resolves the user id behind a token, via its Token node's `OWNS`/`CREATED` relation (its start is the owning
-     * user; a self-registered user's token has `CREATED`, a backup-loaded fixture token has `OWNS`).
+     * Resolves the user id behind a token, via its Token node's `OWNS` relation (its start is the owning user).
      */
     private function getUserIdForToken(string $token): string
     {
@@ -144,7 +143,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $this->assertIsCollectionResponse($relatedResponse);
         $relatedData = $this->getBody($relatedResponse);
         foreach ($relatedData['relations'] as $relation) {
-            if (in_array($relation['type'], ['OWNS', 'CREATED'], true)) {
+            if ('OWNS' === $relation['type']) {
                 return $relation['start'];
             }
         }
@@ -327,7 +326,7 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         [$memberUserId, $memberUserToken] = $this->registerUserWithToken('group-search-access-member');
         $this->grantOwnershipOf($memberUserId);
 
-        // created by the owner, not by the member: the member has no OWNS/CREATED relation to it whatsoever
+        // created by the owner, not by the member: the member has no OWNS relation to it and is not its `createdBy`
         $elementId = $this->createNode('cron-update-ownership-group-search-access-target');
         $this->assertSearchAccess($memberUserToken, $elementId, false);
 

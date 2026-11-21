@@ -20,8 +20,12 @@ Options:
   noticeably larger.
 - `--no-files` - skips exporting files, only backing up nodes and relations.
 
-A `summary.json` is written alongside the backup with the node/relation/file counts, hostname, and
-API version - this is what `backup:list` reads to populate its table.
+A `summary.json` is written alongside the backup with the node/relation/file counts, hostname, API version and the
+graph structure (all node labels and relation types of the database, as `graphStructure.nodeTypes` and
+`graphStructure.relationTypes`). `backup:list` reads it to populate its table, and `backup:load` uses the graph
+structure to create the id indices before it loads the first element. The format of the file is described by the
+[JSON Schema `backup-summary.schema.json`](/schemas/backup-summary.schema.json), which the tests of the command are
+checked against.
 
 <Note>
     The command counts nodes and relations up front and pages through them while exporting, so it

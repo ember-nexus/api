@@ -54,7 +54,7 @@ services:
     image: redis:7-alpine
     expose:
       - "6379"
-    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+    command: redis-server --save 20 1 --maxmemory-policy noeviction --loglevel warning --requirepass redis-password
 
   rabbitmq:
     container_name: rabbitmq
@@ -78,7 +78,7 @@ services:
     command: server /data --console-address ":9001"
 
   minio-init:
-    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    image: pgsty/mc:RELEASE.2026-11-12T00-00-00Z
     depends_on:
       - minio
     entrypoint: >
@@ -90,9 +90,11 @@ services:
 
       mc mb --ignore-existing minio/api-storage;
       mc mb --ignore-existing minio/api-upload;
+      mc mb --ignore-existing minio/ember-nexus-system;
 
       mc anonymous set none minio/api-storage;
       mc anonymous set none minio/api-upload;
+      mc anonymous set none minio/ember-nexus-system;
 
       mc admin user add minio accessKey secretKey || true;
       mc admin policy attach minio readwrite --user accessKey;

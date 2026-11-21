@@ -8,7 +8,7 @@ exampleOutput: backup-convert.html
 ---
 
 Converts a backup with legacy UUIDv4 element ids into a new backup with UUIDsv2a7 element ids, see
-[element ids](/reference/element-id).
+[element ids](/reference/element-id). It also replaces `CREATED` relations by the `createdBy` property, see below.
 
 The `source` argument is required and must match an existing backup. The source backup is never modified; all data is
 copied into a new backup, which has to be a name which is not used yet.
@@ -16,6 +16,8 @@ copied into a new backup, which has to be a name which is not used yet.
 Options:
 
 - `-t`, `--target` - name of the new backup, defaults to `<source>-converted`.
+- `-f`, `--force` - also converts backups which were created with version 0.2.0 or newer. Without it, such backups are
+  refused, as they already use the new format.
 - `--mapping-output` - path of the CSV file which receives the mapping of old to new ids. By default, it is written to
   `uuid-mapping.csv` within the new backup. The file uses `;` as delimiter, has the header `UUIDv4;UUIDsv2a7` and is
   sorted by the old id.
@@ -25,3 +27,14 @@ property of the element; elements without it share the time of the conversion. I
 properties of nodes and relations are converted, ids within other properties are not. Files are renamed to the new id.
 Folders which are derived from ids, as created by `backup:create`, are recalculated; all other folders are kept.
 Ids which are already in the new format are kept.
+
+Which backups are converted is decided by the `version` property of the backup's `summary.json`, which `backup:create`
+writes. Backups of versions before 0.2.0 are converted; later versions, including pre-releases of 0.2.0, are refused
+unless `--force` is used. Backups of development builds (`dev`) and backups without a version cannot be classified and
+are converted with a warning.
+
+Older versions stored the creator of an element as a `CREATED` relation from the user to the element. These relations
+are removed; the id of the user is written into the `createdBy` property of the created element instead. If an element
+has several `CREATED` relations, the first one is used and a warning is shown. `summary.json` is updated as well: the
+element counts and the graph structure (`graphStructure.nodeTypes` and `graphStructure.relationTypes`) are written
+from the converted elements.

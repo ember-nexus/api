@@ -7,10 +7,13 @@ namespace App\Controller\Element;
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Helper\CypherHelper;
+use App\Helper\ReadAccessCypherHelper;
 use App\Helper\Regex;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\CollectionService;
+use App\Service\ElementTypeService;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\EtagType;
@@ -29,6 +32,7 @@ class GetParentsController extends AbstractController
         private CollectionService $collectionService,
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
+        private ElementTypeService $elementTypeService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -58,49 +62,18 @@ class GetParentsController extends AbstractController
             throw $this->client404NotFoundExceptionFactory->createFromTemplate();
         }
 
+        $label = $this->elementTypeService->resolveNodeLabel($childId);
+        if (null === $label) {
+            throw $this->client404NotFoundExceptionFactory->createFromTemplate();
+        }
+
         $cypherClient = $this->cypherEntityManager->getClient();
 
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (child {id: \$childId})\n".
+            'MATCH (child:'.CypherHelper::escapeIdentifier($label)." {id: \$childId})\n".
             "MATCH (child)<-[r:OWNS]-(parent)\n".
-            "OPTIONAL MATCH path=(user)-[:IS_IN_GROUP*0..]->()-[:OWNS|HAS_READ_ACCESS*0..]->(parent)\n".
-            "WHERE\n".
-            "  user.id = parent.id\n".
-            "  OR\n".
-            "  ALL(relation in relationships(path) WHERE\n".
-            "    type(relation) = \"IS_IN_GROUP\"\n".
-            "    OR\n".
-            "    type(relation) = \"OWNS\"\n".
-            "    OR\n".
-            "    (\n".
-            "      type(relation) = \"HAS_READ_ACCESS\"\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onLabel IS NULL\n".
-            "        OR\n".
-            "        relation.onLabel IN labels(parent)\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onParentLabel IS NULL\n".
-            "        OR\n".
-            "        relation.onParentLabel IN labels(parent)\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onState IS NULL\n".
-            "        OR\n".
-            "        (parent)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onCreatedByUser IS NULL\n".
-            "        OR\n".
-            "        (parent)<-[:CREATED*]-(user)\n".
-            "      )\n".
-            "    )\n".
-            "  )\n".
+            ReadAccessCypherHelper::readPathMatch('parent').
             "WITH user, r, parent, path\n".
             "ORDER BY parent.id, r.id\n".
             "WHERE\n".

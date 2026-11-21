@@ -12,8 +12,16 @@ use App\Service\AppStateService;
 use App\Service\ElementManager;
 use App\Service\FileHashService;
 use App\Service\FileSizeLimitService;
+use App\Service\GraphStructureService;
+use App\Service\Index\IndexEnsurer;
+use App\Service\Index\IndexEnsureResult;
+use App\Service\MaintenanceLockService;
+use App\Service\Mphf\MphfBuildResult;
+use App\Service\Mphf\MphfBuildService;
 use App\Service\RawToElementService;
 use App\Service\S3Service;
+use App\Type\MaintenanceLock;
+use App\Type\MaintenanceLockType;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
 use App\Type\S3\UploadFileOperation;
@@ -26,18 +34,21 @@ use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
+use Throwable;
 
 /**
  * Covers the file handling of `backup:load` (step 3): hash verification, `--skip-verify`, size limit and error
@@ -73,6 +84,7 @@ class BackupLoadCommandTest extends TestCase
         $this->backupStorage = new Filesystem(new LocalFilesystemAdapter($this->storageRoot));
         $this->backupStorage->createDirectory(self::BACKUP_NAME.'/file');
         $this->backupStorage->write(self::BACKUP_NAME.'/summary.json', '{"nodeCount":0,"relationCount":0,"fileCount":0}');
+        $this->graphStructureService = $this->prophesize(GraphStructureService::class);
         $this->elements = [];
         $this->uploadedIds = [];
         $this->failingIds = [];
@@ -113,12 +125,35 @@ class BackupLoadCommandTest extends TestCase
         return ['hash' => ['sha256' => hash('sha256', $content)], 'extension' => 'bin'];
     }
 
+    private bool $mphfBuildFails = false;
+    private ObjectProphecy $locks;
+    private ObjectProphecy $indexEnsurer;
+    private ObjectProphecy $mphfBuildService;
+    private ObjectProphecy $graphStructureService;
+
     /**
      * @param array<string, mixed> $input
      */
-    private function runCommand(array $input = [], int $maxFileSizeInBytes = 1024): CommandTester
+    private function runCommand(array $input = [], int $maxFileSizeInBytes = 1024, bool $lockTaken = false, int $expectedStatusCode = Command::SUCCESS): CommandTester
     {
         $test = $this;
+
+        $locks = $this->prophesize(MaintenanceLockService::class);
+        $locks->claim(MaintenanceLockType::DATABASE)->willReturn($lockTaken ? null : new MaintenanceLock(MaintenanceLockType::DATABASE, 'a'));
+        $locks->claim(MaintenanceLockType::DATABASE_INDICES)->willReturn(new MaintenanceLock(MaintenanceLockType::DATABASE_INDICES, 'b'));
+        $locks->claim(MaintenanceLockType::MPHF)->willReturn(new MaintenanceLock(MaintenanceLockType::MPHF, 'c'));
+        $locks->release(Argument::type(MaintenanceLock::class))->willReturn(true);
+        $indexEnsurer = $this->prophesize(IndexEnsurer::class);
+        $indexEnsurer->ensure(Argument::cetera())->willReturn(new IndexEnsureResult());
+        $mphfBuildService = $this->prophesize(MphfBuildService::class);
+        if ($this->mphfBuildFails) {
+            $mphfBuildService->build(Argument::cetera())->willThrow(new Exception('boom'));
+        } else {
+            $mphfBuildService->build(Argument::cetera())->willReturn(new MphfBuildResult(false, null, '20260101-0000.mphf', 3));
+        }
+        $this->locks = $locks;
+        $this->indexEnsurer = $indexEnsurer;
+        $this->mphfBuildService = $mphfBuildService;
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->flush()->willReturn($elementManager->reveal());
@@ -207,12 +242,16 @@ class BackupLoadCommandTest extends TestCase
             ),
             new FileHashService(),
             new NullLogger(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+            $locks->reveal(),
+            $indexEnsurer->reveal(),
+            $mphfBuildService->reveal(),
+            $this->graphStructureService->reveal(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
 
         $tester = new CommandTester($command);
         $statusCode = $tester->execute(['name' => self::BACKUP_NAME, ...$input]);
-        $this->assertSame(Command::SUCCESS, $statusCode);
+        $this->assertSame($expectedStatusCode, $statusCode);
 
         return $tester;
     }
@@ -358,5 +397,89 @@ class BackupLoadCommandTest extends TestCase
         $this->assertStringContainsString('relation/invalid-json.json; skipping relation', $display);
         $this->assertStringContainsString('relation/without-id.json; skipping relation: InvalidArgumentException: Relation has no valid id.', $display);
         $this->assertStringContainsString('Loaded 2 relations, skipped 2 broken relation files', $display);
+    }
+
+    public function testEnsuresIndicesAfterNodesAndRelationsForBackupsWithoutGraphStructureAndBuildsMphf(): void
+    {
+        $tester = $this->runCommand();
+        $this->graphStructureService->setStructure(Argument::cetera())->shouldNotHaveBeenCalled();
+
+        $this->indexEnsurer->ensure(true, false, Argument::any())->shouldHaveBeenCalledOnce();
+        $this->indexEnsurer->ensure(false, true, Argument::any())->shouldHaveBeenCalledOnce();
+        $this->mphfBuildService->build(Argument::cetera())->shouldHaveBeenCalledOnce();
+        $this->assertStringContainsString('20260101-0000.mphf', $tester->getDisplay());
+    }
+
+    public function testGraphStructureOfSummaryCreatesAllIndicesBeforeAnythingIsLoaded(): void
+    {
+        $this->backupStorage->write(self::BACKUP_NAME.'/summary.json', '{"nodeCount":0,"relationCount":0,"fileCount":0,"graphStructure":{"nodeTypes":["Data","User"],"relationTypes":["OWNS"]}}');
+        $this->graphStructureService->setStructure(['Data', 'User'], ['OWNS'])->shouldBeCalledOnce();
+        $this->graphStructureService->refresh()->shouldBeCalledOnce();
+
+        $this->runCommand();
+
+        // once, for nodes and relations together, with the structure of the summary instead of the empty database
+        $this->indexEnsurer->ensure(true, true, Argument::any(), false, false)->shouldHaveBeenCalledOnce();
+        $this->indexEnsurer->ensure(true, false, Argument::cetera())->shouldNotHaveBeenCalled();
+        $this->indexEnsurer->ensure(false, true, Argument::cetera())->shouldNotHaveBeenCalled();
+    }
+
+    public function testInvalidGraphStructureOfSummaryFailsTheLoad(): void
+    {
+        $this->backupStorage->write(self::BACKUP_NAME.'/summary.json', '{"graphStructure":{"nodeTypes":["Data",3],"relationTypes":[]}}');
+
+        $this->expectException(Throwable::class);
+        $this->runCommand();
+    }
+
+    public function testBackupsOfOlderVersionsAreRefusedAndPointToConvert(): void
+    {
+        $this->backupStorage->write(self::BACKUP_NAME.'/summary.json', '{"nodeCount":0,"relationCount":0,"fileCount":0,"version":"0.1.4"}');
+
+        try {
+            $this->runCommand();
+            $this->fail('Expected the load to be refused.');
+        } catch (LogicException $exception) {
+            $this->assertStringContainsString('backup:convert '.self::BACKUP_NAME, $exception->getMessage());
+        }
+    }
+
+    public function testBackupsOfNewDevelopmentAndUnknownVersionsAreLoaded(): void
+    {
+        foreach (['0.2.0', '0.2.0-rc1', '1.0.0', 'dev'] as $version) {
+            $this->backupStorage->write(self::BACKUP_NAME.'/summary.json', '{"nodeCount":0,"relationCount":0,"fileCount":0,"version":"'.$version.'"}');
+            $this->assertSame(0, $this->runCommand()->getStatusCode(), $version);
+        }
+    }
+
+    public function testGraphStructureIsRefreshedAfterTheLoad(): void
+    {
+        $this->graphStructureService->refresh()->shouldBeCalledOnce();
+
+        $this->runCommand();
+    }
+
+    public function testSkipMphfBuildOptionDoesNotBuild(): void
+    {
+        $this->runCommand(['--skip-mphf-build' => true]);
+
+        $this->mphfBuildService->build(Argument::cetera())->shouldNotHaveBeenCalled();
+    }
+
+    public function testFailingMphfBuildOnlyWarns(): void
+    {
+        $this->mphfBuildFails = true;
+        $tester = $this->runCommand();
+
+        $this->assertStringContainsString('boom', $tester->getDisplay());
+    }
+
+    public function testTakenLockFailsWithoutLoading(): void
+    {
+        $tester = $this->runCommand(lockTaken: true, expectedStatusCode: Command::FAILURE);
+
+        $this->assertStringContainsString('lock:maintenance:database', $tester->getDisplay());
+        $this->indexEnsurer->ensure(Argument::cetera())->shouldNotHaveBeenCalled();
+        $this->mphfBuildService->build(Argument::cetera())->shouldNotHaveBeenCalled();
     }
 }

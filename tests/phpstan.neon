@@ -3,6 +3,8 @@ parameters:
   paths:
     - ../src
     - ../lib/EmberNexusBundle/src
+  scanFiles:
+    - ../stubs/mphf.stub.php
   ignoreErrors:
     -
       identifier: missingType.generics

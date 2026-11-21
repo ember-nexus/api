@@ -6,3 +6,31 @@ parameters:
   anonymousUserUUID: '%env(string:ANONYMOUS_USER_UUID)%'
   isCronDisabled: '%env(bool:default:_false:DISABLE_CRON)%'
   isAnonymousUserReadonly: '%env(bool:default:_true:ANONYMOUS_USER_READONLY)%'
+
+  # id -> type lookup (MPHF), overlay and maintenance locks; see docs "Element type lookup"
+  _mphf_storage_memory: 'memory'
+  _mphf_dir_default: ''
+  _mphf_overlay_switch_delay: 10
+  _mphf_overlay_clear_delay: 300
+  _maintenance_lock_ttl: 10800
+  _mphf_retention_files: 7
+  _mphf_export_batch_size: 10000
+  _mphf_cli_download_timeout: 120
+  _mphf_builder_binary: '/usr/local/bin/mphf-builder'
+  _element_id_filter_error_rate: 0.001
+  _s3_system_bucket: 'ember-nexus-system'
+  mphfEnabled: '%env(bool:default:_true:MPHF_ENABLED)%'
+  mphfStorage: '%env(default:_mphf_storage_memory:MPHF_STORAGE)%'
+  mphfDir: '%env(default:_mphf_dir_default:MPHF_DIR)%'
+  mphfMadviseRandom: '%env(bool:default:_true:MPHF_MADVISE_RANDOM)%'
+  mphfStrict: '%env(bool:default:_true:MPHF_STRICT)%'
+  mphfOverlaySwitchDelay: '%env(int:default:_mphf_overlay_switch_delay:MPHF_OVERLAY_SWITCH_DELAY)%'
+  mphfOverlayClearDelay: '%env(int:default:_mphf_overlay_clear_delay:MPHF_OVERLAY_CLEAR_DELAY)%'
+  maintenanceLockTtl: '%env(int:default:_maintenance_lock_ttl:MAINTENANCE_LOCK_TTL)%'
+  mphfRetentionFiles: '%env(int:default:_mphf_retention_files:MPHF_RETENTION_FILES)%'
+  mphfExportBatchSize: '%env(int:default:_mphf_export_batch_size:MPHF_EXPORT_BATCH_SIZE)%'
+  mphfCliDownloadTimeout: '%env(int:default:_mphf_cli_download_timeout:MPHF_CLI_DOWNLOAD_TIMEOUT)%'
+  mphfBuilderBinary: '%env(default:_mphf_builder_binary:MPHF_BUILDER_BINARY)%'
+  elementIdFilterEnabled: '%env(bool:default:_true:ELEMENT_ID_FILTER_ENABLED)%'
+  elementIdFilterErrorRate: '%env(float:default:_element_id_filter_error_rate:ELEMENT_ID_FILTER_ERROR_RATE)%'
+  s3SystemBucket: '%env(default:_s3_system_bucket:S3_SYSTEM_BUCKET)%'

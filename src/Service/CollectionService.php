@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Contract\NodeElementInterface;
+use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\Response\CollectionResponse;
@@ -140,15 +142,14 @@ class CollectionService
         $nodeData = [];
         $relationData = [];
 
-        foreach ($nodeIds as $nodeId) {
-            $nodeElement = $this->elementManager->getNode($nodeId);
-            if ($nodeElement) {
+        // the ids were selected by the controller's access aware query, loading only reads them
+        foreach ($this->elementManager->getElements($nodeIds) as $nodeElement) {
+            if ($nodeElement instanceof NodeElementInterface) {
                 $nodeData[] = $this->elementToRawService->elementToRaw($nodeElement);
             }
         }
-        foreach ($relationIds as $relationId) {
-            $relationElement = $this->elementManager->getRelation($relationId);
-            if ($relationElement) {
+        foreach ($this->elementManager->getElements($relationIds) as $relationElement) {
+            if ($relationElement instanceof RelationElementInterface) {
                 $relationData[] = $this->elementToRawService->elementToRaw($relationElement);
             }
         }
@@ -190,11 +191,8 @@ class CollectionService
     ): CollectionResponse {
         $elementData = [];
 
-        foreach ($elementIds as $elementId) {
-            $element = $this->elementManager->getElement($elementId);
-            if ($element) {
-                $elementData[] = $this->elementToRawService->elementToRaw($element);
-            }
+        foreach ($this->elementManager->getElements($elementIds) as $element) {
+            $elementData[] = $this->elementToRawService->elementToRaw($element);
         }
 
         $totalPages = $this->getTotalPages($totalElements);

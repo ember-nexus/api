@@ -144,7 +144,7 @@ services:
     image: redis:7-alpine
     expose:
       - "6379"
-    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+    command: redis-server --save 20 1 --maxmemory-policy noeviction --loglevel warning --requirepass redis-password
 
   rabbitmq:
     container_name: rabbitmq
@@ -179,7 +179,7 @@ services:
     image: busybox
     volumes:
       - versitygw-data:/data
-    command: sh -c "mkdir -p /data/api-storage /data/api-upload"
+    command: sh -c "mkdir -p /data/api-storage /data/api-upload /data/ember-nexus-system"
 
 volumes:
   versitygw-data:

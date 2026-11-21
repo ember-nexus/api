@@ -15,11 +15,9 @@ to the parent, and the parent must itself be a node - a relation can not own chi
     <script type="application/json">{`
     {
         "elements": [
-            { "id": "user", "type": "User", "data": { "name": "User" }},
             { "id": "parent", "type": "Data", "data": { "name": "Parent", "hl": "1" }},
             { "id": "node", "type": "Data", "data": { "name": "Node", "hl": "2" }},
-            { "id": "owns", "type": "OWNS", "start": "parent", "end": "node"},
-            { "id": "created", "type": "CREATED", "start": "user", "end": "node"}
+            { "id": "owns", "type": "OWNS", "start": "parent", "end": "node"}
         ]
     }
 `}</script>

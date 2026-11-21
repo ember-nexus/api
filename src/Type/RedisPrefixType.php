@@ -8,6 +8,8 @@ enum RedisPrefixType: string
 {
     case TOKEN = 'token:';
     case VALIDATED_QUERY_CYPHER_PATH_SUBSET = 'validated-query:cypher-path-subset:';
+    case GRAPH_STRUCTURE = 'graph-structure:';
+    case REWRITTEN_QUERY_CYPHER_PATH_SUBSET = 'rewritten-query:cypher-path-subset:';
 
     case ETAG_ELEMENT = 'etag:element:';
     case ETAG_CHILDREN_COLLECTION = 'etag:children:';
@@ -20,4 +22,8 @@ enum RedisPrefixType: string
     case LOCK_FILE_CREATION = 'lock:file-creation:';
     case LOCK_ELEMENT_REQUEST = 'lock:element-request:';
     case CRON_DELETE_EXPIRED_UPLOAD = 'cron:delete-expired-upload:';
+    case MPHF_VERSION = 'mphf-version';
+    case MPHF_OVERLAY = 'mphf-overlay:';
+    case ELEMENT_ID_FILTER = 'element-id-filter:';
+    case LOCK_MAINTENANCE = 'lock:maintenance:';
 }

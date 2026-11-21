@@ -15,12 +15,17 @@ use App\Service\AppStateService;
 use App\Service\ElementManager;
 use App\Service\FileHashService;
 use App\Service\FileSizeLimitService;
+use App\Service\GraphStructureService;
+use App\Service\Index\IndexEnsurer;
+use App\Service\MaintenanceLockService;
+use App\Service\Mphf\MphfBuildService;
 use App\Service\RawToElementService;
 use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
 use App\Trait\CommandInputTrait;
 use App\Type\AppStateType;
-use App\Type\LegacyUuidMap;
+use App\Type\MaintenanceLock;
+use App\Type\MaintenanceLockType;
 use App\Type\RelationElement;
 use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
@@ -42,6 +47,8 @@ use Throwable;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor $io
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[AsCommand(name: 'backup:load', description: 'Loads a local backup into the empty database.')]
 class BackupLoadCommand extends Command
@@ -54,9 +61,14 @@ class BackupLoadCommand extends Command
     private int $nodeCount = 0;
     private int $pageSize = 250;
     private bool $skipVerify = false;
-    private ?string $legacyMappingOutput = null;
-    private LegacyUuidMap $legacyUuidMap;
     private int $futureTimestampCount = 0;
+
+    /**
+     * Node labels and relation types of the backup, null for backups from before the summary contained them.
+     *
+     * @var array{nodeTypes: string[], relationTypes: string[]}|null
+     */
+    private ?array $graphStructure = null;
 
     private EmberNexusStyle $io;
 
@@ -75,6 +87,10 @@ class BackupLoadCommand extends Command
         private FileSizeLimitService $fileSizeLimitService,
         private FileHashService $fileHashService,
         private LoggerInterface $logger,
+        private MaintenanceLockService $maintenanceLockService,
+        private IndexEnsurer $indexEnsurer,
+        private MphfBuildService $mphfBuildService,
+        private GraphStructureService $graphStructureService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
@@ -83,7 +99,7 @@ class BackupLoadCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('name', InputArgument::REQUIRED, 'Name of the backup');
-        $this->addOption('legacy-mapping-output', null, InputOption::VALUE_REQUIRED, 'If the backup contains legacy UUIDv4 element ids, the mapping to the new ids is written to this CSV file');
+        $this->addOption('skip-mphf-build', null, InputOption::VALUE_NONE, 'Do not build the element type index after loading; run mphf:build afterwards instead');
         $this->addOption('skip-verify', null, InputOption::VALUE_NONE, "Skip verifying file contents against their stored 'file.hash' values");
     }
 
@@ -107,17 +123,43 @@ class BackupLoadCommand extends Command
 
         $this->backupName = $this->checkBackupName($this->getStringArgument($input, 'name'));
         $this->skipVerify = $this->isOptionActive($input, 'skip-verify');
-        $this->legacyMappingOutput = $this->getNullableStringOption($input, 'legacy-mapping-output');
-        // legacy ids without created timestamp share the import time of this backup load
-        $this->legacyUuidMap = LegacyUuidMap::createFromNow();
 
         $this->loadSummary();
 
-        $this->loadNodes();
-        $this->loadRelations();
-        $this->loadFiles();
-        $this->afterBackupTasks();
-        $this->reportUuidConversion();
+        /** @var MaintenanceLock[] $locks */
+        $locks = [];
+        foreach ([MaintenanceLockType::DATABASE, MaintenanceLockType::DATABASE_INDICES, MaintenanceLockType::MPHF] as $lockType) {
+            $lock = $this->maintenanceLockService->claim($lockType);
+            if (null === $lock) {
+                foreach ($locks as $heldLock) {
+                    $this->maintenanceLockService->release($heldLock);
+                }
+                $this->io->error(sprintf('Unable to load the backup, another maintenance task holds lock:maintenance:%s.', $lockType->value));
+
+                return Command::FAILURE;
+            }
+            $locks[] = $lock;
+        }
+
+        try {
+            $this->prepareIndices();
+            $this->loadNodes();
+            $this->ensureIndicesIfUnknownStructure(true);
+            $this->loadRelations();
+            $this->ensureIndicesIfUnknownStructure(false);
+            $this->loadFiles();
+            $this->afterBackupTasks();
+            $this->reportUuidConversion();
+        } finally {
+            // the Redis flush at the end of afterBackupTasks() removes the locks already; releasing is then a no-op
+            foreach ($locks as $lock) {
+                $this->maintenanceLockService->release($lock);
+            }
+        }
+
+        if (!$this->isOptionActive($input, 'skip-mphf-build')) {
+            $this->buildMphf();
+        }
 
         $this->io->finalMessage('Backup successfully loaded.');
 
@@ -139,7 +181,7 @@ class BackupLoadCommand extends Command
             if (!str_ends_with($nodeFile->path(), '.json')) {
                 continue;
             }
-            $data = $this->legacyUuidMap->mapRawElement($this->readJsonObject($nodeFile->path()));
+            $data = $this->readJsonObject($nodeFile->path());
             $nodeElement = $this->rawToElementService->rawToElement($data, true);
             unset($data);
             $this->warnIfIdIsInFuture($nodeElement->getId());
@@ -162,6 +204,48 @@ class BackupLoadCommand extends Command
         ));
     }
 
+    /**
+     * The summary names all node labels and relation types, so the id indices exist before the first element is
+     * written and neither nodes nor relations are ever matched without them.
+     */
+    private function prepareIndices(): void
+    {
+        if (null === $this->graphStructure) {
+            return;
+        }
+        $this->io->writeln('  Creating node and relation id indices...');
+        $this->graphStructureService->setStructure($this->graphStructure['nodeTypes'], $this->graphStructure['relationTypes']);
+        $this->indexEnsurer->ensure(nodes: true, relations: true, awaitSeconds: IndexEnsurer::DEFAULT_AWAIT_SECONDS, readStructure: false);
+    }
+
+    /**
+     * Backups without a graph structure in the summary: the indices are created once the elements of a kind are
+     * loaded, so they are online before the next step.
+     */
+    private function ensureIndicesIfUnknownStructure(bool $nodes): void
+    {
+        if (null !== $this->graphStructure) {
+            return;
+        }
+        $this->io->writeln(sprintf('  Creating %s id indices...', $nodes ? 'node' : 'relation'));
+        $this->indexEnsurer->ensure(nodes: $nodes, relations: !$nodes, awaitSeconds: IndexEnsurer::DEFAULT_AWAIT_SECONDS);
+    }
+
+    private function buildMphf(): void
+    {
+        $this->io->startSection('Building element type index');
+        try {
+            // loading a backup means the instance has no traffic, so there are no requests which the build has to wait for
+            $result = $this->mphfBuildService->build(fn (string $line) => $this->io->writeln('  '.$line), concurrentRequests: false);
+        } catch (Throwable $throwable) {
+            $this->io->warning(sprintf('The backup is loaded, but building the type index failed (run mphf:build to retry): %s', $throwable->getMessage()));
+            $this->io->stopSection('Type index not built.');
+
+            return;
+        }
+        $this->io->stopSection($result->isSkipped() ? sprintf('Skipped: %s.', (string) $result->getMessage()) : sprintf('Built <info>%s</info> with %d ids.', (string) $result->getVersion(), $result->getKeyCount()));
+    }
+
     private function loadRelations(): void
     {
         $this->io->startSection('Step 2 of 4: Loading Relations');
@@ -179,7 +263,7 @@ class BackupLoadCommand extends Command
                 continue;
             }
             try {
-                $data = $this->legacyUuidMap->mapRawElement($this->readJsonObject($relationFile->path()));
+                $data = $this->readJsonObject($relationFile->path());
                 $relationElement = $this->rawToElementService->rawToElement($data, true);
                 unset($data);
                 $this->warnIfIdIsInFuture($relationElement->getId());
@@ -222,11 +306,11 @@ class BackupLoadCommand extends Command
             return false;
         }
         $name = $parts[0];
-        if (!\Safe\preg_match(Regex::UUID, $name) && !Uuid::isLegacyUuidV4($name)) {
+        if (!\Safe\preg_match(Regex::UUID, $name)) {
             return false;
         }
 
-        return Uuid::fromString($this->legacyUuidMap->mapId($name));
+        return Uuid::fromString($name);
     }
 
     /**
@@ -249,17 +333,6 @@ class BackupLoadCommand extends Command
     {
         if ($this->futureTimestampCount > 0) {
             $this->io->warning(sprintf('%d element ids of the backup contain a timestamp in the future; they were imported as they are.', $this->futureTimestampCount));
-        }
-        if (0 === $this->legacyUuidMap->count()) {
-            return;
-        }
-        $this->io->warning(sprintf(
-            'The backup contains %d legacy UUIDv4 element ids, which were converted to UUIDsv2a7. Existing references to the old ids, e.g. in clients, are no longer valid.',
-            $this->legacyUuidMap->count()
-        ));
-        if (null !== $this->legacyMappingOutput) {
-            \Safe\file_put_contents($this->legacyMappingOutput, $this->legacyUuidMap->toCsv());
-            $this->io->writeln(sprintf('Wrote id mapping to <info>%s</info>.', $this->legacyMappingOutput));
         }
     }
 
@@ -478,6 +551,8 @@ class BackupLoadCommand extends Command
         }
 
         $this->redisClient->flushdb();
+        // everything which was cached while loading is gone; read the structure of the loaded database fresh
+        $this->graphStructureService->refresh();
 
         $this->io->stopSection('Finished all after backup tasks.');
     }
@@ -541,9 +616,60 @@ class BackupLoadCommand extends Command
             throw new LogicException(sprintf("Backup with the name '%s' does not contain a summary.json", $this->backupName));
         }
         $data = $this->readJsonObject($this->backupName.'/summary.json');
+        $this->checkBackupVersion($data);
         $this->nodeCount = $this->getCountFromSummary($data, 'nodeCount');
         $this->relationCount = $this->getCountFromSummary($data, 'relationCount');
         $this->fileCount = $this->getCountFromSummary($data, 'fileCount');
+        $this->graphStructure = $this->getGraphStructureFromSummary($data);
+    }
+
+    /**
+     * Backups of versions before 0.2.0 use UUIDv4 ids and `CREATED` relations, which are not loaded; `backup:convert`
+     * migrates them. Backups without a version, and of development builds, cannot be classified and are loaded.
+     *
+     * @param array<string, mixed> $summary
+     */
+    private function checkBackupVersion(array $summary): void
+    {
+        $version = $summary['version'] ?? null;
+        if (!is_string($version) || 1 !== preg_match('/^v?(\d+\.\d+\.\d+)/', trim($version), $matches)) {
+            return;
+        }
+        if (version_compare($matches[1], BackupConvertCommand::FIRST_NEW_FORMAT_VERSION, '<')) {
+            throw new LogicException(sprintf("Backup '%s' was created with version %s, which uses an older format than %s. Convert it first: php bin/console backup:convert %s, then load the converted backup.", $this->backupName, $version, BackupConvertCommand::FIRST_NEW_FORMAT_VERSION, $this->backupName));
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $summary
+     *
+     * @return array{nodeTypes: string[], relationTypes: string[]}|null
+     */
+    private function getGraphStructureFromSummary(array $summary): ?array
+    {
+        if (!array_key_exists('graphStructure', $summary)) {
+            return null;
+        }
+        /** @psalm-suppress MixedAssignment */
+        $structure = $summary['graphStructure'];
+        $types = [];
+        foreach (['nodeTypes', 'relationTypes'] as $key) {
+            $list = is_array($structure) ? ($structure[$key] ?? null) : null;
+            if (!is_array($list) || !array_is_list($list)) {
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Expected property 'graphStructure.%s' of backup summary to be a list of strings.", $key));
+            }
+            $checked = [];
+            /** @psalm-suppress MixedAssignment */
+            foreach ($list as $type) {
+                if (!is_string($type) || '' === $type) {
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf("Expected property 'graphStructure.%s' of backup summary to be a list of strings.", $key));
+                }
+                $checked[] = $type;
+            }
+            $types[$key] = $checked;
+        }
+
+        return ['nodeTypes' => $types['nodeTypes'], 'relationTypes' => $types['relationTypes']];
     }
 
     private function checkDatabaseIsEmpty(): void

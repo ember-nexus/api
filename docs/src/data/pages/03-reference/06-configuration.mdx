@@ -23,7 +23,8 @@ Ember Nexus specific variables:
 - `S3_ENDPOINT`: URL of the S3-compatible storage API, e.g. `http://minio:9000`.
 - `S3_ACCESS_KEY_ID`: Access key ID used to authenticate against the S3-compatible storage API.
 - `S3_SECRET_ACCESS_KEY`: Secret access key used to authenticate against the S3-compatible storage API.
-- `REDIS_AUTH`: Connection string for accessing the Redis database.
+- `REDIS_AUTH`: Connection string for accessing the Redis database. Redis must be configured with
+`maxmemory-policy noeviction`, see [element type index](#element-type-index).
 - `RABBITMQ_AUTH`: Connection string for accessing the RabbitMQ database.
 - `VERSION`: Variable containing the version of the currently running API software. Automatically set by the build
 process.
@@ -42,7 +43,8 @@ for details.
 Every API container instance schedules
 [`cron:update-ownership`](/command/cron-update-ownership),
 [`cron:reindex-files`](/command/cron-reindex-files) and
-[`cron:delete-expired-uploads`](/command/cron-delete-expired-uploads) internally, each on its own interval, for as
+[`cron:delete-expired-uploads`](/command/cron-delete-expired-uploads), [`cron:expire-tokens`](/command/cron-expire-tokens), [`index:ensure`](/command/index-ensure) and
+[`mphf:build`](/command/mphf-build) internally, each on its own interval, for as
 long as the container is up - there is nothing to schedule externally, and running multiple instances in parallel is
 safe since the individual tasks consume their work from a shared RabbitMQ queue, so the same item is never processed
 twice regardless of how many instances happen to poll at once. Set the `DISABLE_CRON` environment variable to `true`
@@ -50,7 +52,8 @@ on an instance to opt it out, e.g. to run these commands on a different schedule
 
 ## File storage buckets
 
-Ember Nexus stores uploaded files in two separate S3-compatible buckets: `file.S3UploadBucket` holds chunks of
+Ember Nexus uses three S3-compatible buckets: the system bucket (see [element type index](#element-type-index)) and
+two for uploaded files: `file.S3UploadBucket` holds chunks of
 resumable uploads still in progress, and `file.S3StorageBucket` holds files that have been fully attached to an
 element - see [Chunk storage](/reference/upload#chunk-storage) for how a file moves from one
 to the other. Ember Nexus already cleans up expired uploads itself (see [Expiry](/reference/upload#expiry) and the
@@ -68,10 +71,46 @@ creates nor manages this policy - it must be set up on the bucket itself, outsid
 The storage bucket holds permanently retained files and should not have such a policy applied to it.
 
 Ember Nexus does not create these buckets itself - they must already exist on the S3-compatible storage before the
-API starts, named exactly as configured (`api-storage` / `api-upload` by default). The
+API starts, named exactly as configured (`api-storage`, `api-upload` and `ember-nexus-system` by default). The
 [Docker Compose example](/getting-started/installation#docker-compose) includes a `minio-init` container that creates
-both buckets on a fresh MinIO instance; without it (or an equivalent manual `mc mb` / console step) the
+the buckets (including the system bucket, see [element type index](#element-type-index)) on a fresh MinIO instance; without it (or an equivalent manual `mc mb` / console step) the
 [`healthcheck`](/command/healthcheck) command fails and uploads and downloads do not work.
+
+## Element type index
+
+Elements are addressed by their id only, but the graph database finds them fast only if the query names their label or
+relationship type. Ember Nexus therefore keeps a compact lookup table (built by [`mphf:build`](/command/mphf-build),
+stored in a third bucket, the system bucket) plus a small overlay in Redis for elements created since the last build,
+and creates the matching id indices with [`index:ensure`](/command/index-ensure). Like the other buckets, the system
+bucket has to exist before the API starts (`ember-nexus-system` by default; the Docker Compose example creates it).
+Without a table the API still works, using slower untyped queries.
+
+Redis must keep the overlay: set `maxmemory-policy noeviction`, and enable persistence (e.g. `appendonly yes` and a
+mounted data directory), otherwise a Redis restart loses the overlay and the version of the current table; the next
+[`mphf:build`](/command/mphf-build) repairs this, but elements created in between are unreachable until then.
+
+Environment variables, all optional:
+
+- `S3_SYSTEM_BUCKET`: bucket for the lookup table files. Default `ember-nexus-system`.
+- `MPHF_ENABLED`: set to `false` to not use the lookup table. Default `true`.
+- `MPHF_STORAGE`: `memory` keeps downloaded tables in `/dev/shm`, `disk` in the temporary directory. Default `memory`.
+- `MPHF_DIR`: overrides the directory of the downloaded tables.
+- `MPHF_MADVISE_RANDOM`: hints the kernel about random access to the table. Default `true`.
+- `MPHF_STRICT`: if `true`, an id which is neither in the table nor in the overlay is treated as non-existing without a
+  database query, as long as the loaded table is the current one. Default `true`.
+- `MPHF_OVERLAY_SWITCH_DELAY`: seconds between switching the overlay and exporting the ids, so requests which started
+  before the switch can finish writing; time spent on index creation counts. Set to `0` if nothing writes during the
+  build, e.g. in CI. Default 10.
+- `MPHF_OVERLAY_CLEAR_DELAY`: seconds the previous overlay stays readable after a build was published; Redis deletes it
+  afterwards, the build does not wait for it. `0` deletes it right away. Default 300.
+- `MPHF_RETENTION_FILES`: number of table files kept in the system bucket. Default 7.
+- `MPHF_EXPORT_BATCH_SIZE`: ids fetched per query while building. Default 10000.
+- `MPHF_CLI_DOWNLOAD_TIMEOUT`: seconds a command waits for a table download. Default 120.
+- `MPHF_BUILDER_BINARY`: path of the builder executable. Default `/usr/local/bin/mphf-builder`.
+- `ELEMENT_ID_FILTER_ENABLED`: set to `false` to not build or use the Bloom filter of element ids (needs Redis 8 or the
+  RedisBloom module; without it the filter is skipped automatically). Default `true`.
+- `ELEMENT_ID_FILTER_ERROR_RATE`: false positive rate of the filter. Default `0.001`.
+- `MAINTENANCE_LOCK_TTL`: seconds until a maintenance lock expires if its owner dies. Default 10800.
 
 ## YML configuration
 

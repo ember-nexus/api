@@ -71,6 +71,9 @@ class PostRegisterController extends AbstractController
             skipReservedTypeCheck: true
         );
         $userNode->addProperty($uniqueIdentifier, $uniqueUserIdentifier);
+        // the registering caller is anonymous, so the new user is its own creator
+        $userNode->addProperty('createdBy', $userId->toString());
+        $userNode->addProperty('updatedBy', $userId->toString());
         $userNode->addProperty('_passwordHash', $this->userPasswordHasher->hashPassword($password));
         $this->elementManager->create($userNode);
         $this->elementManager->flush();

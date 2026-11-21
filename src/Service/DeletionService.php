@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Helper\CypherHelper;
 use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -22,6 +23,7 @@ class DeletionService
     public function __construct(
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
+        private ElementTypeService $elementTypeService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
@@ -49,11 +51,15 @@ class DeletionService
      */
     private function getRelationsTouching(Uuid $nodeId): array
     {
+        $label = $this->elementTypeService->resolveNodeLabel($nodeId);
+        if (null === $label) {
+            return [];
+        }
         // DISTINCT matters for a self-referencing relation (both ends on the same node): an undirected pattern like
         // this one would otherwise match it twice (once per traversal direction), which would queue it for delete
         // twice below and dispatch its delete events twice - each of which is wrong on its own.
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            "MATCH (node {id: \$nodeId})-[relation]-()\n".
+            'MATCH (node:'.CypherHelper::escapeIdentifier($label)." {id: \$nodeId})-[relation]-()\n".
             'RETURN DISTINCT relation.id AS relationId',
             [
                 'nodeId' => $nodeId->toString(),

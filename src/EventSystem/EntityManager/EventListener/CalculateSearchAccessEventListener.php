@@ -7,6 +7,7 @@ namespace App\EventSystem\EntityManager\EventListener;
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementUpdateAfterBackupLoadEvent;
 use App\Service\AppStateService;
+use App\Service\PendingSearchDocumentService;
 use App\Service\SearchAccessCalculatorService;
 use App\Type\AppStateType;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -19,6 +20,7 @@ class CalculateSearchAccessEventListener
         private AppStateService $appStateService,
         private ElasticEntityManager $elasticEntityManager,
         private SearchAccessCalculatorService $searchAccessCalculatorService,
+        private PendingSearchDocumentService $pendingSearchDocumentService,
     ) {
     }
 
@@ -47,6 +49,17 @@ class CalculateSearchAccessEventListener
         }
 
         $access = $this->searchAccessCalculatorService->calculateSearchAccess($element);
+
+        $pendingDocument = $this->pendingSearchDocumentService->get($elementId->toString());
+        if (null !== $pendingDocument) {
+            // the element is created right now, its document is written once this property is added
+            $pendingDocument->addProperties([
+                '_groupsWithSearchAccess' => $access['groups'],
+                '_usersWithSearchAccess' => $access['users'],
+            ]);
+
+            return;
+        }
 
         $document = new Document();
         $document

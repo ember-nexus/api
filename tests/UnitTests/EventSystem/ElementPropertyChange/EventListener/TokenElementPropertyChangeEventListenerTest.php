@@ -9,6 +9,7 @@ use App\EventSystem\ElementPropertyChange\EventListener\TokenElementPropertyChan
 use App\Factory\Exception\Client400ForbiddenPropertyExceptionFactory;
 use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -72,6 +73,27 @@ class TokenElementPropertyChangeEventListenerTest extends TestCase
                 $urlGenerator->reveal()
             )
         );
+        $this->expectException(Exception::class);
+        $eventListener->onElementPropertyChangeEvent($event);
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function protectedProperties(): iterable
+    {
+        foreach (TokenElementPropertyChangeEventListener::PROTECTED_PROPERTIES as $property) {
+            yield $property => [$property];
+        }
+    }
+
+    #[DataProvider('protectedProperties')]
+    public function testEveryProtectedTokenPropertyTriggersException(string $property): void
+    {
+        $event = new ElementPropertyChangeEvent('Token', null, [$property => 'x']);
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())->willReturn('http://example.com/url-to-error');
+        $eventListener = new TokenElementPropertyChangeEventListener(new Client400ForbiddenPropertyExceptionFactory($urlGenerator->reveal()));
         $this->expectException(Exception::class);
         $eventListener->onElementPropertyChangeEvent($event);
     }

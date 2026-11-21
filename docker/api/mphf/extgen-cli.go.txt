@@ -1,0 +1,29 @@
+// Tiny wrapper around FrankenPHP's extension generator (internal/extgen), which can't be imported from outside of the
+// FrankenPHP module. The Dockerfile copies this file into the pinned FrankenPHP source tree and builds it there, so the
+// generator is exactly the one of the FrankenPHP version that is compiled afterwards, without building a first, plain
+// FrankenPHP binary just to run `frankenphp extension-init`.
+package main
+
+import (
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/dunglas/frankenphp/internal/extgen"
+)
+
+func main() {
+	if len(os.Args) != 2 {
+		log.Fatal("usage: extgen-cli path/to/extension.go")
+	}
+	src := os.Args[1]
+	g := extgen.Generator{
+		BaseName:   extgen.SanitizePackageName(strings.TrimSuffix(filepath.Base(src), ".go")),
+		SourceFile: src,
+		BuildDir:   filepath.Dir(src),
+	}
+	if err := g.Generate(); err != nil {
+		log.Fatal(err)
+	}
+}

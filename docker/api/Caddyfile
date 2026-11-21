@@ -19,10 +19,10 @@
 		format json
 	}
 	frankenphp {
-		# upload requests hold a PHP thread while the client sends the request body, so more threads than the default
-		# (2x cores) may be started under load; both values are calculated by the entrypoint, the fallbacks are only used
+		# request handling is CPU bound, so one thread per core is started; upload requests hold a PHP thread while
+		# the client sends the request body, so more threads may be added under load; both values are calculated by the entrypoint, the fallbacks are only used
 		# if it did not run. `num_threads` has to be set explicitly, as it drops to 1 as soon as `max_threads` is set.
-		num_threads {$FRANKENPHP_NUM_THREADS:16}
+		num_threads {$FRANKENPHP_NUM_THREADS:8}
 		max_threads {$FRANKENPHP_MAX_THREADS:auto}
 		# do not queue requests forever if all threads are busy
 		max_wait_time {$FRANKENPHP_MAX_WAIT_TIME:30s}

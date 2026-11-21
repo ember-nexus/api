@@ -66,7 +66,7 @@ class ApiKeyCheckOnKernelRequestEventListener
         $hashedToken = $this->tokenGenerator->hashToken($token);
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                'MATCH (user:User)-[:OWNS]->(token:Token {hash: $hash, state: $state}) RETURN user.id, token.id, token.expirationDate',
+                'MATCH (user:User)-[:OWNS]->(token:Token {hash: $hash, state: $state}) WHERE token.expirationDate IS NULL OR token.expirationDate > datetime() RETURN user.id, token.id, token.expirationDate',
                 [
                     'hash' => $hashedToken,
                     'state' => TokenStateType::ACTIVE->value,
@@ -101,6 +101,10 @@ class ApiKeyCheckOnKernelRequestEventListener
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property token.expirationDate as LaudisDateTime|DateTimeZoneId, not %s.', get_debug_type($rawTokenExpiration))); // @codeCoverageIgnore
             }
             $secondsUntilTokenExpires = $rawTokenExpiration->toDateTime()->getTimestamp() - (new DateTime())->getTimestamp();
+            if ($secondsUntilTokenExpires <= 0) {
+                // clock difference between Neo4j and PHP: the database just accepted the token, do not cache it
+                $secondsUntilTokenExpires = 1;
+            }
             $tokenLifetimeInRedis = min($tokenLifetimeInRedis, $secondsUntilTokenExpires);
         }
 

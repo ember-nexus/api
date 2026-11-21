@@ -53,6 +53,8 @@ class HealthcheckCommandVersionsTest extends TestCase
             $amqpStreamConnection ?? $this->prophesize(AMQPStreamConnection::class)->reveal(),
             $this->prophesize(S3Client::class)->reveal(),
             $this->prophesize(EmberNexusConfiguration::class)->reveal(),
+            $this->prophesize(\App\Contract\MphfInterface::class)->reveal(),
+            $this->prophesize(\App\Factory\Type\RedisKeyFactory::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
     }

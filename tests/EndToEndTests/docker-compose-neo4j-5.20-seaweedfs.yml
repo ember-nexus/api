@@ -144,7 +144,7 @@ services:
     image: redis:7-alpine
     expose:
       - "6379"
-    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+    command: redis-server --save 20 1 --maxmemory-policy noeviction --loglevel warning --requirepass redis-password
 
   rabbitmq:
     container_name: rabbitmq
@@ -165,7 +165,7 @@ services:
     environment:
       - AWS_ACCESS_KEY_ID=accessKey
       - AWS_SECRET_ACCESS_KEY=secretKey
-      - S3_BUCKET=api-storage,api-upload
+      - S3_BUCKET=api-storage,api-upload,ember-nexus-system
     command: ["mini", "-dir=/data", "-s3.port=9000"]
 
 volumes:

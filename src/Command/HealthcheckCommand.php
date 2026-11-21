@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Contract\MphfInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Factory\Type\RedisKeyFactory;
 use App\Helper\S3ProviderNameHelper;
 use App\Style\EmberNexusStyle;
 use AsyncAws\S3\Result\BucketExistsWaiter;
@@ -42,6 +44,8 @@ class HealthcheckCommand extends Command
         private AMQPStreamConnection $amqpStreamConnection,
         private S3Client $s3Client,
         private EmberNexusConfiguration $emberNexusConfiguration,
+        private MphfInterface $mphf,
+        private RedisKeyFactory $redisKeyFactory,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
@@ -145,6 +149,16 @@ class HealthcheckCommand extends Command
         return null;
     }
 
+    private function getTypeIndexStatus(): string
+    {
+        if (!$this->mphf->isAvailable()) {
+            return 'not available, elements are resolved with untyped queries';
+        }
+        $version = $this->redisClient->get((string) $this->redisKeyFactory->getMphfVersionRedisKey());
+
+        return sprintf('Go extension, published version: %s', is_string($version) ? $version : 'none yet, run mphf:build');
+    }
+
     private function getAlpineVersion(): string
     {
         $alpineVersion = \Safe\shell_exec('cat /etc/os-release | grep -i version') ?? '=unknown';
@@ -211,6 +225,7 @@ class HealthcheckCommand extends Command
         $this->io->writeln(sprintf('Caddy version:         %s', $this->getCaddyVersion()));
         $this->io->writeln(sprintf('FrankenPHP version:    %s', $this->getFrankenPhpVersion()));
         $this->io->writeln(sprintf('PHP version:           %s', $this->getPhpVersion()));
+        $this->io->writeln(sprintf('Type index:            %s', $this->getTypeIndexStatus()));
         $this->io->stopSection('Internal services are ok.');
 
         $this->io->startSection('Check API');

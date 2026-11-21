@@ -7,6 +7,7 @@ namespace App\Controller\Element;
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AuthProvider;
+use App\Helper\ReadAccessCypherHelper;
 use App\Service\CollectionService;
 use App\Type\EtagType;
 use App\Type\Response\CollectionResponse;
@@ -39,7 +40,8 @@ class GetIndexController extends AbstractController
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(element)\n".
+            "MATCH (user)-[relation:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(element)\n".
+            'WHERE '.ReadAccessCypherHelper::directReadRelationCondition('relation', 'element').
             "WITH count(element.id) AS totalCount, collect(element.id) as elementIds\n".
             "UNWIND elementIds AS elementId\n".
             "WITH elementId, totalCount\n".

@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Security;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Helper\CypherHelper;
+use App\Helper\ReadAccessCypherHelper;
+use App\Service\AccessResultCacheService;
+use App\Service\ElementTypeService;
 use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\Uuid;
@@ -15,6 +19,7 @@ use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveClassLength")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[WithMonologChannel('audit')]
 class AccessChecker
@@ -23,8 +28,31 @@ class AccessChecker
         private CypherEntityManager $cypherEntityManager,
         private AuthProvider $authProvider,
         private LoggerInterface $logger,
+        private ElementTypeService $elementTypeService,
+        private AccessResultCacheService $accessResultCacheService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
+    }
+
+    /**
+     * Escaped label of the node, null if there is no node with this id. Matching nodes by label lets Neo4j use the
+     * id index of that label instead of scanning all nodes.
+     */
+    private function getEscapedNodeLabel(Uuid $nodeId): ?string
+    {
+        $label = $this->elementTypeService->resolveNodeLabel($nodeId);
+
+        return null === $label ? null : CypherHelper::escapeIdentifier($label);
+    }
+
+    /**
+     * Escaped type of the relation, null if there is no relation with this id.
+     */
+    private function getEscapedRelationType(Uuid $relationId): ?string
+    {
+        $type = $this->elementTypeService->resolveRelationType($relationId);
+
+        return null === $type ? null : CypherHelper::escapeIdentifier($type);
     }
 
     /**
@@ -50,12 +78,46 @@ class AccessChecker
         return $groupIds;
     }
 
+    /**
+     * Whether the user reaches the node only through ownership and group membership or through read access relations
+     * without any condition (onLabel, onParentLabel, onState, onCreatedByUser). Ownership passes such access on to every
+     * owned element, so it also holds for all children of the node.
+     *
+     * @param string $escapedLabel label of the node, already escaped for the use in a query
+     */
+    public function hasUnconditionalReadAccessToNode(Uuid $userId, Uuid $nodeId, string $escapedLabel): bool
+    {
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            "MATCH (user:User {id: \$userId})\n".
+            'MATCH (element:'.$escapedLabel." {id: \$elementId})\n".
+            ReadAccessCypherHelper::unconditionalReadPathMatch('element').
+            "WITH path\n".
+            "WHERE path IS NOT NULL\n".
+            "RETURN count(path) AS count\n".
+            'LIMIT 1;',
+            [
+                'userId' => $userId->toString(),
+                'elementId' => $nodeId->toString(),
+            ]
+        ));
+
+        return $res->count() > 0 && $res->first()->get('count') > 0;
+    }
+
+    /**
+     * Answers are remembered for the rest of the request, see AccessResultCacheService.
+     */
     public function hasAccessToElement(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
+        $remembered = $this->accessResultCacheService->get($userId, $elementId, $accessType);
+        if (null !== $remembered) {
+            return $remembered;
+        }
         $hasAccess = $this->checkAccessToElement($userId, $elementId, $accessType);
         if (!$hasAccess) {
             $this->logAccessDenied($userId, $elementId, $accessType);
         }
+        $this->accessResultCacheService->set($userId, $elementId, $accessType, $hasAccess);
 
         return $hasAccess;
     }
@@ -86,8 +148,12 @@ class AccessChecker
      */
     public function hasWriteAccessToRelation(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
+        $relationType = $this->getEscapedRelationType($elementId);
+        if (null === $relationType) {
+            return false;
+        }
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            'MATCH (start)-[element {id: $elementId}]->(end) RETURN start.id, end.id',
+            'MATCH (start)-[element:'.$relationType.' {id: $elementId}]->(end) RETURN start.id, end.id',
             [
                 'elementId' => $elementId->toString(),
             ]
@@ -135,48 +201,33 @@ class AccessChecker
         return 0;
     }
 
-    public function hasReadAccessToNode(Uuid $userId, Uuid $elementId): bool
+    /**
+     * Read access of the user to the nodes with the given ids, which all have the given (escaped) label.
+     */
+    private function buildReadAccessToNodesQuery(string $escapedLabel): string
     {
-        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+        return
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (element {id: \$elementId})\n".
-            "OPTIONAL MATCH path=(user)-[:IS_IN_GROUP*0..]->()-[:OWNS|HAS_READ_ACCESS*0..]->(element)\n".
+            "UNWIND \$ids AS elementId\n".
+            'MATCH (element:'.$escapedLabel." {id: elementId})\n".
+            ReadAccessCypherHelper::readPathMatch('element').
+            "WITH user, element, path\n".
             "WHERE\n".
             "  user.id = element.id\n".
-            "  OR\n".
-            "  ALL(relation in relationships(path) WHERE\n".
-            "    type(relation) = \"IS_IN_GROUP\"\n".
-            "    OR\n".
-            "    type(relation) = \"OWNS\"\n".
-            "    OR\n".
-            "    (\n".
-            "      type(relation) = \"HAS_READ_ACCESS\"\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onLabel IS NULL\n".
-            "        OR\n".
-            "        relation.onLabel IN labels(element)\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onParentLabel IS NULL\n".
-            "        OR\n".
-            "        relation.onParentLabel IN labels(element)\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onState IS NULL\n".
-            "        OR\n".
-            "        (element)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})\n".
-            "      )\n".
-            "      AND\n".
-            "      (\n".
-            "        relation.onCreatedByUser IS NULL\n".
-            "        OR\n".
-            "        (element)<-[:CREATED*]-(user)\n".
-            "      )\n".
-            "    )\n".
-            "  )\n".
+            "  OR path IS NOT NULL\n".
+            'RETURN element.id AS elementId;';
+    }
+
+    public function hasReadAccessToNode(Uuid $userId, Uuid $elementId): bool
+    {
+        $label = $this->getEscapedNodeLabel($elementId);
+        if (null === $label) {
+            return false;
+        }
+        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            "MATCH (user:User {id: \$userId})\n".
+            'MATCH (element:'.$label." {id: \$elementId})\n".
+            ReadAccessCypherHelper::readPathMatch('element').
             "WITH user, element, path\n".
             "WHERE\n".
             "  user.id = element.id\n".
@@ -200,11 +251,15 @@ class AccessChecker
 
     public function hasGeneralAccessToNode(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
+        $label = $this->getEscapedNodeLabel($elementId);
+        if (null === $label) {
+            return false;
+        }
         $minimumRelationsHops = $this->getMinimumAccessRelationsHops($accessType);
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (element {id: \$elementId})\n".
-            sprintf('OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_%s_ACCESS*%d..]->(element)'."\n", $accessType->value, $minimumRelationsHops).
+            'MATCH (element:'.$label." {id: \$elementId})\n".
+            sprintf('OPTIONAL MATCH (element)<-[relations:OWNS|HAS_%s_ACCESS*%d..]-()<-[:IS_IN_GROUP*0..]-(user)'."\n", $accessType->value, $minimumRelationsHops).
             "WHERE\n".
             "  user.id = element.id\n".
             "  OR\n".
@@ -235,7 +290,7 @@ class AccessChecker
             "      (\n".
             "        relation.onCreatedByUser IS NULL\n".
             "        OR\n".
-            "        (element)<-[:CREATED*]-(user)\n".
+            "        element.createdBy = user.id\n".
             "      )\n".
             "    )\n".
             "  )\n".
@@ -262,11 +317,15 @@ class AccessChecker
 
     public function hasReadAccessToRelation(Uuid $userId, Uuid $elementId): bool
     {
+        $relationType = $this->getEscapedRelationType($elementId);
+        if (null === $relationType) {
+            return false;
+        }
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (start)-[element {id: \$elementId}]->(end)\n".
-            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_'.AccessType::READ->value."_ACCESS*0..]->(start)\n".
-            'OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_'.AccessType::READ->value."_ACCESS*0..]->(end)\n".
+            'MATCH (start)-[element:'.$relationType." {id: \$elementId}]->(end)\n".
+            'OPTIONAL MATCH (start)<-[startRelations:OWNS|HAS_'.AccessType::READ->value."_ACCESS*0..]-()<-[:IS_IN_GROUP*0..]-(user)\n".
+            'OPTIONAL MATCH (end)<-[endRelations:OWNS|HAS_'.AccessType::READ->value."_ACCESS*0..]-()<-[:IS_IN_GROUP*0..]-(user)\n".
             "WHERE\n".
             "  (\n".
             "    user.id = start.id\n".
@@ -298,7 +357,7 @@ class AccessChecker
             "        (\n".
             "          startRelation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (start)<-[:CREATED*]-(user)\n".
+            "          start.createdBy = user.id\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -338,7 +397,7 @@ class AccessChecker
             "        (\n".
             "          endRelation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (end)<-[:CREATED*]-(user)\n".
+            "          end.createdBy = user.id\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -374,12 +433,16 @@ class AccessChecker
 
     public function hasGeneralAccessToRelation(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
+        $relationType = $this->getEscapedRelationType($elementId);
+        if (null === $relationType) {
+            return false;
+        }
         $minimumRelationsHops = $this->getMinimumAccessRelationsHops($accessType);
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (start)-[element {id: \$elementId}]->(end)\n".
-            sprintf('OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_%s_ACCESS*%d..]->(start)'."\n", $accessType->value, $minimumRelationsHops).
-            sprintf('OPTIONAL MATCH (user)-[:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_%s_ACCESS*%d..]->(end)'."\n", $accessType->value, $minimumRelationsHops).
+            'MATCH (start)-[element:'.$relationType." {id: \$elementId}]->(end)\n".
+            sprintf('OPTIONAL MATCH (start)<-[startRelations:OWNS|HAS_%s_ACCESS*%d..]-()<-[:IS_IN_GROUP*0..]-(user)'."\n", $accessType->value, $minimumRelationsHops).
+            sprintf('OPTIONAL MATCH (end)<-[endRelations:OWNS|HAS_%s_ACCESS*%d..]-()<-[:IS_IN_GROUP*0..]-(user)'."\n", $accessType->value, $minimumRelationsHops).
             "WHERE\n".
             "  (\n".
             "    user.id = start.id\n".
@@ -411,7 +474,7 @@ class AccessChecker
             "        (\n".
             "          startRelation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (start)<-[:CREATED*]-(user)\n".
+            "          start.createdBy = user.id\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -451,7 +514,7 @@ class AccessChecker
             "        (\n".
             "          endRelation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (end)<-[:CREATED*]-(user)\n".
+            "          end.createdBy = user.id\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -489,11 +552,12 @@ class AccessChecker
      * Matching a relation only by its id scans all relations, while the start and end node of an element which was
      * just read or written are known: anchoring the match on them only expands the relations of those two nodes.
      */
-    private function getRelationMatchClause(?Uuid $startId, ?Uuid $endId): string
+    private function getRelationMatchClause(string $escapedRelationType, ?Uuid $startId, ?Uuid $endId): string
     {
         return sprintf(
-            'MATCH (start%s)-[element {id: $elementId}]->(end%s)',
+            'MATCH (start%s)-[element:%s {id: $elementId}]->(end%s)',
             null === $startId ? '' : ' {id: $startId}',
+            $escapedRelationType,
             null === $endId ? '' : ' {id: $endId}',
         );
     }
@@ -516,26 +580,12 @@ class AccessChecker
 
     public function getElementType(Uuid $elementId): ?ElementType
     {
-        $cypherClient = $this->cypherEntityManager->getClient();
-        $res = $cypherClient->runStatement(Statement::create(
-            "OPTIONAL MATCH (node {id: \$elementId})\n".
-            "OPTIONAL MATCH ()-[relation {id: \$elementId}]-()\n".
-            'RETURN node.id, relation.id',
-            [
-                'elementId' => $elementId->toString(),
-            ]
-        ));
-        if (0 === $res->count()) {
+        $resolved = $this->elementTypeService->resolve($elementId);
+        if (null === $resolved) {
             return null;
         }
-        if (null !== $res->first()->get('node.id')) {
-            return ElementType::NODE;
-        }
-        if (null !== $res->first()->get('relation.id')) {
-            return ElementType::RELATION;
-        }
 
-        return null;
+        return $resolved->isNode() ? ElementType::NODE : ElementType::RELATION;
     }
 
     /**
@@ -564,8 +614,12 @@ class AccessChecker
      */
     public function getDirectGroupsWithAccessToNode(Uuid $elementId, AccessType $accessType): array
     {
+        $label = $this->getEscapedNodeLabel($elementId);
+        if (null === $label) {
+            return [];
+        }
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            'MATCH (group:Group)-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
+            'MATCH (group:Group)-[relations:OWNS|HAS_'.$accessType->value.'_ACCESS*0..]->(element:'.$label." {id: \$elementId})\n".
             "WHERE\n".
             "  ALL(relation in relations WHERE\n".
             "    type(relation) = \"OWNS\"\n".
@@ -619,8 +673,12 @@ class AccessChecker
      */
     public function getDirectGroupsWithAccessToRelation(Uuid $elementId, AccessType $accessType, ?Uuid $startId = null, ?Uuid $endId = null): array
     {
+        $relationType = $this->getEscapedRelationType($elementId);
+        if (null === $relationType) {
+            return [];
+        }
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            $this->getRelationMatchClause($startId, $endId)."\n".
+            $this->getRelationMatchClause($relationType, $startId, $endId)."\n".
             "OPTIONAL MATCH (startGroup:Group)-[startRelations:OWNS|HAS_SEARCH_ACCESS*1..]->(start)\n".
             "OPTIONAL MATCH (endGroup:Group)-[endRelations:OWNS|HAS_READ_ACCESS|HAS_SEARCH_ACCESS*1..]->(end)\n".
             "WHERE\n".
@@ -745,8 +803,12 @@ class AccessChecker
      */
     public function getDirectUsersWithAccessToNode(Uuid $elementId, AccessType $accessType): array
     {
+        $label = $this->getEscapedNodeLabel($elementId);
+        if (null === $label) {
+            return [];
+        }
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            'MATCH (user:User)-[groups:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
+            'MATCH (element:'.$label.' {id: $elementId})<-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]-()<-[groups:IS_IN_GROUP*0..]-(user:User)\n".
             "WHERE\n".
             "  user.id = element.id\n".
             "  OR\n".
@@ -778,7 +840,7 @@ class AccessChecker
             "        (\n".
             "          relation.onCreatedByUser IS NULL\n".
             "          OR\n".
-            "          (element)<-[:CREATED*]-(user)\n".
+            "          element.createdBy = user.id\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -789,7 +851,7 @@ class AccessChecker
             "      ANY(relation in relations WHERE\n".
             '        type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
             "        AND\n".
-            "        (element)<-[:CREATED*]-(user)\n".
+            "        element.createdBy = user.id\n".
             "      )\n".
             "    )\n".
             "  )\n".
@@ -823,10 +885,14 @@ class AccessChecker
      */
     public function getDirectUsersWithAccessToRelation(Uuid $elementId, AccessType $accessType, ?Uuid $startId = null, ?Uuid $endId = null): array
     {
+        $relationType = $this->getEscapedRelationType($elementId);
+        if (null === $relationType) {
+            return [];
+        }
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            $this->getRelationMatchClause($startId, $endId)."\n".
-            "OPTIONAL MATCH (startUser:User)-[startGroups:IS_IN_GROUP*0..]->()-[startRelations:OWNS|HAS_SEARCH_ACCESS*1..]->(start)\n".
-            "OPTIONAL MATCH (endUser:User)-[endGroups:IS_IN_GROUP*0..]->()-[endRelations:OWNS|HAS_READ_ACCESS|HAS_SEARCH_ACCESS*1..]->(end)\n".
+            $this->getRelationMatchClause($relationType, $startId, $endId)."\n".
+            "OPTIONAL MATCH (start)<-[startRelations:OWNS|HAS_SEARCH_ACCESS*1..]-()<-[startGroups:IS_IN_GROUP*0..]-(startUser:User)\n".
+            "OPTIONAL MATCH (end)<-[endRelations:OWNS|HAS_READ_ACCESS|HAS_SEARCH_ACCESS*1..]-()<-[endGroups:IS_IN_GROUP*0..]-(endUser:User)\n".
             "WHERE\n".
             "  (\n".
             "    startUser.id = start.id\n".
@@ -859,7 +925,7 @@ class AccessChecker
             "          (\n".
             "            relation.onCreatedByUser IS NULL\n".
             "            OR\n".
-            "            (start)<-[:CREATED*]-(startUser)\n".
+            "            start.createdBy = startUser.id\n".
             "          )\n".
             "        )\n".
             "      )\n".
@@ -870,7 +936,7 @@ class AccessChecker
             "        ANY(relation in startRelations WHERE\n".
             '          type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
             "          AND\n".
-            "          (start)<-[:CREATED*]-(startUser)\n".
+            "          start.createdBy = startUser.id\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -911,7 +977,7 @@ class AccessChecker
             "          (\n".
             "            relation.onCreatedByUser IS NULL\n".
             "            OR\n".
-            "            (end)<-[:CREATED*]-(endUser)\n".
+            "            end.createdBy = endUser.id\n".
             "          )\n".
             "        )\n".
             "      )\n".
@@ -926,7 +992,7 @@ class AccessChecker
             '            type(relation) = "HAS_'.$accessType->value."_ACCESS\"\n".
             "          )\n".
             "          AND\n".
-            "          (end)<-[:CREATED*]-(endUser)\n".
+            "          end.createdBy = endUser.id\n".
             "        )\n".
             "      )\n".
             "    )\n".
@@ -963,6 +1029,7 @@ class AccessChecker
 
     /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      *
      * @param Uuid[] $elementIds
      *
@@ -971,157 +1038,119 @@ class AccessChecker
     public function checkUserAccessToMultipleElements(Uuid $userId, array $elementIds): array
     {
         /**
-         * First find elements, their type as well as start and end nodes for relationships.
+         * First find the type of all elements, as well as start and end nodes for relationships. Nodes need no query of
+         * their own here, the access query below only returns nodes which exist.
          */
-        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            <<<'EOD'
-MATCH (node)
-WHERE node.id IN $ids
-RETURN
-  node.id AS id,
-  null as startId,
-  null as endId
-UNION
-MATCH (start)-[relation]->(end)
-WHERE relation.id IN $ids
-RETURN
-  relation.id AS id,
-  start.id as startId,
-  end.id as endId;
-EOD,
-            [
-                'ids' => array_map(fn (Uuid $elementId) => $elementId->toString(), $elementIds),
-            ]
-        ));
-
+        /** @var array<array{id: string, startId: string|null, endId: string|null}> $data */
         $data = [];
-        foreach ($res as $row) {
-            $rawId = $row->get('id');
-            if (!is_string($rawId)) {
-                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
+        $relationIdsByType = [];
+        $nodeLabels = [];
+        foreach ($this->elementTypeService->resolveMany($elementIds) as $rawElementId => $resolved) {
+            if (null === $resolved) {
+                continue;
             }
-            $id = Uuid::fromString($rawId);
-
-            $rawStartId = $row->get('startId');
-            $startId = null;
-            if (is_string($rawStartId)) {
-                $startId = Uuid::fromString($rawStartId);
-            } elseif (!is_null($rawStartId)) {
-                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property startId as string or null, not %s.', get_debug_type($rawStartId))); // @codeCoverageIgnore
+            if ($resolved->isNode()) {
+                $data[] = ['id' => $rawElementId, 'startId' => null, 'endId' => null];
+                $nodeLabels[$rawElementId] = $resolved->getType();
+            } else {
+                $relationIdsByType[$resolved->getType()][] = $rawElementId;
             }
-
-            $rawEndId = $row->get('endId');
-            $endId = null;
-            if (is_string($rawEndId)) {
-                $endId = Uuid::fromString($rawEndId);
-            } elseif (!is_null($rawEndId)) {
-                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property endId as string or null, not %s.', get_debug_type($rawEndId))); // @codeCoverageIgnore
+        }
+        foreach ($relationIdsByType as $relationType => $relationIds) {
+            $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+                sprintf(
+                    'UNWIND $ids AS relationId MATCH (start)-[relation:%s {id: relationId}]->(end) RETURN relation.id AS id, start.id AS startId, end.id AS endId',
+                    CypherHelper::escapeIdentifier($relationType)
+                ),
+                ['ids' => $relationIds]
+            ));
+            foreach ($res as $row) {
+                $rawId = $row->get('id');
+                $rawStartId = $row->get('startId');
+                $rawEndId = $row->get('endId');
+                if (!is_string($rawId) || !is_string($rawStartId) || !is_string($rawEndId)) {
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return properties id, startId and endId as string, not %s, %s and %s.', get_debug_type($rawId), get_debug_type($rawStartId), get_debug_type($rawEndId))); // @codeCoverageIgnore
+                }
+                $data[] = ['id' => $rawId, 'startId' => $rawStartId, 'endId' => $rawEndId];
             }
-
-            $data[] = [
-                'id' => $id,
-                'startId' => $startId,
-                'endId' => $endId,
-            ];
         }
 
         /**
-         * Select all nodes from the dataset such that access queries can be executed on them.
+         * Select all nodes from the dataset such that access queries can be executed on them. The start and end nodes
+         * of relations were not resolved yet, they are resolved in one go as well.
          */
         $nodeIds = [];
         foreach ($data as $row) {
             if (null === $row['startId'] || null === $row['endId']) {
-                $nodeIds[] = $row['id'];
+                $nodeIds[$row['id']] = $row['id'];
             } else {
-                $nodeIds[] = $row['startId'];
-                $nodeIds[] = $row['endId'];
+                $nodeIds[$row['startId']] = $row['startId'];
+                $nodeIds[$row['endId']] = $row['endId'];
             }
         }
-        /** @var Uuid[] $nodeIds */
+        $missingLabels = [];
+        foreach ($nodeIds as $rawNodeId) {
+            if (!array_key_exists($rawNodeId, $nodeLabels)) {
+                $missingLabels[] = Uuid::fromString($rawNodeId);
+            }
+        }
+        foreach ($this->elementTypeService->resolveMany($missingLabels) as $rawNodeId => $resolved) {
+            if (null !== $resolved && $resolved->isNode()) {
+                $nodeLabels[$rawNodeId] = $resolved->getType();
+            }
+        }
 
         /**
-         * Execute access query against all nodes.
+         * Execute access query against all nodes, once per label so the id index of that label can be used.
          */
-        $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            <<<'EOD'
-MATCH (user:User {id: $userId})
-UNWIND $ids AS elementId
-MATCH (element {id: elementId})
-OPTIONAL MATCH path=(user)-[:IS_IN_GROUP*0..]->()-[:OWNS|HAS_READ_ACCESS*0..]->(element)
-WHERE
-  user.id = element.id
-  OR
-  ALL(relation IN relationships(path) WHERE
-    type(relation) = "IS_IN_GROUP"
-    OR
-    type(relation) = "OWNS"
-    OR
-    (
-      type(relation) = "HAS_READ_ACCESS"
-      AND
-      (
-        relation.onLabel IS NULL
-        OR relation.onLabel IN labels(element)
-      )
-      AND
-      (
-        relation.onParentLabel IS NULL
-        OR relation.onParentLabel IN labels(element)
-      )
-      AND
-      (
-        relation.onState IS NULL
-        OR (element)<-[:OWNS*0..]-()-[:HAS_STATE]->(:State {id: relation.onState})
-      )
-      AND
-      (
-        relation.onCreatedByUser IS NULL
-        OR (element)<-[:CREATED*]-(user)
-      )
-    )
-  )
-WITH user, element, path
-WHERE
-  user.id = element.id
-  OR path IS NOT NULL
-RETURN element.id AS elementId;
-EOD,
-            [
-                'userId' => $userId->toString(),
-                'ids' => array_map(fn (Uuid $nodeId) => $nodeId->toString(), $nodeIds),
-            ]
-        ));
-
-        $nodeIdsWithAccess = [];
-        foreach ($res as $row) {
-            $rawElementId = $row->get('elementId');
-            if (!is_string($rawElementId)) {
-                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementId as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
+        $nodeIdsByLabel = [];
+        foreach ($nodeIds as $rawNodeId) {
+            if (array_key_exists($rawNodeId, $nodeLabels)) {
+                $nodeIdsByLabel[$nodeLabels[$rawNodeId]][] = $rawNodeId;
             }
-            $nodeIdsWithAccess[] = Uuid::fromString($rawElementId);
+        }
+        $accessRows = [];
+        foreach ($nodeIdsByLabel as $label => $labelNodeIds) {
+            $accessRows[] = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+                $this->buildReadAccessToNodesQuery(CypherHelper::escapeIdentifier($label)),
+                [
+                    'userId' => $userId->toString(),
+                    'ids' => $labelNodeIds,
+                ]
+            ));
+        }
+
+        /** @var array<string, true> $nodeIdsWithAccess */
+        $nodeIdsWithAccess = [];
+        foreach ($accessRows as $res) {
+            foreach ($res as $row) {
+                $rawElementId = $row->get('elementId');
+                if (!is_string($rawElementId)) {
+                    throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementId as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
+                }
+                $nodeIdsWithAccess[$rawElementId] = true;
+            }
         }
 
         /**
          * Now filter out nodes from the data array where the user does not have access to all nodes per row.
          */
+        /** @var array<string, true> $elementIdsWithAccess */
         $elementIdsWithAccess = [];
         foreach ($data as $row) {
-            if (null === $row['startId'] && null === $row['endId']) {
-                if (!in_array($row['id'], $nodeIdsWithAccess)) {
+            if (null === $row['startId'] || null === $row['endId']) {
+                if (!isset($nodeIdsWithAccess[$row['id']])) {
                     continue;
                 }
-                $elementIdsWithAccess[] = $row['id'];
-            } else {
-                if (!in_array($row['startId'], $nodeIdsWithAccess)) {
-                    continue;
-                }
-                if (!in_array($row['endId'], $nodeIdsWithAccess)) {
-                    continue;
-                }
-                $elementIdsWithAccess[] = $row['id'];
+            } elseif (!isset($nodeIdsWithAccess[$row['startId']]) || !isset($nodeIdsWithAccess[$row['endId']])) {
+                continue;
             }
+            $elementIdsWithAccess[$row['id']] = true;
         }
 
-        return array_values(array_intersect($elementIds, $elementIdsWithAccess));
+        return array_values(array_filter(
+            $elementIds,
+            static fn (Uuid $elementId): bool => isset($elementIdsWithAccess[$elementId->toString()])
+        ));
     }
 }

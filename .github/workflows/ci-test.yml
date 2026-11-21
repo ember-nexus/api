@@ -278,6 +278,24 @@ jobs:
         run: |
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
+  test-unit-go-uuid-to-type-mphf-lookup:
+    runs-on: ubuntu-26.04
+    name: 'Unit Test UuidToTypeMphfLookup (Go)'
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: lib/UuidToTypeMphfLookup/go.mod
+      # the FrankenPHP extension package (./extension) needs cgo and FrankenPHP's toolchain, it is built and loaded by
+      # the Docker image and covered by the PHP tests
+      - name: Vet
+        working-directory: lib/UuidToTypeMphfLookup
+        run: go vet ./mphf/... ./cmd/...
+      - name: Unit Test
+        working-directory: lib/UuidToTypeMphfLookup
+        run: go test ./mphf/... ./cmd/...
+
   test-meta:
     runs-on: ubuntu-26.04
     name: 'Meta Test'
@@ -334,6 +352,7 @@ jobs:
     timeout-minutes: 30
     needs:
       - test-unit
+      - test-unit-go-uuid-to-type-mphf-lookup
       - test-meta
       - phpstan
       - psalm
@@ -385,6 +404,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-unit-go-uuid-to-type-mphf-lookup
       - test-meta
       - phpstan
       - psalm
@@ -426,6 +446,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-unit-go-uuid-to-type-mphf-lookup
       - test-meta
       - phpstan
       - psalm
@@ -462,6 +483,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-unit-go-uuid-to-type-mphf-lookup
       - test-meta
       - phpstan
       - psalm

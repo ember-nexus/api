@@ -21,6 +21,51 @@ services:
   # only one S3 connection is supported for now; replace with a per-connection factory once there are more
   App\Contract\S3\S3TechnicalLimitsInterface: '@App\Type\S3\S3TechnicalLimits'
 
+  # id -> type lookup (see docs "Element type lookup")
+  App\Factory\MphfFactory:
+    arguments:
+      $enabled: '%mphfEnabled%'
+
+  App\Contract\MphfInterface:
+    factory: ['@App\Factory\MphfFactory', 'create']
+
+  App\Service\MaintenanceLockService:
+    arguments:
+      $maintenanceLockTtl: '%maintenanceLockTtl%'
+
+  App\Service\Mphf\MphfStorageService:
+    arguments:
+      $mphfStorage: '%mphfStorage%'
+      $mphfDir: '%mphfDir%'
+
+  App\Service\Mphf\SystemBucketService:
+    arguments:
+      $s3SystemBucket: '%s3SystemBucket%'
+
+  App\Service\Mphf\MphfVersionSynchronizer:
+    arguments:
+      $mphfEnabled: '%mphfEnabled%'
+      $mphfMadviseRandom: '%mphfMadviseRandom%'
+      $mphfCliDownloadTimeout: '%mphfCliDownloadTimeout%'
+
+  App\Service\Mphf\ElementIdFilterService:
+    arguments:
+      $enabled: '%elementIdFilterEnabled%'
+      $errorRate: '%elementIdFilterErrorRate%'
+
+  App\Service\Mphf\MphfBuildService:
+    arguments:
+      $mphfOverlaySwitchDelay: '%mphfOverlaySwitchDelay%'
+      $mphfOverlayClearDelay: '%mphfOverlayClearDelay%'
+      $mphfRetentionFiles: '%mphfRetentionFiles%'
+      $mphfExportBatchSize: '%mphfExportBatchSize%'
+      $mphfBuilderBinary: '%mphfBuilderBinary%'
+      $appVersion: '%version%'
+
+  App\Service\ElementTypeService:
+    arguments:
+      $mphfStrict: '%mphfStrict%'
+
   # library services
 
   monolog_json_formatter:
@@ -154,6 +199,7 @@ services:
 
   Syndesi\CypherEntityManager\Type\EntityManager:
     factory: ['@App\Factory\CypherEntityManagerFactory', 'createCypherEntityManager']
+    lazy: true
 
   App\Factory\MongoEntityManagerFactory:
     arguments:
@@ -161,13 +207,16 @@ services:
 
   Syndesi\MongoEntityManager\Type\EntityManager:
     factory: ['@App\Factory\MongoEntityManagerFactory', 'createMongoEntityManager']
+    lazy: true
 
   App\Factory\ElasticEntityManagerFactory:
     arguments:
       $elasticAuth: '%env(ELASTIC_AUTH)%'
 
+  # lazy: building the Elasticsearch client costs a few percent of a request, and e.g. reading an element never uses it
   Syndesi\ElasticEntityManager\Type\EntityManager:
     factory: ['@App\Factory\ElasticEntityManagerFactory', 'createElasticEntityManager']
+    lazy: true
 
   App\Factory\RedisFactory:
     arguments:

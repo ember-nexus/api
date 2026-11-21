@@ -9,6 +9,7 @@ use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\ElementToRawService;
+use App\Service\GraphStructureService;
 use App\Service\S3Service;
 use App\Service\StorageService;
 use App\Style\EmberNexusStyle;
@@ -65,6 +66,7 @@ class BackupCreateCommand extends Command
         private S3Service $s3Service,
         private S3OperationFactory $s3OperationFactory,
         private LoggerInterface $logger,
+        private GraphStructureService $graphStructureService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
@@ -122,11 +124,17 @@ class BackupCreateCommand extends Command
 
     private function writeSummary(): void
     {
+        // read fresh, the backup load creates the id indices from it before any element exists
+        $this->graphStructureService->loadGraphStructure();
         $data = [
             'backupCreated' => (new DateTime())->format('Y-m-d H:i:s e'),
             'nodeCount' => $this->nodeCount - $this->skippedNodeCount,
             'relationCount' => $this->relationCount - $this->skippedRelationCount,
             'fileCount' => $this->fileCount - $this->skippedFileCount,
+            'graphStructure' => [
+                'nodeTypes' => $this->graphStructureService->getNodeTypes(),
+                'relationTypes' => $this->graphStructureService->getRelationTypes(),
+            ],
             'hostname' => gethostname(),
             'version' => $this->bag->get('version'),
         ];

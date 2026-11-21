@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ember-nexus.github.io/schemas/backup-summary.schema.json",
+  "title": "Backup summary",
+  "description": "The summary.json in the root folder of a backup, as written by backup:create.",
+  "type": "object",
+  "required": [
+    "backupCreated",
+    "nodeCount",
+    "relationCount",
+    "fileCount",
+    "hostname",
+    "version"
+  ],
+  "properties": {
+    "backupCreated": {
+      "description": "Time of the backup, formatted as `Y-m-d H:i:s e`, e.g. `2026-11-22 18:14:03 UTC`.",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} .+$"
+    },
+    "nodeCount": {
+      "description": "Number of node files in the backup.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "relationCount": {
+      "description": "Number of relation files in the backup.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "fileCount": {
+      "description": "Number of files, i.e. contents of file elements, in the backup.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "graphStructure": {
+      "description": "All node labels and relation types of the database. Missing in backups of older versions.",
+      "type": "object",
+      "required": [
+        "nodeTypes",
+        "relationTypes"
+      ],
+      "properties": {
+        "nodeTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "relationTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "hostname": {
+      "description": "Hostname of the machine which created the backup.",
+      "type": "string"
+    },
+    "version": {
+      "description": "Version of the API which created the backup, `dev` for development builds. Backups of versions before 0.2.0 have to be converted by backup:convert.",
+      "type": "string",
+      "minLength": 1
+    },
+    "backupVersion": {
+      "description": "Only set by the release workflow of the reference dataset: version of the dataset.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

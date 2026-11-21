@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Command;
 
 use App\Command\DatabaseDropCommand;
+use App\Service\Index\IndexEnsurer;
+use App\Service\MaintenanceLockService;
+use App\Service\Mphf\SystemBucketService;
+use App\Type\MaintenanceLock;
+use App\Type\MaintenanceLockType;
 use App\Type\RabbitMQQueueType;
 use AsyncAws\S3\Result\DeleteObjectsOutput;
 use AsyncAws\S3\Result\ListMultipartUploadsOutput;
@@ -50,6 +55,9 @@ class DatabaseDropCommandTest extends TestCase
     private ObjectProphecy $s3Client;
     private ObjectProphecy $redisClient;
     private ObjectProphecy $amqpChannel;
+    private ObjectProphecy $indexEnsurer;
+    private ObjectProphecy $systemBucket;
+    private bool $lockTaken = false;
 
     protected function setUp(): void
     {
@@ -62,7 +70,7 @@ class DatabaseDropCommandTest extends TestCase
     {
         $null = null;
         $neo4jClient = $this->prophesize(ClientInterface::class);
-        $neo4jClient->runStatement(Argument::any())->shouldBeCalledOnce()->willReturn(new SummarizedResult($null, []));
+        $neo4jClient->runStatement(Argument::any())->shouldBeCalledTimes($this->lockTaken ? 0 : 1)->willReturn(new SummarizedResult($null, []));
         $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
         $cypherEntityManager->getClient()->willReturn($neo4jClient->reveal());
 
@@ -93,6 +101,17 @@ class DatabaseDropCommandTest extends TestCase
         $configuration->getFileS3StorageBucket()->willReturn(self::STORAGE_BUCKET);
         $configuration->getFileS3UploadBucket()->willReturn(self::UPLOAD_BUCKET);
 
+        $locks = $this->prophesize(MaintenanceLockService::class);
+        $locks->claim(MaintenanceLockType::DATABASE)->willReturn(new MaintenanceLock(MaintenanceLockType::DATABASE, 'a'));
+        $locks->claim(MaintenanceLockType::DATABASE_INDICES)->willReturn($this->lockTaken ? null : new MaintenanceLock(MaintenanceLockType::DATABASE_INDICES, 'b'));
+        $locks->claim(MaintenanceLockType::MPHF)->willReturn(new MaintenanceLock(MaintenanceLockType::MPHF, 'c'));
+        $locks->release(Argument::type(MaintenanceLock::class))->willReturn(true);
+        $this->indexEnsurer = $this->prophesize(IndexEnsurer::class);
+        $this->indexEnsurer->dropManagedIndices()->willReturn([]);
+        $this->systemBucket = $this->prophesize(SystemBucketService::class);
+        $this->systemBucket->list('mphf/')->willReturn(['mphf/20260101-0000.mphf']);
+        $this->systemBucket->delete('mphf/20260101-0000.mphf');
+
         $command = new DatabaseDropCommand(
             $cypherEntityManager->reveal(),
             $mongoEntityManager->reveal(),
@@ -101,6 +120,9 @@ class DatabaseDropCommandTest extends TestCase
             $amqpConnection->reveal(),
             $this->s3Client->reveal(),
             $configuration->reveal(),
+            $locks->reveal(),
+            $this->indexEnsurer->reveal(),
+            $this->systemBucket->reveal(),
         );
         $application = new Application();
         $application->addCommand($command);
@@ -281,6 +303,9 @@ class DatabaseDropCommandTest extends TestCase
             $this->prophesize(AMQPStreamConnection::class)->reveal(),
             $this->s3Client->reveal(),
             $this->prophesize(EmberNexusConfiguration::class)->reveal(),
+            $this->prophesize(MaintenanceLockService::class)->reveal(),
+            $this->prophesize(IndexEnsurer::class)->reveal(),
+            $this->prophesize(SystemBucketService::class)->reveal(),
         );
         $application = new Application();
         $application->addCommand($command);
@@ -291,5 +316,26 @@ class DatabaseDropCommandTest extends TestCase
 
         $this->assertSame(Command::FAILURE, $exitCode);
         $this->assertStringContainsString('Aborted dropping databases.', $tester->getDisplay());
+    }
+
+    public function testDropsManagedIndicesAndTypeIndexFiles(): void
+    {
+        $this->s3Client->listMultipartUploads(Argument::any())->willReturn($this->multipartOutput([]));
+        $this->s3Client->listObjectsV2(Argument::any())->willReturn($this->listOutput([]));
+        $tester = $this->buildCommandTester();
+        $tester->execute(['--force' => true]);
+
+        $this->indexEnsurer->dropManagedIndices()->shouldHaveBeenCalledOnce();
+        $this->systemBucket->delete('mphf/20260101-0000.mphf')->shouldHaveBeenCalledOnce();
+    }
+
+    public function testFailsWhenAnotherMaintenanceLockIsTaken(): void
+    {
+        $this->lockTaken = true;
+        $this->redisClient->flushdb()->shouldNotBeCalled();
+        $tester = $this->buildCommandTester(false);
+
+        $this->assertSame(Command::FAILURE, $tester->execute(['--force' => true]));
+        $this->assertStringContainsString('lock:maintenance:database-indices', $tester->getDisplay());
     }
 }

@@ -40,13 +40,15 @@ class PostTokenController extends AbstractController
         $this->requestUtilService->validateTypeFromBody('Token', $body);
         $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
 
-        $userElement = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier);
+        // the password is read first: a missing password must be reported the same way for known and unknown users
+        $currentPassword = $this->requestUtilService->getStringFromBody('password', $body);
+
+        $userElement = $this->securityUtilService->findUserByUniqueUserIdentifier($uniqueUserIdentifier, $currentPassword);
         $userId = $userElement->getId();
         if (null === $userId) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
 
-        $currentPassword = $this->requestUtilService->getStringFromBody('password', $body);
         $this->securityUtilService->validatePasswordMatches($userElement, $currentPassword);
 
         $lifetimeInSeconds = $this->getLifetimeInSecondsFromBody($body);

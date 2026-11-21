@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# Serves the working tree of the reference dataset (../reference-dataset, including uncommitted changes) as a zip
+# archive, in the layout of GitHub's tag archives, from a tiny web server on the docker network of the dev setup.
+# Use it before the new dataset version is released:
+#
+#   bin/reference-dataset-wip
+#   REFERENCE_DATASET_URL=http://reference-dataset-wip/reference-dataset-wip.zip bin/test-end-to-end-prepare
+#
+# Run it again after changing the dataset, it rebuilds the archive; the server keeps running.
+
+set -e
+
+DATASET_DIR="${REFERENCE_DATASET_DIR:-$(cd "$(dirname "$0")/../../reference-dataset" && pwd)}"
+SERVE_DIR="${REFERENCE_DATASET_WIP_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/reference-dataset-wip}"
+CONTAINER=reference-dataset-wip
+NETWORK="${REFERENCE_DATASET_WIP_NETWORK:-dev_default}"
+
+mkdir -p "$SERVE_DIR"
+python3 - "$DATASET_DIR" "$SERVE_DIR/reference-dataset-wip.zip" <<'PY'
+import os, sys, zipfile
+source, target = sys.argv[1], sys.argv[2]
+with zipfile.ZipFile(target + '.tmp', 'w', zipfile.ZIP_DEFLATED) as archive:
+    archive.write(source, 'reference-dataset-wip/')  # directory entries, as in GitHub's archives
+    for root, dirs, files in os.walk(source):
+        dirs[:] = [d for d in dirs if d != '.git']
+        for name in dirs:
+            path = os.path.join(root, name)
+            archive.write(path, os.path.join('reference-dataset-wip', os.path.relpath(path, source)) + '/')
+        for name in files:
+            path = os.path.join(root, name)
+            archive.write(path, os.path.join('reference-dataset-wip', os.path.relpath(path, source)))
+os.replace(target + '.tmp', target)
+PY
+echo "Archive: $SERVE_DIR/reference-dataset-wip.zip"
+
+if [ -z "$(docker ps -q -f "name=^${CONTAINER}$")" ]; then
+    docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+    docker run -d --name "$CONTAINER" --network "$NETWORK" -v "$SERVE_DIR:/srv:ro" busybox:1.37 httpd -f -p 80 -h /srv >/dev/null
+fi
+echo "Served at http://${CONTAINER}/reference-dataset-wip.zip (inside the docker network $NETWORK)"

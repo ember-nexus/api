@@ -9,6 +9,7 @@ use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\EventListener\OwnershipChangeEventListener;
 use App\Service\AppStateService;
+use App\Service\PendingSearchDocumentService;
 use App\Service\QueueService;
 use App\Type\AppStateType;
 use App\Type\NodeElement;
@@ -21,6 +22,7 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Syndesi\ElasticDataStructures\Type\Document;
 
 #[Small]
 #[CoversClass(OwnershipChangeEventListener::class)]
@@ -28,14 +30,18 @@ class OwnershipChangeEventListenerTest extends TestCase
 {
     use ProphecyTrait;
 
-    private function buildListener(?QueueService $queueService = null, AppStateType $appState = AppStateType::DEFAULT): OwnershipChangeEventListener
-    {
+    private function buildListener(
+        ?QueueService $queueService = null,
+        AppStateType $appState = AppStateType::DEFAULT,
+        ?PendingSearchDocumentService $pendingSearchDocumentService = null,
+    ): OwnershipChangeEventListener {
         $appStateService = $this->prophesize(AppStateService::class);
         $appStateService->getAppState()->willReturn($appState);
 
         return new OwnershipChangeEventListener(
             $queueService ?? $this->prophesize(QueueService::class)->reveal(),
-            $appStateService->reveal()
+            $appStateService->reveal(),
+            $pendingSearchDocumentService ?? new PendingSearchDocumentService()
         );
     }
 
@@ -66,7 +72,6 @@ class OwnershipChangeEventListenerTest extends TestCase
     public static function nonTriggeringTypesProvider(): array
     {
         return [
-            'CREATED' => ['CREATED'],
             'HAS_READ_ACCESS' => ['HAS_READ_ACCESS'],
             'HAS_CREATE_ACCESS' => ['HAS_CREATE_ACCESS'],
             'HAS_UPDATE_ACCESS' => ['HAS_UPDATE_ACCESS'],
@@ -107,6 +112,59 @@ class OwnershipChangeEventListenerTest extends TestCase
 
         $listener = $this->buildListener($queueService->reveal());
         $listener->onElementPostCreate(new ElementPostCreateEvent($relation));
+    }
+
+    public function testPostCreateOfOwnsToNodeCreatedInSameFlushDoesNotPublish(): void
+    {
+        $pending = new PendingSearchDocumentService();
+        $pending->hold('02IiNr0G8viOVKjk87c7OoU78ONujU6JKLydP', new Document());
+
+        $queueService = $this->prophesize(QueueService::class);
+        $queueService->publishEvent(Argument::cetera())->shouldNotBeCalled();
+
+        $listener = $this->buildListener($queueService->reveal(), AppStateType::DEFAULT, $pending);
+        $listener->onElementPostCreate(new ElementPostCreateEvent($this->buildRelation('OWNS')));
+    }
+
+    public function testPostCreateOfOwnsToExistingNodePublishesEvenIfTheStartIsNew(): void
+    {
+        $pending = new PendingSearchDocumentService();
+        $pending->hold('02IiNr0G8viOVKjboyDliyOxJlXj6Bii5l1U2', new Document());
+
+        $queueService = $this->prophesize(QueueService::class);
+        $queueService->publishEvent(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE, Argument::any())->shouldBeCalledOnce();
+
+        $listener = $this->buildListener($queueService->reveal(), AppStateType::DEFAULT, $pending);
+        $listener->onElementPostCreate(new ElementPostCreateEvent($this->buildRelation('OWNS')));
+    }
+
+    #[DataProvider('triggeringTypesProvider')]
+    public function testOnlyOwnsToNewNodeIsSkipped(string $type): void
+    {
+        $pending = new PendingSearchDocumentService();
+        $pending->hold('02IiNr0G8viOVKjk87c7OoU78ONujU6JKLydP', new Document());
+
+        $queueService = $this->prophesize(QueueService::class);
+        if ('OWNS' === $type) {
+            $queueService->publishEvent(Argument::cetera())->shouldNotBeCalled();
+        } else {
+            $queueService->publishEvent(Argument::cetera())->shouldBeCalledOnce();
+        }
+
+        $listener = $this->buildListener($queueService->reveal(), AppStateType::DEFAULT, $pending);
+        $listener->onElementPostCreate(new ElementPostCreateEvent($this->buildRelation($type)));
+    }
+
+    public function testPostMergeOfOwnsToPendingNodeStillPublishes(): void
+    {
+        $pending = new PendingSearchDocumentService();
+        $pending->hold('02IiNr0G8viOVKjk87c7OoU78ONujU6JKLydP', new Document());
+
+        $queueService = $this->prophesize(QueueService::class);
+        $queueService->publishEvent(Argument::cetera())->shouldBeCalledOnce();
+
+        $listener = $this->buildListener($queueService->reveal(), AppStateType::DEFAULT, $pending);
+        $listener->onElementPostMerge(new ElementPostMergeEvent($this->buildRelation('OWNS')));
     }
 
     public function testPostMergePublishesWithMergeEventKind(): void

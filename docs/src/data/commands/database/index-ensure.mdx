@@ -1,0 +1,30 @@
+---
+command: index:ensure
+name: index:ensure
+helpCommand: php bin/console index:ensure --help
+helpOutput: index-ensure-help.html
+exampleCommand: php bin/console index:ensure
+exampleOutput: index-ensure.html
+---
+
+Creates a range index on the `id` property for every node label and every relationship type which does not have one
+yet. Elements are looked up by their id on almost every request; with a label (or relationship type) in the query and
+an index on it, Neo4j finds the element directly instead of scanning the whole graph.
+
+Options:
+
+- `--nodes-only` / `--relations-only` - only handle node labels or only relationship types.
+- `--wait[=<seconds>]` - waits until the new indices are online, at most the given number of seconds (default 600).
+- `--dry-run` - only lists the indices which would be created.
+
+Index names are deterministic: `ember_nexus_node_id_<type>_<hash>` and `ember_nexus_relation_id_<type>_<hash>`. Types
+which already have an equivalent index under another name (for example from a uniqueness constraint) are left alone.
+The command only creates indices, it never drops them. MongoDB and Elasticsearch need nothing, as the element id is the
+document identifier there.
+
+<Note>
+    Every API instance runs this command every ten minutes (see
+    [Background tasks](/reference/configuration#background-tasks)), so indices of newly used types appear on their own.
+    The command is skipped (successfully) while another instance is already creating indices, or while a backup is
+    being loaded or the database is being reset.
+</Note>

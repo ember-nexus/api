@@ -13,6 +13,7 @@ use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\DeletionService;
 use App\Service\ElementManager;
+use App\Service\ElementTypeService;
 use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\NodeElement;
@@ -38,6 +39,14 @@ class UploadServiceTest extends TestCase
 {
     use ProphecyTrait;
 
+    private function buildElementTypeService(?string $nodeLabel = 'Data'): ElementTypeService
+    {
+        $elementTypeService = $this->prophesize(ElementTypeService::class);
+        $elementTypeService->resolveNodeLabel(Argument::any())->willReturn($nodeLabel);
+
+        return $elementTypeService->reveal();
+    }
+
     /**
      * @return array{0: UploadService, 1: ObjectProphecy<ElementManager>, 2: ObjectProphecy<Server500LogicErrorExceptionFactory>, 3: ObjectProphecy<S3OperationFactory>, 4: ObjectProphecy<S3Service>, 5: ObjectProphecy<UploadFactory>, 6: ObjectProphecy<CypherEntityManager>, 7: ObjectProphecy<DeletionService>}
      */
@@ -49,6 +58,7 @@ class UploadServiceTest extends TestCase
         ?ObjectProphecy $uploadFactory = null,
         ?ObjectProphecy $cypherEntityManager = null,
         ?ObjectProphecy $deletionService = null,
+        ?string $nodeLabel = 'Data',
     ): array {
         $elementManager ??= $this->prophesize(ElementManager::class);
         $server500LogicErrorExceptionFactory ??= $this->prophesize(Server500LogicErrorExceptionFactory::class);
@@ -65,6 +75,7 @@ class UploadServiceTest extends TestCase
             $uploadFactory->reveal(),
             $cypherEntityManager->reveal(),
             $deletionService->reveal(),
+            $this->buildElementTypeService($nodeLabel),
             $server500LogicErrorExceptionFactory->reveal(),
         );
 
@@ -296,6 +307,24 @@ class UploadServiceTest extends TestCase
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
         $this->assertSame($uploadFound, $service->hasUploadsTargeting(Uuid::generate()));
+    }
+
+    public function testUploadsTargetingQueryIncludesAttachedRelationsOnlyWhenLabelResolves(): void
+    {
+        foreach ([['Da`ta', true], [null, false]] as [$label, $expectsClause]) {
+            [$service, , , , , , $cypherEntityManager] = $this->buildService(nodeLabel: $label);
+            $client = $this->prophesize(ClientInterface::class);
+            $client->runStatement(Argument::that(function (Statement $statement) use ($expectsClause) {
+                $text = $statement->getText();
+
+                return $expectsClause
+                    ? str_contains($text, 'OR u.uploadTarget IN [(:`Da``ta` {id: $elementId})-[r]-() | r.id]')
+                    : !str_contains($text, ' OR ') && str_contains($text, 'u.uploadTarget = $elementId');
+            }))->shouldBeCalledOnce()->willReturn($this->buildSummarizedResultOf());
+            $cypherEntityManager->getClient()->willReturn($client->reveal());
+
+            $service->hasUploadsTargeting(Uuid::generate());
+        }
     }
 
     /**

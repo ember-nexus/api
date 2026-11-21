@@ -24,6 +24,10 @@ The following safeguards are in place:
 With all the different safeguards in place and full test coverage across all guards, **this search step is considered
 safe**.
 
+The query can not read internal properties (starting with `_`, or the token property `hash`) and can not access
+properties dynamically; see [grammar](/reference/search/cypher-path-subset/grammar) for the full list of rejected
+constructs.
+
 ## Input parameters
 
 Any parameters available are passed as query variables to the database, i.e. as `$parameterName` inside the query

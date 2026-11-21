@@ -6,8 +6,12 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\ElementManager;
+use App\Service\ElementTypeService;
+use App\Helper\ReadAccessCypherHelper;
 use App\Service\EtagCalculatorService;
+use App\Type\ElementKind;
 use App\Type\NodeElement;
+use App\Type\ResolvedType;
 use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -18,6 +22,7 @@ use Laudis\Neo4j\Types\CypherList;
 use Laudis\Neo4j\Types\CypherMap;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -34,6 +39,15 @@ class EtagCalculatorServiceTest extends TestCase
 {
     use ProphecyTrait;
 
+    private function buildElementTypeService(?ResolvedType $resolved = new ResolvedType(ElementKind::NODE, 'Data'), ?string $nodeLabel = 'Data'): ElementTypeService
+    {
+        $elementTypeService = $this->prophesize(ElementTypeService::class);
+        $elementTypeService->resolve(Argument::any())->willReturn($resolved);
+        $elementTypeService->resolveNodeLabel(Argument::any())->willReturn($nodeLabel);
+
+        return $elementTypeService->reveal();
+    }
+
     public function testCalculateElementEtagForNodeWhichExists(): void
     {
         // setup variables
@@ -43,8 +57,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
-                    'relation.updated' => null,
+                    'updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                 ]),
             ]
         );
@@ -76,6 +89,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -88,9 +102,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "OPTIONAL MATCH (node {id: \$elementId})\n".
-            "OPTIONAL MATCH ()-[relation {id: \$elementId}]->()\n".
-            'RETURN node.updated, relation.updated',
+            'MATCH (element:`Data` {id: $elementId}) RETURN element.updated AS updated',
             $statement->getText()
         );
 
@@ -108,8 +120,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => null,
-                    'relation.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
+                    'updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                 ]),
             ]
         );
@@ -141,6 +152,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(new ResolvedType(ElementKind::RELATION, 'RELATED')),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -153,9 +165,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "OPTIONAL MATCH (node {id: \$elementId})\n".
-            "OPTIONAL MATCH ()-[relation {id: \$elementId}]->()\n".
-            'RETURN node.updated, relation.updated',
+            'MATCH ()-[element:`RELATED` {id: $elementId}]->() RETURN element.updated AS updated',
             $statement->getText()
         );
 
@@ -173,8 +183,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => null,
-                    'relation.updated' => null,
+                    'updated' => null,
                 ]),
             ]
         );
@@ -195,6 +204,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -207,6 +217,85 @@ class EtagCalculatorServiceTest extends TestCase
         $this->assertTrue($logger->records->includeMessagesContaining('Calculating Etag for element.'));
     }
 
+    public function testCalculateElementEtagReturnsNullWithoutQueryIfTypeIsUnresolved(): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(null),
+            TestLogger::create(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+
+        $this->assertNull($etagCalculatorService->calculateElementEtag(Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub')));
+    }
+
+    public function testCalculateElementEtagEscapesTheResolvedType(): void
+    {
+        $null = null;
+        /** @var ?Statement $statement */
+        $statement = null;
+        $clientInterface = $this->prophesize(ClientInterface::class);
+        $clientInterface->runStatement(Argument::that(
+            function ($internalStatement) use (&$statement) {
+                $statement = $internalStatement;
+
+                return true;
+            }
+        ))->shouldBeCalledOnce()->willReturn(new SummarizedResult($null, []));
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->willReturn($clientInterface->reveal());
+
+        $etagCalculatorService = new EtagCalculatorService(
+            $this->prophesize(EmberNexusConfiguration::class)->reveal(),
+            $cypherEntityManager->reveal(),
+            $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(new ResolvedType(ElementKind::NODE, 'Da`ta')),
+            TestLogger::create(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+
+        // no row at all is treated like an element without updated timestamp
+        $this->assertNull($etagCalculatorService->calculateElementEtag(Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub')));
+        $this->assertSame('MATCH (element:`Da``ta` {id: $elementId}) RETURN element.updated AS updated', $statement?->getText());
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function collectionMethodProvider(): array
+    {
+        return [
+            'children' => ['calculateChildrenCollectionEtag'],
+            'parents' => ['calculateParentsCollectionEtag'],
+            'related' => ['calculateRelatedCollectionEtag'],
+        ];
+    }
+
+    #[DataProvider('collectionMethodProvider')]
+    public function testCollectionEtagIsNullWithoutQueryIfNodeLabelIsUnresolved(string $method): void
+    {
+        $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+
+        $etagCalculatorService = new EtagCalculatorService(
+            $emberNexusConfiguration->reveal(),
+            $cypherEntityManager->reveal(),
+            $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(null, null),
+            TestLogger::create(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+
+        $this->assertNull($etagCalculatorService->$method(Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub')));
+    }
+
     public function testCalculateElementEtagWithEdgecaseWhereDifferentObjectIsReturned(): void
     {
         // setup variables
@@ -216,8 +305,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => new stdClass(),
-                    'relation.updated' => null,
+                    'updated' => new stdClass(),
                 ]),
             ]
         );
@@ -239,6 +327,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -304,6 +393,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -316,7 +406,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (parent {id: \$parentId})\n".
+            "MATCH (parent:`Data` {id: \$parentId})\n".
             "MATCH (parent)-[:OWNS]->(children)\n".
             "MATCH (parent)-[relations]->(children)\n".
             "WITH children, relations\n".
@@ -382,6 +472,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -394,7 +485,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (parent {id: \$parentId})\n".
+            "MATCH (parent:`Data` {id: \$parentId})\n".
             "MATCH (parent)-[:OWNS]->(children)\n".
             "MATCH (parent)-[relations]->(children)\n".
             "WITH children, relations\n".
@@ -456,6 +547,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -509,6 +601,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -549,6 +642,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -614,6 +708,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -626,7 +721,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (child {id: \$childId})\n".
+            "MATCH (child:`Data` {id: \$childId})\n".
             "MATCH (child)<-[:OWNS]-(parents)\n".
             "MATCH (child)<-[relations]-(parents)\n".
             "WITH parents, relations\n".
@@ -692,6 +787,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -704,7 +800,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (child {id: \$childId})\n".
+            "MATCH (child:`Data` {id: \$childId})\n".
             "MATCH (child)<-[:OWNS]-(parents)\n".
             "MATCH (child)<-[relations]-(parents)\n".
             "WITH parents, relations\n".
@@ -766,6 +862,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -819,6 +916,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -859,6 +957,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -924,6 +1023,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -936,7 +1036,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (center {id: \$centerId})\n".
+            "MATCH (center:`Data` {id: \$centerId})\n".
             "MATCH (center)-[relations]-(related)\n".
             "WITH related, relations\n".
             "LIMIT 101\n".
@@ -1001,6 +1101,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1013,7 +1114,7 @@ class EtagCalculatorServiceTest extends TestCase
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
-            "MATCH (center {id: \$centerId})\n".
+            "MATCH (center:`Data` {id: \$centerId})\n".
             "MATCH (center)-[relations]-(related)\n".
             "WITH related, relations\n".
             "LIMIT 101\n".
@@ -1074,6 +1175,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1127,6 +1229,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1167,6 +1270,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1232,6 +1336,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1245,7 +1350,8 @@ class EtagCalculatorServiceTest extends TestCase
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+            "MATCH (user)-[relation:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+            'WHERE '.ReadAccessCypherHelper::directReadRelationCondition('relation', 'elements').
             "WITH elements\n".
             "LIMIT 101\n".
             "WITH elements\n".
@@ -1309,6 +1415,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1322,7 +1429,8 @@ class EtagCalculatorServiceTest extends TestCase
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
             "MATCH (user:User {id: \$userId})\n".
-            "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+            "MATCH (user)-[relation:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+            'WHERE '.ReadAccessCypherHelper::directReadRelationCondition('relation', 'elements').
             "WITH elements\n".
             "LIMIT 101\n".
             "WITH elements\n".
@@ -1382,6 +1490,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1435,6 +1544,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1475,6 +1585,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $this->prophesize(ElementManager::class)->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1511,8 +1622,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
-                    'relation.updated' => null,
+                    'updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                 ]),
             ]
         );
@@ -1537,6 +1647,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1574,8 +1685,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
-                    'relation.updated' => null,
+                    'updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                 ]),
             ]
         );
@@ -1600,6 +1710,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1624,8 +1735,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
-                    'relation.updated' => null,
+                    'updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                 ]),
             ]
         );
@@ -1650,6 +1760,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1678,8 +1789,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
-                    'relation.updated' => null,
+                    'updated' => new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                 ]),
             ]
         );
@@ -1704,6 +1814,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1729,8 +1840,7 @@ class EtagCalculatorServiceTest extends TestCase
             $null,
             [
                 new CypherMap([
-                    'node.updated' => null,
-                    'relation.updated' => null,
+                    'updated' => null,
                 ]),
             ]
         );
@@ -1754,6 +1864,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager->reveal(),
+            $this->buildElementTypeService(),
             $logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
@@ -1783,6 +1894,7 @@ class EtagCalculatorServiceTest extends TestCase
             $emberNexusConfiguration->reveal(),
             $cypherEntityManager->reveal(),
             $elementManager->reveal(),
+            $this->buildElementTypeService(),
             TestLogger::create(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );

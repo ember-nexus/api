@@ -13,12 +13,14 @@ use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\ElementService;
+use App\Service\ElementTypeService;
 use App\Service\S3Service;
 use App\Tests\UnitTests\AssertLoggerTrait;
 use App\Type\NodeElement;
 use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use Laudis\Neo4j\Contracts\ClientInterface;
+use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -62,6 +64,11 @@ class ElementFileDeletionServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->setUpService('Data');
+    }
+
+    private function setUpService(?string $nodeLabel): void
+    {
         $this->elementManager = $this->prophesize(ElementManager::class);
         $this->elementService = $this->prophesize(ElementService::class);
         $this->fileOperationFactory = $this->prophesize(S3OperationFactory::class);
@@ -77,9 +84,18 @@ class ElementFileDeletionServiceTest extends TestCase
             $this->fileOperationFactory->reveal(),
             $this->s3Service->reveal(),
             $cypherEntityManager->reveal(),
+            $this->buildElementTypeService($nodeLabel),
             $this->logger,
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
+    }
+
+    private function buildElementTypeService(?string $nodeLabel = 'Data'): ElementTypeService
+    {
+        $elementTypeService = $this->prophesize(ElementTypeService::class);
+        $elementTypeService->resolveNodeLabel(Argument::any())->willReturn($nodeLabel);
+
+        return $elementTypeService->reveal();
     }
 
     private function buildNode(Uuid $id): NodeElement
@@ -141,6 +157,28 @@ class ElementFileDeletionServiceTest extends TestCase
             [['elementId' => $relationId, 'operation' => $relationFileOperation]],
             $this->service->getFileOperationsForDeletionOfElement($node)
         );
+    }
+
+    public function testNodeWithUnresolvedLabelDoesNotQueryForAttachedRelations(): void
+    {
+        $this->setUpService(null);
+        $node = $this->buildNode(Uuid::generate());
+        $this->client->runStatement(Argument::any())->shouldNotBeCalled();
+        $this->elementService->hasFile($node)->willReturn(false);
+
+        $this->assertSame([], $this->service->getFileOperationsForDeletionOfElement($node));
+    }
+
+    public function testAttachedRelationsQueryUsesTheEscapedResolvedLabel(): void
+    {
+        $this->setUpService('Da`ta');
+        $node = $this->buildNode(Uuid::generate());
+        $this->client->runStatement(Argument::that(
+            fn (Statement $statement) => str_contains($statement->getText(), 'MATCH (:`Da``ta` {id: $nodeId})-[r]-()')
+        ))->shouldBeCalledOnce()->willReturn($this->buildAttachedRelationsResult());
+        $this->elementService->hasFile($node)->willReturn(false);
+
+        $this->service->getFileOperationsForDeletionOfElement($node);
     }
 
     public function testRelationDoesNotQueryForAttachedRelations(): void

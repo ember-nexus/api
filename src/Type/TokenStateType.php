@@ -8,4 +8,5 @@ enum TokenStateType: string
 {
     case ACTIVE = 'ACTIVE';
     case REVOKED = 'REVOKED';
+    case EXPIRED = 'EXPIRED';
 }
