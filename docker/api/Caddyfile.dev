@@ -57,8 +57,13 @@
 	# identifies the request in the access log below and, via the request header, in the logs of the application; it is
 	# not part of the response headers, but of the `instance` of every problem json response (`urn:uuid:<id>`); always
 	# set by the server, so that clients can not spoof it in the logs
-	request_header X-Request-Id "{http.request.uuid}"
-	log_append request_id {http.request.uuid}
+	# Caddy only generates UUIDv4s, which the application rejects: the 120 random bits are re-packed into the base16
+	# form of a UUIDsv2a7 (8-8-4-4-4-12-14); its timestamp part is random as well, as it carries no meaning for request ids
+	map {http.request.uuid} {request_id} {
+		~^([0-9a-f]{8})-([0-9a-f]{4})-4([0-9a-f]{3})-[89ab]([0-9a-f]{3})-([0-9a-f]{6})([0-9a-f]{6})$ "02070007-${1}-${2}-7${3}-F${4}-${5}${6}-${1}${5}"
+	}
+	request_header X-Request-Id "{request_id}"
+	log_append request_id {request_id}
 	# hard backstop for the request body, deliberately 1 MiB above the default `file.uploadMaxChunkSizeInBytes` (101 MiB):
 	# Caddy rejects declared bodies above this limit with a bare 413 before PHP runs, so with equal limits the
 	# application would never get to answer oversized chunks with its descriptive 400 problem json
@@ -70,11 +75,11 @@
 	# smaller chunks
 	@uploadFile {
 		method POST PUT
-		path_regexp ^/[0-9a-fA-F-]{36}/file$
+		path_regexp ^/([0-9A-Za-z]{37}|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14}|[0-9A-Fa-f]{54})/file$
 	}
 	@uploadChunk {
 		method PATCH
-		path_regexp ^/upload/[0-9a-fA-F-]{36}$
+		path_regexp ^/upload/([0-9A-Za-z]{37}|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14}|[0-9A-Fa-f]{54})$
 	}
 	# Caddy 2.11.6 removed the read_timeout/write_timeout subdirectives from request_body; per-route read
 	# timeouts are now set via the timeouts directive instead (global default is set above in the servers block)
@@ -98,7 +103,7 @@
 		}
 		handle_response @phpFailure {
 			import problem_json_headers
-			respond `{"type":"/error/500/internal-server-error","title":"Internal server error","status":500,"instance":"urn:uuid:{http.request.uuid}","detail":"Internal server error, see log."}` 500
+			respond `{"type":"/error/500/internal-server-error","title":"Internal server error","status":500,"instance":"urn:uuid:{request_id}","detail":"Internal server error, see log."}` 500
 		}
 		@noFreePhpThread {
 			status 503
@@ -106,7 +111,7 @@
 		}
 		handle_response @noFreePhpThread {
 			import problem_json_headers
-			respond `{"type":"/error/503/service-unavailable","title":"Service unavailable","status":503,"instance":"urn:uuid:{http.request.uuid}","detail":"The service itself or an internal component is currently unavailable."}` 503
+			respond `{"type":"/error/503/service-unavailable","title":"Service unavailable","status":503,"instance":"urn:uuid:{request_id}","detail":"The service itself or an internal component is currently unavailable."}` 503
 		}
 	}
 	log {

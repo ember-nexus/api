@@ -65,3 +65,6 @@ elete
 
 Versity
 xcontent
+
+# UUID draft name
+uuidrev

@@ -8,6 +8,8 @@ use App\Exception\InvalidUuidException;
 use JsonSerializable;
 use Stringable;
 
+use function Safe\unpack;
+
 /**
  * UUIDsv2a7 with 128 random bits (rand_a 12 + rand_b 60 + rand_c 56) as defined by draft-davis-uuidrev-uuid-long-00,
  * encoded as base62sort.
@@ -35,6 +37,7 @@ final class Uuid implements JsonSerializable, Stringable
     public const int RANDOM_BYTE_LENGTH = 16;
     public const int BODY_BYTE_LENGTH = 23;
     public const int BODY_BASE62_LENGTH = 31;
+    private const int BASE62_CHUNK = 916132832; // 62^5
     public const int MAX_TIMESTAMP_MS = 0xFFFFFFFFFFFF;
     public const string HEX_PATTERN = '/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14}$/';
     public const string LEGACY_V4_PATTERN = '/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/';
@@ -267,36 +270,49 @@ final class Uuid implements JsonSerializable, Stringable
 
     private static function encodeBase62(string $body): string
     {
-        $digits = array_map('ord', str_split($body));
+        // the 23 bytes are processed as six 32 bit words, five base62 digits (62^5 < 2^30) are extracted per round
+        /** @var list<int> $words */
+        $words = array_values(unpack('N6', "\0".$body));
         $result = '';
-        for ($i = 0; $i < self::BODY_BASE62_LENGTH; ++$i) {
+        for ($round = 0; $round < 7; ++$round) {
             $remainder = 0;
-            foreach ($digits as $index => $digit) {
-                $current = $remainder * 256 + $digit;
-                $digits[$index] = intdiv($current, 62);
-                $remainder = $current % 62;
+            foreach ($words as $index => $word) {
+                $current = ($remainder << 32) | $word;
+                $words[$index] = intdiv($current, self::BASE62_CHUNK);
+                $remainder = $current % self::BASE62_CHUNK;
             }
-            $result = self::ALPHABET[$remainder].$result;
+            $chunk = '';
+            for ($digit = 0; $digit < 5; ++$digit) {
+                $chunk = self::ALPHABET[$remainder % 62].$chunk;
+                $remainder = intdiv($remainder, 62);
+            }
+            $result = $chunk.$result;
         }
 
-        return $result;
+        return substr($result, -self::BODY_BASE62_LENGTH);
     }
 
     private static function decodeBase62(string $body, string $original): string
     {
-        $bytes = array_fill(0, self::BODY_BYTE_LENGTH, 0);
-        foreach (str_split($body) as $char) {
-            $carry = (int) strpos(self::ALPHABET, $char);
-            for ($i = self::BODY_BYTE_LENGTH - 1; $i >= 0; --$i) {
-                $current = $bytes[$i] * 62 + $carry;
-                $bytes[$i] = $current & 0xFF;
-                $carry = $current >> 8;
+        $words = array_fill(0, 6, 0);
+        foreach (str_split(str_pad($body, 35, '0', STR_PAD_LEFT), 5) as $chunk) {
+            $carry = 0;
+            foreach (str_split($chunk) as $char) {
+                $carry = $carry * 62 + (int) strpos(self::ALPHABET, $char);
+            }
+            for ($index = 5; $index >= 0; --$index) {
+                $current = $words[$index] * self::BASE62_CHUNK + $carry;
+                $words[$index] = $current & 0xFFFFFFFF;
+                $carry = $current >> 32;
             }
             if ($carry > 0) {
                 throw new InvalidUuidException(InvalidUuidReason::OVERFLOW, sprintf("'%s' exceeds the maximum value of a UUIDsv2a7.", $original));
             }
         }
+        if ($words[0] > 0xFFFFFF) {
+            throw new InvalidUuidException(InvalidUuidReason::OVERFLOW, sprintf("'%s' exceeds the maximum value of a UUIDsv2a7.", $original));
+        }
 
-        return pack('C*', ...$bytes);
+        return substr(pack('N6', ...$words), 1);
     }
 }

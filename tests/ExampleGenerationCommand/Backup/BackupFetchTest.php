@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\ExampleGenerationCommand\Backup;
 
 use App\Tests\ExampleGenerationCommand\BaseCommandTestCase;
-use Symfony\Component\Dotenv\Dotenv;
 
 class BackupFetchTest extends BaseCommandTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
-    private const string FALLBACK_REFERENCE_DATASET_VERSION = '0.0.33';
 
     public function testBackupFetchHelp(): void
     {
@@ -42,26 +40,5 @@ class BackupFetchTest extends BaseCommandTestCase
                 ' [',
             ]
         );
-    }
-
-    /**
-     * Uses the same reference dataset version as the other tests, so that this test stays up to date automatically.
-     * A real environment variable wins over the value in `.env`.
-     */
-    private function getReferenceDatasetVersion(): string
-    {
-        $version = getenv('REFERENCE_DATASET_VERSION');
-        if (false !== $version && '' !== $version) {
-            return $version;
-        }
-        $envFile = self::PATH_TO_ROOT.'.env';
-        if (is_file($envFile)) {
-            $values = (new Dotenv())->parse(\Safe\file_get_contents($envFile));
-            if (is_string($values['REFERENCE_DATASET_VERSION'] ?? null) && '' !== $values['REFERENCE_DATASET_VERSION']) {
-                return $values['REFERENCE_DATASET_VERSION'];
-            }
-        }
-
-        return self::FALLBACK_REFERENCE_DATASET_VERSION;
     }
 }

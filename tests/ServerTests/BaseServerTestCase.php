@@ -121,7 +121,8 @@ abstract class BaseServerTestCase extends BaseRequestTestCase
         $this->assertIsArray($body);
         $this->assertArrayHasKey('instance', $body);
         $this->assertIsString($body['instance']);
-        $this->assertMatchesRegularExpression('/^urn:uuid:[0-9A-Za-z]{37}$/', $body['instance']);
+        // the application answers with base62sort, the web server, which can not encode base62, with the base16 form
+        $this->assertMatchesRegularExpression('/^urn:uuid:(?:[0-9A-Za-z]{37}|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14})$/', $body['instance']);
         // the id is not part of the response headers
         $this->assertFalse($response->hasHeader('X-Request-Id'));
 

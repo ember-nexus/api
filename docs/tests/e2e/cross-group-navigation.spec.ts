@@ -44,7 +44,7 @@ const BOUNDARIES: Record<string, CategoryBoundary> = {
     },
   },
   command: {
-    first: { url: "/command/backup-create", title: "backup:create command" },
+    first: { url: "/command/backup-convert", title: "backup:convert command" },
     last: { url: "/command/user-create", title: "user:create command" },
   },
 };
