@@ -15,6 +15,7 @@ use App\Service\ExpressionService;
 use App\Service\QueryExplanation\ExprLang\ExprLangQueryExplanationService;
 use App\Service\QueryExplanation\QueryExplanationPayloadService;
 use App\Tests\UnitTests\AssertLoggerTrait;
+use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -24,7 +25,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 use ReflectionProperty;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
@@ -53,7 +53,7 @@ class ExpressionServiceTest extends TestCase
 
         if (null === $authProvider) {
             $authProvider = $this->prophesize(AuthProvider::class);
-            $authProvider->getUserId()->willReturn(Uuid::fromString('3f34b034-bbe4-4461-a023-dc2920c1b1c3'));
+            $authProvider->getUserId()->willReturn(Uuid::fromString('02IiNr0G8viOVKjpyQows4JvpJwpUJ8FeiaJI'));
             $authProvider = $authProvider->reveal();
         }
 
@@ -157,7 +157,7 @@ class ExpressionServiceTest extends TestCase
             [
                 'expression_truncated' => '"some expression"',
                 'expression_length' => 17,
-                'user' => '3f34b034-bbe4-4461-a023-dc2920c1b1c3',
+                'user' => '02IiNr0G8viOVKjpyQows4JvpJwpUJ8FeiaJI',
             ]
         );
     }
@@ -195,7 +195,7 @@ class ExpressionServiceTest extends TestCase
             [
                 'expression_truncated' => '"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"',
                 'expression_length' => 251,
-                'user' => '3f34b034-bbe4-4461-a023-dc2920c1b1c3',
+                'user' => '02IiNr0G8viOVKjpyQows4JvpJwpUJ8FeiaJI',
             ]
         );
     }
@@ -228,7 +228,7 @@ class ExpressionServiceTest extends TestCase
             [
                 'expression_truncated' => '"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"',
                 'expression_length' => 101,
-                'user' => '3f34b034-bbe4-4461-a023-dc2920c1b1c3',
+                'user' => '02IiNr0G8viOVKjpyQows4JvpJwpUJ8FeiaJI',
             ]
         );
     }
@@ -318,7 +318,7 @@ class ExpressionServiceTest extends TestCase
         $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
         $urlGenerator->generate(Argument::cetera())->willReturn('https://mock.dev/123');
         $authProvider = $this->prophesize(AuthProvider::class);
-        $authProvider->getUserId()->willReturn(Uuid::fromString('3f34b034-bbe4-4461-a023-dc2920c1b1c3'));
+        $authProvider->getUserId()->willReturn(Uuid::fromString('02IiNr0G8viOVKjpyQows4JvpJwpUJ8FeiaJI'));
         $expressionService = new class($authProvider->reveal(), $emberNexusConfiguration, $this->prophesize(LoggerInterface::class)->reveal(), new ExprLangQueryExplanationService(new QueryExplanationPayloadService()), new Client400BadContentExceptionFactory($urlGenerator->reveal()), new Client403ForbiddenExceptionFactory($urlGenerator->reveal()), new Client422UnprocessableContentExceptionFactory($urlGenerator->reveal())) extends ExpressionService {
             protected function runProcess(Process $process): void
             {
@@ -383,7 +383,7 @@ class ExpressionServiceTest extends TestCase
             [
                 'expression_truncated' => '1',
                 'timeout_in_milliseconds' => 500,
-                'user' => '3f34b034-bbe4-4461-a023-dc2920c1b1c3',
+                'user' => '02IiNr0G8viOVKjpyQows4JvpJwpUJ8FeiaJI',
             ]
         );
     }

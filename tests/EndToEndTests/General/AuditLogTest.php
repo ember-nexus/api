@@ -15,7 +15,7 @@ class AuditLogTest extends BaseRequestTestCase
 {
     // taken from the "security.mixedGroupOwnership" / "99_02" scenario: a node this token has no access to at all
     private const string TOKEN_WITHOUT_ACCESS = 'secret-token:SaUQctGYKDHdRnm1jj7pG5';
-    private const string FORBIDDEN_DATA = '23f86352-4382-4fbd-bc6b-848fa3eadae0';
+    private const string FORBIDDEN_DATA = '02IiNr0GOoKiPMLOSYvbNseT9wAmaD6nCLdhG';
 
     private const string ACTIVE_TOKEN = 'secret-token:VWPtCCQskD6uQnf0CHdNjY';
 

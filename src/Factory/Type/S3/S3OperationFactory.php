@@ -23,8 +23,8 @@ use App\Type\S3\FileOperation;
 use App\Type\S3\MergeFileChunksOperation;
 use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
-use Ramsey\Uuid\UuidInterface;
 
 /**
  * Builds every S3 operation value object; callers depend on this single factory instead of one per operation type.
@@ -112,7 +112,7 @@ class S3OperationFactory
         );
     }
 
-    public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequestInterface $resumableUploadRequest, UuidInterface $uploadId, string $chunkId): UploadFileChunkOperationInterface
+    public function createUploadFileChunkOperationFromResumableUploadRequest(ResumableUploadRequestInterface $resumableUploadRequest, Uuid $uploadId, string $chunkId): UploadFileChunkOperationInterface
     {
         if (true === $resumableUploadRequest->isUploadComplete()) {
             throw $this->client400BadContentExceptionFactory->createFromDetail("'UploadFileChunkOperation' requires 'ResumableUploadRequest' to contain partial content, i.e. be a chunked upload request.");

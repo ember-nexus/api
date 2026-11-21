@@ -21,7 +21,7 @@ curl -v \
   -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
   -H 'Content-Disposition: inline; filename=image.jpg' \
   --data-binary @./image.jpg \
-  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+  https://api.example.com/02IiNr0GOoKiPMM4jZCMVnOvOsSB4aokKxQkw/file
 ```
 
 **Note**: A file upload using `POST` will fail, if the element already has a file.
@@ -41,7 +41,7 @@ curl -X PUT -v \
   -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
   -H 'Content-Disposition: inline; filename=image.jpg' \
   --data-binary @./image.jpg \
-  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+  https://api.example.com/02IiNr0GOoKiPMM4jZCMVnOvOsSB4aokKxQkw/file
 ```
 
 ## Downloading a file
@@ -50,7 +50,7 @@ curl -X PUT -v \
 curl -v \
   -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
   -o download.jpg \
-  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+  https://api.example.com/02IiNr0GOoKiPMM4jZCMVnOvOsSB4aokKxQkw/file
 ```
 
 ### Verifying file integrity
@@ -66,5 +66,5 @@ stored - see the [file reference](/reference/file#verifying-integrity) for the f
 ```bash
 curl -X DELETE -v \
   -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
-  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+  https://api.example.com/02IiNr0GOoKiPMM4jZCMVnOvOsSB4aokKxQkw/file
 ```

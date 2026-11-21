@@ -16,18 +16,18 @@ class BotanicalFileTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
 
-    private const string ROSE_ID = '0fdd52ba-55da-430c-b015-3277a231e895';
+    private const string ROSE_ID = '02IiNr0GOoKiPMLEezecUZIcqABdykANm0j0F';
     private const string ROSE_SHA256 = '7124bba0a86dcc10e1b5c78ef968b92e1fe681c16d0f2ec9f35b0e8448c1a4c0';
     private const int ROSE_CONTENT_LENGTH = 138937;
 
-    private const string TULIP_ID = '8940d70b-5b6f-43b7-bee4-41d073396ff8';
+    private const string TULIP_ID = '02IiNr0GOoKiPMMBnI2aIF8Qd4GH33FIAozo7';
     private const string TULIP_SHA256 = 'c4c242897c43a74e9e4a8b5bf89e6b2cb1cbd99f8d621f33eea175cbf6dfab97';
     private const int TULIP_CONTENT_LENGTH = 105488;
 
-    private const string ORCHID_ID = 'ba6fd9dd-dfec-488b-864c-b7dca1602fd9';
-    private const string DAISY_ID = 'dde20559-c290-4d42-a6f3-87d5d326b66f';
-    private const string AZALEA_ID = 'bfdac7bb-5a6d-497e-97ea-2dcac44bbdf8';
-    private const string CHERRY_BLOSSOM_ID = 'd1a8ef01-2947-4e19-a381-5af0d0d7abca';
+    private const string ORCHID_ID = '02IiNr0GOoKiPMMZiYrzEbIiqMyO9DleBgKlK';
+    private const string DAISY_ID = '02IiNr0GOoKiPMMr0GBuS3RIRADKoC6OymddC';
+    private const string AZALEA_ID = '02IiNr0GOoKiPMMcMgsv9gWVq1n2NgzFZLXB8';
+    private const string CHERRY_BLOSSOM_ID = '02IiNr0GOoKiPMMl2Sr18EdDLeJmc8OScZ6uP';
 
     public function testDownloadedRoseImageHasCorrectHashAndLength(): void
     {

@@ -8,7 +8,7 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\FileProperty;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 class FilePropertyService
 {
@@ -41,7 +41,7 @@ class FilePropertyService
      *
      * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
-    protected function parseExtensionPropertyFromRawFileProperties(array $rawFileProperties, ?UuidInterface $elementId): string
+    protected function parseExtensionPropertyFromRawFileProperties(array $rawFileProperties, ?Uuid $elementId): string
     {
         // a missing, null or non-string extension falls back to the default; an empty string is valid and means that the
         // file has no extension at all

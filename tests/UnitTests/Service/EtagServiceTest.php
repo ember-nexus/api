@@ -18,13 +18,13 @@ use App\Service\EtagService;
 use App\Type\AccessType;
 use App\Type\Etag;
 use App\Type\EtagType;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 
 #[Small]
@@ -52,7 +52,7 @@ class EtagServiceTest extends TestCase
     private function createAuthProviderWithUser(): AuthProvider
     {
         $authProvider = $this->prophesize(AuthProvider::class);
-        $authProvider->getUserId()->willReturn(Uuid::fromString('11111111-1111-4111-8111-111111111111'));
+        $authProvider->getUserId()->willReturn(Uuid::fromString('02IiNr0G8viOVKjTVopQ38JnV8PxJrftZpRV7'));
 
         return $authProvider->reveal();
     }
@@ -71,7 +71,7 @@ class EtagServiceTest extends TestCase
 
         $this->expectException(Client404NotFoundException::class);
         $etagService->setCurrentRequestEtagFromRequestAndEtagType(
-            new Request(attributes: ['id' => '224b322a-c2a1-4971-8b05-28af080d67f1']),
+            new Request(attributes: ['id' => '02IiNr0G8viOVKjbsoLbAzNdbleW5NVJZSwLP']),
             EtagType::ELEMENT
         );
     }
@@ -100,7 +100,7 @@ class EtagServiceTest extends TestCase
                 $this->createNotFoundFactory()
             );
             $etagService->setCurrentRequestEtagFromRequestAndEtagType(
-                new Request(attributes: ['id' => '224b322a-c2a1-4971-8b05-28af080d67f1'], server: ['REQUEST_METHOD' => $method]),
+                new Request(attributes: ['id' => '02IiNr0G8viOVKjbsoLbAzNdbleW5NVJZSwLP'], server: ['REQUEST_METHOD' => $method]),
                 $etagType
             );
         }
@@ -116,12 +116,12 @@ class EtagServiceTest extends TestCase
             /**
              * @var ElementEtagEvent $event
              */
-            $self->assertSame('224b322a-c2a1-4971-8b05-28af080d67f1', $event->getElementId()->toString());
+            $self->assertSame('02IiNr0G8viOVKjbsoLbAzNdbleW5NVJZSwLP', $event->getElementId()->toString());
             $self->assertInstanceOf(ElementEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
 
-        $request = new Request(attributes: ['id' => '224b322a-c2a1-4971-8b05-28af080d67f1']);
+        $request = new Request(attributes: ['id' => '02IiNr0G8viOVKjbsoLbAzNdbleW5NVJZSwLP']);
 
         $etagService = new EtagService(
             $eventDispatcher->reveal(),
@@ -143,12 +143,12 @@ class EtagServiceTest extends TestCase
             /**
              * @var ChildrenCollectionEtagEvent $event
              */
-            $self->assertSame('47d86985-68e0-4747-8921-33f3a9090549', $event->getParentId()->toString());
+            $self->assertSame('02IiNr0G8viOVKjuArSoLxWuKY6LksuKcCKEP', $event->getParentId()->toString());
             $self->assertInstanceOf(ChildrenCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
 
-        $request = new Request(attributes: ['id' => '47d86985-68e0-4747-8921-33f3a9090549']);
+        $request = new Request(attributes: ['id' => '02IiNr0G8viOVKjuArSoLxWuKY6LksuKcCKEP']);
 
         $etagService = new EtagService(
             $eventDispatcher->reveal(),
@@ -170,12 +170,12 @@ class EtagServiceTest extends TestCase
             /**
              * @var ParentsCollectionEtagEvent $event
              */
-            $self->assertSame('685b5a01-f2d2-4764-9c69-3fd87c45d5b0', $event->getChildId()->toString());
+            $self->assertSame('02IiNr0G8viOVKkA06oibQxRGVLfCEG5Ff1H2', $event->getChildId()->toString());
             $self->assertInstanceOf(ParentsCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
 
-        $request = new Request(attributes: ['id' => '685b5a01-f2d2-4764-9c69-3fd87c45d5b0']);
+        $request = new Request(attributes: ['id' => '02IiNr0G8viOVKkA06oibQxRGVLfCEG5Ff1H2']);
 
         $etagService = new EtagService(
             $eventDispatcher->reveal(),
@@ -197,12 +197,12 @@ class EtagServiceTest extends TestCase
             /**
              * @var RelatedCollectionEtagEvent $event
              */
-            $self->assertSame('adfd47a3-7d25-4bdb-b546-f5744382d488', $event->getCenterId()->toString());
+            $self->assertSame('02IiNr0G8viOVKkhuD9OTeR2AF6U5cDbkxoaB', $event->getCenterId()->toString());
             $self->assertInstanceOf(RelatedCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
 
-        $request = new Request(attributes: ['id' => 'adfd47a3-7d25-4bdb-b546-f5744382d488']);
+        $request = new Request(attributes: ['id' => '02IiNr0G8viOVKkhuD9OTeR2AF6U5cDbkxoaB']);
 
         $etagService = new EtagService(
             $eventDispatcher->reveal(),
@@ -224,12 +224,12 @@ class EtagServiceTest extends TestCase
             /**
              * @var FileEtagEvent $event
              */
-            $self->assertSame('e70224a0-9dd6-4e57-a1c1-e90985834620', $event->getElementId()->toString());
+            $self->assertSame('02IiNr0G8viOVKl9gw3VOEjF028rKn5PwGfdw', $event->getElementId()->toString());
             $self->assertInstanceOf(FileEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
 
-        $request = new Request(attributes: ['id' => 'e70224a0-9dd6-4e57-a1c1-e90985834620']);
+        $request = new Request(attributes: ['id' => '02IiNr0G8viOVKl9gw3VOEjF028rKn5PwGfdw']);
 
         $etagService = new EtagService(
             $eventDispatcher->reveal(),
@@ -251,14 +251,14 @@ class EtagServiceTest extends TestCase
             /**
              * @var IndexCollectionEtagEvent $event
              */
-            $self->assertSame('405599eb-f72b-4505-9ad6-fabe458e9607', $event->getUserId()->toString());
+            $self->assertSame('02IiNr0G8viOVKjqWP6FkrAQPIIA3k8D7AmRg', $event->getUserId()->toString());
             $self->assertInstanceOf(IndexCollectionEtagEvent::class, $event);
             $event->setEtag(new Etag('someEtag'));
         })->shouldBeCalledTimes(1);
         $authProvider = $this->prophesize(AuthProvider::class);
-        $authProvider->getUserId()->shouldBeCalledOnce()->willReturn(Uuid::fromString('405599eb-f72b-4505-9ad6-fabe458e9607'));
+        $authProvider->getUserId()->shouldBeCalledOnce()->willReturn(Uuid::fromString('02IiNr0G8viOVKjqWP6FkrAQPIIA3k8D7AmRg'));
 
-        $request = new Request(attributes: ['id' => '405599eb-f72b-4505-9ad6-fabe458e9607']);
+        $request = new Request(attributes: ['id' => '02IiNr0G8viOVKjqWP6FkrAQPIIA3k8D7AmRg']);
 
         $etagService = new EtagService(
             $eventDispatcher->reveal(),

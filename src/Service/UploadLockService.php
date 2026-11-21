@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Type\RedisKeyFactory;
+use App\Type\Uuid;
 use Predis\Client as RedisClient;
-use Ramsey\Uuid\UuidInterface;
 
 /**
  * Per-upload mutual exclusion, so that concurrent appends or deletions of the same upload cannot corrupt it
@@ -32,7 +32,7 @@ class UploadLockService
     /**
      * @return string|null lock token which has to be passed to {@see release()}, null if the upload is already locked
      */
-    public function acquire(UuidInterface $uploadId): ?string
+    public function acquire(Uuid $uploadId): ?string
     {
         $token = bin2hex(random_bytes(16));
         $result = $this->redisClient->set((string) $this->redisKeyFactory->getUploadLockRedisKey($uploadId), $token, 'PX', self::TTL_IN_MILLISECONDS, 'NX');
@@ -40,7 +40,7 @@ class UploadLockService
         return null === $result ? null : $token;
     }
 
-    public function release(UuidInterface $uploadId, string $token): void
+    public function release(Uuid $uploadId, string $token): void
     {
         // plain GET + DEL instead of a Lua script (EVAL) for simplicity: there is a small race window between the
         // GET and the DEL where the key could expire and be re-acquired by a different request in between, whose

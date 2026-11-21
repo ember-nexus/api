@@ -10,10 +10,10 @@ class _03_03_GroupPathNodeOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:9SmOltFEeOc50tSJCFKiv';
 
-    private const string GROUP = '84db789d-a8aa-4042-86f4-6e6aa0f59558';
-    private const string DATA_1 = '4a2095a3-9908-456f-82ad-2c0b8f7ef240';
-    private const string DATA_2 = 'f11927d2-e50a-4134-9920-be1d3fcfc3c7';
-    private const string DATA_3 = 'd6f7bf30-cfb1-4875-a2b1-df1d982752a7';
+    private const string GROUP = '02IiNr0GOoKiPMM9dORaIjoD4U6Tc8JoNxKhm';
+    private const string DATA_1 = '02IiNr0GOoKiPMLh3RfpU9slVZxwpr8NEbFpq';
+    private const string DATA_2 = '02IiNr0GOoKiPMN0Lc611Apx6cXlZYaxCgdL8';
+    private const string DATA_3 = '02IiNr0GOoKiPMMncqexESFwAPR3S2Tfwg89V';
 
     public function testGetIndex(): void
     {

@@ -19,9 +19,10 @@
             "name": "uuid",
             "in": "path",
             "required": true,
+            "description": "Element id: a UUIDsv2a7 (draft-davis-uuidrev-uuid-long-00) with 16 random bytes, encoded as base62sort (37 characters); the base16-and-dash representation is accepted as well.",
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "pattern": "^(?:[0-9A-Za-z]{37}|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14})$"
             },
             "description": "Id of the element whose data is to be updated."
           }
@@ -45,7 +46,7 @@
           {
             "har": {
               "method": "PATCH",
-              "url": "https://api.example.com/7b80b203-2b82-40f5-accd-c7089fe6114e",
+              "url": "https://api.example.com/02IiNr0GOoKiPMM569f95VLLfjRVJ1JriLYcy",
               "httpVersion": "HTTP/1.1",
               "cookies": [],
               "headers": [

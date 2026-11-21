@@ -30,6 +30,7 @@ use App\Service\UploadCreationService;
 use App\Service\UploadService;
 use App\Type\Response\CreatedResponse;
 use App\Type\Response\NoContentResponse;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -37,8 +38,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -55,7 +54,7 @@ class UploadCreationServiceTest extends TestCase
     private const int MIN_CHUNK_SIZE = 10;
     private const int MAX_CHUNK_SIZE = 100;
 
-    private UuidInterface $elementId;
+    private Uuid $elementId;
     /** @var ObjectProphecy<NodeElementInterface> */
     private ObjectProphecy $element;
     /** @var ObjectProphecy<ResumableUploadRequestInterface> */
@@ -78,7 +77,7 @@ class UploadCreationServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->elementId = Uuid::uuid4();
+        $this->elementId = Uuid::generate();
         $this->element = $this->prophesize(NodeElementInterface::class);
         $this->resumableUploadRequest = $this->prophesize(ResumableUploadRequestInterface::class);
         $this->resumableUploadRequest->getElementId()->willReturn($this->elementId);
@@ -119,7 +118,7 @@ class UploadCreationServiceTest extends TestCase
         $badContentFactory = $badContentFactory->reveal();
 
         $authProvider = $this->prophesize(AuthProvider::class);
-        $authProvider->getUserId()->willReturn(Uuid::uuid4());
+        $authProvider->getUserId()->willReturn(Uuid::generate());
 
         $requestFactory = $this->prophesize(ResumableUploadRequestFactory::class);
         $requestFactory

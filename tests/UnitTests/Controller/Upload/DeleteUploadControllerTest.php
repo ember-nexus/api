@@ -15,13 +15,13 @@ use App\Security\AuthProvider;
 use App\Service\ElementManager;
 use App\Service\UploadLockService;
 use App\Service\UploadService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(DeleteUploadController::class)]
@@ -29,15 +29,15 @@ class DeleteUploadControllerTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string UPLOAD_ID = '224a787e-3b32-4822-8697-61047175505d';
+    private const string UPLOAD_ID = '02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub';
 
     private function buildController(?string $lockToken, $uploadService, $lockService): DeleteUploadController
     {
-        $userId = Uuid::uuid4();
+        $userId = Uuid::generate();
         $upload = $this->prophesize(UploadInterface::class);
         $upload->getId()->willReturn(Uuid::fromString(self::UPLOAD_ID));
         $upload->getUploadOwner()->willReturn($userId);
-        $upload->getUploadTarget()->willReturn(Uuid::uuid4());
+        $upload->getUploadTarget()->willReturn(Uuid::generate());
         $uploadFactory = $this->prophesize(UploadFactory::class);
         $uploadFactory->createUploadFromElement(Argument::any())->willReturn($upload->reveal());
         $elementManager = $this->prophesize(ElementManager::class);

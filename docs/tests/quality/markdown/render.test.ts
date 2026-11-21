@@ -82,8 +82,8 @@ describe('generated markdown round-trips through remark with no leaked html', ()
 describe('markdown snapshots', () => {
     const fixtures = [
         'index',
-        '03-reference/03-search/01-elasticsearch-query-dsl-mixin',
-        '03-reference/03-search/01-elasticsearch-query-dsl-mixin/01-full-text-search',
+        '03-reference/04-search/01-elasticsearch-query-dsl-mixin',
+        '03-reference/04-search/01-elasticsearch-query-dsl-mixin/01-full-text-search',
     ];
 
     it.each(fixtures)('%s', async (id) => {

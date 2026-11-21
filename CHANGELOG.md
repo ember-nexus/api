@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
+- **BREAKING CHANGE**: Support for UUIDv4 got dropped; instead the new format UUID sv2a7 got introduced. It is similar
+  to UUIDv7, but got more random bits, and is provided in base62sort encoding. It is used to improve general API
+  performance. Closes #532.
+- `backup:convert` migrates backups with legacy UUIDv4 ids, so old datasets stay usable without a live migration.
+- `backup:load` converts legacy UUIDv4 ids on the fly and can write the old-to-new mapping with
+  `--legacy-mapping-output`, so clients can translate stored references.
 - The Elasticsearch search step supports a long query definition: an object with the property `query` (the
   Elasticsearch query, same as the short form which is still supported) and the optional properties `highlight`
   (Elasticsearch's highlight options) and `sort` (Elasticsearch's sort definition, closes #456), closes #412. Highlights
@@ -34,11 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Password hashes (`_passwordHash` of users) and token hashes (`hash` and `_tokenHash` of tokens) are no longer indexed
-  into Elasticsearch, where they were searchable by every user with search access to the element. They are still stored
-  in the graph database, which authentication relies on. Documents which were indexed by earlier versions keep these
-  properties until they are removed from the index, e.g. with an `_update_by_query` request using
-  `ctx._source.remove('_passwordHash')` on `node_user` and `ctx._source.remove('hash')` and
-  `ctx._source.remove('_tokenHash')` on `node_token`.
+  into Elasticsearch.
 
 ## 0.1.36 - 2026-11-19
 ### Changed

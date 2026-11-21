@@ -15,6 +15,7 @@ use App\Service\ElementFragmentizeService;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -22,8 +23,6 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\NullLogger;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
@@ -34,7 +33,7 @@ class ElementManagerGetElementOrFailTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string ID = '224a787e-3b32-4822-8697-61047175505d';
+    private const string ID = '02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub';
 
     private Client404NotFoundException $notFoundException;
 
@@ -65,12 +64,12 @@ class ElementManagerGetElementOrFailTest extends TestCase
             public ?NodeElementInterface $node = null;
             public ?RelationElementInterface $relation = null;
 
-            public function getNode(UuidInterface $id): ?NodeElementInterface
+            public function getNode(Uuid $id): ?NodeElementInterface
             {
                 return $this->node;
             }
 
-            public function getRelation(UuidInterface $id): ?RelationElementInterface
+            public function getRelation(Uuid $id): ?RelationElementInterface
             {
                 return $this->relation;
             }

@@ -2,7 +2,7 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:93b28d9d-43c9-493a-b7ff-3adab665b908",
+  "instance": "urn:uuid:02IiNr0G8viOVKkV7bTGkK5PjqcwQ52DTIdj5",
   "detail": "Search step 1 (type elasticsearch-query-dsl-mixin) was rejected by elasticsearch, see failedStep.diagnostics for the reason.",
   "debug": [],
   "failedStep": {
@@ -58,7 +58,7 @@
                     {
                       "term": {
                         "_usersWithSearchAccess.keyword": {
-                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                          "value": "02IiNr0GOoKiPMM5A0eq9jHk2upaJezsVtWjL"
                         }
                       }
                     }

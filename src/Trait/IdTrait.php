@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Trait;
 
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 trait IdTrait
 {
-    private ?UuidInterface $id = null;
+    private ?Uuid $id = null;
 
-    public function getId(): ?UuidInterface
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
 
-    public function setId(?UuidInterface $id): static
+    public function setId(?Uuid $id): static
     {
         $this->id = $id;
 

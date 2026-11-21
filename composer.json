@@ -19,7 +19,6 @@
     "mongodb/mongodb": "^2.1",
     "php-amqplib/php-amqplib": "^3.7",
     "predis/predis": "^3.7",
-    "ramsey/uuid": "^4.10",
     "symfony/asset": "8.1.*",
     "symfony/console": "8.1.*",
     "symfony/dotenv": "8.1.*",

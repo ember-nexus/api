@@ -14,13 +14,13 @@ use App\Type\AppStateType;
 use App\Type\NodeElement;
 use App\Type\RabbitMQQueueType;
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(OwnershipChangeEventListener::class)]
@@ -42,10 +42,10 @@ class OwnershipChangeEventListenerTest extends TestCase
     private function buildRelation(string $type): RelationElement
     {
         return (new RelationElement())
-            ->setId(Uuid::fromString('11111111-1111-1111-1111-111111111111'))
+            ->setId(Uuid::fromString('02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf'))
             ->setType($type)
-            ->setStart(Uuid::fromString('22222222-2222-2222-2222-222222222222'))
-            ->setEnd(Uuid::fromString('33333333-3333-3333-3333-333333333333'));
+            ->setStart(Uuid::fromString('02IiNr0G8viOVKjboyDliyOxJlXj6Bii5l1U2'))
+            ->setEnd(Uuid::fromString('02IiNr0G8viOVKjk87c7OoU78ONujU6JKLydP'));
     }
 
     /**
@@ -84,10 +84,10 @@ class OwnershipChangeEventListenerTest extends TestCase
         $queueService->publishEvent(
             RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE,
             [
-                'relationId' => '11111111-1111-1111-1111-111111111111',
+                'relationId' => '02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf',
                 'relationType' => $type,
-                'startId' => '22222222-2222-2222-2222-222222222222',
-                'endId' => '33333333-3333-3333-3333-333333333333',
+                'startId' => '02IiNr0G8viOVKjboyDliyOxJlXj6Bii5l1U2',
+                'endId' => '02IiNr0G8viOVKjk87c7OoU78ONujU6JKLydP',
                 'eventKind' => 'create',
                 'tries' => 0,
             ]
@@ -133,10 +133,10 @@ class OwnershipChangeEventListenerTest extends TestCase
         $queueService->publishEvent(
             RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE,
             [
-                'relationId' => '11111111-1111-1111-1111-111111111111',
+                'relationId' => '02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf',
                 'relationType' => 'OWNS',
-                'startId' => '22222222-2222-2222-2222-222222222222',
-                'endId' => '33333333-3333-3333-3333-333333333333',
+                'startId' => '02IiNr0G8viOVKjboyDliyOxJlXj6Bii5l1U2',
+                'endId' => '02IiNr0G8viOVKjk87c7OoU78ONujU6JKLydP',
                 'eventKind' => 'delete',
                 'tries' => 0,
             ]
@@ -148,7 +148,7 @@ class OwnershipChangeEventListenerTest extends TestCase
 
     public function testNodeElementIsIgnored(): void
     {
-        $node = (new NodeElement())->setId(Uuid::fromString('44444444-4444-4444-4444-444444444444'))->setLabel('Data');
+        $node = (new NodeElement())->setId(Uuid::fromString('02IiNr0G8viOVKjsRH0T4eZGx1E6MmTuYwvmm'))->setLabel('Data');
 
         $queueService = $this->prophesize(QueueService::class);
         $queueService->publishEvent(Argument::cetera())->shouldNotBeCalled();
@@ -159,7 +159,7 @@ class OwnershipChangeEventListenerTest extends TestCase
 
     public function testRelationWithoutTypeIsIgnored(): void
     {
-        $relation = (new RelationElement())->setId(Uuid::fromString('11111111-1111-1111-1111-111111111111'));
+        $relation = (new RelationElement())->setId(Uuid::fromString('02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf'));
 
         $queueService = $this->prophesize(QueueService::class);
         $queueService->publishEvent(Argument::cetera())->shouldNotBeCalled();

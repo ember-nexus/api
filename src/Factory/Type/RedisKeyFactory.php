@@ -6,7 +6,7 @@ namespace App\Factory\Type;
 
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 class RedisKeyFactory
 {
@@ -30,7 +30,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getEtagElementRedisKey(UuidInterface $elementId): RedisKey
+    public function getEtagElementRedisKey(Uuid $elementId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_ELEMENT,
@@ -38,7 +38,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getEtagChildrenCollectionRedisKey(UuidInterface $parentId): RedisKey
+    public function getEtagChildrenCollectionRedisKey(Uuid $parentId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_CHILDREN_COLLECTION,
@@ -46,7 +46,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getEtagParentsCollectionRedisKey(UuidInterface $childId): RedisKey
+    public function getEtagParentsCollectionRedisKey(Uuid $childId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_PARENTS_COLLECTION,
@@ -54,7 +54,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getEtagRelatedCollectionRedisKey(UuidInterface $centerId): RedisKey
+    public function getEtagRelatedCollectionRedisKey(Uuid $centerId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_RELATED_COLLECTION,
@@ -62,7 +62,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getEtagIndexCollectionRedisKey(UuidInterface $userId): RedisKey
+    public function getEtagIndexCollectionRedisKey(Uuid $userId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_INDEX_COLLECTION,
@@ -70,7 +70,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getEtagFileRedisKey(UuidInterface $elementId): RedisKey
+    public function getEtagFileRedisKey(Uuid $elementId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::ETAG_FILE,
@@ -78,7 +78,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getUploadLockRedisKey(UuidInterface $uploadId): RedisKey
+    public function getUploadLockRedisKey(Uuid $uploadId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::LOCK_UPLOAD,
@@ -86,7 +86,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getFileCreationLockRedisKey(UuidInterface $elementId): RedisKey
+    public function getFileCreationLockRedisKey(Uuid $elementId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::LOCK_FILE_CREATION,
@@ -94,7 +94,7 @@ class RedisKeyFactory
         );
     }
 
-    public function getElementRequestLockRedisKey(UuidInterface $elementId): RedisKey
+    public function getElementRequestLockRedisKey(Uuid $elementId): RedisKey
     {
         return new RedisKey(
             RedisPrefixType::LOCK_ELEMENT_REQUEST,

@@ -10,8 +10,8 @@ class GetParentsTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string CHILD_UUID = '45482998-274a-43d0-a466-f31d0b24cc0a';
-    private const string ELEMENT_WHICH_DOES_NOT_EXIST = 'b4117ae0-1241-479f-b363-45f290ec7fc7';
+    private const string CHILD_UUID = '02IiNr0GOoKiPMLegJjeNqVMrLPHabnYmR6eX';
+    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '02IiNr0G8viOVKkkt30R04iI2cjxQKZ9bnCYA';
 
     public function testGetParentsSuccess(): void
     {

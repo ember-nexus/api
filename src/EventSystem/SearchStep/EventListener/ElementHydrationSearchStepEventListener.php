@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\EventSystem\SearchStep\EventListener;
 
 use App\EventSystem\SearchStep\Event\SearchStepEvent;
+use App\Exception\InvalidUuidException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Security\AccessChecker;
@@ -13,9 +14,7 @@ use App\Service\ElementManager;
 use App\Service\ElementToRawService;
 use App\Service\ExpressionService;
 use App\Type\SearchStepType;
-use Ramsey\Uuid\Exception\InvalidUuidStringException;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class ElementHydrationSearchStepEventListener
@@ -51,9 +50,9 @@ class ElementHydrationSearchStepEventListener
         return $stepResults[count($stepResults) - 1];
     }
 
-    private function parseUuid(mixed $rawId, string $propertyPath): UuidInterface
+    private function parseUuid(mixed $rawId, string $propertyPath): Uuid
     {
-        if ($rawId instanceof UuidInterface) {
+        if ($rawId instanceof Uuid) {
             return $rawId;
         }
         if (!is_string($rawId)) {
@@ -61,13 +60,13 @@ class ElementHydrationSearchStepEventListener
         }
         try {
             return Uuid::fromString($rawId);
-        } catch (InvalidUuidStringException $exception) {
+        } catch (InvalidUuidException $exception) {
             throw $this->client400BadContentExceptionFactory->createFromTemplate($propertyPath, 'uuid (string)', $rawId, previous: $exception);
         }
     }
 
     /**
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
     private function getElementIdsFromElementsResult(mixed $stepResult): ?array
     {
@@ -92,7 +91,7 @@ class ElementHydrationSearchStepEventListener
     /**
      * @psalm-suppress MixedAssignment
      *
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
     private function getElementIdsFromPathsResult(mixed $stepResult): ?array
     {
@@ -127,7 +126,7 @@ class ElementHydrationSearchStepEventListener
     /**
      * @psalm-suppress MixedAssignment
      *
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
     private function getElementIdsFromQuery(SearchStepEvent $event): ?array
     {
@@ -166,7 +165,7 @@ class ElementHydrationSearchStepEventListener
     /**
      * @psalm-suppress MixedAssignment
      *
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
     private function parseElementIdsFromEvent(SearchStepEvent $event): array
     {
@@ -190,7 +189,7 @@ class ElementHydrationSearchStepEventListener
     }
 
     /**
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
     private function parseElementIds(SearchStepEvent $event): array
     {
@@ -201,7 +200,7 @@ class ElementHydrationSearchStepEventListener
                 sprintf('%s:redundantElementIds', self::TYPE->value),
                 [
                     'message' => sprintf('Removed %d redundant elementIds.', count($elementIds) - count($uniqueElementIds)),
-                    'removedElementIds' => array_map(fn (UuidInterface $elementId) => $elementId->toString(), array_values(array_unique(array_diff_assoc($elementIds, $uniqueElementIds)))),
+                    'removedElementIds' => array_map(fn (Uuid $elementId) => $elementId->toString(), array_values(array_unique(array_diff_assoc($elementIds, $uniqueElementIds)))),
                 ]
             );
             $elementIds = array_values($uniqueElementIds);
@@ -242,7 +241,7 @@ class ElementHydrationSearchStepEventListener
     }
 
     /**
-     * @param UuidInterface[]                                 $elementIds
+     * @param Uuid[]                                          $elementIds
      * @param array<string, array<int, array<string, mixed>>> $elementMetadata metadata of previous steps, indexed by element id
      *
      * @return array<mixed[]>
@@ -264,9 +263,9 @@ class ElementHydrationSearchStepEventListener
     }
 
     /**
-     * @param UuidInterface[] $elementIds
+     * @param Uuid[] $elementIds
      *
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
     private function filterElementIdsToAccessibleOnly(array $elementIds, SearchStepEvent $event): array
     {

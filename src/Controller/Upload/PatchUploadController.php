@@ -32,7 +32,7 @@ class PatchUploadController extends AbstractController
         '/upload/{id}',
         name: 'patch-upload',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['PATCH']
     )]

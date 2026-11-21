@@ -7,11 +7,10 @@ namespace App\Security;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\AccessType;
 use App\Type\ElementType;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
@@ -29,9 +28,9 @@ class AccessChecker
     }
 
     /**
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
-    public function getUsersGroups(UuidInterface $userId): array
+    public function getUsersGroups(Uuid $userId): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (user:User {id: $userId})-[:IS_IN_GROUP*1..]->(group:Group) RETURN group.id',
@@ -45,13 +44,13 @@ class AccessChecker
             if (!is_string($rawGroupId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group.id as string, not %s.', get_debug_type($rawGroupId))); // @codeCoverageIgnore
             }
-            $groupIds[] = UuidV4::fromString($rawGroupId);
+            $groupIds[] = Uuid::fromString($rawGroupId);
         }
 
         return $groupIds;
     }
 
-    public function hasAccessToElement(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
+    public function hasAccessToElement(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
         $hasAccess = $this->checkAccessToElement($userId, $elementId, $accessType);
         if (!$hasAccess) {
@@ -61,7 +60,7 @@ class AccessChecker
         return $hasAccess;
     }
 
-    private function checkAccessToElement(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
+    private function checkAccessToElement(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
         if (ElementType::NODE === $this->getElementType($elementId)) {
             if (AccessType::READ === $accessType) {
@@ -85,7 +84,7 @@ class AccessChecker
      * the start node, but only READ access to the end node. This mirrors creating a relation, which requires CREATE
      * access to the start node and READ access to the end node.
      */
-    public function hasWriteAccessToRelation(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
+    public function hasWriteAccessToRelation(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (start)-[element {id: $elementId}]->(end) RETURN start.id, end.id',
@@ -102,14 +101,14 @@ class AccessChecker
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return properties start.id and end.id as string, not %s and %s.', get_debug_type($rawStartId), get_debug_type($rawEndId))); // @codeCoverageIgnore
         }
 
-        return $this->hasGeneralAccessToNode($userId, UuidV4::fromString($rawStartId), $accessType)
-            && $this->hasReadAccessToNode($userId, UuidV4::fromString($rawEndId));
+        return $this->hasGeneralAccessToNode($userId, Uuid::fromString($rawStartId), $accessType)
+            && $this->hasReadAccessToNode($userId, Uuid::fromString($rawEndId));
     }
 
     /**
      * Logged on the dedicated, always-flushed `audit` channel instead of regular request logging (see monolog.yaml).
      */
-    private function logAccessDenied(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): void
+    private function logAccessDenied(Uuid $userId, Uuid $elementId, AccessType $accessType): void
     {
         $this->logger->notice(
             'Access to element was denied.',
@@ -136,7 +135,7 @@ class AccessChecker
         return 0;
     }
 
-    public function hasReadAccessToNode(UuidInterface $userId, UuidInterface $elementId): bool
+    public function hasReadAccessToNode(Uuid $userId, Uuid $elementId): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
@@ -199,7 +198,7 @@ class AccessChecker
         return true;
     }
 
-    public function hasGeneralAccessToNode(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
+    public function hasGeneralAccessToNode(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
         $minimumRelationsHops = $this->getMinimumAccessRelationsHops($accessType);
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
@@ -261,7 +260,7 @@ class AccessChecker
         return true;
     }
 
-    public function hasReadAccessToRelation(UuidInterface $userId, UuidInterface $elementId): bool
+    public function hasReadAccessToRelation(Uuid $userId, Uuid $elementId): bool
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (user:User {id: \$userId})\n".
@@ -373,7 +372,7 @@ class AccessChecker
         return true;
     }
 
-    public function hasGeneralAccessToRelation(UuidInterface $userId, UuidInterface $elementId, AccessType $accessType): bool
+    public function hasGeneralAccessToRelation(Uuid $userId, Uuid $elementId, AccessType $accessType): bool
     {
         $minimumRelationsHops = $this->getMinimumAccessRelationsHops($accessType);
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
@@ -490,7 +489,7 @@ class AccessChecker
      * Matching a relation only by its id scans all relations, while the start and end node of an element which was
      * just read or written are known: anchoring the match on them only expands the relations of those two nodes.
      */
-    private function getRelationMatchClause(?UuidInterface $startId, ?UuidInterface $endId): string
+    private function getRelationMatchClause(?Uuid $startId, ?Uuid $endId): string
     {
         return sprintf(
             'MATCH (start%s)-[element {id: $elementId}]->(end%s)',
@@ -502,7 +501,7 @@ class AccessChecker
     /**
      * @return array<string, string>
      */
-    private function getRelationMatchParameters(UuidInterface $elementId, ?UuidInterface $startId, ?UuidInterface $endId): array
+    private function getRelationMatchParameters(Uuid $elementId, ?Uuid $startId, ?Uuid $endId): array
     {
         $parameters = ['elementId' => $elementId->toString()];
         if (null !== $startId) {
@@ -515,7 +514,7 @@ class AccessChecker
         return $parameters;
     }
 
-    public function getElementType(UuidInterface $elementId): ?ElementType
+    public function getElementType(Uuid $elementId): ?ElementType
     {
         $cypherClient = $this->cypherEntityManager->getClient();
         $res = $cypherClient->runStatement(Statement::create(
@@ -540,9 +539,9 @@ class AccessChecker
     }
 
     /**
-     * @return array<UuidInterface>
+     * @return array<Uuid>
      */
-    public function getDirectGroupsWithAccessToElement(UuidInterface $elementId, AccessType $accessType): array
+    public function getDirectGroupsWithAccessToElement(Uuid $elementId, AccessType $accessType): array
     {
         $type = $this->getElementType($elementId);
         if (!$type) {
@@ -559,11 +558,11 @@ class AccessChecker
      * @note will only return direct groups. I.e. if group a has access to the element through group b, then only group
      *       b will be returned.
      *
-     * @return array<UuidInterface>
+     * @return array<Uuid>
      *
      * @todo check if element is a group itself?
      */
-    public function getDirectGroupsWithAccessToNode(UuidInterface $elementId, AccessType $accessType): array
+    public function getDirectGroupsWithAccessToNode(Uuid $elementId, AccessType $accessType): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (group:Group)-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
@@ -606,7 +605,7 @@ class AccessChecker
             if (!is_string($rawGroupId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group.id as string, not %s.', get_debug_type($rawGroupId))); // @codeCoverageIgnore
             }
-            $groups[] = UuidV4::fromString($rawGroupId);
+            $groups[] = Uuid::fromString($rawGroupId);
         }
 
         return $groups;
@@ -616,9 +615,9 @@ class AccessChecker
      * @note will only return direct groups. I.e. if group a has access to the element through group b, then only group
      *       b will be returned.
      *
-     * @return array<UuidInterface>
+     * @return array<Uuid>
      */
-    public function getDirectGroupsWithAccessToRelation(UuidInterface $elementId, AccessType $accessType, ?UuidInterface $startId = null, ?UuidInterface $endId = null): array
+    public function getDirectGroupsWithAccessToRelation(Uuid $elementId, AccessType $accessType, ?Uuid $startId = null, ?Uuid $endId = null): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             $this->getRelationMatchClause($startId, $endId)."\n".
@@ -716,16 +715,16 @@ class AccessChecker
             if (!is_string($rawGroup)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property group as string, not %s.', get_debug_type($rawGroup))); // @codeCoverageIgnore
             }
-            $groups[] = UuidV4::fromString($rawGroup);
+            $groups[] = Uuid::fromString($rawGroup);
         }
 
         return $groups;
     }
 
     /**
-     * @return array<UuidInterface>
+     * @return array<Uuid>
      */
-    public function getDirectUsersWithAccessToElement(UuidInterface $elementId, AccessType $accessType): array
+    public function getDirectUsersWithAccessToElement(Uuid $elementId, AccessType $accessType): array
     {
         $type = $this->getElementType($elementId);
         if (!$type) {
@@ -742,9 +741,9 @@ class AccessChecker
      * @note will only return direct users. I.e. only users which are connected via OWNS-chain. Also, if the user is
      *       connected via groups & owns *and also* satisfies an onCreatedByUser test.
      *
-     * @return array<UuidInterface>
+     * @return array<Uuid>
      */
-    public function getDirectUsersWithAccessToNode(UuidInterface $elementId, AccessType $accessType): array
+    public function getDirectUsersWithAccessToNode(Uuid $elementId, AccessType $accessType): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             'MATCH (user:User)-[groups:IS_IN_GROUP*0..]->()-[relations:OWNS|HAS_'.$accessType->value."_ACCESS*0..]->(element {id: \$elementId})\n".
@@ -810,7 +809,7 @@ class AccessChecker
             if (!is_string($rawUserId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user.id as string, not %s.', get_debug_type($rawUserId))); // @codeCoverageIgnore
             }
-            $users[] = UuidV4::fromString($rawUserId);
+            $users[] = Uuid::fromString($rawUserId);
         }
 
         return $users;
@@ -820,9 +819,9 @@ class AccessChecker
      * @note will only return direct users. I.e. only users which are connected via OWNS-chain. Also, if the user is
      *       connected via groups & owns *and also* satisfies an onCreatedByUser test.
      *
-     * @return array<UuidInterface>
+     * @return array<Uuid>
      */
-    public function getDirectUsersWithAccessToRelation(UuidInterface $elementId, AccessType $accessType, ?UuidInterface $startId = null, ?UuidInterface $endId = null): array
+    public function getDirectUsersWithAccessToRelation(Uuid $elementId, AccessType $accessType, ?Uuid $startId = null, ?Uuid $endId = null): array
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             $this->getRelationMatchClause($startId, $endId)."\n".
@@ -956,7 +955,7 @@ class AccessChecker
             if (!is_string($rawUser)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property user as string, not %s.', get_debug_type($rawUser))); // @codeCoverageIgnore
             }
-            $users[] = UuidV4::fromString($rawUser);
+            $users[] = Uuid::fromString($rawUser);
         }
 
         return $users;
@@ -965,11 +964,11 @@ class AccessChecker
     /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      *
-     * @param UuidInterface[] $elementIds
+     * @param Uuid[] $elementIds
      *
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
-    public function checkUserAccessToMultipleElements(UuidInterface $userId, array $elementIds): array
+    public function checkUserAccessToMultipleElements(Uuid $userId, array $elementIds): array
     {
         /**
          * First find elements, their type as well as start and end nodes for relationships.
@@ -991,7 +990,7 @@ RETURN
   end.id as endId;
 EOD,
             [
-                'ids' => array_map(fn (UuidInterface $elementId) => $elementId->toString(), $elementIds),
+                'ids' => array_map(fn (Uuid $elementId) => $elementId->toString(), $elementIds),
             ]
         ));
 
@@ -1001,12 +1000,12 @@ EOD,
             if (!is_string($rawId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
             }
-            $id = UuidV4::fromString($rawId);
+            $id = Uuid::fromString($rawId);
 
             $rawStartId = $row->get('startId');
             $startId = null;
             if (is_string($rawStartId)) {
-                $startId = UuidV4::fromString($rawStartId);
+                $startId = Uuid::fromString($rawStartId);
             } elseif (!is_null($rawStartId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property startId as string or null, not %s.', get_debug_type($rawStartId))); // @codeCoverageIgnore
             }
@@ -1014,7 +1013,7 @@ EOD,
             $rawEndId = $row->get('endId');
             $endId = null;
             if (is_string($rawEndId)) {
-                $endId = UuidV4::fromString($rawEndId);
+                $endId = Uuid::fromString($rawEndId);
             } elseif (!is_null($rawEndId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property endId as string or null, not %s.', get_debug_type($rawEndId))); // @codeCoverageIgnore
             }
@@ -1038,7 +1037,7 @@ EOD,
                 $nodeIds[] = $row['endId'];
             }
         }
-        /** @var UuidInterface[] $nodeIds */
+        /** @var Uuid[] $nodeIds */
 
         /**
          * Execute access query against all nodes.
@@ -1089,7 +1088,7 @@ RETURN element.id AS elementId;
 EOD,
             [
                 'userId' => $userId->toString(),
-                'ids' => array_map(fn (UuidInterface $nodeId) => $nodeId->toString(), $nodeIds),
+                'ids' => array_map(fn (Uuid $nodeId) => $nodeId->toString(), $nodeIds),
             ]
         ));
 
@@ -1099,7 +1098,7 @@ EOD,
             if (!is_string($rawElementId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementId as string, not %s.', get_debug_type($rawElementId))); // @codeCoverageIgnore
             }
-            $nodeIdsWithAccess[] = UuidV4::fromString($rawElementId);
+            $nodeIdsWithAccess[] = Uuid::fromString($rawElementId);
         }
 
         /**

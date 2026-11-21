@@ -11,6 +11,7 @@ use App\Service\ElementManager;
 use App\Service\QueueService;
 use App\Type\NodeElement;
 use App\Type\RabbitMQQueueType;
+use App\Type\Uuid;
 use InvalidArgumentException;
 use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -18,7 +19,6 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -103,7 +103,7 @@ class ReindexFilesCommandTest extends TestCase
 
     public function testCommandResyncsElementForEachQueuedMessage(): void
     {
-        $elementId = Uuid::fromString('4f4c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d4');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKjxnRNk163IJyKc3ShnMAwuH');
         $element = (new NodeElement())->setId($elementId)->setLabel('Data');
 
         $elementManager = $this->prophesize(ElementManager::class);
@@ -134,7 +134,7 @@ class ReindexFilesCommandTest extends TestCase
 
     public function testCommandSkipsMessageIfElementWasAlreadyDeleted(): void
     {
-        $elementId = Uuid::fromString('5a5c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d5');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKk3BR1XOGxsa14KbgI1FK6yb');
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(Argument::any())->willReturn(null);

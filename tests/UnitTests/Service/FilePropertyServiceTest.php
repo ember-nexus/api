@@ -9,12 +9,12 @@ use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\FileNameService;
 use App\Service\FilePropertyService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 
 #[Small]
 #[CoversClass(FilePropertyService::class)]
@@ -45,7 +45,7 @@ class FilePropertyServiceTest extends TestCase
         $element = $this->prophesize(NodeElementInterface::class);
         $element->hasProperty('file')->willReturn(true);
         $element->getProperty('file')->willReturn(['extension' => 'png']);
-        $element->getId()->willReturn(UuidV4::uuid4());
+        $element->getId()->willReturn(Uuid::generate());
 
         $result = $this->buildService()->parseFilePropertyFromElement($element->reveal());
 
@@ -58,7 +58,7 @@ class FilePropertyServiceTest extends TestCase
         $element = $this->prophesize(NodeElementInterface::class);
         $element->hasProperty('file')->willReturn(true);
         $element->getProperty('file')->willReturn([]);
-        $element->getId()->willReturn(UuidV4::uuid4());
+        $element->getId()->willReturn(Uuid::generate());
 
         $result = $this->buildService()->parseFilePropertyFromElement($element->reveal());
 
@@ -71,7 +71,7 @@ class FilePropertyServiceTest extends TestCase
         $element = $this->prophesize(NodeElementInterface::class);
         $element->hasProperty('file')->willReturn(true);
         $element->getProperty('file')->willReturn(['extension' => '']);
-        $element->getId()->willReturn(UuidV4::uuid4());
+        $element->getId()->willReturn(Uuid::generate());
 
         $result = $this->buildService()->parseFilePropertyFromElement($element->reveal());
 
@@ -81,7 +81,7 @@ class FilePropertyServiceTest extends TestCase
 
     public function testThrowsWhenFilePropertyIsNotAnArray(): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $element = $this->prophesize(NodeElementInterface::class);
         $element->hasProperty('file')->willReturn(true);
         $element->getProperty('file')->willReturn('not-an-array');
@@ -104,7 +104,7 @@ class FilePropertyServiceTest extends TestCase
             $element = $this->prophesize(NodeElementInterface::class);
             $element->hasProperty('file')->willReturn(true);
             $element->getProperty('file')->willReturn(['extension' => $value]);
-            $element->getId()->willReturn(UuidV4::uuid4());
+            $element->getId()->willReturn(Uuid::generate());
 
             $result = $this->buildService()->parseFilePropertyFromElement($element->reveal());
 

@@ -17,7 +17,7 @@ curl -v \
   -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
   -H 'Range: bytes=0-1048575' \
   -o download.jpg.part \
-  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+  https://api.example.com/02IiNr0GOoKiPMM4jZCMVnOvOsSB4aokKxQkw/file
 ```
 
 A satisfiable range responds with `206 Partial Content` and a `Content-Range` header; only a single range per request
@@ -59,7 +59,7 @@ curl -X PUT -v \
   -H 'Content-Type: image/jpeg' \
   -H 'Upload-Complete: ?0' \
   --data-binary @./image.jpg.01.part \
-  https://api.example.com/7ac83b11-3c48-4ecd-930c-97e9dbf47ef3/file
+  https://api.example.com/02IiNr0GOoKiPMM4jZCMVnOvOsSB4aokKxQkw/file
 ```
 
 The response then contains the `location` header, which is the location of the newly created resumable upload object.
@@ -75,7 +75,7 @@ curl -X PATCH -v \
   -H 'Upload-Complete: ?0' \
   -H 'Upload-Offset: 10485760' \
   --data-binary @./image.jpg.02.part \
-  https://api.example.com/upload/98e795bc-cbe8-49d2-a5ce-e6977b877139
+  https://api.example.com/upload/02IiNr0G8viOVKkXeG8LxlS9wRDGz06MEWMI3
 ```
 
 ### Querying the current upload offset
@@ -85,7 +85,7 @@ curl -X PATCH -v \
 ```bash
 curl -I -v \
   -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
-  https://api.example.com/upload/ec19e774-b54d-43d7-b167-e3c35441b6fa
+  https://api.example.com/upload/02IiNr0G8viOVKlC9pysDyHhZ1aUzyRoyPASx
 ```
 
 ### Sending the last chunk
@@ -99,7 +99,7 @@ curl -X PATCH -v \
   -H 'Upload-Complete: ?1' \
   -H 'Upload-Offset: 20971520' \
   --data-binary @./image.jpg.03.part \
-  https://api.example.com/upload/93c842b6-60a7-419e-aa39-17b31d504b90
+  https://api.example.com/upload/02IiNr0G8viOVKkV9X4VXWYROyvCHw4UKcEhR
 ```
 
 ### Canceling a resumable upload
@@ -107,7 +107,7 @@ curl -X PATCH -v \
 ```bash
 curl -X DELETE -v \
   -H 'Authorization: Bearer secret-token:1nc1pFdBO2QLYRMMvULgtQ' \
-  https://api.example.com/upload/93c842b6-60a7-419e-aa39-17b31d504b90
+  https://api.example.com/upload/02IiNr0G8viOVKkV9X4VXWYROyvCHw4UKcEhR
 ```
 
 ### Limitations and side effects

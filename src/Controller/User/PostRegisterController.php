@@ -14,10 +14,9 @@ use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
 use App\Service\RequestUtilService;
 use App\Type\Response\CreatedResponse;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -57,7 +56,7 @@ class PostRegisterController extends AbstractController
         $rawData = $this->requestUtilService->getDataFromBody($body);
 
         $this->requestUtilService->validateTypeFromBody('User', $body);
-        $userId = UuidV4::uuid4();
+        $userId = Uuid::generate();
         $password = $this->requestUtilService->getStringFromBody('password', $body);
         $uniqueUserIdentifier = $this->requestUtilService->getUniqueUserIdentifierFromBodyAndData($body);
         $this->checkUniqueUserIdentifierAgainstRegex($uniqueUserIdentifier);
@@ -120,7 +119,7 @@ class PostRegisterController extends AbstractController
         }
     }
 
-    private function createCreatedResponse(UuidInterface $userId): CreatedResponse
+    private function createCreatedResponse(Uuid $userId): CreatedResponse
     {
         return new CreatedResponse(
             $this->router->generate(

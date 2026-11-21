@@ -9,7 +9,7 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class DeleteElementNodeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:CevJS3ZkDtJcCdqEhFKqWF';
-    private const string DATA = '55cce573-1377-4781-be16-8b81587aca10';
+    private const string DATA = '02IiNr0GOoKiPMLmiVsBdAPtibfrpZE8uLou8';
 
     public function testDeleteNode(): void
     {

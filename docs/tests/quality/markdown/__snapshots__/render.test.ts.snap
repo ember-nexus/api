@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`markdown snapshots > 03-reference/03-search/01-elasticsearch-query-dsl-mixin 1`] = `
+exports[`markdown snapshots > 03-reference/04-search/01-elasticsearch-query-dsl-mixin 1`] = `
 "# Elasticsearch query
 
 The Elasticsearch query step allows users to execute queries against the internal Elasticsearch
@@ -211,7 +211,7 @@ be executed by any user.
 "
 `;
 
-exports[`markdown snapshots > 03-reference/03-search/01-elasticsearch-query-dsl-mixin/01-full-text-search 1`] = `
+exports[`markdown snapshots > 03-reference/04-search/01-elasticsearch-query-dsl-mixin/01-full-text-search 1`] = `
 "# Full text search
 
 This example uses Elasticsearch's [\`match\` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query)
@@ -252,7 +252,7 @@ curl -X POST \\
   "results": [
     {
       "type": "Taxon",
-      "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+      "id": "02IiNr0GOoKiPMLHurXARbcQUHxEJVbY9UJPL",
       "data": {
         "created": "2026-11-21T09:46:33+00:00",
         "name": "Gloriosa",
@@ -268,7 +268,7 @@ curl -X POST \\
     },
     {
       "type": "Plant",
-      "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "id": "02IiNr0GOoKiPMLPDlPbKrlR4vnBQsvSBSkU5",
       "data": {
         "created": "2026-11-21T09:46:33+00:00",
         "images": [
@@ -307,7 +307,7 @@ curl -X POST \\
     },
     {
       "type": "Taxon",
-      "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+      "id": "02IiNr0GOoKiPMLMTxO45AnoTbb6AIdILXae9",
       "data": {
         "created": "2026-11-21T09:46:31+00:00",
         "name": "Lilieae",
@@ -368,7 +368,7 @@ curl -X POST \\
                     {
                       "term": {
                         "_usersWithSearchAccess.keyword": {
-                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                          "value": "02IiNr0GOoKiPMM5A0eq9jHk2upaJezsVtWjL"
                         }
                       }
                     }
@@ -392,21 +392,21 @@ curl -X POST \\
             {
               "elements": [
                 {
-                  "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+                  "id": "02IiNr0GOoKiPMLHurXARbcQUHxEJVbY9UJPL",
                   "type": "Taxon",
                   "metadata": {
                     "score": 4.5426874
                   }
                 },
                 {
-                  "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                  "id": "02IiNr0GOoKiPMLPDlPbKrlR4vnBQsvSBSkU5",
                   "type": "Plant",
                   "metadata": {
                     "score": 3.9679806
                   }
                 },
                 {
-                  "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+                  "id": "02IiNr0GOoKiPMLMTxO45AnoTbb6AIdILXae9",
                   "type": "Taxon",
                   "metadata": {
                     "score": 3.7307374
@@ -423,9 +423,9 @@ curl -X POST \\
       "step-handler": "element-hydration (App\\\\EventSystem\\\\SearchStep\\\\EventListener\\\\ElementHydrationSearchStepEventListener)",
       "start": 1795257792.621327,
       "accessibleElementIds": [
-        "16884ac8-ba7a-4c91-8449-4fdd803644b6",
-        "258c0dfe-b1d8-4839-beed-d00d1b544a96",
-        "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+        "02IiNr0GOoKiPMLHurXARbcQUHxEJVbY9UJPL",
+        "02IiNr0GOoKiPMLPDlPbKrlR4vnBQsvSBSkU5",
+        "02IiNr0GOoKiPMLMTxO45AnoTbb6AIdILXae9",
         "... 17 more items omitted (shapes seen: string) ..."
       ],
       "end": 1795257792.712474,

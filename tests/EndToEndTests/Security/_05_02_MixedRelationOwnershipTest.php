@@ -10,14 +10,14 @@ class _05_02_MixedRelationOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:HGDfrDYh5T5hFerngpuY8I';
 
-    private const string GROUP_1 = '17322018-bf8d-4aff-aae1-e028bbdfbb16';
-    private const string GROUP_2 = '96b251b5-56b6-43fa-9f62-dcd85892f0d3';
-    private const string DATA_1 = 'f2f0fd3a-5d5f-4667-849d-06a3798614d6';
-    private const string DATA_2 = '537bde6e-a661-4f31-b395-adc6bf3383c1';
-    private const string DATA_3 = 'b67ebe02-0c3d-4c8f-bbb0-8bdf2fd57290';
-    private const string DATA_4 = '01a23f36-fa76-4a9c-acfa-11803ebba906';
-    private const string DATA_5 = '3d23a51c-861c-48c7-9233-7f8c27156400';
-    private const string DATA_6 = '21003b34-684b-4736-a415-47e739cb9c24';
+    private const string GROUP_1 = '02IiNr0GOoKiPMLIFZdCnEu6YLntrDHpDHvnO';
+    private const string GROUP_2 = '02IiNr0GOoKiPMMIL04DJ7mzVncYxrlgGV0rS';
+    private const string DATA_1 = '02IiNr0GOoKiPMN1GA8MAC8QYaY2jCj8WTdyM';
+    private const string DATA_2 = '02IiNr0GOoKiPMLlaggg56miYmdod9GylJsjy';
+    private const string DATA_3 = '02IiNr0GOoKiPMMXnfqXXWbsfPhyb7zKzbAfZ';
+    private const string DATA_4 = '02IiNr0GOoKiPML7kZKm7xBJPFuNDffjqXBoM';
+    private const string DATA_5 = '02IiNr0GOoKiPMLaiyfUlsH75znFGoLlJYSsH';
+    private const string DATA_6 = '02IiNr0GOoKiPMLN1oYqf7FyJjNnVob0CpKE6';
 
     public function testGetIndex(): void
     {

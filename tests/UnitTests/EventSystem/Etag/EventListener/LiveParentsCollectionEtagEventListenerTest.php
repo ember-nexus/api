@@ -13,6 +13,7 @@ use App\Type\Etag;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
 use App\Type\RedisValueType;
+use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -20,7 +21,6 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(LiveParentsCollectionEtagEventListener::class)]
@@ -32,7 +32,7 @@ class LiveParentsCollectionEtagEventListenerTest extends TestCase
     public function testLiveParentsCollectionEtagEventListenerWithFewEnoughParents(): void
     {
         // setup variables
-        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $id = Uuid::fromString('02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_PARENTS_COLLECTION, $id->toString());
         $elementEtagEvent = new ParentsCollectionEtagEvent($id);
         $etag = new Etag('someEtag');
@@ -73,8 +73,8 @@ class LiveParentsCollectionEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to persist Etag for parents collection in Redis.', [
-            'childId' => '977245a7-a584-44bd-8992-1bfd80251a41',
-            'redisKey' => 'etag:parents:977245a7-a584-44bd-8992-1bfd80251a41',
+            'childId' => '02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
+            'redisKey' => 'etag:parents:02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
             'etag' => $etag,
         ]);
     }
@@ -82,7 +82,7 @@ class LiveParentsCollectionEtagEventListenerTest extends TestCase
     public function testLiveParentsCollectionEtagEventListenerWithTooManyParents(): void
     {
         // setup variables
-        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $id = Uuid::fromString('02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_PARENTS_COLLECTION, $id->toString());
         $elementEtagEvent = new ParentsCollectionEtagEvent($id);
 
@@ -122,8 +122,8 @@ class LiveParentsCollectionEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to persist Etag for parents collection in Redis.', [
-            'childId' => '977245a7-a584-44bd-8992-1bfd80251a41',
-            'redisKey' => 'etag:parents:977245a7-a584-44bd-8992-1bfd80251a41',
+            'childId' => '02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
+            'redisKey' => 'etag:parents:02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
             'etag' => null,
         ]);
     }

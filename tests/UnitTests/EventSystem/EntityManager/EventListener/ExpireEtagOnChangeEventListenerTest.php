@@ -16,6 +16,7 @@ use App\Service\AppStateService;
 use App\Type\AppStateType;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use Exception;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\SummarizedResult;
@@ -28,7 +29,6 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[Small]
@@ -37,13 +37,13 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string ELEMENT_ID = '224a787e-3b32-4822-8697-61047175505d';
-    private const string CHILD_ID = '11111111-1111-4111-8111-111111111111';
-    private const string PARENT_ID = '22222222-2222-4222-8222-222222222222';
-    private const string RELATED_ID = '33333333-3333-4333-8333-333333333333';
-    private const string USER_ID = '44444444-4444-4444-8444-444444444444';
-    private const string START_ID = '55555555-5555-4555-8555-555555555555';
-    private const string END_ID = '66666666-6666-4666-8666-666666666666';
+    private const string ELEMENT_ID = '02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub';
+    private const string CHILD_ID = '02IiNr0G8viOVKjTVopQ38JnV8PxJrftZpRV7';
+    private const string PARENT_ID = '02IiNr0G8viOVKjboyDliyOxJkyYo8OHX5lnv';
+    private const string RELATED_ID = '02IiNr0G8viOVKjk87c7OoU78NXAIP6fUM673';
+    private const string USER_ID = '02IiNr0G8viOVKjsRH0T4eZGx05lmfp3RcQPi';
+    private const string START_ID = '02IiNr0G8viOVKk0kQOokUeQlceNGwXROskip';
+    private const string END_ID = '02IiNr0G8viOVKk93ZnAQKjaaFCylDFpM952o';
 
     /**
      * @param array<string, mixed>|null $neighbours   result of the first query, null for no row at all

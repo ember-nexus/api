@@ -7,15 +7,22 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
+use App\Exception\InvalidUuidException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Ramsey\Uuid\Uuid;
 
 class RawToElementService
 {
+    /**
+     * User supplied ids may carry historic timestamps, but not timestamps in the future; this tolerance covers clock
+     * differences between client and server.
+     */
+    public const int FUTURE_TOLERANCE_MS = 60_000;
+
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
@@ -41,16 +48,19 @@ class RawToElementService
         if (!array_key_exists('id', $rawData)) {
             throw $this->client400MissingPropertyExceptionFactory->createFromTemplate('id', 'valid UUID');
         }
-        $id = Uuid::fromString($this->getStringFromRawData($rawData, 'id'));
+        $id = $this->getUuidFromRawData($rawData, 'id');
+        if (!$supportFile && $id->getTimestampMs() > Uuid::nowMs() + self::FUTURE_TOLERANCE_MS) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Property 'id' must not contain a timestamp in the future, got %s.", $id->toString()));
+        }
 
         $start = null;
         if (array_key_exists('start', $rawData)) {
-            $start = Uuid::fromString($this->getStringFromRawData($rawData, 'start'));
+            $start = $this->getUuidFromRawData($rawData, 'start');
         }
 
         $end = null;
         if (array_key_exists('end', $rawData)) {
-            $end = Uuid::fromString($this->getStringFromRawData($rawData, 'end'));
+            $end = $this->getUuidFromRawData($rawData, 'end');
         }
 
         $rawProperties = [];
@@ -98,5 +108,18 @@ class RawToElementService
         }
 
         return $value;
+    }
+
+    /**
+     * @param array<string, mixed> $rawData
+     */
+    private function getUuidFromRawData(array $rawData, string $key): Uuid
+    {
+        $value = $this->getStringFromRawData($rawData, $key);
+        try {
+            return Uuid::fromString($value);
+        } catch (InvalidUuidException $exception) {
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Property '%s' must be a valid UUID: %s", $key, $exception->getMessage()), $exception);
+        }
     }
 }

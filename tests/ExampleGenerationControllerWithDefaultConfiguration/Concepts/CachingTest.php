@@ -10,7 +10,7 @@ class CachingTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string NODE_UUID = '74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac';
+    private const string NODE_UUID = '02IiNr0GOoKiPMM1keIQn6X4HCRG6E9xAcDJ9';
 
     public function testInitialRequest(): void
     {

@@ -13,9 +13,8 @@ use App\Service\QueueService;
 use App\Service\SearchAccessCalculatorService;
 use App\Style\EmberNexusStyle;
 use App\Type\RabbitMQQueueType;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -134,7 +133,7 @@ class UpdateOwnershipCommand extends Command
      * children too; this also makes a cycle in the ownership graph self-terminating, as each message does O(1)
      * work and the cascade stops once nothing reachable changes anymore.
      */
-    private function recalculateElementAndQueueChildren(UuidInterface $elementId): void
+    private function recalculateElementAndQueueChildren(Uuid $elementId): void
     {
         $element = $this->elementManager->getElement($elementId);
         if (null === $element) {
@@ -195,9 +194,9 @@ class UpdateOwnershipCommand extends Command
     }
 
     /**
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
-    private function getChildrenIds(UuidInterface $parentId): array
+    private function getChildrenIds(Uuid $parentId): array
     {
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
             "MATCH (parent {id: \$parentId})-[:OWNS]->(children)\n".

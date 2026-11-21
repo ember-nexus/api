@@ -10,10 +10,10 @@ class PostElementTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string PARENT_ELEMENT = '7b80b203-2b82-40f5-accd-c7089fe6114e';
+    private const string PARENT_ELEMENT = '02IiNr0GOoKiPMM569f95VLLfjRVJ1JriLYcy';
     // a relation the test user can read but has no CREATE access to (neither its start nor end node is owned by
     // them), used to assert the "no access" 404 case
-    private const string RELATION_WITHOUT_CREATE_ACCESS = 'eb5d2879-c5e6-43a6-b8ce-2a1188ca7073';
+    private const string RELATION_WITHOUT_CREATE_ACCESS = '02IiNr0GOoKiPMMxY2dBt9kLzyjTv2FqOIHUL';
 
     public function testPostElementSuccess(): void
     {

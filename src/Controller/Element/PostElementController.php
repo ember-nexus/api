@@ -17,7 +17,7 @@ use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\RelationElement;
 use App\Type\Response\CreatedResponse;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Type\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -42,13 +42,13 @@ class PostElementController extends AbstractController
         '/{id}',
         name: 'post-element',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['POST']
     )]
     public function postElement(string $id, Request $request): CreatedResponse
     {
-        $parentElementId = UuidV4::fromString($id);
+        $parentElementId = Uuid::fromString($id);
         $userId = $this->authProvider->getUserId();
 
         $parentType = $this->accessChecker->getElementType($parentElementId);
@@ -77,7 +77,7 @@ class PostElementController extends AbstractController
         if (array_key_exists('id', $body)) {
             $elementId = $this->requestUtilService->getUuidFromBody('id', $body);
         } else {
-            $elementId = UuidV4::uuid4();
+            $elementId = Uuid::generate();
         }
 
         if (!array_key_exists('type', $body)) {
@@ -95,14 +95,14 @@ class PostElementController extends AbstractController
         $this->elementManager->create($element);
 
         $newNodeOwnsRelation = (new RelationElement())
-            ->setId(UuidV4::uuid4())
+            ->setId(Uuid::generate())
             ->setType('OWNS')
             ->setStart($parentElementId)
             ->setEnd($element->getId());
         $this->elementManager->create($newNodeOwnsRelation);
 
         $newNodeCreatedRelation = (new RelationElement())
-            ->setId(UuidV4::uuid4())
+            ->setId(Uuid::generate())
             ->setType('CREATED')
             ->setStart($userId)
             ->setEnd($element->getId());

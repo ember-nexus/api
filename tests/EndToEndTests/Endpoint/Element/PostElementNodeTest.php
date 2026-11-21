@@ -9,8 +9,8 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class PostElementNodeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:27bYlF6ZPIaGNbC6VT3V41';
-    private const string ID_DATA = '2010c776-c739-4909-995b-b08e171a268a';
-    private const string ID_USER = 'f994b541-23d6-4065-b992-14548f3e3345';
+    private const string ID_DATA = '02IiNr0GOoKiPMLMZVvVZNLb5GOXWQhzznNG5';
+    private const string ID_USER = '02IiNr0GOoKiPMN4UD1Ie1GR6kUqzPQpQbT7B';
 
     public function testCreateNode(): void
     {

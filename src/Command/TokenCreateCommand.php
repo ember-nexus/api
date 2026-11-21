@@ -11,9 +11,9 @@ use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
 use App\Trait\CommandInputTrait;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -66,7 +66,7 @@ class TokenCreateCommand extends Command
 
         $identifier = $this->getStringArgument($input, 'identifier');
 
-        if (preg_match(Regex::UUID_V4, $identifier)) {
+        if (preg_match(Regex::UUID, $identifier)) {
             $identifier = Uuid::fromString($identifier);
         } else {
             $res = $this->cypherEntityManager->getClient()->runStatement(

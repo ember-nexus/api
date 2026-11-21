@@ -46,7 +46,7 @@ class CronReferenceDatasetTest extends BaseCronTestCase
     public function testCronCommandKeepsAllDataWhichIsNotAnExpiredUpload(): void
     {
         $countsBefore = $this->getCounts();
-        $filesBefore = $this->runGetRequest('/0fdd52ba-55da-430c-b015-3277a231e895/file', self::TOKEN);
+        $filesBefore = $this->runGetRequest('/02IiNr0GOoKiPMLEezecUZIcqABdykANm0j0F/file', self::TOKEN);
         $this->assertSame(200, $filesBefore->getStatusCode());
 
         foreach (['cron:delete-expired-uploads', 'cron:reindex-files', 'cron:update-ownership'] as $command) {
@@ -55,7 +55,7 @@ class CronReferenceDatasetTest extends BaseCronTestCase
         }
 
         $this->assertSame($countsBefore, $this->getCounts());
-        $filesAfter = $this->runGetRequest('/0fdd52ba-55da-430c-b015-3277a231e895/file', self::TOKEN);
+        $filesAfter = $this->runGetRequest('/02IiNr0GOoKiPMLEezecUZIcqABdykANm0j0F/file', self::TOKEN);
         $this->assertSame(200, $filesAfter->getStatusCode());
         $this->assertSame((string) $filesBefore->getBody(), (string) $filesAfter->getBody());
     }

@@ -19,6 +19,7 @@ use App\Service\UploadService;
 use App\Type\AccessType;
 use App\Type\NodeElement;
 use App\Type\Response\NoContentResponse;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +35,7 @@ class PostElementFileControllerTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string ID = '6d3d983e-8cc0-43b7-88f9-5595d5ca0ad1';
+    private const string ID = '02IiNr0G8viOVKkCNJFAUZAABiVkBOm9SiRqR';
 
     private ObjectProphecy $accessChecker;
     private ObjectProphecy $uploadCreationService;
@@ -46,12 +47,12 @@ class PostElementFileControllerTest extends TestCase
     private function buildController(): PostElementFileController
     {
         $authProvider = $this->prophesize(AuthProvider::class);
-        $authProvider->getUserId()->willReturn(\Ramsey\Uuid\Uuid::uuid4());
+        $authProvider->getUserId()->willReturn(Uuid::generate());
         $this->accessChecker = $this->prophesize(AccessChecker::class);
         $this->accessChecker->hasAccessToElement(Argument::cetera())->willReturn(true);
         $this->uploadCreationService = $this->prophesize(UploadCreationService::class);
         $this->elementManager = $this->prophesize(ElementManager::class);
-        $this->elementManager->getElementOrFail(Argument::any())->willReturn((new NodeElement())->setId(\Ramsey\Uuid\Uuid::fromString(self::ID)));
+        $this->elementManager->getElementOrFail(Argument::any())->willReturn((new NodeElement())->setId(Uuid::fromString(self::ID)));
         $this->elementService = $this->prophesize(ElementService::class);
         $this->elementService->hasFile(Argument::any())->willReturn(false);
         $this->fileCreationLockService = $this->prophesize(FileCreationLockService::class);

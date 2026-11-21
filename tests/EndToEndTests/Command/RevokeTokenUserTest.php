@@ -13,10 +13,10 @@ class RevokeTokenUserTest extends BaseRequestTestCase
     private const string TOKEN_1_USER_1 = 'secret-token:BPZQtpPeHOpUZ8JPEZK8s8';
     private const string TOKEN_2_USER_1 = 'secret-token:MEPKIWtNvAQpcLuUuGQeuC';
     private const string TOKEN_1_USER_2 = 'secret-token:PjrG1LJdmkHedddDoDHXgT';
-    private const string TOKEN_1_USER_1_UUID = '47efaba8-5f2c-474c-a52c-b9e1973d5baf';
-    private const string TOKEN_2_USER_1_UUID = '51e33dee-46b9-4b28-a20f-23a6d88955c9';
-    private const string TOKEN_1_USER_2_UUID = '9a9c44c6-1af7-4320-89eb-7e83825ca39a';
-    private const string USER_1_UUID = '15572057-0605-482a-9903-115ea8243474';
+    private const string TOKEN_1_USER_1_UUID = '02IiNr0GOoKiPMLfxcqP648hMHX1tDl6ObMJW';
+    private const string TOKEN_2_USER_1_UUID = '02IiNr0GOoKiPMLkpRw8MscLOlqtR23WzFMzf';
+    private const string TOKEN_1_USER_2_UUID = '02IiNr0GOoKiPMMKE48cz4OGMa0N2wzbAvuwo';
+    private const string USER_1_UUID = '02IiNr0GOoKiPMLHL09AsYXpyYAQpSnczVhTc';
 
     public function testRevokeTokenUser(): void
     {

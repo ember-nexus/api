@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Contract;
 
+use App\Type\Uuid;
 use DateTime;
-use Ramsey\Uuid\UuidInterface;
 
 interface UploadInterface
 {
-    public function getId(): UuidInterface;
+    public function getId(): Uuid;
 
     public function getUploadLength(): ?int;
 
@@ -17,7 +17,7 @@ interface UploadInterface
 
     public function isUploadComplete(): bool;
 
-    public function getUploadTarget(): UuidInterface;
+    public function getUploadTarget(): Uuid;
 
     public function getAlreadyUploadedChunks(): int;
 
@@ -33,7 +33,7 @@ interface UploadInterface
      */
     public function getLastChunkId(): ?string;
 
-    public function getUploadOwner(): UuidInterface;
+    public function getUploadOwner(): Uuid;
 
     public function getExtension(): string;
 

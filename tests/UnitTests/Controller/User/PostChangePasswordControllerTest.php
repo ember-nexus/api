@@ -13,13 +13,13 @@ use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
 use App\Type\Response\NoContentResponse;
+use App\Type\Uuid;
 use Exception;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -58,7 +58,7 @@ class PostChangePasswordControllerTest extends TestCase
         $requestUtilService->method('getUniqueUserIdentifierFromBodyAndData')->willReturn('test@example.com');
 
         $userNode = new NodeElement();
-        $userNode->setId(Uuid::fromString('6d3d983e-8cc0-43b7-88f9-5595d5ca0ad1'));
+        $userNode->setId(Uuid::fromString('02IiNr0G8viOVKkCNJFAUZAABiVkBOm9SiRqR'));
 
         $securityUtilService = $this->createMock(SecurityUtilService::class);
         $securityUtilService->method('findUserByUniqueUserIdentifier')->willReturn($userNode);

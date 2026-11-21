@@ -16,7 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 class ProblemResponsesTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
-    private const string ROSE_ID = '0fdd52ba-55da-430c-b015-3277a231e895';
+    private const string ROSE_ID = '02IiNr0GOoKiPMLEezecUZIcqABdykANm0j0F';
     private const int ROSE_CONTENT_LENGTH = 138937;
     private const int CHUNK_SIZE = 5 * 1024 * 1024;
 
@@ -32,7 +32,7 @@ class ProblemResponsesTest extends BaseRequestTestCase
         $this->assertSame($expectedTitle, $body['title']);
         $this->assertSame($status, $body['status']);
         $this->assertMatchesRegularExpression(
-            '/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/',
+            '/^urn:uuid:[0-9A-Za-z]{37}$/',
             $body['instance']
         );
         // extension members are camelCase, never kebab-case

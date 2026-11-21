@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -17,23 +16,23 @@ class RequestIdService
 {
     public const string HEADER_NAME = 'X-Request-Id';
 
-    private ?UuidInterface $requestId = null;
+    private ?Uuid $requestId = null;
 
     public function __construct(
         private RequestStack $requestStack,
     ) {
     }
 
-    public function getRequestId(): UuidInterface
+    public function getRequestId(): Uuid
     {
         if (null === $this->requestId) {
-            $this->requestId = $this->getRequestIdFromHeader() ?? Uuid::uuid4();
+            $this->requestId = $this->getRequestIdFromHeader() ?? Uuid::generate();
         }
 
         return $this->requestId;
     }
 
-    private function getRequestIdFromHeader(): ?UuidInterface
+    private function getRequestIdFromHeader(): ?Uuid
     {
         $request = $this->requestStack->getMainRequest();
         if (null === $request) {

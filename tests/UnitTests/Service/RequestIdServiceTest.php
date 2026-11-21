@@ -28,21 +28,21 @@ class RequestIdServiceTest extends TestCase
     public function testRequestIdIsTakenFromHeaderOfTheMainRequest(): void
     {
         $request = new Request();
-        $request->headers->set('X-Request-Id', '3950e94a-2cd0-43ef-ac5a-8e116a4263c8');
+        $request->headers->set('X-Request-Id', '02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f');
 
-        $this->assertSame('3950e94a-2cd0-43ef-ac5a-8e116a4263c8', $this->buildService($request)->getRequestId()->toString());
+        $this->assertSame('02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f', $this->buildService($request)->getRequestId()->toString());
     }
 
     public function testRequestIdIsGeneratedWithoutHeader(): void
     {
         $requestId = $this->buildService(new Request())->getRequestId();
 
-        $this->assertSame(4, $requestId->getFields()->getVersion());
+        $this->assertSame(37, strlen($requestId->toString()));
     }
 
     public function testRequestIdIsGeneratedWithoutRequest(): void
     {
-        $this->assertSame(4, $this->buildService(null)->getRequestId()->getFields()->getVersion());
+        $this->assertSame(37, strlen($this->buildService(null)->getRequestId()->toString()));
     }
 
     public function testInvalidHeaderIsIgnored(): void
@@ -53,7 +53,7 @@ class RequestIdServiceTest extends TestCase
         $requestId = $this->buildService($request)->getRequestId();
 
         $this->assertNotSame('not-a-uuid', $requestId->toString());
-        $this->assertSame(4, $requestId->getFields()->getVersion());
+        $this->assertSame(37, strlen($requestId->toString()));
     }
 
     public function testRequestIdStaysTheSameDuringTheRequest(): void
@@ -68,9 +68,9 @@ class RequestIdServiceTest extends TestCase
         $requestStack = new RequestStack();
         $service = new RequestIdService($requestStack);
         $request = new Request();
-        $request->headers->set('X-Request-Id', '3950e94a-2cd0-43ef-ac5a-8e116a4263c8');
+        $request->headers->set('X-Request-Id', '02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f');
         $requestStack->push($request);
 
-        $this->assertSame('3950e94a-2cd0-43ef-ac5a-8e116a4263c8', $service->getRequestId()->toString());
+        $this->assertSame('02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f', $service->getRequestId()->toString());
     }
 }

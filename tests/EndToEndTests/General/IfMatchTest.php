@@ -9,14 +9,14 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class IfMatchTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:M3WHIDj4q62EY0XiZFMLnv';
-    private const string ID_DATA = '35cd3b18-0d0c-4e98-876e-898b930797f2';
-    private const string ID_PARENT = 'e94ebb96-8cca-49eb-a214-ba73a72abba0';
-    private const string ID_CHILD = 'ad966733-6cfb-427b-8661-8207a58bdc7f';
-    private const string ID_RELATED = '1647af8f-2f6a-46de-ab8a-3f1a740761f3';
+    private const string ID_DATA = '02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4';
+    private const string ID_PARENT = '02IiNr0EPf9nVLC3rw4ikBk2gP56rk5cMuybf';
+    private const string ID_CHILD = '02IiNr0EPf9nVLBanob1kPi9qxPOHHZJ8DSti';
+    private const string ID_RELATED = '02IiNr0EPf9nVLAP7Sl6Xm9YO2PLTt87DnJqL';
 
     public function testIfMatchElementNode(): void
     {
-        $this->getEtagOfElement(self::TOKEN, self::ID_DATA, '', '"6JM8JahrCeu"');
+        $this->getEtagOfElement(self::TOKEN, self::ID_DATA, '', '"Ab5tfHLLWiQ"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -34,7 +34,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"6JM8JahrCeu"',
+                'If-Match' => '"Ab5tfHLLWiQ"',
             ]
         );
         $this->assertIsNodeResponse($response, 'Data');
@@ -61,7 +61,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'if-match' => '"6JM8JahrCeu"',
+                'if-match' => '"Ab5tfHLLWiQ"',
             ]
         );
         $this->assertIsNodeResponse($response, 'Data');
@@ -84,7 +84,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'IF-MATCH' => '"6JM8JahrCeu"',
+                'IF-MATCH' => '"Ab5tfHLLWiQ"',
             ]
         );
         $this->assertIsNodeResponse($response, 'Data');
@@ -104,7 +104,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchElementRelation(): void
     {
-        $this->getEtagOfElement(self::TOKEN, self::ID_RELATED, '', '"fMmIm5Rb9kp"');
+        $this->getEtagOfElement(self::TOKEN, self::ID_RELATED, '', '"LgsupQ0JF0c"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -122,7 +122,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"fMmIm5Rb9kp"',
+                'If-Match' => '"LgsupQ0JF0c"',
             ]
         );
         $this->assertIsNodeResponse($response, 'RELATED');
@@ -142,7 +142,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchIndex(): void
     {
-        $this->getEtagOfElement(self::TOKEN, '', '', '"ZWkfjHF1QO1"');
+        $this->getEtagOfElement(self::TOKEN, '', '', '"KXF7jSeciBq"');
 
         $response = $this->runGetRequest('/', self::TOKEN);
         $this->assertIsCollectionResponse($response, 2, 0);
@@ -151,7 +151,7 @@ class IfMatchTest extends BaseRequestTestCase
             '/',
             self::TOKEN,
             [
-                'If-Match' => '"ZWkfjHF1QO1"',
+                'If-Match' => '"KXF7jSeciBq"',
             ]
         );
         $this->assertIsCollectionResponse($response, 2, 0);
@@ -168,7 +168,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchChildren(): void
     {
-        $this->getEtagOfElement(self::TOKEN, self::ID_PARENT, '/children', '"V3s5O8medDn"');
+        $this->getEtagOfElement(self::TOKEN, self::ID_PARENT, '/children', '"OCmYgMeR5G3"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -186,7 +186,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"V3s5O8medDn"',
+                'If-Match' => '"OCmYgMeR5G3"',
             ]
         );
         $this->assertIsCollectionResponse($response, 1, 1);
@@ -206,7 +206,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchParents(): void
     {
-        $this->getEtagOfElement(self::TOKEN, self::ID_CHILD, '/parents', '"If6HLZuIreW"');
+        $this->getEtagOfElement(self::TOKEN, self::ID_CHILD, '/parents', '"8psbSBqOAFS"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -224,7 +224,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"If6HLZuIreW"',
+                'If-Match' => '"8psbSBqOAFS"',
             ]
         );
         $this->assertIsCollectionResponse($response, 1, 1);
@@ -244,7 +244,7 @@ class IfMatchTest extends BaseRequestTestCase
 
     public function testIfMatchRelated(): void
     {
-        $this->getEtagOfElement(self::TOKEN, self::ID_PARENT, '/related', '"5DkIZtvdg3q"');
+        $this->getEtagOfElement(self::TOKEN, self::ID_PARENT, '/related', '"YCsIRJiNDhn"');
 
         $response = $this->runGetRequest(
             sprintf(
@@ -262,7 +262,7 @@ class IfMatchTest extends BaseRequestTestCase
             ),
             self::TOKEN,
             [
-                'If-Match' => '"5DkIZtvdg3q"',
+                'If-Match' => '"YCsIRJiNDhn"',
             ]
         );
         $this->assertIsCollectionResponse($response, 3, 3);

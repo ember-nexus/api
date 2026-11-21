@@ -10,11 +10,11 @@ class _05_01_MixedNodeOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:FD6njLoO4k8cmFJbluNkfT';
 
-    private const string GROUP_1 = 'e849e075-5824-4bc1-9d37-bca918912e48';
-    private const string GROUP_2 = 'a6eef102-6982-40c9-b47d-670f078cdab4';
-    private const string DATA_1 = '81535f3e-20e8-46e8-b4c3-970391974cd7';
-    private const string DATA_2 = '29904788-ce0a-4989-bc84-81fe62bc59e2';
-    private const string DATA_3 = '012a7959-7a8f-4c3e-9ca1-a4bf2ac0637b';
+    private const string GROUP_1 = '02IiNr0GOoKiPMMw3YVWoW1Nus0pjKvg7rPSP';
+    private const string GROUP_2 = '02IiNr0GOoKiPMMQDoqdn49ksIfLdBMnQyAIL';
+    private const string DATA_1 = '02IiNr0GOoKiPMM7vfAkCsjYvy9WnYNFrN4Qg';
+    private const string DATA_2 = '02IiNr0GOoKiPMLRCKX2Rl56AaMuoZ9ykufJQ';
+    private const string DATA_3 = '02IiNr0GOoKiPML7VX9gilvlZBF6dYUgE3NED';
 
     public function testGetIndex(): void
     {

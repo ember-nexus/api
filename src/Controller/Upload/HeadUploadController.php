@@ -23,7 +23,7 @@ class HeadUploadController extends AbstractController
         '/upload/{id}',
         name: 'head-upload',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['HEAD']
     )]

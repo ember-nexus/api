@@ -9,7 +9,7 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class PutElementRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:7Sm1i6YAFHCW2FFf5KmG3j';
-    private const string RELATION = '0c3898d0-e0f4-4ad1-a754-347ea0865ac5';
+    private const string RELATION = '02IiNr0GOoKiPMLCtVwIb3KaGJXzfy7sqPgsq';
 
     public function testPutRelation(): void
     {

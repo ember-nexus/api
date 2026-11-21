@@ -16,6 +16,7 @@ use App\Service\ElementManager;
 use App\Service\S3Service;
 use App\Service\UploadService;
 use App\Type\NodeElement;
+use App\Type\Uuid;
 use DateTime;
 use Exception;
 use Laudis\Neo4j\Contracts\ClientInterface;
@@ -29,8 +30,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[Small]
@@ -76,26 +75,26 @@ class UploadServiceTest extends TestCase
      * @return ObjectProphecy<UploadInterface>
      */
     private function buildUpload(
-        ?UuidInterface $id = null,
+        ?Uuid $id = null,
         ?int $uploadLength = 1000,
         int $uploadOffset = 0,
         bool $uploadComplete = false,
-        ?UuidInterface $uploadTarget = null,
+        ?Uuid $uploadTarget = null,
         array $chunkIds = [],
-        ?UuidInterface $uploadOwner = null,
+        ?Uuid $uploadOwner = null,
         string $extension = 'bin',
         ?string $hashState = null,
     ): ObjectProphecy {
         $upload = $this->prophesize(UploadInterface::class);
-        $upload->getId()->willReturn($id ?? UuidV4::uuid4());
+        $upload->getId()->willReturn($id ?? Uuid::generate());
         $upload->getUploadLength()->willReturn($uploadLength);
         $upload->getUploadOffset()->willReturn($uploadOffset);
         $upload->isUploadComplete()->willReturn($uploadComplete);
-        $upload->getUploadTarget()->willReturn($uploadTarget ?? UuidV4::uuid4());
+        $upload->getUploadTarget()->willReturn($uploadTarget ?? Uuid::generate());
         $upload->getAlreadyUploadedChunks()->willReturn(count($chunkIds));
         $upload->getChunkIds()->willReturn($chunkIds);
         $upload->getLastChunkId()->willReturn([] === $chunkIds ? null : $chunkIds[array_key_last($chunkIds)]);
-        $upload->getUploadOwner()->willReturn($uploadOwner ?? UuidV4::uuid4());
+        $upload->getUploadOwner()->willReturn($uploadOwner ?? Uuid::generate());
         $upload->getExtension()->willReturn($extension);
         $upload->getExpires()->willReturn(new DateTime('2099-01-01'));
         $upload->getHashState()->willReturn($hashState);
@@ -129,9 +128,9 @@ class UploadServiceTest extends TestCase
 
     public function testMergeUploadElementCreatesNewElementWhenNoneExists(): void
     {
-        $id = UuidV4::uuid4();
-        $uploadTarget = UuidV4::uuid4();
-        $uploadOwner = UuidV4::uuid4();
+        $id = Uuid::generate();
+        $uploadTarget = Uuid::generate();
+        $uploadOwner = Uuid::generate();
         $upload = $this->buildUpload(id: $id, uploadTarget: $uploadTarget, uploadOwner: $uploadOwner, extension: 'png', hashState: 'abc');
 
         $capturedElement = null;
@@ -169,7 +168,7 @@ class UploadServiceTest extends TestCase
 
     public function testMergeUploadElementUpdatesExistingUploadElement(): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $existingElement = (new NodeElement())->setId($id)->setLabel('Upload');
         $upload = $this->buildUpload(id: $id, uploadLength: null, uploadOffset: 42);
 
@@ -185,7 +184,7 @@ class UploadServiceTest extends TestCase
 
     public function testMergeUploadElementThrowsWhenExistingElementIsNotANode(): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $relationElement = $this->prophesize(RelationElementInterface::class)->reveal();
         $upload = $this->buildUpload(id: $id);
 
@@ -202,7 +201,7 @@ class UploadServiceTest extends TestCase
 
     public function testMergeUploadElementThrowsWhenExistingElementHasWrongLabel(): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $existingElement = (new NodeElement())->setId($id)->setLabel('SomethingElse');
         $upload = $this->buildUpload(id: $id);
 
@@ -219,7 +218,7 @@ class UploadServiceTest extends TestCase
 
     public function testMergeUploadElementThrowsWhenExistingElementHasNullLabel(): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $existingElement = (new NodeElement())->setId($id);
         $upload = $this->buildUpload(id: $id);
 
@@ -236,7 +235,7 @@ class UploadServiceTest extends TestCase
 
     public function testDeleteUploadDeletesElement(): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $upload = $this->buildUpload(id: $id);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
 
@@ -249,7 +248,7 @@ class UploadServiceTest extends TestCase
 
     public function testDeleteUploadAndChunksDeletesOnlyUploadWhenNoChunkUploadedYet(): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $upload = $this->buildUpload(id: $id);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
 
@@ -264,7 +263,7 @@ class UploadServiceTest extends TestCase
 
     public function testDeleteUploadAndChunksDeletesAllChunks(): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $upload = $this->buildUpload(id: $id, chunkIds: ['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2']);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
 
@@ -292,11 +291,11 @@ class UploadServiceTest extends TestCase
     {
         [$service, , , , , , $cypherEntityManager] = $this->buildService();
         $client = $this->prophesize(ClientInterface::class);
-        $maps = $uploadFound ? [new CypherMap(['u.id' => UuidV4::uuid4()->toString()])] : [];
+        $maps = $uploadFound ? [new CypherMap(['u.id' => Uuid::generate()->toString()])] : [];
         $client->runStatement(Argument::any())->willReturn($this->buildSummarizedResultOf(...$maps));
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
-        $this->assertSame($uploadFound, $service->hasUploadsTargeting(UuidV4::uuid4()));
+        $this->assertSame($uploadFound, $service->hasUploadsTargeting(Uuid::generate()));
     }
 
     /**
@@ -309,7 +308,7 @@ class UploadServiceTest extends TestCase
 
     public function testDeleteUploadsTargetingDoesNothingWhenNoUploadsFound(): void
     {
-        $elementId = UuidV4::uuid4();
+        $elementId = Uuid::generate();
 
         [$service, $elementManager, , , , , $cypherEntityManager] = $this->buildService();
         $client = $this->prophesize(ClientInterface::class);
@@ -324,15 +323,15 @@ class UploadServiceTest extends TestCase
 
     public function testDeleteUploadsTargetingSkipsUploadsAlreadyGone(): void
     {
-        $elementId = UuidV4::uuid4();
-        $uploadId = UuidV4::uuid4();
+        $elementId = Uuid::generate();
+        $uploadId = Uuid::generate();
 
         [$service, $elementManager, , , , , $cypherEntityManager, $deletionService] = $this->buildService();
         $client = $this->prophesize(ClientInterface::class);
         $client->runStatement(Argument::any())->willReturn($this->buildSummarizedResultOf(new CypherMap(['u.id' => $uploadId->toString()])));
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
-        $elementManager->getElement(Argument::that(fn (UuidInterface $id) => $id->equals($uploadId)))->willReturn(null);
+        $elementManager->getElement(Argument::that(fn (Uuid $id) => $id->equals($uploadId)))->willReturn(null);
         $deletionService->delete(Argument::any())->shouldNotBeCalled();
 
         $service->deleteUploadsTargeting($elementId);
@@ -341,8 +340,8 @@ class UploadServiceTest extends TestCase
 
     public function testDeleteUploadsTargetingSkipsUploadsThatFailToParse(): void
     {
-        $elementId = UuidV4::uuid4();
-        $uploadId = UuidV4::uuid4();
+        $elementId = Uuid::generate();
+        $uploadId = Uuid::generate();
         $uploadElement = (new NodeElement())->setId($uploadId)->setLabel('Upload');
 
         [$service, $elementManager, , , , $uploadFactory, $cypherEntityManager, $deletionService] = $this->buildService();
@@ -350,7 +349,7 @@ class UploadServiceTest extends TestCase
         $client->runStatement(Argument::any())->willReturn($this->buildSummarizedResultOf(new CypherMap(['u.id' => $uploadId->toString()])));
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
-        $elementManager->getElement(Argument::that(fn (UuidInterface $id) => $id->equals($uploadId)))->willReturn($uploadElement);
+        $elementManager->getElement(Argument::that(fn (Uuid $id) => $id->equals($uploadId)))->willReturn($uploadElement);
         $uploadFactory->createUploadFromElement($uploadElement)->willThrow(new Exception('bad upload'));
         $deletionService->delete(Argument::any())->shouldNotBeCalled();
 
@@ -360,8 +359,8 @@ class UploadServiceTest extends TestCase
 
     public function testDeleteUploadsTargetingDeletesFoundUploadsAndTheirChunks(): void
     {
-        $elementId = UuidV4::uuid4();
-        $uploadId = UuidV4::uuid4();
+        $elementId = Uuid::generate();
+        $uploadId = Uuid::generate();
         $uploadElement = (new NodeElement())->setId($uploadId)->setLabel('Upload');
         $upload = $this->buildUpload(id: $uploadId, chunkIds: ['aaaaaaaaaaaaaaa1'])->reveal();
 
@@ -370,7 +369,7 @@ class UploadServiceTest extends TestCase
         $client->runStatement(Argument::any())->willReturn($this->buildSummarizedResultOf(new CypherMap(['u.id' => $uploadId->toString()])));
         $cypherEntityManager->getClient()->willReturn($client->reveal());
 
-        $elementManager->getElement(Argument::that(fn (UuidInterface $id) => $id->equals($uploadId)))->willReturn($uploadElement);
+        $elementManager->getElement(Argument::that(fn (Uuid $id) => $id->equals($uploadId)))->willReturn($uploadElement);
         $uploadFactory->createUploadFromElement($uploadElement)->willReturn($upload);
 
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
@@ -394,7 +393,7 @@ class UploadServiceTest extends TestCase
     #[DataProvider('appendChunkResultProvider')]
     public function testAppendChunkIfOffsetMatchesReportsWhetherUploadWasUpdated(bool $rowReturned, bool $expected): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $expectedUpload = $this->buildUpload(id: $id, uploadOffset: 500, chunkIds: ['aaaaaaaaaaaaaaa1'])->reveal();
         $nextUpload = $this->buildUpload(id: $id, uploadOffset: 1000, uploadComplete: true, chunkIds: ['aaaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaaa2'], hashState: 'state')->reveal();
 
@@ -428,7 +427,7 @@ class UploadServiceTest extends TestCase
     #[DataProvider('appendChunkResultProvider')]
     public function testMarkUploadAsUnfinalizedReportsWhetherUploadWasUpdated(bool $rowReturned, bool $expected): void
     {
-        $id = UuidV4::uuid4();
+        $id = Uuid::generate();
         $upload = $this->buildUpload(id: $id, uploadOffset: 500, uploadComplete: true, chunkIds: ['aaaaaaaaaaaaaaa1'])->reveal();
 
         [$service, $elementManager, , , , , $cypherEntityManager] = $this->buildService();

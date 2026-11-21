@@ -21,6 +21,12 @@ Options:
 - `--skip-verify` - skips verifying file contents against their stored `file.hash` values. Without it, files that
   fail verification are skipped and reported as errors on the console and in the logs; the element keeps
   `hasFile=true` and the command's exit code stays `0`.
+- `--legacy-mapping-output` - if the backup contains legacy UUIDv4 element ids, the mapping to the new ids is written to this
+  CSV file, see [`backup:convert`](/command/backup-convert) for the format.
+
+Backups with legacy UUIDv4 element ids are converted while loading, with the same logic as `backup:convert`. Elements
+without a `created` property share the time of the import as timestamp. Ids with timestamps in the future are imported
+as they are, and a warning is logged.
 
 <Note>
     The target database must be empty - the command checks for existing nodes or relations up

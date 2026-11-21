@@ -22,8 +22,8 @@ use App\Service\S3Service;
 use App\Type\AccessType;
 use App\Type\EtagType;
 use App\Type\Response\BinaryStreamResponse;
+use App\Type\Uuid;
 use ArrayAccess;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -49,14 +49,14 @@ class GetElementFileController extends AbstractController
         '/{id}/file',
         name: 'get-element-file',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['GET']
     )]
     #[EndpointSupportsEtag(EtagType::FILE)]
     public function getElementFile(string $id, Request $request): BinaryStreamResponse
     {
-        $elementId = UuidV4::fromString($id);
+        $elementId = Uuid::fromString($id);
         $userId = $this->authProvider->getUserId();
 
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::READ)) {

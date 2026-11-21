@@ -23,6 +23,7 @@ use App\Service\IncrementalHashService;
 use App\Service\S3Service;
 use App\Service\UploadFinalizationService;
 use App\Service\UploadService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -30,8 +31,6 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use RuntimeException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -43,7 +42,7 @@ class UploadFinalizationServiceTest extends TestCase
 
     private const string HASH = '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824';
 
-    private UuidInterface $targetId;
+    private Uuid $targetId;
     private ObjectProphecy $upload;
     private ObjectProphecy $element;
     private ObjectProphecy $elementManager;
@@ -60,11 +59,11 @@ class UploadFinalizationServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->targetId = Uuid::uuid4();
+        $this->targetId = Uuid::generate();
         $this->upload = $this->prophesize(UploadInterface::class);
         $this->upload->getUploadTarget()->willReturn($this->targetId);
         $this->upload->targetHadFileAtCreation()->willReturn(false);
-        $this->upload->getId()->willReturn(Uuid::uuid4());
+        $this->upload->getId()->willReturn(Uuid::generate());
         $this->upload->getUploadOffset()->willReturn(5);
         $this->upload->getExtension()->willReturn('txt');
 

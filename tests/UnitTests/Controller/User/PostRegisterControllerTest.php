@@ -21,6 +21,7 @@ use App\Service\RequestContentService;
 use App\Service\RequestUtilService;
 use App\Type\NodeElement;
 use App\Type\Response\CreatedResponse;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Contracts\ClientInterface;
@@ -32,8 +33,6 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Nonstandard\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -102,7 +101,7 @@ class PostRegisterControllerTest extends TestCase
             ->expects($this->once())
             ->method('createElementFromRawData')
             ->with(
-                $this->callback(fn ($arg) => $arg instanceof UuidInterface),
+                $this->callback(fn ($arg) => $arg instanceof Uuid),
                 'User',
                 null,
                 null,
@@ -163,7 +162,7 @@ class PostRegisterControllerTest extends TestCase
             ->expects($this->once())
             ->method('createElementFromRawData')
             ->with(
-                $this->callback(fn ($arg) => $arg instanceof UuidInterface),
+                $this->callback(fn ($arg) => $arg instanceof Uuid),
                 'User',
                 null,
                 null,
@@ -251,7 +250,7 @@ class PostRegisterControllerTest extends TestCase
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'checkForDuplicateUniqueUserIdentifier');
 
-        $userId = Uuid::uuid4();
+        $userId = Uuid::generate();
         try {
             $method->invokeArgs($postRegisterController, [$userId]);
         } catch (Exception $e) {
@@ -291,7 +290,7 @@ class PostRegisterControllerTest extends TestCase
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'checkForDuplicateUniqueUserIdentifier');
 
-        $userId = Uuid::uuid4();
+        $userId = Uuid::generate();
         $method->invokeArgs($postRegisterController, [$userId]);
     }
 
@@ -353,7 +352,7 @@ class PostRegisterControllerTest extends TestCase
         );
         $method = new ReflectionMethod(PostRegisterController::class, 'createCreatedResponse');
 
-        $userId = Uuid::uuid4();
+        $userId = Uuid::generate();
         $response = $method->invokeArgs($postRegisterController, [$userId]);
         $this->assertInstanceOf(CreatedResponse::class, $response);
         $this->assertSame(201, $response->getStatusCode());

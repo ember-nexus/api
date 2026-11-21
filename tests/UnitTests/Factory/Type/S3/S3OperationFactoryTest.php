@@ -24,13 +24,13 @@ use App\Type\S3\FileOperation;
 use App\Type\S3\MergeFileChunksOperation;
 use App\Type\S3\UploadFileChunkOperation;
 use App\Type\S3\UploadFileOperation;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(S3OperationFactory::class)]
@@ -60,7 +60,7 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateFileOperationFromUpload(): void
     {
-        $id = Uuid::fromString('2e92baf4-850e-4a98-ab03-a5b2f717808f');
+        $id = Uuid::fromString('02IiNr0G8viOVKjhsTy0tWZQp036kIYc2s0BV');
 
         $emberNexusConfiguration = $this->prophesize(EmberNexusConfiguration::class);
         $emberNexusConfiguration->getFileS3UploadBucket()->shouldBeCalledOnce()->willReturn('upload-bucket');
@@ -85,7 +85,7 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateFileOperationFromElement(): void
     {
-        $id = Uuid::fromString('2e92baf4-850e-4a98-ab03-a5b2f717808f');
+        $id = Uuid::fromString('02IiNr0G8viOVKjhsTy0tWZQp036kIYc2s0BV');
 
         $element = $this->prophesize(NodeElement::class);
         $element->getId()->shouldBeCalledOnce()->willReturn($id);
@@ -132,7 +132,7 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateUploadFileOperationFromResumableUploadRequest(): void
     {
-        $elementId = Uuid::fromString('9c981309-8269-4469-a595-282eb62ec04f');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkZRau9a3LR2ZJGYUJyc0vMX');
 
         $resumableUploadRequest = $this->prophesize(ResumableUploadRequestInterface::class);
         $resumableUploadRequest->isUploadComplete()->shouldBeCalledOnce()->willReturn(true);
@@ -184,7 +184,7 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateUploadFileOperationFromResumableUploadRequestSetsPreviousStorageKeyWhenPossible(): void
     {
-        $elementId = Uuid::fromString('9c981309-8269-4469-a595-282eb62ec04f');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkZRau9a3LR2ZJGYUJyc0vMX');
 
         $resumableUploadRequest = $this->prophesize(ResumableUploadRequestInterface::class);
         $resumableUploadRequest->isUploadComplete()->shouldBeCalledOnce()->willReturn(true);
@@ -248,7 +248,7 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateUploadFileOperationFromElementAndResource(): void
     {
-        $elementId = Uuid::fromString('9c981309-8269-4469-a595-282eb62ec04f');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkZRau9a3LR2ZJGYUJyc0vMX');
 
         $element = $this->prophesize(NodeElementInterface::class);
         $element->getId()->shouldBeCalledOnce()->willReturn($elementId);
@@ -310,7 +310,7 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateUploadFileChunkOperationFromResumableUploadRequest(): void
     {
-        $uploadId = Uuid::fromString('8bcc36eb-0a16-4a2f-b5f9-a892a81c56c5');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkRG1rQpDlONRde8T35PrzKJ');
 
         $resumableUploadRequest = $this->prophesize(ResumableUploadRequestInterface::class);
         $resumableUploadRequest->isUploadComplete()->shouldBeCalledOnce()->willReturn(false);
@@ -341,7 +341,7 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateUploadFileChunkOperationFromResumableUploadRequestFailsOnCompleteUpload(): void
     {
-        $uploadId = Uuid::fromString('8bcc36eb-0a16-4a2f-b5f9-a892a81c56c5');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkRG1rQpDlONRde8T35PrzKJ');
 
         $resumableUploadRequest = $this->prophesize(ResumableUploadRequestInterface::class);
         $resumableUploadRequest->isUploadComplete()->shouldBeCalledOnce()->willReturn(true);
@@ -363,7 +363,7 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateUploadFileChunkOperationFromPartialUploadRequest(): void
     {
-        $uploadId = Uuid::fromString('8bcc36eb-0a16-4a2f-b5f9-a892a81c56c5');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkRG1rQpDlONRde8T35PrzKJ');
 
         $partialUploadRequest = $this->prophesize(PartialUploadRequestInterface::class);
         $partialUploadRequest->getContent()->shouldBeCalledOnce()->willReturn('some content');
@@ -417,8 +417,8 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateMergeFileOperationFromUpload(): void
     {
-        $uploadId = Uuid::fromString('8fb0017a-c2af-4140-96fd-c8e7bbe03f5e');
-        $uploadTarget = Uuid::fromString('25825901-d004-4c13-a9d9-a0f813de49b4');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkTAonXNRTv19cA8ZLRbc7Ch');
+        $uploadTarget = Uuid::fromString('02IiNr0G8viOVKjdSru9Xkf4j9g12TYp72wXt');
 
         $upload = $this->prophesize(UploadInterface::class);
         $upload->isUploadComplete()->shouldBeCalledOnce()->willReturn(true);
@@ -465,8 +465,8 @@ class S3OperationFactoryTest extends TestCase
 
     public function testCreateMergeFileOperationFromUploadSetsPreviousStorageKeyWhenPossible(): void
     {
-        $uploadId = Uuid::fromString('8fb0017a-c2af-4140-96fd-c8e7bbe03f5e');
-        $uploadTarget = Uuid::fromString('25825901-d004-4c13-a9d9-a0f813de49b4');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkTAonXNRTv19cA8ZLRbc7Ch');
+        $uploadTarget = Uuid::fromString('02IiNr0G8viOVKjdSru9Xkf4j9g12TYp72wXt');
 
         $upload = $this->prophesize(UploadInterface::class);
         $upload->isUploadComplete()->shouldBeCalledOnce()->willReturn(true);

@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Group;
 class GetFileRangeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
-    private const string ROSE_ID = '0fdd52ba-55da-430c-b015-3277a231e895';
+    private const string ROSE_ID = '02IiNr0GOoKiPMLEezecUZIcqABdykANm0j0F';
     private const int ROSE_CONTENT_LENGTH = 138937;
 
     private function getFullBody(): string

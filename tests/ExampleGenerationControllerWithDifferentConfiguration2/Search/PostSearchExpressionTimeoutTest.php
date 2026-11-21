@@ -22,7 +22,7 @@ class PostSearchExpressionTimeoutTest extends BaseRequestTestCase
         $elements = [];
         for ($i = 0; $i < 3000; ++$i) {
             $elements[] = [
-                'id' => 'd747bfe6-0d52-4119-87c6-1fc37ed9395b',
+                'id' => '02IiNr0GOoKiPMMnmHcecC7H3P3IOipWs3wbB',
                 'score' => $i,
             ];
         }

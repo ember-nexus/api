@@ -9,7 +9,7 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class GetElementRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1cgn8kiSLVMTTZG6DNNII6';
-    private const string DATA = '8d5a0747-58a9-4c05-9659-8980be4ed4f0';
+    private const string DATA = '02IiNr0GOoKiPMMDm0k0WQYZQyPLA4iuBcRU3';
 
     public function testGetElementRelation(): void
     {

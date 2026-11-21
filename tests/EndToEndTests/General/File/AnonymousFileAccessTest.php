@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Group;
 #[Group('test')]
 class AnonymousFileAccessTest extends BaseRequestTestCase
 {
-    private const string ANONYMOUS_DATA_ID = '9edb178e-1b4a-4518-a9d3-0fa97e6d1007';
+    private const string ANONYMOUS_DATA_ID = '02IiNr0GOoKiPMMMIN4wJBu4swFXdpYWKlf6P';
 
     public function testAnonymousUserCanAccessOwnedElementAndFile(): void
     {

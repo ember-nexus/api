@@ -2,6 +2,6 @@
   "type": "http://api-different-configuration-2/error/422/unprocessable-content",
   "title": "Unprocessable content",
   "status": 422,
-  "instance": "urn:uuid:a2e19b20-3fa7-44b3-bb61-ff568e7512b0",
+  "instance": "urn:uuid:02IiNr0G8viOVKkcW8ApS5QPm5hEtwrRNvrO3",
   "detail": "Query execution timed out after 100 ms."
 }

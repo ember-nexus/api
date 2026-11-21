@@ -16,7 +16,7 @@ class FilePermissionTest extends BaseRequestTestCase
 {
     private const string TOKEN_USER_A = 'secret-token:V8m72O3ovtRU09JrdbJRnh';
     private const string TOKEN_USER_B = 'secret-token:3JMIdZMTqEF27mZHDO9AoA';
-    private const string DATA_ID = '592693f7-b1be-454e-b9f0-ed0416e7df48';
+    private const string DATA_ID = '02IiNr0GOoKiPMLoMMZTTfsr63d6CaUOpOWZa';
 
     public function testOwningUserCanAccessElementAndFile(): void
     {

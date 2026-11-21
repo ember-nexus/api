@@ -16,13 +16,13 @@ use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Helper\Neo4jClientHelper;
 use App\Type\FragmentGroup;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\Node;
 use Laudis\Neo4j\Types\Relationship;
 use OutOfBoundsException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 use Syndesi\MongoEntityManager\Type\EntityManager as MongoEntityManager;
@@ -188,7 +188,7 @@ class ElementManager
         return true;
     }
 
-    public function getElement(UuidInterface $id): NodeElementInterface|RelationElementInterface|null
+    public function getElement(Uuid $id): NodeElementInterface|RelationElementInterface|null
     {
         $node = $this->getNode($id);
         if ($node) {
@@ -202,7 +202,7 @@ class ElementManager
         return null;
     }
 
-    public function getElementOrFail(UuidInterface $id): NodeElementInterface|RelationElementInterface
+    public function getElementOrFail(Uuid $id): NodeElementInterface|RelationElementInterface
     {
         $element = $this->getElement($id);
         if (null === $element) {
@@ -212,7 +212,7 @@ class ElementManager
         return $element;
     }
 
-    public function getNode(UuidInterface $id): ?NodeElementInterface
+    public function getNode(Uuid $id): ?NodeElementInterface
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
@@ -241,7 +241,7 @@ class ElementManager
         return $node;
     }
 
-    public function getRelation(UuidInterface $id): ?RelationElementInterface
+    public function getRelation(Uuid $id): ?RelationElementInterface
     {
         $res = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(

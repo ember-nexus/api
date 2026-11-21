@@ -10,8 +10,8 @@ class PutElementTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string ELEMENT = '251654a1-588e-4dc4-836f-b1e334d91aae';
-    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '00000000-0000-4000-8000-000000000000';
+    private const string ELEMENT = '02IiNr0GOoKiPMLP0VqkEbqqWW3xZV85q5KxJ';
+    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '02IiNr0G8viOVKjLCfR4NIEdgVrLpaxVcZ7Bq';
 
     public function testPutElementSuccess(): void
     {

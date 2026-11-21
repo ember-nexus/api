@@ -14,11 +14,9 @@ use App\Factory\Exception\Client401UnauthorizedExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\UserPasswordHasher;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
@@ -72,13 +70,13 @@ class SecurityUtilService
      * @throws Server500LogicErrorException
      * @throws Client403ForbiddenException
      */
-    public function validateUserIsNotAnonymousUser(UuidInterface $userId): void
+    public function validateUserIsNotAnonymousUser(Uuid $userId): void
     {
         $anonymousUserId = $this->bag->get('anonymousUserUUID');
         if (!is_string($anonymousUserId)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Environment variable "ANONYMOUS_USER_UUID" must be set to a valid UUID.');
         }
-        $anonymousUserId = UuidV4::fromString($anonymousUserId);
+        $anonymousUserId = Uuid::fromString($anonymousUserId);
         if ($userId->equals($anonymousUserId)) {
             throw $this->client403ForbiddenExceptionFactory->createFromTemplate();
         }

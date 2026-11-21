@@ -8,6 +8,7 @@ use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\FileNameService;
 use App\Service\PropertyParseService;
+use App\Type\Uuid;
 use DateTimeImmutable as NativeDateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -15,7 +16,6 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 use Safe\DateTimeImmutable;
 
@@ -145,7 +145,7 @@ class PropertyParseServiceTest extends TestCase
 
     public function testUploadTargetIsParsedFromString(): void
     {
-        $uuid = Uuid::uuid4();
+        $uuid = Uuid::generate();
         $this->assertTrue($uuid->equals($this->buildService()->getUploadTargetFromProperties(['uploadTarget' => $uuid->toString()])));
     }
 
@@ -159,7 +159,7 @@ class PropertyParseServiceTest extends TestCase
 
     public function testUploadTargetIsReturnedFromUuid(): void
     {
-        $uuid = Uuid::uuid4();
+        $uuid = Uuid::generate();
         $this->assertSame($uuid, $this->buildService()->getUploadTargetFromProperties(['uploadTarget' => $uuid]));
     }
 
@@ -211,7 +211,7 @@ class PropertyParseServiceTest extends TestCase
 
     public function testUploadOwnerIsParsedFromString(): void
     {
-        $uuid = Uuid::uuid4();
+        $uuid = Uuid::generate();
         $this->assertTrue($uuid->equals($this->buildService()->getUploadOwnerFromProperties(['uploadOwner' => $uuid->toString()])));
     }
 
@@ -225,7 +225,7 @@ class PropertyParseServiceTest extends TestCase
 
     public function testUploadOwnerIsReturnedFromUuid(): void
     {
-        $uuid = Uuid::uuid4();
+        $uuid = Uuid::generate();
         $this->assertSame($uuid, $this->buildService()->getUploadOwnerFromProperties(['uploadOwner' => $uuid]));
     }
 

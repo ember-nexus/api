@@ -10,12 +10,12 @@ class _99_02_OwningGroupsGiveDirectAccessButNotToRelatedGroupsTest extends BaseR
 {
     private const string TOKEN = 'secret-token:SaUQctGYKDHdRnm1jj7pG5';
 
-    private const string GROUP_1 = '56dbdf19-8669-43a5-b332-3845e52e9cae';
-    private const string GROUP_2 = '2f72bf0b-c6f2-45a9-9769-2c6dee5dfe02';
-    private const string GROUP_3 = 'c3c99512-f29d-46d0-8d3f-37e89d6a079c';
-    private const string DATA_1 = 'f7a4fff8-8e81-4eb5-8623-ae3d1a159642';
-    private const string DATA_2 = '5aeaa647-39ef-419a-9c04-d12fd489f1c0';
-    private const string DATA_3 = '23f86352-4382-4fbd-bc6b-848fa3eadae0';
+    private const string GROUP_1 = '02IiNr0GOoKiPMLnEaH3vcRafOG8kTaBPKxua';
+    private const string GROUP_2 = '02IiNr0GOoKiPMLU3iwDRc1pnBHMyGlm9HItf';
+    private const string GROUP_3 = '02IiNr0GOoKiPMMeHYr0dC5W63nJhUCwz5TD2';
+    private const string DATA_1 = '02IiNr0GOoKiPMN3XiOJhwh7deLXuMwXLxKxY';
+    private const string DATA_2 = '02IiNr0GOoKiPMLpDEDW7ORnt1RWrC5vYAGzF';
+    private const string DATA_3 = '02IiNr0GOoKiPMLOSYvbNseT9wAmaD6nCLdhG';
 
     public function testGetIndex(): void
     {

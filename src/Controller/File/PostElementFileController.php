@@ -17,7 +17,7 @@ use App\Service\UploadCreationService;
 use App\Service\UploadService;
 use App\Type\AccessType;
 use App\Type\EtagType;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Type\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,14 +42,14 @@ class PostElementFileController extends AbstractController
         '/{id}/file',
         name: 'post-element-file',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['POST']
     )]
     #[EndpointSupportsEtag(EtagType::FILE)]
     public function postElementFile(string $id, Request $request): Response
     {
-        $elementId = UuidV4::fromString($id);
+        $elementId = Uuid::fromString($id);
         $userId = $this->authProvider->getUserId();
 
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {

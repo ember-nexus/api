@@ -6,8 +6,8 @@ namespace App\Tests\EndToEndTests\General\Etag;
 
 use App\Factory\Type\RedisKeyFactory;
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use App\Type\Uuid;
 use Predis\Client as RedisClient;
-use Ramsey\Uuid\Uuid;
 
 /**
  * Element ids are server-generated UUIDv4s and are never reused by normal API usage, so a cached Etag value can

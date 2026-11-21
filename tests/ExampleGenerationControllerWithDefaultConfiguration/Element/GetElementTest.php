@@ -10,9 +10,9 @@ class GetElementTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string NODE_UUID = '74a8fcd9-6cb0-4b0d-8d42-0b6c3c54d1ac';
-    private const string RELATION_UUID = 'eb5d2879-c5e6-43a6-b8ce-2a1188ca7073';
-    private const string ELEMENT_WHICH_DOES_NOT_EXIST = 'b4117ae0-1241-479f-b363-45f290ec7fc7';
+    private const string NODE_UUID = '02IiNr0GOoKiPMM1keIQn6X4HCRG6E9xAcDJ9';
+    private const string RELATION_UUID = '02IiNr0GOoKiPMMxY2dBt9kLzyjTv2FqOIHUL';
+    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '02IiNr0G8viOVKkkt30R04iI2cjxQKZ9bnCYA';
 
     public function testGetNodeSuccess(): void
     {

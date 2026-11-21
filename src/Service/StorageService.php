@@ -7,8 +7,8 @@ namespace App\Service;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\DashJoinedKey;
 use App\Type\DottedName;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
-use Ramsey\Uuid\UuidInterface;
 
 class StorageService
 {
@@ -29,7 +29,7 @@ class StorageService
         return (string) new DottedName($pathWithoutExtension, $extension);
     }
 
-    public function getStorageBucketKey(UuidInterface $id, string $extension): string
+    public function getStorageBucketKey(Uuid $id, string $extension): string
     {
         return $this->appendExtension(
             $this->uuidToNestedFolderStructure(
@@ -44,7 +44,7 @@ class StorageService
     /**
      * @param string|null $chunkId null for uploads which consist of a single object and have no chunk attempts
      */
-    public function getUploadBucketKey(UuidInterface $id, int $chunkIndex, ?string $chunkId = null): string
+    public function getUploadBucketKey(Uuid $id, int $chunkIndex, ?string $chunkId = null): string
     {
         if (null !== $chunkId && 1 !== \Safe\preg_match('/^[0-9A-Za-z]{1,64}$/', $chunkId)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Chunk id has to be an alphanumeric string with at most 64 characters.');
@@ -72,9 +72,10 @@ class StorageService
         );
     }
 
-    public function uuidToNestedFolderStructure(UuidInterface $uuid, int $levels = 0, int $levelLength = 2): string
+    public function uuidToNestedFolderStructure(Uuid $uuid, int $levels = 0, int $levelLength = 2): string
     {
-        $uuidAsHexString = $uuid->getHex()->toString();
+        // the leading part of a uuid is a timestamp, so the random tail is used for sharding
+        $uuidAsHexString = $uuid->getRandomHex();
         if ($levels < 0) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to generate nested folder structure from uuid with negative level argument.', ['levels' => $levels]);
         }
@@ -82,7 +83,7 @@ class StorageService
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to generate nested folder structure from uuid with level length less than 1.', ['levelLength' => $levelLength]);
         }
         if ($levels * $levelLength >= strlen($uuidAsHexString)) {
-            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to generate nested folder structure as long as product of levels and level length exceeds length of uuid without dashes.', ['levels' => $levels, 'levelLength' => $levelLength, 'product' => $levels * $levelLength, 'limit' => strlen($uuidAsHexString) - 1]);
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate('Unable to generate nested folder structure as long as product of levels and level length exceeds length of the random part of the uuid.', ['levels' => $levels, 'levelLength' => $levelLength, 'product' => $levels * $levelLength, 'limit' => strlen($uuidAsHexString) - 1]);
         }
 
         $parts = [];

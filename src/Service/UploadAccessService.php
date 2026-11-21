@@ -11,8 +11,8 @@ use App\Factory\Type\UploadFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Type\AccessType;
+use App\Type\Uuid;
 use Exception;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Safe\DateTime;
 
 /**
@@ -34,7 +34,7 @@ class UploadAccessService
 
     public function loadAuthorizedUpload(string $id): UploadInterface
     {
-        $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
+        $uploadElement = $this->elementManager->getElementOrFail(Uuid::fromString($id));
         try {
             $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
         } catch (Exception) {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Contract\Request;
 
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 interface ResumableUploadRequestInterface
 {
-    public function getElementId(): UuidInterface;
+    public function getElementId(): Uuid;
 
     /**
      * @return resource

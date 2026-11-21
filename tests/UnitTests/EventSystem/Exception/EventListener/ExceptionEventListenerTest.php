@@ -34,7 +34,7 @@ class ExceptionEventListenerTest extends TestCase
     use ProphecyTrait;
     use AssertLoggerTrait;
 
-    private const string REQUEST_ID = '3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f';
+    private const string REQUEST_ID = '02IiNr0G8viOVKjpwaXCo0cjj9GJHQrf5045X';
 
     private function createRequestIdService(): RequestIdService
     {
@@ -104,7 +104,7 @@ class ExceptionEventListenerTest extends TestCase
         /**
          * @var ProblemJsonResponse $response
          */
-        $this->assertSame('{"type":"someType","title":"Internal server error","status":500,"instance":"urn:uuid:3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f"}', $response->getContent());
+        $this->assertSame('{"type":"someType","title":"Internal server error","status":500,"instance":"urn:uuid:02IiNr0G8viOVKjpwaXCo0cjj9GJHQrf5045X"}', $response->getContent());
         $this->assertSame(500, $response->getStatusCode());
         $this->assertTrue($exceptionEvent->isPropagationStopped());
     }
@@ -223,7 +223,7 @@ class ExceptionEventListenerTest extends TestCase
         /**
          * @var ProblemJsonResponse $response
          */
-        $this->assertSame('{"type":"Some extended exception","title":"Forbidden","status":403,"instance":"urn:uuid:3f2a9c1e-8b4d-4c2a-9e1f-6a7b8c9d0e1f","detail":"Requested endpoint, element or action is forbidden."}', $response->getContent());
+        $this->assertSame('{"type":"Some extended exception","title":"Forbidden","status":403,"instance":"urn:uuid:02IiNr0G8viOVKjpwaXCo0cjj9GJHQrf5045X","detail":"Requested endpoint, element or action is forbidden."}', $response->getContent());
         $this->assertSame(403, $response->getStatusCode());
         $this->assertTrue($exceptionEvent->isPropagationStopped());
     }
@@ -360,7 +360,7 @@ class ExceptionEventListenerTest extends TestCase
         $this->assertInstanceOf(ProblemJsonResponse::class, $response);
         $responseData = json_decode((string) $response->getContent(), true);
         $this->assertSame(sprintf('urn:uuid:%s', $requestIdService->getRequestId()->toString()), $responseData['instance']);
-        $this->assertMatchesRegularExpression('/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $responseData['instance']);
+        $this->assertMatchesRegularExpression('/^urn:uuid:[0-9A-Za-z]{37}$/', $responseData['instance']);
         $this->assertSame(['type', 'title', 'status', 'instance', 'detail'], array_keys($responseData));
     }
 

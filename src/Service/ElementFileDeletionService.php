@@ -12,10 +12,9 @@ use App\Contract\S3\UploadFileOperationInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
 use App\Type\S3\FileOperation;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Throwable;
 
@@ -42,7 +41,7 @@ class ElementFileDeletionService
     /**
      * Includes the files of relations which are attached to the element, as they are deleted together with it.
      *
-     * @return array<array{elementId: ?UuidInterface, operation: FileOperationInterface}>
+     * @return array<array{elementId: ?Uuid, operation: FileOperationInterface}>
      */
     public function getFileOperationsForDeletionOfElement(NodeElementInterface|RelationElementInterface $element): array
     {
@@ -50,7 +49,7 @@ class ElementFileDeletionService
         $elementId = $element instanceof NodeElementInterface ? $element->getId() : null;
         if (null !== $elementId) {
             foreach ($this->getIdsOfAttachedRelationsWithFile($elementId->toString()) as $relationId) {
-                $elements[] = $this->elementManager->getElementOrFail(UuidV4::fromString($relationId));
+                $elements[] = $this->elementManager->getElementOrFail(Uuid::fromString($relationId));
             }
         }
 
@@ -68,7 +67,7 @@ class ElementFileDeletionService
     }
 
     /**
-     * @param array<array{elementId: ?UuidInterface, operation: FileOperationInterface}> $fileOperations
+     * @param array<array{elementId: ?Uuid, operation: FileOperationInterface}> $fileOperations
      */
     public function deleteFiles(array $fileOperations): void
     {
@@ -96,7 +95,7 @@ class ElementFileDeletionService
      * Never throws: the element (or its file reference) is already gone, so a failing S3 delete must not fail the
      * request. The remaining object is an orphan.
      */
-    public function deleteFile(FileOperationInterface $fileOperation, ?UuidInterface $elementId = null): void
+    public function deleteFile(FileOperationInterface $fileOperation, ?Uuid $elementId = null): void
     {
         try {
             $existed = $this->s3Service->deleteFile($fileOperation);

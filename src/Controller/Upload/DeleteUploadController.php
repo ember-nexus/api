@@ -13,9 +13,9 @@ use App\Service\ElementManager;
 use App\Service\UploadLockService;
 use App\Service\UploadService;
 use App\Type\Response\NoContentResponse;
+use App\Type\Uuid;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -37,13 +37,13 @@ class DeleteUploadController extends AbstractController
         '/upload/{id}',
         name: 'delete-upload',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['DELETE']
     )]
     public function deleteUpload(string $id): NoContentResponse
     {
-        $uploadElement = $this->elementManager->getElementOrFail(UuidV4::fromString($id));
+        $uploadElement = $this->elementManager->getElementOrFail(Uuid::fromString($id));
         try {
             $upload = $this->uploadFactory->createUploadFromElement($uploadElement);
         } catch (Exception) {
@@ -70,7 +70,7 @@ class DeleteUploadController extends AbstractController
 
         try {
             // an append may have finished while waiting for the lock, chunk count has to be fresh
-            $upload = $this->uploadFactory->createUploadFromElement($this->elementManager->getElementOrFail(UuidV4::fromString($id)));
+            $upload = $this->uploadFactory->createUploadFromElement($this->elementManager->getElementOrFail(Uuid::fromString($id)));
             $this->uploadService->deleteUploadAndChunks($upload);
             $this->elementManager->flush();
         } finally {

@@ -15,10 +15,10 @@ class _07_01_SearchAccessTest extends BaseRequestTestCase
     private const string TOKEN_5 = 'secret-token:Urhq1nO0p8jQnAZER721r5';
     private const string TOKEN_6 = 'secret-token:S8Y7FhkJIotvKnejEcSmdW';
     private const string TOKEN_7 = 'secret-token:OSeO4aXCZQorQ977P6XISP';
-    private const string DATA_1 = '3a3c2f8b-d1bd-40fd-b381-82de60539c9f';
-    private const string DATA_2 = 'c1bacef0-bdfc-4b13-b2fa-062bea9c0372';
-    private const string DATA_3 = '2cacaa15-8920-43d4-b885-f53a90035aef';
-    private const string DATA_4 = 'ef8a72b3-87d0-478c-a665-e134be8b8f7a';
+    private const string DATA_1 = '02IiNr0GOoKiPMLZILvqhhEsdhWyyXjlhaVGa';
+    private const string DATA_2 = '02IiNr0GOoKiPMMdHIfRllzz6tOlRA5tejr9t';
+    private const string DATA_3 = '02IiNr0GOoKiPMLSgsoe0WqlPI4wW6bBNOCg2';
+    private const string DATA_4 = '02IiNr0GOoKiPMMzaRsWvdlD0Yjh4zaMbFC7b';
 
     private function baseSearchTest(string $token): void
     {

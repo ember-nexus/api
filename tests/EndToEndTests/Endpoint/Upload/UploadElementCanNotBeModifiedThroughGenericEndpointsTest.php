@@ -25,7 +25,7 @@ class UploadElementCanNotBeModifiedThroughGenericEndpointsTest extends BaseUploa
         return [
             'hashState' => [['hashState' => 'abc']],
             'uploadOffset' => [['uploadOffset' => 0]],
-            'uploadOwner' => [['uploadOwner' => '00000000-0000-4000-8000-000000000000']],
+            'uploadOwner' => [['uploadOwner' => '02IiNr0G8viOVKjLCfR4NIEdgVrLpaxVcZ7Bq']],
             'chunkIds' => [['chunkIds' => ['abc']]],
             'uploadComplete' => [['uploadComplete' => true]],
             'expires' => [['expires' => '2099-01-01T00:00:00+00:00']],

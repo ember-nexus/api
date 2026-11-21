@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Type;
 
 use App\Type\EtagCalculator;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 
 #[Small]
@@ -52,14 +52,14 @@ class EtagCalculatorTest extends TestCase
     public function testAddUuidChangesEtag(): void
     {
         $etagCalculator = new EtagCalculator('seed');
-        $etagCalculator->addUuid(Uuid::fromString('67b1689e-e6c7-4463-a48a-74236fd5f08a'));
+        $etagCalculator->addUuid(Uuid::fromString('02IiNr0G8viOVKk9hALkhZIQdPfQB1JnQyjPN'));
         $etag = $etagCalculator->getEtag();
 
         $emptyEtagCalculator = new EtagCalculator('seed');
         $emptyEtag = $emptyEtagCalculator->getEtag();
 
         $this->assertNotSame((string) $emptyEtag, (string) $etag);
-        $this->assertSame('D7h1i75muKb', (string) $etag);
+        $this->assertSame('LMLs4i3Z3KC', (string) $etag);
     }
 
     public function testAddStringChangesEtag(): void
@@ -98,7 +98,7 @@ class EtagCalculatorTest extends TestCase
         $etagCalculator->getEtag();
 
         $this->expectExceptionMessage('Etag is already finalized, no new data can be added.');
-        $etagCalculator->addUuid(Uuid::fromString('67b1689e-e6c7-4463-a48a-74236fd5f08a'));
+        $etagCalculator->addUuid(Uuid::fromString('02IiNr0G8viOVKk9hALkhZIQdPfQB1JnQyjPN'));
     }
 
     public function testAddStringAfterGettingEtagResultsInException(): void

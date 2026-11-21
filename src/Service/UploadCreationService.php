@@ -18,10 +18,9 @@ use App\Type\FileHashAlgorithm;
 use App\Type\Response\CreatedResponse;
 use App\Type\Response\NoContentResponse;
 use App\Type\Upload;
+use App\Type\Uuid;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,7 +60,7 @@ class UploadCreationService
     ) {
     }
 
-    public function handleUploadCreationFromRequest(UuidInterface $elementId, Request $request): Response
+    public function handleUploadCreationFromRequest(Uuid $elementId, Request $request): Response
     {
         $element = $this->elementManager->getElementOrFail($elementId);
 
@@ -163,7 +162,7 @@ class UploadCreationService
             $this->fileSizeLimitService->assertWithinMaxFileSize($uploadLength);
         }
 
-        $uploadId = Uuid::uuid4();
+        $uploadId = Uuid::generate();
 
         $uploadOffset = 0;
         $chunkIds = [];

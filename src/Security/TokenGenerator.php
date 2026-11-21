@@ -9,11 +9,10 @@ use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
 use App\Type\TokenStateType;
+use App\Type\Uuid;
 use DateInterval;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Tuupola\Base58;
@@ -34,7 +33,7 @@ class TokenGenerator
     /**
      * @param array<string, mixed> $data
      */
-    public function createNewToken(UuidInterface $userId, array $data = [], ?int $lifetimeInSeconds = null): string
+    public function createNewToken(Uuid $userId, array $data = [], ?int $lifetimeInSeconds = null): string
     {
         for ($i = 0; $i < 3; ++$i) {
             $token = $this->createToken();
@@ -73,7 +72,7 @@ class TokenGenerator
             }
         }
 
-        $tokenId = Uuid::uuid4();
+        $tokenId = Uuid::generate();
         $tokenNode = (new NodeElement())
             ->setLabel('Token')
             ->setId($tokenId)
@@ -89,7 +88,7 @@ class TokenGenerator
 
         $tokenOwnedByUserRelation = (new RelationElement())
             ->setType('OWNS')
-            ->setId(Uuid::uuid4())
+            ->setId(Uuid::generate())
             ->setStart($userId)
             ->setEnd($tokenId);
         $this->elementManager->create($tokenOwnedByUserRelation);

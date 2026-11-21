@@ -13,6 +13,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Type\SearchStepType;
+use App\Type\Uuid;
 use Laudis\Neo4j\Types\CypherList;
 use Laudis\Neo4j\Types\CypherMap;
 use Laudis\Neo4j\Types\Node;
@@ -24,7 +25,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Uuid;
 use ReflectionMethod;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -73,11 +73,11 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $row = new CypherMap([
             'path' => new Path(
                 new CypherList([
-                    new Node(0, new CypherList([]), new CypherMap(['id' => '209b792a-4040-44f7-a635-37a933d5c735']), '0'),
-                    new Node(1, new CypherList([]), new CypherMap(['id' => '0da46bbc-bb83-4ca8-a5f0-2e196bda3a92']), '1'),
+                    new Node(0, new CypherList([]), new CypherMap(['id' => '02IiNr0G8viOVKjb3rgIk6d1avGq8DSTDo3gH']), '0'),
+                    new Node(1, new CypherList([]), new CypherMap(['id' => '02IiNr0G8viOVKjRq3mcc33Eok6ZQjl94VAvx']), '1'),
                 ]),
                 new CypherList([
-                    new UnboundRelationship(0, 'type', new CypherMap(['id' => '2db76287-43dd-4162-b961-36cf2c840a3e']), '0'),
+                    new UnboundRelationship(0, 'type', new CypherMap(['id' => '02IiNr0G8viOVKjhS6CYaiwTWkyr9YBtOkkrg']), '0'),
                 ]),
                 new CypherList()
             ),
@@ -86,10 +86,10 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $result = $method->invokeArgs($cypherPathSearchStepEventListener, [$row]);
 
         $this->assertCount(2, $result['nodeIds']);
-        $this->assertSame('209b792a-4040-44f7-a635-37a933d5c735', (string) $result['nodeIds'][0]);
-        $this->assertSame('0da46bbc-bb83-4ca8-a5f0-2e196bda3a92', (string) $result['nodeIds'][1]);
+        $this->assertSame('02IiNr0G8viOVKjb3rgIk6d1avGq8DSTDo3gH', (string) $result['nodeIds'][0]);
+        $this->assertSame('02IiNr0G8viOVKjRq3mcc33Eok6ZQjl94VAvx', (string) $result['nodeIds'][1]);
         $this->assertCount(1, $result['relationIds']);
-        $this->assertSame('2db76287-43dd-4162-b961-36cf2c840a3e', (string) $result['relationIds'][0]);
+        $this->assertSame('02IiNr0G8viOVKjhS6CYaiwTWkyr9YBtOkkrg', (string) $result['relationIds'][0]);
     }
 
     public function testParseRawPathFromRowThrowsErrorWhenNumberOfElementsIsUnexpected(): void
@@ -116,10 +116,10 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $row = new CypherMap([
             'path' => new Path(
                 new CypherList([
-                    new Node(0, new CypherList([]), new CypherMap(['id' => '209b792a-4040-44f7-a635-37a933d5c735']), '0'),
+                    new Node(0, new CypherList([]), new CypherMap(['id' => '02IiNr0G8viOVKjb3rgIk6d1avGq8DSTDo3gH']), '0'),
                 ]),
                 new CypherList([
-                    new UnboundRelationship(0, 'type', new CypherMap(['id' => '2db76287-43dd-4162-b961-36cf2c840a3e']), '0'),
+                    new UnboundRelationship(0, 'type', new CypherMap(['id' => '02IiNr0G8viOVKjhS6CYaiwTWkyr9YBtOkkrg']), '0'),
                 ]),
                 new CypherList()
             ),
@@ -138,11 +138,11 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $cypherPathSearchStepEventListener = $this->buildCypherPathSearchStepEventListener();
         $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'getElementIdsFromPaths');
 
-        $elementIdA = Uuid::fromString('ad0c2924-0a22-4225-902f-b00cd6ad6e05');
-        $elementIdB = Uuid::fromString('86534249-04d0-4b32-acea-7b47f7c6666d');
-        $elementIdC = Uuid::fromString('4d4e1df5-a25d-47f2-bba7-a3fa9046f4fa');
-        $elementIdD = Uuid::fromString('e52abeae-b6c1-4087-b5ff-282d865ff3cb');
-        $elementIdE = Uuid::fromString('c6d0bae7-f9ac-43e7-8d05-f77239f1490c');
+        $elementIdA = Uuid::fromString('02IiNr0G8viOVKkhRtkouQlLCT96e1EytUwAN');
+        $elementIdB = Uuid::fromString('02IiNr0G8viOVKkObnR4Ty6lD1EcqNse4n7lv');
+        $elementIdC = Uuid::fromString('02IiNr0G8viOVKjwp4P42npyMiQxhoS94ydJA');
+        $elementIdD = Uuid::fromString('02IiNr0G8viOVKl8mODV5zK1vHTn9ucMCYFQ7');
+        $elementIdE = Uuid::fromString('02IiNr0G8viOVKku18MT9stADWuP3fwnXT3sH');
 
         $paths = [
             [
@@ -162,23 +162,23 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $result = $method->invokeArgs($cypherPathSearchStepEventListener, [$paths]);
 
         $this->assertCount(5, $result);
-        $this->assertSame('ad0c2924-0a22-4225-902f-b00cd6ad6e05', (string) $result[0]);
-        $this->assertSame('86534249-04d0-4b32-acea-7b47f7c6666d', (string) $result[1]);
-        $this->assertSame('e52abeae-b6c1-4087-b5ff-282d865ff3cb', (string) $result[2]);
-        $this->assertSame('4d4e1df5-a25d-47f2-bba7-a3fa9046f4fa', (string) $result[3]);
-        $this->assertSame('c6d0bae7-f9ac-43e7-8d05-f77239f1490c', (string) $result[4]);
+        $this->assertSame('02IiNr0G8viOVKkhRtkouQlLCT96e1EytUwAN', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKkObnR4Ty6lD1EcqNse4n7lv', (string) $result[1]);
+        $this->assertSame('02IiNr0G8viOVKl8mODV5zK1vHTn9ucMCYFQ7', (string) $result[2]);
+        $this->assertSame('02IiNr0G8viOVKjwp4P42npyMiQxhoS94ydJA', (string) $result[3]);
+        $this->assertSame('02IiNr0G8viOVKku18MT9stADWuP3fwnXT3sH', (string) $result[4]);
     }
 
     public function testFilterPathsToAccessibleOnlyOperatesCorrectly(): void
     {
-        $userId = Uuid::fromString('3b74b11f-b53b-445e-be21-916f3504ac9c');
+        $userId = Uuid::fromString('02IiNr0G8viOVKjo9DHasDKs1LXdANErG15iL');
 
-        $elementIdA = Uuid::fromString('3a365022-6b3f-40d1-84dd-528a93e70a85');
-        $elementIdB = Uuid::fromString('4a35e57f-5296-41c2-88f4-9588ba9ac1e5');
-        $elementIdC = Uuid::fromString('085a6162-5eda-4053-b45c-3bc0deae6ea0');
-        $elementIdD = Uuid::fromString('23daa353-34fd-40d9-af5f-5e287a5674e3');
-        $elementIdE = Uuid::fromString('ef6b6103-17f3-48cb-9e59-0be054a9ee4d');
-        $elementIdF = Uuid::fromString('a881e529-d9bc-49cf-b579-89f6eb38ed68');
+        $elementIdA = Uuid::fromString('02IiNr0G8viOVKjnXUB2dyBe4uq3JswDduJ2S');
+        $elementIdB = Uuid::fromString('02IiNr0G8viOVKjvKY1S99oEuAPIX8xD3Yzfb');
+        $elementIdC = Uuid::fromString('02IiNr0G8viOVKjPFi9uvWHbOm7ELF06UInor');
+        $elementIdD = Uuid::fromString('02IiNr0G8viOVKjcdyttax4LieWnpmzch0Apz');
+        $elementIdE = Uuid::fromString('02IiNr0G8viOVKlDlrFRpx2FVAG1rGyLfE9qN');
+        $elementIdF = Uuid::fromString('02IiNr0G8viOVKkfFxcCxBFcKUChLvx0wLg14');
 
         $event = new SearchStepEvent(
             SearchStepType::CYPHER_PATH_SUBSET,

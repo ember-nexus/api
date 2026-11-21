@@ -23,7 +23,7 @@ services:
     volumes:
       - ./well-known-security.txt:/well-known-security.txt
     environment:
-      - ANONYMOUS_USER_UUID=521def67-6016-45e1-bb30-6a4977713e3b
+      - ANONYMOUS_USER_UUID=02IiNr0G8viOVKjzAMjHS4DASb93nrGVPG8KU
     ports:
       - "80:80"
 ```
@@ -46,10 +46,10 @@ curl \
   https://api.example.com/me
 ```
 
-```json /521def67-6016-45e1-bb30-6a4977713e3b/
+```json /02IiNr0G8viOVKjzAMjHS4DASb93nrGVPG8KU/
 {
   "type": "User",
-  "id": "521def67-6016-45e1-bb30-6a4977713e3b",
+  "id": "02IiNr0G8viOVKjzAMjHS4DASb93nrGVPG8KU",
   "data": {
     "created": "2026-07-27T10:39:51+00:00",
     "updated": "2026-07-27T10:39:51+00:00",

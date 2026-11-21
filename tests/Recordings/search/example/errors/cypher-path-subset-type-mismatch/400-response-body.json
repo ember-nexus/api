@@ -2,7 +2,7 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:5f4fbe6c-4ca7-46ac-b862-da0dcf5d2f9c",
+  "instance": "urn:uuid:02IiNr0G8viOVKk5aWw9Izaubt5MxqSRrx402",
   "detail": "Search step 2 (type cypher-path-subset) was rejected by neo4j, see failedStep.diagnostics for the reason.",
   "debug": [
     {
@@ -49,7 +49,7 @@
                     {
                       "term": {
                         "_usersWithSearchAccess.keyword": {
-                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                          "value": "02IiNr0GOoKiPMM5A0eq9jHk2upaJezsVtWjL"
                         }
                       }
                     }
@@ -77,140 +77,140 @@
             {
               "elements": [
                 {
-                  "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
+                  "id": "02IiNr0GOoKiPMLHurXARbcQUHxEJVbY9UJPL",
                   "type": "Taxon",
                   "metadata": {
                     "score": 4.5739636
                   }
                 },
                 {
-                  "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                  "id": "02IiNr0GOoKiPMLPDlPbKrlR4vnBQsvSBSkU5",
                   "type": "Plant",
                   "metadata": {
                     "score": 4.0113134
                   }
                 },
                 {
-                  "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
+                  "id": "02IiNr0GOoKiPMLMTxO45AnoTbb6AIdILXae9",
                   "type": "Taxon",
                   "metadata": {
                     "score": 3.7564187
                   }
                 },
                 {
-                  "id": "63bcbffb-29a3-45b5-8cc1-8c41281bcae3",
+                  "id": "02IiNr0GOoKiPMLtVJ5x7LAjzI5YxHlc22CsB",
                   "type": "Taxon",
                   "metadata": {
                     "score": 3.431453
                   }
                 },
                 {
-                  "id": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+                  "id": "02IiNr0GOoKiPMM8VYQwSjn1SLUX4EI5n8arM",
                   "type": "Taxon",
                   "metadata": {
                     "score": 3.269838
                   }
                 },
                 {
-                  "id": "f8179dfc-5578-44de-adc0-d6b613eb7a32",
+                  "id": "02IiNr0GOoKiPMN3kwX8zU4CDN8SlR7WlvzLO",
                   "type": "Plant",
                   "metadata": {
                     "score": 3.2554708
                   }
                 },
                 {
-                  "id": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
+                  "id": "02IiNr0GOoKiPMMKHq1FVE9PGfXYUHKPwwRDT",
                   "type": "Taxon",
                   "metadata": {
                     "score": 3.2443726
                   }
                 },
                 {
-                  "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+                  "id": "02IiNr0GOoKiPMLO9dQSP9Mmvy5E3YmZXDsBP",
                   "type": "Plant",
                   "metadata": {
                     "score": 3.060035
                   }
                 },
                 {
-                  "id": "7dd3a650-d60e-40c9-89d0-bccaf395369f",
+                  "id": "02IiNr0GOoKiPMM6DzjFe3koFBcuei8dqj4Vv",
                   "type": "Taxon",
                   "metadata": {
                     "score": 2.86511
                   }
                 },
                 {
-                  "id": "2c0bb4b9-c1ec-41f3-b9d9-f59a8b8bef38",
+                  "id": "02IiNr0GOoKiPMLSO0SFGjR5wLzVI2bOAUZ7C",
                   "type": "Taxon",
                   "metadata": {
                     "score": 2.71575
                   }
                 },
                 {
-                  "id": "425235d6-75ab-4ccb-8208-783ced0decc6",
+                  "id": "02IiNr0GOoKiPMLdFaNMOFkRwUaBIeqDCV8MK",
                   "type": "Taxon",
                   "metadata": {
                     "score": 2.6083744
                   }
                 },
                 {
-                  "id": "1a9579bd-1331-4d5c-93ec-a9ff8d9c576b",
+                  "id": "02IiNr0GOoKiPMLJtUkRKrlDCgQECzuOvovxu",
                   "type": "Taxon",
                   "metadata": {
                     "score": 2.2473185
                   }
                 },
                 {
-                  "id": "47e135a7-c77a-4489-9262-1e425a4b7177",
+                  "id": "02IiNr0GOoKiPMLfxWEfMiKf3cT5sVUFMG0j4",
                   "type": "Taxon",
                   "metadata": {
                     "score": 2.17333
                   }
                 },
                 {
-                  "id": "3283fd3d-8083-4170-882a-41b1cd152c55",
+                  "id": "02IiNr0GOoKiPMLVYC87gam9dbmx8E6khf0g8",
                   "type": "Plant",
                   "metadata": {
                     "score": 2.1294188
                   }
                 },
                 {
-                  "id": "74023bac-88ea-4031-b4a5-68d861ea2e91",
+                  "id": "02IiNr0GOoKiPMM1RjHnrdKCZC9YSQcRh6HVB",
                   "type": "Plant",
                   "metadata": {
                     "score": 2.085987
                   }
                 },
                 {
-                  "id": "de004523-5165-4f10-872b-92eb9637a5d1",
+                  "id": "02IiNr0GOoKiPMMr41NLkpxWBZFZ6Xwo147EV",
                   "type": "Plant",
                   "metadata": {
                     "score": 2.0042536
                   }
                 },
                 {
-                  "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
+                  "id": "02IiNr0GOoKiPMMBnI2aIF8Qd4GH33FIAozo7",
                   "type": "Plant",
                   "metadata": {
                     "score": 1.9657542
                   }
                 },
                 {
-                  "id": "cec3972f-322f-432c-b86e-611c85a96b6c",
+                  "id": "02IiNr0GOoKiPMMjdclVhiRxyZdTUn17bXYMW",
                   "type": "Taxon",
                   "metadata": {
                     "score": 1.9168881
                   }
                 },
                 {
-                  "id": "c3b3dcf9-4947-43b3-b877-7a337eea5fda",
+                  "id": "02IiNr0GOoKiPMMeFdFREieZfdDYxEGHG3xKj",
                   "type": "Plant",
                   "metadata": {
                     "score": 1.8255562
                   }
                 },
                 {
-                  "id": "1852bdff-a4dd-4f91-9243-0e802775f757",
+                  "id": "02IiNr0GOoKiPMLInXm7QkEoxFbe837GDR9EV",
                   "type": "Taxon",
                   "metadata": {
                     "score": 1.4407414

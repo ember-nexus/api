@@ -9,7 +9,7 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class GetElementNodeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:MmFndbNiEHUr87EtAl8mH4';
-    private const string DATA = '59493df1-736f-4860-b4a8-a7ebb2bcd96e';
+    private const string DATA = '02IiNr0GOoKiPMLoQ9m0JTYrpAHdxOWWB3JFv';
 
     public function testGetElementNode(): void
     {

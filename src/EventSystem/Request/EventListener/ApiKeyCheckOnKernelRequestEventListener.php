@@ -10,12 +10,11 @@ use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
 use App\Type\TokenStateType;
 use App\Type\UserIdAndTokenIdObject;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\DateTime as LaudisDateTime;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 use Predis\Client as RedisClient;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
@@ -135,8 +134,8 @@ class ApiKeyCheckOnKernelRequestEventListener
         }
 
         return new UserIdAndTokenIdObject(
-            UuidV4::fromString($data['user']),
-            UuidV4::fromString($data['token'])
+            Uuid::fromString($data['user']),
+            Uuid::fromString($data['token'])
         );
     }
 

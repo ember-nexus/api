@@ -3,7 +3,7 @@
   "results": [
     {
       "type": "Tag",
-      "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+      "id": "02IiNr0GOoKiPMM4FOCWJ7N93GB5Ih1r74WAy",
       "data": {
         "created": "2026-11-21T09:46:31+00:00",
         "description": "Blue is one of the three primary colours in the RGB (additive) colour model, as well as in the RYB colour model (traditional colour theory). It lies between violet and cyan on the spectrum of visible light. The term blue generally describes colours perceived by humans observing light with a dominant wavelength that's between approximately 450 and 495 nanometres. The clear daytime sky and the deep sea appear blue because of an optical effect known as Rayleigh scattering. An optical effect called the Tyndall effect explains blue eyes. Distant objects appear more blue because of another optical effect called aerial perspective.\n\nBlue has been an important colour in art and decoration since ancient times. The semi-precious stone lapis lazuli was used in ancient Egypt for jewellery and ornament and later, in the Renaissance, to make the pigment ultramarine, the most expensive of all pigments. In the eighth century Chinese artists used cobalt blue to colour fine blue and white porcelain. In the Middle Ages, European artists used it in the windows of cathedrals. Europeans wore clothing coloured with the vegetable dye woad until it was replaced by the finer indigo from America. In the 19th century, synthetic blue dyes and pigments gradually replaced organic dyes and mineral pigments. Dark blue became a common colour for military uniforms and later, in the late 20th century, for business suits. Because blue has commonly been associated with harmony, it was chosen as the colour of the flags of the United Nations and the European Union.\n\nIn the United States and Europe, blue is the colour that both men and women are most likely to choose as their favourite, with at least one recent survey showing the same across several other countries, including China, Malaysia, and Indonesia. Past surveys in the US and Europe have found that blue is the colour most commonly associated with harmony, confidence, masculinity, knowledge, intelligence, calmness, distance, infinity, the imagination, cold, and sadness.",
@@ -19,7 +19,7 @@
     },
     {
       "type": "Plant",
-      "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+      "id": "02IiNr0GOoKiPMM95MrKH8ljX349BOQ3hyMlZ",
       "data": {
         "created": "2026-11-21T09:46:33+00:00",
         "images": [
@@ -102,7 +102,7 @@
                     {
                       "term": {
                         "_usersWithSearchAccess.keyword": {
-                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                          "value": "02IiNr0GOoKiPMM5A0eq9jHk2upaJezsVtWjL"
                         }
                       }
                     }
@@ -126,14 +126,14 @@
             {
               "elements": [
                 {
-                  "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
+                  "id": "02IiNr0GOoKiPMM4FOCWJ7N93GB5Ih1r74WAy",
                   "type": "Tag",
                   "metadata": {
                     "score": 1.0219789
                   }
                 },
                 {
-                  "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
+                  "id": "02IiNr0GOoKiPMM95MrKH8ljX349BOQ3hyMlZ",
                   "type": "Plant",
                   "metadata": {
                     "score": 1.0101794
@@ -149,8 +149,8 @@
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
       "start": 1795257786.954866,
       "accessibleElementIds": [
-        "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
-        "83b35321-4a91-4e9f-a49b-66d718c32ba7"
+        "02IiNr0GOoKiPMM4FOCWJ7N93GB5Ih1r74WAy",
+        "02IiNr0GOoKiPMM95MrKH8ljX349BOQ3hyMlZ"
       ],
       "end": 1795257786.970042,
       "duration": 0.015176

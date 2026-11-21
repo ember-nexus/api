@@ -15,9 +15,9 @@ use App\Type\AccessType;
 use App\Type\ElementType;
 use App\Type\EtagType;
 use App\Type\Response\CollectionResponse;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\CypherList;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -38,14 +38,14 @@ class GetParentsController extends AbstractController
         '/{id}/parents',
         name: 'get-parents',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['GET']
     )]
     #[EndpointSupportsEtag(EtagType::PARENTS_COLLECTION)]
     public function getParents(string $id): CollectionResponse
     {
-        $childId = UuidV4::fromString($id);
+        $childId = Uuid::fromString($id);
         $userId = $this->authProvider->getUserId();
 
         $type = $this->accessChecker->getElementType($childId);
@@ -135,7 +135,7 @@ class GetParentsController extends AbstractController
                 if (!is_string($rawParent)) {
                     throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property parent as string, not %s.', get_debug_type($rawParent))); // @codeCoverageIgnore
                 }
-                $nodeIds[] = UuidV4::fromString($rawParent);
+                $nodeIds[] = Uuid::fromString($rawParent);
                 $rawRelations = $resultSet->get('r');
                 if (!($rawRelations instanceof CypherList)) {
                     throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r as CypherList, not %s.', get_debug_type($rawRelations))); // @codeCoverageIgnore
@@ -144,7 +144,7 @@ class GetParentsController extends AbstractController
                     if (!is_string($relationId)) {
                         throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property r.item as string, not %s.', get_debug_type($relationId))); // @codeCoverageIgnore
                     }
-                    $relationIds[] = UuidV4::fromString($relationId);
+                    $relationIds[] = Uuid::fromString($relationId);
                 }
             }
         }

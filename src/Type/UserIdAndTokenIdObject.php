@@ -4,34 +4,32 @@ declare(strict_types=1);
 
 namespace App\Type;
 
-use Ramsey\Uuid\UuidInterface;
-
 class UserIdAndTokenIdObject
 {
     public function __construct(
-        private UuidInterface $userId,
-        private UuidInterface $tokenId,
+        private Uuid $userId,
+        private Uuid $tokenId,
     ) {
     }
 
-    public function getUserId(): UuidInterface
+    public function getUserId(): Uuid
     {
         return $this->userId;
     }
 
-    public function setUserId(UuidInterface $userId): static
+    public function setUserId(Uuid $userId): static
     {
         $this->userId = $userId;
 
         return $this;
     }
 
-    public function getTokenId(): UuidInterface
+    public function getTokenId(): Uuid
     {
         return $this->tokenId;
     }
 
-    public function setTokenId(UuidInterface $tokenId): static
+    public function setTokenId(Uuid $tokenId): static
     {
         $this->tokenId = $tokenId;
 

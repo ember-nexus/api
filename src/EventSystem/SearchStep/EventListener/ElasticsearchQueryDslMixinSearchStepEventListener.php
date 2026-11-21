@@ -13,8 +13,8 @@ use App\Service\ExpressionService;
 use App\Service\GraphStructureService;
 use App\Service\Search\ElasticsearchQueryDefinitionService;
 use App\Type\SearchStepType;
+use App\Type\Uuid;
 use Elastic\Elasticsearch\Response\Elasticsearch;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\ElasticEntityManager\Type\EntityManager as ElasticEntityManager;
 
@@ -143,7 +143,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
                 $metadata['sort'] = $element['sort'];
             }
             $elements[] = [
-                'id' => UuidV4::fromString($element['_id']),
+                'id' => Uuid::fromString($element['_id']),
                 'type' => $this->graphStructureService->getTypeFromElasticIndex($element['_index']),
                 'metadata' => $metadata,
             ];
@@ -160,7 +160,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     private function getElementMetadata(array $elements): array
     {
         $elementMetadata = [];
-        /** @var array{id: UuidV4, metadata: array<string, mixed>} $element */
+        /** @var array{id: Uuid, metadata: array<string, mixed>} $element */
         foreach ($elements as $element) {
             $elementMetadata[$element['id']->toString()] = $element['metadata'];
         }

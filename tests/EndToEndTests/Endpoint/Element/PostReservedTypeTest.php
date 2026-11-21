@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Endpoint\Element;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Ramsey\Uuid\Uuid;
 
 /**
  * The types User, Token and Upload are managed by the API itself and can not be created through the generic
@@ -31,7 +31,7 @@ class PostReservedTypeTest extends BaseRequestTestCase
     #[DataProvider('reservedTypeProvider')]
     public function testPostIndexWithReservedTypeReturns400(string $type): void
     {
-        $id = Uuid::uuid4()->toString();
+        $id = Uuid::generate()->toString();
         $response = $this->runPostRequest('/', self::TOKEN, [
             'id' => $id,
             'type' => $type,
@@ -50,7 +50,7 @@ class PostReservedTypeTest extends BaseRequestTestCase
             'type' => 'Data',
             'data' => ['name' => 'post-reserved-type-parent-'.$type],
         ]));
-        $id = Uuid::uuid4()->toString();
+        $id = Uuid::generate()->toString();
 
         $response = $this->runPostRequest(sprintf('/%s', $parentId), self::TOKEN, [
             'id' => $id,

@@ -7,6 +7,7 @@ namespace App\Tests\UnitTests\Service;
 use App\Factory\Type\RedisKeyFactory;
 use App\Service\FileCreationLockService;
 use App\Service\RequestIdService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
@@ -14,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(FileCreationLockService::class)]
@@ -22,7 +22,7 @@ class FileCreationLockServiceTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string REQUEST_ID = '3950e94a-2cd0-43ef-ac5a-8e116a4263c8';
+    private const string REQUEST_ID = '02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f';
 
     private function buildRequestIdService(string $requestId = self::REQUEST_ID): RequestIdService
     {
@@ -34,7 +34,7 @@ class FileCreationLockServiceTest extends TestCase
 
     public function testAcquireSetsKeyWithNxAndTtlAndReturnsTheRequestIdAsToken(): void
     {
-        $elementId = Uuid::uuid4();
+        $elementId = Uuid::generate();
         $redis = $this->prophesize(Client::class);
         $redis->set(
             'lock:file-creation:'.$elementId->toString(),
@@ -54,13 +54,13 @@ class FileCreationLockServiceTest extends TestCase
         $redis = $this->prophesize(Client::class);
         $redis->set(Argument::cetera())->willReturn(null);
 
-        $this->assertNull((new FileCreationLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->acquire(Uuid::uuid4()));
+        $this->assertNull((new FileCreationLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->acquire(Uuid::generate()));
     }
 
     #[DataProvider('isLockedProvider')]
     public function testIsLocked(int $existsResult, bool $expected): void
     {
-        $elementId = Uuid::uuid4();
+        $elementId = Uuid::generate();
         $redis = $this->prophesize(Client::class);
         $redis->exists('lock:file-creation:'.$elementId->toString())->shouldBeCalledOnce()->willReturn($existsResult);
 
@@ -77,7 +77,7 @@ class FileCreationLockServiceTest extends TestCase
 
     public function testReleaseComparesTokenBeforeDeleting(): void
     {
-        $elementId = Uuid::uuid4();
+        $elementId = Uuid::generate();
         $key = 'lock:file-creation:'.$elementId->toString();
         $redis = $this->prophesize(Client::class);
         $redis->get($key)->shouldBeCalledOnce()->willReturn('my-token');
@@ -88,7 +88,7 @@ class FileCreationLockServiceTest extends TestCase
 
     public function testReleaseDoesNotDeleteWhenTokenDoesNotMatch(): void
     {
-        $elementId = Uuid::uuid4();
+        $elementId = Uuid::generate();
         $key = 'lock:file-creation:'.$elementId->toString();
         $redis = $this->prophesize(Client::class);
         $redis->get($key)->shouldBeCalledOnce()->willReturn('someone-elses-token');

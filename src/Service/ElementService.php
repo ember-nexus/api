@@ -7,7 +7,7 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 class ElementService
 {
@@ -33,7 +33,7 @@ class ElementService
         return $this->storageService->getStorageBucketKey($this->getElementId($element), $this->getFileNameExtension($element));
     }
 
-    public function getElementId(NodeElementInterface|RelationElementInterface $element): UuidInterface
+    public function getElementId(NodeElementInterface|RelationElementInterface $element): Uuid
     {
         $elementId = $element->getId();
         if (null === $elementId) {

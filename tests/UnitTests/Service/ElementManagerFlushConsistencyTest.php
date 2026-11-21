@@ -14,6 +14,7 @@ use App\Service\ElementManager;
 use App\Tests\UnitTests\AssertLoggerTrait;
 use App\Type\FragmentGroup;
 use App\Type\NodeElement;
+use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -22,7 +23,6 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Syndesi\CypherDataStructures\Contract\NodeInterface as CypherNodeInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Syndesi\ElasticDataStructures\Type\Document as ElasticDocument;
@@ -99,7 +99,7 @@ class ElementManagerFlushConsistencyTest extends TestCase
 
     private function buildElement(): NodeElementInterface
     {
-        return (new NodeElement())->setId(UuidV4::uuid4())->setLabel('Data');
+        return (new NodeElement())->setId(Uuid::generate())->setLabel('Data');
     }
 
     private function stubFragmentize(NodeElementInterface $element): FragmentGroup

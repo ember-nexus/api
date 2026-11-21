@@ -11,14 +11,13 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Type\SearchStepType;
+use App\Type\Uuid;
 use Laudis\Neo4j\Contracts\TransactionInterface;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
 use Laudis\Neo4j\Types\Node;
 use Laudis\Neo4j\Types\Path;
 use Laudis\Neo4j\Types\UnboundRelationship;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -39,7 +38,7 @@ class CypherPathSearchStepEventListener
     }
 
     /**
-     * @return array{nodeIds: UuidInterface[], relationIds: UuidInterface[]}
+     * @return array{nodeIds: Uuid[], relationIds: Uuid[]}
      */
     private function parseRawPathFromRow(CypherMap $row): array
     {
@@ -58,7 +57,7 @@ class CypherPathSearchStepEventListener
             if (!is_string($rawId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.node.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
             }
-            $nodeIds[] = UuidV4::fromString($rawId);
+            $nodeIds[] = Uuid::fromString($rawId);
         }
         foreach ($rawPath->getRelationships() as $rawRelation) {
             /**
@@ -71,7 +70,7 @@ class CypherPathSearchStepEventListener
             if (!is_string($rawId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property path.relationships.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
             }
-            $relationIds[] = UuidV4::fromString($rawId);
+            $relationIds[] = Uuid::fromString($rawId);
         }
         $nodeCount = count($nodeIds);
         $relationCount = count($relationIds);
@@ -86,9 +85,9 @@ class CypherPathSearchStepEventListener
     }
 
     /**
-     * @param array<array{nodeIds: UuidInterface[], relationIds: UuidInterface[]}> $paths
+     * @param array<array{nodeIds: Uuid[], relationIds: Uuid[]}> $paths
      *
-     * @return UuidInterface[]
+     * @return Uuid[]
      */
     private function getElementIdsFromPaths(array $paths): array
     {
@@ -101,9 +100,9 @@ class CypherPathSearchStepEventListener
     }
 
     /**
-     * @param array<array{nodeIds: UuidInterface[], relationIds: UuidInterface[]}> $paths
+     * @param array<array{nodeIds: Uuid[], relationIds: Uuid[]}> $paths
      *
-     * @return array<array{nodeIds: UuidInterface[], relationIds: UuidInterface[]}>
+     * @return array<array{nodeIds: Uuid[], relationIds: Uuid[]}>
      */
     private function filterPathsToAccessibleOnly(SearchStepEvent $event, array $paths): array
     {

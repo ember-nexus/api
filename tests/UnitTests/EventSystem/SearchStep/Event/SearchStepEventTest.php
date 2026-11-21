@@ -69,7 +69,7 @@ class SearchStepEventTest extends TestCase
 
     public function testPreviousElementMetadataIsProvidedByConstructorAndNotPartOfTheDebugInput(): void
     {
-        $previous = ['4b0d1aa3-fa47-47e8-b5e3-5ea23f6b7a5a' => [0 => ['score' => 1.5]]];
+        $previous = ['02IiNr0G8viOVKjvj8DUNVx7k7SGySTlPgIzB' => [0 => ['score' => 1.5]]];
 
         $event = new SearchStepEvent(SearchStepType::ELEMENT_HYDRATION, null, [], $previous);
 
@@ -80,7 +80,7 @@ class SearchStepEventTest extends TestCase
     public function testElementMetadataCanBeSet(): void
     {
         $event = new SearchStepEvent(SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN, [], []);
-        $metadata = ['4b0d1aa3-fa47-47e8-b5e3-5ea23f6b7a5a' => ['score' => 1.5]];
+        $metadata = ['02IiNr0G8viOVKjvj8DUNVx7k7SGySTlPgIzB' => ['score' => 1.5]];
 
         $this->assertSame($event, $event->setElementMetadata($metadata));
 

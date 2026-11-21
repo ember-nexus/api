@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\ServerTests;
 
 use App\Tests\ExampleGenerationControllerWithDefaultConfiguration\BaseRequestTestCase;
+use App\Type\Uuid;
 use Psr\Http\Message\ResponseInterface;
-use Ramsey\Uuid\Uuid;
 
 /**
  * Base for tests of the server behaviour (web server limits, PHP failures) against the production image, started
@@ -121,7 +121,7 @@ abstract class BaseServerTestCase extends BaseRequestTestCase
         $this->assertIsArray($body);
         $this->assertArrayHasKey('instance', $body);
         $this->assertIsString($body['instance']);
-        $this->assertMatchesRegularExpression('/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $body['instance']);
+        $this->assertMatchesRegularExpression('/^urn:uuid:[0-9A-Za-z]{37}$/', $body['instance']);
         // the id is not part of the response headers
         $this->assertFalse($response->hasHeader('X-Request-Id'));
 
@@ -133,7 +133,7 @@ abstract class BaseServerTestCase extends BaseRequestTestCase
      */
     protected function runNotFoundRequest(): ResponseInterface
     {
-        $response = $this->runGetRequest(sprintf('/%s', Uuid::uuid4()->toString()), $this->getToken());
+        $response = $this->runGetRequest(sprintf('/%s', Uuid::generate()->toString()), $this->getToken());
         $this->assertSame(404, $response->getStatusCode());
 
         return $response;

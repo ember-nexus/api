@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Type;
 
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(RelationElement::class)]
@@ -69,7 +69,7 @@ class RelationElementTest extends TestCase
 
         $this->assertNull($relationElement->getId());
 
-        $id = Uuid::fromString('e6f6ef39-60b4-47aa-8a7f-091502943815');
+        $id = Uuid::fromString('02IiNr0G8viOVKl9f5FjzIeTKZPCtL4rbxhUb');
         $relationElement->setId($id);
         $this->assertSame($id, $relationElement->getId());
 
@@ -98,7 +98,7 @@ class RelationElementTest extends TestCase
 
         $this->assertNull($relationElement->getStart());
 
-        $id = Uuid::fromString('8790d9de-453c-44af-9bd4-ce2515c5f164');
+        $id = Uuid::fromString('02IiNr0G8viOVKkPDWBKd4gdtqNHPgzvd2wVe');
 
         $relationElement->setStart($id);
 
@@ -115,7 +115,7 @@ class RelationElementTest extends TestCase
 
         $this->assertNull($relationElement->getEnd());
 
-        $id = Uuid::fromString('8790d9de-453c-44af-9bd4-ce2515c5f164');
+        $id = Uuid::fromString('02IiNr0G8viOVKkPDWBKd4gdtqNHPgzvd2wVe');
 
         $relationElement->setEnd($id);
 

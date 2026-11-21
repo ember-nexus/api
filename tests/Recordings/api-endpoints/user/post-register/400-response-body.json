@@ -2,6 +2,6 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:f15cfcf3-099d-48c9-9aa5-6b52a263801b",
+  "instance": "urn:uuid:02IiNr0G8viOVKlEiMkIGlXPg3vK7QEdZ0oLQ",
   "detail": "Endpoint expects property 'type' to be User, got string 'NotAUser'."
 }

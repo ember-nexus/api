@@ -2,6 +2,6 @@
   "type": "http://api/error/409/conflict",
   "title": "Conflict",
   "status": 409,
-  "instance": "urn:uuid:64b5fb80-4e1d-4118-9729-1cdd37915b17",
+  "instance": "urn:uuid:02IiNr0G8viOVKk8EcoBEYO6fUtxjRGvJ5Lnv",
   "detail": "Another request is currently modifying this upload, please retry once it has finished."
 }

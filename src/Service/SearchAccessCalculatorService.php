@@ -8,7 +8,7 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Security\AccessChecker;
 use App\Type\AccessType;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 /**
  * Calculates the direct groups/users with search access to a node or relation, and the Elasticsearch index name its
@@ -56,7 +56,7 @@ class SearchAccessCalculatorService
     }
 
     /**
-     * @param UuidInterface[] $ids
+     * @param Uuid[] $ids
      *
      * @return string[]
      */

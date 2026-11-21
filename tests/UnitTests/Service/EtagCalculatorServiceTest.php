@@ -8,6 +8,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\ElementManager;
 use App\Service\EtagCalculatorService;
 use App\Type\NodeElement;
+use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Contracts\ClientInterface;
@@ -21,7 +22,6 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use stdClass;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
@@ -37,7 +37,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateElementEtagForNodeWhichExists(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -84,7 +84,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateElementEtag($id);
 
         // assert result
-        $this->assertSame('Rh8DXSRXuja', (string) $etag);
+        $this->assertSame('f6unNiDhNmd', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -102,7 +102,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateElementEtagForRelationWhichExists(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -149,7 +149,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateElementEtag($id);
 
         // assert result
-        $this->assertSame('Rh8DXSRXuja', (string) $etag);
+        $this->assertSame('f6unNiDhNmd', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -167,7 +167,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateElementEtagForElementWhichDoesNotExist(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -210,7 +210,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateElementEtagWithEdgecaseWhereDifferentObjectIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -255,7 +255,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagWithExistingElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -263,11 +263,11 @@ class EtagCalculatorServiceTest extends TestCase
                 new CypherMap([
                     'sortedTuples' => new CypherList([
                         new CypherList([
-                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                         new CypherList([
-                            '2c42deee-ad24-4f04-bb37-7c31fd5b3345',
+                            '02IiNr0G8viOVKjgkfJb5pRcbhHifRTwfgwml',
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                     ]),
@@ -312,7 +312,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateChildrenCollectionEtag($id);
 
         // assert result
-        $this->assertSame('EKHX4b5HhHX', (string) $etag);
+        $this->assertSame('1p5bkZfgbcb', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -342,7 +342,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagWithNoElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -390,7 +390,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateChildrenCollectionEtag($id);
 
         // assert result
-        $this->assertSame('3F8H5eXjtu0', (string) $etag);
+        $this->assertSame('HWAlNPdJoU', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -420,12 +420,12 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagWithTooManyElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $resultList = [];
         for ($i = 0; $i < 101; ++$i) {
             $resultList[] = new CypherList([
-                '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                 new DateTimeZoneId(1705772003, 646811000, 'UTC'),
             ]);
         }
@@ -474,7 +474,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagDifferentObjectIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -482,7 +482,7 @@ class EtagCalculatorServiceTest extends TestCase
                 new CypherMap([
                     'sortedTuples' => new CypherList([
                         new CypherList([
-                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                             new stdClass(),
                         ]),
                     ]),
@@ -525,7 +525,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateChildrenCollectionEtagWhereNoDataIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -565,7 +565,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagWithExistingElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -573,11 +573,11 @@ class EtagCalculatorServiceTest extends TestCase
                 new CypherMap([
                     'sortedTuples' => new CypherList([
                         new CypherList([
-                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                         new CypherList([
-                            '2c42deee-ad24-4f04-bb37-7c31fd5b3345',
+                            '02IiNr0G8viOVKjgkfJb5pRcbhHifRTwfgwml',
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                     ]),
@@ -622,7 +622,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateParentsCollectionEtag($id);
 
         // assert result
-        $this->assertSame('EKHX4b5HhHX', (string) $etag);
+        $this->assertSame('1p5bkZfgbcb', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -652,7 +652,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagWithNoElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -700,7 +700,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateParentsCollectionEtag($id);
 
         // assert result
-        $this->assertSame('3F8H5eXjtu0', (string) $etag);
+        $this->assertSame('HWAlNPdJoU', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -730,12 +730,12 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagWithTooManyElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $resultList = [];
         for ($i = 0; $i < 101; ++$i) {
             $resultList[] = new CypherList([
-                '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                 new DateTimeZoneId(1705772003, 646811000, 'UTC'),
             ]);
         }
@@ -784,7 +784,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagDifferentObjectIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -792,7 +792,7 @@ class EtagCalculatorServiceTest extends TestCase
                 new CypherMap([
                     'sortedTuples' => new CypherList([
                         new CypherList([
-                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                             new stdClass(),
                         ]),
                     ]),
@@ -835,7 +835,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateParentsCollectionEtagWhereNoDataIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -875,7 +875,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagWithExistingElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -883,11 +883,11 @@ class EtagCalculatorServiceTest extends TestCase
                 new CypherMap([
                     'sortedTuples' => new CypherList([
                         new CypherList([
-                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                         new CypherList([
-                            '2c42deee-ad24-4f04-bb37-7c31fd5b3345',
+                            '02IiNr0G8viOVKjgkfJb5pRcbhHifRTwfgwml',
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                     ]),
@@ -932,7 +932,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateRelatedCollectionEtag($id);
 
         // assert result
-        $this->assertSame('EKHX4b5HhHX', (string) $etag);
+        $this->assertSame('1p5bkZfgbcb', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -961,7 +961,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagWithNoElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1009,7 +1009,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateRelatedCollectionEtag($id);
 
         // assert result
-        $this->assertSame('3F8H5eXjtu0', (string) $etag);
+        $this->assertSame('HWAlNPdJoU', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -1038,12 +1038,12 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagWithTooManyElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $resultList = [];
         for ($i = 0; $i < 101; ++$i) {
             $resultList[] = new CypherList([
-                '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                 new DateTimeZoneId(1705772003, 646811000, 'UTC'),
             ]);
         }
@@ -1092,7 +1092,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagDifferentObjectIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1100,7 +1100,7 @@ class EtagCalculatorServiceTest extends TestCase
                 new CypherMap([
                     'sortedTuples' => new CypherList([
                         new CypherList([
-                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                             new stdClass(),
                         ]),
                     ]),
@@ -1143,7 +1143,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateRelatedCollectionEtagWhereNoDataIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1183,7 +1183,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagWithExistingElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1191,11 +1191,11 @@ class EtagCalculatorServiceTest extends TestCase
                 new CypherMap([
                     'sortedTuples' => new CypherList([
                         new CypherList([
-                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                         new CypherList([
-                            '2c42deee-ad24-4f04-bb37-7c31fd5b3345',
+                            '02IiNr0G8viOVKjgkfJb5pRcbhHifRTwfgwml',
                             new DateTimeZoneId(1705772003, 646811000, 'UTC'),
                         ]),
                     ]),
@@ -1240,7 +1240,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateIndexCollectionEtag($id);
 
         // assert result
-        $this->assertSame('EKHX4b5HhHX', (string) $etag);
+        $this->assertSame('1p5bkZfgbcb', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -1269,7 +1269,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagWithNoElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1317,7 +1317,7 @@ class EtagCalculatorServiceTest extends TestCase
         $etag = $etagCalculatorService->calculateIndexCollectionEtag($id);
 
         // assert result
-        $this->assertSame('3F8H5eXjtu0', (string) $etag);
+        $this->assertSame('HWAlNPdJoU', (string) $etag);
 
         $this->assertInstanceOf(Statement::class, $statement);
         $this->assertSame(
@@ -1346,12 +1346,12 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagWithTooManyElements(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $resultList = [];
         for ($i = 0; $i < 101; ++$i) {
             $resultList[] = new CypherList([
-                '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                 new DateTimeZoneId(1705772003, 646811000, 'UTC'),
             ]);
         }
@@ -1400,7 +1400,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagDifferentObjectIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1408,7 +1408,7 @@ class EtagCalculatorServiceTest extends TestCase
                 new CypherMap([
                     'sortedTuples' => new CypherList([
                         new CypherList([
-                            '06f5da99-dfca-43c9-9d5f-3254c0d5f3c9',
+                            '02IiNr0G8viOVKjOaAG83wxK2tnTIFmidgw60',
                             new stdClass(),
                         ]),
                     ]),
@@ -1451,7 +1451,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateIndexCollectionEtagWhereNoDataIsReturned(): void
     {
         // setup variables
-        $id = Uuid::fromString('224a787e-3b32-4822-8697-61047175505d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub');
         $null = null;
         $queryResult = new SummarizedResult(
             $null,
@@ -1491,7 +1491,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateFileEtagUsesStoredSha256Hash(): void
     {
         // setup variables
-        $id = Uuid::fromString('544e0cf6-d351-435c-828f-7a0762240ce6');
+        $id = Uuid::fromString('02IiNr0G8viOVKk0EPVtyLZhHyrSwZ9Pb54qV');
 
         $element = new NodeElement();
         $element->addProperty('hasFile', true);
@@ -1553,7 +1553,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateFileEtagFallsBackToAlphabeticallyFirstHashWhenSha256Missing(): void
     {
         // setup variables
-        $id = Uuid::fromString('7f8e9d0c-1b2a-4c3d-9e8f-0a1b2c3d4e5f');
+        $id = Uuid::fromString('02IiNr0G8viOVKkLICSe6spsY4YUBDwkcKDN7');
 
         $element = new NodeElement();
         $element->addProperty('hasFile', true);
@@ -1612,7 +1612,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateFileEtagFallsBackToElementEtagWhenNoHashIsPresent(): void
     {
         // setup variables
-        $id = Uuid::fromString('9c1a0c0e-6b8f-4b3d-9b1e-2b1a0c0e6b8f');
+        $id = Uuid::fromString('02IiNr0G8viOVKkZCVrr3zNzDN2WeKk4HWwn9');
 
         $element = new NodeElement();
         $element->addProperty('hasFile', true);
@@ -1668,7 +1668,7 @@ class EtagCalculatorServiceTest extends TestCase
         // an element can lack the 'file' property, e.g. after an upload was rejected due to a mismatched digest
 
         // setup variables
-        $id = Uuid::fromString('1a2b3c4d-5e6f-4a1b-8c9d-0e1f2a3b4c5d');
+        $id = Uuid::fromString('02IiNr0G8viOVKjXvVMZ5FrajXyVAYy15Wrxe');
 
         $element = new NodeElement();
         $element->addProperty('hasFile', true);
@@ -1719,7 +1719,7 @@ class EtagCalculatorServiceTest extends TestCase
     public function testCalculateFileEtagReturnsNullWhenElementEtagFallbackAlsoReturnsNull(): void
     {
         // setup variables
-        $id = Uuid::fromString('662a045f-7d90-4fa2-85f8-9f972f2bdbd3');
+        $id = Uuid::fromString('02IiNr0G8viOVKk8w3TYZwdGVcX9NwAzXzc0t');
 
         $element = new NodeElement();
         $element->addProperty('hasFile', true);
@@ -1765,7 +1765,7 @@ class EtagCalculatorServiceTest extends TestCase
 
     public function testCalculateFileEtagReturnsNullForElementWithoutFile(): void
     {
-        $id = Uuid::fromString('544e0cf6-d351-435c-828f-7a0762240ce6');
+        $id = Uuid::fromString('02IiNr0G8viOVKk0EPVtyLZhHyrSwZ9Pb54qV');
 
         $element = new NodeElement();
         $element->addProperty('hasFile', false);

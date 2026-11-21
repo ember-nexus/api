@@ -15,13 +15,13 @@ use App\Service\UploadAccessService;
 use App\Service\UploadAppendService;
 use App\Service\UploadLockService;
 use App\Type\Response\NoContentResponse;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -31,7 +31,7 @@ class PatchUploadControllerTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string UPLOAD_ID = '224a787e-3b32-4822-8697-61047175505d';
+    private const string UPLOAD_ID = '02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub';
 
     private ObjectProphecy $uploadAccessService;
     private ObjectProphecy $uploadAppendService;

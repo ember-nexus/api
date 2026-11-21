@@ -6,13 +6,13 @@ namespace App\Tests\UnitTests\Service;
 
 use App\Factory\Type\RedisKeyFactory;
 use App\Service\UploadLockService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(UploadLockService::class)]
@@ -22,7 +22,7 @@ class UploadLockServiceTest extends TestCase
 
     public function testAcquireSetsKeyWithNxAndTtlAndReturnsToken(): void
     {
-        $uploadId = Uuid::uuid4();
+        $uploadId = Uuid::generate();
         $redis = $this->prophesize(Client::class);
         $redis->set(
             'lock:upload:'.$uploadId->toString(),
@@ -42,12 +42,12 @@ class UploadLockServiceTest extends TestCase
         $redis = $this->prophesize(Client::class);
         $redis->set(Argument::cetera())->willReturn(null);
 
-        $this->assertNull((new UploadLockService($redis->reveal(), new RedisKeyFactory()))->acquire(Uuid::uuid4()));
+        $this->assertNull((new UploadLockService($redis->reveal(), new RedisKeyFactory()))->acquire(Uuid::generate()));
     }
 
     public function testReleaseComparesTokenBeforeDeleting(): void
     {
-        $uploadId = Uuid::uuid4();
+        $uploadId = Uuid::generate();
         $key = 'lock:upload:'.$uploadId->toString();
         $redis = $this->prophesize(Client::class);
         $redis->get($key)->shouldBeCalledOnce()->willReturn('my-token');
@@ -58,7 +58,7 @@ class UploadLockServiceTest extends TestCase
 
     public function testReleaseDoesNotDeleteWhenTokenDoesNotMatch(): void
     {
-        $uploadId = Uuid::uuid4();
+        $uploadId = Uuid::generate();
         $key = 'lock:upload:'.$uploadId->toString();
         $redis = $this->prophesize(Client::class);
         $redis->get($key)->shouldBeCalledOnce()->willReturn('someone-elses-token');

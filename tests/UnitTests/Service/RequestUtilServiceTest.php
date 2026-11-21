@@ -292,8 +292,8 @@ class RequestUtilServiceTest extends TestCase
     {
         $requestUtilService = $this->getRequestUtilService();
 
-        $uuid = $requestUtilService->getUuidFromBody('id', ['id' => '3d5b3a5a-6a5e-4b0e-9b3c-3c1f6a2b4d5e']);
-        $this->assertSame('3d5b3a5a-6a5e-4b0e-9b3c-3c1f6a2b4d5e', $uuid->toString());
+        $uuid = $requestUtilService->getUuidFromBody('id', ['id' => '02IiNr0G8viOVKjp3s2VzLtcvsS4jbHGrHgxi']);
+        $this->assertSame('02IiNr0G8viOVKjp3s2VzLtcvsS4jbHGrHgxi', $uuid->toString());
     }
 
     /**

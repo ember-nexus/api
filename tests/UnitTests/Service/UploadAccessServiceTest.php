@@ -18,6 +18,7 @@ use App\Service\UploadAccessService;
 use App\Service\UploadCancellationService;
 use App\Service\UploadConsistencyService;
 use App\Type\AccessType;
+use App\Type\Uuid;
 use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -25,7 +26,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 
 #[Small]
@@ -34,7 +34,7 @@ class UploadAccessServiceTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string UPLOAD_ID = '224a787e-3b32-4822-8697-61047175505d';
+    private const string UPLOAD_ID = '02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub';
 
     private ObjectProphecy $uploadCancellationService;
     private ObjectProphecy $uploadConsistencyService;
@@ -45,12 +45,12 @@ class UploadAccessServiceTest extends TestCase
 
     private function createService(string $expires = '+1 hour', bool $isOwner = true, bool $hasAccess = true): UploadAccessService
     {
-        $userId = Uuid::uuid4();
-        $targetId = Uuid::uuid4();
+        $userId = Uuid::generate();
+        $targetId = Uuid::generate();
 
         $this->upload = $this->prophesize(UploadInterface::class);
         $this->upload->getId()->willReturn(Uuid::fromString(self::UPLOAD_ID));
-        $this->upload->getUploadOwner()->willReturn($isOwner ? $userId : Uuid::uuid4());
+        $this->upload->getUploadOwner()->willReturn($isOwner ? $userId : Uuid::generate());
         $this->upload->getUploadTarget()->willReturn($targetId);
         $this->upload->getExpires()->willReturn(new DateTime($expires));
 

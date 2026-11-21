@@ -13,7 +13,7 @@ use App\Service\ElementResponseService;
 use App\Type\AccessType;
 use App\Type\EtagType;
 use App\Type\Response\ElementResponse;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Type\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -31,14 +31,14 @@ class GetElementController extends AbstractController
         '/{id}',
         name: 'get-element',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['GET']
     )]
     #[EndpointSupportsEtag(EtagType::ELEMENT)]
     public function getElement(string $id): ElementResponse
     {
-        $elementId = UuidV4::fromString($id);
+        $elementId = Uuid::fromString($id);
         $userId = $this->authProvider->getUserId();
 
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::READ)) {

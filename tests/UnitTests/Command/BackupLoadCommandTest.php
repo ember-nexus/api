@@ -17,6 +17,7 @@ use App\Service\S3Service;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
 use App\Type\S3\UploadFileOperation;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use InvalidArgumentException;
@@ -32,7 +33,6 @@ use Predis\Client;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\NullLogger;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -93,7 +93,7 @@ class BackupLoadCommandTest extends TestCase
      */
     private function addBackupFile(string $content, ?array $fileProperty): string
     {
-        $id = Uuid::uuid4();
+        $id = Uuid::generate();
         $this->backupStorage->write(sprintf('%s/file/%s.bin', self::BACKUP_NAME, $id->toString()), $content);
         $element = new NodeElement();
         $element->setId($id);
@@ -343,8 +343,8 @@ class BackupLoadCommandTest extends TestCase
 
     public function testBrokenRelationFilesDoNotAbortRestoreOfOtherRelations(): void
     {
-        $good1 = Uuid::uuid4()->toString();
-        $good2 = Uuid::uuid4()->toString();
+        $good1 = Uuid::generate()->toString();
+        $good2 = Uuid::generate()->toString();
         $this->backupStorage->write(self::BACKUP_NAME.'/relation/good-1.json', sprintf('{"type":"RELATION","id":"%s"}', $good1));
         $this->backupStorage->write(self::BACKUP_NAME.'/relation/invalid-json.json', 'this is not json');
         $this->backupStorage->write(self::BACKUP_NAME.'/relation/without-id.json', '{"type":"RELATION"}');

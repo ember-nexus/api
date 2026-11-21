@@ -17,14 +17,13 @@ use App\Service\ElementToRawService;
 use App\Service\ExpressionService;
 use App\Type\NodeElement;
 use App\Type\SearchStepType;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionMethod;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -121,7 +120,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             SearchStepType::ELEMENT_HYDRATION,
             [
                 'elementIds' => [
-                    '718cf4c7-6815-49e1-8b1f-082949365c5f',
+                    '02IiNr0G8viOVKkETVQFbgu6KmMBxZapcuFGX',
                     23847234,
                 ],
             ],
@@ -160,7 +159,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             SearchStepType::ELEMENT_HYDRATION,
             [
                 'elementIds' => [
-                    '718cf4c7-6815-49e1-8b1f-082949365c5f',
+                    '02IiNr0G8viOVKkETVQFbgu6KmMBxZapcuFGX',
                     'thisIsNotAnUuid',
                 ],
             ],
@@ -197,7 +196,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $elementIds = [];
         for ($i = 0; $i < 1234; ++$i) {
-            $elementIds[] = sprintf('00000000-0000-0000-0000-00000000%04d', $i);
+            $elementIds[] = Uuid::generate()->toString();
         }
 
         $event = new SearchStepEvent(
@@ -223,9 +222,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener();
 
         $uuids = [];
-        $base = '00000000-0000-0000-0000-000000000000';
         for ($i = 0; $i < 1000; ++$i) {
-            $uuids[] = substr_replace($base, sprintf('%04d', $i), -4);
+            $uuids[] = Uuid::generate()->toString();
         }
 
         $event = new SearchStepEvent(
@@ -238,7 +236,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
-        /** @var UuidInterface[] $elementIds */
+        /** @var Uuid[] $elementIds */
         $this->assertCount(1000, $elementIds);
     }
 
@@ -268,8 +266,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             SearchStepType::ELEMENT_HYDRATION,
             [
                 'elementIds' => [
-                    '32339603-72de-4f55-868a-9887fb267ae5',
-                    '7c3e153f-7de6-4ae7-8161-60c8e631dce3',
+                    '02IiNr0G8viOVKjjdvufOUfNmf2TFmn7TCGUT',
+                    '02IiNr0G8viOVKkJgBcpTKTA3NF0oCaSyMxYz',
                 ],
             ],
             []
@@ -277,10 +275,10 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
-        /** @var UuidInterface[] $elementIds */
+        /** @var Uuid[] $elementIds */
         $this->assertCount(2, $elementIds);
-        $this->assertSame('32339603-72de-4f55-868a-9887fb267ae5', $elementIds[0]->toString());
-        $this->assertSame('7c3e153f-7de6-4ae7-8161-60c8e631dce3', $elementIds[1]->toString());
+        $this->assertSame('02IiNr0G8viOVKjjdvufOUfNmf2TFmn7TCGUT', $elementIds[0]->toString());
+        $this->assertSame('02IiNr0G8viOVKkJgBcpTKTA3NF0oCaSyMxYz', $elementIds[1]->toString());
     }
 
     public function testParseElementIdsAcceptObjectUuids(): void
@@ -291,8 +289,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             SearchStepType::ELEMENT_HYDRATION,
             [
                 'elementIds' => [
-                    Uuid::fromString('972cb6ec-738b-4718-94f4-8fb4b21e441b'),
-                    Uuid::fromString('e469ab3b-c6e6-4439-9503-c04234ca80f5'),
+                    Uuid::fromString('02IiNr0G8viOVKkWnSh17NG7foVI0dNlknOea'),
+                    Uuid::fromString('02IiNr0G8viOVKl8PjoirTPdFGgA9To37EZU8'),
                 ],
             ],
             []
@@ -300,10 +298,10 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
-        /** @var UuidInterface[] $elementIds */
+        /** @var Uuid[] $elementIds */
         $this->assertCount(2, $elementIds);
-        $this->assertSame('972cb6ec-738b-4718-94f4-8fb4b21e441b', $elementIds[0]->toString());
-        $this->assertSame('e469ab3b-c6e6-4439-9503-c04234ca80f5', $elementIds[1]->toString());
+        $this->assertSame('02IiNr0G8viOVKkWnSh17NG7foVI0dNlknOea', $elementIds[0]->toString());
+        $this->assertSame('02IiNr0G8viOVKl8PjoirTPdFGgA9To37EZU8', $elementIds[1]->toString());
     }
 
     public function testParseElementIdsRemovesRedundantElementIds(): void
@@ -314,11 +312,11 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             SearchStepType::ELEMENT_HYDRATION,
             [
                 'elementIds' => [
-                    '186ed38c-388b-456c-bfea-09a775c1bfb8',
-                    '186ed38c-388b-456c-bfea-09a775c1bfb8',
-                    '186ed38c-388b-456c-bfea-09a775c1bfb8',
-                    '35076fee-c622-4377-8b7a-fc3acbc57459',
-                    '35076fee-c622-4377-8b7a-fc3acbc57459',
+                    '02IiNr0G8viOVKjX4hDcxHW7Y6rFd7YcfCc0m',
+                    '02IiNr0G8viOVKjX4hDcxHW7Y6rFd7YcfCc0m',
+                    '02IiNr0G8viOVKjX4hDcxHW7Y6rFd7YcfCc0m',
+                    '02IiNr0G8viOVKjl0sKNeSbWj6ee42j0a1F6j',
+                    '02IiNr0G8viOVKjl0sKNeSbWj6ee42j0a1F6j',
                 ],
             ],
             []
@@ -326,10 +324,10 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'parseElementIds');
         $elementIds = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
-        /** @var UuidInterface[] $elementIds */
+        /** @var Uuid[] $elementIds */
         $this->assertCount(2, $elementIds);
-        $this->assertSame('186ed38c-388b-456c-bfea-09a775c1bfb8', $elementIds[0]->toString());
-        $this->assertSame('35076fee-c622-4377-8b7a-fc3acbc57459', $elementIds[1]->toString());
+        $this->assertSame('02IiNr0G8viOVKjX4hDcxHW7Y6rFd7YcfCc0m', $elementIds[0]->toString());
+        $this->assertSame('02IiNr0G8viOVKjl0sKNeSbWj6ee42j0a1F6j', $elementIds[1]->toString());
 
         $debugData = $event->getDebugData();
         $this->assertArrayHasKey('element-hydration:redundantElementIds', $debugData);
@@ -337,8 +335,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $this->assertSame('Removed 3 redundant elementIds.', $redundantElementIdsDebugData['message']);
         $this->assertSame(
             [
-                '186ed38c-388b-456c-bfea-09a775c1bfb8',
-                '35076fee-c622-4377-8b7a-fc3acbc57459',
+                '02IiNr0G8viOVKjX4hDcxHW7Y6rFd7YcfCc0m',
+                '02IiNr0G8viOVKjl0sKNeSbWj6ee42j0a1F6j',
             ],
             $redundantElementIdsDebugData['removedElementIds']
         );
@@ -468,18 +466,18 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             'elements' => [
                 [],
                 [
-                    'id' => 'e7842691-53a4-4482-8ab5-15e8c53439b3',
+                    'id' => '02IiNr0G8viOVKl9w2uaAaDm4kZJPrHGnKcKW',
                 ],
                 [
-                    'id' => Uuid::fromString('ae54e7bc-3b07-4508-b910-b4cac756f499'),
+                    'id' => Uuid::fromString('02IiNr0G8viOVKki5THFhQbp1dxm9KHdBACtK'),
                 ],
             ],
         ];
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$stepResults]);
         $this->assertCount(2, $result);
-        $this->assertSame('e7842691-53a4-4482-8ab5-15e8c53439b3', (string) $result[0]);
-        $this->assertSame('ae54e7bc-3b07-4508-b910-b4cac756f499', (string) $result[1]);
+        $this->assertSame('02IiNr0G8viOVKl9w2uaAaDm4kZJPrHGnKcKW', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKki5THFhQbp1dxm9KHdBACtK', (string) $result[1]);
     }
 
     public function testGetElementIdsFromElementsResultThrowsWhenElementIdIsNotString(): void
@@ -606,30 +604,30 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
                     'relationIds' => [],
                 ],
                 [
-                    'nodeIds' => ['a4db6c8d-3475-4a29-bfe7-3f7080b03d10', Uuid::fromString('54bea3cb-227b-4cde-a77c-a749cd3ae112')],
-                    'relationIds' => ['b36182c2-4f4e-453b-98ed-f4ecb642d725', Uuid::fromString('6f483b13-df86-4f0b-8da1-7b163a50aee5')],
+                    'nodeIds' => ['02IiNr0G8viOVKkdShQGdK5jFCCcvfHqZ8L2N', Uuid::fromString('02IiNr0G8viOVKk0RcjGWQ1HjneKpnqiX9Wsh')],
+                    'relationIds' => ['02IiNr0G8viOVKkkYI6XXsUQSIFXKEOT0C94v', Uuid::fromString('02IiNr0G8viOVKkDNXXUGWeZQvOjJS4uOd0TG')],
                 ],
                 [
-                    'nodeIds' => ['5a92d393-663e-4d4e-ac25-bd9f3b18eacd', '3f741928-03ff-4842-ab19-96aca977df1f'], // test unequal distribution I
+                    'nodeIds' => ['02IiNr0G8viOVKk3IubpJwcsB9w8onekeCSCc', '02IiNr0G8viOVKjq5yWKMcFaAviWyozhLJMil'], // test unequal distribution I
                     'relationIds' => [],
                 ],
                 [
                     'nodeIds' => [],
-                    'relationIds' => ['80bcac38-7f85-4a67-a024-dffe56a5c3c3', '3b649923-4ff0-4733-a441-c9afc1e3ef50'], // test unequal distribution II
+                    'relationIds' => ['02IiNr0G8viOVKkLs2QcOsoeBJO3oVRuSynbI', '02IiNr0G8viOVKjo7KFPm0KfCpLtUYxavZfFk'], // test unequal distribution II
                 ],
             ],
         ];
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$stepResults]);
         $this->assertCount(8, $result);
-        $this->assertSame('3b649923-4ff0-4733-a441-c9afc1e3ef50', (string) $result[0]);
-        $this->assertSame('3f741928-03ff-4842-ab19-96aca977df1f', (string) $result[1]);
-        $this->assertSame('54bea3cb-227b-4cde-a77c-a749cd3ae112', (string) $result[2]);
-        $this->assertSame('5a92d393-663e-4d4e-ac25-bd9f3b18eacd', (string) $result[3]);
-        $this->assertSame('6f483b13-df86-4f0b-8da1-7b163a50aee5', (string) $result[4]);
-        $this->assertSame('80bcac38-7f85-4a67-a024-dffe56a5c3c3', (string) $result[5]);
-        $this->assertSame('a4db6c8d-3475-4a29-bfe7-3f7080b03d10', (string) $result[6]);
-        $this->assertSame('b36182c2-4f4e-453b-98ed-f4ecb642d725', (string) $result[7]);
+        $this->assertSame('02IiNr0G8viOVKjo7KFPm0KfCpLtUYxavZfFk', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKjq5yWKMcFaAviWyozhLJMil', (string) $result[1]);
+        $this->assertSame('02IiNr0G8viOVKk0RcjGWQ1HjneKpnqiX9Wsh', (string) $result[2]);
+        $this->assertSame('02IiNr0G8viOVKk3IubpJwcsB9w8onekeCSCc', (string) $result[3]);
+        $this->assertSame('02IiNr0G8viOVKkDNXXUGWeZQvOjJS4uOd0TG', (string) $result[4]);
+        $this->assertSame('02IiNr0G8viOVKkLs2QcOsoeBJO3oVRuSynbI', (string) $result[5]);
+        $this->assertSame('02IiNr0G8viOVKkdShQGdK5jFCCcvfHqZ8L2N', (string) $result[6]);
+        $this->assertSame('02IiNr0G8viOVKkkYI6XXsUQSIFXKEOT0C94v', (string) $result[7]);
     }
 
     public function testGetElementIdsFromPathsResultThrowsWhenNodeIdIsNotString(): void
@@ -867,9 +865,9 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $expressionService = $this->prophesize(ExpressionService::class);
         $expressionService
-            ->runExpression(Argument::is('["96a7100a-e663-4fae-92b4-b450622a21fc"]'), Argument::is(['key' => 'value']))
+            ->runExpression(Argument::is('["02IiNr0G8viOVKkWYKAgLiy1OD5FLphoim7zD"]'), Argument::is(['key' => 'value']))
             ->shouldBeCalledOnce()
-            ->willReturn(['96a7100a-e663-4fae-92b4-b450622a21fc']);
+            ->willReturn(['02IiNr0G8viOVKkWYKAgLiy1OD5FLphoim7zD']);
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener(
             expressionService: $expressionService->reveal()
         );
@@ -878,7 +876,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
             [
-                'elementIds' => '{{["96a7100a-e663-4fae-92b4-b450622a21fc"]}}',
+                'elementIds' => '{{["02IiNr0G8viOVKkWYKAgLiy1OD5FLphoim7zD"]}}',
             ],
             [
                 'key' => 'value',
@@ -887,7 +885,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         $this->assertCount(1, $result);
-        $this->assertSame('96a7100a-e663-4fae-92b4-b450622a21fc', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKkWYKAgLiy1OD5FLphoim7zD', (string) $result[0]);
     }
 
     public function testGetElementIdsFromQueryThrowsIfElementIdsIsExpressionNotReturningArray(): void
@@ -906,9 +904,9 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $client400BadContentExceptionFactory = new Client400BadContentExceptionFactory($urlGenerator);
         $expressionService = $this->prophesize(ExpressionService::class);
         $expressionService
-            ->runExpression(Argument::is('"654eda21-8320-4bfd-9fe7-f3e6f892ac35"'), Argument::is(['key' => 'value']))
+            ->runExpression(Argument::is('"02IiNr0G8viOVKk8VfnDCatFjTHNc1ixNIc37"'), Argument::is(['key' => 'value']))
             ->shouldBeCalledOnce()
-            ->willReturn('654eda21-8320-4bfd-9fe7-f3e6f892ac35');
+            ->willReturn('02IiNr0G8viOVKk8VfnDCatFjTHNc1ixNIc37');
         $elementHydrationSearchStepEventListener = $this->buildElementHydrationSearchStepEventListener(
             expressionService: $expressionService->reveal(),
             client400BadContentExceptionFactory: $client400BadContentExceptionFactory
@@ -919,7 +917,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
             [
-                'elementIds' => '{{"654eda21-8320-4bfd-9fe7-f3e6f892ac35"}}',
+                'elementIds' => '{{"02IiNr0G8viOVKk8VfnDCatFjTHNc1ixNIc37"}}',
             ],
             [
                 'key' => 'value',
@@ -930,7 +928,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
             $this->fail('Expected exception to be thrown.');
         } catch (Client400BadContentException $exception) {
-            $this->assertSame("Endpoint expects property 'elementIds' to be array, got string '654eda21-8320-4bfd-9fe7-f3e6f892ac35'.", $exception->getDetail());
+            $this->assertSame("Endpoint expects property 'elementIds' to be array, got string '02IiNr0G8viOVKk8VfnDCatFjTHNc1ixNIc37'.", $exception->getDetail());
         }
     }
 
@@ -979,8 +977,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             SearchStepType::ELEMENT_HYDRATION,
             [
                 'elementIds' => [
-                    '6b61af2a-1ee3-4d6e-ba50-3dc3905bf10d',
-                    Uuid::fromString('97faff07-8aff-48cb-8f7b-761f2df1ee78'),
+                    '02IiNr0G8viOVKkBUV1UZlzAyzBdcAVxsSEUK',
+                    Uuid::fromString('02IiNr0G8viOVKkXByo93erV2RUcHZQgMsVx2'),
                 ],
             ],
             []
@@ -988,8 +986,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         $this->assertCount(2, $result);
-        $this->assertSame('6b61af2a-1ee3-4d6e-ba50-3dc3905bf10d', (string) $result[0]);
-        $this->assertSame('97faff07-8aff-48cb-8f7b-761f2df1ee78', (string) $result[1]);
+        $this->assertSame('02IiNr0G8viOVKkBUV1UZlzAyzBdcAVxsSEUK', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKkXByo93erV2RUcHZQgMsVx2', (string) $result[1]);
     }
 
     public function testGetElementIdsFromQueryThrowsIfElementIdIsNotString(): void
@@ -1073,8 +1071,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             SearchStepType::ELEMENT_HYDRATION,
             [
                 'elementIds' => [
-                    '45421836-ed2c-4848-8645-89b9cccd9274',
-                    Uuid::fromString('67182ba2-3c39-4611-87f9-7d7e04b04606'),
+                    '02IiNr0G8viOVKjsvRtJR0W5rEIxBx8DJq8uP',
+                    Uuid::fromString('02IiNr0G8viOVKk9OLW68lL1RAdQaCW49Uhr8'),
                 ],
             ],
             []
@@ -1082,8 +1080,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         $this->assertCount(2, $result);
-        $this->assertSame('45421836-ed2c-4848-8645-89b9cccd9274', (string) $result[0]);
-        $this->assertSame('67182ba2-3c39-4611-87f9-7d7e04b04606', (string) $result[1]);
+        $this->assertSame('02IiNr0G8viOVKjsvRtJR0W5rEIxBx8DJq8uP', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKk9OLW68lL1RAdQaCW49Uhr8', (string) $result[1]);
     }
 
     public function testParseElementIdsFromEventFailsIfNeitherQueryNorPreviousResultIsAvailable(): void
@@ -1133,10 +1131,10 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
                     [
                         'elements' => [
                             [
-                                'id' => '49966bcc-6134-4662-81a1-1b717c3c4cbe',
+                                'id' => '02IiNr0G8viOVKjv1gL4gz2cXuEtg31kA87be',
                             ],
                             [
-                                'id' => Uuid::fromString('dd899b7e-2579-4329-944c-fc7940241512'),
+                                'id' => Uuid::fromString('02IiNr0G8viOVKl54AdJIqMAtE6DQylgJouNH'),
                             ],
                         ],
                     ],
@@ -1146,8 +1144,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         $this->assertCount(2, $result);
-        $this->assertSame('49966bcc-6134-4662-81a1-1b717c3c4cbe', (string) $result[0]);
-        $this->assertSame('dd899b7e-2579-4329-944c-fc7940241512', (string) $result[1]);
+        $this->assertSame('02IiNr0G8viOVKjv1gL4gz2cXuEtg31kA87be', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKl54AdJIqMAtE6DQylgJouNH', (string) $result[1]);
     }
 
     public function testParseElementIdsFromEventCorrectlyParsesElementsFromPathsResult(): void
@@ -1163,8 +1161,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
                     [
                         'paths' => [
                             [
-                                'nodeIds' => ['4c6b2e15-1559-4a76-9837-c123c9e87a5a'],
-                                'relationIds' => [Uuid::fromString('2203f89c-6eeb-40fc-891f-574251348464')],
+                                'nodeIds' => ['02IiNr0G8viOVKjwOdAVTRfZeAZH1z0LVf8rC'],
+                                'relationIds' => [Uuid::fromString('02IiNr0G8viOVKjblD4nCx3v5CWVX77O8wAXd')],
                             ],
                         ],
                     ],
@@ -1174,8 +1172,8 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         $this->assertCount(2, $result);
-        $this->assertSame('2203f89c-6eeb-40fc-891f-574251348464', (string) $result[0]);
-        $this->assertSame('4c6b2e15-1559-4a76-9837-c123c9e87a5a', (string) $result[1]);
+        $this->assertSame('02IiNr0G8viOVKjblD4nCx3v5CWVX77O8wAXd', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKjwOdAVTRfZeAZH1z0LVf8rC', (string) $result[1]);
     }
 
     public function testParseElementIdsFromEventThrowsIfNoElementIdsCanBeLocated(): void
@@ -1224,14 +1222,14 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $event = new SearchStepEvent(
             SearchStepType::ELEMENT_HYDRATION,
             [
-                'elementIds' => ['309321cd-e74c-495f-9ddf-9a7badea188c'],
+                'elementIds' => ['02IiNr0G8viOVKjiqruAotU5Rlt31RzcSCEV8'],
             ],
             [
                 'stepResults' => [
                     [
                         'elements' => [
                             [
-                                'id' => '9531925f-ed9f-4c04-9307-8ff933b02150',
+                                'id' => '02IiNr0G8viOVKkVqsq2onijXJ5Q6RaRhJKAe',
                             ],
                         ],
                     ],
@@ -1241,7 +1239,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         $this->assertCount(1, $result);
-        $this->assertSame('309321cd-e74c-495f-9ddf-9a7badea188c', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKjiqruAotU5Rlt31RzcSCEV8', (string) $result[0]);
     }
 
     public function testParseElementIdsFromEventParsesElementsBeforePaths(): void
@@ -1257,12 +1255,12 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
                     [
                         'elements' => [
                             [
-                                'id' => 'ea262394-4c5c-420b-b690-fd4cc6f38d7e',
+                                'id' => '02IiNr0G8viOVKlBDJUwIPrc5ACqUouDMmcVs',
                             ],
                         ],
                         'paths' => [
                             [
-                                'nodeIds' => ['3c792019-0aa5-4085-b8b2-f656548911e3'],
+                                'nodeIds' => ['02IiNr0G8viOVKjodRBbKDZ2ctMUZB9cmepgr'],
                                 'relationIds' => [],
                             ],
                         ],
@@ -1273,21 +1271,21 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$event]);
         $this->assertCount(1, $result);
-        $this->assertSame('ea262394-4c5c-420b-b690-fd4cc6f38d7e', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKlBDJUwIPrc5ACqUouDMmcVs', (string) $result[0]);
     }
 
     public function testGetElementDataExecutesProperly(): void
     {
         $elementIds = [
-            Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba'),
-            Uuid::fromString('591331e6-3d74-4758-9bb1-7cbc1bbd3443'),
-            Uuid::fromString('bc884188-e54b-449a-b49d-6f00f431cd05'),
+            Uuid::fromString('02IiNr0G8viOVKkKYuPxtRmJz09u2qdKJPUMu'),
+            Uuid::fromString('02IiNr0G8viOVKk2ZcxgSwQRLaVrwLAqjIMaI'),
+            Uuid::fromString('02IiNr0G8viOVKkozq4Cg2vCEH9iJ4EBjDnrU'),
         ];
         $elementA = new NodeElement();
         $elementA->setId($elementIds[0]);
         $elementA->setLabel('Something');
         $rawElementA = [
-            'id' => '7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba',
+            'id' => '02IiNr0G8viOVKkKYuPxtRmJz09u2qdKJPUMu',
             'type' => 'Something',
             'data' => [],
         ];
@@ -1295,7 +1293,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $elementB->setId($elementIds[2]);
         $elementB->setLabel('Something');
         $rawElementB = [
-            'id' => 'bc884188-e54b-449a-b49d-6f00f431cd05',
+            'id' => '02IiNr0G8viOVKkozq4Cg2vCEH9iJ4EBjDnrU',
             'type' => 'Something',
             'data' => [],
         ];
@@ -1337,11 +1335,11 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
     public function testFilterElementIdsToAccessibleOnlyAddsNoDebugMessageWhenNoFilteringHasHappened(): void
     {
-        $userId = Uuid::fromString('fe99d627-f0e0-42bd-925f-722b56a3b33a');
+        $userId = Uuid::fromString('02IiNr0G8viOVKlLANg8yGxSrIfBj8rdDajmf');
 
         $elementIds = [
-            Uuid::fromString('dacd0536-3346-44d8-ae28-8c63e5809c75'),
-            Uuid::fromString('77485325-62cb-48b8-87b4-61ed30e4fc85'),
+            Uuid::fromString('02IiNr0G8viOVKl3jAWwgWR143yMf5as7QwHP'),
+            Uuid::fromString('02IiNr0G8viOVKkHH4bG3hcZXuzn6jp7uD33f'),
         ];
 
         $authProvider = $this->prophesize(AuthProvider::class);
@@ -1370,22 +1368,22 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$elementIds, $event]);
         $this->assertCount(2, $result);
-        $this->assertSame('dacd0536-3346-44d8-ae28-8c63e5809c75', (string) $result[0]);
-        $this->assertSame('77485325-62cb-48b8-87b4-61ed30e4fc85', (string) $result[1]);
+        $this->assertSame('02IiNr0G8viOVKl3jAWwgWR143yMf5as7QwHP', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKkHH4bG3hcZXuzn6jp7uD33f', (string) $result[1]);
         $this->assertCount(1, $event->getDebugData());
     }
 
     public function testFilterElementIdsToAccessibleOnlyAddsDebugMessageWhenFilteringHasHappened(): void
     {
-        $userId = Uuid::fromString('fe99d627-f0e0-42bd-925f-722b56a3b33a');
+        $userId = Uuid::fromString('02IiNr0G8viOVKlLANg8yGxSrIfBj8rdDajmf');
 
         $elementIds = [
-            Uuid::fromString('dacd0536-3346-44d8-ae28-8c63e5809c75'),
-            Uuid::fromString('77485325-62cb-48b8-87b4-61ed30e4fc85'),
+            Uuid::fromString('02IiNr0G8viOVKl3jAWwgWR143yMf5as7QwHP'),
+            Uuid::fromString('02IiNr0G8viOVKkHH4bG3hcZXuzn6jp7uD33f'),
         ];
 
         $filteredElementIds = [
-            Uuid::fromString('dacd0536-3346-44d8-ae28-8c63e5809c75'),
+            Uuid::fromString('02IiNr0G8viOVKl3jAWwgWR143yMf5as7QwHP'),
         ];
 
         $authProvider = $this->prophesize(AuthProvider::class);
@@ -1414,7 +1412,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
         $result = $method->invokeArgs($elementHydrationSearchStepEventListener, [$elementIds, $event]);
         $this->assertCount(1, $result);
-        $this->assertSame('dacd0536-3346-44d8-ae28-8c63e5809c75', (string) $result[0]);
+        $this->assertSame('02IiNr0G8viOVKl3jAWwgWR143yMf5as7QwHP', (string) $result[0]);
         $this->assertCount(2, $event->getDebugData());
         $debugMessage = array_values($event->getDebugData())[1];
         $this->assertSame('Removed elementIds due to missing access rights.', $debugMessage['message']);
@@ -1445,7 +1443,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
             []
         );
 
-        $userId = Uuid::fromString('fe99d627-f0e0-42bd-925f-722b56a3b33a');
+        $userId = Uuid::fromString('02IiNr0G8viOVKlLANg8yGxSrIfBj8rdDajmf');
 
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider
@@ -1478,7 +1476,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
     /**
      * @param array<string, array<int, array<string, mixed>>> $elementMetadata
-     * @param UuidInterface[]                                 $elementIds
+     * @param Uuid[]                                          $elementIds
      *
      * @return array<mixed[]>
      */
@@ -1512,7 +1510,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
     public function testGetElementDataAddsMetadataOfPreviousStepsAfterNativeProperties(): void
     {
-        $elementId = Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkKYuPxtRmJz09u2qdKJPUMu');
 
         $result = $this->getElementDataWithMetadata([$elementId], [
             $elementId->toString() => [
@@ -1529,7 +1527,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
     public function testGetElementDataMergesMetadataOfStepsWhereLaterStepsOverwriteEarlierOnes(): void
     {
-        $elementId = Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkKYuPxtRmJz09u2qdKJPUMu');
 
         $result = $this->getElementDataWithMetadata([$elementId], [
             $elementId->toString() => [
@@ -1551,13 +1549,13 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
     public function testGetElementDataOnlyAddsMetadataToElementsWhichHaveSome(): void
     {
-        $idWithMetadata = Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba');
-        $idWithoutMetadata = Uuid::fromString('591331e6-3d74-4758-9bb1-7cbc1bbd3443');
+        $idWithMetadata = Uuid::fromString('02IiNr0G8viOVKkKYuPxtRmJz09u2qdKJPUMu');
+        $idWithoutMetadata = Uuid::fromString('02IiNr0G8viOVKk2ZcxgSwQRLaVrwLAqjIMaI');
 
         $result = $this->getElementDataWithMetadata([$idWithMetadata, $idWithoutMetadata], [
             $idWithMetadata->toString() => [0 => ['score' => 1.5]],
             // metadata of elements which are not part of the hydration is ignored
-            'bc884188-e54b-449a-b49d-6f00f431cd05' => [0 => ['score' => 9.9]],
+            '02IiNr0G8viOVKkozq4Cg2vCEH9iJ4EBjDnrU' => [0 => ['score' => 9.9]],
             // empty metadata does not result in an empty metadata property
             $idWithoutMetadata->toString() => [],
         ]);
@@ -1570,9 +1568,9 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
 
     public function testOnSearchStepEventPropagatesMetadataOfElasticsearchStepResultOnlyForAccessibleElements(): void
     {
-        $accessibleId = Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba');
-        $inaccessibleId = Uuid::fromString('591331e6-3d74-4758-9bb1-7cbc1bbd3443');
-        $userId = Uuid::fromString('fe99d627-f0e0-42bd-925f-722b56a3b33a');
+        $accessibleId = Uuid::fromString('02IiNr0G8viOVKkKYuPxtRmJz09u2qdKJPUMu');
+        $inaccessibleId = Uuid::fromString('02IiNr0G8viOVKk2ZcxgSwQRLaVrwLAqjIMaI');
+        $userId = Uuid::fromString('02IiNr0G8viOVKlLANg8yGxSrIfBj8rdDajmf');
 
         // synthetic result of a previous Elasticsearch step, as the controller would hand it over
         $previousStepResult = [

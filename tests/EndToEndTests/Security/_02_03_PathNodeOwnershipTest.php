@@ -10,9 +10,9 @@ class _02_03_PathNodeOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:6EorX1or81QkQDVp8uJMIV';
 
-    private const string DATA_1 = '237defce-d3be-44c5-b8a1-8288b76851e4';
-    private const string DATA_2 = '512e0d66-68bd-4515-b969-fa0eb739ea50';
-    private const string DATA_3 = '20ca0b80-9a92-4425-896d-bad6129f9c2e';
+    private const string DATA_1 = '02IiNr0GOoKiPMLODVWcwzqoucL6oCOMVnkm1';
+    private const string DATA_2 = '02IiNr0GOoKiPMLkSsy97p39iASRYhwbNzghE';
+    private const string DATA_3 = '02IiNr0GOoKiPMLMuL4oQk1VXuLEVzGCmumR2';
 
     public function testGetIndex(): void
     {

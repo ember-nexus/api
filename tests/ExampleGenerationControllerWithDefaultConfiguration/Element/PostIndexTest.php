@@ -10,7 +10,7 @@ class PostIndexTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string ELEMENT_WHICH_DOES_NOT_EXIST = 'b4117ae0-1241-479f-b363-45f290ec7fc7';
+    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '02IiNr0G8viOVKkkt30R04iI2cjxQKZ9bnCYA';
 
     public function testPostIndexSuccess(): void
     {
@@ -93,7 +93,7 @@ class PostIndexTest extends BaseRequestTestCase
             self::TOKEN,
             [
                 'type' => 'RELATION',
-                'start' => '7b80b203-2b82-40f5-accd-c7089fe6114e',
+                'start' => '02IiNr0GOoKiPMM569f95VLLfjRVJ1JriLYcy',
                 'end' => self::ELEMENT_WHICH_DOES_NOT_EXIST,
                 'data' => [
                     'hello' => 'world',

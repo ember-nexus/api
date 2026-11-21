@@ -11,14 +11,13 @@ use App\Service\UploadCancellationService;
 use App\Service\UploadLockService;
 use App\Service\UploadService;
 use App\Type\NodeElement;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 
 #[Small]
 #[CoversClass(UploadCancellationService::class)]
@@ -50,19 +49,19 @@ class UploadCancellationServiceTest extends TestCase
         );
     }
 
-    private function buildUpload(UuidInterface $id): ObjectProphecy
+    private function buildUpload(Uuid $id): ObjectProphecy
     {
         $upload = $this->prophesize(UploadInterface::class);
         $upload->getId()->willReturn($id);
-        $upload->getUploadOwner()->willReturn(UuidV4::fromString('11111111-1111-4111-8111-111111111111'));
-        $upload->getUploadTarget()->willReturn(UuidV4::fromString('22222222-2222-4222-8222-222222222222'));
+        $upload->getUploadOwner()->willReturn(Uuid::fromString('02IiNr0G8viOVKjTVopQ38JnV8PxJrftZpRV7'));
+        $upload->getUploadTarget()->willReturn(Uuid::fromString('02IiNr0G8viOVKjboyDliyOxJkyYo8OHX5lnv'));
 
         return $upload;
     }
 
     public function testLockedUploadIsNotCancelled(): void
     {
-        $id = UuidV4::fromString('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+        $id = Uuid::fromString('02IiNr0G8viOVKkgIBMZ7h4DqjROiI7NBCOGi');
         $upload = $this->buildUpload($id);
         $this->uploadLockService->acquire($id)->willReturn(null);
         $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldNotBeCalled();
@@ -73,7 +72,7 @@ class UploadCancellationServiceTest extends TestCase
 
     public function testCancelUploadReloadsUploadUnderLockAndDeletesChunksAndNode(): void
     {
-        $id = UuidV4::fromString('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+        $id = Uuid::fromString('02IiNr0G8viOVKkgIBMZ7h4DqjROiI7NBCOGi');
         $upload = $this->buildUpload($id);
         $freshUpload = $this->buildUpload($id);
         $element = (new NodeElement())->setId($id)->setLabel('Upload');
@@ -88,7 +87,7 @@ class UploadCancellationServiceTest extends TestCase
 
     public function testCancelUploadOfAlreadyDeletedUploadSucceedsWithoutDeleting(): void
     {
-        $id = UuidV4::fromString('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+        $id = Uuid::fromString('02IiNr0G8viOVKkgIBMZ7h4DqjROiI7NBCOGi');
         $upload = $this->buildUpload($id);
         $this->elementManager->getElement($id)->willReturn(null);
         $this->uploadService->deleteUploadAndChunks(Argument::any())->shouldNotBeCalled();

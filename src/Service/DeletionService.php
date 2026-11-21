@@ -7,9 +7,8 @@ namespace App\Service;
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
@@ -48,7 +47,7 @@ class DeletionService
     /**
      * @return RelationElementInterface[]
      */
-    private function getRelationsTouching(UuidInterface $nodeId): array
+    private function getRelationsTouching(Uuid $nodeId): array
     {
         // DISTINCT matters for a self-referencing relation (both ends on the same node): an undirected pattern like
         // this one would otherwise match it twice (once per traversal direction), which would queue it for delete

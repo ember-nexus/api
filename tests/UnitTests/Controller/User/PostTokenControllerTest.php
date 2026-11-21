@@ -14,13 +14,13 @@ use App\Service\RequestUtilService;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
 use App\Type\Response\JsonResponse;
+use App\Type\Uuid;
 use Exception;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -57,7 +57,7 @@ class PostTokenControllerTest extends TestCase
         $requestUtilService->method('getDataFromBody')->willReturn([]);
 
         $userNode = new NodeElement();
-        $userNode->setId(Uuid::fromString('018ed248-d1de-4e20-9e61-30d1a479215c'));
+        $userNode->setId(Uuid::fromString('02IiNr0G8viOVKjLw41bTmqWXhQO5wSOGT8mk'));
 
         $securityUtilService = $this->createMock(SecurityUtilService::class);
         $securityUtilService->method('findUserByUniqueUserIdentifier')->willReturn($userNode);

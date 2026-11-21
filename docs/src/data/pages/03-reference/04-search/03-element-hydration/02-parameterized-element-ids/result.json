@@ -1,0 +1,153 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "02IiNr0GOoKiPMLzlyajuxj3r003A91sQN0s8",
+      "data": {
+        "created": "2026-11-21T09:46:33+00:00",
+        "images": [
+          {
+            "description": "White trillium (Trillium grandiflorum) blooming in Backus Woods.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Trillium_grandiflorum_at_Backus_Woods.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Trillium_grandiflorum_at_Backus_Woods.jpg/960px-Trillium_grandiflorum_at_Backus_Woods.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Trillium_grandiflorum_at_Backus_Woods.jpg"
+          },
+          {
+            "description": "Pink form of Trillium grandiflorum",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Trillium_grandiflorum_pink1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Trillium_grandiflorum_pink1.jpg/960px-Trillium_grandiflorum_pink1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Trillium_grandiflorum_pink1.jpg"
+          },
+          {
+            "description": "Photograph of the flower of the White Trilliumen (Trillium grandiflorum en ). Photo taken at the Mt. Cuba Center where it was identified.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/0/0c/White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg/960px-White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:White_Trillium_Trillium_grandiflorum_Flower_2613px.jpg"
+          }
+        ],
+        "hasFile": true,
+        "name": "Trillium",
+        "updated": "2026-11-21T09:46:33+00:00",
+        "scientificName": "T. grandiflorum",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Trillium_grandiflorum",
+        "description": "Trillium grandiflorum, the white trillium, large-flowered trillium, great white trillium, white wake-robin or French: trille blanc, is a species of flowering plant in the family Melanthiaceae. A monocotyledonous, herbaceous perennial, the plant is native to eastern North America, from northern Quebec to the southern parts of the United States through the Appalachian Mountains into northernmost Georgia and west to Minnesota. There are also several isolated populations in Nova Scotia, Maine, southern Illinois, and Iowa."
+      },
+      "file": {
+        "contentLength": 52082,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "a235debeb572b5ab0cd3a84dfcf869dd558042dead656097fa5d414f2fee2b31"
+        }
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "02IiNr0GOoKiPMLh5LwCdzZMAqqP08VzcXmWl",
+      "data": {
+        "created": "2026-11-21T09:46:33+00:00",
+        "images": [
+          {
+            "description": "Hibiscus heterophyllus cultivated plant growing in Thirlmere",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Hibiscus_heterophyllus_flower_image.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Hibiscus_heterophyllus_flower_image.jpg/500px-Hibiscus_heterophyllus_flower_image.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Hibiscus_heterophyllus_flower_image.jpg"
+          },
+          {
+            "description": "Hibiscus heterophyllus in flower, Chatswood West",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/1/19/Hibiscus_heterophyllus_Chatswood_West.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/19/Hibiscus_heterophyllus_Chatswood_West.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Hibiscus_heterophyllus_Chatswood_West.jpg"
+          }
+        ],
+        "hasFile": true,
+        "name": "Hibiscus",
+        "updated": "2026-11-21T09:46:33+00:00",
+        "scientificName": "H. heterophyllus",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Hibiscus_heterophyllus",
+        "description": "Hibiscus heterophyllus, commonly known as native rosella or toilet paper bush, is a flowering plant in the family Malvaceae. It a shrub or small tree with white, pale pink or yellow flowers with a dark red centre and grows in New South Wales and Queensland."
+      },
+      "file": {
+        "contentLength": 91123,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "9adcacd32ddda75b23007df4be9d74d85f1e768ae1a991891703e3d1bee64006"
+        }
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "02IiNr0GOoKiPMMVF5V1KsKN9p11vzC3JU7xE",
+      "data": {
+        "created": "2026-11-21T09:46:33+00:00",
+        "images": [
+          {
+            "description": "Arabian jasmin 'Grand Duke of Tuscany'",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Jasminum_sambac_%27Grand_Duke_of_Tuscany%27.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Jasminum_sambac_%27Grand_Duke_of_Tuscany%27.jpg/500px-Jasminum_sambac_%27Grand_Duke_of_Tuscany%27.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Jasminum_sambac_%27Grand_Duke_of_Tuscany%27.jpg"
+          }
+        ],
+        "hasFile": true,
+        "name": "Jasmine",
+        "updated": "2026-11-21T09:46:33+00:00",
+        "scientificName": "J. sambac",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Jasminum_sambac",
+        "description": "Jasminum sambac (Arabian jasmine or Sambac jasmine) is a species of jasmine native to Bhutan and India. It is cultivated in many places, especially West Asia, South Asia and Southeast Asia. It is naturalised in many scattered locales: Mauritius, Madagascar, the Maldives, Christmas Island, Chiapas, Central America, southern Florida, the Bahamas, Cuba, Hispaniola, Jamaica, Puerto Rico, and the Lesser Antilles."
+      },
+      "file": {
+        "contentLength": 27888,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "96e35f27fa6c148d68ba326b80f3172f4de2e08ad35127bd8e3e4fb006fb5176"
+        }
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": {
+          "elementIds": "{{map(sortBy(filter(elements, #.score > 1.0), .score, \"desc\"), #.id)}}"
+        },
+        "parameters": {
+          "elements": [
+            {
+              "id": "02IiNr0GOoKiPMMnmHcecC7H3P3IOipWs3wbB",
+              "score": 0.9
+            },
+            {
+              "id": "02IiNr0GOoKiPMLzlyajuxj3r003A91sQN0s8",
+              "score": 4
+            },
+            {
+              "id": "02IiNr0GOoKiPMMVF5V1KsKN9p11vzC3JU7xE",
+              "score": 1.4
+            },
+            {
+              "id": "02IiNr0GOoKiPMLh5LwCdzZMAqqP08VzcXmWl",
+              "score": 3.2
+            }
+          ],
+          "stepResults": []
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1795257795.139659,
+      "accessibleElementIds": [
+        "02IiNr0GOoKiPMLzlyajuxj3r003A91sQN0s8",
+        "02IiNr0GOoKiPMLh5LwCdzZMAqqP08VzcXmWl",
+        "02IiNr0GOoKiPMMVF5V1KsKN9p11vzC3JU7xE"
+      ],
+      "end": 1795257795.244379,
+      "duration": 0.10472
+    }
+  ]
+}

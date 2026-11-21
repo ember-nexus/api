@@ -9,23 +9,23 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class DeleteOwnsRelationEtagTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:83ArPQkCKE5bSPiF3bhLmv';
-    private const string ID_DATA_1 = 'd82c07a7-5b49-489e-889c-e59351b84797';
-    private const string ID_DATA_2 = '8b0e08f1-beda-4753-91ba-26f2c2546cdb';
-    private const string ID_OWNS = '8adecb8f-01ca-41c9-907c-dca9ee8f4bc9';
+    private const string ID_DATA_1 = '02IiNr0EPf9nVLBvWswUE9M07NYBZJVyASsF3';
+    private const string ID_DATA_2 = '02IiNr0EPf9nVLBJyNKLPvqmt1WEqC7nvmKS2';
+    private const string ID_OWNS = '02IiNr0EPf9nVLBJsihJNQgYE1CFMgxGv3DBl';
 
     public function testEtagBeforeAndAfterDeletingCentralOwnsRelation(): void
     {
-        $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"3fKNknCFOBH"');
-        $initialEtagNode1Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', '"9F1JTjQKoVJ"');
-        $initialEtagNode1Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', '"Dq278kamNMf"');
-        $initialEtagNode1Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related', '"Jl2uY8TavUB"');
+        $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"8mBTpJZeqCp"');
+        $initialEtagNode1Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', '"4k4m1G6r5lX"');
+        $initialEtagNode1Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', '"Nj2YRqqBS07"');
+        $initialEtagNode1Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related', '"Zn483VEPulV"');
 
-        $initialEtagNode2Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '', '"BDPMr0qWeQd"');
-        $initialEtagNode2Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', '"WTg34RDiXJb"');
-        $initialEtagNode2Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', '"SRimvnbGFLT"');
-        $initialEtagNode2Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related', '"WTg34RDiXJb"');
+        $initialEtagNode2Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '', '"YWONTmeN5o9"');
+        $initialEtagNode2Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', '"ZEXWickgYP2"');
+        $initialEtagNode2Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', '"RXZnPShJ5VP"');
+        $initialEtagNode2Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related', '"ZEXWickgYP2"');
 
-        $this->getEtagOfElement(self::TOKEN, self::ID_OWNS, '', '"efJI5bhHtUD"');
+        $this->getEtagOfElement(self::TOKEN, self::ID_OWNS, '', '"6CXMOWXmrBs"');
 
         $response = $this->runDeleteRequest(
             sprintf(

@@ -6,15 +6,14 @@ namespace App\Security;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\RedisPrefixType;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class AuthProvider
 {
     private bool $isAnonymous;
-    private UuidInterface $userId;
-    private ?UuidInterface $tokenId = null;
+    private Uuid $userId;
+    private ?Uuid $tokenId = null;
     private ?string $hashedToken = null;
 
     public function __construct(
@@ -26,7 +25,7 @@ class AuthProvider
         if (!is_string($anonymousUserId)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate('anonymousUserUUID must be set to a valid UUID');
         }
-        $this->userId = UuidV4::fromString($anonymousUserId);
+        $this->userId = Uuid::fromString($anonymousUserId);
         $this->isAnonymous = true;
     }
 
@@ -45,8 +44,8 @@ class AuthProvider
     }
 
     public function setUserAndToken(
-        UuidInterface $userId,
-        ?UuidInterface $tokenId = null,
+        Uuid $userId,
+        ?Uuid $tokenId = null,
         ?string $hashedToken = null,
         bool $isAnonymous = false,
     ): static {
@@ -63,7 +62,7 @@ class AuthProvider
         return $this->isAnonymous;
     }
 
-    public function getUserId(): UuidInterface
+    public function getUserId(): Uuid
     {
         return $this->userId;
     }
@@ -73,7 +72,7 @@ class AuthProvider
         return $this->hashedToken;
     }
 
-    public function getTokenId(): ?UuidInterface
+    public function getTokenId(): ?Uuid
     {
         return $this->tokenId;
     }

@@ -9,8 +9,8 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class ChildrenPaginationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:FcXR4LsliYfWkYFKhTVovA';
-    private const string PARENT_WITH_MANY_CHILDREN = '1ab54e88-a9cc-481a-b371-8873ca56c51b';
-    private const string PARENT_WITH_ONE_CHILD = '12ac1946-0efd-43b2-8e8f-fc73a2413b03';
+    private const string PARENT_WITH_MANY_CHILDREN = '02IiNr0GOoKiPMLJxGehrr78XwJennHG1e4LH';
+    private const string PARENT_WITH_ONE_CHILD = '02IiNr0GOoKiPMLG1tkWF1bdsK24jkbZS1dlx';
 
     public function testParentWithManyChildrenPagination(): void
     {
@@ -25,10 +25,10 @@ class ChildrenPaginationTest extends BaseRequestTestCase
 
         $data = json_decode((string) $response->getBody(), true);
         $this->assertSame(62, $data['totalNodes']);
-        $this->assertSame('/1ab54e88-a9cc-481a-b371-8873ca56c51b/children', $data['links']['first']);
+        $this->assertSame('/02IiNr0GOoKiPMLJxGehrr78XwJennHG1e4LH/children', $data['links']['first']);
         $this->assertSame(null, $data['links']['previous']);
-        $this->assertSame('/1ab54e88-a9cc-481a-b371-8873ca56c51b/children?page=2', $data['links']['next']);
-        $this->assertSame('/1ab54e88-a9cc-481a-b371-8873ca56c51b/children?page=3', $data['links']['last']);
+        $this->assertSame('/02IiNr0GOoKiPMLJxGehrr78XwJennHG1e4LH/children?page=2', $data['links']['next']);
+        $this->assertSame('/02IiNr0GOoKiPMLJxGehrr78XwJennHG1e4LH/children?page=3', $data['links']['last']);
         $this->assertCount(25, $data['nodes']);
         $this->assertCount(25, $data['relations']);
     }
@@ -46,10 +46,10 @@ class ChildrenPaginationTest extends BaseRequestTestCase
 
         $data = json_decode((string) $response->getBody(), true);
         $this->assertSame(1, $data['totalNodes']);
-        $this->assertSame('/12ac1946-0efd-43b2-8e8f-fc73a2413b03/children', $data['links']['first']);
+        $this->assertSame('/02IiNr0GOoKiPMLG1tkWF1bdsK24jkbZS1dlx/children', $data['links']['first']);
         $this->assertSame(null, $data['links']['previous']);
         $this->assertSame(null, $data['links']['next']);
-        $this->assertSame('/12ac1946-0efd-43b2-8e8f-fc73a2413b03/children', $data['links']['last']);
+        $this->assertSame('/02IiNr0GOoKiPMLG1tkWF1bdsK24jkbZS1dlx/children', $data['links']['last']);
         $this->assertCount(1, $data['nodes']);
         $this->assertCount(1, $data['relations']);
     }

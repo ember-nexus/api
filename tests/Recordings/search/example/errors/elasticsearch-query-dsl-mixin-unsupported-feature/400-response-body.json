@@ -2,7 +2,7 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:85341a5c-af11-44ba-b7f4-768a53f2c969",
+  "instance": "urn:uuid:02IiNr0G8viOVKkO3pxY9BXLsZWr38Ex7Zz3a",
   "detail": "The Elasticsearch feature 'script_score' at 'query.query.script_score' is not supported: scripts are not supported.",
   "debug": [],
   "failedStep": {

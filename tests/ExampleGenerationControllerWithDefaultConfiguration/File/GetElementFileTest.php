@@ -15,8 +15,8 @@ class GetElementFileTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
-    private const string ROSE_ID = '0fdd52ba-55da-430c-b015-3277a231e895';
-    private const string ELEMENT_WHICH_DOES_NOT_EXIST = 'b4117ae0-1241-479f-b363-45f290ec7fc7';
+    private const string ROSE_ID = '02IiNr0GOoKiPMLEezecUZIcqABdykANm0j0F';
+    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '02IiNr0G8viOVKkkt30R04iI2cjxQKZ9bnCYA';
 
     public function testGetElementFileSuccess200(): void
     {
@@ -160,7 +160,7 @@ class GetElementFileTest extends BaseRequestTestCase
 
     public function testGetElementFileSuccess206WithMatchingIfRange(): void
     {
-        $elementId = '3c4d5e6f-7a8b-4c9d-8e0f-2a3b4c5d6e7f';
+        $elementId = '02IiNr0G8viOVKjoXo9GQtbb1IqbssnjA1lz7';
         $etag = $this->createElementWithShortTextFile($elementId, 'get-element-file-if-range-match');
 
         // the ETag of the file still matches: the client resumes its download, the requested range is returned
@@ -186,7 +186,7 @@ class GetElementFileTest extends BaseRequestTestCase
 
     public function testGetElementFileSuccess200WithNonMatchingIfRange(): void
     {
-        $elementId = '4d5e6f7a-8b9c-4d0e-9f1a-3b4c5d6e7f8a';
+        $elementId = '02IiNr0G8viOVKjwqxXbwlS0qONXk2nfSH8Gw';
         $this->createElementWithShortTextFile($elementId, 'get-element-file-if-range-mismatch');
 
         // the file changed since the client started its download: the Range header is ignored and the full file is

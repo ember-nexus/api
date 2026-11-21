@@ -10,14 +10,14 @@ class _03_02_GroupImmediateRelationOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:JhQYvkR2HUHuukHbOgOuH1';
 
-    private const string GROUP = 'f935bed2-cf13-406b-8ad2-0a943b9329f1';
-    private const string DATA_1 = 'bc69b38c-d087-4355-97a9-4e4ec48e4810';
-    private const string DATA_2 = '04cc4124-8b39-41ad-979c-e389e7c73fc6';
-    private const string IS_IN_GROUP = 'c2e419ef-998c-48c6-8af3-e9db2b9bff17';
-    private const string OWNS_TOKEN = '2643d165-8e0f-4978-b344-c360ce63ae41';
-    private const string OWNS_DATA_1 = 'a8805631-5a83-49cb-af8b-628ff727b6d4';
-    private const string OWNS_DATA_2 = '0bfd0925-75e1-4574-8cab-0e97267e7052';
-    private const string RELATION = '704eac29-cda1-441f-93b4-069df785b9c2';
+    private const string GROUP = '02IiNr0GOoKiPMN4ItXXzYmDiblB2cG2nMNvM';
+    private const string DATA_1 = '02IiNr0GOoKiPMMagtoWBEC9iyjKSlcDCmHcB';
+    private const string DATA_2 = '02IiNr0GOoKiPML9GzWXjX55XsAzQj6wNVWWd';
+    private const string IS_IN_GROUP = '02IiNr0GOoKiPMMdr6SN0KXuDNqNOKeEXyX7U';
+    private const string OWNS_TOKEN = '02IiNr0GOoKiPMLPaLYVrC4yTrBUSGb6fWt1Q';
+    private const string OWNS_DATA_1 = '02IiNr0GOoKiPMMR0lySYsMv8hUO3Y4t1sT54';
+    private const string OWNS_DATA_2 = '02IiNr0GOoKiPMLClzzyG2Kepk9hPVPia5eAj';
+    private const string RELATION = '02IiNr0GOoKiPMLzcbQo2hMhkGOj2i2ZOPPDW';
 
     public function testGetIndex(): void
     {

@@ -2,6 +2,6 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:9d597fbb-e79c-4d7b-81c1-9ab00eb6e06e",
+  "instance": "urn:uuid:02IiNr0G8viOVKkZoFSoFQe6gfkmZT9NrccKH",
   "detail": "Could not verify upload: the digest declared in 'Repr-Digest' does not match the uploaded file's actual content."
 }

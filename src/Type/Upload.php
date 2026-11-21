@@ -6,7 +6,6 @@ namespace App\Type;
 
 use App\Contract\UploadInterface;
 use DateTime;
-use Ramsey\Uuid\UuidInterface;
 
 final readonly class Upload implements UploadInterface
 {
@@ -14,13 +13,13 @@ final readonly class Upload implements UploadInterface
      * @param list<string> $chunkIds
      */
     public function __construct(
-        private UuidInterface $id,
+        private Uuid $id,
         private ?int $uploadLength,
         private int $uploadOffset,
         private bool $uploadComplete,
-        private UuidInterface $uploadTarget,
+        private Uuid $uploadTarget,
         private array $chunkIds,
-        private UuidInterface $uploadOwner,
+        private Uuid $uploadOwner,
         private string $extension,
         private DateTime $expires,
         private ?string $hashState = null,
@@ -28,7 +27,7 @@ final readonly class Upload implements UploadInterface
     ) {
     }
 
-    public function getId(): UuidInterface
+    public function getId(): Uuid
     {
         return $this->id;
     }
@@ -48,7 +47,7 @@ final readonly class Upload implements UploadInterface
         return $this->uploadComplete;
     }
 
-    public function getUploadTarget(): UuidInterface
+    public function getUploadTarget(): Uuid
     {
         return $this->uploadTarget;
     }
@@ -71,7 +70,7 @@ final readonly class Upload implements UploadInterface
         return [] === $this->chunkIds ? null : $this->chunkIds[array_key_last($this->chunkIds)];
     }
 
-    public function getUploadOwner(): UuidInterface
+    public function getUploadOwner(): Uuid
     {
         return $this->uploadOwner;
     }

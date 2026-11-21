@@ -11,8 +11,8 @@ use PHPUnit\Framework\Attributes\Group;
 class RevokeTokenIssuedAfterTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:IJA6RN4dKZENVerSXGp4H';
-    private const string TOKEN_ISSUED_AFTER_UUID = 'fbb02626-c3e8-46de-93d4-ee33607dbc69';
-    private const string USER_UUID = 'e1284efb-d66e-47fd-83b9-4c375ae1c9a2';
+    private const string TOKEN_ISSUED_AFTER_UUID = '02IiNr0FHIR60KylIzsLuPGHb91Mi6EaEr1LG';
+    private const string USER_UUID = '02IiNr0GOoKiPMMsaQfKGfasPlNHNf2KU6ZJq';
 
     public function testRevokeTokenIssuedAfter(): void
     {

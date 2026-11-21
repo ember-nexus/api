@@ -10,10 +10,10 @@ class _99_06_TokenHasTwoOwnersTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:Fqd0dnLYhXdPSMvMi3c8Bp';
 
-    private const string DATA = 'd69f2e6c-ce6a-4915-a567-acf0c1fc4432';
-    private const string TOKEN_UUID = 'bbf1baf9-c665-4470-9a1d-47483da18bf3';
-    private const string USER_1 = '3b9bd45a-a363-434f-8956-2877857c7456';
-    private const string USER_2 = '9827facc-40b0-40ca-a7a5-ff947e1c4b86';
+    private const string DATA = '02IiNr0GOoKiPMMnRa6SV720hqjpWyJshCKn6';
+    private const string TOKEN_UUID = '02IiNr0GOoKiPMMaTdDztkBfiygLQYTsVtgdK';
+    private const string USER_1 = '02IiNr0GOoKiPMLZxrbI2OBY6FlpVQMxNUDOH';
+    private const string USER_2 = '02IiNr0GOoKiPMMJ2RTenxTnk5QjRkiS9s90s';
 
     public function testGetDataFails(): void
     {

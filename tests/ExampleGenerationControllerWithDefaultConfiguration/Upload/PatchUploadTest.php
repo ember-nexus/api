@@ -46,7 +46,7 @@ class PatchUploadTest extends BaseRequestTestCase
 
     public function testPatchUploadSuccess204IntermediateChunk(): void
     {
-        $elementId = 'c2d3e4f5-6a7b-4c8d-9e0f-1a2b3c4d5e6f';
+        $elementId = '02IiNr0G8viOVKks4OIZYIXbT8XNKe8riA3ar';
         $this->createDocumentedElement($elementId, 'patch-upload-204-intermediate', self::TOKEN);
 
         // three chunks, so the second PATCH (tested here) is still an intermediate one, not the final chunk
@@ -94,7 +94,7 @@ class PatchUploadTest extends BaseRequestTestCase
 
     public function testPatchUploadSuccess204FinalChunk(): void
     {
-        $elementId = 'd3e4f5a6-7b8c-4d9e-0f1a-2b3c4d5e6f7a';
+        $elementId = '02IiNr0G8viOVKl0NXgseaotritUQ1qj2QFnm';
         $this->createDocumentedElement($elementId, 'patch-upload-204-final', self::TOKEN);
         [$uploadId, $chunks] = $this->createResumableUploadWithOneChunkRemaining($elementId, 'example-patch-upload-204-final.bin');
 
@@ -123,7 +123,7 @@ class PatchUploadTest extends BaseRequestTestCase
 
     public function testPatchUploadFailure400(): void
     {
-        $elementId = 'e4f5a6b7-8c9d-4e0f-1a2b-3c4d5e6f7a8b';
+        $elementId = '02IiNr0G8viOVKl8ggubYrF9ejGwxJDj1jLh5';
         $this->createDocumentedElement($elementId, 'patch-upload-400', self::TOKEN);
         [$uploadId, $chunks] = $this->createResumableUploadWithOneChunkRemaining($elementId, 'example-patch-upload-400.bin');
 
@@ -162,7 +162,7 @@ class PatchUploadTest extends BaseRequestTestCase
 
     public function testPatchUploadFailure409(): void
     {
-        $elementId = 'f5a6b7c8-9d0e-4f1a-2b3c-4d5e6f7a8b9c';
+        $elementId = '02IiNr0G8viOVKlGoWLoCrDIh1UKekhrrL9e0';
         $this->createDocumentedElement($elementId, 'patch-upload-409', self::TOKEN);
         [$uploadId, $chunks] = $this->createResumableUploadWithOneChunkRemaining($elementId, 'example-patch-upload-409.bin');
 
@@ -198,7 +198,7 @@ class PatchUploadTest extends BaseRequestTestCase
 
     public function testPatchUploadFailure401(): void
     {
-        $elementId = 'a6b7c8d9-0e1f-4a2b-3c4d-5e6f7a8b9c0d';
+        $elementId = '02IiNr0G8viOVKkeNHWsHWMnGTubPx60jIIAP';
         $this->createDocumentedElement($elementId, 'patch-upload-401', self::TOKEN);
         [$uploadId, $chunks] = $this->createResumableUploadWithOneChunkRemaining($elementId, 'example-patch-upload-401.bin');
 
@@ -233,7 +233,7 @@ class PatchUploadTest extends BaseRequestTestCase
 
     public function testPatchUploadFailure404(): void
     {
-        $uploadWhichDoesNotExist = 'b4117ae0-1241-479f-b363-45f290ec7fc7';
+        $uploadWhichDoesNotExist = '02IiNr0G8viOVKkkt30R04iI2cjxQKZ9bnCYA';
 
         $response = $this->runUploadRequest(
             'PATCH',
