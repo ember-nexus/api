@@ -6,7 +6,7 @@ namespace App\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\Response\ElementResponse;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 class ElementResponseService
 {
@@ -18,7 +18,7 @@ class ElementResponseService
     }
 
     public function buildElementResponseFromId(
-        UuidInterface $id,
+        Uuid $id,
     ): ElementResponse {
         $element = $this->elementManager->getElement($id);
         if (null === $element) {

@@ -6,18 +6,18 @@ namespace App\EventSystem\ElementFileDelete\Event;
 
 use App\Contract\EventInterface;
 use App\Trait\StoppableEventTrait;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 class ElementFileDeleteEvent implements EventInterface
 {
     use StoppableEventTrait;
 
     public function __construct(
-        private UuidInterface $elementId,
+        private Uuid $elementId,
     ) {
     }
 
-    public function getElementId(): UuidInterface
+    public function getElementId(): Uuid
     {
         return $this->elementId;
     }

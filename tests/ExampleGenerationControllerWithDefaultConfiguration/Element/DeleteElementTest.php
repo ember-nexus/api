@@ -11,8 +11,8 @@ class DeleteElementTest extends BaseRequestTestCase
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
 
     private const string TOKEN = 'secret-token:CevJS3ZkDtJcCdqEhFKqWF';
-    private const string ELEMENT = '55cce573-1377-4781-be16-8b81587aca10';
-    private const string NON_EXISTENT_ELEMENT = '00000000-0000-4000-8000-000000000000';
+    private const string ELEMENT = '02IiNr0GOoKiPMLmiVsBdAPtibfrpZE8uLou8';
+    private const string NON_EXISTENT_ELEMENT = '02IiNr0G8viOVKjLCfR4NIEdgVrLpaxVcZ7Bq';
 
     public function testDeleteElementFailure412(): void
     {

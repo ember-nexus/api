@@ -10,10 +10,9 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
 use App\Type\NodeElement;
+use App\Type\Uuid;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 use Tuupola\Base58;
 
@@ -154,10 +153,10 @@ class UploadService
      * supported; each matched upload is flushed individually, so callers no longer need (but may keep) a flush of
      * their own right after this call.
      */
-    public function deleteUploadsTargeting(UuidInterface $elementId): void
+    public function deleteUploadsTargeting(Uuid $elementId): void
     {
         foreach ($this->getUploadIdsTargeting($elementId) as $uploadId) {
-            $uploadElement = $this->elementManager->getElement(UuidV4::fromString($uploadId));
+            $uploadElement = $this->elementManager->getElement(Uuid::fromString($uploadId));
             if (null === $uploadElement) {
                 continue;
             }
@@ -175,7 +174,7 @@ class UploadService
     /**
      * Whether an upload (e.g. a started resumable upload) currently targets the element.
      */
-    public function hasUploadsTargeting(UuidInterface $elementId): bool
+    public function hasUploadsTargeting(Uuid $elementId): bool
     {
         return [] !== $this->getUploadIdsTargeting($elementId);
     }
@@ -183,7 +182,7 @@ class UploadService
     /**
      * @return string[]
      */
-    private function getUploadIdsTargeting(UuidInterface $elementId): array
+    private function getUploadIdsTargeting(Uuid $elementId): array
     {
         $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
             'MATCH (u:Upload) '.

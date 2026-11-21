@@ -9,7 +9,7 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class GetParentsTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:TVg2TMLeeK6AJMT4QhNsjA';
-    private const string CHILD = '65ad4ffe-17b3-4258-894f-561d64abd2db';
+    private const string CHILD = '02IiNr0GOoKiPMLuRo7903qQINXcFqdP5hcJU';
 
     public function testGetParents(): void
     {

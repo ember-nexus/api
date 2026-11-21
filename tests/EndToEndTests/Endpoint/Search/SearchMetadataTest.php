@@ -56,7 +56,7 @@ class SearchMetadataTest extends BaseSearchTestCase
     public function testHydrationWithoutMetadataDoesNotAddMetadata(): void
     {
         $response = $this->runSearch([
-            ['type' => 'element-hydration', 'query' => ['elementIds' => ['258c0dfe-b1d8-4839-beed-d00d1b544a96']]],
+            ['type' => 'element-hydration', 'query' => ['elementIds' => ['02IiNr0GOoKiPMLPDlPbKrlR4vnBQsvSBSkU5']]],
         ]);
 
         $elements = $this->getHydratedElements($response);
@@ -133,12 +133,12 @@ class SearchMetadataTest extends BaseSearchTestCase
     {
         $response = $this->runSearch([
             $this->elasticsearchStep(['match' => ['name' => 'flame lily']]),
-            ['type' => 'element-hydration', 'query' => ['elementIds' => ['258c0dfe-b1d8-4839-beed-d00d1b544a96']]],
+            ['type' => 'element-hydration', 'query' => ['elementIds' => ['02IiNr0GOoKiPMLPDlPbKrlR4vnBQsvSBSkU5']]],
         ]);
 
         $elements = $this->getHydratedElements($response);
         $this->assertCount(1, $elements);
-        $this->assertSame('258c0dfe-b1d8-4839-beed-d00d1b544a96', $elements[0]['id']);
+        $this->assertSame('02IiNr0GOoKiPMLPDlPbKrlR4vnBQsvSBSkU5', $elements[0]['id']);
         $this->assertIsFloat($elements[0]['metadata']['score']);
     }
 

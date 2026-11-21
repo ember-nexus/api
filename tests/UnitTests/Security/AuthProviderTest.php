@@ -8,13 +8,12 @@ use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AuthProvider;
 use App\Security\TokenGenerator;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[Small]
@@ -48,7 +47,7 @@ class AuthProviderTest extends TestCase
     public function testInitialState(): void
     {
         $bag = $this->prophesize(ParameterBagInterface::class);
-        $bag->get(Argument::is('anonymousUserUUID'))->shouldBeCalledOnce()->willReturn('100ee3de-3846-4bd4-be4a-b17886dfc50c');
+        $bag->get(Argument::is('anonymousUserUUID'))->shouldBeCalledOnce()->willReturn('02IiNr0G8viOVKjSzqHBHo1qzjnXu7l1Hdocz');
         $authProvider = new AuthProvider(
             $bag->reveal(),
             $this->prophesize(TokenGenerator::class)->reveal(),
@@ -56,7 +55,7 @@ class AuthProviderTest extends TestCase
         );
 
         $this->assertTrue($authProvider->isAnonymous());
-        $this->assertSame('100ee3de-3846-4bd4-be4a-b17886dfc50c', $authProvider->getUserId()->toString());
+        $this->assertSame('02IiNr0G8viOVKjSzqHBHo1qzjnXu7l1Hdocz', $authProvider->getUserId()->toString());
         $this->assertNull($authProvider->getHashedToken());
         $this->assertNull($authProvider->getTokenId());
     }
@@ -64,35 +63,35 @@ class AuthProviderTest extends TestCase
     public function testSetUserAndToken(): void
     {
         $bag = $this->prophesize(ParameterBagInterface::class);
-        $bag->get(Argument::is('anonymousUserUUID'))->shouldBeCalledOnce()->willReturn('100ee3de-3846-4bd4-be4a-b17886dfc50c');
+        $bag->get(Argument::is('anonymousUserUUID'))->shouldBeCalledOnce()->willReturn('02IiNr0G8viOVKjSzqHBHo1qzjnXu7l1Hdocz');
         $authProvider = new AuthProvider(
             $bag->reveal(),
             $this->prophesize(TokenGenerator::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
-        $authProvider->setUserAndToken(Uuid::fromString('d3e0ce1e-cdf1-4c80-beae-266008d5e520'));
+        $authProvider->setUserAndToken(Uuid::fromString('02IiNr0G8viOVKl0NVnAXbLPSIUrELTd4k3AC'));
 
         $this->assertFalse($authProvider->isAnonymous());
-        $this->assertSame($authProvider->getUserId()->toString(), 'd3e0ce1e-cdf1-4c80-beae-266008d5e520');
+        $this->assertSame($authProvider->getUserId()->toString(), '02IiNr0G8viOVKl0NVnAXbLPSIUrELTd4k3AC');
         $this->assertNull($authProvider->getHashedToken());
         $this->assertNull($authProvider->getTokenId());
 
         $authProvider->setUserAndToken(
-            UuidV4::fromString('84e2dca1-3d54-4eda-81af-203c5cb4cec7'),
-            UuidV4::fromString('8a961321-fd60-475a-95b4-7f976ce44213'),
+            Uuid::fromString('02IiNr0G8viOVKkNuOQlIFMNqh2bOiN2KMJpC'),
+            Uuid::fromString('02IiNr0G8viOVKkQg8CVOBaX40LNaGTOY7YcB'),
             'some hashed token'
         );
 
         $this->assertFalse($authProvider->isAnonymous());
-        $this->assertSame('84e2dca1-3d54-4eda-81af-203c5cb4cec7', $authProvider->getUserId()->toString());
+        $this->assertSame('02IiNr0G8viOVKkNuOQlIFMNqh2bOiN2KMJpC', $authProvider->getUserId()->toString());
         $this->assertSame('some hashed token', $authProvider->getHashedToken());
-        $this->assertSame('8a961321-fd60-475a-95b4-7f976ce44213', $authProvider->getTokenId()->toString());
+        $this->assertSame('02IiNr0G8viOVKkQg8CVOBaX40LNaGTOY7YcB', $authProvider->getTokenId()->toString());
 
-        $authProvider->setUserAndToken(Uuid::fromString('c48aaf8e-4ab5-4e60-8f03-154b13e35724'), null, null, true);
+        $authProvider->setUserAndToken(Uuid::fromString('02IiNr0G8viOVKkstOC9iWUFCWcdEAkfOcFXo'), null, null, true);
 
         $this->assertTrue($authProvider->isAnonymous());
-        $this->assertSame($authProvider->getUserId()->toString(), 'c48aaf8e-4ab5-4e60-8f03-154b13e35724');
+        $this->assertSame($authProvider->getUserId()->toString(), '02IiNr0G8viOVKkstOC9iWUFCWcdEAkfOcFXo');
         $this->assertNull($authProvider->getHashedToken());
         $this->assertNull($authProvider->getTokenId());
     }
@@ -100,7 +99,7 @@ class AuthProviderTest extends TestCase
     public function testRedisToken(): void
     {
         $bag = $this->prophesize(ParameterBagInterface::class);
-        $bag->get(Argument::is('anonymousUserUUID'))->shouldBeCalledOnce()->willReturn('100ee3de-3846-4bd4-be4a-b17886dfc50c');
+        $bag->get(Argument::is('anonymousUserUUID'))->shouldBeCalledOnce()->willReturn('02IiNr0G8viOVKjSzqHBHo1qzjnXu7l1Hdocz');
         $tokenGenerator = $this->prophesize(TokenGenerator::class);
         $tokenGenerator
             ->hashToken(Argument::is('test'))

@@ -12,6 +12,7 @@ use App\Type\Etag;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
 use App\Type\RedisValueType;
+use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -19,7 +20,6 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(RedisFileEtagEventListener::class)]
@@ -31,7 +31,7 @@ class RedisFileEtagEventListenerTest extends TestCase
     public function testRedisFileEtagEventListenerWithFileNotInRedis(): void
     {
         // setup variables
-        $id = Uuid::fromString('3079fc16-9bd0-4b06-8cdf-b0b6cc16c307');
+        $id = Uuid::fromString('02IiNr0G8viOVKjin93HzGc5SD8UKuKuXFHey');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_FILE, $id->toString());
         $fileEtagEvent = new FileEtagEvent($id);
 
@@ -62,19 +62,19 @@ class RedisFileEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for file in Redis.', [
-            'elementId' => '3079fc16-9bd0-4b06-8cdf-b0b6cc16c307',
-            'redisKey' => 'etag:file:3079fc16-9bd0-4b06-8cdf-b0b6cc16c307',
+            'elementId' => '02IiNr0G8viOVKjin93HzGc5SD8UKuKuXFHey',
+            'redisKey' => 'etag:file:02IiNr0G8viOVKjin93HzGc5SD8UKuKuXFHey',
         ]);
         $this->assertLogHappened($logger, 'debug', 'Unable to find Etag for file in Redis.', [
-            'elementId' => '3079fc16-9bd0-4b06-8cdf-b0b6cc16c307',
-            'redisKey' => 'etag:file:3079fc16-9bd0-4b06-8cdf-b0b6cc16c307',
+            'elementId' => '02IiNr0G8viOVKjin93HzGc5SD8UKuKuXFHey',
+            'redisKey' => 'etag:file:02IiNr0G8viOVKjin93HzGc5SD8UKuKuXFHey',
         ]);
     }
 
     public function testRedisFileEtagEventListenerWithFileInRedisWithNullValue(): void
     {
         // setup variables
-        $id = Uuid::fromString('0eaa9823-3131-448d-b8cd-122b5eada7a5');
+        $id = Uuid::fromString('02IiNr0G8viOVKjSKITveOu20CmRvKrfzh0Zt');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_FILE, $id->toString());
         $fileEtagEvent = new FileEtagEvent($id);
 
@@ -105,12 +105,12 @@ class RedisFileEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for file in Redis.', [
-            'elementId' => '0eaa9823-3131-448d-b8cd-122b5eada7a5',
-            'redisKey' => 'etag:file:0eaa9823-3131-448d-b8cd-122b5eada7a5',
+            'elementId' => '02IiNr0G8viOVKjSKITveOu20CmRvKrfzh0Zt',
+            'redisKey' => 'etag:file:02IiNr0G8viOVKjSKITveOu20CmRvKrfzh0Zt',
         ]);
         $this->assertLogHappened($logger, 'debug', 'Found Etag for file in Redis.', [
-            'elementId' => '0eaa9823-3131-448d-b8cd-122b5eada7a5',
-            'redisKey' => 'etag:file:0eaa9823-3131-448d-b8cd-122b5eada7a5',
+            'elementId' => '02IiNr0G8viOVKjSKITveOu20CmRvKrfzh0Zt',
+            'redisKey' => 'etag:file:02IiNr0G8viOVKjSKITveOu20CmRvKrfzh0Zt',
             'etag' => null,
         ]);
     }
@@ -118,7 +118,7 @@ class RedisFileEtagEventListenerTest extends TestCase
     public function testRedisFileEtagEventListenerWithFileInRedisWithValue(): void
     {
         // setup variables
-        $id = Uuid::fromString('e0350f14-2aa0-4878-83a8-188dae3c3d93');
+        $id = Uuid::fromString('02IiNr0G8viOVKl6NHDycWcDYJLdyyhJ6724z');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_FILE, $id->toString());
         $fileEtagEvent = new FileEtagEvent($id);
         $etag = new Etag('someEtag');
@@ -150,12 +150,12 @@ class RedisFileEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for file in Redis.', [
-            'elementId' => 'e0350f14-2aa0-4878-83a8-188dae3c3d93',
-            'redisKey' => 'etag:file:e0350f14-2aa0-4878-83a8-188dae3c3d93',
+            'elementId' => '02IiNr0G8viOVKl6NHDycWcDYJLdyyhJ6724z',
+            'redisKey' => 'etag:file:02IiNr0G8viOVKl6NHDycWcDYJLdyyhJ6724z',
         ]);
         $data = $this->assertLogHappened($logger, 'debug', 'Found Etag for file in Redis.', false);
-        $this->assertSame('e0350f14-2aa0-4878-83a8-188dae3c3d93', $data['elementId']);
-        $this->assertSame('etag:file:e0350f14-2aa0-4878-83a8-188dae3c3d93', $data['redisKey']);
+        $this->assertSame('02IiNr0G8viOVKl6NHDycWcDYJLdyyhJ6724z', $data['elementId']);
+        $this->assertSame('etag:file:02IiNr0G8viOVKl6NHDycWcDYJLdyyhJ6724z', $data['redisKey']);
         $this->assertSame('someEtag', (string) $data['etag']);
     }
 }

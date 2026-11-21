@@ -18,6 +18,7 @@ use App\Service\ElementManager;
 use App\Service\SecurityUtilService;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Contracts\ClientInterface;
@@ -31,8 +32,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -80,14 +79,14 @@ class SecurityUtilServiceTest extends TestCase
     public function testValidatePasswordMatchesWithMissingProperty(): void
     {
         $bag = $this->createMock(ParameterBagInterface::class);
-        $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
+        $bag->method('get')->willReturn('02IiNr0G8viOVKkmxNLT7iu90eJrTtMp7MxDT');
 
         $securityUtilService = $this->getSecurityUtilService(
             bag: $bag
         );
 
         $userNode = new NodeElement();
-        $userNode->setId(Uuid::fromString('3207d629-7199-4c2d-9b2a-b0fba10fe309'));
+        $userNode->setId(Uuid::fromString('02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW'));
         try {
             $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
         } catch (Exception $e) {
@@ -102,7 +101,7 @@ class SecurityUtilServiceTest extends TestCase
     public function testValidatePasswordMatchesWithBadPassword(): void
     {
         $bag = $this->createMock(ParameterBagInterface::class);
-        $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
+        $bag->method('get')->willReturn('02IiNr0G8viOVKkmxNLT7iu90eJrTtMp7MxDT');
 
         $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
         $userPasswordHasher->method('verifyPassword')->willReturn(false);
@@ -113,7 +112,7 @@ class SecurityUtilServiceTest extends TestCase
         );
 
         $userNode = new NodeElement();
-        $userNode->setId(Uuid::fromString('2c6c7f9a-10c9-434c-b770-9733b749b82c'));
+        $userNode->setId(Uuid::fromString('02IiNr0G8viOVKjgoVhR3hsN5WT28D4nU8TuK'));
         $userNode->addProperty('_passwordHash', 'someHash');
         try {
             $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
@@ -129,7 +128,7 @@ class SecurityUtilServiceTest extends TestCase
     public function testValidatePasswordMatchesWithCorrectPassword(): void
     {
         $bag = $this->createMock(ParameterBagInterface::class);
-        $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
+        $bag->method('get')->willReturn('02IiNr0G8viOVKkmxNLT7iu90eJrTtMp7MxDT');
 
         $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
         $userPasswordHasher->method('verifyPassword')->willReturn(true);
@@ -140,7 +139,7 @@ class SecurityUtilServiceTest extends TestCase
         );
 
         $userNode = new NodeElement();
-        $userNode->setId(Uuid::fromString('4b08d9bd-4dfa-42f9-b433-0902d71f421e'));
+        $userNode->setId(Uuid::fromString('02IiNr0G8viOVKjvj6GyAIgDWCgVvNJG8uy6m'));
         $userNode->addProperty('_passwordHash', 'someHash');
         $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
         $this->expectNotToPerformAssertions();
@@ -163,7 +162,7 @@ class SecurityUtilServiceTest extends TestCase
         );
 
         $userNode = new NodeElement();
-        $userNode->setId(Uuid::fromString('4b08d9bd-4dfa-42f9-b433-0902d71f421e'));
+        $userNode->setId(Uuid::fromString('02IiNr0G8viOVKjvj6GyAIgDWCgVvNJG8uy6m'));
         $userNode->addProperty('_passwordHash', 'oldHash');
         $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
         $this->assertSame('newHash', $userNode->getStringProperty('_passwordHash'));
@@ -178,7 +177,7 @@ class SecurityUtilServiceTest extends TestCase
             bag: $bag
         );
 
-        $userId = Uuid::fromString('b8535d33-235f-4f71-811a-02145bf641c6');
+        $userId = Uuid::fromString('02IiNr0G8viOVKkmxNLT7iu90eJrTtMp7MxDT');
         try {
             $securityUtilService->validateUserIsNotAnonymousUser($userId);
         } catch (Exception $e) {
@@ -193,13 +192,13 @@ class SecurityUtilServiceTest extends TestCase
     public function testValidateUserIsNotAnonymousUserWithAnonymousUser(): void
     {
         $bag = $this->createMock(ParameterBagInterface::class);
-        $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
+        $bag->method('get')->willReturn('02IiNr0G8viOVKkmxNLT7iu90eJrTtMp7MxDT');
 
         $securityUtilService = $this->getSecurityUtilService(
             bag: $bag
         );
 
-        $userId = Uuid::fromString('b8535d33-235f-4f71-811a-02145bf641c6');
+        $userId = Uuid::fromString('02IiNr0G8viOVKkmxNLT7iu90eJrTtMp7MxDT');
         try {
             $securityUtilService->validateUserIsNotAnonymousUser($userId);
         } catch (Exception $e) {
@@ -214,13 +213,13 @@ class SecurityUtilServiceTest extends TestCase
     public function testValidateUserIsNotAnonymousUserWithNormalUser(): void
     {
         $bag = $this->createMock(ParameterBagInterface::class);
-        $bag->method('get')->willReturn('b8535d33-235f-4f71-811a-02145bf641c6');
+        $bag->method('get')->willReturn('02IiNr0G8viOVKkmxNLT7iu90eJrTtMp7MxDT');
 
         $securityUtilService = $this->getSecurityUtilService(
             bag: $bag
         );
 
-        $userId = Uuid::fromString('a530420d-d426-4028-9377-9f8486ae7a4a');
+        $userId = Uuid::fromString('02IiNr0G8viOVKkddwH2CCUubKbySd0PQFxbf');
         $securityUtilService->validateUserIsNotAnonymousUser($userId);
         $this->expectNotToPerformAssertions();
     }
@@ -305,10 +304,10 @@ class SecurityUtilServiceTest extends TestCase
                 $null,
                 [
                     new CypherMap([
-                        'id' => 'd8defdd8-8e79-40af-84dd-169587bf2bcc',
+                        'id' => '02IiNr0G8viOVKl2mgfXuczNayTF7iW6bHLJu',
                     ]),
                     new CypherMap([
-                        'id' => '4eb44f78-f793-4610-b857-78ce12462fff',
+                        'id' => '02IiNr0G8viOVKjxWOkGILVaIxfSIpj7r51FV',
                     ]),
                 ]
             ));
@@ -350,7 +349,7 @@ class SecurityUtilServiceTest extends TestCase
                 $null,
                 [
                     new CypherMap([
-                        'id' => 'd8defdd8-8e79-40af-84dd-169587bf2bcc',
+                        'id' => '02IiNr0G8viOVKl2mgfXuczNayTF7iW6bHLJu',
                     ]),
                 ]
             ));
@@ -360,8 +359,8 @@ class SecurityUtilServiceTest extends TestCase
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(
-            Argument::that(function (UuidInterface $elementId) {
-                return 'd8defdd8-8e79-40af-84dd-169587bf2bcc' === $elementId->toString();
+            Argument::that(function (Uuid $elementId) {
+                return '02IiNr0G8viOVKl2mgfXuczNayTF7iW6bHLJu' === $elementId->toString();
             })
         )
             ->shouldBeCalledOnce()
@@ -408,7 +407,7 @@ class SecurityUtilServiceTest extends TestCase
                 $null,
                 [
                     new CypherMap([
-                        'id' => 'd8defdd8-8e79-40af-84dd-169587bf2bcc',
+                        'id' => '02IiNr0G8viOVKl2mgfXuczNayTF7iW6bHLJu',
                     ]),
                 ]
             ));
@@ -445,7 +444,7 @@ class SecurityUtilServiceTest extends TestCase
                 $null,
                 [
                     new CypherMap([
-                        'id' => 'd8defdd8-8e79-40af-84dd-169587bf2bcc',
+                        'id' => '02IiNr0G8viOVKl2mgfXuczNayTF7iW6bHLJu',
                     ]),
                 ]
             ));

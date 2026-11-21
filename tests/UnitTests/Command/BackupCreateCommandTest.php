@@ -14,6 +14,7 @@ use App\Service\S3Service;
 use App\Service\StorageService;
 use App\Type\NodeElement;
 use App\Type\S3\FileOperation;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\SummarizedResult;
@@ -26,7 +27,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -162,8 +162,8 @@ class BackupCreateCommandTest extends TestCase
 
     public function testFilesAreWrittenToBackupAndCountedInSummary(): void
     {
-        $idA = Uuid::uuid4()->toString();
-        $idB = Uuid::uuid4()->toString();
+        $idA = Uuid::generate()->toString();
+        $idB = Uuid::generate()->toString();
 
         $tester = $this->runCommand([$idA => 'content a', $idB => '']);
 
@@ -175,7 +175,7 @@ class BackupCreateCommandTest extends TestCase
 
     public function testNoFilesOptionSkipsFileExport(): void
     {
-        $id = Uuid::uuid4()->toString();
+        $id = Uuid::generate()->toString();
 
         $tester = $this->runCommand([$id => 'content'], ['--no-files' => true]);
 
@@ -195,8 +195,8 @@ class BackupCreateCommandTest extends TestCase
 
     public function testFileOfVanishedElementIsSkipped(): void
     {
-        $present = Uuid::uuid4()->toString();
-        $vanished = Uuid::uuid4()->toString();
+        $present = Uuid::generate()->toString();
+        $vanished = Uuid::generate()->toString();
 
         $this->runCommand([$present => 'a', $vanished => 'b'], [], [$vanished]);
 
@@ -206,8 +206,8 @@ class BackupCreateCommandTest extends TestCase
 
     public function testFileMissingFromS3IsSkipped(): void
     {
-        $present = Uuid::uuid4()->toString();
-        $missingFromS3 = Uuid::uuid4()->toString();
+        $present = Uuid::generate()->toString();
+        $missingFromS3 = Uuid::generate()->toString();
 
         $tester = $this->runCommand(
             [$present => 'a', $missingFromS3 => 'b'],

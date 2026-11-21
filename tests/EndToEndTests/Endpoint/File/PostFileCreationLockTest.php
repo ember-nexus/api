@@ -6,9 +6,9 @@ namespace App\Tests\EndToEndTests\Endpoint\File;
 
 use App\Factory\Type\RedisKeyFactory;
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use App\Type\Uuid;
 use Predis\Client as RedisClient;
 use Psr\Http\Message\ResponseInterface;
-use Ramsey\Uuid\Uuid;
 
 /**
  * `POST /<id>/file` creates the file: it reserves the element in Redis (`lock:file-creation:<id>`) while it runs and fails if

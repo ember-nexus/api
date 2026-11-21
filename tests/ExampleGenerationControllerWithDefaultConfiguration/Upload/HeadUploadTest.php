@@ -43,7 +43,7 @@ class HeadUploadTest extends BaseRequestTestCase
 
     public function testHeadUploadSuccess204(): void
     {
-        $elementId = '8b9c0d1e-2f3a-4b4c-5d6e-7f8a9b0c1d2e';
+        $elementId = '02IiNr0G8viOVKkRAMoETEpFaFnTi76hNO2ms';
         $this->createDocumentedElement($elementId, 'head-upload-204', self::TOKEN);
         $uploadId = $this->createResumableUpload($elementId, 'example-head-upload-204.bin');
 
@@ -64,7 +64,7 @@ class HeadUploadTest extends BaseRequestTestCase
      */
     public function testHeadUploadFailure401(): void
     {
-        $elementId = '9c0d1e2f-3a4b-4c5d-6e7f-8a9b0c1d2e3f';
+        $elementId = '02IiNr0G8viOVKkZAeHL5yizSwzPgjIG93qWt';
         $this->createDocumentedElement($elementId, 'head-upload-401', self::TOKEN);
         $uploadId = $this->createResumableUpload($elementId, 'example-head-upload-401.bin');
 
@@ -82,7 +82,7 @@ class HeadUploadTest extends BaseRequestTestCase
 
     public function testHeadUploadFailure404(): void
     {
-        $uploadWhichDoesNotExist = 'b4117ae0-1241-479f-b363-45f290ec7fc7';
+        $uploadWhichDoesNotExist = '02IiNr0G8viOVKkkt30R04iI2cjxQKZ9bnCYA';
 
         $response = $this->runHeadRequest(sprintf('/upload/%s', $uploadWhichDoesNotExist), self::TOKEN);
         $this->assertSame(404, $response->getStatusCode());

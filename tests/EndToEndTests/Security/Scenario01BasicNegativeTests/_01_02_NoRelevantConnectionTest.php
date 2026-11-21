@@ -9,9 +9,9 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class _01_02_NoRelevantConnectionTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1KLilQkUoSgY4BhbCQimec';
-    private const string USER = 'c83935f7-bdd6-4eda-ad41-b85e22f5a68f';
-    private const string DATA = '6a8a8afb-2a07-4fa2-b467-0afa359a4b7e';
-    private const string RELATION = 'aac81a63-2d2e-40ab-b0bb-471f30a2b119';
+    private const string USER = '02IiNr0GOoKiPMMgRX8hqacSlgyAlheKe8Dd8';
+    private const string DATA = '02IiNr0GOoKiPMLwoyFZ2FQ9DiWL4gjup9I99';
+    private const string RELATION = '02IiNr0GOoKiPMMS6lFO348iOKbE1MLHnCudt';
 
     /**
      * @description test 1-02-01-01

@@ -10,13 +10,13 @@ use App\EventSystem\EntityManager\EventListener\GroupChangeAuditEventListener;
 use App\Security\AuthProvider;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(GroupChangeAuditEventListener::class)]
@@ -29,9 +29,9 @@ class GroupChangeAuditEventListenerTest extends TestCase
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider->isAnonymous()->willReturn($isAnonymous);
         if (!$isAnonymous) {
-            $authProvider->getUserId()->willReturn(Uuid::fromString('55555555-5555-5555-5555-555555555555'));
+            $authProvider->getUserId()->willReturn(Uuid::fromString('02IiNr0G8viOVKk0kQOokUeQle4I04rVnXsw9'));
         }
-        $authProvider->getTokenId()->willReturn(Uuid::fromString('66666666-6666-6666-6666-666666666666'));
+        $authProvider->getTokenId()->willReturn(Uuid::fromString('02IiNr0G8viOVKk93ZnAQKjaaGuTdNF728q5W'));
 
         return new GroupChangeAuditEventListener($authProvider->reveal(), $logger);
     }
@@ -39,7 +39,7 @@ class GroupChangeAuditEventListenerTest extends TestCase
     private function buildGroupNode(): NodeElement
     {
         return (new NodeElement())
-            ->setId(Uuid::fromString('11111111-1111-1111-1111-111111111111'))
+            ->setId(Uuid::fromString('02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf'))
             ->setLabel('Group');
     }
 
@@ -49,10 +49,10 @@ class GroupChangeAuditEventListenerTest extends TestCase
         $logger->notice(
             'Group node was updated.',
             [
-                'elementId' => '11111111-1111-1111-1111-111111111111',
+                'elementId' => '02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf',
                 'client' => [
-                    'user' => '55555555-5555-5555-5555-555555555555',
-                    'token' => '66666666-6666-6666-6666-666666666666',
+                    'user' => '02IiNr0G8viOVKk0kQOokUeQle4I04rVnXsw9',
+                    'token' => '02IiNr0G8viOVKk93ZnAQKjaaGuTdNF728q5W',
                 ],
             ]
         )->shouldBeCalledOnce();
@@ -67,10 +67,10 @@ class GroupChangeAuditEventListenerTest extends TestCase
         $logger->notice(
             'Group node was deleted.',
             [
-                'elementId' => '11111111-1111-1111-1111-111111111111',
+                'elementId' => '02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf',
                 'client' => [
-                    'user' => '55555555-5555-5555-5555-555555555555',
-                    'token' => '66666666-6666-6666-6666-666666666666',
+                    'user' => '02IiNr0G8viOVKk0kQOokUeQle4I04rVnXsw9',
+                    'token' => '02IiNr0G8viOVKk93ZnAQKjaaGuTdNF728q5W',
                 ],
             ]
         )->shouldBeCalledOnce();
@@ -85,10 +85,10 @@ class GroupChangeAuditEventListenerTest extends TestCase
         $logger->notice(
             'Group node was updated.',
             [
-                'elementId' => '11111111-1111-1111-1111-111111111111',
+                'elementId' => '02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf',
                 'client' => [
                     'user' => 'anonymous',
-                    'token' => '66666666-6666-6666-6666-666666666666',
+                    'token' => '02IiNr0G8viOVKk93ZnAQKjaaGuTdNF728q5W',
                 ],
             ]
         )->shouldBeCalledOnce();
@@ -99,7 +99,7 @@ class GroupChangeAuditEventListenerTest extends TestCase
 
     public function testMergeOfNonGroupNodeIsIgnored(): void
     {
-        $node = (new NodeElement())->setId(Uuid::fromString('22222222-2222-2222-2222-222222222222'))->setLabel('Data');
+        $node = (new NodeElement())->setId(Uuid::fromString('02IiNr0G8viOVKjboyDliyOxJlXj6Bii5l1U2'))->setLabel('Data');
 
         $logger = $this->prophesize(LoggerInterface::class);
         $logger->notice(Argument::cetera())->shouldNotBeCalled();
@@ -110,7 +110,7 @@ class GroupChangeAuditEventListenerTest extends TestCase
 
     public function testDeleteOfNonGroupNodeIsIgnored(): void
     {
-        $node = (new NodeElement())->setId(Uuid::fromString('22222222-2222-2222-2222-222222222222'))->setLabel('Data');
+        $node = (new NodeElement())->setId(Uuid::fromString('02IiNr0G8viOVKjboyDliyOxJlXj6Bii5l1U2'))->setLabel('Data');
 
         $logger = $this->prophesize(LoggerInterface::class);
         $logger->notice(Argument::cetera())->shouldNotBeCalled();
@@ -122,7 +122,7 @@ class GroupChangeAuditEventListenerTest extends TestCase
     public function testRelationElementIsIgnored(): void
     {
         $relation = (new RelationElement())
-            ->setId(Uuid::fromString('33333333-3333-3333-3333-333333333333'))
+            ->setId(Uuid::fromString('02IiNr0G8viOVKjk87c7OoU78ONujU6JKLydP'))
             ->setType('OWNS');
 
         $logger = $this->prophesize(LoggerInterface::class);
@@ -134,7 +134,7 @@ class GroupChangeAuditEventListenerTest extends TestCase
 
     public function testGroupNodeWithoutLabelIsIgnored(): void
     {
-        $node = (new NodeElement())->setId(Uuid::fromString('44444444-4444-4444-4444-444444444444'));
+        $node = (new NodeElement())->setId(Uuid::fromString('02IiNr0G8viOVKjsRH0T4eZGx1E6MmTuYwvmm'));
 
         $logger = $this->prophesize(LoggerInterface::class);
         $logger->notice(Argument::cetera())->shouldNotBeCalled();

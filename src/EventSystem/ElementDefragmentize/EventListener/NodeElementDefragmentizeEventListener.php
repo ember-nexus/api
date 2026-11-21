@@ -6,7 +6,7 @@ namespace App\EventSystem\ElementDefragmentize\EventListener;
 
 use App\EventSystem\ElementDefragmentize\Event\NodeElementDefragmentizeEvent;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Type\Uuid;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class NodeElementDefragmentizeEventListener
@@ -26,6 +26,6 @@ class NodeElementDefragmentizeEventListener
         }
         $event->getNodeElement()
             ->setLabel($cypherFragment->getLabels()[0])
-            ->setId(UuidV4::fromString($identifier));
+            ->setId(Uuid::fromString($identifier));
     }
 }

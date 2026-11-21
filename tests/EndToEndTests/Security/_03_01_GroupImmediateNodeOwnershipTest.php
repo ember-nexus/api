@@ -10,11 +10,11 @@ class _03_01_GroupImmediateNodeOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:7RXVmoiChLrKPUJNjdEZvT';
 
-    private const string GROUP = 'f95c84f8-c33a-410a-93be-da0d65c1f0de';
-    private const string DATA = '56acb0c6-aaed-451f-b277-bceac61d7632';
-    private const string IS_IN_GROUP = 'f656b91e-6c2f-4dda-a4ff-69717e0b4559';
-    private const string OWNS_DATA = 'c76a7d30-2250-4bb3-bffd-e5f83a2ccd5b';
-    private const string OWNS_TOKEN = '2541a4d1-73f1-4716-8de8-2caf3c943d15';
+    private const string GROUP = '02IiNr0GOoKiPMN4MicX0KC7vxoiyxHA5aJMz';
+    private const string DATA = '02IiNr0GOoKiPMLn8vfhFJnqnpxl6f2A5SqND';
+    private const string IS_IN_GROUP = '02IiNr0GOoKiPMN2u6L8KccUxHDNXiTUlGbnK';
+    private const string OWNS_DATA = '02IiNr0GOoKiPMMg30p6il6jpysS0IM6mq3Zp';
+    private const string OWNS_TOKEN = '02IiNr0GOoKiPMLP68gWRmxdBJMz5XBnvjSIk';
 
     public function testGetIndex(): void
     {

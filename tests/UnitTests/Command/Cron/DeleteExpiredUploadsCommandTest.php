@@ -15,6 +15,7 @@ use App\Service\ExpiredUploadDeletionAttemptService;
 use App\Service\UploadService;
 use App\Type\NodeElement;
 use App\Type\Upload;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\Statement;
@@ -27,7 +28,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use Safe\DateTime;
 use Symfony\Component\Console\Command\Command;
@@ -161,9 +161,9 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
     public function testCommandDeletesSingleExpiredUploadIncludingItsChunks(): void
     {
-        $uploadId = Uuid::fromString('7d7c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d1');
-        $uploadTarget = Uuid::fromString('8f8c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d2');
-        $uploadOwner = Uuid::fromString('9a9c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d3');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkKHuiBAHzFaASeAQDwJ8ZJr');
+        $uploadTarget = Uuid::fromString('02IiNr0G8viOVKkT5FUh5kJTwrSgVGWnoKj6B');
+        $uploadOwner = Uuid::fromString('02IiNr0G8viOVKkYTF8USvE4CuCP3U71hTtAw');
 
         $upload = new Upload(
             $uploadId,
@@ -207,7 +207,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
     public function testCommandSkipsUploadWhichWasAlreadyDeletedInTheMeantime(): void
     {
-        $uploadId = Uuid::fromString('1c1c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d1');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKjYs0fMTPxsPb9mNlocgK2ra');
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(Argument::any())->willReturn(null);
@@ -259,8 +259,8 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
     public function testCommandDeletesMultipleExpiredUploads(): void
     {
-        $uploadId1 = Uuid::fromString('2d2c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d1');
-        $uploadId2 = Uuid::fromString('3e3c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d2');
+        $uploadId1 = Uuid::fromString('02IiNr0G8viOVKjhB9ZUJyf133Y3bfRgEwLX4');
+        $uploadId2 = Uuid::fromString('02IiNr0G8viOVKjpUITcAXM9gVwKpZ4jnYeD6');
 
         $buildUpload = fn ($id) => new Upload($id, null, 0, false, $id, [], $id, 'bin', (new DateTime())->modify('-1 hour'));
 
@@ -297,8 +297,8 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
     public function testFailingUploadIsLoggedAndDoesNotStopOtherUploads(): void
     {
-        $badId = Uuid::fromString('2d2c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d1');
-        $goodId = Uuid::fromString('3e3c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d2');
+        $badId = Uuid::fromString('02IiNr0G8viOVKjhB9ZUJyf133Y3bfRgEwLX4');
+        $goodId = Uuid::fromString('02IiNr0G8viOVKjpUITcAXM9gVwKpZ4jnYeD6');
         $goodUpload = new Upload($goodId, null, 0, false, $goodId, [], $goodId, 'bin', (new DateTime())->modify('-1 hour'));
         $goodElement = (new NodeElement())->setId($goodId)->setLabel('Upload');
 
@@ -338,7 +338,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
     public function testUploadIsGivenUpAfterThirdFailedAttempt(): void
     {
-        $uploadId = Uuid::fromString('2d2c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d1');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKjhB9ZUJyf133Y3bfRgEwLX4');
         $uploadElement = (new NodeElement())->setId($uploadId)->setLabel('Upload');
 
         $elementManager = $this->prophesize(ElementManager::class);
@@ -375,7 +375,7 @@ class DeleteExpiredUploadsCommandTest extends TestCase
 
     public function testDeferredUploadIsSkippedSilently(): void
     {
-        $uploadId = Uuid::fromString('2d2c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d1');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKjhB9ZUJyf133Y3bfRgEwLX4');
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(Argument::any())->shouldNotBeCalled();

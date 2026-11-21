@@ -15,7 +15,7 @@ class FilePermissionOnRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN_USER_A = 'secret-token:V8m72O3ovtRU09JrdbJRnh';
     private const string TOKEN_USER_B = 'secret-token:3JMIdZMTqEF27mZHDO9AoA';
-    private const string RELATION_ID = '5ed54a8f-b4d5-4e95-a7f3-d23c026c8afe';
+    private const string RELATION_ID = '02IiNr0GOoKiPMLr84HizN5swhk7q0WNFmwfq';
     private const string FILE_CONTENT = "File attached to a relation.\nUsed by the security.filePermission scenario of the Ember Nexus reference dataset.\n";
 
     public function testOwningUserCanAccessRelationAndFile(): void

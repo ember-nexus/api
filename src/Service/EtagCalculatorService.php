@@ -9,14 +9,13 @@ use App\Helper\DateTimeHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
 use App\Type\FileHashAlgorithm;
+use App\Type\Uuid;
 use ArrayAccess;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\CypherList;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 class EtagCalculatorService
@@ -30,7 +29,7 @@ class EtagCalculatorService
     ) {
     }
 
-    public function calculateElementEtag(UuidInterface $elementId): ?Etag
+    public function calculateElementEtag(Uuid $elementId): ?Etag
     {
         $this->logger->debug(
             'Calculating Etag for element.',
@@ -70,7 +69,7 @@ class EtagCalculatorService
         return $etag;
     }
 
-    public function calculateChildrenCollectionEtag(UuidInterface $parentId): ?Etag
+    public function calculateChildrenCollectionEtag(Uuid $parentId): ?Etag
     {
         $this->logger->debug(
             'Calculating Etag for children collection.',
@@ -139,7 +138,7 @@ class EtagCalculatorService
         return $etag;
     }
 
-    public function calculateParentsCollectionEtag(UuidInterface $childId): ?Etag
+    public function calculateParentsCollectionEtag(Uuid $childId): ?Etag
     {
         $this->logger->debug(
             'Calculating Etag for parents collection.',
@@ -208,7 +207,7 @@ class EtagCalculatorService
         return $etag;
     }
 
-    public function calculateRelatedCollectionEtag(UuidInterface $centerId): ?Etag
+    public function calculateRelatedCollectionEtag(Uuid $centerId): ?Etag
     {
         $this->logger->debug(
             'Calculating Etag for related collection.',
@@ -276,7 +275,7 @@ class EtagCalculatorService
         return $etag;
     }
 
-    public function calculateIndexCollectionEtag(UuidInterface $userId): ?Etag
+    public function calculateIndexCollectionEtag(Uuid $userId): ?Etag
     {
         $this->logger->debug(
             'Calculating Etag for index collection.',
@@ -344,7 +343,7 @@ class EtagCalculatorService
         return $etag;
     }
 
-    public function calculateFileEtag(UuidInterface $elementId): ?Etag
+    public function calculateFileEtag(Uuid $elementId): ?Etag
     {
         $this->logger->debug(
             'Calculating Etag for file.',

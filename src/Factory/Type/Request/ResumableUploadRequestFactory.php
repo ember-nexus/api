@@ -9,7 +9,7 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\HeaderParseService;
 use App\Service\UploadBodyLimitService;
 use App\Type\Request\ResumableUploadRequest;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 
 class ResumableUploadRequestFactory
@@ -21,7 +21,7 @@ class ResumableUploadRequestFactory
     ) {
     }
 
-    public function createResumableUploadRequestFromRequest(Request $request, UuidInterface $elementId): ResumableUploadRequestInterface
+    public function createResumableUploadRequestFromRequest(Request $request, Uuid $elementId): ResumableUploadRequestInterface
     {
         $headers = $request->headers;
 

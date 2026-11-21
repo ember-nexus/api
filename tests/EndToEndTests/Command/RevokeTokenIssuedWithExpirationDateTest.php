@@ -11,8 +11,8 @@ use PHPUnit\Framework\Attributes\Group;
 class RevokeTokenIssuedWithExpirationDateTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:S1aCcsPd5nPfI16SGcoTY0';
-    private const string TOKEN_WITH_EXPIRATION_DATE_UUID = '0b72c3eb-fea1-4436-a4d7-d1601da9b4ac';
-    private const string USER_UUID = 'dcad1936-b490-45ba-b9cb-348b75b5f9f6';
+    private const string TOKEN_WITH_EXPIRATION_DATE_UUID = '02IiNr0GOoKiPMLCWpMm3lBaHClRzRAzdeEDi';
+    private const string USER_UUID = '02IiNr0GOoKiPMMqObPIUxPIpl108cImNrlNF';
 
     public function testRevokeTokenIssuedWithExpirationDate(): void
     {

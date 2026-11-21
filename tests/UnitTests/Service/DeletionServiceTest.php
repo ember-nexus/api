@@ -9,6 +9,7 @@ use App\Service\DeletionService;
 use App\Service\ElementManager;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
@@ -19,8 +20,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[Small]
@@ -60,7 +59,7 @@ class DeletionServiceTest extends TestCase
 
     public function testDeletingARelationNeverQueriesCypherAndJustDeletesIt(): void
     {
-        $relation = (new RelationElement())->setId(UuidV4::uuid4())->setType('RELATED');
+        $relation = (new RelationElement())->setId(Uuid::generate())->setType('RELATED');
 
         [$service, $elementManager, $client] = $this->buildService();
         $client->runStatement(Argument::any())->shouldNotBeCalled();
@@ -72,7 +71,7 @@ class DeletionServiceTest extends TestCase
 
     public function testDeletingANodeWithNoRelationsJustDeletesIt(): void
     {
-        $nodeId = UuidV4::uuid4();
+        $nodeId = Uuid::generate();
         $node = (new NodeElement())->setId($nodeId)->setLabel('Data');
 
         [$service, $elementManager, $client] = $this->buildService();
@@ -86,17 +85,17 @@ class DeletionServiceTest extends TestCase
 
     public function testDeletingANodeDeletesEachCascadingRelationBeforeTheNodeItself(): void
     {
-        $nodeId = UuidV4::uuid4();
+        $nodeId = Uuid::generate();
         $node = (new NodeElement())->setId($nodeId)->setLabel('Data');
-        $relationId1 = UuidV4::uuid4();
-        $relationId2 = UuidV4::uuid4();
+        $relationId1 = Uuid::generate();
+        $relationId2 = Uuid::generate();
         $relation1 = (new RelationElement())->setId($relationId1)->setType('OWNS');
         $relation2 = (new RelationElement())->setId($relationId2)->setType('RELATED');
 
         [$service, $elementManager, $client] = $this->buildService();
         $this->willReturnRelationIds($client, [$relationId1->toString(), $relationId2->toString()]);
-        $elementManager->getRelation(Argument::that(fn (UuidInterface $id) => $id->equals($relationId1)))->willReturn($relation1);
-        $elementManager->getRelation(Argument::that(fn (UuidInterface $id) => $id->equals($relationId2)))->willReturn($relation2);
+        $elementManager->getRelation(Argument::that(fn (Uuid $id) => $id->equals($relationId1)))->willReturn($relation1);
+        $elementManager->getRelation(Argument::that(fn (Uuid $id) => $id->equals($relationId2)))->willReturn($relation2);
 
         $deletedInOrder = [];
         $elementManager->delete(Argument::any())->will(function (array $args) use (&$deletedInOrder, $elementManager) {
@@ -113,13 +112,13 @@ class DeletionServiceTest extends TestCase
 
     public function testDeletingANodeSkipsARelationThatIsAlreadyGoneByTheTimeItIsHydrated(): void
     {
-        $nodeId = UuidV4::uuid4();
+        $nodeId = Uuid::generate();
         $node = (new NodeElement())->setId($nodeId)->setLabel('Data');
-        $relationId = UuidV4::uuid4();
+        $relationId = Uuid::generate();
 
         [$service, $elementManager, $client] = $this->buildService();
         $this->willReturnRelationIds($client, [$relationId->toString()]);
-        $elementManager->getRelation(Argument::that(fn (UuidInterface $id) => $id->equals($relationId)))->willReturn(null);
+        $elementManager->getRelation(Argument::that(fn (Uuid $id) => $id->equals($relationId)))->willReturn(null);
 
         $deleted = [];
         $elementManager->delete(Argument::any())->will(function (array $args) use (&$deleted, $elementManager) {
@@ -136,16 +135,16 @@ class DeletionServiceTest extends TestCase
 
     public function testDeletingANodeDoesNotDeleteTheSameDuplicatedRelationIdTwice(): void
     {
-        $nodeId = UuidV4::uuid4();
+        $nodeId = Uuid::generate();
         $node = (new NodeElement())->setId($nodeId)->setLabel('Data');
-        $relationId = UuidV4::uuid4();
+        $relationId = Uuid::generate();
         $relation = (new RelationElement())->setId($relationId)->setType('RELATED');
 
         [$service, $elementManager, $client] = $this->buildService();
         // simulates a self-referencing relation matching twice despite the query's DISTINCT (e.g. a future query
         // change losing it)
         $this->willReturnRelationIds($client, [$relationId->toString(), $relationId->toString()]);
-        $elementManager->getRelation(Argument::that(fn (UuidInterface $id) => $id->equals($relationId)))
+        $elementManager->getRelation(Argument::that(fn (Uuid $id) => $id->equals($relationId)))
             ->shouldBeCalledOnce()
             ->willReturn($relation);
 

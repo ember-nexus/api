@@ -2,6 +2,6 @@
   "type": "http://api/error/400/missing-property",
   "title": "Missing property",
   "status": 400,
-  "instance": "urn:uuid:aa0a8699-d4e2-4630-bd53-45f6cc31cd72",
+  "instance": "urn:uuid:02IiNr0G8viOVKkfzJNKaJUjWETL6XXDAoJ0T",
   "detail": "Endpoint requires that the request contains property 'password' to be set to string."
 }

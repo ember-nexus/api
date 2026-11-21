@@ -18,7 +18,7 @@ class PatchUploadLockedTest extends BaseRequestTestCase
 
     public function testPatchUploadFailure409Locked(): void
     {
-        $elementId = 'b7c8d9e0-1f2a-4b3c-8d4e-5f6a7b8c9d0e';
+        $elementId = '02IiNr0G8viOVKkmgQvDgk2pysNTWfr9xz6jX';
         $this->createDocumentedElement($elementId, 'patch-upload-409-locked', self::TOKEN);
 
         $createResponse = $this->runUploadRequest(

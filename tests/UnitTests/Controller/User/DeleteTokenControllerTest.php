@@ -13,11 +13,11 @@ use App\Service\DeletionService;
 use App\Service\ElementFileDeletionService;
 use App\Service\ElementManager;
 use App\Service\UploadService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(DeleteTokenController::class)]
@@ -27,7 +27,7 @@ class DeleteTokenControllerTest extends TestCase
 
     public function testDeletingTokenAlsoDeletesFilesAndTargetingUploadsInOrder(): void
     {
-        $tokenId = Uuid::uuid4();
+        $tokenId = Uuid::generate();
         $tokenElement = $this->prophesize(NodeElementInterface::class)->reveal();
         $fileOperation = $this->prophesize(FileOperationInterface::class)->reveal();
 

@@ -7,8 +7,8 @@ namespace App\Service;
 use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Type\Response\CollectionResponse;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -129,8 +129,8 @@ class CollectionService
     }
 
     /**
-     * @param UuidInterface[] $nodeIds
-     * @param UuidInterface[] $relationIds
+     * @param Uuid[] $nodeIds
+     * @param Uuid[] $relationIds
      */
     public function buildCollectionFromIds(
         array $nodeIds = [],
@@ -182,7 +182,7 @@ class CollectionService
     }
 
     /**
-     * @param UuidInterface[] $elementIds
+     * @param Uuid[] $elementIds
      */
     public function buildElementCollectionFromIds(
         array $elementIds = [],

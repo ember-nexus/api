@@ -5,21 +5,20 @@ declare(strict_types=1);
 namespace App\Type;
 
 use DateTimeInterface;
-use Ramsey\Uuid\UuidInterface;
 
 readonly class TokenRevokeEntry
 {
     public function __construct(
-        private UuidInterface $tokenId,
+        private Uuid $tokenId,
         private DateTimeInterface $tokenCreated,
         private ?DateTimeInterface $tokenExpirationDate,
-        private UuidInterface $userId,
+        private Uuid $userId,
         private string $userUniqueIdentifier,
         private string $tokenHash,
     ) {
     }
 
-    public function getTokenId(): UuidInterface
+    public function getTokenId(): Uuid
     {
         return $this->tokenId;
     }
@@ -34,7 +33,7 @@ readonly class TokenRevokeEntry
         return $this->tokenExpirationDate;
     }
 
-    public function getUserId(): UuidInterface
+    public function getUserId(): Uuid
     {
         return $this->userId;
     }

@@ -10,8 +10,8 @@ class PatchElementTest extends BaseRequestTestCase
 {
     private const string PATH_TO_ROOT = __DIR__.'/../../../';
     private const string TOKEN = 'secret-token:PIPeJGUt7c00ENn8a5uDlc';
-    private const string ELEMENT = '84e67836-6455-489c-85d2-b57c70885b3b';
-    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '00000000-0000-4000-8000-000000000000';
+    private const string ELEMENT = '02IiNr0GOoKiPMM9fF9OTQ4duR8P2cWSSl0XI';
+    private const string ELEMENT_WHICH_DOES_NOT_EXIST = '02IiNr0G8viOVKjLCfR4NIEdgVrLpaxVcZ7Bq';
 
     public function testPatchElementSuccess(): void
     {

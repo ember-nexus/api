@@ -13,12 +13,11 @@ use App\Service\S3Service;
 use App\Service\StorageService;
 use App\Style\EmberNexusStyle;
 use App\Trait\CommandInputTrait;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -340,7 +339,7 @@ class BackupCreateCommand extends Command
         ));
     }
 
-    private function getNodePath(UuidInterface $nodeId): string
+    private function getNodePath(Uuid $nodeId): string
     {
         $levels = max(0, (int) ceil(log($this->nodeCount, 256)) - 1);
 
@@ -351,7 +350,7 @@ class BackupCreateCommand extends Command
         );
     }
 
-    private function getRelationPath(UuidInterface $relationId): string
+    private function getRelationPath(Uuid $relationId): string
     {
         $levels = max(0, (int) ceil(log($this->relationCount, 256)) - 1);
 
@@ -362,7 +361,7 @@ class BackupCreateCommand extends Command
         );
     }
 
-    private function getFilePath(UuidInterface $elementId, string $extension): string
+    private function getFilePath(Uuid $elementId, string $extension): string
     {
         $levels = max(0, (int) ceil(log($this->fileCount, 256)) - 1);
 

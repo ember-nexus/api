@@ -17,7 +17,7 @@ use App\Service\RequestUtilService;
 use App\Type\AccessType;
 use App\Type\RelationElement;
 use App\Type\Response\CreatedResponse;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Type\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -60,7 +60,7 @@ class PostIndexController extends AbstractController
         if (array_key_exists('id', $body)) {
             $elementId = $this->requestUtilService->getUuidFromBody('id', $body);
         } else {
-            $elementId = UuidV4::uuid4();
+            $elementId = Uuid::generate();
         }
 
         if (!array_key_exists('type', $body)) {
@@ -105,14 +105,14 @@ class PostIndexController extends AbstractController
 
         if ($element instanceof NodeElementInterface) {
             $newNodeOwnsRelation = (new RelationElement())
-                ->setId(UuidV4::uuid4())
+                ->setId(Uuid::generate())
                 ->setType('OWNS')
                 ->setStart($userId)
                 ->setEnd($element->getId());
             $this->elementManager->create($newNodeOwnsRelation);
 
             $newNodeCreatedRelation = (new RelationElement())
-                ->setId(UuidV4::uuid4())
+                ->setId(Uuid::generate())
                 ->setType('CREATED')
                 ->setStart($userId)
                 ->setEnd($element->getId());

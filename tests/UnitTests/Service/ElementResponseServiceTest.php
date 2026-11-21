@@ -11,12 +11,12 @@ use App\Service\ElementResponseService;
 use App\Service\ElementToRawService;
 use App\Type\NodeElement;
 use App\Type\Response\ElementResponse;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(ElementResponseService::class)]
@@ -26,7 +26,7 @@ class ElementResponseServiceTest extends TestCase
 
     public function testBuildElementResponseFromIdWithElement(): void
     {
-        $elementId = Uuid::fromString('71a8f62c-0fae-42ee-9c38-e8bdc9228f1e');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkEXFa7KEiSnEQE0VXKGLIWH');
         $element = new NodeElement();
         $data = ['hello' => 'world'];
 
@@ -57,7 +57,7 @@ class ElementResponseServiceTest extends TestCase
 
     public function testBuildElementResponseFromIdWithoutElement(): void
     {
-        $elementId = Uuid::fromString('336eff5e-ff4e-463f-abed-168c06af5fae');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKjkDryxoJys4N19LAEYL8Yim');
         $exception = new Server500LogicErrorException('blub');
 
         $elementManager = $this->prophesize(ElementManager::class);
@@ -70,7 +70,7 @@ class ElementResponseServiceTest extends TestCase
 
         $server500LogicExceptionFactory = $this->prophesize(Server500LogicErrorExceptionFactory::class);
         $server500LogicExceptionFactory
-            ->createFromTemplate(Argument::is("Unable to find element with the id '336eff5e-ff4e-463f-abed-168c06af5fae'."))
+            ->createFromTemplate(Argument::is("Unable to find element with the id '02IiNr0G8viOVKjkDryxoJys4N19LAEYL8Yim'."))
             ->shouldBeCalledOnce()
             ->willReturn($exception);
 

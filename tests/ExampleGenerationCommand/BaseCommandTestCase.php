@@ -6,9 +6,12 @@ namespace App\Tests\ExampleGenerationCommand;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Dotenv\Dotenv;
 
 abstract class BaseCommandTestCase extends TestCase
 {
+    private const string FALLBACK_REFERENCE_DATASET_VERSION = '0.0.33';
+
     /**
      * Runs the command and returns its stdout. Stderr is captured as well: it contains e.g. progress bars, which would
      * otherwise end up in the test log without any context. It is only shown if the command fails.
@@ -97,5 +100,26 @@ abstract class BaseCommandTestCase extends TestCase
         $composerJson = json_decode(\Safe\file_get_contents(__DIR__.'/../../composer.json'), true);
 
         return $composerJson['version'];
+    }
+
+    /**
+     * Uses the same reference dataset version as the other tests, so that this test stays up to date automatically.
+     * A real environment variable wins over the value in `.env`.
+     */
+    public function getReferenceDatasetVersion(): string
+    {
+        $version = getenv('REFERENCE_DATASET_VERSION');
+        if (false !== $version && '' !== $version) {
+            return $version;
+        }
+        $envFile = __DIR__.'/../../.env';
+        if (is_file($envFile)) {
+            $values = (new Dotenv())->parse(\Safe\file_get_contents($envFile));
+            if (is_string($values['REFERENCE_DATASET_VERSION'] ?? null) && '' !== $values['REFERENCE_DATASET_VERSION']) {
+                return $values['REFERENCE_DATASET_VERSION'];
+            }
+        }
+
+        return self::FALLBACK_REFERENCE_DATASET_VERSION;
     }
 }

@@ -14,10 +14,10 @@ class FileEndpointAccessControlTest extends BaseRequestTestCase
 {
     private const string TOKEN_OWNER = 'secret-token:V8m72O3ovtRU09JrdbJRnh';
     private const string TOKEN_STRANGER = 'secret-token:3JMIdZMTqEF27mZHDO9AoA';
-    private const string OWNED_DATA_WITH_FILE_ID = '592693f7-b1be-454e-b9f0-ed0416e7df48';
+    private const string OWNED_DATA_WITH_FILE_ID = '02IiNr0GOoKiPMLoMMZTTfsr63d6CaUOpOWZa';
 
     private const string TOKEN_READ_ONLY = 'secret-token:S55SWBoCDt99LT95JTIWg0';
-    private const string READ_ONLY_DATA_ID = '135a2d64-8c7a-41d5-9f4b-75fef057846a';
+    private const string READ_ONLY_DATA_ID = '02IiNr0GOoKiPMLGMdmqQk2ltxWdYHIQj5fq7';
 
     public function testOwnerCanPostFileToNewElement(): void
     {

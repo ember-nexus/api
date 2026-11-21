@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Contract;
 
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 interface HasIdInterface
 {
-    public function getId(): ?UuidInterface;
+    public function getId(): ?Uuid;
 
-    public function setId(?UuidInterface $id): static;
+    public function setId(?Uuid $id): static;
 }

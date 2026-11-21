@@ -10,9 +10,9 @@ use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use App\Type\EtagType;
 use App\Type\Response\CollectionResponse;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\CypherList;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -68,7 +68,7 @@ class GetIndexController extends AbstractController
                 if (!is_string($elementId)) {
                     throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property elementIds as list of strings, got %s.', get_debug_type($elementId))); // @codeCoverageIgnore
                 }
-                $nodeIds[] = UuidV4::fromString($elementId);
+                $nodeIds[] = Uuid::fromString($elementId);
             }
         }
 

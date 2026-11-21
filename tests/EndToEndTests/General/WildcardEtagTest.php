@@ -19,10 +19,10 @@ class WildcardEtagTest extends BaseRequestTestCase
     private const string TOKEN = 'secret-token:RRq4WsomBeTH0AAa7Jmi4k';
     // separate user for tests which create elements: the index ETag of the user above is asserted by other tests
     private const string WRITE_TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
-    private const string ID_DATA = '88d75ef3-8b27-4519-af9a-baa5dc2907db';
-    private const string ID_PARENT = '17370748-35e2-41f7-ae9b-66be353b5a90';
-    private const string ID_CHILD = 'f621c1b9-1d3f-4a9c-999c-99d1edcc9c6f';
-    private const string ID_RELATION = 'b576e116-f5f1-4106-92e6-1547b8131108';
+    private const string ID_DATA = '02IiNr0EPf9nVLBIuHYAwqBZoaz85PTYYstCi';
+    private const string ID_PARENT = '02IiNr0EPf9nVLAPZlLLN9h0MVh8ly8VrFCb8';
+    private const string ID_CHILD = '02IiNr0EPf9nVLCA8YZ3annMXymmQYJJ0uq5q';
+    private const string ID_RELATION = '02IiNr0EPf9nVLBedZqZn38dBHiUSvac95XDo';
 
     /**
      * @return array<string, array{string}>

@@ -16,9 +16,9 @@ use App\Security\AuthProvider;
 use App\Type\AccessType;
 use App\Type\Etag;
 use App\Type\EtagType;
+use App\Type\Uuid;
 use Exception;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 
 class EtagService

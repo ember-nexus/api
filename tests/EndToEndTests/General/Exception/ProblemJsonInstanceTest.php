@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\General\Exception;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
-use Ramsey\Uuid\Uuid;
+use App\Type\Uuid;
 
 /**
  * Every problem json response identifies its request as `instance` (`urn:uuid:<id>`), which is also part of the logs.
@@ -13,11 +13,11 @@ use Ramsey\Uuid\Uuid;
 class ProblemJsonInstanceTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
-    private const string INSTANCE_PATTERN = '/^urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/';
+    private const string INSTANCE_PATTERN = '/^urn:uuid:[0-9A-Za-z]{37}$/';
 
     public function testNotFoundResponseContainsRequestIdAsInstance(): void
     {
-        $response = $this->runGetRequest(sprintf('/%s', Uuid::uuid4()->toString()), self::TOKEN);
+        $response = $this->runGetRequest(sprintf('/%s', Uuid::generate()->toString()), self::TOKEN);
 
         $this->assertSame(404, $response->getStatusCode());
         $this->assertStringStartsWith('application/problem+json', $response->getHeaderLine('Content-Type'));
@@ -32,7 +32,7 @@ class ProblemJsonInstanceTest extends BaseRequestTestCase
     {
         $instances = [];
         for ($i = 0; $i < 2; ++$i) {
-            $response = $this->runGetRequest(sprintf('/%s', Uuid::uuid4()->toString()), self::TOKEN);
+            $response = $this->runGetRequest(sprintf('/%s', Uuid::generate()->toString()), self::TOKEN);
             $instances[] = json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR)['instance'];
         }
 

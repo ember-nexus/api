@@ -246,7 +246,7 @@ class RelationAccessMatrixStructureTest extends TestCase
     public function testIdsAreValidAndUnique(): void
     {
         $relationIds = [];
-        $uuidPattern = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/';
+        $uuidPattern = '/^[0-9A-Za-z]{37}$/';
         foreach (self::STRUCTURES as $structure) {
             foreach ($this->getExpectedClassNames() as $shortName) {
                 foreach ($this->getClassName($structure, $shortName)::pairs() as $name => $dataSet) {

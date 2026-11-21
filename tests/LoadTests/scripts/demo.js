@@ -53,7 +53,7 @@ function authHeaders(extra) {
 }
 
 // Extracts the UUID of a newly created element from a POST response's Location header,
-// e.g. "/455a89b9-4ec7-4b02-b023-bcfbcbba9a9f" -> "455a89b9-4ec7-4b02-b023-bcfbcbba9a9f"
+// e.g. "/02IiNr0G8viOVKjsxOk4YtPkUfpZ9kebWGIzA" -> "02IiNr0G8viOVKjsxOk4YtPkUfpZ9kebWGIzA"
 function extractIdFromLocation(res) {
   const location = res.headers['Location'];
   check(res, { 'response has Location header': () => undefined !== location });

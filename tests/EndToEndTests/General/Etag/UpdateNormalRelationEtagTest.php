@@ -9,23 +9,23 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class UpdateNormalRelationEtagTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:L7mQpPOOdY2ESN6GsJIGkU';
-    private const string ID_DATA_1 = '81826403-6513-40ce-a2b7-6ce1ec259df4';
-    private const string ID_DATA_2 = 'eeccb6bf-91da-4da1-8bef-b797a32eb8a6';
-    private const string ID_RELATED = '7f3afac6-013e-4b28-acc7-f4fe1c418c99';
+    private const string ID_DATA_1 = '02IiNr0EPf9nVLBFLTAj2dmGxTFCTuumIsx2t';
+    private const string ID_DATA_2 = '02IiNr0EPf9nVLC6XyTeXcoDq03gW67mo4BJD';
+    private const string ID_RELATED = '02IiNr0EPf9nVLBEDiNgbQvPp11A1wwJrlTXL';
 
     public function testEtagBeforeAndAfterUpdatingCentralNormalRelation(): void
     {
-        $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"YoB0OOEREXk"');
-        $initialEtagNode1Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', '"3j6Nn1Zg7Vh"');
-        $initialEtagNode1Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', '"CXBnJAUbSJp"');
-        $initialEtagNode1Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related', '"KLXJORKMBo2"');
+        $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"g2W8L0ZJ2tg"');
+        $initialEtagNode1Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', '"NmMMSmZuvIZ"');
+        $initialEtagNode1Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', '"AHpVrN9GurL"');
+        $initialEtagNode1Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related', '"aAvG3moNAHC"');
 
-        $initialEtagNode2Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '', '"7VR6m1Ibrsd"');
-        $initialEtagNode2Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', '"Ii50AcImQIP"');
-        $initialEtagNode2Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', '"qgOpKWhgph"');
-        $initialEtagNode2Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related', '"4MjlN2a6NE5"');
+        $initialEtagNode2Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '', '"68ZX4mtDuOn"');
+        $initialEtagNode2Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', '"STcEmbKIqmN"');
+        $initialEtagNode2Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', '"bCVEBGfRPBT"');
+        $initialEtagNode2Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related', '"Arco5fCsuia"');
 
-        $initialEtagRelatedSelf = $this->getEtagOfElement(self::TOKEN, self::ID_RELATED, '', '"UoDabdDMmbq"');
+        $initialEtagRelatedSelf = $this->getEtagOfElement(self::TOKEN, self::ID_RELATED, '', '"1qbHJ4K4s6I"');
 
         $response = $this->runPatchRequest(
             sprintf(

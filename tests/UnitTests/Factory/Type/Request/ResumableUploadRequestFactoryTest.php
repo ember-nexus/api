@@ -10,13 +10,13 @@ use App\Factory\Exception\Client408RequestTimeoutExceptionFactory;
 use App\Factory\Type\Request\ResumableUploadRequestFactory;
 use App\Service\HeaderParseService;
 use App\Service\UploadBodyLimitService;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -62,7 +62,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
 
     public function testCreateResumableUploadRequestFromRequest(): void
     {
-        $elementId = Uuid::fromString('c01ab4f8-ab3c-4372-9aca-e919f501ad5c');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkqjPkX1qt8qisIylVic7WJk');
 
         $headers = $this->prophesize(HeaderBag::class)->reveal();
 
@@ -94,7 +94,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
 
     public function testCreateResumableUploadRequestFromRequestThrowsOnLengthMismatchForCompleteUploads(): void
     {
-        $elementId = Uuid::fromString('c01ab4f8-ab3c-4372-9aca-e919f501ad5c');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkqjPkX1qt8qisIylVic7WJk');
 
         $headers = $this->prophesize(HeaderBag::class)->reveal();
 
@@ -127,7 +127,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
 
     public function testCreateResumableUploadRequestFromRequestDoesNotThrowWhenUploadLengthIsNull(): void
     {
-        $elementId = Uuid::fromString('c01ab4f8-ab3c-4372-9aca-e919f501ad5c');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkqjPkX1qt8qisIylVic7WJk');
 
         $headers = $this->prophesize(HeaderBag::class)->reveal();
 
@@ -152,7 +152,7 @@ class ResumableUploadRequestFactoryTest extends TestCase
 
     public function testCreateResumableUploadRequestFromRequestDoesNotThrowWhenContentLengthIsNull(): void
     {
-        $elementId = Uuid::fromString('c01ab4f8-ab3c-4372-9aca-e919f501ad5c');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkqjPkX1qt8qisIylVic7WJk');
 
         $headers = $this->prophesize(HeaderBag::class)->reveal();
 

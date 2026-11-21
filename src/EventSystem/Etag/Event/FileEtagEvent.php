@@ -7,7 +7,7 @@ namespace App\EventSystem\Etag\Event;
 use App\Contract\EventInterface;
 use App\Trait\StoppableEventTrait;
 use App\Type\Etag;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 class FileEtagEvent implements EventInterface
 {
@@ -16,7 +16,7 @@ class FileEtagEvent implements EventInterface
     private ?Etag $etag = null;
 
     public function __construct(
-        private UuidInterface $elementId,
+        private Uuid $elementId,
     ) {
     }
 
@@ -32,7 +32,7 @@ class FileEtagEvent implements EventInterface
         return $this;
     }
 
-    public function getElementId(): UuidInterface
+    public function getElementId(): Uuid
     {
         return $this->elementId;
     }

@@ -14,6 +14,7 @@ use App\Service\ElementManager;
 use App\Service\S3Service;
 use App\Service\UploadConsistencyService;
 use App\Service\UploadService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +22,6 @@ use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(UploadConsistencyService::class)]
@@ -65,7 +65,7 @@ class UploadConsistencyServiceTest extends TestCase
     private function createUpload(array $chunkIds, int $offset): UploadInterface
     {
         $upload = $this->prophesize(UploadInterface::class);
-        $upload->getId()->willReturn(Uuid::uuid4());
+        $upload->getId()->willReturn(Uuid::generate());
         $upload->getChunkIds()->willReturn($chunkIds);
         $upload->getLastChunkId()->willReturn([] === $chunkIds ? null : $chunkIds[array_key_last($chunkIds)]);
         $upload->getUploadOffset()->willReturn($offset);

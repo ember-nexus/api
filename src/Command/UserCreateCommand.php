@@ -9,9 +9,9 @@ use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
 use App\Trait\CommandInputTrait;
 use App\Type\NodeElement;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Laudis\Neo4j\Databags\Statement;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -82,7 +82,7 @@ class UserCreateCommand extends Command
             return Command::FAILURE;
         }
 
-        $userId = Uuid::uuid4();
+        $userId = Uuid::generate();
 
         $userNode = (new NodeElement())
             ->setLabel('User')

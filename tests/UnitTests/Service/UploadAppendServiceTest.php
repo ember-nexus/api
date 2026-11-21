@@ -22,6 +22,7 @@ use App\Service\UploadAppendService;
 use App\Service\UploadChunkValidator;
 use App\Service\UploadFinalizationService;
 use App\Service\UploadService;
+use App\Type\Uuid;
 use HashContext;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -29,7 +30,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use Symfony\Component\Stopwatch\Stopwatch;
 
@@ -42,7 +42,7 @@ class UploadAppendServiceTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string UPLOAD_ID = '224a787e-3b32-4822-8697-61047175505d';
+    private const string UPLOAD_ID = '02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub';
 
     private ObjectProphecy $uploadFactory;
     private ObjectProphecy $uploadService;
@@ -75,7 +75,7 @@ class UploadAppendServiceTest extends TestCase
         bool $offsetMatches = true,
         bool $targetHasFile = false,
     ): UploadAppendService {
-        $targetId = Uuid::uuid4();
+        $targetId = Uuid::generate();
 
         $this->upload = $this->prophesize(UploadInterface::class);
         $this->upload->getId()->willReturn(Uuid::fromString(self::UPLOAD_ID));

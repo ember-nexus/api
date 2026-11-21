@@ -11,12 +11,12 @@ use App\Exception\Client400BadContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Type\UploadFactory;
 use App\Service\PropertyParseService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use Safe\DateTime;
 
 #[Small]
@@ -37,9 +37,9 @@ class UploadFactoryTest extends TestCase
 
     public function testCreateUploadFromElement(): void
     {
-        $elementId = Uuid::fromString('95ddb14a-bf07-4bab-958a-64ec5240800b');
-        $uploadTarget = Uuid::fromString('5c9d0f01-251e-47a0-983c-b39201b07a32');
-        $uploadOwner = Uuid::fromString('5bdafd97-fe7c-4e68-b094-63da5c992a69');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKkW9qIia8QHPAo5WuJZFMjRP');
+        $uploadTarget = Uuid::fromString('02IiNr0G8viOVKk4HN2WPugRtxpWwFgvE9ArW');
+        $uploadOwner = Uuid::fromString('02IiNr0G8viOVKk3uiBdSMyv8DMvmb2xGhIia');
         $expires = new DateTime();
 
         $properties = [];
@@ -140,9 +140,9 @@ class UploadFactoryTest extends TestCase
 
     public function testMarkUploadAsComplete(): void
     {
-        $uploadId = Uuid::fromString('c4c01f55-3b29-48e9-aa4a-814ea1b7f3c8');
-        $uploadTarget = Uuid::fromString('9c6dd5e1-b58c-4b04-be08-c81cd0eda6e4');
-        $uploadOwner = Uuid::fromString('db37197b-415d-4659-825e-f5d374b4d2a7');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkt0rKwvY8EAusajdmyQpCSK');
+        $uploadTarget = Uuid::fromString('02IiNr0G8viOVKkZLyYogVHqzHc1pxIWhCQ1b');
+        $uploadOwner = Uuid::fromString('02IiNr0G8viOVKl3wKlr2IyBHgxJvDnt8szk5');
         $expires = new DateTime();
 
         $upload = $this->prophesize(UploadInterface::class);
@@ -177,9 +177,9 @@ class UploadFactoryTest extends TestCase
 
     public function testAddNewChunkToUpload(): void
     {
-        $uploadId = Uuid::fromString('7f27bcda-3d08-4790-b6f0-a5727fbc2bde');
-        $uploadTarget = Uuid::fromString('f253379f-3533-4719-8337-871df7d336f6');
-        $uploadOwner = Uuid::fromString('2be74c20-89d7-4f61-9c5b-c47a7ae11b5e');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkL6pMgLICKFfUwWK04zNFK2');
+        $uploadTarget = Uuid::fromString('02IiNr0G8viOVKlFCU9pq7WPHAOzwIFS71Ztb');
+        $uploadOwner = Uuid::fromString('02IiNr0G8viOVKjgZNNsE8ZFvu4Vh8rJRpKgt');
         $expires = new DateTime();
 
         $upload = $this->prophesize(UploadInterface::class);
@@ -215,9 +215,9 @@ class UploadFactoryTest extends TestCase
 
     public function testAddNewChunkToUploadUsesProvidedHashStateInsteadOfExistingUploadHashState(): void
     {
-        $uploadId = Uuid::fromString('7f27bcda-3d08-4790-b6f0-a5727fbc2bde');
-        $uploadTarget = Uuid::fromString('f253379f-3533-4719-8337-871df7d336f6');
-        $uploadOwner = Uuid::fromString('2be74c20-89d7-4f61-9c5b-c47a7ae11b5e');
+        $uploadId = Uuid::fromString('02IiNr0G8viOVKkL6pMgLICKFfUwWK04zNFK2');
+        $uploadTarget = Uuid::fromString('02IiNr0G8viOVKlFCU9pq7WPHAOzwIFS71Ztb');
+        $uploadOwner = Uuid::fromString('02IiNr0G8viOVKjgZNNsE8ZFvu4Vh8rJRpKgt');
         $expires = new DateTime();
 
         $upload = $this->prophesize(UploadInterface::class);

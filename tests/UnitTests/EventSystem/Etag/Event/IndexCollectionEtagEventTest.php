@@ -6,10 +6,10 @@ namespace App\Tests\UnitTests\EventSystem\Etag\Event;
 
 use App\EventSystem\Etag\Event\IndexCollectionEtagEvent;
 use App\Type\Etag;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(IndexCollectionEtagEvent::class)]
@@ -17,7 +17,7 @@ class IndexCollectionEtagEventTest extends TestCase
 {
     public function testEventWithEtag(): void
     {
-        $id = Uuid::fromString('87877759-2856-4b4a-80f6-df53296d12a4');
+        $id = Uuid::fromString('02IiNr0G8viOVKkPBgDF3SqTNzjPCjqQzuDAf');
         $etag = new Etag('someEtag');
         $event = new IndexCollectionEtagEvent($id);
         $event->setEtag($etag);
@@ -28,7 +28,7 @@ class IndexCollectionEtagEventTest extends TestCase
 
     public function testEventWithNull(): void
     {
-        $id = Uuid::fromString('87877759-2856-4b4a-80f6-df53296d12a4');
+        $id = Uuid::fromString('02IiNr0G8viOVKkPBgDF3SqTNzjPCjqQzuDAf');
         $event = new IndexCollectionEtagEvent($id);
         $event->setEtag(null);
 

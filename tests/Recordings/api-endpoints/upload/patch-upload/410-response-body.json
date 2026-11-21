@@ -2,6 +2,6 @@
   "type": "http://api/error/410/gone",
   "title": "Gone",
   "status": 410,
-  "instance": "urn:uuid:0bb3dad2-34e0-4d45-a979-078406a4d061",
+  "instance": "urn:uuid:02IiNr0G8viOVKjQtYlKWQoeLylw1Tuza0hm1",
   "detail": "Requested resource is no longer available and is expected to soon be permanently deleted."
 }

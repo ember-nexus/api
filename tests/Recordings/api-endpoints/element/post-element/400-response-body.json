@@ -2,6 +2,6 @@
   "type": "http://api/error/400/missing-property",
   "title": "Missing property",
   "status": 400,
-  "instance": "urn:uuid:3c159295-e485-4d4d-b796-d31e472ebad4",
+  "instance": "urn:uuid:02IiNr0G8viOVKjoS5bn4opSsh6bh7mZur6bV",
   "detail": "Endpoint requires that the request contains property 'type' to be set to a valid type."
 }

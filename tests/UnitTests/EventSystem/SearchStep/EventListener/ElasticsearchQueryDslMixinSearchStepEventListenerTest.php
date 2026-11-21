@@ -17,6 +17,7 @@ use App\Service\GraphStructureService;
 use App\Service\Search\ElasticsearchForbiddenFeatureCheckService;
 use App\Service\Search\ElasticsearchQueryDefinitionService;
 use App\Type\SearchStepType;
+use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use Elastic\Elasticsearch\Client;
 use Elastic\Elasticsearch\Response\Elasticsearch;
@@ -28,7 +29,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Uuid;
 use ReflectionMethod;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -256,17 +256,17 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
                 'hits' => [
                     'hits' => [
                         [
-                            '_id' => '55f1e41a-a5e1-4efd-a93c-fb115e76c68b',
+                            '_id' => '02IiNr0G8viOVKk13GkWf89F0kIugSLErQnjs',
                             '_index' => 'node_data',
                             '_score' => 2.1,
                         ],
                         [
-                            '_id' => '0c6cd0ce-07ca-4326-8f82-2d0834d34de5',
+                            '_id' => '02IiNr0G8viOVKjRENlzl7fDQix8mdM4oc3jJ',
                             '_index' => 'node_plant',
                             '_score' => 1.7,
                         ],
                         [
-                            '_id' => 'e877ffae-d756-44c0-b5b1-60a049e247c0',
+                            '_id' => '02IiNr0G8viOVKlAONYTlKBUu91I1UGyO84Hw',
                             '_index' => 'relation_owns',
                             '_score' => 0.3,
                         ],
@@ -296,9 +296,9 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         $result = $method->invokeArgs($elasticsearchQueryDslMixinSearchStepEventListener, [$response->reveal()]);
 
         $this->assertCount(3, $result);
-        $this->assertSame('55f1e41a-a5e1-4efd-a93c-fb115e76c68b', (string) $result[0]['id']);
-        $this->assertSame('0c6cd0ce-07ca-4326-8f82-2d0834d34de5', (string) $result[1]['id']);
-        $this->assertSame('e877ffae-d756-44c0-b5b1-60a049e247c0', (string) $result[2]['id']);
+        $this->assertSame('02IiNr0G8viOVKk13GkWf89F0kIugSLErQnjs', (string) $result[0]['id']);
+        $this->assertSame('02IiNr0G8viOVKjRENlzl7fDQix8mdM4oc3jJ', (string) $result[1]['id']);
+        $this->assertSame('02IiNr0G8viOVKlAONYTlKBUu91I1UGyO84Hw', (string) $result[2]['id']);
         $this->assertSame('Data', $result[0]['type']);
         $this->assertSame('Plant', $result[1]['type']);
         $this->assertSame('OWNS', $result[2]['type']);
@@ -317,14 +317,14 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
                 'hits' => [
                     'hits' => [
                         [
-                            '_id' => '55f1e41a-a5e1-4efd-a93c-fb115e76c68b',
+                            '_id' => '02IiNr0G8viOVKk13GkWf89F0kIugSLErQnjs',
                             '_index' => 'node_plant',
                             '_score' => 2.1,
                             'highlight' => ['name' => ['Flame <em>Lily</em>']],
                             'sort' => ['Flame Lily'],
                         ],
                         [
-                            '_id' => '0c6cd0ce-07ca-4326-8f82-2d0834d34de5',
+                            '_id' => '02IiNr0G8viOVKjRENlzl7fDQix8mdM4oc3jJ',
                             '_index' => 'node_plant',
                             '_score' => 1.7,
                         ],
@@ -354,14 +354,14 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getElementMetadata');
 
         $result = $method->invokeArgs($listener, [[
-            ['id' => Uuid::fromString('55f1e41a-a5e1-4efd-a93c-fb115e76c68b'), 'type' => 'Plant', 'metadata' => ['score' => 2.1, 'highlight' => ['name' => ['x']]]],
-            ['id' => Uuid::fromString('0c6cd0ce-07ca-4326-8f82-2d0834d34de5'), 'type' => 'Plant', 'metadata' => ['score' => 1.7]],
+            ['id' => Uuid::fromString('02IiNr0G8viOVKk13GkWf89F0kIugSLErQnjs'), 'type' => 'Plant', 'metadata' => ['score' => 2.1, 'highlight' => ['name' => ['x']]]],
+            ['id' => Uuid::fromString('02IiNr0G8viOVKjRENlzl7fDQix8mdM4oc3jJ'), 'type' => 'Plant', 'metadata' => ['score' => 1.7]],
         ]]);
 
         $this->assertSame(
             [
-                '55f1e41a-a5e1-4efd-a93c-fb115e76c68b' => ['score' => 2.1, 'highlight' => ['name' => ['x']]],
-                '0c6cd0ce-07ca-4326-8f82-2d0834d34de5' => ['score' => 1.7],
+                '02IiNr0G8viOVKk13GkWf89F0kIugSLErQnjs' => ['score' => 2.1, 'highlight' => ['name' => ['x']]],
+                '02IiNr0G8viOVKjRENlzl7fDQix8mdM4oc3jJ' => ['score' => 1.7],
             ],
             $result
         );
@@ -637,7 +637,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
 
     public function testBuildCombinedQueryBuildsCorrectQuery(): void
     {
-        $userId = Uuid::fromString('a743f578-518d-4fdb-855d-28b49e48d671');
+        $userId = Uuid::fromString('02IiNr0G8viOVKkeeEiCB89pEDlc8Mwl2SaCa');
 
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider
@@ -649,7 +649,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         $accessChecker
             ->getUsersGroups(Argument::is($userId))
             ->shouldBeCalledOnce()
-            ->willReturn([Uuid::fromString('5e644c3e-00aa-444a-9847-deb675ab9ced')]);
+            ->willReturn([Uuid::fromString('02IiNr0G8viOVKk5A1oUrobeqiMg7ie7bN5Un')]);
 
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener(
             authProvider: $authProvider->reveal(),
@@ -694,14 +694,14 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
                                         [
                                             'terms' => [
                                                 '_groupsWithSearchAccess.keyword' => [
-                                                    '5e644c3e-00aa-444a-9847-deb675ab9ced',
+                                                    '02IiNr0G8viOVKk5A1oUrobeqiMg7ie7bN5Un',
                                                 ],
                                             ],
                                         ],
                                         [
                                             'term' => [
                                                 '_usersWithSearchAccess.keyword' => [
-                                                    'value' => 'a743f578-518d-4fdb-855d-28b49e48d671',
+                                                    'value' => '02IiNr0G8viOVKkeeEiCB89pEDlc8Mwl2SaCa',
                                                 ],
                                             ],
                                         ],
@@ -719,7 +719,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
 
     public function testBuildCombinedQueryBuildsCorrectQueryWithMinScore(): void
     {
-        $userId = Uuid::fromString('4b320d59-79e3-4f1d-800b-5949490bfd6f');
+        $userId = Uuid::fromString('02IiNr0G8viOVKjvoi8uqVk7e2PPx3w4acLGo');
 
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider
@@ -731,7 +731,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         $accessChecker
             ->getUsersGroups(Argument::is($userId))
             ->shouldBeCalledOnce()
-            ->willReturn([Uuid::fromString('33ba6632-d824-480c-a943-3c098f4c0de7')]);
+            ->willReturn([Uuid::fromString('02IiNr0G8viOVKjkNGqIODszlFHq6FLRnkDB1')]);
 
         $elasticsearchQueryDslMixinSearchStepEventListener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener(
             authProvider: $authProvider->reveal(),
@@ -779,14 +779,14 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
                                         [
                                             'terms' => [
                                                 '_groupsWithSearchAccess.keyword' => [
-                                                    '33ba6632-d824-480c-a943-3c098f4c0de7',
+                                                    '02IiNr0G8viOVKjkNGqIODszlFHq6FLRnkDB1',
                                                 ],
                                             ],
                                         ],
                                         [
                                             'term' => [
                                                 '_usersWithSearchAccess.keyword' => [
-                                                    'value' => '4b320d59-79e3-4f1d-800b-5949490bfd6f',
+                                                    'value' => '02IiNr0G8viOVKjvoi8uqVk7e2PPx3w4acLGo',
                                                 ],
                                             ],
                                         ],
@@ -809,7 +809,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
      */
     private function buildCombinedQueryFor(array $query): array
     {
-        $userId = Uuid::fromString('a743f578-518d-4fdb-855d-28b49e48d671');
+        $userId = Uuid::fromString('02IiNr0G8viOVKkeeEiCB89pEDlc8Mwl2SaCa');
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider->getUserId()->willReturn($userId);
         $accessChecker = $this->prophesize(AccessChecker::class);
@@ -887,7 +887,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         $urlGenerator->method('generate')->willReturn('https://mock.dev/error');
         $factory = new Client400BadContentExceptionFactory($urlGenerator);
 
-        $userId = Uuid::fromString('a743f578-518d-4fdb-855d-28b49e48d671');
+        $userId = Uuid::fromString('02IiNr0G8viOVKkeeEiCB89pEDlc8Mwl2SaCa');
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider->getUserId()->willReturn($userId);
         $accessChecker = $this->prophesize(AccessChecker::class);

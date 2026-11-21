@@ -19,7 +19,7 @@ class PatchUploadGoneTest extends BaseRequestTestCase
 
     public function testPatchUploadFailure410Gone(): void
     {
-        $elementId = 'a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d';
+        $elementId = '02IiNr0G8viOVKkbwHqhtr3GzanRJMhEUN7sI';
         $this->createDocumentedElement($elementId, 'patch-upload-410-gone', self::TOKEN);
 
         $createResponse = $this->runUploadRequest(

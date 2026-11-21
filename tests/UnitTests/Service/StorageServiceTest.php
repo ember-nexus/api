@@ -7,6 +7,7 @@ namespace App\Tests\UnitTests\Service;
 use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\StorageService;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -16,7 +17,6 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -56,7 +56,7 @@ class StorageServiceTest extends TestCase
         );
 
         try {
-            $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), -1);
+            $storageService->getUploadBucketKey(Uuid::fromString('02IiNr0G8viOVKkRCAnGVctblMH1uQTu3OQ0v'), -1);
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
@@ -76,7 +76,7 @@ class StorageServiceTest extends TestCase
         );
 
         try {
-            $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 10000);
+            $storageService->getUploadBucketKey(Uuid::fromString('02IiNr0G8viOVKkRCAnGVctblMH1uQTu3OQ0v'), 10000);
         } catch (Exception $e) {
             $this->assertInstanceOf(Server500LogicErrorException::class, $e);
             /**
@@ -97,8 +97,8 @@ class StorageServiceTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
-        $key = $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1234);
-        $this->assertSame('8b/a1/17/8ba117cf-8983-4f13-be93-415e175cb64d-1234.wip', $key);
+        $key = $storageService->getUploadBucketKey(Uuid::fromString('02IiNr0G8viOVKkRCAnGVctblMH1uQTu3OQ0v'), 1234);
+        $this->assertSame('cf/89/83/02IiNr0G8viOVKkRCAnGVctblMH1uQTu3OQ0v-1234.wip', $key);
     }
 
     public function testGetUploadBucketKeyWithChunkId(): void
@@ -112,8 +112,8 @@ class StorageServiceTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
-        $key = $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 12, '3mJr7AoUXx2Wqd9G');
-        $this->assertSame('8b/a1/17/8ba117cf-8983-4f13-be93-415e175cb64d-0012-3mJr7AoUXx2Wqd9G.wip', $key);
+        $key = $storageService->getUploadBucketKey(Uuid::fromString('02IiNr0G8viOVKkRCAnGVctblMH1uQTu3OQ0v'), 12, '3mJr7AoUXx2Wqd9G');
+        $this->assertSame('cf/89/83/02IiNr0G8viOVKkRCAnGVctblMH1uQTu3OQ0v-0012-3mJr7AoUXx2Wqd9G.wip', $key);
     }
 
     public function testGetUploadBucketKeyRejectsInvalidChunkId(): void
@@ -121,7 +121,7 @@ class StorageServiceTest extends TestCase
         $storageService = $this->buildStorageService();
 
         $this->expectException(Server500LogicErrorException::class);
-        $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1, '../etc/passwd');
+        $storageService->getUploadBucketKey(Uuid::fromString('02IiNr0G8viOVKkRCAnGVctblMH1uQTu3OQ0v'), 1, '../etc/passwd');
     }
 
     /**
@@ -145,7 +145,7 @@ class StorageServiceTest extends TestCase
         $storageService = $this->buildStorageService();
 
         $this->expectException(Server500LogicErrorException::class);
-        $storageService->getUploadBucketKey(Uuid::fromString('8ba117cf-8983-4f13-be93-415e175cb64d'), 1, $chunkId);
+        $storageService->getUploadBucketKey(Uuid::fromString('02IiNr0G8viOVKkRCAnGVctblMH1uQTu3OQ0v'), 1, $chunkId);
     }
 
     public function testGetStorageBucketKeySupportsOtherExtension(): void
@@ -158,8 +158,8 @@ class StorageServiceTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
-        $key = $storageService->getStorageBucketKey(Uuid::fromString('5dbd948b-d9dc-4b6c-af1c-c12dc8120755'), 'png');
-        $this->assertSame('5d/bd/94/5dbd948b-d9dc-4b6c-af1c-c12dc8120755.png', $key);
+        $key = $storageService->getStorageBucketKey(Uuid::fromString('02IiNr0G8viOVKk4pL8jtJPNyKx05n9qpJb8Q'), 'png');
+        $this->assertSame('8b/d9/dc/02IiNr0G8viOVKk4pL8jtJPNyKx05n9qpJb8Q.png', $key);
     }
 
     public function testGetStorageBucketKeyWithEmptyExtensionHasNoTrailingDot(): void
@@ -172,8 +172,8 @@ class StorageServiceTest extends TestCase
             emberNexusConfiguration: $emberNexusConfiguration->reveal()
         );
 
-        $key = $storageService->getStorageBucketKey(Uuid::fromString('5dbd948b-d9dc-4b6c-af1c-c12dc8120755'), '');
-        $this->assertSame('5d/bd/94/5dbd948b-d9dc-4b6c-af1c-c12dc8120755', $key);
+        $key = $storageService->getStorageBucketKey(Uuid::fromString('02IiNr0G8viOVKk4pL8jtJPNyKx05n9qpJb8Q'), '');
+        $this->assertSame('8b/d9/dc/02IiNr0G8viOVKk4pL8jtJPNyKx05n9qpJb8Q', $key);
     }
 
     public function testAppendExtension(): void
@@ -187,7 +187,7 @@ class StorageServiceTest extends TestCase
     {
         $storageService = $this->buildStorageService();
 
-        $uuid = Uuid::fromString('3207d629-7199-4c2d-9b2a-b0fba10fe309');
+        $uuid = Uuid::fromString('02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW');
 
         try {
             $storageService->uuidToNestedFolderStructure($uuid, -1);
@@ -226,28 +226,28 @@ class StorageServiceTest extends TestCase
             /**
              * @var Server500LogicErrorException $e
              */
-            $this->assertSame('Unable to generate nested folder structure as long as product of levels and level length exceeds length of uuid without dashes.', $e->getDetail());
+            $this->assertSame('Unable to generate nested folder structure as long as product of levels and level length exceeds length of the random part of the uuid.', $e->getDetail());
         }
 
         $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid);
-        $this->assertSame('3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
+        $this->assertSame('02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW', $generatedStructure);
 
         $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 1, 1);
-        $this->assertSame('3/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
+        $this->assertSame('2/02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW', $generatedStructure);
 
         $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 1, 3);
-        $this->assertSame('320/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
+        $this->assertSame('297/02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW', $generatedStructure);
 
         $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 3, 1);
-        $this->assertSame('3/2/0/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
+        $this->assertSame('2/9/7/02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW', $generatedStructure);
 
         $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 2, 2);
-        $this->assertSame('32/07/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
+        $this->assertSame('29/71/02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW', $generatedStructure);
 
-        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 6, 5);
-        $this->assertSame('3207d/62971/994c2/d9b2a/b0fba/10fe3/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 6, 4);
+        $this->assertSame('2971/99c2/d6ca/ac3e/e843/f8c2/02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW', $generatedStructure);
 
-        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 15, 2);
-        $this->assertSame('32/07/d6/29/71/99/4c/2d/9b/2a/b0/fb/a1/0f/e3/3207d629-7199-4c2d-9b2a-b0fba10fe309', $generatedStructure);
+        $generatedStructure = $storageService->uuidToNestedFolderStructure($uuid, 12, 2);
+        $this->assertSame('29/71/99/c2/d6/ca/ac/3e/e8/43/f8/c2/02IiNr0G8viOVKjjYIsWvZXUJEs5I5bXOooTW', $generatedStructure);
     }
 }

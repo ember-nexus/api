@@ -9,8 +9,8 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class PostIndexRelationTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:OZmOjZnLpek1ppUvog82KR';
-    private const string START = '2e709799-b84b-487f-837b-9ba92b991614';
-    private const string END = '8bf94f2b-898e-4e50-9657-6a9a0736a1be';
+    private const string START = '02IiNr0GOoKiPMLTZW4nG3aFeCuD6GdoH9wjQ';
+    private const string END = '02IiNr0GOoKiPMMD6Ua61xSFAbxJbaIke8Wru';
 
     public function testCreateRelation(): void
     {

@@ -6,8 +6,7 @@ namespace App\EventSystem\ElementDefragmentize\EventListener;
 
 use App\EventSystem\ElementDefragmentize\Event\RelationElementDefragmentizeEvent;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 class RelationElementDefragmentizeEventListener
@@ -46,12 +45,12 @@ class RelationElementDefragmentizeEventListener
             ->setEnd($end);
     }
 
-    private function getUuidFromFragmentId(mixed $rawId, string $requirement): UuidInterface
+    private function getUuidFromFragmentId(mixed $rawId, string $requirement): Uuid
     {
         if (!is_string($rawId)) {
             throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Relation element defragmentize event listener %s Got %s.', $requirement, get_debug_type($rawId)));
         }
 
-        return UuidV4::fromString($rawId);
+        return Uuid::fromString($rawId);
     }
 }

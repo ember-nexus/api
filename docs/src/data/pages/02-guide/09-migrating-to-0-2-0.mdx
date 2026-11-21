@@ -1,0 +1,75 @@
+---
+type: guide
+title: Migrating to version 0.2.0
+---
+
+Version 0.2.0 replaces the random UUIDv4 element ids with UUIDsv2a7 ids, see [element id](/reference/element-id).
+Ids are now time-sortable, which makes database indices faster, and they carry 128 random bits. This is a breaking
+change: **ids of version 0.1.x are not valid in version 0.2.0 and data has to be migrated.**
+
+|                  | Before 0.2.0                             | Since 0.2.0                                                   |
+| ---------------- | ---------------------------------------- | ------------------------------------------------------------- |
+| Standard         | UUIDv4                                   | UUIDsv2a7 with 16 random bytes                                |
+| Canonical format | base16 with dashes, 36 characters        | base62sort, 37 characters                                     |
+| Example          | `aee9e678-42fa-48cf-85e3-33638bebf0b1`   | `02IiNr0GOnGDqcho5adnseWkNNcoz7fA7tFnO`                       |
+| Sorting          | random                                   | by creation time, when compared as case-sensitive strings     |
+
+## What changes for clients
+
+- All ids in responses, e.g. `id`, `start`, `end`, the `Location` header and `uploadTarget`, are returned in the
+  base62sort format.
+- Endpoints accept the base62sort format everywhere an id is expected, e.g. in `/<uuid>`, in request bodies and in search
+  steps. The base16 format with dashes is accepted as a fallback for humans, e.g. `02070007-01A1FC4B-4C3D-7C10-F288-2CAAA0662FD8-CCF69A89204F6A`.
+  It is converted to base62sort immediately, so it never shows up in responses or logs.
+- Legacy UUIDv4 ids are rejected, in URLs as well as in request bodies.
+- Custom ids, e.g. in `POST /` requests, are validated: encoding block, version, and variant have to match. Their
+  timestamp may be in the past, but not more than one minute in the future.
+- Clients which validate ids, e.g. with the regular expression for UUIDv4, have to be updated. Base62sort ids match
+  `^[0-9A-Za-z]{37}$`. Clients which store ids have to keep them case-sensitive.
+- Clients which sort ids have to compare them byte-wise and case-sensitively; a locale-aware or case-insensitive
+  collation breaks the order and the uniqueness.
+- The `ETag` of every element, collection, and file changes, because ids are part of the calculation.
+
+## Migrating an instance
+
+Elements are not migrated automatically. Instead, a backup is created, the databases are reset, and the backup is loaded
+again. The backup can be converted beforehand, or while loading.
+
+1. Create a backup with the old version, using [`backup:create`](/command/backup-create). Stop all clients from writing
+   to the instance afterwards.
+2. Convert the backup, using [`backup:convert`](/command/backup-convert). The source backup is not modified, all data
+   is copied into a new backup. The command also writes a CSV file with the mapping from the old to the new ids.
+3. Update the new version of the API, then reset all databases using [`database:drop`](/command/database-drop).
+4. Load the converted backup using [`backup:load`](/command/backup-load).
+5. Update everything which references old ids, see below.
+
+Alternatively, step 2 can be skipped: [`backup:load`](/command/backup-load) converts backups with legacy ids on the fly
+and can write the mapping with `--legacy-mapping-output`. Backups with new ids can be loaded as they are, and a backup
+can even contain a mix of both formats. Converting beforehand is recommended, as the converted backup is a reproducible
+artifact which can be inspected and loaded multiple times.
+
+### How legacy ids are converted
+
+- The 122 random bits of the UUIDv4 become the first 122 random bits of the new id. The remaining 6 bits are derived from
+  the old id with SHA-256. The conversion is therefore deterministic: the same legacy id always results in the same random
+  part.
+- The timestamp is taken from the element's `created` property. Elements without it share a single timestamp per run,
+  which is the time of the conversion or the import.
+- Only the `id`, `start`, and `end` of nodes and relations are converted, as well as the names of files. Ids which are
+  part of other property values are not converted.
+- In backups created by `backup:create`, the nested folders are recalculated from the random end of the new id. Other
+  folder structures are kept.
+
+### What has to be updated manually
+
+- The environment variable `ANONYMOUS_USER_UUID`, if set. Look up the new id in the mapping file.
+- Every external reference to an element, e.g. bookmarks, links, other systems, and stored ids of clients. The mapping
+  file can be used to translate them.
+- Existing tokens keep their value, but the ids of the token and user nodes change.
+- Uploads which are in progress are lost and have to be started again.
+- Elements which have a property referencing other elements by id are not updated, see above.
+
+<Note>
+    The mapping file contains the old and the new id of every element. Keep it as long as clients might still use old
+    ids.
+</Note>

@@ -12,6 +12,7 @@ use App\Type\Etag;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
 use App\Type\RedisValueType;
+use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -19,7 +20,6 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(RedisRelatedCollectionEtagEventListener::class)]
@@ -31,7 +31,7 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
     public function testRedisRelatedCollectionEtagEventListenerWithElementNotInRedis(): void
     {
         // setup variables
-        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $id = Uuid::fromString('02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $id->toString());
         $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($id);
 
@@ -62,19 +62,19 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for related collection in Redis.', [
-            'centerId' => '977245a7-a584-44bd-8992-1bfd80251a41',
-            'redisKey' => 'etag:related:977245a7-a584-44bd-8992-1bfd80251a41',
+            'centerId' => '02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
+            'redisKey' => 'etag:related:02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
         ]);
         $this->assertLogHappened($logger, 'debug', 'Unable to find Etag for related collection in Redis.', [
-            'centerId' => '977245a7-a584-44bd-8992-1bfd80251a41',
-            'redisKey' => 'etag:related:977245a7-a584-44bd-8992-1bfd80251a41',
+            'centerId' => '02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
+            'redisKey' => 'etag:related:02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
         ]);
     }
 
     public function testRedisRelatedCollectionEtagEventListenerWithElementInRedisWithNullValue(): void
     {
         // setup variables
-        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $id = Uuid::fromString('02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $id->toString());
         $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($id);
 
@@ -105,12 +105,12 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for related collection in Redis.', [
-            'centerId' => '977245a7-a584-44bd-8992-1bfd80251a41',
-            'redisKey' => 'etag:related:977245a7-a584-44bd-8992-1bfd80251a41',
+            'centerId' => '02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
+            'redisKey' => 'etag:related:02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
         ]);
         $this->assertLogHappened($logger, 'debug', 'Found Etag for related collection in Redis.', [
-            'centerId' => '977245a7-a584-44bd-8992-1bfd80251a41',
-            'redisKey' => 'etag:related:977245a7-a584-44bd-8992-1bfd80251a41',
+            'centerId' => '02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
+            'redisKey' => 'etag:related:02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
             'etag' => null,
         ]);
     }
@@ -118,7 +118,7 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
     public function testRedisRelatedCollectionEtagEventListenerWithElementInRedisWithValue(): void
     {
         // setup variables
-        $id = Uuid::fromString('977245a7-a584-44bd-8992-1bfd80251a41');
+        $id = Uuid::fromString('02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_RELATED_COLLECTION, $id->toString());
         $elementRelatedCollectionEvent = new RelatedCollectionEtagEvent($id);
         $etag = new Etag('someEtag');
@@ -150,12 +150,12 @@ class RedisRelatedCollectionEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to find Etag for related collection in Redis.', [
-            'centerId' => '977245a7-a584-44bd-8992-1bfd80251a41',
-            'redisKey' => 'etag:related:977245a7-a584-44bd-8992-1bfd80251a41',
+            'centerId' => '02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
+            'redisKey' => 'etag:related:02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1',
         ]);
         $data = $this->assertLogHappened($logger, 'debug', 'Found Etag for related collection in Redis.', false);
-        $this->assertSame('977245a7-a584-44bd-8992-1bfd80251a41', $data['centerId']);
-        $this->assertSame('etag:related:977245a7-a584-44bd-8992-1bfd80251a41', $data['redisKey']);
+        $this->assertSame('02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1', $data['centerId']);
+        $this->assertSame('etag:related:02IiNr0G8viOVKkWwoslFGBjEGp2K6GFczcU1', $data['redisKey']);
         $this->assertSame('someEtag', (string) $data['etag']);
     }
 }

@@ -13,6 +13,8 @@
     "ignorePaths": ["src/data/swagger.json"],
     "ignoreRegExpList": [
         "/secret-token:\\S+/g",
+        "/\\b02IiNr[0-9A-Za-z]{31}\\b/g",
+        "/\\b[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14}\\b/g",
         "/(ETag|If-Match|If-None-Match): ?\"[^\"]+\"/gi"
     ]
 }

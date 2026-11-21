@@ -11,8 +11,8 @@ use PHPUnit\Framework\Attributes\Group;
 class GetFileTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
-    private const string NODE_WITH_FILE_UUID = '0fdd52ba-55da-430c-b015-3277a231e895';
-    private const string NODE_WITHOUT_FILE_UUID = 'b7121a49-8f17-4858-b988-4bd837a5f1fe';
+    private const string NODE_WITH_FILE_UUID = '02IiNr0GOoKiPMLEezecUZIcqABdykANm0j0F';
+    private const string NODE_WITHOUT_FILE_UUID = '02IiNr0GOoKiPMMY6RzeYaPpTMxaHXVGh8k0X';
 
     public function testGetFileOnNodeWithFile(): void
     {

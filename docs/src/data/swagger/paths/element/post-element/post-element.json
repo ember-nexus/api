@@ -33,9 +33,9 @@
                   },
                   "id": {
                     "type": "string",
-                    "format": "uuid",
+                    "pattern": "^(?:[0-9A-Za-z]{37}|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14})$",
                     "description": "The element's UUID. Auto-generated if not provided.",
-                    "example": "f9a619e1-f3f5-4fbf-a80e-fa8f7dd88103"
+                    "example": "02IiNr0G8viOVKlIlHZsyqDvsMzGHDQtcQZdN"
                   },
                   "data": {
                     "type": "object",
@@ -54,7 +54,7 @@
           {
             "har": {
               "method": "POST",
-              "url": "https://api.example.com/7b80b203-2b82-40f5-accd-c7089fe6114e",
+              "url": "https://api.example.com/02IiNr0GOoKiPMM569f95VLLfjRVJ1JriLYcy",
               "httpVersion": "HTTP/1.1",
               "cookies": [],
               "headers": [

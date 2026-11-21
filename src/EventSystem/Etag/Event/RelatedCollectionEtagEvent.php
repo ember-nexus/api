@@ -7,7 +7,7 @@ namespace App\EventSystem\Etag\Event;
 use App\Contract\EventInterface;
 use App\Trait\StoppableEventTrait;
 use App\Type\Etag;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 class RelatedCollectionEtagEvent implements EventInterface
 {
@@ -16,7 +16,7 @@ class RelatedCollectionEtagEvent implements EventInterface
     private ?Etag $etag = null;
 
     public function __construct(
-        private UuidInterface $centerId,
+        private Uuid $centerId,
     ) {
     }
 
@@ -32,7 +32,7 @@ class RelatedCollectionEtagEvent implements EventInterface
         return $this;
     }
 
-    public function getCenterId(): UuidInterface
+    public function getCenterId(): Uuid
     {
         return $this->centerId;
     }

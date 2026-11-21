@@ -9,20 +9,20 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class CreateOwnsRelationEtagTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:9M0TgcI5840lflFfU81u9i';
-    private const string ID_DATA_1 = 'd62f5169-1e12-42eb-ac91-8a6cfa9b3244';
-    private const string ID_DATA_2 = 'a0691ac0-b75b-4c4f-9fe0-a95b30263e10';
+    private const string ID_DATA_1 = '02IiNr0EPf9nVLBuYWgsL6nsBoqLklVCyuwtA';
+    private const string ID_DATA_2 = '02IiNr0EPf9nVLBUNgRwkIQZYQjLsjZ7Hlhpv';
 
     public function testEtagBeforeAndAfterCreatingCentralOwnsRelation(): void
     {
-        $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"Sv20bjBNB4C"');
-        $initialEtagNode1Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', '"RT5DNLKkjYu"');
-        $initialEtagNode1Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', '"JMkheNkHcMY"');
-        $initialEtagNode1Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related', '"RT5DNLKkjYu"');
+        $initialEtagNode1Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '', '"D4lP567ZWPr"');
+        $initialEtagNode1Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/parents', '"2FUKnvefHts"');
+        $initialEtagNode1Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/children', '"9H7UORSgXnn"');
+        $initialEtagNode1Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_1, '/related', '"2FUKnvefHts"');
 
-        $initialEtagNode2Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '', '"cppdLnhCrkB"');
-        $initialEtagNode2Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', '"QpQpqTtRbQ0"');
-        $initialEtagNode2Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', '"cr9HksHQb3o"');
-        $initialEtagNode2Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related', '"QpQpqTtRbQ0"');
+        $initialEtagNode2Self = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '', '"6c2kNOpUgZY"');
+        $initialEtagNode2Parents = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/parents', '"csCkOpqW01P"');
+        $initialEtagNode2Children = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/children', '"PtUlrtRPSAP"');
+        $initialEtagNode2Related = $this->getEtagOfElement(self::TOKEN, self::ID_DATA_2, '/related', '"csCkOpqW01P"');
 
         $response = $this->runPostRequest(
             '/',

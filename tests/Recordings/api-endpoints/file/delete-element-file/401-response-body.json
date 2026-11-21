@@ -2,6 +2,6 @@
   "type": "http://api/error/401/unauthorized",
   "title": "Unauthorized",
   "status": 401,
-  "instance": "urn:uuid:00ca6c44-b93a-4e8a-8fc5-e2c5f0b2d661",
+  "instance": "urn:uuid:02IiNr0G8viOVKjLZO6gWCpZrcKBkw7InnO4O",
   "detail": "Authorization for the request failed due to possible problems with the token (incorrect or expired), password (incorrect or changed), the user's unique identifier, or the user's status (e.g., missing, blocked, or deleted)."
 }

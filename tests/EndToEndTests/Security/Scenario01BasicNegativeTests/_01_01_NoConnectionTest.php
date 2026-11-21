@@ -9,8 +9,8 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class _01_01_NoConnectionTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:451NiderFjTRW7TpoLoSWA';
-    private const string USER = '33d44651-ba40-4e5e-b2c3-079b9509b068';
-    private const string DATA = 'b1b253a6-d9a5-45b5-b7a9-1be29ced4df6';
+    private const string USER = '02IiNr0GOoKiPMLWBp6Dlli8rvIJ64z67Ljk1';
+    private const string DATA = '02IiNr0GOoKiPMMVUAkumBCjOjBOzfGBsdfFM';
 
     /**
      * @description test 1-01-01-01

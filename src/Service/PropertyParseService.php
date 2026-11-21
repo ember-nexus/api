@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Exception\InvalidUuidException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
-use Ramsey\Uuid\Exception\InvalidUuidStringException;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Safe\DateTime;
 use Safe\DateTimeImmutable;
 
@@ -94,7 +93,7 @@ class PropertyParseService
     /**
      * @param mixed[] $properties
      */
-    public function getUploadTargetFromProperties(mixed $properties): UuidInterface
+    public function getUploadTargetFromProperties(mixed $properties): Uuid
     {
         if (!array_key_exists('uploadTarget', $properties)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property uploadTarget to be present.');
@@ -103,11 +102,11 @@ class PropertyParseService
         if (is_string($uploadTarget)) {
             try {
                 $uploadTarget = Uuid::fromString($uploadTarget);
-            } catch (InvalidUuidStringException) {
+            } catch (InvalidUuidException) {
                 throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Upload expects property uploadTarget to be a uuid, got %s.', get_debug_type($properties['uploadTarget'])));
             }
         }
-        if (!($uploadTarget instanceof UuidInterface)) {
+        if (!($uploadTarget instanceof Uuid)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Upload expects property uploadTarget to be a uuid, got %s.', get_debug_type($uploadTarget)));
         }
 
@@ -141,7 +140,7 @@ class PropertyParseService
     /**
      * @param mixed[] $properties
      */
-    public function getUploadOwnerFromProperties(mixed $properties): UuidInterface
+    public function getUploadOwnerFromProperties(mixed $properties): Uuid
     {
         if (!array_key_exists('uploadOwner', $properties)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail('Upload expects property uploadOwner to be present.');
@@ -150,11 +149,11 @@ class PropertyParseService
         if (is_string($uploadOwner)) {
             try {
                 $uploadOwner = Uuid::fromString($uploadOwner);
-            } catch (InvalidUuidStringException) {
+            } catch (InvalidUuidException) {
                 throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Upload expects property uploadOwner to be a uuid, got %s.', get_debug_type($properties['uploadOwner'])));
             }
         }
-        if (!($uploadOwner instanceof UuidInterface)) {
+        if (!($uploadOwner instanceof Uuid)) {
             throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf('Upload expects property uploadOwner to be a uuid, got %s.', get_debug_type($uploadOwner)));
         }
 

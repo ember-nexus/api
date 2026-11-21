@@ -15,7 +15,7 @@ class EtagAccessControlTest extends BaseRequestTestCase
 {
     private const string OWNER_TOKEN = 'secret-token:1nc1pFdBO2QLYRMMvULgtQ';
     private const string OTHER_TOKEN = 'secret-token:RRq4WsomBeTH0AAa7Jmi4k';
-    private const string UNKNOWN_ID = '3f0d6d0e-8d0e-4b8e-9f0e-5b3a8d0e6c11';
+    private const string UNKNOWN_ID = '02IiNr0G8viOVKjpsppwz5KcCj34Mc2e0kLOG';
 
     /**
      * @return array<string, array{string}>

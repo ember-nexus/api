@@ -2,7 +2,7 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:21425992-0b66-4a89-a015-fb3976998cc6",
+  "instance": "urn:uuid:02IiNr0G8viOVKjbOYQZ4dq1nWe2qeaASub9w",
   "detail": "Expression execution failed.\n\ncompile error: unexpected token EOF (1:5)\n |  1 + \n | ....^",
   "expressionError": {
     "source": "expr-lang",

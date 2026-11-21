@@ -5,7 +5,7 @@
         "description": "URL of the newly created resource.",
         "schema": {
           "type": "string",
-          "example": "/455a89b9-4ec7-4b02-b023-bcfbcbba9a9f"
+          "example": "/02IiNr0G8viOVKjsxOk4YtPkUfpZ9kebWGIzA"
         },
         "x-ember-nexus-links": [
           {

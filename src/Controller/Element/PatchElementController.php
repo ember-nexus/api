@@ -15,7 +15,7 @@ use App\Service\UpdateElementFromRawDataService;
 use App\Type\AccessType;
 use App\Type\EtagType;
 use App\Type\Response\NoContentResponse;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Type\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -36,14 +36,14 @@ class PatchElementController extends AbstractController
         '/{id}',
         name: 'patch-element',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['PATCH']
     )]
     #[EndpointSupportsEtag(EtagType::ELEMENT)]
     public function patchElement(string $id, Request $request): NoContentResponse
     {
-        $elementId = UuidV4::fromString($id);
+        $elementId = Uuid::fromString($id);
         $userId = $this->authProvider->getUserId();
 
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {

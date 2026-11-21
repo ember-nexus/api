@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Contract;
 
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 interface RelationElementInterface extends ElementInterface
 {
@@ -12,11 +12,11 @@ interface RelationElementInterface extends ElementInterface
 
     public function setType(?string $type): static;
 
-    public function getStart(): ?UuidInterface;
+    public function getStart(): ?Uuid;
 
-    public function setStart(?UuidInterface $start): static;
+    public function setStart(?Uuid $start): static;
 
-    public function getEnd(): ?UuidInterface;
+    public function getEnd(): ?Uuid;
 
-    public function setEnd(?UuidInterface $end): static;
+    public function setEnd(?Uuid $end): static;
 }

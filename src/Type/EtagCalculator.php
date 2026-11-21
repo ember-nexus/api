@@ -7,7 +7,6 @@ namespace App\Type;
 use DateTimeInterface;
 use HashContext;
 use LogicException;
-use Ramsey\Uuid\UuidInterface;
 use Tuupola\Base58;
 
 use function Safe\pack;
@@ -42,12 +41,12 @@ class EtagCalculator
         return $this;
     }
 
-    public function addUuid(UuidInterface $id): static
+    public function addUuid(Uuid $id): static
     {
         if ($this->finalEtag) {
             throw new LogicException('Etag is already finalized, no new data can be added.');
         }
-        hash_update($this->hashContext, $id->getBytes());
+        hash_update($this->hashContext, $id->toBytes());
 
         return $this;
     }

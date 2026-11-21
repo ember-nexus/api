@@ -6,11 +6,10 @@ namespace App\Service;
 
 use App\Exception\Client400BadContentException;
 use App\Exception\Client400MissingPropertyException;
+use App\Exception\InvalidUuidException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
-use Ramsey\Uuid\Exception\InvalidUuidStringException;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 
 class RequestUtilService
@@ -121,12 +120,12 @@ class RequestUtilService
      * @throws Client400BadContentException
      * @throws Client400MissingPropertyException
      */
-    public function getUuidFromBody(string $key, array $body): UuidInterface
+    public function getUuidFromBody(string $key, array $body): Uuid
     {
         $value = $this->getStringFromBody($key, $body);
         try {
-            return UuidV4::fromString($value);
-        } catch (InvalidUuidStringException $exception) {
+            return Uuid::fromString($value);
+        } catch (InvalidUuidException $exception) {
             throw $this->client400BadContentExceptionFactory->createFromTemplate($key, 'uuid', $value, $exception);
         }
     }

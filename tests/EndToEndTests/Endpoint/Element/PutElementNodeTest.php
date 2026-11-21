@@ -9,7 +9,7 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class PutElementNodeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:SuB0jXgi2sFAkC9su6ecr8';
-    private const string DATA = 'b0f77cc4-5cd1-4de6-a172-ca49a662e0a7';
+    private const string DATA = '02IiNr0GOoKiPMMV7ZCqQAOEmsCEh8LMv6pbo';
 
     public function testPutNode(): void
     {

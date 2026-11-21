@@ -7,13 +7,13 @@ namespace App\Tests\UnitTests\Service;
 use App\Factory\Type\RedisKeyFactory;
 use App\Service\ElementRequestLockService;
 use App\Service\RequestIdService;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(ElementRequestLockService::class)]
@@ -21,7 +21,7 @@ class ElementRequestLockServiceTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string REQUEST_ID = '3950e94a-2cd0-43ef-ac5a-8e116a4263c8';
+    private const string REQUEST_ID = '02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f';
 
     private function buildRequestIdService(string $requestId = self::REQUEST_ID): RequestIdService
     {
@@ -33,7 +33,7 @@ class ElementRequestLockServiceTest extends TestCase
 
     public function testAcquireSetsKeyWithNxAndTtlAndReturnsTheRequestIdAsToken(): void
     {
-        $elementId = Uuid::uuid4();
+        $elementId = Uuid::generate();
         $redis = $this->prophesize(Client::class);
         $redis->set(
             'lock:element-request:'.$elementId->toString(),
@@ -53,12 +53,12 @@ class ElementRequestLockServiceTest extends TestCase
         $redis = $this->prophesize(Client::class);
         $redis->set(Argument::cetera())->willReturn(null);
 
-        $this->assertNull((new ElementRequestLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->acquire(Uuid::uuid4()));
+        $this->assertNull((new ElementRequestLockService($redis->reveal(), new RedisKeyFactory(), $this->buildRequestIdService()))->acquire(Uuid::generate()));
     }
 
     public function testReleaseComparesTokenBeforeDeleting(): void
     {
-        $elementId = Uuid::uuid4();
+        $elementId = Uuid::generate();
         $key = 'lock:element-request:'.$elementId->toString();
         $redis = $this->prophesize(Client::class);
         $redis->get($key)->shouldBeCalledOnce()->willReturn('my-token');
@@ -69,7 +69,7 @@ class ElementRequestLockServiceTest extends TestCase
 
     public function testReleaseDoesNotDeleteWhenTokenDoesNotMatch(): void
     {
-        $elementId = Uuid::uuid4();
+        $elementId = Uuid::generate();
         $key = 'lock:element-request:'.$elementId->toString();
         $redis = $this->prophesize(Client::class);
         $redis->get($key)->shouldBeCalledOnce()->willReturn('someone-elses-token');

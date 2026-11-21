@@ -12,6 +12,7 @@ use App\Tests\UnitTests\AssertLoggerTrait;
 use App\Type\Etag;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
+use App\Type\Uuid;
 use Beste\Psr\Log\TestLogger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
@@ -19,7 +20,6 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(LiveFileEtagEventListener::class)]
@@ -31,7 +31,7 @@ class LiveFileEtagEventListenerTest extends TestCase
     public function testLiveFileEtagEventListener(): void
     {
         // setup variables
-        $id = Uuid::fromString('5fe57bf8-799d-4a19-9d0e-8566035521e1');
+        $id = Uuid::fromString('02IiNr0G8viOVKk5tKAhDbDVSmb8rOTwJsDRl');
         $redisKey = new RedisKey(RedisPrefixType::ETAG_FILE, $id->toString());
         $fileEtagEvent = new FileEtagEvent($id);
         $etag = new Etag('someEtag');
@@ -72,8 +72,8 @@ class LiveFileEtagEventListenerTest extends TestCase
 
         // assert logs
         $this->assertLogHappened($logger, 'debug', 'Trying to persist Etag for file in Redis.', [
-            'elementId' => '5fe57bf8-799d-4a19-9d0e-8566035521e1',
-            'redisKey' => 'etag:file:5fe57bf8-799d-4a19-9d0e-8566035521e1',
+            'elementId' => '02IiNr0G8viOVKk5tKAhDbDVSmb8rOTwJsDRl',
+            'redisKey' => 'etag:file:02IiNr0G8viOVKk5tKAhDbDVSmb8rOTwJsDRl',
             'etag' => $etag,
         ]);
     }

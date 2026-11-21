@@ -88,7 +88,7 @@ class CypherPathSubsetGrammarTest extends TestCase
             ['MATCH path = ((:Type)) RETURN `path` LIMIT 10;'],
             ['MATCH path = ((:Type)) RETURN DISTINCT path SKIP 5 LIMIT 10'],
             ['MATCH path = ((:Type)) RETURN DISTINCT `path` SKIP 5 LIMIT 10;'],
-            ['MATCH path = ((n:Type)) WHERE n.id = "00000000-0000-0000-0000-000000000000" RETURN path'],
+            ['MATCH path = ((n:Type)) WHERE n.id = "02IiNr0G8viOVKjLCfR4NIEdgVrLpaxVcZ7BI" RETURN path'],
             ['MATCH path=((:Plant)-[:HAS_TAG]->(:Tag {name: $color})) RETURN path'],
             ['UNWIND $stepResults[0].elements AS el MATCH path=((plant:Plant)-[:IS_MEMBER_OF*..]->(:Taxon)) WHERE plant.id = el.id RETURN path'],
             ['MATCH path=((:Plant)-[:IS_MEMBER_OF*..]->(t:Taxon)) WHERE t.name IN $taxonNames RETURN path LIMIT 5'],
@@ -140,16 +140,16 @@ class CypherPathSubsetGrammarTest extends TestCase
                 'Syntax exception at line 1 position 23: mismatched input \'<EOF>\' expecting {\'{\', \'(\', \'+\', RETURN, \'*\', WHERE}',
             ],
             [
-                'MATCH path=((canary:Plant {id: "f06bde24-337f-497c-825e-c70f866485d0"})) MATCH (target:Plant {id: "70965ab5-bc3e-4bbe-aacf-1b7e12b76110"}) RETURN path',
-                'Syntax exception at line 1 position 73: missing RETURN at \'MATCH\'',
+                'MATCH path=((canary:Plant {id: "02IiNr0GOoKiPMN00sQ5ywcxsF84RQgf2FqD4"})) MATCH (target:Plant {id: "02IiNr0GOoKiPMLzlyajuxj3r003A91sQN0s8"}) RETURN path',
+                'Syntax exception at line 1 position 74: missing RETURN at \'MATCH\'',
             ],
             [
-                'MATCH path=((canary:Plant {id: "f06bde24-337f-497c-825e-c70f866485d0"})), (target:Plant {id: "70965ab5-bc3e-4bbe-aacf-1b7e12b76110"}) RETURN path',
-                'Syntax exception at line 1 position 72: mismatched input \',\' expecting {\'{\', \'(\', \'+\', RETURN, \'*\', WHERE}',
+                'MATCH path=((canary:Plant {id: "02IiNr0GOoKiPMN00sQ5ywcxsF84RQgf2FqD4"})), (target:Plant {id: "02IiNr0GOoKiPMLzlyajuxj3r003A91sQN0s8"}) RETURN path',
+                'Syntax exception at line 1 position 73: mismatched input \',\' expecting {\'{\', \'(\', \'+\', RETURN, \'*\', WHERE}',
             ],
             [
-                'MATCH (canary {id: "9abc0ab3-fa1a-4138-80c1-49db5c4d082f"})-[rel]-(target:Plant {id: "70965ab5-bc3e-4bbe-aacf-1b7e12b76110"}) WITH (canary) AS path RETURN path',
-                'Syntax exception at line 1 position 126: missing RETURN at \'WITH\'',
+                'MATCH (canary {id: "02IiNr0GOoKiPMMKHq1FVE9PGfXYUHKPwwRDT"})-[rel]-(target:Plant {id: "02IiNr0GOoKiPMLzlyajuxj3r003A91sQN0s8"}) WITH (canary) AS path RETURN path',
+                'Syntax exception at line 1 position 128: missing RETURN at \'WITH\'',
             ],
             [
                 'MATCH (n) WHERE EXISTS { MATCH (n)-->(:Tag) } RETURN path',
@@ -180,7 +180,7 @@ class CypherPathSubsetGrammarTest extends TestCase
                 'Syntax exception at line 1 position 36: missing \')\' at \'(\'',
             ],
             [
-                'UNWIND ["70965ab5-bc3e-4bbe-aacf-1b7e12b76110"] AS targetId UNWIND ["9abc0ab3-fa1a-4138-80c1-49db5c4d082f"] AS startId MATCH path=(({id: startId})-[]->({id: targetId})) RETURN path',
+                'UNWIND ["02IiNr0GOoKiPMLzlyajuxj3r003A91sQN0s8"] AS targetId UNWIND ["02IiNr0GOoKiPMMKHq1FVE9PGfXYUHKPwwRDT"] AS startId MATCH path=(({id: startId})-[]->({id: targetId})) RETURN path',
                 'Syntax exception at line 1 position 7: extraneous input \'[\' expecting {DECIMAL_DOUBLE, UNSIGNED_DECIMAL_INTEGER, UNSIGNED_HEX_INTEGER, UNSIGNED_OCTAL_INTEGER, STRING_LITERAL1, STRING_LITERAL2, ESCAPED_SYMBOLIC_NAME, ACCESS, ACTIVE, ADMIN, ADMINISTRATOR, ALIAS, ALIASES, ALL_SHORTEST_PATHS, ALL, ALTER, AND, ANY, ARRAY, AS, ASC, ASCENDING, ASSIGN, AT, AUTH, BINDINGS, BOOL, BOOLEAN, BOOSTED, BOTH, BREAK, BUILT, BY, CALL, CASCADE, CASE, CHANGE, CIDR, COLLECT, COMMAND, COMMANDS, COMPOSITE, CONCURRENT, CONSTRAINT, CONSTRAINTS, CONTAINS, COPY, CONTINUE, COUNT, CREATE, CSV, CURRENT, DATA, DATABASE, DATABASES, DATE, DATETIME, DBMS, DEALLOCATE, DEFAULT, DEFINED, DELETE, DENY, DESC, DESCENDING, DESTROY, DETACH, DIFFERENT, \'$\', DISTINCT, DRIVER, DROP, DRYRUN, DUMP, DURATION, EACH, EDGE, ENABLE, ELEMENT, ELEMENTS, ELSE, ENCRYPTED, END, ENDS, EXECUTABLE, EXECUTE, EXIST, EXISTENCE, EXISTS, ERROR, FAIL, FALSE, FIELDTERMINATOR, FINISH, FLOAT, FOR, FOREACH, FROM, FULLTEXT, FUNCTION, FUNCTIONS, GRANT, GRAPH, GRAPHS, GROUP, GROUPS, HEADERS, HOME, ID, IF, IMPERSONATE, IMMUTABLE, IN, INDEX, INDEXES, INF, INFINITY, INSERT, INT, INTEGER, IS, JOIN, KEY, LABEL, LABELS, \'{\', LEADING, LIMITROWS, LIST, LOAD, LOCAL, LOOKUP, \'(\', MANAGEMENT, MAP, MATCH, MERGE, \'-\', NAME, NAMES, NAN, NFC, NFD, NFKC, NFKD, NEW, NODE, NODETACH, NODES, NONE, NORMALIZE, NORMALIZED, NOT, NOTHING, NOWAIT, NULL, OF, OFFSET, ON, ONLY, OPTIONAL, OPTIONS, OPTION, OR, ORDER, PASSWORD, PASSWORDS, PATH, PATHS, PLAINTEXT, \'+\', POINT, POPULATED, PRIMARY, PRIMARIES, PRIVILEGE, PRIVILEGES, PROCEDURE, PROCEDURES, PROPERTIES, PROPERTY, PROVIDER, PROVIDERS, RANGE, READ, REALLOCATE, REDUCE, RENAME, REL, RELATIONSHIP, RELATIONSHIPS, REMOVE, REPEATABLE, REPLACE, REPORT, REQUIRE, REQUIRED, RESTRICT, RETURN, REVOKE, ROLE, ROLES, ROW, ROWS, SCAN, SEC, SECOND, SECONDARY, SECONDARIES, SECONDS, SEEK, SERVER, SERVERS, SET, SETTING, SETTINGS, SHORTEST_PATH, SHORTEST, SHOW, SIGNED, SINGLE, SKIPROWS, START, STARTS, STATUS, STOP, STRING, SUPPORTED, SUSPENDED, TARGET, TERMINATE, TEXT, THEN, TIME, TIMESTAMP, TIMEZONE, TO, TOPOLOGY, TRAILING, TRANSACTION, TRANSACTIONS, TRAVERSE, TRIM, TRUE, TYPE, TYPED, TYPES, UNION, UNIQUE, UNIQUENESS, UNWIND, URL, USE, USER, USERS, USING, VALUE, VARCHAR, VECTOR, VERTEX, WAIT, WHEN, WHERE, WITH, WITHOUT, WRITE, XOR, YIELD, ZONE, ZONED, IDENTIFIER}',
             ],
             [
@@ -207,13 +207,13 @@ class CypherPathSubsetGrammarTest extends TestCase
     {
         $cypherPathSubsetGrammar = $this->buildCypherPathSubsetGrammar(true);
 
-        $query = 'MATCH path=((canary:Plant {id: "f06bde24-337f-497c-825e-c70f866485d0"})) MATCH (target:Plant {id: "70965ab5-bc3e-4bbe-aacf-1b7e12b76110"}) RETURN path;';
+        $query = 'MATCH path=((canary:Plant {id: "02IiNr0GOoKiPMN00sQ5ywcxsF84RQgf2FqD4"})) MATCH (target:Plant {id: "02IiNr0GOoKiPMLzlyajuxj3r003A91sQN0s8"}) RETURN path;';
 
         try {
             $cypherPathSubsetGrammar->validateQuery($query);
             $this->fail();
         } catch (Exception $e) {
-            $this->assertSame('Syntax exception at line 1 position 73: missing RETURN at \'MATCH\'', $e->getDetail());
+            $this->assertSame('Syntax exception at line 1 position 74: missing RETURN at \'MATCH\'', $e->getDetail());
         }
     }
 

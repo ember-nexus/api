@@ -8,8 +8,7 @@ use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Service\ElementRequestLockService;
 use App\Type\EtagType;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -57,7 +56,7 @@ class ElementRequestLockControllerEventListener
         if (!is_string($rawElementId)) {
             return;
         }
-        $elementId = UuidV4::fromString($rawElementId);
+        $elementId = Uuid::fromString($rawElementId);
 
         $token = $this->elementRequestLockService->acquire($elementId);
         if (null === $token) {
@@ -77,7 +76,7 @@ class ElementRequestLockControllerEventListener
         $request = $event->getRequest();
         $elementId = $request->attributes->get(self::REQUEST_ATTRIBUTE_ELEMENT_ID);
         $token = $request->attributes->get(self::REQUEST_ATTRIBUTE_TOKEN);
-        if (!($elementId instanceof UuidInterface) || !is_string($token)) {
+        if (!($elementId instanceof Uuid) || !is_string($token)) {
             return;
         }
         $request->attributes->remove(self::REQUEST_ATTRIBUTE_ELEMENT_ID);

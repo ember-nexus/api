@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Logger;
 
 use App\Logger\RequestProcessor;
 use App\Service\RequestIdService;
+use App\Type\Uuid;
 use DateTimeImmutable;
 use Monolog\Level;
 use Monolog\LogRecord;
@@ -13,7 +14,6 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(RequestProcessor::class)]
@@ -24,7 +24,7 @@ class RequestProcessorTest extends TestCase
     {
         $requestIdService = $this->createMock(RequestIdService::class);
         $requestIdService->method('getRequestId')->willReturn(
-            Uuid::fromString('3950e94a-2cd0-43ef-ac5a-8e116a4263c8')
+            Uuid::fromString('02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f')
         );
 
         $requestProcessor = new RequestProcessor($requestIdService);
@@ -39,6 +39,6 @@ class RequestProcessorTest extends TestCase
         $newLogRecord = $requestProcessor->__invoke($logRecord);
         $this->assertSame($logRecord, $newLogRecord);
         $this->assertArrayHasKey('requestId', $logRecord->extra);
-        $this->assertSame('3950e94a-2cd0-43ef-ac5a-8e116a4263c8', $logRecord->extra['requestId']);
+        $this->assertSame('02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f', $logRecord->extra['requestId']);
     }
 }

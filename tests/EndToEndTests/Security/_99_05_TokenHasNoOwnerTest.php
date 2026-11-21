@@ -10,8 +10,8 @@ class _99_05_TokenHasNoOwnerTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:D44551NKEtvd9KgHXTPd32';
 
-    private const string DATA = 'ebc364c6-ba06-4e80-9491-9bcc091199c6';
-    private const string TOKEN_UUID = 'adc8ae1e-d86c-4fe4-8a12-1fb7c485d360';
+    private const string DATA = '02IiNr0GOoKiPMMxlB7C5Q8ZvioYmJIpYgmto';
+    private const string TOKEN_UUID = '02IiNr0GOoKiPMMTZL8u3NHZ2TZuPwK5EtyQy';
 
     public function testGetDataFails(): void
     {

@@ -10,12 +10,12 @@ class _02_04_PathRelationOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:JbPPgmVodPsBPGOpbS2NdD';
 
-    private const string DATA_1 = '3d6e975b-3c1e-40ea-a50d-21dc3a1df97b';
-    private const string DATA_2 = 'ec5ea3d7-d192-4e96-8933-d03a1e16f978';
-    private const string DATA_3 = 'a9a5ed76-755d-43ed-9a5d-8a1de910132c';
-    private const string DATA_4 = '0a27046a-4ed6-4937-aa5e-418296ab8612';
-    private const string DATA_5 = '62b6f1bf-25e3-43b5-b9c9-1920d62d77f6';
-    private const string DATA_6 = '1822cdab-a246-4887-99f7-e03a0f62ce45';
+    private const string DATA_1 = '02IiNr0GOoKiPMLaqbdkFAaR25gNFUgTZYGAc';
+    private const string DATA_2 = '02IiNr0GOoKiPMMy2FBZFNj9uxyxWlR4fEETJ';
+    private const string DATA_3 = '02IiNr0GOoKiPMMRYmOJFm6k5SgMDth6EGOBm';
+    private const string DATA_4 = '02IiNr0GOoKiPMLBtETEs6kuL5MT2u7F7mNpA';
+    private const string DATA_5 = '02IiNr0GOoKiPMLt14Z4GCDPVXEAHafpc1DgD';
+    private const string DATA_6 = '02IiNr0GOoKiPMLIhspHSTDGG0NdPnuvzj5lZ';
 
     public function testGetIndex(): void
     {

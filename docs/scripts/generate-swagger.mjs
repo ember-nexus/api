@@ -102,7 +102,7 @@ function minifyJson(raw) {
 // Both get replaced with a fixed, realistic-looking placeholder - this keeps every other property
 // and value exactly as recorded (per the "don't drop or alter real content" rule) while still
 // making the output deterministic across regenerations.
-const PLACEHOLDER_INSTANCE_URN = 'urn:uuid:00000000-0000-0000-0000-000000000000';
+const PLACEHOLDER_INSTANCE_URN = 'urn:uuid:02IiNr0G8viOVKjLCfR4NIEdgVrLpaxVcZ7BI';
 
 function normalizeProblemRecording(parsed) {
   if (!isPlainObject(parsed) || typeof parsed.instance !== 'string') {

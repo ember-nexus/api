@@ -2,6 +2,6 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:e485e6d2-3c25-41c2-abf0-7dcca15c23eb",
+  "instance": "urn:uuid:02IiNr0G8viOVKl8TU51v7BzFOcN8MMhVAcMs",
   "detail": "Endpoint expects property 'type' to be ActionChangePassword, got string 'NotActionChangePassword'."
 }

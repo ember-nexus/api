@@ -12,14 +12,13 @@ use App\Style\EmberNexusStyle;
 use App\Trait\CommandInputTrait;
 use App\Type\TokenRevokeEntry;
 use App\Type\TokenStateType;
+use App\Type\Uuid;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\DateTimeZoneId;
 use Predis\Client as RedisClient;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Safe\DateTime;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -58,8 +57,8 @@ class TokenRevokeCommand extends Command
     private bool $isForceActive = false;
     private bool $isDryRunActive = false;
     private bool $isListAllAffectedTokensActive = false;
-    private ?UuidInterface $userId = null;
-    private ?UuidInterface $groupId = null;
+    private ?Uuid $userId = null;
+    private ?Uuid $groupId = null;
     private ?DateTime $issuedBefore = null;
     private ?DateTime $issuedAfter = null;
     private bool $isFilterIssuedWithoutExpirationDateActive = false;
@@ -229,7 +228,7 @@ class TokenRevokeCommand extends Command
 
         $userIdentifier = $this->getNullableStringOption($input, self::OPTION_USER);
         if (null !== $userIdentifier) {
-            if (preg_match(Regex::UUID_V4, $userIdentifier)) {
+            if (preg_match(Regex::UUID, $userIdentifier)) {
                 $this->userId = Uuid::fromString($userIdentifier);
             } else {
                 $res = $this->cypherEntityManager->getClient()->runStatement(new Statement(

@@ -9,7 +9,7 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class PatchElementNodeTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:PsN3SfXuql92IjEUkUYZFN';
-    private const string DATA = 'd77ca32c-8cf2-4ed9-868e-27ae122e9ea1';
+    private const string DATA = '02IiNr0GOoKiPMMnrypia7C0UK8m833QvrnFm';
 
     public function testPutNode(): void
     {

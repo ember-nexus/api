@@ -28,15 +28,15 @@ class BackupFilesTest extends BaseCommandTestCase
     private const string BACKUP_DIRECTORY = __DIR__.'/../../../var/backup/';
     private const string ROUND_TRIP_BACKUP = 'files-round-trip-test';
     private const string TAMPERED_BACKUP = 'files-tampered-test';
-    private const string RELATION_WITH_FILE_ID = '5ed54a8f-b4d5-4e95-a7f3-d23c026c8afe';
+    private const string RELATION_WITH_FILE_ID = '02IiNr0GOoKiPMLr84HizN5swhk7q0WNFmwfq';
     private const string EXTENSIONLESS_ROUND_TRIP_BACKUP = 'files-extensionless-test';
     /**
      * Elements of the scenario `general.extensionlessFile` of the reference dataset, their `file.extension` is an
      * empty string, so their files are stored without any extension (and without trailing dot).
      */
     private const array EXTENSIONLESS_FILE_IDS = [
-        '404db674-cc9a-4c76-9ecb-c804ce41f499', // node
-        '8cc130fd-fa1b-482d-9bea-adb3e4a36d34', // relation
+        '02IiNr0GOoKiPMLcFOsyAbejVoE9EBqhFIPxp', // node
+        '02IiNr0GOoKiPMMDUxltnzxUycfjfbdOheKXI', // relation
     ];
 
     protected function tearDown(): void

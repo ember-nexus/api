@@ -38,7 +38,7 @@ or a relation, and both are addressed, created and modified through the same set
 Every element:
 
 - has at least one `type`, which is a label in the case of a node, and the relation type in the case of a relation;
-- has an `id` property, a random [UUIDv4](https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random))
+- has an `id` property, a time-sortable UUIDsv2a7 with 128 random bits (see [element ids](/reference/element-id)),
   assigned automatically on creation and never changed afterward;
 - can hold arbitrary additional properties, including nested JSON data — not just flat key/value pairs; and
 - may additionally have up to one file attached, see [working with files](/guide/working-with-files).

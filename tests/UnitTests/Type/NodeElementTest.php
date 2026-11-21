@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Type;
 
 use App\Type\NodeElement;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
 
 #[Small]
 #[CoversClass(NodeElement::class)]
@@ -69,7 +69,7 @@ class NodeElementTest extends TestCase
 
         $this->assertNull($nodeElement->getId());
 
-        $id = Uuid::fromString('e6f6ef39-60b4-47aa-8a7f-091502943815');
+        $id = Uuid::fromString('02IiNr0G8viOVKl9f5FjzIeTKZPCtL4rbxhUb');
         $nodeElement->setId($id);
         $this->assertSame($id, $nodeElement->getId());
 

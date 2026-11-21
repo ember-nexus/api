@@ -14,7 +14,7 @@ class _03_05_GroupImmediateWriteAccessTest extends BaseRequestTestCase
 
     private const string TOKEN_ACCESS = 'secret-token:oRACZjdcNS5xpdEq7LmC3H';
 
-    private const string GROUP = '67f8978f-6205-4e95-a20c-e82fa3367f6a';
+    private const string GROUP = '02IiNr0GOoKiPMLvZafnE4cjgxHsGZ4POSLgq';
 
     public function testGetIndex(): void
     {

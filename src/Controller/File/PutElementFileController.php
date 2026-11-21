@@ -14,7 +14,7 @@ use App\Service\FileCreationLockService;
 use App\Service\UploadCreationService;
 use App\Type\AccessType;
 use App\Type\EtagType;
-use Ramsey\Uuid\Rfc4122\UuidV4;
+use App\Type\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,14 +36,14 @@ class PutElementFileController extends AbstractController
         '/{id}/file',
         name: 'put-element-file',
         requirements: [
-            'id' => Regex::UUID_V4_CONTROLLER,
+            'id' => Regex::UUID_CONTROLLER,
         ],
         methods: ['PUT']
     )]
     #[EndpointSupportsEtag(EtagType::FILE)]
     public function putElementFile(string $id, Request $request): Response
     {
-        $elementId = UuidV4::fromString($id);
+        $elementId = Uuid::fromString($id);
         $userId = $this->authProvider->getUserId();
 
         if (!$this->accessChecker->hasAccessToElement($userId, $elementId, AccessType::UPDATE)) {

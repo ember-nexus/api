@@ -13,7 +13,7 @@ use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client400ReservedTypeExceptionFactory;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class CreateElementFromRawDataService
@@ -35,10 +35,10 @@ class CreateElementFromRawDataService
      * @param array<string, mixed> $rawData
      */
     public function createElementFromRawData(
-        UuidInterface $elementId,
+        Uuid $elementId,
         string $type,
-        ?UuidInterface $startNodeId = null,
-        ?UuidInterface $endNodeId = null,
+        ?Uuid $startNodeId = null,
+        ?Uuid $endNodeId = null,
         array $rawData = [],
         bool $skipReservedTypeCheck = false,
     ): NodeElementInterface|RelationElementInterface {

@@ -1,0 +1,71 @@
+---
+type: reference
+title: Element id
+---
+
+Every element has an `id`, which is an instance of the UUIDsv2a7 standard as described in
+[draft-davis-uuidrev-uuid-long-00](https://datatracker.ietf.org/doc/draft-davis-uuidrev-uuid-long/). It consists of a
+millisecond timestamp followed by 128 random bits, similar to a UUIDv7 with a longer random part. As the timestamp
+comes first, ids are sortable by creation time, which keeps database indices small and fast.
+
+An id consists of 27 bytes: a 4 byte encoding block, a 6 byte timestamp, and a random part of 16 bytes (128 bits),
+which includes 1 byte of version and variant markers. The random part has the same strength as the 122 random bits of
+the UUIDv4 used before version 0.2.0.
+
+## Formats
+
+Two textual representations are supported.
+
+### base62sort
+
+The canonical format, used by the API in all responses, logs, and databases. It always has 37 characters, consists
+only of the characters `0-9`, `A-Z` and `a-z`, and starts with `02IiNr`:
+
+```text
+02IiNr0GOnGDqcho5adnseWkNNcoz7fA7tFnO
+```
+
+Characters are ordered by their ASCII value and ids are zero padded to the same length, so sorting ids as plain strings
+sorts them by creation time. The comparison has to be case-sensitive and byte-wise.
+
+### base16 with dashes
+
+A fallback for humans, which can be used wherever an id is accepted. It has 60 characters in the groups
+`8-8-4-4-4-12-14` and is case-insensitive:
+
+```text
+02070007-01A1FC4B-4C3D-7C10-F288-2CAAA0662FD8-CCF69A89204F6A
+```
+
+Internally, the id is converted to base62sort immediately, so responses and logs always contain the base62sort variant.
+Both formats are accepted in URLs, e.g. in `/<uuid>`, as well as in request bodies and search steps.
+
+## Validation
+
+Ids are validated when they are parsed: the encoding block, the version (`7`) and the variant (`F`) have to match, and
+the length and characters have to be valid. Legacy UUIDv4 ids, as used before version 0.2.0, are rejected.
+
+## Timestamp
+
+The first 48 bits after the encoding block contain the creation time as Unix timestamp in milliseconds. Clients can use
+it for analysis, but it is not authoritative; use the `created` property for that.
+
+When creating an element with a custom `id`, the timestamp of the id may be in the past, but not in the future
+(with a tolerance of one minute). Backups are an exception: ids with future timestamps are imported as they are, and a
+warning is logged.
+
+## Storage notes
+
+- Compare and index ids with a byte-wise (binary) collation. Case-insensitive or locale-aware collations break
+  uniqueness and sorting.
+- Case-insensitive file systems, e.g. on macOS or Windows, can merge ids which differ only in their case, e.g. when
+  syncing the file bucket or a backup to local disk.
+- Nested folder structures, e.g. in backups and the file bucket, are derived from the random end of the id, as the
+  beginning is a timestamp.
+
+## Upgrading from UUIDv4
+
+Ids are not compatible with the UUIDv4 ids of version 0.1.x. Backups with legacy ids can be loaded with
+[`backup:load`](/command/backup-load), which converts the ids on the fly, or converted beforehand with
+[`backup:convert`](/command/backup-convert). The random part of the new id is derived from the legacy id, and the
+timestamp is taken from the element's `created` property, or the time of the conversion if it is not available.

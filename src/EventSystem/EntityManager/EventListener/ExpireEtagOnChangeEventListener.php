@@ -13,11 +13,11 @@ use App\Factory\Type\RedisKeyFactory;
 use App\Service\AppStateService;
 use App\Type\AppStateType;
 use App\Type\RedisKey;
+use App\Type\Uuid;
 use Exception;
 use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Types\CypherList;
 use Predis\Client;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 

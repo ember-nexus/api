@@ -65,7 +65,7 @@ curl \
   'https://api.example.com/<uuid of element>/parents'
 ```
 
-```bash /0c4cabca-a519-4ace-9b7b-2f4d57c31259/
+```bash /02IiNr0G8viOVKjRAbiql5bVtabZLuYjPFOfO/
 {
   "type": "_PartialCollection",
   "id": "/<uuid of element>/parents",
@@ -97,7 +97,7 @@ curl \
   "relations": [
     {
       "type": "OWNS",
-      "id": "0c4cabca-a519-4ace-9b7b-2f4d57c31259",
+      "id": "02IiNr0G8viOVKjRAbiql5bVtabZLuYjPFOfO",
       "start": "<uuid of old owner>",
       "end": "<uuid of element>",
       "data": {
@@ -107,7 +107,7 @@ curl \
     },
     {
       "type": "OWNS",
-      "id": "0d1817ab-9c6e-4052-8a1c-6913163cfff3",
+      "id": "02IiNr0G8viOVKjRZ6Ww2VpB4nSA08RVCxgUj",
       "start": "<uuid of new owner>",
       "end": "<uuid of element>",
       "data": {
@@ -120,14 +120,14 @@ curl \
 ```
 
 You then look for the `uuid` of the `OWNS`-relation between the old owner and the element, in this case it is
-`0c4cabca-a519-4ace-9b7b-2f4d57c31259`.
+`02IiNr0G8viOVKjRAbiql5bVtabZLuYjPFOfO`.
 
 This relation can then be deleted:
 
 ```bash
 curl -X DELETE \
   -H 'Authorization: Bearer secret-token:PIPeJGUt7c00ENn8a5uDlc' \
-  https://api.example.com/0c4cabca-a519-4ace-9b7b-2f4d57c31259
+  https://api.example.com/02IiNr0G8viOVKjRAbiql5bVtabZLuYjPFOfO
 ```
 
 The graph will then look like this:

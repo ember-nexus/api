@@ -33,21 +33,21 @@
                   },
                   "id": {
                     "type": "string",
-                    "format": "uuid",
+                    "pattern": "^(?:[0-9A-Za-z]{37}|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14})$",
                     "description": "The element's UUID. Auto-generated if not provided.",
-                    "example": "f9a619e1-f3f5-4fbf-a80e-fa8f7dd88103"
+                    "example": "02IiNr0G8viOVKlIlHZsyqDvsMzGHDQtcQZdN"
                   },
                   "start": {
                     "type": "string",
-                    "format": "uuid",
+                    "pattern": "^(?:[0-9A-Za-z]{37}|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14})$",
                     "description": "The start node's UUID. Required for relations.",
-                    "example": "f9a619e1-f3f5-4fbf-a80e-fa8f7dd88103"
+                    "example": "02IiNr0G8viOVKlIlHZsyqDvsMzGHDQtcQZdN"
                   },
                   "end": {
                     "type": "string",
-                    "format": "uuid",
+                    "pattern": "^(?:[0-9A-Za-z]{37}|[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14})$",
                     "description": "The end node's UUID. Required for relations.",
-                    "example": "ecfe46ff-d3c7-4ca7-9b41-9be5476d36e0"
+                    "example": "02IiNr0G8viOVKlCaHs7mNxKQSgNY6CWxemrf"
                   },
                   "data": {
                     "type": "object",
@@ -111,7 +111,7 @@
               "bodySize": -1,
               "postData": {
                 "mimeType": "application/json",
-                "text": "{\"type\": \"RELATION\", \"start\": \"f9a619e1-f3f5-4fbf-a80e-fa8f7dd88103\", \"end\": \"ecfe46ff-d3c7-4ca7-9b41-9be5476d36e0\", \"data\": {\"hello\": \"world :D\"}}"
+                "text": "{\"type\": \"RELATION\", \"start\": \"02IiNr0G8viOVKlIlHZsyqDvsMzGHDQtcQZdN\", \"end\": \"02IiNr0G8viOVKlCaHs7mNxKQSgNY6CWxemrf\", \"data\": {\"hello\": \"world :D\"}}"
               }
             }
           }

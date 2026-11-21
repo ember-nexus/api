@@ -7,7 +7,6 @@ namespace App\Type;
 use App\Contract\RelationElementInterface;
 use App\Trait\IdTrait;
 use App\Trait\PropertiesTrait;
-use Ramsey\Uuid\UuidInterface;
 
 class RelationElement implements RelationElementInterface
 {
@@ -15,8 +14,8 @@ class RelationElement implements RelationElementInterface
     use IdTrait;
 
     private ?string $type = null;
-    private ?UuidInterface $start = null;
-    private ?UuidInterface $end = null;
+    private ?Uuid $start = null;
+    private ?Uuid $end = null;
 
     public function __construct()
     {
@@ -34,24 +33,24 @@ class RelationElement implements RelationElementInterface
         return $this;
     }
 
-    public function getStart(): ?UuidInterface
+    public function getStart(): ?Uuid
     {
         return $this->start;
     }
 
-    public function setStart(?UuidInterface $start): static
+    public function setStart(?Uuid $start): static
     {
         $this->start = $start;
 
         return $this;
     }
 
-    public function getEnd(): ?UuidInterface
+    public function getEnd(): ?Uuid
     {
         return $this->end;
     }
 
-    public function setEnd(?UuidInterface $end): static
+    public function setEnd(?Uuid $end): static
     {
         $this->end = $end;
 

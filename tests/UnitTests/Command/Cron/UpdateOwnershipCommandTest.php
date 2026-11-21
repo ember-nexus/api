@@ -12,6 +12,7 @@ use App\Service\QueueService;
 use App\Service\SearchAccessCalculatorService;
 use App\Type\NodeElement;
 use App\Type\RabbitMQQueueType;
+use App\Type\Uuid;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
@@ -21,7 +22,6 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
@@ -150,7 +150,7 @@ class UpdateOwnershipCommandTest extends TestCase
 
     public function testCommandSkipsMessageIfElementWasAlreadyDeleted(): void
     {
-        $elementId = Uuid::fromString('5a5c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d5');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKk3BR1XOGxsa14KbgI1FK6yb');
 
         $elementManager = $this->prophesize(ElementManager::class);
         $elementManager->getElement(Argument::any())->willReturn(null);
@@ -184,7 +184,7 @@ class UpdateOwnershipCommandTest extends TestCase
 
     public function testCommandDoesNotStoreOrEnqueueChildrenWhenDeltaIsZero(): void
     {
-        $elementId = Uuid::fromString('4f4c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d4');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKjxnRNk163IJyKc3ShnMAwuH');
         $element = (new NodeElement())->setId($elementId)->setLabel('Data');
 
         $elementManager = $this->prophesize(ElementManager::class);
@@ -247,8 +247,8 @@ class UpdateOwnershipCommandTest extends TestCase
      */
     public function testCommandQueuesChildrenAsNewMessagesInsteadOfRecalculatingThemInProcess(): void
     {
-        $parentId = Uuid::fromString('4f4c6b60-1b3b-4e6d-9c0b-6c1b7bb2f9d4');
-        $childId = Uuid::fromString('11111111-1111-1111-1111-111111111111');
+        $parentId = Uuid::fromString('02IiNr0G8viOVKjxnRNk163IJyKc3ShnMAwuH');
+        $childId = Uuid::fromString('02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf');
         $parent = (new NodeElement())->setId($parentId)->setLabel('Data');
 
         $elementManager = $this->prophesize(ElementManager::class);
@@ -311,7 +311,7 @@ class UpdateOwnershipCommandTest extends TestCase
 
     public function testCommandHandlesAQueuedChildMessageJustLikeAnyOtherElement(): void
     {
-        $childId = Uuid::fromString('11111111-1111-1111-1111-111111111111');
+        $childId = Uuid::fromString('02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf');
         $child = (new NodeElement())->setId($childId)->setLabel('Data');
 
         $elementManager = $this->prophesize(ElementManager::class);
@@ -357,9 +357,9 @@ class UpdateOwnershipCommandTest extends TestCase
         // IS_IN_GROUP does not change the group's own direct accessors (it grants the member the group's rights,
         // not access to the group node itself), so its own delta is always zero; the group's children must still be
         // recalculated directly rather than only cascading on a non-zero delta at the group itself
-        $groupId = Uuid::fromString('44444444-4444-4444-4444-444444444444');
-        $memberId = Uuid::fromString('55555555-5555-5555-5555-555555555555');
-        $childId = Uuid::fromString('66666666-6666-6666-6666-666666666666');
+        $groupId = Uuid::fromString('02IiNr0G8viOVKjsRH0T4eZGx1E6MmTuYwvmm');
+        $memberId = Uuid::fromString('02IiNr0G8viOVKk0kQOokUeQle4I04rVnXsw9');
+        $childId = Uuid::fromString('02IiNr0G8viOVKk93ZnAQKjaaGuTdNF728q5W');
         $group = (new NodeElement())->setId($groupId)->setLabel('Group');
         $member = (new NodeElement())->setId($memberId)->setLabel('User');
         $child = (new NodeElement())->setId($childId)->setLabel('Data');
@@ -430,7 +430,7 @@ class UpdateOwnershipCommandTest extends TestCase
     {
         // relationId, startId and endId of the same message all point at the same element: it must be recomputed
         // only once per message, not three times
-        $elementId = Uuid::fromString('22222222-2222-2222-2222-222222222222');
+        $elementId = Uuid::fromString('02IiNr0G8viOVKjboyDliyOxJlXj6Bii5l1U2');
         $element = (new NodeElement())->setId($elementId)->setLabel('Data');
 
         $elementManager = $this->prophesize(ElementManager::class);

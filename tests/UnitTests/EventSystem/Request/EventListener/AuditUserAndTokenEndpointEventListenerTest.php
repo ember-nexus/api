@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\EventSystem\Request\EventListener;
 
 use App\EventSystem\Request\EventListener\AuditUserAndTokenEndpointEventListener;
 use App\Security\AuthProvider;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
@@ -13,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -30,9 +30,9 @@ class AuditUserAndTokenEndpointEventListenerTest extends TestCase
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider->isAnonymous()->willReturn($isAnonymous);
         if (!$isAnonymous) {
-            $authProvider->getUserId()->willReturn(Uuid::fromString('55555555-5555-5555-5555-555555555555'));
+            $authProvider->getUserId()->willReturn(Uuid::fromString('02IiNr0G8viOVKk0kQOokUeQle4I04rVnXsw9'));
         }
-        $authProvider->getTokenId()->willReturn(Uuid::fromString('66666666-6666-6666-6666-666666666666'));
+        $authProvider->getTokenId()->willReturn(Uuid::fromString('02IiNr0G8viOVKk93ZnAQKjaaGuTdNF728q5W'));
 
         return new AuditUserAndTokenEndpointEventListener($authProvider->reveal(), $logger);
     }
@@ -88,8 +88,8 @@ class AuditUserAndTokenEndpointEventListenerTest extends TestCase
             'User/token endpoint was called.',
             [
                 'client' => [
-                    'user' => '55555555-5555-5555-5555-555555555555',
-                    'token' => '66666666-6666-6666-6666-666666666666',
+                    'user' => '02IiNr0G8viOVKk0kQOokUeQle4I04rVnXsw9',
+                    'token' => '02IiNr0G8viOVKk93ZnAQKjaaGuTdNF728q5W',
                     'ip' => '127.0.0.1',
                 ],
                 'request' => [

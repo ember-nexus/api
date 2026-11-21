@@ -6,7 +6,7 @@ namespace App\Type\Request;
 
 use App\Contract\Request\ResumableUploadRequestInterface;
 use App\Service\FileNameService;
-use Ramsey\Uuid\UuidInterface;
+use App\Type\Uuid;
 
 final readonly class ResumableUploadRequest implements ResumableUploadRequestInterface
 {
@@ -14,7 +14,7 @@ final readonly class ResumableUploadRequest implements ResumableUploadRequestInt
      * @param resource $content
      */
     public function __construct(
-        private UuidInterface $elementId,
+        private Uuid $elementId,
         private mixed $content,
         private ?bool $isUploadComplete = false,
         private ?int $uploadLength = null,
@@ -23,7 +23,7 @@ final readonly class ResumableUploadRequest implements ResumableUploadRequestInt
     ) {
     }
 
-    public function getElementId(): UuidInterface
+    public function getElementId(): Uuid
     {
         return $this->elementId;
     }

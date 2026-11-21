@@ -10,15 +10,15 @@ class _04_01_GroupsImmediateNodeOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:GVt8Z7QsZf6c8Yu6e1gnB8';
 
-    private const string GROUP_1 = '8978f6cb-9a55-4727-9df4-ebd2dafe1352';
-    private const string GROUP_2 = '99f40c22-1b11-48bf-b9f4-350cac7b1fdd';
-    private const string GROUP_3 = 'f1c7a5c3-5135-458f-b5a3-940335b90d31';
-    private const string DATA = '896b608e-0dba-4f5f-8b39-522bc3e079c1';
-    private const string IS_IN_GROUP_1 = '8c9d0790-7faa-4310-abab-8800fd2c14d4';
-    private const string IS_IN_GROUP_2 = '0b9cf8e7-6bf0-4697-adb5-65b7145b84c5';
-    private const string IS_IN_GROUP_3 = '60f2a995-4c11-4c6c-a16b-2da6edbcaf44';
-    private const string OWNS_DATA = '1ef6accb-650a-459e-87fb-3209f15baa51';
-    private const string OWNS_TOKEN = '5bb067b2-3e28-4f2d-b0c9-0aa306f1d15f';
+    private const string GROUP_1 = '02IiNr0GOoKiPMMBt0jLOKo10w1x53eKuicjH';
+    private const string GROUP_2 = '02IiNr0GOoKiPMMJv8SRYQn8yNHRMIL7RGPDq';
+    private const string GROUP_3 = '02IiNr0GOoKiPMN0gMK3MRZ189VZyhLGjkdVn';
+    private const string DATA = '02IiNr0GOoKiPMMBr8qC3FklXE98igS1UOG4q';
+    private const string IS_IN_GROUP_1 = '02IiNr0GOoKiPMMDPOCkYvhWhtwU7mlwrNj9m';
+    private const string IS_IN_GROUP_2 = '02IiNr0GOoKiPMLCag11lpjj3Nx45V9VcZeAu';
+    private const string IS_IN_GROUP_3 = '02IiNr0GOoKiPMLsACp44acPbF0i00AU60BJY';
+    private const string OWNS_DATA = '02IiNr0GOoKiPMLM1al7kRK8m6BPfADbcfrmg';
+    private const string OWNS_TOKEN = '02IiNr0GOoKiPMLpbgR46crlzEzM6tWcQeBq9';
 
     public function testGetIndex(): void
     {

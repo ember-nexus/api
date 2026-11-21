@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\EndToEndTests\Command;
 
+use App\Type\Uuid;
 use DateTimeImmutable;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
@@ -163,14 +164,15 @@ class CronUpdateOwnershipTest extends BaseCronTestCase
         $ownerUserId = $this->getUserIdForToken(self::TOKEN);
         $now = (new DateTimeImmutable())->format(DateTimeImmutable::ATOM);
         foreach (['HAS_CREATE_ACCESS', 'HAS_DELETE_ACCESS'] as $relationType) {
+            $newRelationId = Uuid::generate()->toString();
             $result = $this->getCypherClient()->run(
                 sprintf(
                     'MATCH (owner:User {id: $ownerUserId}), (target:User {id: $userId}) '.
-                    'CREATE (owner)-[r:%s {id: randomUUID(), created: datetime(), updated: datetime()}]->(target) '.
+                    'CREATE (owner)-[r:%s {id: $relationId, created: datetime(), updated: datetime()}]->(target) '.
                     'RETURN r.id AS id',
                     $relationType
                 ),
-                ['ownerUserId' => $ownerUserId, 'userId' => $userId]
+                ['ownerUserId' => $ownerUserId, 'userId' => $userId, 'relationId' => $newRelationId]
             );
             $relationId = $result->first()->get('id');
             $this->assertNotNull($relationId);

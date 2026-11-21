@@ -14,13 +14,13 @@ use App\Security\AuthProvider;
 use App\Service\FileCreationLockService;
 use App\Service\UploadCreationService;
 use App\Type\Response\NoContentResponse;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 
 #[Small]
@@ -29,7 +29,7 @@ class PutElementFileControllerTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string ID = '6d3d983e-8cc0-43b7-88f9-5595d5ca0ad1';
+    private const string ID = '02IiNr0G8viOVKkCNJFAUZAABiVkBOm9SiRqR';
 
     private ObjectProphecy $accessChecker;
     private ObjectProphecy $uploadCreationService;
@@ -38,7 +38,7 @@ class PutElementFileControllerTest extends TestCase
     private function buildController(): PutElementFileController
     {
         $authProvider = $this->prophesize(AuthProvider::class);
-        $authProvider->getUserId()->willReturn(Uuid::uuid4());
+        $authProvider->getUserId()->willReturn(Uuid::generate());
         $this->accessChecker = $this->prophesize(AccessChecker::class);
         $this->accessChecker->hasAccessToElement(Argument::cetera())->willReturn(true);
         $this->uploadCreationService = $this->prophesize(UploadCreationService::class);

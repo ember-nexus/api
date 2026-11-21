@@ -58,7 +58,7 @@ As we do not yet know the `ETag` value associated with the first request, we sim
 ```bash
 curl \
   -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
-  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+  https://api.example.com/02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4
 ```
 
 The response then contains the `Etag`-header.
@@ -72,7 +72,7 @@ Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
 Date: Tue, 25 Aug 2026 11:53:42 GMT
-Etag: "6JM8JahrCeu"
+Etag: "Ab5tfHLLWiQ"
 Transfer-Encoding: chunked
 X-Powered-By: Ember Nexus API
 ```
@@ -80,7 +80,7 @@ X-Powered-By: Ember Nexus API
 ```json
 {
   "type": "Data",
-  "id": "35cd3b18-0d0c-4e98-876e-898b930797f2",
+  "id": "02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4",
   "data": {
     "created": "2020-01-01T00:00:00+00:00",
     "updated": "2020-01-01T00:00:00+00:00",
@@ -105,8 +105,8 @@ response headers.
 ```bash /If-None-Match: .\w+./
 curl \
   -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
-  -H 'If-None-Match: "6JM8JahrCeu"' \
-  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+  -H 'If-None-Match: "Ab5tfHLLWiQ"' \
+  https://api.example.com/02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4
 ```
 
 Response:
@@ -119,7 +119,7 @@ Access-Control-Expose-Headers: ETag, Location
 Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Date: Tue, 25 Aug 2026 11:53:50 GMT
-Etag: "6JM8JahrCeu"
+Etag: "Ab5tfHLLWiQ"
 X-Powered-By: Ember Nexus API
 ```
 
@@ -134,7 +134,7 @@ and return up-to-date data for the endpoint:
 curl \
   -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
   -H 'If-None-Match: "invalid"' \
-  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+  https://api.example.com/02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4
 ```
 
 Response:
@@ -148,7 +148,7 @@ Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
 Date: Tue, 25 Aug 2026 11:54:05 GMT
-Etag: "6JM8JahrCeu"
+Etag: "Ab5tfHLLWiQ"
 Transfer-Encoding: chunked
 X-Powered-By: Ember Nexus API
 ```
@@ -156,7 +156,7 @@ X-Powered-By: Ember Nexus API
 ```json
 {
   "type": "Data",
-  "id": "35cd3b18-0d0c-4e98-876e-898b930797f2",
+  "id": "02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4",
   "data": {
     "created": "2020-01-01T00:00:00+00:00",
     "updated": "2020-01-01T00:00:00+00:00",
@@ -178,7 +178,7 @@ Similarly to the `If-None-Match`-header, we first need to find out the `ETag` of
 ```bash
 curl \
   -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
-  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+  https://api.example.com/02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4
 ```
 
 The response then contains the `Etag`-header.
@@ -192,7 +192,7 @@ Allow: DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
 Date: Tue, 25 Aug 2026 11:54:15 GMT
-Etag: "6JM8JahrCeu"
+Etag: "Ab5tfHLLWiQ"
 Transfer-Encoding: chunked
 X-Powered-By: Ember Nexus API
 ```
@@ -200,7 +200,7 @@ X-Powered-By: Ember Nexus API
 ```json
 {
   "type": "Data",
-  "id": "35cd3b18-0d0c-4e98-876e-898b930797f2",
+  "id": "02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4",
   "data": {
     "created": "2020-01-01T00:00:00+00:00",
     "updated": "2020-01-01T00:00:00+00:00",
@@ -218,11 +218,11 @@ If the element has not been changed in the meantime, a conditional request will 
 curl -X PATCH \
   -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
   -H 'Content-Type: application/json' \
-  -H 'If-Match: "6JM8JahrCeu"' \
+  -H 'If-Match: "Ab5tfHLLWiQ"' \
   -d '{
         "key": "some update to the element"
       }' \
-  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+  https://api.example.com/02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4
 ```
 
 The condition matches, so the update is applied and the response is `204 No Content` - the element's `ETag` has now
@@ -249,11 +249,11 @@ request will fail:
 curl -X PATCH \
   -H 'Authorization: Bearer secret-token:M3WHIDj4q62EY0XiZFMLnv' \
   -H 'Content-Type: application/json' \
-  -H 'If-Match: "6JM8JahrCeu"' \
+  -H 'If-Match: "Ab5tfHLLWiQ"' \
   -d '{
         "key": "some update to the element"
       }' \
-  https://api.example.com/35cd3b18-0d0c-4e98-876e-898b930797f2
+  https://api.example.com/02IiNr0EPf9nVLAeSXQS6b16IfFg9aNoX8Vj4
 ```
 
 ```http
@@ -274,7 +274,7 @@ X-Powered-By: Ember Nexus API
   "type": "https://api.example.com/error/412/precondition-failed",
   "title": "Precondition Failed",
   "status": 412,
-  "instance": "urn:uuid:00000000-0000-0000-0000-000000000000",
+  "instance": "urn:uuid:02IiNr0G8viOVKjLCfR4NIEdgVrLpaxVcZ7BI",
   "detail": "Precondition does not match."
 }
 ```

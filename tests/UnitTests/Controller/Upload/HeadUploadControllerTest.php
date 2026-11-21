@@ -20,7 +20,7 @@ class HeadUploadControllerTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string UPLOAD_ID = '224a787e-3b32-4822-8697-61047175505d';
+    private const string UPLOAD_ID = '02IiNr0G8viOVKjbso133HjMjY1fDvYfd7Wub';
 
     public function testHeadReportsStateOfAuthorizedUpload(): void
     {

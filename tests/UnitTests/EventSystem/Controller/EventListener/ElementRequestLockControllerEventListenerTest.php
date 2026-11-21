@@ -10,13 +10,12 @@ use App\Exception\Client409ConflictException;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
 use App\Service\ElementRequestLockService;
 use App\Type\EtagType;
+use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -29,7 +28,7 @@ class ElementRequestLockControllerEventListenerTest extends TestCase
 {
     use ProphecyTrait;
 
-    private const string ELEMENT_ID = '3950e94a-2cd0-43ef-ac5a-8e116a4263c8';
+    private const string ELEMENT_ID = '02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f';
 
     private function createListener(?ElementRequestLockService $elementRequestLockService = null, ?Client409ConflictExceptionFactory $client409ConflictExceptionFactory = null): ElementRequestLockControllerEventListener
     {
@@ -131,7 +130,7 @@ class ElementRequestLockControllerEventListenerTest extends TestCase
 
         $this->createListener($elementRequestLockService->reveal())->onKernelController($event);
 
-        $this->assertEquals(UuidV4::fromString(self::ELEMENT_ID), $request->attributes->get('_elementRequestLockElementId'));
+        $this->assertEquals(Uuid::fromString(self::ELEMENT_ID), $request->attributes->get('_elementRequestLockElementId'));
         $this->assertSame('request-token', $request->attributes->get('_elementRequestLockToken'));
     }
 
@@ -168,7 +167,7 @@ class ElementRequestLockControllerEventListenerTest extends TestCase
     public function testResponseReleasesTheLockAndClearsTheRequestAttributes(): void
     {
         $request = Request::create('/'.self::ELEMENT_ID, 'PATCH');
-        $elementId = UuidV4::fromString(self::ELEMENT_ID);
+        $elementId = Uuid::fromString(self::ELEMENT_ID);
         $request->attributes->set('_elementRequestLockElementId', $elementId);
         $request->attributes->set('_elementRequestLockToken', 'request-token');
 
@@ -194,7 +193,7 @@ class ElementRequestLockControllerEventListenerTest extends TestCase
     public function testSubRequestResponseIsIgnored(): void
     {
         $request = Request::create('/'.self::ELEMENT_ID, 'PATCH');
-        $elementId = UuidV4::fromString(self::ELEMENT_ID);
+        $elementId = Uuid::fromString(self::ELEMENT_ID);
         $request->attributes->set('_elementRequestLockElementId', $elementId);
         $request->attributes->set('_elementRequestLockToken', 'request-token');
 

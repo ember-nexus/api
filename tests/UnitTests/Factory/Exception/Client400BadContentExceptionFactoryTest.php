@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Factory\Exception;
 
 use App\Factory\Exception\Client400BadContentExceptionFactory;
+use App\Type\Uuid;
 use Exception;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -12,7 +13,6 @@ use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Ramsey\Uuid\Uuid;
 use ReflectionMethod;
 use Safe\Exceptions\JsonException;
 use stdClass;
@@ -151,8 +151,8 @@ class Client400BadContentExceptionFactoryTest extends TestCase
                 'array with 2 elements',
             ],
             [
-                Uuid::fromString('7fff27c5-3147-4a77-9b79-c6b6876c6b52'),
-                "'7fff27c5-3147-4a77-9b79-c6b6876c6b52' of type Ramsey\Uuid\Lazy\LazyUuidFromString",
+                Uuid::fromString('02IiNr0G8viOVKkLVPefaGXWAB4PgGdHVCmBC'),
+                "'02IiNr0G8viOVKkLVPefaGXWAB4PgGdHVCmBC' of type App\Type\Uuid",
             ],
             [
                 new stdClass(),

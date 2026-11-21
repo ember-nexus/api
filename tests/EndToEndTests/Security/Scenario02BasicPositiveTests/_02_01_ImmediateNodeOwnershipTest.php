@@ -9,9 +9,9 @@ use App\Tests\EndToEndTests\BaseRequestTestCase;
 class _02_01_ImmediateNodeOwnershipTest extends BaseRequestTestCase
 {
     private const string TOKEN = 'secret-token:P4VWKNQ2A6UaoaQgGSQXRB';
-    private const string USER = '88f75d78-5ba2-42bc-8a46-4f20651cff2e';
-    private const string OWNS = 'd9e9b864-81a6-4821-9b11-2a556e762860';
-    private const string DATA = '7d051aaf-904b-4711-81d8-07067fa94d7e';
+    private const string USER = '02IiNr0GOoKiPMMBdu3qUtGmHXiNde2O6WCuS';
+    private const string OWNS = '02IiNr0GOoKiPMMp3YCVjyfqqAIfdpkWm8MWi';
+    private const string DATA = '02IiNr0GOoKiPMM5pTUeLMfdqvDcVt9pbXw4E';
 
     /**
      * @description test 2-01-01-01

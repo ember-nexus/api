@@ -45,36 +45,36 @@ class ElementStoreConsistencyTest extends BaseRequestTestCase
 
     public function testDeletingNodeWithoutMongoDocumentSucceeds(): void
     {
-        $this->deleteMongoDocument('Data', 'effd07e6-cd38-4933-b451-ff8ff4090663');
+        $this->deleteMongoDocument('Data', '02IiNr0GOoKiPMMzng0Nj1bjmKvTwXnZkmVy4');
 
-        $response = $this->runDeleteRequest('/effd07e6-cd38-4933-b451-ff8ff4090663', self::TOKEN);
+        $response = $this->runDeleteRequest('/02IiNr0GOoKiPMMzng0Nj1bjmKvTwXnZkmVy4', self::TOKEN);
 
         $this->assertIsDeletedResponse($response);
     }
 
     public function testDeletingRelationWithoutMongoDocumentSucceeds(): void
     {
-        $this->deleteMongoDocument('RELATED', '24fe920f-314d-4f08-ae76-e3d7bcca3aae');
+        $this->deleteMongoDocument('RELATED', '02IiNr0GOoKiPMLOwndASqXc0axmIi7mCksFK');
 
-        $response = $this->runDeleteRequest('/24fe920f-314d-4f08-ae76-e3d7bcca3aae', self::TOKEN);
+        $response = $this->runDeleteRequest('/02IiNr0GOoKiPMLOwndASqXc0axmIi7mCksFK', self::TOKEN);
 
         $this->assertIsDeletedResponse($response);
     }
 
     public function testDeletingNodeWithoutElasticsearchDocumentSucceeds(): void
     {
-        $this->deleteElasticsearchDocument('node_data', '8c59a3e4-0a28-4b8b-8c1f-a3c9b2912205');
+        $this->deleteElasticsearchDocument('node_data', '02IiNr0GOoKiPMMDHogcQYJsShA0IaXiGxVs0');
 
-        $response = $this->runDeleteRequest('/8c59a3e4-0a28-4b8b-8c1f-a3c9b2912205', self::TOKEN);
+        $response = $this->runDeleteRequest('/02IiNr0GOoKiPMMDHogcQYJsShA0IaXiGxVs0', self::TOKEN);
 
         $this->assertIsDeletedResponse($response);
     }
 
     public function testDeletingRelationWithoutElasticsearchDocumentSucceeds(): void
     {
-        $this->deleteElasticsearchDocument('relation_related', '49d7f006-1505-4dfa-a411-06ac3dc51f35');
+        $this->deleteElasticsearchDocument('relation_related', '02IiNr0GOoKiPMLgu44YBYZWraYEB4gU8yTF1');
 
-        $response = $this->runDeleteRequest('/49d7f006-1505-4dfa-a411-06ac3dc51f35', self::TOKEN);
+        $response = $this->runDeleteRequest('/02IiNr0GOoKiPMLgu44YBYZWraYEB4gU8yTF1', self::TOKEN);
 
         $this->assertIsDeletedResponse($response);
     }
@@ -86,75 +86,75 @@ class ElementStoreConsistencyTest extends BaseRequestTestCase
      */
     public function testDeletingNodeWithoutS3FileSucceeds(): void
     {
-        $response = $this->runDeleteRequest('/fed71d17-0ea6-416f-a3d8-f053b1a41217', self::TOKEN);
+        $response = $this->runDeleteRequest('/02IiNr0GOoKiPMN72jTV1OmXNJykilzet71ma', self::TOKEN);
 
         $this->assertIsDeletedResponse($response);
     }
 
     public function testDeletingRelationWithoutS3FileSucceeds(): void
     {
-        $response = $this->runDeleteRequest('/80ba487c-8f57-4ebd-aae7-5ccb1aaf7572', self::TOKEN);
+        $response = $this->runDeleteRequest('/02IiNr0GOoKiPMM7cqPJzXZvaBeHjVlCENyJN', self::TOKEN);
 
         $this->assertIsDeletedResponse($response);
     }
 
     public function testPatchingNodeWithoutMongoDocumentSucceeds(): void
     {
-        $this->deleteMongoDocument('Data', '1b1872c4-aeb6-4eb4-8a73-bad312a076d3');
+        $this->deleteMongoDocument('Data', '02IiNr0GOoKiPMLK8c2rgNjMUmGC4Z8VdHnF1');
 
-        $response = $this->runPatchRequest('/1b1872c4-aeb6-4eb4-8a73-bad312a076d3', self::TOKEN, ['name' => 'patched without mongo document']);
+        $response = $this->runPatchRequest('/02IiNr0GOoKiPMLK8c2rgNjMUmGC4Z8VdHnF1', self::TOKEN, ['name' => 'patched without mongo document']);
 
         $this->assertNoContentResponse($response);
-        $this->assertNotNull($this->getMongoClient()->selectDatabase('ember-nexus')->selectCollection('Data')->findOne(['_id' => '1b1872c4-aeb6-4eb4-8a73-bad312a076d3']));
+        $this->assertNotNull($this->getMongoClient()->selectDatabase('ember-nexus')->selectCollection('Data')->findOne(['_id' => '02IiNr0GOoKiPMLK8c2rgNjMUmGC4Z8VdHnF1']));
     }
 
     public function testPatchingRelationWithoutMongoDocumentSucceeds(): void
     {
-        $this->deleteMongoDocument('RELATED', '61c44476-2aa7-4d13-9456-3ca58142a91f');
+        $this->deleteMongoDocument('RELATED', '02IiNr0GOoKiPMLsYkSM9O7aj4T2Nt0i8ITZ9');
 
-        $response = $this->runPatchRequest('/61c44476-2aa7-4d13-9456-3ca58142a91f', self::TOKEN, ['name' => 'patched without mongo document']);
+        $response = $this->runPatchRequest('/02IiNr0GOoKiPMLsYkSM9O7aj4T2Nt0i8ITZ9', self::TOKEN, ['name' => 'patched without mongo document']);
 
         $this->assertNoContentResponse($response);
-        $this->assertNotNull($this->getMongoClient()->selectDatabase('ember-nexus')->selectCollection('RELATED')->findOne(['_id' => '61c44476-2aa7-4d13-9456-3ca58142a91f']));
+        $this->assertNotNull($this->getMongoClient()->selectDatabase('ember-nexus')->selectCollection('RELATED')->findOne(['_id' => '02IiNr0GOoKiPMLsYkSM9O7aj4T2Nt0i8ITZ9']));
     }
 
     public function testPuttingNodeWithoutMongoDocumentSucceeds(): void
     {
-        $this->deleteMongoDocument('Data', '1b1872c4-aeb6-4eb4-8a73-bad312a076d3');
+        $this->deleteMongoDocument('Data', '02IiNr0GOoKiPMLK8c2rgNjMUmGC4Z8VdHnF1');
 
-        $response = $this->runPutRequest('/1b1872c4-aeb6-4eb4-8a73-bad312a076d3', self::TOKEN, ['name' => 'put without mongo document']);
+        $response = $this->runPutRequest('/02IiNr0GOoKiPMLK8c2rgNjMUmGC4Z8VdHnF1', self::TOKEN, ['name' => 'put without mongo document']);
 
         $this->assertNoContentResponse($response);
-        $this->assertNotNull($this->getMongoClient()->selectDatabase('ember-nexus')->selectCollection('Data')->findOne(['_id' => '1b1872c4-aeb6-4eb4-8a73-bad312a076d3']));
+        $this->assertNotNull($this->getMongoClient()->selectDatabase('ember-nexus')->selectCollection('Data')->findOne(['_id' => '02IiNr0GOoKiPMLK8c2rgNjMUmGC4Z8VdHnF1']));
     }
 
     public function testPuttingRelationWithoutMongoDocumentSucceeds(): void
     {
-        $this->deleteMongoDocument('RELATED', '61c44476-2aa7-4d13-9456-3ca58142a91f');
+        $this->deleteMongoDocument('RELATED', '02IiNr0GOoKiPMLsYkSM9O7aj4T2Nt0i8ITZ9');
 
-        $response = $this->runPutRequest('/61c44476-2aa7-4d13-9456-3ca58142a91f', self::TOKEN, ['name' => 'put without mongo document']);
+        $response = $this->runPutRequest('/02IiNr0GOoKiPMLsYkSM9O7aj4T2Nt0i8ITZ9', self::TOKEN, ['name' => 'put without mongo document']);
 
         $this->assertNoContentResponse($response);
-        $this->assertNotNull($this->getMongoClient()->selectDatabase('ember-nexus')->selectCollection('RELATED')->findOne(['_id' => '61c44476-2aa7-4d13-9456-3ca58142a91f']));
+        $this->assertNotNull($this->getMongoClient()->selectDatabase('ember-nexus')->selectCollection('RELATED')->findOne(['_id' => '02IiNr0GOoKiPMLsYkSM9O7aj4T2Nt0i8ITZ9']));
     }
 
     public function testPatchingNodeWithoutElasticsearchDocumentSucceeds(): void
     {
-        $this->deleteElasticsearchDocument('node_data', '13af9a84-b879-4ef7-9e6c-7e556f3730db');
+        $this->deleteElasticsearchDocument('node_data', '02IiNr0GOoKiPMLGW7EDMDXlAJjoxeJAaVp1T');
 
-        $response = $this->runPatchRequest('/13af9a84-b879-4ef7-9e6c-7e556f3730db', self::TOKEN, ['name' => 'patched without elasticsearch document']);
+        $response = $this->runPatchRequest('/02IiNr0GOoKiPMLGW7EDMDXlAJjoxeJAaVp1T', self::TOKEN, ['name' => 'patched without elasticsearch document']);
 
         $this->assertNoContentResponse($response);
-        $this->assertTrue($this->getElasticsearchClient()->exists(['index' => 'node_data', 'id' => '13af9a84-b879-4ef7-9e6c-7e556f3730db'])->asBool());
+        $this->assertTrue($this->getElasticsearchClient()->exists(['index' => 'node_data', 'id' => '02IiNr0GOoKiPMLGW7EDMDXlAJjoxeJAaVp1T'])->asBool());
     }
 
     public function testPatchingRelationWithoutElasticsearchDocumentSucceeds(): void
     {
-        $this->deleteElasticsearchDocument('relation_related', '05bd9faf-beb9-4e11-bed5-956d05f830ca');
+        $this->deleteElasticsearchDocument('relation_related', '02IiNr0GOoKiPML9jJ2CnKlwWQ8DidmBaJbU7');
 
-        $response = $this->runPatchRequest('/05bd9faf-beb9-4e11-bed5-956d05f830ca', self::TOKEN, ['name' => 'patched without elasticsearch document']);
+        $response = $this->runPatchRequest('/02IiNr0GOoKiPML9jJ2CnKlwWQ8DidmBaJbU7', self::TOKEN, ['name' => 'patched without elasticsearch document']);
 
         $this->assertNoContentResponse($response);
-        $this->assertTrue($this->getElasticsearchClient()->exists(['index' => 'relation_related', 'id' => '05bd9faf-beb9-4e11-bed5-956d05f830ca'])->asBool());
+        $this->assertTrue($this->getElasticsearchClient()->exists(['index' => 'relation_related', 'id' => '02IiNr0GOoKiPML9jJ2CnKlwWQ8DidmBaJbU7'])->asBool());
     }
 }

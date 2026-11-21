@@ -8,6 +8,7 @@ use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Type\AccessType;
+use App\Type\Uuid;
 use Laudis\Neo4j\Contracts\ClientInterface;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
@@ -17,7 +18,6 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Uuid;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 /**
@@ -56,9 +56,9 @@ class AccessCheckerTest extends TestCase
 
     public function testLogsNoticeWhenAccessIsDenied(): void
     {
-        $userId = Uuid::uuid4();
-        $elementId = Uuid::uuid4();
-        $tokenId = Uuid::uuid4();
+        $userId = Uuid::generate();
+        $elementId = Uuid::generate();
+        $tokenId = Uuid::generate();
 
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider->isAnonymous()->willReturn(false);
@@ -89,8 +89,8 @@ class AccessCheckerTest extends TestCase
 
     public function testDoesNotLogWhenAccessIsGranted(): void
     {
-        $userId = Uuid::uuid4();
-        $elementId = Uuid::uuid4();
+        $userId = Uuid::generate();
+        $elementId = Uuid::generate();
 
         $authProvider = $this->prophesize(AuthProvider::class);
 
@@ -109,8 +109,8 @@ class AccessCheckerTest extends TestCase
 
     public function testLogsAnonymousUserWhenAccessIsDenied(): void
     {
-        $userId = Uuid::uuid4();
-        $elementId = Uuid::uuid4();
+        $userId = Uuid::generate();
+        $elementId = Uuid::generate();
 
         $authProvider = $this->prophesize(AuthProvider::class);
         $authProvider->isAnonymous()->willReturn(true);

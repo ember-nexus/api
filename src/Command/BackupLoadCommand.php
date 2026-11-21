@@ -20,15 +20,14 @@ use App\Service\S3Service;
 use App\Style\EmberNexusStyle;
 use App\Trait\CommandInputTrait;
 use App\Type\AppStateType;
+use App\Type\LegacyUuidMap;
 use App\Type\RelationElement;
+use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
 use League\Flysystem\FilesystemOperator;
 use LogicException;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
-use Ramsey\Uuid\Rfc4122\UuidV4;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -55,6 +54,9 @@ class BackupLoadCommand extends Command
     private int $nodeCount = 0;
     private int $pageSize = 250;
     private bool $skipVerify = false;
+    private ?string $legacyMappingOutput = null;
+    private LegacyUuidMap $legacyUuidMap;
+    private int $futureTimestampCount = 0;
 
     private EmberNexusStyle $io;
 
@@ -81,6 +83,7 @@ class BackupLoadCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('name', InputArgument::REQUIRED, 'Name of the backup');
+        $this->addOption('legacy-mapping-output', null, InputOption::VALUE_REQUIRED, 'If the backup contains legacy UUIDv4 element ids, the mapping to the new ids is written to this CSV file');
         $this->addOption('skip-verify', null, InputOption::VALUE_NONE, "Skip verifying file contents against their stored 'file.hash' values");
     }
 
@@ -104,6 +107,9 @@ class BackupLoadCommand extends Command
 
         $this->backupName = $this->checkBackupName($this->getStringArgument($input, 'name'));
         $this->skipVerify = $this->isOptionActive($input, 'skip-verify');
+        $this->legacyMappingOutput = $this->getNullableStringOption($input, 'legacy-mapping-output');
+        // legacy ids without created timestamp share the import time of this backup load
+        $this->legacyUuidMap = LegacyUuidMap::createFromNow();
 
         $this->loadSummary();
 
@@ -111,6 +117,7 @@ class BackupLoadCommand extends Command
         $this->loadRelations();
         $this->loadFiles();
         $this->afterBackupTasks();
+        $this->reportUuidConversion();
 
         $this->io->finalMessage('Backup successfully loaded.');
 
@@ -132,9 +139,10 @@ class BackupLoadCommand extends Command
             if (!str_ends_with($nodeFile->path(), '.json')) {
                 continue;
             }
-            $data = $this->readJsonObject($nodeFile->path());
+            $data = $this->legacyUuidMap->mapRawElement($this->readJsonObject($nodeFile->path()));
             $nodeElement = $this->rawToElementService->rawToElement($data, true);
             unset($data);
+            $this->warnIfIdIsInFuture($nodeElement->getId());
             $this->elementManager->create($nodeElement);
             ++$pageCount;
             if ($pageCount >= $this->pageSize) {
@@ -171,9 +179,10 @@ class BackupLoadCommand extends Command
                 continue;
             }
             try {
-                $data = $this->readJsonObject($relationFile->path());
+                $data = $this->legacyUuidMap->mapRawElement($this->readJsonObject($relationFile->path()));
                 $relationElement = $this->rawToElementService->rawToElement($data, true);
                 unset($data);
+                $this->warnIfIdIsInFuture($relationElement->getId());
                 $this->elementManager->create($relationElement);
             } catch (Throwable $e) {
                 // one broken relation file, e.g. invalid JSON or an invalid id, must not abort the whole restore
@@ -205,7 +214,7 @@ class BackupLoadCommand extends Command
         ));
     }
 
-    private function parseFilenameAsUuidFromPath(string $path, bool $extensionIsOptional = false): false|UuidInterface
+    private function parseFilenameAsUuidFromPath(string $path, bool $extensionIsOptional = false): false|Uuid
     {
         $filename = basename($path);
         $parts = explode('.', $filename, 2);
@@ -213,11 +222,45 @@ class BackupLoadCommand extends Command
             return false;
         }
         $name = $parts[0];
-        if (!\Safe\preg_match(Regex::UUID_V4, $name)) {
+        if (!\Safe\preg_match(Regex::UUID, $name) && !Uuid::isLegacyUuidV4($name)) {
             return false;
         }
 
-        return Uuid::fromString($name);
+        return Uuid::fromString($this->legacyUuidMap->mapId($name));
+    }
+
+    /**
+     * Backups may contain ids with timestamps in the future, e.g. if they were created on a machine with a wrong
+     * clock; they are imported anyway.
+     */
+    private function warnIfIdIsInFuture(?Uuid $id): void
+    {
+        if (null === $id) {
+            return;
+        }
+        if ($id->getTimestampMs() <= Uuid::nowMs() + RawToElementService::FUTURE_TOLERANCE_MS) {
+            return;
+        }
+        ++$this->futureTimestampCount;
+        $this->logger->warning(sprintf('Element id %s of backup contains a timestamp in the future.', $id->toString()));
+    }
+
+    private function reportUuidConversion(): void
+    {
+        if ($this->futureTimestampCount > 0) {
+            $this->io->warning(sprintf('%d element ids of the backup contain a timestamp in the future; they were imported as they are.', $this->futureTimestampCount));
+        }
+        if (0 === $this->legacyUuidMap->count()) {
+            return;
+        }
+        $this->io->warning(sprintf(
+            'The backup contains %d legacy UUIDv4 element ids, which were converted to UUIDsv2a7. Existing references to the old ids, e.g. in clients, are no longer valid.',
+            $this->legacyUuidMap->count()
+        ));
+        if (null !== $this->legacyMappingOutput) {
+            \Safe\file_put_contents($this->legacyMappingOutput, $this->legacyUuidMap->toCsv());
+            $this->io->writeln(sprintf('Wrote id mapping to <info>%s</info>.', $this->legacyMappingOutput));
+        }
     }
 
     /**
@@ -233,7 +276,7 @@ class BackupLoadCommand extends Command
     /**
      * Problems with a single file are reported instead of thrown, so that one bad file does not abort the restore.
      */
-    private function loadFile(string $path, UuidInterface $fileId): bool
+    private function loadFile(string $path, Uuid $fileId): bool
     {
         $element = $this->elementManager->getElement($fileId);
         if (null === $element) {
@@ -390,7 +433,7 @@ class BackupLoadCommand extends Command
                 if (!is_string($rawId)) {
                     throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property n.id as string, not %s.', get_debug_type($rawId))); // @codeCoverageIgnore
                 }
-                $id = UuidV4::fromString($rawId);
+                $id = Uuid::fromString($rawId);
                 $element = $this->elementManager->getNode($id);
                 if ($element) {
                     $event = new ElementUpdateAfterBackupLoadEvent($element);
@@ -424,10 +467,10 @@ class BackupLoadCommand extends Command
                 // the listeners of this event only need the relation's identity; fetching the full element would look
                 // up the relation by its id again, which scans all relations
                 $element = (new RelationElement())
-                    ->setId(UuidV4::fromString($rawId))
+                    ->setId(Uuid::fromString($rawId))
                     ->setType($rawType)
-                    ->setStart(UuidV4::fromString($rawStartId))
-                    ->setEnd(UuidV4::fromString($rawEndId));
+                    ->setStart(Uuid::fromString($rawStartId))
+                    ->setEnd(Uuid::fromString($rawEndId));
                 $this->eventDispatcher->dispatch(new ElementUpdateAfterBackupLoadEvent($element));
             }
             $this->elasticEntityManager->flush();
