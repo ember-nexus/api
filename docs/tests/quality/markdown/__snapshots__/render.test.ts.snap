@@ -32,6 +32,80 @@ database. As Elasticsearch is a document-based database, **only a list of indivi
 like vector or geospatial search need manual index setup - this is possible, just not through the Ember Nexus API yet.
 Support for this is planned - see [ticket #477](https://github.com/ember-nexus/api/issues/477).
 
+## Step query
+
+The \`query\` of the step can be written in two ways:
+
+- **Short form**: the query itself, i.e. an object like \`{"match": {"description": "lily"}}\`. This is the Elasticsearch
+  [Query DSL](https://www.elastic.co/docs/reference/query-languages/query-dsl) query, without any wrapping.
+- **Long form**: an object with the property \`query\`, which contains the Elasticsearch query, and the optional
+  properties \`highlight\` and \`sort\`:
+  - \`query\`: Required, the Elasticsearch query, same as the short form.
+  - \`highlight\`: Optional, Elasticsearch's [highlight options](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/highlighting),
+    see [highlighting](#highlighting).
+  - \`sort\`: Optional, Elasticsearch's [sort definition](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/sort-search-results),
+    see [sorting](#sorting).
+
+Elasticsearch has no query named \`query\`, therefore both forms can not be mixed up. Other properties of the long form are
+rejected, as are queries which wrap the query twice. Expressions can be used anywhere inside the long form, see
+[parameterized Elasticsearch queries](#parameterized-elasticsearch-queries).
+
+\`\`\`json
+{
+  "type": "elasticsearch-query-dsl-mixin",
+  "query": {
+    "query": {
+      "match": {
+        "description": "lily"
+      }
+    },
+    "highlight": {
+      "fields": {
+        "description": {}
+      }
+    },
+    "sort": [
+      {
+        "name.keyword": "asc"
+      }
+    ]
+  }
+}
+\`\`\`
+
+### Highlighting
+
+If the property \`highlight\` is set, the result contains the highlights of the matching text in \`metadata.highlight\` of
+each element. Elasticsearch's highlight options are passed through, e.g. \`pre_tags\`, \`post_tags\`, \`fragment_size\`,
+\`number_of_fragments\` or \`encoder\`. The property \`fields\` is required.
+
+- Fields starting with an underscore (\`_\`), i.e. internal fields, are rejected. As wildcards could be used to reach
+  them, field names starting with a wildcard (\`*\` or \`?\`) are rejected as well. This also applies to \`matched_fields\`.
+  Wildcards later in the name, e.g. \`desc*\`, are supported.
+- Custom highlight queries (\`highlight_query\`) are supported. They only change what is highlighted in the elements which
+  the main query found, and are checked for unsupported features like the main query. Scripts are rejected.
+- Highlights contain the stored text of properties. If they are rendered as HTML, set \`"encoder": "html"\` so that
+  Elasticsearch escapes the text, and only the tags are markup.
+
+See the [highlighting example](/reference/search/elasticsearch-query-dsl-mixin/highlighting.md).
+
+### Sorting
+
+If the property \`sort\` is set, results are ordered by it instead of by score. It accepts a field name, an object like
+\`{"name.keyword": "asc"}\`, or a list of them. The supported options of a field are \`order\` (\`asc\` or \`desc\`), \`missing\`,
+\`mode\`, \`unmapped_type\`, \`numeric_type\` and \`format\`.
+
+- Text properties can not be sorted directly, use their keyword variant instead, e.g. \`name.keyword\`. Elasticsearch's
+  error is explained in the response, see [understanding search errors](/guide/search/understanding-search-errors.md).
+- \`_score\` can be used to sort by relevance, optionally combined with other fields.
+- Internal fields (starting with \`_\`) are rejected, as well as \`_geo_distance\`, \`_script\` and nested sorting.
+- The score of every element is still calculated and returned in \`metadata.score\` and \`maxScore\`, also if the sort does
+  not use it. The sort values of every element are returned in \`metadata.sort\`.
+- The order is kept by the [element hydration](/reference/search/element-hydration.md) step.
+- Pagination with \`page\` and \`pageSize\` continues the order of the sort.
+
+See the [sorting example](/reference/search/elasticsearch-query-dsl-mixin/sorting.md).
+
 ## Step parameters
 
 In addition to \`query\`, the step's \`parameters\` object supports the following options:
@@ -51,9 +125,17 @@ In addition to \`query\`, the step's \`parameters\` object supports the followin
   - \`type\`: Type of the element.
   - \`metadata.score\`: Numeric value returned by Elasticsearch. A high score implies a high fit between the query and
     the element.
+  - \`metadata.highlight\`: Only if \`highlight\` was requested and the element has highlights. Object of field names to
+    lists of highlighted text fragments.
+  - \`metadata.sort\`: Only if \`sort\` was requested. List of the values which the element was sorted by.
 - \`totalHits\`: Integer, number of total elements found by the query. Can be used to calculate how many pages of
   results are available. Very high numbers of results might be rounded or estimates by Elasticsearch.
 - \`maxScore\`: Maximum score achieved by any element, regardless of whether it is part of the current page of results.
+
+The metadata of the elements is also made available to all following steps, and returned by the
+[element hydration](/reference/search/element-hydration.md#metadata) step next to the elements. It is associated with the
+element id, therefore it is also returned if other steps, e.g. a [Cypher path search](/reference/search/cypher-path-subset.md),
+are executed in between.
 
 ## Parameterized Elasticsearch queries
 
@@ -82,6 +164,9 @@ See the [parameterized search example](/reference/search/elasticsearch-query-dsl
 - [Text prefix search](/reference/search/elasticsearch-query-dsl-mixin/text-prefix-search.md)
 - [Wildcard search](/reference/search/elasticsearch-query-dsl-mixin/wildcard-search.md)
 - [Parameterized search](/reference/search/elasticsearch-query-dsl-mixin/parameterized-search.md)
+- [Highlighting](/reference/search/elasticsearch-query-dsl-mixin/highlighting.md)
+- [Sorting](/reference/search/elasticsearch-query-dsl-mixin/sorting.md)
+- [Reverse sorting](/reference/search/elasticsearch-query-dsl-mixin/reverse-sorting.md)
 
 See [writing an Elasticsearch query](/guide/search/writing-an-elasticsearch-query.md) for a walkthrough of building and
 running a custom query against this step, including how to use Kibana's console and how to parameterize queries.
@@ -90,8 +175,13 @@ running a custom query against this step, including how to use Kibana's console 
 
 - Other query languages like ES|QL, PromQL, SQL, EQL and others are not supported.\\
   If there is demand, please open a [feature request ticket on GitHub](https://github.com/ember-nexus/api/issues/new).
-- Aggregations and join-like features are generally not supported - see [security aspects](#security-aspects).
-- Defining a custom sort direction is not yet supported. It is tracked in [GitHub issue #456](https://github.com/ember-nexus/api/issues/456).
+- Aggregations are not supported, as only elements can be returned.
+- Scripts of any kind (\`script\`, \`script_score\`, script fields, script sorts etc.) are rejected.
+- Features which look up data of other documents are rejected: terms lookups (\`terms\` with \`index\`, \`id\` and \`path\`),
+  document references of \`more_like_this\`, pre-indexed shapes (\`indexed_shape\`) and \`percolate\` queries.
+- Joining queries (\`nested\`, \`has_child\`, \`has_parent\`, \`parent_id\`) are rejected. Joins need custom index definitions,
+  which are not supported yet; they will stay unavailable once administrators can define their own indices.
+- \`wrapper\` queries are rejected, as they would hide such features.
 
 ## Security aspects
 
@@ -105,6 +195,16 @@ While this removes support for aggregated properties and direct property lookups
 additional dangerous approaches like the [terms lookup query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-terms-query#query-dsl-terms-lookup)
 and [joins](https://www.elastic.co/docs/reference/query-languages/query-dsl/joining-queries). Note that joins are
 considered to be expensive, and are therefore already disabled in normal Elasticsearch deployments.
+
+The rejected features listed above are detected by their names, on any level of the query, including results of
+expressions. As Elasticsearch's Query DSL has no formal grammar, this is a check of names and not a full validation. A
+side effect is that properties which are named like such a feature (or contain \`script\` as a word, e.g. \`my_script\`) can
+not be used inside queries. The response of a rejected query names the feature and its location.
+
+Elements are returned by this step, and their highlights and sort values are visible, because the user has _search
+access_ to them. Search access implies read access inside of search requests, but not for
+[\`GET /<uuid>\`](/api/get-element.md). Properties which must never be visible, like password hashes and token hashes, are
+not indexed in Elasticsearch in the first place.
 
 As there is no way to manipulate or exfiltrate arbitrary data, this search step **is considered safe** and can therefore
 be executed by any user.
@@ -154,19 +254,23 @@ curl -X POST \\
       "type": "Taxon",
       "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
       "data": {
-        "created": "2025-09-25T18:35:26+00:00",
-        "updated": "2025-09-25T18:35:26+00:00",
+        "created": "2026-11-21T09:46:33+00:00",
         "name": "Gloriosa",
+        "updated": "2026-11-21T09:46:33+00:00",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Colchicaceae/Gloriosa",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Gloriosa_(plant)",
         "description": "Gloriosa is a genus of 12 species in the plant family Colchicaceae, and includes the formerly recogn..."
+      },
+      "metadata": {
+        "score": 4.5426874
       }
     },
     {
       "type": "Plant",
       "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
       "data": {
+        "created": "2026-11-21T09:46:33+00:00",
         "images": [
           {
             "description": "",
@@ -181,26 +285,40 @@ curl -X POST \\
             "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
           }
         ],
-        "created": "2025-09-25T18:35:28+00:00",
-        "updated": "2025-09-25T18:35:28+00:00",
+        "hasFile": true,
         "name": "Flame Lily",
-        "scenario": "general.botanicExample",
+        "updated": "2026-11-21T09:46:33+00:00",
         "scientificName": "G. superba",
+        "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
         "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include fl..."
+      },
+      "file": {
+        "contentLength": 90681,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "72e3e3770db795b2f04f0b5bb0be43e74df70de4faa0bf83a706bbde29e4ea0b"
+        }
+      },
+      "metadata": {
+        "score": 3.9679806
       }
     },
     {
       "type": "Taxon",
       "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
       "data": {
-        "created": "2025-09-25T18:35:26+00:00",
-        "updated": "2025-09-25T18:35:26+00:00",
+        "created": "2026-11-21T09:46:31+00:00",
         "name": "Lilieae",
+        "updated": "2026-11-21T09:46:31+00:00",
         "path": "/Plantae/Tracheophytes/Angiosperms/Monocots/Liliales/Liliaceae/Lilioideae/Lilieae",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Lilieae",
         "description": "The Lilieae are a monophyletic tribe of monocotyledon perennial, herbaceous mainly bulbous flowering..."
+      },
+      "metadata": {
+        "score": 3.7307374
       }
     },
     "... 17 more items omitted (shapes seen: type:Taxon, type:Plant) ..."
@@ -221,7 +339,7 @@ curl -X POST \\
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\\\EventSystem\\\\SearchStep\\\\EventListener\\\\ElasticsearchQueryDslMixinSe...",
-      "start": 1758825391.222043,
+      "start": 1795257792.608348,
       "indices": "*",
       "combinedQuery": {
         "_source": [
@@ -262,8 +380,8 @@ curl -X POST \\
           }
         }
       },
-      "end": 1758825391.252388,
-      "duration": 0.030345
+      "end": 1795257792.62104,
+      "duration": 0.012692
     },
     {
       "input": {
@@ -277,41 +395,41 @@ curl -X POST \\
                   "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 4.5739636
+                    "score": 4.5426874
                   }
                 },
                 {
                   "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.9976888
+                    "score": 3.9679806
                   }
                 },
                 {
                   "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 3.7564187
+                    "score": 3.7307374
                   }
                 },
                 "... 17 more items omitted (shapes seen: type:Taxon, type:Plant) ..."
               ],
               "totalHits": 20,
-              "maxScore": 4.5739636
+              "maxScore": 4.5426874
             }
           ]
         }
       },
       "step-handler": "element-hydration (App\\\\EventSystem\\\\SearchStep\\\\EventListener\\\\ElementHydrationSearchStepEventListener)",
-      "start": 1758825391.25256,
+      "start": 1795257792.621327,
       "accessibleElementIds": [
         "16884ac8-ba7a-4c91-8449-4fdd803644b6",
         "258c0dfe-b1d8-4839-beed-d00d1b544a96",
         "1feedd9f-0c12-490c-8461-b12ff7447ac8",
         "... 17 more items omitted (shapes seen: string) ..."
       ],
-      "end": 1758825391.322722,
-      "duration": 0.070162
+      "end": 1795257792.712474,
+      "duration": 0.091147
     }
   ]
 }
@@ -327,7 +445,7 @@ Access-Control-Expose-Headers: ETag, Location
 Allow: OPTIONS, POST
 Cache-Control: no-cache, private
 Content-Type: application/json; charset=utf-8
-Date: Thu, 11 Sep 2025 20:23:41 GMT
+Date: Sat, 21 Nov 2026 10:43:12 GMT
 Transfer-Encoding: chunked
 X-Powered-By: Ember Nexus API
 \`\`\`

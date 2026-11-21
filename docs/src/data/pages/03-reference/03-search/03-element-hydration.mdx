@@ -28,6 +28,33 @@ element ids (string).
 
 List of hydrated elements.
 
+### Metadata
+
+Steps can add metadata to elements, e.g. the [Elasticsearch step](/reference/search/elasticsearch-query-dsl-mixin) adds
+the score of its elements. The hydration returns the metadata of all previous steps as `metadata`, after the native
+properties of the element like `data` and `file`. It is associated with the element id, so it is also returned for
+elements whose ids passed through steps which do not know about it, e.g. a Cypher path search.
+
+`metadata` is a single object: the metadata of all previous steps is merged in the order of the steps, so keys of later
+steps overwrite keys of earlier steps. The metadata of individual steps stays available to later steps in their
+`stepResults`, e.g. in expressions. Elements without metadata have no `metadata` property. As with all elements, only
+elements which the user has access to are returned, including their metadata.
+
+The following search runs an Elasticsearch step followed by the hydration. Each element contains the score of the
+Elasticsearch step in `metadata.score`:
+
+import metadataQuery from './03-element-hydration/03-metadata/query.sh?raw';
+import metadataResultBody from './03-element-hydration/03-metadata/result.json';
+import metadataResultHeaders from './03-element-hydration/03-metadata/header.txt?raw';
+
+<Code code={metadataQuery} lang="bash" mark="element-hydration" />
+
+<SearchResponseCard
+    responseBody={metadataResultBody}
+    responseHeaders={metadataResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
 ## Examples
 
 - [Explicit element ids](/reference/search/element-hydration/explicit-element-ids)

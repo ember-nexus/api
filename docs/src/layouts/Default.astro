@@ -54,7 +54,24 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).href;
     <meta property="og:image:height" content="630" />
     <!-- Suppress transitions immediately so panels don't animate into position on first paint. -->
     <script is:inline>document.documentElement.classList.add('no-transitions');</script>
-    <script defer src="https://analytics.webserver.ember-nexus.dev/script.js" data-website-id="dcc00c41-5a1a-48db-8e4f-59ce8a7fada7"></script>
+    <!--
+        Optional analytics: loaded after the page finished loading, and a failing request (e.g. the analytics server being
+        offline) is ignored. Set PUBLIC_DISABLE_ANALYTICS=true at build time to omit it completely.
+    -->
+    {import.meta.env.PUBLIC_DISABLE_ANALYTICS !== 'true' && (
+        <script is:inline>
+            window.addEventListener('load', function () {
+                try {
+                    var analytics = document.createElement('script');
+                    analytics.async = true;
+                    analytics.src = 'https://analytics.webserver.ember-nexus.dev/script.js';
+                    analytics.setAttribute('data-website-id', 'dcc00c41-5a1a-48db-8e4f-59ce8a7fada7');
+                    analytics.onerror = function () { analytics.remove(); };
+                    document.head.appendChild(analytics);
+                } catch (e) { /* analytics is optional */ }
+            });
+        </script>
+    )}
 </head>
 
 <body class="min-h-screen bg-white text-gray-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">

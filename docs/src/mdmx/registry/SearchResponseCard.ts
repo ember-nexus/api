@@ -5,6 +5,7 @@ import { truncateJson } from "../truncateJson.ts";
 interface Props {
   responseBody: object;
   responseHeaders: string;
+  highlightField?: string;
 }
 
 /**

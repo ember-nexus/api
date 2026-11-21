@@ -170,6 +170,8 @@ class PostSearchController extends AbstractController
         $steps = $this->getStepsFromBody($body);
 
         $stepResults = [];
+        /** @var array<string, array<int, array<string, mixed>>> $elementMetadata */
+        $elementMetadata = [];
         $lastStepResults = [];
         $debugData = [];
         foreach ($steps as $index => $step) {
@@ -186,12 +188,17 @@ class PostSearchController extends AbstractController
             $event = new SearchStepEvent(
                 $type,
                 $query,
-                $parameters
+                $parameters,
+                $elementMetadata
             );
             try {
                 $this->eventDispatcher->dispatch($event);
             } catch (Throwable $t) {
                 throw $this->searchStepFailureService->createException($index, $event, $debugData, $t);
+            }
+
+            foreach ($event->getElementMetadata() as $elementId => $metadata) {
+                $elementMetadata[$elementId][$index] = $metadata;
             }
 
             $lastStepResults = $event->getResults();

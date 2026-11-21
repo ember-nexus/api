@@ -59,9 +59,10 @@ class SearchErrorTest extends BaseRequestTestCase
 
     public function testNestedQueryKeyInElasticsearchQueryIsExplained(): void
     {
+        // a single `query` property is the extended query definition, wrapping the query twice is a mistake
         $response = $this->runFailingStep(
             'elasticsearch-query-dsl-mixin',
-            ['query' => ['match' => ['description' => ['query' => 'lily']]]]
+            ['query' => ['query' => ['match' => ['description' => ['query' => 'lily']]]]]
         );
         $this->assertIsProblemResponse($response, 400);
         $body = $this->getBody($response);
@@ -78,6 +79,10 @@ class SearchErrorTest extends BaseRequestTestCase
         $this->assertSame(
             ['query' => ['match' => ['description' => ['query' => 'lily']]]],
             $failedStep['debug']['combinedQuery']['query']['bool']['must'][0]
+        );
+        $this->assertSame(
+            ['query' => ['match' => ['description' => ['query' => 'lily']]]],
+            $failedStep['debug']['input']['query']['query']
         );
     }
 

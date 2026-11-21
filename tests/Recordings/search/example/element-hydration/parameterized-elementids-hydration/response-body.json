@@ -5,7 +5,7 @@
       "type": "Plant",
       "id": "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "White trillium (Trillium grandiflorum) blooming in Backus Woods.",
@@ -28,7 +28,7 @@
         ],
         "hasFile": true,
         "name": "Trillium",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "T. grandiflorum",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Trillium_grandiflorum",
@@ -47,7 +47,7 @@
       "type": "Plant",
       "id": "4a335e0b-e6bf-4c64-8c28-2a17bd6f0dec",
       "data": {
-        "created": "2026-09-24T19:04:03+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "Hibiscus heterophyllus cultivated plant growing in Thirlmere",
@@ -64,7 +64,7 @@
         ],
         "hasFile": true,
         "name": "Hibiscus",
-        "updated": "2026-09-24T19:04:03+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "H. heterophyllus",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Hibiscus_heterophyllus",
@@ -83,7 +83,7 @@
       "type": "Plant",
       "id": "b133d1d5-a24c-4409-955f-99b53b3f2a73",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "Arabian jasmin 'Grand Duke of Tuscany'",
@@ -94,7 +94,7 @@
         ],
         "hasFile": true,
         "name": "Jasmine",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "J. sambac",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Jasminum_sambac",
@@ -140,14 +140,14 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1790276706.945658,
+      "start": 1795253563.81949,
       "accessibleElementIds": [
         "70965ab5-bc3e-4bbe-aacf-1b7e12b76110",
         "4a335e0b-e6bf-4c64-8c28-2a17bd6f0dec",
         "b133d1d5-a24c-4409-955f-99b53b3f2a73"
       ],
-      "end": 1790276707.040742,
-      "duration": 0.095084
+      "end": 1795253563.927869,
+      "duration": 0.108379
     }
   ]
 }

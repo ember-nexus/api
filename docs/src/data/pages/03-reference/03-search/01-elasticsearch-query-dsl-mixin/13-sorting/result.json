@@ -1,0 +1,360 @@
+{
+  "type": "_SearchResultResponse",
+  "results": [
+    {
+      "type": "Plant",
+      "id": "c3b3dcf9-4947-43b3-b877-7a337eea5fda",
+      "data": {
+        "created": "2026-11-21T09:46:33+00:00",
+        "images": [
+          {
+            "description": "Narcissus pseudonarcissus",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Narcissus_pseudonarcissus_flower_300303.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Narcissus_pseudonarcissus_flower_300303.jpg/960px-Narcissus_pseudonarcissus_flower_300303.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Narcissus_pseudonarcissus_flower_300303.jpg"
+          }
+        ],
+        "hasFile": true,
+        "name": "Daffodil",
+        "updated": "2026-11-21T09:46:33+00:00",
+        "scientificName": "N. pseudonarcissus",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Narcissus_pseudonarcissus",
+        "description": "Narcissus pseudonarcissus, commonly named the wild daffodil or Lent lily (Welsh: Cennin Pedr), is a perennial flowering plant.\n\nThis species has pale yellow tepals, with a darker central trumpet. The long, narrow leaves are slightly greyish green in colour and rise from the base of the stem. The plant grows from a bulb. The flowers produce seeds which, when germinated, take five to seven years to produce a flowering plant. (Sexual seed reproduction mixes the traits of both parent flowers, so if garden hybrid cultivars are planted close to wild populations of Narcissus pseudonarcissus, there is a danger that the new seedlings, having hybrid vigour, could out-compete the wild plants.)"
+      },
+      "file": {
+        "contentLength": 62307,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "ecda5f79c0714acbe609146166abbf3872ba51f459debd5e20c8b61bb932ed37"
+        }
+      },
+      "metadata": {
+        "score": 1.8058954,
+        "sort": [
+          "Daffodil"
+        ]
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "de004523-5165-4f10-872b-92eb9637a5d1",
+      "data": {
+        "created": "2026-11-21T09:46:33+00:00",
+        "images": [
+          {
+            "description": "Adenium obesum (desert rose), macro of a flower, side view showing calyx, corolla and styles. Focus stack of 7 images. Uthandi, Chennai",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg/960px-Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg"
+          },
+          {
+            "description": "Ra Chi Nee Pan Dok's mother plant",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/7/7e/RCN_Mother.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/7e/RCN_Mother.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:RCN_Mother.jpg"
+          }
+        ],
+        "hasFile": true,
+        "name": "Desert Rose",
+        "updated": "2026-11-21T09:46:33+00:00",
+        "scientificName": "A. obesum",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Adenium_obesum",
+        "description": "Adenium obesum, more commonly known as a desert rose, is a poisonous species of flowering plant belonging to the tribe Nerieae of the subfamily Apocynoideae of the dogbane family, Apocynaceae. It is native to the Sahel regions south of the Sahara (from Mauritania and Senegal to Sudan), tropical and subtropical eastern and southern Africa, as well as the Arabian Peninsula. Other names for the flower include Sabi star, kudu, mock azalea, and impala lily. Adenium obesum is a popular houseplant and bonsai in temperate regions."
+      },
+      "file": {
+        "contentLength": 58116,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "858fe2bee255dd252d51d161d4f183a93c2da0d2d6662b20870cbbf3eec81acb"
+        }
+      },
+      "metadata": {
+        "score": 1.9826578,
+        "sort": [
+          "Desert Rose"
+        ]
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+      "data": {
+        "created": "2026-11-21T09:46:33+00:00",
+        "images": [
+          {
+            "description": "",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Flame_lily.png",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flame_lily.png/500px-Flame_lily.png",
+            "link": "https://en.wikipedia.org/wiki/File:Flame_lily.png"
+          },
+          {
+            "description": "Gloriosa superba at Mabvuku, Harare, Zimbabwe",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Gloriosa_superba_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gloriosa_superba_1.jpg/960px-Gloriosa_superba_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Gloriosa_superba_1.jpg"
+          }
+        ],
+        "hasFile": true,
+        "name": "Flame Lily",
+        "updated": "2026-11-21T09:46:33+00:00",
+        "scientificName": "G. superba",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
+        "description": "Gloriosa superba is a species of flowering plant in the family Colchicaceae. Common names include flame lily, climbing lily, creeping lily, glory lily, gloriosa lily, tiger claw, and fire lily."
+      },
+      "file": {
+        "contentLength": 90681,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "72e3e3770db795b2f04f0b5bb0be43e74df70de4faa0bf83a706bbde29e4ea0b"
+        }
+      },
+      "metadata": {
+        "score": 3.9679806,
+        "sort": [
+          "Flame Lily"
+        ]
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+      "data": {
+        "created": "2026-11-21T09:46:33+00:00",
+        "images": [
+          {
+            "description": "Lilium candidum, Israel",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/ShoshanTzachor-2-wiki-Zachi-Evenor.jpg/500px-ShoshanTzachor-2-wiki-Zachi-Evenor.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:ShoshanTzachor-2-wiki-Zachi-Evenor.jpg"
+          },
+          {
+            "description": "Photo of Lilium candidum at VanDusen Botanical Garden",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/30/Lilium_candidum_1.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Lilium_candidum_1.jpg/960px-Lilium_candidum_1.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Lilium_candidum_1.jpg"
+          }
+        ],
+        "hasFile": true,
+        "name": "Lily",
+        "updated": "2026-11-21T09:46:33+00:00",
+        "scientificName": "L. candidum",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Lilium_candidum",
+        "description": "Lilium candidum, the Madonna lily or white lily, is a plant in the true lily family. It is native to the Balkans and Middle East, and naturalized in other parts of Europe, including France, Italy, and Ukraine, and in North Africa, the Canary Islands, Mexico, and other regions. It has been cultivated since antiquity, for at least 3,000 years, and has great symbolic value since then for many cultures. It is susceptible to several virus diseases common to lilies, and especially to Botrytis fungus. One technique to avoid problems with viruses is to grow plants from seed instead of bulblets."
+      },
+      "file": {
+        "contentLength": 115168,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "ee066b93ae72c719f863a428f03c86ecd28e52818528eacf4d4e32acb4b4b37c"
+        }
+      },
+      "metadata": {
+        "score": 3.027005,
+        "sort": [
+          "Lily"
+        ]
+      }
+    },
+    {
+      "type": "Plant",
+      "id": "3283fd3d-8083-4170-882a-41b1cd152c55",
+      "data": {
+        "created": "2026-11-21T09:46:33+00:00",
+        "images": [
+          {
+            "description": "Flower of Nelumbo nucifera, bean of India.",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/e/ed/Sacred_lotus_Nelumbo_nucifera.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Sacred_lotus_Nelumbo_nucifera.jpg/960px-Sacred_lotus_Nelumbo_nucifera.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Sacred_lotus_Nelumbo_nucifera.jpg"
+          },
+          {
+            "description": "Nelumbo nucifera",
+            "imageLinkFull": "https://upload.wikimedia.org/wikipedia/commons/3/34/Nelumbo_nucifera1romainguy.jpg",
+            "imageLinkThumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Nelumbo_nucifera1romainguy.jpg/500px-Nelumbo_nucifera1romainguy.jpg",
+            "link": "https://en.wikipedia.org/wiki/File:Nelumbo_nucifera1romainguy.jpg"
+          }
+        ],
+        "hasFile": true,
+        "name": "Lotus",
+        "updated": "2026-11-21T09:46:33+00:00",
+        "scientificName": "N. nucifera",
+        "scenario": "general.botanicExample",
+        "link": "https://en.wikipedia.org/wiki/Nelumbo_nucifera",
+        "description": "Nelumbo nucifera, also known as Padma (Sanskrit: \\u092a\\u0926\\u094d\\u092e, romanized: Padm\\u0101, lit.\\u2009'Lotus') or Kamala (Sanskrit: \\u0915\\u092e\\u0932, lit. 'Lotus'), sacred lotus, pink lotus, Indian lotus, or simply lotus, is one of two extant species of aquatic plant in the family Nelumbonaceae. It is sometimes colloquially called a water lily, though this more often refers to members of the family Nymphaeaceae. The lotus belongs in the order Proteales."
+      },
+      "file": {
+        "contentLength": 63295,
+        "extension": "jpg",
+        "mimeType": "image/jpeg",
+        "hash": {
+          "sha256": "a46657ef9ece1a7e0939ee5edcc4358f23a3b8b7871c6eba4ad2ce0f30cf4e9f"
+        }
+      },
+      "metadata": {
+        "score": 2.1064672,
+        "sort": [
+          "Lotus"
+        ]
+      }
+    }
+  ],
+  "debug": [
+    {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "query": {
+            "match": {
+              "description": "lily"
+            }
+          },
+          "sort": [
+            {
+              "name.keyword": "asc"
+            }
+          ]
+        },
+        "parameters": {
+          "nodeTypes": [
+            "Plant"
+          ],
+          "pageSize": 5,
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1795257793.978278,
+      "indices": "node_plant",
+      "combinedQuery": {
+        "_source": [
+          "_id"
+        ],
+        "from": 0,
+        "size": 5,
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "match": {
+                  "description": "lily"
+                }
+              },
+              {
+                "bool": {
+                  "should": [
+                    {
+                      "terms": {
+                        "_groupsWithSearchAccess.keyword": []
+                      }
+                    },
+                    {
+                      "term": {
+                        "_usersWithSearchAccess.keyword": {
+                          "value": "7baba8b7-a6bb-4184-9a9a-925a4d2736b0"
+                        }
+                      }
+                    }
+                  ],
+                  "minimum_should_match": 1
+                }
+              }
+            ]
+          }
+        },
+        "sort": [
+          {
+            "name.keyword": "asc"
+          }
+        ],
+        "track_scores": true
+      },
+      "end": 1795257793.989119,
+      "duration": 0.010841
+    },
+    {
+      "input": {
+        "type": "element-hydration",
+        "query": null,
+        "parameters": {
+          "stepResults": [
+            {
+              "elements": [
+                {
+                  "id": "c3b3dcf9-4947-43b3-b877-7a337eea5fda",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 1.8058954,
+                    "sort": [
+                      "Daffodil"
+                    ]
+                  }
+                },
+                {
+                  "id": "de004523-5165-4f10-872b-92eb9637a5d1",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 1.9826578,
+                    "sort": [
+                      "Desert Rose"
+                    ]
+                  }
+                },
+                {
+                  "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.9679806,
+                    "sort": [
+                      "Flame Lily"
+                    ]
+                  }
+                },
+                {
+                  "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 3.027005,
+                    "sort": [
+                      "Lily"
+                    ]
+                  }
+                },
+                {
+                  "id": "3283fd3d-8083-4170-882a-41b1cd152c55",
+                  "type": "Plant",
+                  "metadata": {
+                    "score": 2.1064672,
+                    "sort": [
+                      "Lotus"
+                    ]
+                  }
+                }
+              ],
+              "totalHits": 8,
+              "maxScore": 3.9679806
+            }
+          ]
+        }
+      },
+      "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
+      "start": 1795257793.98941,
+      "accessibleElementIds": [
+        "c3b3dcf9-4947-43b3-b877-7a337eea5fda",
+        "de004523-5165-4f10-872b-92eb9637a5d1",
+        "258c0dfe-b1d8-4839-beed-d00d1b544a96",
+        "23508e6c-632a-496d-9bd6-8c62a03216af",
+        "3283fd3d-8083-4170-882a-41b1cd152c55"
+      ],
+      "end": 1795257794.016952,
+      "duration": 0.027542
+    }
+  ]
+}

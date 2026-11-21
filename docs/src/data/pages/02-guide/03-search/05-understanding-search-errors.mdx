@@ -69,6 +69,63 @@ and the original error with the `instance` of the response can be found in the s
 
 If the data passed through from a database exceeds 16 KiB, it is replaced by a truncated excerpt.
 
+## Queries which are rejected by Ember Nexus
+
+Some queries are rejected by Ember Nexus before they reach the database, e.g. Elasticsearch queries which use
+[unsupported features](/reference/search/elasticsearch-query-dsl-mixin#unsupported-elasticsearch-features) like scripts,
+or highlights of internal fields. The response is also a `400` with `failedStep` and `debug`, but without `source`,
+`code` and `diagnostics`. The `detail` names the problem and its location inside of the query, e.g.:
+
+- `The Elasticsearch feature 'script_score' at 'query.script_score' is not supported: scripts are not supported.`
+- `The field name '_id' at 'query.highlight.fields._id' is not allowed: internal fields (starting with an underscore) as well as field names starting with a wildcard (* or ?) are not supported.`
+
+For example, the following request uses a script, which is never supported:
+
+```json
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "query": {
+          "script_score": {
+            "query": {
+              "match": {
+                "description": "lily"
+              }
+            },
+            "script": {
+              "source": "_score * 2"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+The query is rejected before it reaches Elasticsearch (shortened):
+
+```json
+{
+  "type": "https://api.example.com/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "instance": "urn:uuid:061deb06-355b-4e61-9679-0ec5eecd51ce",
+  "detail": "The Elasticsearch feature 'script_score' at 'query.query.script_score' is not supported: scripts are not supported.",
+  "debug": [],
+  "failedStep": {
+    "index": 0,
+    "type": "elasticsearch-query-dsl-mixin",
+    "debug": {
+      "...": "..."
+    }
+  }
+}
+```
+
 ## Disabling explanations
 
 Explaining failed searches can be disabled with the configuration option `search.explainFailures` (default `true`, see
@@ -83,7 +140,9 @@ server's log.
 
 ## Example
 
-The following request contains an Elasticsearch query which wraps the actual query in another `query` property:
+The following request contains an Elasticsearch query which wraps the actual query in two `query` properties. The
+first one is the long form of the [Elasticsearch query](/reference/search/elasticsearch-query-dsl-mixin#step-query), the
+second one is unknown to Elasticsearch:
 
 ```json
 {
@@ -93,9 +152,11 @@ The following request contains an Elasticsearch query which wraps the actual que
       "type": "elasticsearch-query-dsl-mixin",
       "query": {
         "query": {
-          "match": {
-            "description": {
-              "query": "lily"
+          "query": {
+            "match": {
+              "description": {
+                "query": "lily"
+              }
             }
           }
         }

@@ -1,0 +1,22 @@
+---
+type: example
+title: Reverse sorting
+---
+import searchQuery from './14-reverse-sorting/query.sh?raw';
+import searchResultBody from './14-reverse-sorting/result.json';
+import searchResultHeaders from './14-reverse-sorting/header.txt?raw';
+
+This example is the [sorting example](/reference/search/elasticsearch-query-dsl-mixin/sorting) in descending order: the
+full text search for "lily" is sorted by the name of the plants, but with `"order": "desc"`, so the results start with
+the last name in alphabetical order. The search is restricted to plants, and only the first three results are returned.
+
+<Code code={searchQuery} lang="bash" mark="sort" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+The short notation `{"name.keyword": "desc"}` and the long notation `{"name.keyword": {"order": "desc"}}` are
+equivalent. `metadata.sort` contains the values the results were sorted by.

@@ -5,7 +5,7 @@
       "type": "Plant",
       "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
       "data": {
-        "created": "2026-09-24T19:04:03+00:00",
+        "created": "2026-11-21T09:46:33+00:00",
         "images": [
           {
             "description": "Mertensia virginica Virginia Bluebell seen in Brooklyn Botanic Garden",
@@ -22,7 +22,7 @@
         ],
         "hasFile": true,
         "name": "Bluebell",
-        "updated": "2026-09-24T19:04:03+00:00",
+        "updated": "2026-11-21T09:46:33+00:00",
         "scientificName": "M. virginica",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Mertensia_virginica",
@@ -35,6 +35,9 @@
         "hash": {
           "sha256": "527fa0ca5006ae3c888c06c3e208db64aa0214b31ce9f26a1ccd5fa7cdf91c3b"
         }
+      },
+      "metadata": {
+        "score": 3.7318485
       }
     }
   ],
@@ -54,7 +57,7 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1790276705.894463,
+      "start": 1795257786.379564,
       "indices": "*",
       "combinedQuery": {
         "_source": [
@@ -95,8 +98,8 @@
           }
         }
       },
-      "end": 1790276705.906694,
-      "duration": 0.012231
+      "end": 1795257786.391693,
+      "duration": 0.012129
     },
     {
       "input": {
@@ -110,23 +113,23 @@
                   "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
                   "type": "Plant",
                   "metadata": {
-                    "score": 3.9060724
+                    "score": 3.7318485
                   }
                 }
               ],
               "totalHits": 1,
-              "maxScore": 3.9060724
+              "maxScore": 3.7318485
             }
           ]
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1790276705.906997,
+      "start": 1795257786.391978,
       "accessibleElementIds": [
         "83b35321-4a91-4e9f-a49b-66d718c32ba7"
       ],
-      "end": 1790276705.9172,
-      "duration": 0.010203
+      "end": 1795257786.401675,
+      "duration": 0.009697
     }
   ]
 }

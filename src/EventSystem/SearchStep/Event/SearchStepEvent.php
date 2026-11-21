@@ -24,15 +24,21 @@ class SearchStepEvent implements EventInterface
      * @var array<string, mixed>|null
      */
     private ?array $resolvedQuery = null;
+    /**
+     * @var array<string, array<string, mixed>>
+     */
+    private array $elementMetadata = [];
 
     /**
-     * @param string|array<string, mixed>|null $query
-     * @param array<string, mixed>             $parameters
+     * @param string|array<string, mixed>|null                $query
+     * @param array<string, mixed>                            $parameters
+     * @param array<string, array<int, array<string, mixed>>> $previousElementMetadata metadata of elements which was added by previous steps: element id => step index => metadata
      */
     public function __construct(
         private SearchStepType $type,
         private string|array|null $query,
         private array $parameters,
+        private array $previousElementMetadata = [],
     ) {
         $this->addDebugData(
             'input',
@@ -115,6 +121,39 @@ class SearchStepEvent implements EventInterface
     public function setResolvedQuery(array $resolvedQuery): self
     {
         $this->resolvedQuery = $resolvedQuery;
+
+        return $this;
+    }
+
+    /**
+     * Metadata of elements which got added by previous steps, e.g. the Elasticsearch score or highlights. Indexed by
+     * element id and the index of the step which added the metadata, so that the information survives steps which
+     * do not know about it.
+     *
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    public function getPreviousElementMetadata(): array
+    {
+        return $this->previousElementMetadata;
+    }
+
+    /**
+     * Metadata which this step adds to elements, indexed by element id. The search controller makes it available to
+     * all later steps, element hydration returns it next to the elements.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function getElementMetadata(): array
+    {
+        return $this->elementMetadata;
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $elementMetadata
+     */
+    public function setElementMetadata(array $elementMetadata): self
+    {
+        $this->elementMetadata = $elementMetadata;
 
         return $this;
     }

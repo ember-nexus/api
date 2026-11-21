@@ -14,6 +14,8 @@ use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ExpressionService;
 use App\Service\GraphStructureService;
+use App\Service\Search\ElasticsearchForbiddenFeatureCheckService;
+use App\Service\Search\ElasticsearchQueryDefinitionService;
 use App\Type\SearchStepType;
 use Beste\Psr\Log\TestLogger;
 use Elastic\Elasticsearch\Client;
@@ -45,6 +47,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         ?ElasticEntityManager $elasticEntityManager = null,
         ?ExpressionService $expressionService = null,
         ?GraphStructureService $graphStructureService = null,
+        ?ElasticsearchQueryDefinitionService $elasticsearchQueryDefinitionService = null,
         ?Client400BadContentExceptionFactory $client400BadContentExceptionFactory = null,
         ?Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory = null,
     ): ElasticsearchQueryDslMixinSearchStepEventListener {
@@ -54,6 +57,10 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         $expressionService = $expressionService ?? $this->prophesize(ExpressionService::class)->reveal();
         $graphStructureService = $graphStructureService ?? $this->prophesize(GraphStructureService::class)->reveal();
         $client400BadContentExceptionFactory = $client400BadContentExceptionFactory ?? $this->prophesize(Client400BadContentExceptionFactory::class)->reveal();
+        $elasticsearchQueryDefinitionService = $elasticsearchQueryDefinitionService ?? new ElasticsearchQueryDefinitionService(
+            new ElasticsearchForbiddenFeatureCheckService($client400BadContentExceptionFactory),
+            $client400BadContentExceptionFactory
+        );
         $server500InternalServerErrorExceptionFactory = $server500InternalServerErrorExceptionFactory ?? $this->prophesize(Server500InternalServerErrorExceptionFactory::class)->reveal();
 
         return new ElasticsearchQueryDslMixinSearchStepEventListener(
@@ -62,6 +69,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             $elasticEntityManager,
             $expressionService,
             $graphStructureService,
+            $elasticsearchQueryDefinitionService,
             $client400BadContentExceptionFactory,
             $server500InternalServerErrorExceptionFactory
         );
@@ -297,6 +305,66 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
         $this->assertSame(2.1, $result[0]['metadata']['score']);
         $this->assertSame(1.7, $result[1]['metadata']['score']);
         $this->assertSame(0.3, $result[2]['metadata']['score']);
+    }
+
+    public function testFormatElementResultsAddsHighlightAndSortToMetadataOnlyWhenReturnedByElasticsearch(): void
+    {
+        $response = $this->prophesize(Elasticsearch::class);
+        $response
+            ->asArray()
+            ->shouldBeCalledOnce()
+            ->willReturn([
+                'hits' => [
+                    'hits' => [
+                        [
+                            '_id' => '55f1e41a-a5e1-4efd-a93c-fb115e76c68b',
+                            '_index' => 'node_plant',
+                            '_score' => 2.1,
+                            'highlight' => ['name' => ['Flame <em>Lily</em>']],
+                            'sort' => ['Flame Lily'],
+                        ],
+                        [
+                            '_id' => '0c6cd0ce-07ca-4326-8f82-2d0834d34de5',
+                            '_index' => 'node_plant',
+                            '_score' => 1.7,
+                        ],
+                    ],
+                ],
+            ]);
+        $graphStructureService = $this->prophesize(GraphStructureService::class);
+        $graphStructureService->getTypeFromElasticIndex('node_plant')->willReturn('Plant');
+
+        $listener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener(
+            graphStructureService: $graphStructureService->reveal()
+        );
+        $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'formatElementResults');
+
+        $result = $method->invokeArgs($listener, [$response->reveal()]);
+
+        $this->assertSame(
+            ['score' => 2.1, 'highlight' => ['name' => ['Flame <em>Lily</em>']], 'sort' => ['Flame Lily']],
+            $result[0]['metadata']
+        );
+        $this->assertSame(['score' => 1.7], $result[1]['metadata']);
+    }
+
+    public function testGetElementMetadataIsIndexedByElementId(): void
+    {
+        $listener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener();
+        $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'getElementMetadata');
+
+        $result = $method->invokeArgs($listener, [[
+            ['id' => Uuid::fromString('55f1e41a-a5e1-4efd-a93c-fb115e76c68b'), 'type' => 'Plant', 'metadata' => ['score' => 2.1, 'highlight' => ['name' => ['x']]]],
+            ['id' => Uuid::fromString('0c6cd0ce-07ca-4326-8f82-2d0834d34de5'), 'type' => 'Plant', 'metadata' => ['score' => 1.7]],
+        ]]);
+
+        $this->assertSame(
+            [
+                '55f1e41a-a5e1-4efd-a93c-fb115e76c68b' => ['score' => 2.1, 'highlight' => ['name' => ['x']]],
+                '0c6cd0ce-07ca-4326-8f82-2d0834d34de5' => ['score' => 1.7],
+            ],
+            $result
+        );
     }
 
     public function testGetQueryFromEventReturnsQueryOfTypeArray(): void
@@ -732,6 +800,114 @@ class ElasticsearchQueryDslMixinSearchStepEventListenerTest extends TestCase
             ],
             $result
         );
+    }
+
+    /**
+     * @param array<string, mixed> $query
+     *
+     * @return array<string, mixed>
+     */
+    private function buildCombinedQueryFor(array $query): array
+    {
+        $userId = Uuid::fromString('a743f578-518d-4fdb-855d-28b49e48d671');
+        $authProvider = $this->prophesize(AuthProvider::class);
+        $authProvider->getUserId()->willReturn($userId);
+        $accessChecker = $this->prophesize(AccessChecker::class);
+        $accessChecker->getUsersGroups(Argument::is($userId))->willReturn([]);
+
+        $listener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener(
+            authProvider: $authProvider->reveal(),
+            accessChecker: $accessChecker->reveal()
+        );
+        $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'buildCombinedQuery');
+        $event = new SearchStepEvent(SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN, $query, []);
+
+        /** @var array<string, mixed> $result */
+        $result = $method->invokeArgs($listener, [$event]);
+        $this->lastEvent = $event;
+
+        return $result;
+    }
+
+    private ?SearchStepEvent $lastEvent = null;
+
+    public function testBuildCombinedQueryWithShorthandQueryHasNoHighlightAndNoSort(): void
+    {
+        $result = $this->buildCombinedQueryFor(['match' => ['name' => 'lily']]);
+
+        $this->assertSame(['match' => ['name' => 'lily']], $result['query']['bool']['must'][0]);
+        $this->assertArrayNotHasKey('highlight', $result);
+        $this->assertArrayNotHasKey('sort', $result);
+        $this->assertArrayNotHasKey('track_scores', $result);
+    }
+
+    public function testBuildCombinedQueryWithExtendedQueryUsesTheInnerQueryAndResolvesItForDiagnostics(): void
+    {
+        $result = $this->buildCombinedQueryFor(['query' => ['match' => ['name' => 'lily']]]);
+
+        $this->assertSame(['match' => ['name' => 'lily']], $result['query']['bool']['must'][0]);
+        $this->assertSame(['match' => ['name' => 'lily']], $this->lastEvent?->getResolvedQuery());
+    }
+
+    public function testBuildCombinedQueryAddsHighlight(): void
+    {
+        $result = $this->buildCombinedQueryFor([
+            'query' => ['match' => ['name' => 'lily']],
+            'highlight' => ['fields' => ['name' => []]],
+        ]);
+
+        $this->assertArrayHasKey('highlight', $result);
+        $this->assertSame(['name'], array_keys($result['highlight']['fields']));
+        $this->assertArrayNotHasKey('sort', $result);
+        $this->assertArrayNotHasKey('track_scores', $result);
+        // access restrictions stay in place
+        $this->assertCount(2, $result['query']['bool']['must']);
+        $this->assertSame(['_id'], $result['_source']);
+    }
+
+    public function testBuildCombinedQueryAddsSortAndTracksScores(): void
+    {
+        $result = $this->buildCombinedQueryFor([
+            'query' => ['match' => ['name' => 'lily']],
+            'sort' => [['name.keyword' => 'asc']],
+        ]);
+
+        $this->assertSame([['name.keyword' => 'asc']], $result['sort']);
+        $this->assertTrue($result['track_scores']);
+        $this->assertArrayNotHasKey('highlight', $result);
+    }
+
+    public function testBuildCombinedQueryResolvesExpressionsBeforeValidatingThem(): void
+    {
+        $expressionService = $this->prophesize(ExpressionService::class);
+        $expressionService
+            ->runExpression('someExpression', Argument::any())
+            ->willReturn(['script' => ['source' => 'true']]);
+        $urlGenerator = $this->createStub(UrlGeneratorInterface::class);
+        $urlGenerator->method('generate')->willReturn('https://mock.dev/error');
+        $factory = new Client400BadContentExceptionFactory($urlGenerator);
+
+        $userId = Uuid::fromString('a743f578-518d-4fdb-855d-28b49e48d671');
+        $authProvider = $this->prophesize(AuthProvider::class);
+        $authProvider->getUserId()->willReturn($userId);
+        $accessChecker = $this->prophesize(AccessChecker::class);
+        $accessChecker->getUsersGroups(Argument::is($userId))->willReturn([]);
+
+        $listener = $this->buildElasticsearchQueryDslMixinSearchStepEventListener(
+            authProvider: $authProvider->reveal(),
+            accessChecker: $accessChecker->reveal(),
+            expressionService: $expressionService->reveal(),
+            client400BadContentExceptionFactory: $factory
+        );
+        $method = new ReflectionMethod(ElasticsearchQueryDslMixinSearchStepEventListener::class, 'buildCombinedQuery');
+        $event = new SearchStepEvent(SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN, ['bool' => ['filter' => '{{someExpression}}']], []);
+
+        try {
+            $method->invokeArgs($listener, [$event]);
+            $this->fail('Expected the script which was returned by the expression to be rejected.');
+        } catch (Client400BadContentException $exception) {
+            $this->assertStringContainsString('scripts are not supported', $exception->getDetail());
+        }
     }
 
     public function testOnSearchStepEventReturnsEarlyWhenEventIsOfWrongType(): void

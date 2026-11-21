@@ -5,7 +5,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- The Elasticsearch search step supports a long query definition: an object with the property `query` (the
+  Elasticsearch query, same as the short form which is still supported) and the optional properties `highlight`
+  (Elasticsearch's highlight options) and `sort` (Elasticsearch's sort definition, closes #456), closes #412. Highlights
+  of internal fields (starting with `_`) and of fields starting with a wildcard (`*`, `?`) are rejected. Highlight queries
+  are checked like the main query. Sorting by internal fields is rejected as well. The score of elements is still calculated if
+  results are sorted by something else.
+- Search steps can add metadata to elements. The Elasticsearch step adds `score`, `highlight` and `sort`; the element
+  hydration step returns the metadata of all previous steps as `metadata` after the native properties (`data`, `file`) of each element, the
+  metadata of all steps is merged into one object, later steps overwrite keys of earlier steps. The metadata is associated with the element id, so it also survives steps which do
+  not know about it, like Cypher path searches.
+- Elasticsearch queries which could read other documents or execute code are rejected with a `400`: scripts of any kind,
+  terms lookups, document references of `more_like_this`, `indexed_shape`, `percolate`, `wrapper` queries and joining
+  queries (`nested`, `has_child`, `has_parent`, `parent_id`). The check also applies to results of expressions.
+
 ### Changed
+- The recorded Elasticsearch parse error example now wraps the query twice, as a single `query` property is the long
+  query definition now. Requests which wrapped their query in a `query` property before, and received an error, are now
+  valid requests.
 - Failed search steps are now explained instead of resulting in a generic server error (#453). The problem JSON contains
   the debug data of the previous steps (`debug`) and of the failed step (`failedStep`); for Elasticsearch, Neo4j and
   expr-lang failures the allowlisted data of the database is scoped to `failedStep.diagnostics` (or
@@ -13,6 +31,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of a `500`. The debug data is always part of these error responses, independent of the `debug` request
   property. The new configuration option `search.explainFailures` (default `true`) disables the explanations and the debug data in error responses; failed search steps then result in a short `400` response. Failed search steps never result in a `500`.
 - User passwords are hashed using Argon 2 id instead of Argon 2 i, older hashes are updated during the next hash, closes #547.
+
+### Fixed
+- Password hashes (`_passwordHash` of users) and token hashes (`hash` and `_tokenHash` of tokens) are no longer indexed
+  into Elasticsearch, where they were searchable by every user with search access to the element. They are still stored
+  in the graph database, which authentication relies on. Documents which were indexed by earlier versions keep these
+  properties until they are removed from the index, e.g. with an `_update_by_query` request using
+  `ctx._source.remove('_passwordHash')` on `node_user` and `ctx._source.remove('hash')` and
+  `ctx._source.remove('_tokenHash')` on `node_token`.
 
 ## 0.1.36 - 2026-11-19
 ### Changed

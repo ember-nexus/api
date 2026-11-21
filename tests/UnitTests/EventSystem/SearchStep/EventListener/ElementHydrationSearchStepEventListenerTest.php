@@ -1475,4 +1475,160 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $this->assertArrayHasKey('end', $event->getDebugData());
         $this->assertArrayHasKey('duration', $event->getDebugData());
     }
+
+    /**
+     * @param array<string, array<int, array<string, mixed>>> $elementMetadata
+     * @param UuidInterface[]                                 $elementIds
+     *
+     * @return array<mixed[]>
+     */
+    private function getElementDataWithMetadata(array $elementIds, array $elementMetadata): array
+    {
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementToRawService = $this->prophesize(ElementToRawService::class);
+        foreach ($elementIds as $elementId) {
+            $element = new NodeElement();
+            $element->setId($elementId);
+            $element->setLabel('Something');
+            $elementManager->getElement(Argument::is($elementId))->willReturn($element);
+            $elementToRawService->elementToRaw(Argument::is($element))->willReturn([
+                'type' => 'Something',
+                'id' => $elementId->toString(),
+                'data' => ['name' => 'x'],
+                'file' => ['size' => 1],
+            ]);
+        }
+        $listener = $this->buildElementHydrationSearchStepEventListener(
+            elementManager: $elementManager->reveal(),
+            elementToRawService: $elementToRawService->reveal()
+        );
+        $method = new ReflectionMethod(ElementHydrationSearchStepEventListener::class, 'getElementData');
+
+        /** @var array<mixed[]> $result */
+        $result = $method->invokeArgs($listener, [$elementIds, $elementMetadata]);
+
+        return $result;
+    }
+
+    public function testGetElementDataAddsMetadataOfPreviousStepsAfterNativeProperties(): void
+    {
+        $elementId = Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba');
+
+        $result = $this->getElementDataWithMetadata([$elementId], [
+            $elementId->toString() => [
+                0 => ['score' => 1.5, 'highlight' => ['name' => ['<em>x</em>']]],
+            ],
+        ]);
+
+        $this->assertSame(['type', 'id', 'data', 'file', 'metadata'], array_keys($result[0]));
+        $this->assertEquals(
+            ['score' => 1.5, 'highlight' => ['name' => ['<em>x</em>']]],
+            $result[0]['metadata']
+        );
+    }
+
+    public function testGetElementDataMergesMetadataOfStepsWhereLaterStepsOverwriteEarlierOnes(): void
+    {
+        $elementId = Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba');
+
+        $result = $this->getElementDataWithMetadata([$elementId], [
+            $elementId->toString() => [
+                2 => ['score' => 2.0, 'sort' => ['b']],
+                0 => ['score' => 1.0, 'highlight' => ['name' => ['<em>x</em>']]],
+            ],
+        ]);
+
+        // steps are applied in the order of their index, not in the order they were added
+        $this->assertSame(
+            '{"score":2,"highlight":{"name":["<em>x<\\/em>"]},"sort":["b"]}',
+            json_encode($result[0]['metadata'])
+        );
+        $singleStepResult = $this->getElementDataWithMetadata([$elementId], [
+            $elementId->toString() => [0 => ['score' => 1.0]],
+        ]);
+        $this->assertSame('{"score":1}', json_encode($singleStepResult[0]['metadata']));
+    }
+
+    public function testGetElementDataOnlyAddsMetadataToElementsWhichHaveSome(): void
+    {
+        $idWithMetadata = Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba');
+        $idWithoutMetadata = Uuid::fromString('591331e6-3d74-4758-9bb1-7cbc1bbd3443');
+
+        $result = $this->getElementDataWithMetadata([$idWithMetadata, $idWithoutMetadata], [
+            $idWithMetadata->toString() => [0 => ['score' => 1.5]],
+            // metadata of elements which are not part of the hydration is ignored
+            'bc884188-e54b-449a-b49d-6f00f431cd05' => [0 => ['score' => 9.9]],
+            // empty metadata does not result in an empty metadata property
+            $idWithoutMetadata->toString() => [],
+        ]);
+
+        $this->assertCount(2, $result);
+        $this->assertArrayHasKey('metadata', $result[0]);
+        $this->assertArrayNotHasKey('metadata', $result[1]);
+        $this->assertSame(['type', 'id', 'data', 'file'], array_keys($result[1]));
+    }
+
+    public function testOnSearchStepEventPropagatesMetadataOfElasticsearchStepResultOnlyForAccessibleElements(): void
+    {
+        $accessibleId = Uuid::fromString('7e0e1daa-f6a6-465f-aa97-2902b4f0f8ba');
+        $inaccessibleId = Uuid::fromString('591331e6-3d74-4758-9bb1-7cbc1bbd3443');
+        $userId = Uuid::fromString('fe99d627-f0e0-42bd-925f-722b56a3b33a');
+
+        // synthetic result of a previous Elasticsearch step, as the controller would hand it over
+        $previousStepResult = [
+            'elements' => [
+                ['id' => $inaccessibleId, 'type' => 'Something', 'metadata' => ['score' => 9.0, 'highlight' => ['secret' => ['<em>secret</em>']]]],
+                ['id' => $accessibleId, 'type' => 'Something', 'metadata' => ['score' => 1.5, 'highlight' => ['name' => ['<em>x</em>']]]],
+            ],
+            'totalHits' => 2,
+            'maxScore' => 9.0,
+        ];
+        $event = new SearchStepEvent(
+            SearchStepType::ELEMENT_HYDRATION,
+            null,
+            ['stepResults' => [$previousStepResult]],
+            [
+                $inaccessibleId->toString() => [0 => ['score' => 9.0, 'highlight' => ['secret' => ['<em>secret</em>']]]],
+                $accessibleId->toString() => [0 => ['score' => 1.5, 'highlight' => ['name' => ['<em>x</em>']]]],
+            ]
+        );
+
+        $authProvider = $this->prophesize(AuthProvider::class);
+        $authProvider->getUserId()->willReturn($userId);
+        $accessChecker = $this->prophesize(AccessChecker::class);
+        $accessChecker
+            ->checkUserAccessToMultipleElements(Argument::is($userId), Argument::any())
+            ->willReturn([$accessibleId]);
+
+        $element = new NodeElement();
+        $element->setId($accessibleId);
+        $element->setLabel('Something');
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElement(Argument::is($accessibleId))->shouldBeCalledOnce()->willReturn($element);
+        $elementManager->getElement(Argument::is($inaccessibleId))->shouldNotBeCalled();
+        $elementToRawService = $this->prophesize(ElementToRawService::class);
+        $elementToRawService->elementToRaw(Argument::is($element))->willReturn([
+            'type' => 'Something',
+            'id' => $accessibleId->toString(),
+            'data' => ['name' => 'x'],
+        ]);
+
+        $listener = $this->buildElementHydrationSearchStepEventListener(
+            elementManager: $elementManager->reveal(),
+            elementToRawService: $elementToRawService->reveal(),
+            accessChecker: $accessChecker->reveal(),
+            authProvider: $authProvider->reveal()
+        );
+
+        $listener->onSearchStepEvent($event);
+
+        $results = $event->getResults();
+        $this->assertCount(1, $results);
+        $this->assertSame($accessibleId->toString(), $results[0]['id']);
+        $this->assertSame(
+            '{"score":1.5,"highlight":{"name":["<em>x<\\/em>"]}}',
+            json_encode($results[0]['metadata'])
+        );
+        $this->assertStringNotContainsString('secret', json_encode($results) ?: '');
+    }
 }

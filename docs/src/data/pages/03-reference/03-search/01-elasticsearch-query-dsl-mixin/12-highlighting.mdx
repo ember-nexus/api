@@ -1,0 +1,30 @@
+---
+type: example
+title: Highlighting
+---
+import searchQuery from './12-highlighting/query.sh?raw';
+import searchResultBody from './12-highlighting/result.json';
+import searchResultHeaders from './12-highlighting/header.txt?raw';
+
+This example uses the [long form](/reference/search/elasticsearch-query-dsl-mixin#step-query) of the query. Besides the
+`query` itself, it sets `highlight` to ask Elasticsearch for the text fragments of the property `description` which
+matched the full text search for "lily". The options `pre_tags` and `post_tags` wrap each match, `encoder` escapes the
+stored text, and `number_of_fragments` limits the number of fragments per element. The search is restricted to plants, and only the first
+three results are returned.
+
+<Code code={searchQuery} lang="bash" mark="highlight" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+    highlightField="description"
+></SearchResponseCard>
+
+The first tab lists each plant with its highlighted description, the other tabs show the raw response. The
+[hydrated](/reference/search/element-hydration#metadata) elements contain the highlights in
+`metadata.highlight.description`. Next to it, `metadata.score` contains the score of the element.
+
+**Note**: Highlights contain stored text. If you render them as HTML like the list above, add `"encoder": "html"` to the
+highlight options, so that Elasticsearch escapes the text and only the tags are markup. Fields which start with an underscore or a
+wildcard are rejected.
