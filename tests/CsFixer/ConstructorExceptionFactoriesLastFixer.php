@@ -52,6 +52,9 @@ final class ConstructorExceptionFactoriesLastFixer extends AbstractFixer
         return $tokens->isAllTokenKindsFound([T_FUNCTION, T_VARIABLE]);
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+     */
     protected function applyFix(SplFileInfo $file, Tokens $tokens): void
     {
         for ($index = $tokens->count() - 1; $index >= 0; --$index) {
@@ -73,31 +76,7 @@ final class ConstructorExceptionFactoriesLastFixer extends AbstractFixer
 
     private function fixParameters(Tokens $tokens, int $openIndex, int $closeIndex): void
     {
-        // slots: [contentStart, contentEnd] of every parameter, separators and whitespace stay where they are
-        $slots = [];
-        $slotStart = $openIndex + 1;
-        for ($i = $openIndex + 1; $i <= $closeIndex; ++$i) {
-            $blockType = Tokens::detectBlockType($tokens[$i]);
-            if (null !== $blockType && $blockType['isStart'] && $i < $closeIndex) {
-                $i = $tokens->findBlockEnd($blockType['type'], $i);
-                continue;
-            }
-            if (!$tokens[$i]->equals(',') && $i !== $closeIndex) {
-                continue;
-            }
-            $start = $slotStart;
-            $end = $i - 1;
-            while ($start <= $end && $tokens[$start]->isWhitespace()) {
-                ++$start;
-            }
-            while ($end >= $start && $tokens[$end]->isWhitespace()) {
-                --$end;
-            }
-            if ($start <= $end) {
-                $slots[] = [$start, $end];
-            }
-            $slotStart = $i + 1;
-        }
+        $slots = $this->findParameterSlots($tokens, $openIndex, $closeIndex);
 
         $contents = [];
         $group = [];
@@ -114,21 +93,7 @@ final class ConstructorExceptionFactoriesLastFixer extends AbstractFixer
             $factoryNames[] = $factoryName ?? '';
         }
 
-        $order = [];
-        foreach ([0, 1, 2] as $wantGroup) {
-            foreach ($group as $slot => $slotGroup) {
-                if ($slotGroup === $wantGroup) {
-                    $order[] = $slot;
-                }
-            }
-            if (1 === $wantGroup) {
-                // exception factories are sorted alphabetically by type name, the sort is stable
-                $factoryStart = count($order) - count(array_keys($group, 1, true));
-                $factorySlots = array_slice($order, $factoryStart);
-                usort($factorySlots, static fn (int $a, int $b): int => strcmp($factoryNames[$a], $factoryNames[$b]));
-                array_splice($order, $factoryStart, count($factorySlots), $factorySlots);
-            }
-        }
+        $order = $this->getTargetOrder($group, $factoryNames);
         if ($order === array_keys($order)) {
             return;
         }
@@ -137,6 +102,70 @@ final class ConstructorExceptionFactoriesLastFixer extends AbstractFixer
             [$start, $end] = $slots[$slot];
             $tokens->overrideRange($start, $end, $contents[$order[$slot]]);
         }
+    }
+
+    /**
+     * Content range [start, end] of every parameter, separators and whitespace are not part of it.
+     *
+     * @return array<int, array{int, int}>
+     */
+    private function findParameterSlots(Tokens $tokens, int $openIndex, int $closeIndex): array
+    {
+        $slots = [];
+        $slotStart = $openIndex + 1;
+        for ($i = $openIndex + 1; $i <= $closeIndex; ++$i) {
+            $blockType = Tokens::detectBlockType($tokens[$i]);
+            if (null !== $blockType && $blockType['isStart'] && $i < $closeIndex) {
+                $i = $tokens->findBlockEnd($blockType['type'], $i);
+                continue;
+            }
+            if (!$tokens[$i]->equals(',') && $i !== $closeIndex) {
+                continue;
+            }
+            $slot = $this->trimWhitespace($tokens, $slotStart, $i - 1);
+            if (null !== $slot) {
+                $slots[] = $slot;
+            }
+            $slotStart = $i + 1;
+        }
+
+        return $slots;
+    }
+
+    /**
+     * @return array{int, int}|null
+     */
+    private function trimWhitespace(Tokens $tokens, int $start, int $end): ?array
+    {
+        while ($start <= $end && $tokens[$start]->isWhitespace()) {
+            ++$start;
+        }
+        while ($end >= $start && $tokens[$end]->isWhitespace()) {
+            --$end;
+        }
+
+        return $start <= $end ? [$start, $end] : null;
+    }
+
+    /**
+     * @param array<int, int>    $group        0: regular, 1: exception factory, 2: has default value
+     * @param array<int, string> $factoryNames
+     *
+     * @return array<int, int> slot index which has to be placed at each position
+     */
+    private function getTargetOrder(array $group, array $factoryNames): array
+    {
+        $order = [];
+        foreach ([0, 1, 2] as $wantGroup) {
+            $groupSlots = array_keys($group, $wantGroup, true);
+            if (1 === $wantGroup) {
+                // exception factories are sorted alphabetically by type name, the sort is stable
+                usort($groupSlots, static fn (int $a, int $b): int => strcmp($factoryNames[$a], $factoryNames[$b]));
+            }
+            array_push($order, ...$groupSlots);
+        }
+
+        return $order;
     }
 
     private function hasDefaultValue(Tokens $tokens, int $start, int $end): bool

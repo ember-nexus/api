@@ -21,6 +21,9 @@ use Throwable;
  * A failed search step is never reported as `500`: the server is not at fault if a query can not be run, and the
  * behavior of the databases is not ours to classify. The response is always a `400`.
  *
+ * Problem JSON exceptions which already got created by a step (e.g. broken expressions) only get the debug data added
+ * if they are a `400`.
+ *
  * If `search.explainFailures` is disabled, the response is short and contains neither debug data nor failure details.
  *
  * Otherwise, the response contains
@@ -80,8 +83,9 @@ class SearchStepFailureService
         $explainFailures = $this->emberNexusConfiguration->isSearchExplainFailures();
 
         if ($failure instanceof ProblemJsonException) {
-            // already a helpful response, e.g. bad content
-            if (!$explainFailures) {
+            // already a helpful response, e.g. bad content; other statuses, e.g. the 422 of an expression timeout, are not
+            // query errors and stay as they are, as the debug data would only repeat the possibly huge input
+            if (!$explainFailures || 400 !== $failure->getStatus()) {
                 return $failure;
             }
 

@@ -6,6 +6,9 @@ namespace App\Tests\ExampleGenerationControllerWithDefaultConfiguration;
 
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ */
 abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestTestCase
 {
     /**
@@ -394,6 +397,25 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
     }
 
     /**
+     * Removes everything which is not stable between runs from the debug data of a search step: timings, Elasticsearch
+     * scores, and the order of hits, which depends on the scores.
+     *
+     * @param array<string, mixed> $debug
+     */
+    private function normalizeStepDebugData(array &$debug): void
+    {
+        unset($debug['start'], $debug['end'], $debug['duration']);
+        $this->removeElasticsearchScores($debug);
+        foreach (array_keys($debug['input']['parameters']['stepResults'] ?? []) as $index) {
+            $elements = $debug['input']['parameters']['stepResults'][$index]['elements'] ?? null;
+            if (is_array($elements)) {
+                usort($elements, static fn (array $a, array $b): int => strcmp((string) ($a['id'] ?? ''), (string) ($b['id'] ?? '')));
+                $debug['input']['parameters']['stepResults'][$index]['elements'] = $elements;
+            }
+        }
+    }
+
+    /**
      * @param array<string, mixed> $data
      *
      * @return array<string, mixed>
@@ -402,11 +424,10 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
     {
         unset($data['instance'], $data['exception']);
         foreach (array_keys($data['debug'] ?? []) as $index) {
-            unset($data['debug'][$index]['start'], $data['debug'][$index]['end'], $data['debug'][$index]['duration']);
-            $this->removeElasticsearchScores($data['debug'][$index]);
+            $this->normalizeStepDebugData($data['debug'][$index]);
         }
-        if (array_key_exists('failedStep', $data)) {
-            unset($data['failedStep']['debug']['start'], $data['failedStep']['debug']['end'], $data['failedStep']['debug']['duration']);
+        if (array_key_exists('failedStep', $data) && is_array($data['failedStep']['debug'] ?? null)) {
+            $this->normalizeStepDebugData($data['failedStep']['debug']);
         }
 
         return $data;

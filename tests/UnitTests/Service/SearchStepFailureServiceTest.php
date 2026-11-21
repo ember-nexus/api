@@ -6,6 +6,7 @@ namespace App\Tests\UnitTests\Service;
 
 use App\EventSystem\SearchStep\Event\SearchStepEvent;
 use App\Exception\Client400BadContentException;
+use App\Exception\Client422UnprocessableContentException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Service\QueryExplanation\Elasticsearch\ElasticsearchQueryExplanationService;
 use App\Service\QueryExplanation\Neo4j\Neo4jQueryExplanationService;
@@ -74,6 +75,17 @@ class SearchStepFailureServiceTest extends TestCase
         $this->assertSame('element-hydration', $properties['failedStep']['type']);
         $this->assertSame($event->getDebugData(), $properties['failedStep']['debug']);
         $this->assertArrayNotHasKey('diagnostics', $properties['failedStep']);
+    }
+
+    public function testProblemJsonExceptionsOtherThan400PassThroughUnchanged(): void
+    {
+        $failure = new Client422UnprocessableContentException('type', detail: 'timeout');
+        $event = new SearchStepEvent(SearchStepType::ELEMENT_HYDRATION, null, []);
+
+        $exception = $this->getService()->createException(0, $event, [['a' => 1]], $failure);
+
+        $this->assertSame($failure, $exception);
+        $this->assertSame([], $exception->getAdditionalProperties());
     }
 
     public function testElasticsearchStepExtractsUserQueryAndIndices(): void
