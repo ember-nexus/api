@@ -94,9 +94,9 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             $uploadFactory ?? $this->prophesize(UploadFactory::class)->reveal(),
             $uploadService ?? $this->prophesize(UploadService::class)->reveal(),
             $deletionService ?? $this->prophesize(DeletionService::class)->reveal(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
             $attemptService,
             $logger ?? $this->prophesize(LoggerInterface::class)->reveal(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
     }
 
@@ -130,9 +130,9 @@ class DeleteExpiredUploadsCommandTest extends TestCase
             $this->prophesize(UploadFactory::class)->reveal(),
             $this->prophesize(UploadService::class)->reveal(),
             $this->prophesize(DeletionService::class)->reveal(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
             $this->prophesize(ExpiredUploadDeletionAttemptService::class)->reveal(),
             $this->prophesize(LoggerInterface::class)->reveal(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
 
         $this->expectException(LogicException::class);

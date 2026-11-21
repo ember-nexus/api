@@ -206,8 +206,8 @@ class BackupLoadCommandTest extends TestCase
                 $this->prophesize(Client400BadContentExceptionFactory::class)->reveal()
             ),
             new FileHashService(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
-            new NullLogger()
+            new NullLogger(),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $tester = new CommandTester($command);

@@ -78,8 +78,8 @@ class ElementFileDeletionServiceTest extends TestCase
             $this->fileOperationFactory->reveal(),
             $this->s3Service->reveal(),
             $cypherEntityManager->reveal(),
-            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
             $this->logger,
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
     }
 

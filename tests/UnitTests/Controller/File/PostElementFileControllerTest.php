@@ -70,10 +70,10 @@ class PostElementFileControllerTest extends TestCase
             $this->uploadCreationService->reveal(),
             $this->elementManager->reveal(),
             $this->elementService->reveal(),
-            $client404->reveal(),
-            $client409->reveal(),
             $this->fileCreationLockService->reveal(),
             $this->uploadService->reveal(),
+            $client404->reveal(),
+            $client409->reveal(),
         );
     }
 

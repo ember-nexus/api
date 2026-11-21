@@ -31,10 +31,10 @@ class PostElementFileController extends AbstractController
         private UploadCreationService $uploadCreationService,
         private ElementManager $elementManager,
         private ElementService $elementService,
-        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
-        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private FileCreationLockService $fileCreationLockService,
         private UploadService $uploadService,
+        private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
+        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
     ) {
     }
 

@@ -17,7 +17,10 @@ class Client400BadContentExceptionFactory
     ) {
     }
 
-    public function createFromDetail(string $detail, ?Throwable $previous = null): Client400BadContentException
+    /**
+     * @param array<string, mixed> $additionalProperties properties which get added to the Problem JSON response
+     */
+    public function createFromDetail(string $detail, ?Throwable $previous = null, array $additionalProperties = []): Client400BadContentException
     {
         return new Client400BadContentException(
             $this->urlGenerator->generate(
@@ -30,7 +33,7 @@ class Client400BadContentExceptionFactory
             ),
             detail: $detail,
             previous: $previous
-        );
+        )->withAdditionalProperties($additionalProperties);
     }
 
     private function getContentSummary(mixed $content): string

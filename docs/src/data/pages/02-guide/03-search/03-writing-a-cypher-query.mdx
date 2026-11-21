@@ -22,7 +22,8 @@ is a good starting point, in particular its section on
 
 As small errors can break the whole query, it is recommended to build your query up slowly, e.g. first inside the
 [Neo4j Browser](https://neo4j.com/docs/browser-manual/current/) or `cypher-shell` if you have direct access to the
-database, before running it through [`POST /search`](/api/post-search).
+database, before running it through [`POST /search`](/api/post-search). If a query is rejected, the response contains the error
+code, message and position reported by Neo4j, see [understanding search errors](/guide/search/understanding-search-errors).
 
 As the base of your query you can use one of the provided [examples](/reference/search/cypher-path-subset#examples).
 

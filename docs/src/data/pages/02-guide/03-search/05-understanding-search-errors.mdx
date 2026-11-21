@@ -1,0 +1,190 @@
+---
+type: guide
+title: Understanding search errors
+---
+
+When a search step fails, the API answers with a problem JSON response which explains what went
+wrong, as far as this can be done safely. Without this, a typo inside of an Elasticsearch query, a Cypher type error or
+a broken [expression](/guide/search/parameters-and-expressions) would only result in a generic server error.
+
+## Structure of an error response
+
+In addition to the usual problem JSON properties (`type`, `title`, `status`, `instance`, `detail`), the response of a
+failed search step contains the following properties:
+
+| Property                      | Content                                                                                                                                |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `debug`                       | Debug data of all steps **before** the failed step, in the same format as the `debug` property of successful requests.                 |
+| `failedStep.index`            | Zero-based index of the failed step inside `steps`.                                                                                    |
+| `failedStep.type`             | Type of the failed step.                                                                                                               |
+| `failedStep.debug`            | Debug data of the failed step up to the point of failure, e.g. the input, and for Elasticsearch the whole combined query.              |
+| `failedStep.source`           | Technology which was diagnosed, e.g. `neo4j` or `elasticsearch`. Only set if the failure could be diagnosed.                           |
+| `failedStep.code`             | Stable code of Ember Nexus: `invalid-query` if the query itself is invalid, `query-execution-failed` if it failed while it was running. |
+| `failedStep.diagnostics`     | Allowlisted data which got passed through from the database, e.g. its error code, its message and the position inside of the query.    |
+
+Everything which originates from a database is scoped to `diagnostics`, so it can be handled separately, e.g. removed
+by a web application firewall. The `detail` text of search step failures is written by Ember Nexus and does not contain
+database output; it points to `failedStep.diagnostics` instead.
+
+### Debug data in error responses
+
+The `debug` request property only affects successful responses. If a search step fails and explanations are enabled
+(`search.explainFailures`, the default), `debug` and `failedStep.debug` are always part of the response, independent of the
+request property, because this is exactly the data which is needed to find out what went wrong. They contain the same
+kind of data as the `debug` property of successful requests, which is already limited to what the current user may see. This includes the whole combined Elasticsearch query, which consists of your query and the access
+restrictions of the current user.
+
+### Errors of expressions
+
+If an [expression](/guide/search/parameters-and-expressions) is broken, the response additionally contains
+`expressionError`:
+
+| Property                       | Content                                                                                                  |
+|--------------------------------|----------------------------------------------------------------------------------------------------------|
+| `expressionError.source`       | Always `expr-lang`.                                                                                      |
+| `expressionError.code`         | `invalid-query` for compile errors, `query-execution-failed` for runtime errors.                         |
+| `expressionError.diagnostics`  | `kind` (`compile error` or `runtime error`), `message`, and if available `line` and `column`.             |
+
+Expressions are stateless and only work on data which the current user is allowed to access, therefore the message of the
+expression engine is safe to be shown and is also part of `detail`. As the expression is evaluated before the search step
+runs, the response also contains `failedStep` with the debug data of the step which contained the expression.
+
+## Which data is passed through?
+
+Databases might include stored data in their error messages, e.g. the value which could not be converted to a number.
+Therefore, raw error messages are never forwarded. Instead, the failed query is diagnosed by the database itself,
+and only individually allowlisted properties are returned:
+
+| Technology    | How it is diagnosed                                                                       | Returned                                                                                                 |
+|---------------|-------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| Elasticsearch | The query is validated with `_validate/query`, explanations of valid queries are ignored. | Error code, the reason for invalid queries, HTTP status, codes of root causes.                           |
+| Neo4j         | The query is analyzed with `EXPLAIN`, the query plan is never returned.                   | Error code, message and position for invalid queries; only the code for runtime errors; notifications.   |
+| Expr Lang     | Expressions are stateless and only use data visible to the user.                          | Kind of error, message and position.                                                                     |
+
+Failures which can not be classified as safe, e.g. runtime errors of the database or shard failures, only return their
+error code, or nothing at all. A failed search step is always answered with a `400`, even if the failure could not be
+diagnosed: Ember Nexus can not know more than that the database could not run the step, and the database's behavior
+differs between versions and is not part of Ember Nexus. The `detail` then only states that the reason can not be shown,
+and the original error with the `instance` of the response can be found in the server's log.
+
+If the data passed through from a database exceeds 16 KiB, it is replaced by a truncated excerpt.
+
+## Disabling explanations
+
+Explaining failed searches can be disabled with the configuration option `search.explainFailures` (default `true`, see
+the [configuration reference](/reference/configuration)), e.g. for environments which store highly sensitive data. If it
+is `false`, no diagnostics are requested from the databases and the response contains **neither debug data nor failure
+details**, only a short message:
+
+- `400` with the detail `Search step 2 (type cypher-path-subset) failed.`
+
+Broken expressions also result in a short `400` response without `expressionError`. The cause is still written to the
+server's log.
+
+## Example
+
+The following request contains an Elasticsearch query which wraps the actual query in another `query` property:
+
+```json
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "query": {
+          "match": {
+            "description": {
+              "query": "lily"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+The response explains the problem (shortened, `failedStep.debug` also contains the whole combined query):
+
+```json
+{
+  "type": "https://api.example.com/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "instance": "urn:uuid:6b3a1ec0-2c0f-4a52-8e9b-0b4b6f6b5f1d",
+  "detail": "Search step 1 (type elasticsearch-query-dsl-mixin) was rejected by elasticsearch, see failedStep.diagnostics for the reason.",
+  "debug": [],
+  "failedStep": {
+    "index": 0,
+    "type": "elasticsearch-query-dsl-mixin",
+    "debug": {
+      "...": "..."
+    },
+    "source": "elasticsearch",
+    "code": "invalid-query",
+    "diagnostics": {
+      "code": "x_content_parse_exception",
+      "message": "unknown query [query]; org.elasticsearch.xcontent.NamedObjectNotFoundException: [1:19] unknown field [query]",
+      "status": 400,
+      "rootCauseCodes": [
+        "parsing_exception"
+      ],
+      "validation": {
+        "valid": false,
+        "exception": "org.elasticsearch.common.ParsingException"
+      }
+    }
+  }
+}
+```
+
+A broken expression, e.g. `{{ 1 + }}`, is explained like this (shortened):
+
+```json
+{
+  "status": 400,
+  "detail": "Expression execution failed.\n\ncompile error: unexpected token EOF (1:5)\n |  1 + \n | ....^",
+  "expressionError": {
+    "source": "expr-lang",
+    "code": "invalid-query",
+    "diagnostics": {
+      "kind": "compile error",
+      "message": "compile error: unexpected token EOF (1:5)\n |  1 + \n | ....^",
+      "line": 1,
+      "column": 5
+    }
+  },
+  "failedStep": {
+    "index": 0,
+    "type": "elasticsearch-query-dsl-mixin"
+  }
+}
+```
+
+A Cypher query which compares a property with a number as if it were a list is explained with its position inside of
+the query:
+
+```json
+{
+  "failedStep": {
+    "index": 1,
+    "type": "cypher-path-subset",
+    "source": "neo4j",
+    "code": "invalid-query",
+    "diagnostics": {
+      "code": "Neo.ClientError.Statement.SyntaxError",
+      "message": "Type mismatch: expected List<T> but was Integer",
+      "position": {
+        "line": 1,
+        "column": 66,
+        "offset": 65
+      }
+    }
+  }
+}
+```
+
+**Note**: The exact messages and codes depend on the version of the database and can change without notice. Rely on
+`status`, `failedStep.index`, `failedStep.type`, `failedStep.code` and the error codes in `diagnostics`, but not on the
+wording of messages.

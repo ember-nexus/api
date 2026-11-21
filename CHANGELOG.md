@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Failed search steps are now explained instead of resulting in a generic server error (#453). The problem JSON contains
+  the debug data of the previous steps (`debug`) and of the failed step (`failedStep`); for Elasticsearch, Neo4j and
+  expr-lang failures the allowlisted data of the database is scoped to `failedStep.diagnostics` (or
+  `expressionError.diagnostics`). Raw database messages are never forwarded, and bad queries now result in a `400`
+  instead of a `500`. The debug data is always part of these error responses, independent of the `debug` request
+  property. The new configuration option `search.explainFailures` (default `true`) disables the explanations and the debug data in error responses; failed search steps then result in a short `400` response. Failed search steps never result in a `500`.
 
 ## 0.1.36 - 2026-11-19
 ### Changed

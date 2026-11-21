@@ -72,8 +72,8 @@ class BackupLoadCommand extends Command
         private S3OperationFactory $s3OperationFactory,
         private FileSizeLimitService $fileSizeLimitService,
         private FileHashService $fileHashService,
-        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private LoggerInterface $logger,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
         parent::__construct();
     }

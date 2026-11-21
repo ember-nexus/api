@@ -18,8 +18,8 @@ class RawToElementService
 {
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
-        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
+        private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
     ) {
     }
 

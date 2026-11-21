@@ -1,0 +1,10 @@
+{
+  "components": {
+    "examples": {
+      "SearchExpressionErrorProblemExample": {
+        "summary": "A broken expression inside of a search step is explained inside of expressionError.",
+        "x-ember-nexus-recording": "search/example/errors/expr-lang-compile-error/400-response-body.json"
+      }
+    }
+  }
+}

@@ -20,6 +20,10 @@ class SearchStepEvent implements EventInterface
      * @var array<string, mixed>
      */
     private array $debugData = [];
+    /**
+     * @var array<string, mixed>|null
+     */
+    private ?array $resolvedQuery = null;
 
     /**
      * @param string|array<string, mixed>|null $query
@@ -90,6 +94,27 @@ class SearchStepEvent implements EventInterface
     public function addDebugData(string $key, mixed $data): self
     {
         $this->debugData[$key] = $data;
+
+        return $this;
+    }
+
+    /**
+     * The user's query after expressions got resolved, without anything which gets mixed in by the server (e.g. access
+     * restrictions). Null as long as the step handler did not resolve it.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getResolvedQuery(): ?array
+    {
+        return $this->resolvedQuery;
+    }
+
+    /**
+     * @param array<string, mixed> $resolvedQuery
+     */
+    public function setResolvedQuery(array $resolvedQuery): self
+    {
+        $this->resolvedQuery = $resolvedQuery;
 
         return $this;
     }

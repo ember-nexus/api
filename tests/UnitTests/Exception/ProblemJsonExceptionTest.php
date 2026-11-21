@@ -87,4 +87,14 @@ class ProblemJsonExceptionTest extends TestCase
         $this->assertSame($problemJsonException, $problemJsonException->setHeaders(['Allow' => 'GET']));
         $this->assertSame(['Allow' => 'GET'], $problemJsonException->getHeaders());
     }
+
+    public function testWithAdditionalPropertiesMergesAndReplaces(): void
+    {
+        $problemJsonException = new ProblemJsonException('type', 'title', 123, 'detail', additionalProperties: ['a' => 'b', 'c' => 'd']);
+
+        $result = $problemJsonException->withAdditionalProperties(['c' => 'e', 'f' => 'g']);
+
+        $this->assertSame($problemJsonException, $result);
+        $this->assertSame(['a' => 'b', 'c' => 'e', 'f' => 'g'], $problemJsonException->getAdditionalProperties());
+    }
 }

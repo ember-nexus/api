@@ -61,12 +61,12 @@ class UploadServiceTest extends TestCase
 
         $service = new UploadService(
             $elementManager->reveal(),
-            $server500LogicErrorExceptionFactory->reveal(),
             $fileOperationFactory->reveal(),
             $s3Service->reveal(),
             $uploadFactory->reveal(),
             $cypherEntityManager->reveal(),
             $deletionService->reveal(),
+            $server500LogicErrorExceptionFactory->reveal(),
         );
 
         return [$service, $elementManager, $server500LogicErrorExceptionFactory, $fileOperationFactory, $s3Service, $uploadFactory, $cypherEntityManager, $deletionService];

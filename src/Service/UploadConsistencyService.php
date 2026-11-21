@@ -24,8 +24,8 @@ class UploadConsistencyService
         private UploadService $uploadService,
         private S3Service $s3Service,
         private S3OperationFactory $s3OperationFactory,
-        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
         private LoggerInterface $logger,
+        private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
     ) {
     }
 

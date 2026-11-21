@@ -1,0 +1,15 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "match": {
+          "description": {
+            "query": "{{ 1 + }}"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -67,10 +67,10 @@ class PostRegisterControllerTest extends TestCase
             $emberNexusConfiguration ?? $this->createMock(EmberNexusConfiguration::class),
             $requestUtilService ?? $this->createMock(RequestUtilService::class),
             $createElementFromRawDataService ?? $this->createMock(CreateElementFromRawDataService::class),
+            $client400BadContentExceptionFactory ?? $this->createMock(Client400BadContentExceptionFactory::class),
             $client400ReservedIdentifierExceptionFactory ?? $this->createMock(Client400ReservedIdentifierExceptionFactory::class),
             $client403ForbiddenExceptionFactory ?? $this->createMock(Client403ForbiddenExceptionFactory::class),
             $server500LogicExceptionFactory ?? $this->createMock(Server500LogicErrorExceptionFactory::class),
-            $client400BadContentExceptionFactory ?? $this->createMock(Client400BadContentExceptionFactory::class),
         );
     }
 
@@ -137,9 +137,9 @@ class PostRegisterControllerTest extends TestCase
         $emberNexusConfiguration->method('isRegisterEnabled')->willReturn(true);
 
         $requestUtilService = new RequestUtilService(
+            new RequestContentService(new Client408RequestTimeoutExceptionFactory($this->createStub(UrlGeneratorInterface::class))),
             $this->createMock(Client400BadContentExceptionFactory::class),
             $this->createMock(Client400MissingPropertyExceptionFactory::class),
-            new RequestContentService(new Client408RequestTimeoutExceptionFactory($this->createStub(UrlGeneratorInterface::class))),
         );
 
         $null = null;

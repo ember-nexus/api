@@ -96,6 +96,17 @@ class Configuration implements ConfigurationInterface
                 ->end()
             ->end()
 
+            ->arrayNode(EmberNexusConfiguration::SEARCH)
+                ->info('Configures settings related to the search endpoint.')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->booleanNode(EmberNexusConfiguration::SEARCH_EXPLAIN_FAILURES)
+                        ->info('If true, failed search steps and expressions are explained with the debug data and allowlisted diagnostics of the database. If false, only a short 400 error is returned, without debug data and failure details.')
+                        ->defaultTrue()
+                    ->end()
+                ->end()
+            ->end()
+
             ->arrayNode(EmberNexusConfiguration::INSTANCE_CONFIGURATION)
                 ->info('Configures the /instance-configuration endpoint.')
                 ->addDefaultsIfNotSet()

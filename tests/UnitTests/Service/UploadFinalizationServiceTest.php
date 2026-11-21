@@ -123,13 +123,13 @@ class UploadFinalizationServiceTest extends TestCase
             $this->uploadService->reveal(),
             new DigestService($badContentFactory->reveal()),
             $this->fileSizeLimitService->reveal(),
-            $badContentFactory->reveal(),
-            $conflictFactory->reveal(),
             $this->logger->reveal(),
             $this->elementFileDeletionService->reveal(),
             $this->incrementalHashService->reveal(),
             $this->elementService->reveal(),
             $this->fileCreationLockService->reveal(),
+            $badContentFactory->reveal(),
+            $conflictFactory->reveal(),
         );
     }
 

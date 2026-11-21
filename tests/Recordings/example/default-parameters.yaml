@@ -40,6 +40,12 @@ ember_nexus:
     # Maximum runtime of the Go Expr Lang CLI call in milliseconds, at least 100. Can be set to null to disable the limit.
     timeoutInMilliseconds: 5000
 
+  # Configures settings related to the search endpoint.
+  search:
+
+    # If true, failed search steps and expressions are explained with the debug data and allowlisted diagnostics of the database. If false, only a short 400 error is returned, without debug data and failure details.
+    explainFailures: true
+
   # Configures the /instance-configuration endpoint.
   instanceConfiguration:
 

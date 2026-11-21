@@ -34,8 +34,8 @@ class ElementFileDeletionService
         private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private CypherEntityManager $cypherEntityManager,
-        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private LoggerInterface $logger,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 

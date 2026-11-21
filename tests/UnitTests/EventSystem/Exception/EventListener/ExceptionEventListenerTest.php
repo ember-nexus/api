@@ -83,8 +83,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal(),
-            $this->createRequestIdService()
+            $this->createRequestIdService(),
+            $server500InternalServerErrorExceptionFactory->reveal()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -146,8 +146,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal(),
-            $this->createRequestIdService()
+            $this->createRequestIdService(),
+            $server500InternalServerErrorExceptionFactory->reveal()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -202,8 +202,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal(),
-            $this->createRequestIdService()
+            $this->createRequestIdService(),
+            $server500InternalServerErrorExceptionFactory->reveal()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -254,8 +254,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal(),
-            $this->createRequestIdService()
+            $this->createRequestIdService(),
+            $server500InternalServerErrorExceptionFactory->reveal()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -306,8 +306,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             $logger,
-            $server500InternalServerErrorExceptionFactory->reveal(),
-            $this->createRequestIdService()
+            $this->createRequestIdService(),
+            $server500InternalServerErrorExceptionFactory->reveal()
         );
 
         $exceptionEvent = new ExceptionEvent(
@@ -344,8 +344,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             TestLogger::create(),
-            $this->prophesize(Server500InternalServerErrorExceptionFactory::class)->reveal(),
-            $requestIdService
+            $requestIdService,
+            $this->prophesize(Server500InternalServerErrorExceptionFactory::class)->reveal()
         );
         $exceptionEvent = new ExceptionEvent(
             $this->prophesize(HttpKernelInterface::class)->reveal(),
@@ -378,8 +378,8 @@ class ExceptionEventListenerTest extends TestCase
             $urlGenerator->reveal(),
             $kernel->reveal(),
             TestLogger::create(),
-            $this->prophesize(Server500InternalServerErrorExceptionFactory::class)->reveal(),
-            $this->createRequestIdService()
+            $this->createRequestIdService(),
+            $this->prophesize(Server500InternalServerErrorExceptionFactory::class)->reveal()
         );
         $exceptionEvent = new ExceptionEvent(
             $this->prophesize(HttpKernelInterface::class)->reveal(),

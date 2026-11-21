@@ -85,6 +85,18 @@ class ProblemJsonException extends Exception implements ExceptionInterface
     }
 
     /**
+     * Adds properties to the resulting Problem JSON response; existing properties with the same name get replaced.
+     *
+     * @param array<string, mixed> $additionalProperties
+     */
+    public function withAdditionalProperties(array $additionalProperties): static
+    {
+        $this->additionalProperties = [...$this->additionalProperties, ...$additionalProperties];
+
+        return $this;
+    }
+
+    /**
      * @param array<string, string> $headers HTTP headers which will be added to the resulting Problem JSON response
      */
     public function setHeaders(array $headers): static

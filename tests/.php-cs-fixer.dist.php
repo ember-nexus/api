@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__.'/CsFixer/ConstructorExceptionFactoriesLastFixer.php';
+
 $finder = (new PhpCsFixer\Finder())
     ->in(__DIR__.'/../')
     ->exclude('var')
@@ -7,7 +9,7 @@ $finder = (new PhpCsFixer\Finder())
 ;
 
 return (new PhpCsFixer\Config())
-    ->setUnsupportedPhpVersionAllowed(true)
+    ->registerCustomFixers([new App\Tests\CsFixer\ConstructorExceptionFactoriesLastFixer()])
     ->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect())
     ->setUnsupportedPhpVersionAllowed(true)
     ->setRules([
@@ -22,7 +24,8 @@ return (new PhpCsFixer\Config())
         'no_unneeded_control_parentheses' => [
             'statements' => ['break', 'clone', 'continue', 'echo_print', 'others', 'return', 'switch_case', 'yield', 'yield_from']
         ],
-        'self_accessor' => true
+        'self_accessor' => true,
+        'EmberNexus/constructor_exception_factories_last' => true,
     ])
     ->setFinder($finder)
 ;

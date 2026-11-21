@@ -54,9 +54,9 @@ class PutElementFileControllerTest extends TestCase
             $authProvider->reveal(),
             $this->accessChecker->reveal(),
             $this->uploadCreationService->reveal(),
+            $this->fileCreationLockService->reveal(),
             $client404->reveal(),
             $client409->reveal(),
-            $this->fileCreationLockService->reveal(),
         );
     }
 

@@ -16,9 +16,9 @@ use Symfony\Component\HttpFoundation\Request;
 class RequestUtilService
 {
     public function __construct(
+        private RequestContentService $requestContentService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
-        private RequestContentService $requestContentService,
     ) {
     }
 

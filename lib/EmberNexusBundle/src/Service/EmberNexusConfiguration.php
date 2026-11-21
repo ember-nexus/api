@@ -31,6 +31,9 @@ class EmberNexusConfiguration
     public const string EXPRESSION_TIMEOUT_IN_MILLISECONDS = 'timeoutInMilliseconds';
     public const int EXPRESSION_MIN_TIMEOUT_IN_MILLISECONDS = 100;
 
+    public const string SEARCH = 'search';
+    public const string SEARCH_EXPLAIN_FAILURES = 'explainFailures';
+
     public const string INSTANCE_CONFIGURATION = 'instanceConfiguration';
     public const string INSTANCE_CONFIGURATION_ENABLED = 'enabled';
     public const string INSTANCE_CONFIGURATION_SHOW_VERSION = 'showVersion';
@@ -69,6 +72,7 @@ class EmberNexusConfiguration
     private int $expressionWarningLength;
     private int $expressionMaxLength;
     private ?int $expressionTimeoutInMilliseconds = null;
+    private bool $searchExplainFailures = true;
     private bool $instanceConfigurationEnabled;
     private bool $instanceConfigurationShowVersion;
     private int $tokenMinLifetimeInSeconds;
@@ -287,6 +291,14 @@ class EmberNexusConfiguration
             [
                 self::EXPRESSION,
                 self::EXPRESSION_TIMEOUT_IN_MILLISECONDS,
+            ]
+        ));
+
+        $emberNexusConfiguration->setSearchExplainFailures((bool) self::getValueFromConfig(
+            $configuration,
+            [
+                self::SEARCH,
+                self::SEARCH_EXPLAIN_FAILURES,
             ]
         ));
 
@@ -623,6 +635,18 @@ class EmberNexusConfiguration
             throw new Exception(sprintf('Expression timeout must be null or at least %d milliseconds.', self::EXPRESSION_MIN_TIMEOUT_IN_MILLISECONDS));
         }
         $this->expressionTimeoutInMilliseconds = $expressionTimeoutInMilliseconds;
+
+        return $this;
+    }
+
+    public function isSearchExplainFailures(): bool
+    {
+        return $this->searchExplainFailures;
+    }
+
+    public function setSearchExplainFailures(bool $searchExplainFailures): static
+    {
+        $this->searchExplainFailures = $searchExplainFailures;
 
         return $this;
     }

@@ -27,6 +27,14 @@ class EmberNexusConfigurationTest extends TestCase
         return EmberNexusConfiguration::createFromConfiguration($processedConfiguration);
     }
 
+    public function testSearchExplainFailuresDefaultsToTrueAndCanBeDisabled(): void
+    {
+        $this->assertTrue($this->createFromConfig([])->isSearchExplainFailures());
+        $this->assertFalse($this->createFromConfig([
+            EmberNexusConfiguration::SEARCH => [EmberNexusConfiguration::SEARCH_EXPLAIN_FAILURES => false],
+        ])->isSearchExplainFailures());
+    }
+
     public function testExpressionTimeoutDefaultsTo5000Milliseconds(): void
     {
         $emberNexusConfiguration = $this->createFromConfig([]);

@@ -37,6 +37,12 @@ ember_nexus:
     # Maximum length for executable expressions. Exceeding the limit will throw an exception.
     maxLength: 10240
 
+  # Configures settings related to the search endpoint.
+  search:
+
+    # If true, failed search steps and expressions are explained with the debug data and allowlisted diagnostics of the database. If false, only a short 400 error is returned, without debug data and failure details.
+    explainFailures: true
+
   # Configures the /instance-configuration endpoint.
   instanceConfiguration:
 

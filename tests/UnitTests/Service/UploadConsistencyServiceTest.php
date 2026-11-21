@@ -54,8 +54,8 @@ class UploadConsistencyServiceTest extends TestCase
             $this->uploadService->reveal(),
             $this->s3Service->reveal(),
             $fileOperationFactory->reveal(),
-            $conflictFactory->reveal(),
             $this->logger->reveal(),
+            $conflictFactory->reveal(),
         );
     }
 

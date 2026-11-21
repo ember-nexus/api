@@ -42,7 +42,7 @@
                   },
                   "debug": {
                     "type": "boolean",
-                    "description": "If true, search response will include additional debug and meta data.",
+                    "description": "If true, search response will include additional debug and meta data. Failed requests include the debug data independent of this property, unless failure explanations are disabled in the configuration.",
                     "example": true
                   }
                 }

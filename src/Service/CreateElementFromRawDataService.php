@@ -21,11 +21,11 @@ class CreateElementFromRawDataService
     public const array RESERVED_TYPES = ['User', 'Token', 'Upload'];
 
     public function __construct(
-        private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
-        private Client400ReservedTypeExceptionFactory $client400ReservedTypeExceptionFactory,
-        private Client400IncompleteMutualDependencyExceptionFactory $client400IncompleteMutualDependencyExceptionFactory,
         private ElementManager $elementManager,
         private EventDispatcherInterface $eventDispatcher,
+        private Client400IncompleteMutualDependencyExceptionFactory $client400IncompleteMutualDependencyExceptionFactory,
+        private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
+        private Client400ReservedTypeExceptionFactory $client400ReservedTypeExceptionFactory,
     ) {
     }
 

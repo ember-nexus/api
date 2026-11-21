@@ -1,0 +1,19 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "match": {
+          "description": {
+            "query": "lily"
+          }
+        }
+      }
+    },
+    {
+      "type": "cypher-path-subset",
+      "query": "MATCH path=((:Plant)-[:IS_MEMBER_OF]->(t:Taxon)) WHERE t.name IN 5 RETURN path"
+    }
+  ]
+}

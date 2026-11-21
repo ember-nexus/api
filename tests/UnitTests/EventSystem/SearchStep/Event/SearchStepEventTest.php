@@ -49,4 +49,13 @@ class SearchStepEventTest extends TestCase
         $this->assertCount(2, $event->getResults());
         $this->assertSame($data, $event->getResults());
     }
+
+    public function testResolvedQueryIsNullUntilSet(): void
+    {
+        $event = new SearchStepEvent(SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN, ['match_all' => []], []);
+
+        $this->assertNull($event->getResolvedQuery());
+        $this->assertSame($event, $event->setResolvedQuery(['match_all' => []]));
+        $this->assertSame(['match_all' => []], $event->getResolvedQuery());
+    }
 }

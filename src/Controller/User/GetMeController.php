@@ -16,8 +16,8 @@ class GetMeController extends AbstractController
 {
     public function __construct(
         private ElementResponseService $elementResponseService,
-        private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private AuthProvider $authProvider,
+        private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
     ) {
     }
 

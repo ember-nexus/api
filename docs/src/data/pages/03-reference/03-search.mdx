@@ -24,6 +24,15 @@ Every step can read a `parameters` object, which is assembled in the following p
 This means step-local parameters always take priority over global parameters, which in turn take priority over
 whatever earlier steps returned - allowing later steps to override values injected by earlier ones.
 
+### Failed search steps
+
+If a search step fails, the response is a problem JSON which contains the debug data of all previous steps (`debug`),
+the failed step (`failedStep`) and, if the failure could be diagnosed, the allowlisted error data of the database
+(`failedStep.diagnostics`). The `debug` request property does not matter for failed requests, the debug data is always
+returned. If `search.explainFailures` is disabled, only a short `400` without debug data and
+failure details is returned. Raw database error messages are never forwarded, as they might contain stored data. See
+[understanding search errors](/guide/search/understanding-search-errors) for details and examples.
+
 ## Search steps
 
 ### Elasticsearch query

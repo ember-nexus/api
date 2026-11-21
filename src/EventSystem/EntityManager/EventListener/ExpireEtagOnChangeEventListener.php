@@ -41,8 +41,8 @@ class ExpireEtagOnChangeEventListener
         private Client $redisClient,
         private CypherEntityManager $cypherEntityManager,
         private RedisKeyFactory $redisKeyTypeFactory,
-        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
         private AppStateService $appStateService,
+        private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
 

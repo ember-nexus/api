@@ -26,9 +26,9 @@ class PutElementFileController extends AbstractController
         private AuthProvider $authProvider,
         private AccessChecker $accessChecker,
         private UploadCreationService $uploadCreationService,
+        private FileCreationLockService $fileCreationLockService,
         private Client404NotFoundExceptionFactory $client404NotFoundExceptionFactory,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
-        private FileCreationLockService $fileCreationLockService,
     ) {
     }
 

@@ -156,11 +156,11 @@ class UploadCreationServiceTest extends TestCase
             $this->uploadService->reveal(),
             $fileSizeLimitService,
             new UploadBodyLimitService($configuration, $badContentFactory, new Client408RequestTimeoutExceptionFactory($urlGenerator->reveal())),
-            $badContentFactory,
             new UploadChunkValidator($configuration, $fileSizeLimitService, $badContentFactory, $this->conflictFactory->reveal()),
             $this->elementFileDeletionService->reveal(),
             $this->elementService->reveal(),
             new Stopwatch(),
+            $badContentFactory,
         );
     }
 

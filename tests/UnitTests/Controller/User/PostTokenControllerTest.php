@@ -42,10 +42,10 @@ class PostTokenControllerTest extends TestCase
 
         return new PostTokenController(
             $tokenGenerator ?? $this->createMock(TokenGenerator::class),
-            new Client400BadContentExceptionFactory($urlGenerator),
-            new Client401UnauthorizedExceptionFactory($urlGenerator),
             $requestUtilService ?? $this->createMock(RequestUtilService::class),
             $securityUtilService ?? $this->createMock(SecurityUtilService::class),
+            new Client400BadContentExceptionFactory($urlGenerator),
+            new Client401UnauthorizedExceptionFactory($urlGenerator),
         );
     }
 

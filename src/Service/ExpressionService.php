@@ -8,6 +8,7 @@ use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Client422UnprocessableContentExceptionFactory;
 use App\Security\AuthProvider;
+use App\Service\QueryExplanation\ExprLang\ExprLangQueryExplanationService;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
 use Psr\Log\LoggerInterface;
 use stdClass;
@@ -20,6 +21,7 @@ class ExpressionService
         private AuthProvider $authProvider,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private LoggerInterface $logger,
+        private ExprLangQueryExplanationService $exprLangQueryExplanationService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client403ForbiddenExceptionFactory $client403ForbiddenExceptionFactory,
         private Client422UnprocessableContentExceptionFactory $client422UnprocessableContentExceptionFactory,
@@ -109,16 +111,15 @@ class ExpressionService
         \Safe\unlink($tempFile);
 
         if (!$process->isSuccessful()) {
-            $stdOut = $process->getErrorOutput();
-            $detailErrorMessage = 'unknown error';
-            if ('' !== $stdOut) {
-                /** @var array<array-key, mixed>|string|int|float|bool|null $tmp */
-                $tmp = \Safe\json_decode($stdOut, true);
-                if (is_array($tmp) && isset($tmp['error']) && is_string($tmp['error'])) {
-                    $detailErrorMessage = $tmp['error'];
-                }
+            if (!$this->emberNexusConfiguration->isSearchExplainFailures()) {
+                throw $this->client400BadContentExceptionFactory->createFromDetail('Expression execution failed.');
             }
-            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Expression execution failed.\n\n%s", $detailErrorMessage));
+            $errorOutput = $process->getErrorOutput();
+            $explanation = $this->exprLangQueryExplanationService->explain($errorOutput);
+            /** @psalm-suppress MixedAssignment */
+            $diagnosticsMessage = $explanation->diagnostics['message'] ?? null;
+            $detailErrorMessage = is_string($diagnosticsMessage) ? $diagnosticsMessage : 'unknown error';
+            throw $this->client400BadContentExceptionFactory->createFromDetail(sprintf("Expression execution failed.\n\n%s", $detailErrorMessage), additionalProperties: ['expressionError' => ['source' => $explanation->source, 'code' => $explanation->code, 'diagnostics' => $explanation->diagnostics]]);
         }
 
         $result = $process->getOutput();

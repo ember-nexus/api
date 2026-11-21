@@ -6,11 +6,10 @@ namespace App\Controller\Search;
 
 use App\Attribute\EndpointCanBeUsedByReadonlyAnonymousUser;
 use App\EventSystem\SearchStep\Event\SearchStepEvent;
-use App\Exception\ProblemJsonException;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400MissingPropertyExceptionFactory;
-use App\Factory\Exception\Server500InternalServerErrorExceptionFactory;
 use App\Service\RequestUtilService;
+use App\Service\SearchStepFailureService;
 use App\Type\Response\JsonResponse;
 use App\Type\SearchStepType;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -23,10 +22,10 @@ class PostSearchController extends AbstractController
 {
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
+        private SearchStepFailureService $searchStepFailureService,
+        private RequestUtilService $requestUtilService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
-        private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
-        private RequestUtilService $requestUtilService,
     ) {
     }
 
@@ -192,10 +191,7 @@ class PostSearchController extends AbstractController
             try {
                 $this->eventDispatcher->dispatch($event);
             } catch (Throwable $t) {
-                if ($t instanceof ProblemJsonException) {
-                    throw $t;
-                }
-                throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate(sprintf('Exception of type %s got thrown during search step %d (type %s): %s', get_debug_type($t), $index + 1, $type->value, $t->getMessage()), previous: $t);
+                throw $this->searchStepFailureService->createException($index, $event, $debugData, $t);
             }
 
             $lastStepResults = $event->getResults();
