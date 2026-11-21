@@ -265,7 +265,14 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
             return;
         }
 
-        $scores = $this->collectElasticsearchScores($rawResponseData['debug'] ?? []);
+        // same order as in the file: scores of the hydrated elements, then the ones of the debug data
+        $scores = [];
+        foreach ($rawResponseData['results'] ?? [] as $result) {
+            if (is_array($result) && is_array($result['metadata'] ?? null) && array_key_exists('score', $result['metadata'])) {
+                $scores[] = $result['metadata']['score'];
+            }
+        }
+        array_push($scores, ...$this->collectElasticsearchScores($rawResponseData['debug'] ?? []));
         $documentation = file_get_contents($pathToProjectRoot.$pathToDocumentationFile);
         $replacedScores = 0;
         $updatedDocumentation = preg_replace_callback(
@@ -306,6 +313,30 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
     }
 
     /**
+     * The order of Elasticsearch hits depends on their scores, which are not stable between runs. Therefore, elements
+     * of step results are compared in the order of their ids.
+     */
+    public function sortElementsById(array &$stepResult): void
+    {
+        if (is_array($stepResult['elements'] ?? null)) {
+            usort($stepResult['elements'], static fn (array $a, array $b): int => strcmp((string) ($a['id'] ?? ''), (string) ($b['id'] ?? '')));
+        }
+    }
+
+    /**
+     * Results are compared in the order of their ids, unless the order is requested explicitly by a sort definition.
+     */
+    public function sortResultsByIdUnlessSorted(array &$results): void
+    {
+        foreach ($results as $result) {
+            if (is_array($result) && is_array($result['metadata'] ?? null) && array_key_exists('sort', $result['metadata'])) {
+                return;
+            }
+        }
+        usort($results, static fn (array $a, array $b): int => strcmp((string) ($a['id'] ?? ''), (string) ($b['id'] ?? '')));
+    }
+
+    /**
      * Elasticsearch scores are not stable between runs (e.g. they depend on shard statistics), therefore they are
      * removed before comparing responses.
      */
@@ -332,13 +363,20 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
         foreach ($responseData['results'] as &$result) {
             unset($result['data']['created']);
             unset($result['data']['updated']);
+            unset($result['metadata']['score']);
         }
+        unset($result);
+        $this->sortResultsByIdUnlessSorted($responseData['results']);
         foreach ($responseData['debug'] as &$debug) {
             unset($debug['start']);
             unset($debug['end']);
             unset($debug['duration']);
             $this->removeElasticsearchScores($debug);
+            if (is_array($debug['accessibleElementIds'] ?? null)) {
+                sort($debug['accessibleElementIds']);
+            }
             foreach ($debug['input']['parameters']['stepResults'] as &$stepResult) {
+                $this->sortElementsById($stepResult);
                 if (array_key_exists('paths', $stepResult)) {
                     usort($stepResult['paths'], function ($a, $b) {
                         return strcmp($this->getSignatureOfPathResult($a), $this->getSignatureOfPathResult($b));
@@ -352,13 +390,20 @@ abstract class BaseRequestTestCase extends \App\Tests\EndToEndTests\BaseRequestT
         foreach ($documentationData['results'] as &$result) {
             unset($result['data']['created']);
             unset($result['data']['updated']);
+            unset($result['metadata']['score']);
         }
+        unset($result);
+        $this->sortResultsByIdUnlessSorted($documentationData['results']);
         foreach ($documentationData['debug'] as &$debug) {
             unset($debug['start']);
             unset($debug['end']);
             unset($debug['duration']);
             $this->removeElasticsearchScores($debug);
+            if (is_array($debug['accessibleElementIds'] ?? null)) {
+                sort($debug['accessibleElementIds']);
+            }
             foreach ($debug['input']['parameters']['stepResults'] as &$stepResult) {
+                $this->sortElementsById($stepResult);
                 if (array_key_exists('paths', $stepResult)) {
                     usort($stepResult['paths'], function ($a, $b) {
                         return strcmp($this->getSignatureOfPathResult($a), $this->getSignatureOfPathResult($b));
