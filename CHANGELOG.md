@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   property. The new configuration option `search.explainFailures` (default `true`) disables the explanations and the debug data in error responses; failed search steps then result in a short `400` response. Failed search steps never result in a `500`.
 - User passwords are hashed using Argon 2 id instead of Argon 2 i, older hashes are updated during the next hash, closes #547.
 
+### Fixed
+- Password hashes (`_passwordHash` of users) and token hashes (`hash` and `_tokenHash` of tokens) are no longer indexed
+  into Elasticsearch, where they were searchable by every user with search access to the element. They are still stored
+  in the graph database, which authentication relies on. Documents which were indexed by earlier versions keep these
+  properties until they are removed from the index, e.g. with an `_update_by_query` request using
+  `ctx._source.remove('_passwordHash')` on `node_user` and `ctx._source.remove('hash')` and
+  `ctx._source.remove('_tokenHash')` on `node_token`.
+
 ## 0.1.36 - 2026-11-19
 ### Changed
 - Update PHP from 8.5.12 to 8.5.13, closes [#548].
