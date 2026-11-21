@@ -146,6 +146,29 @@ class SecurityUtilServiceTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
+    public function testValidatePasswordMatchesRehashesOutdatedHash(): void
+    {
+        $userPasswordHasher = $this->createMock(UserPasswordHasher::class);
+        $userPasswordHasher->method('verifyPassword')->willReturn(true);
+        $userPasswordHasher->method('needsRehash')->willReturn(true);
+        $userPasswordHasher->expects($this->once())->method('hashPassword')->with('somePassword')->willReturn('newHash');
+
+        $elementManager = $this->createMock(ElementManager::class);
+        $elementManager->expects($this->once())->method('merge');
+        $elementManager->expects($this->once())->method('flush');
+
+        $securityUtilService = $this->getSecurityUtilService(
+            elementManager: $elementManager,
+            userPasswordHasher: $userPasswordHasher,
+        );
+
+        $userNode = new NodeElement();
+        $userNode->setId(Uuid::fromString('4b08d9bd-4dfa-42f9-b433-0902d71f421e'));
+        $userNode->addProperty('_passwordHash', 'oldHash');
+        $securityUtilService->validatePasswordMatches($userNode, 'somePassword');
+        $this->assertSame('newHash', $userNode->getStringProperty('_passwordHash'));
+    }
+
     public function testValidateUserIsNotAnonymousUserWithBadConfig(): void
     {
         $bag = $this->createMock(ParameterBagInterface::class);
