@@ -7,6 +7,7 @@ namespace App\Command;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Helper\Regex;
 use App\Security\TokenGenerator;
+use App\Security\UserPasswordHasher;
 use App\Service\ElementManager;
 use App\Style\EmberNexusStyle;
 use App\Trait\CommandInputTrait;
@@ -37,6 +38,7 @@ class TokenCreateCommand extends Command
         private ElementManager $elementManager,
         private CypherEntityManager $cypherEntityManager,
         private TokenGenerator $tokenGenerator,
+        private UserPasswordHasher $userPasswordHasher,
         private EmberNexusConfiguration $emberNexusConfiguration,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -133,7 +135,7 @@ class TokenCreateCommand extends Command
             return Command::FAILURE;
         }
 
-        if (!password_verify($this->getStringArgument($input, 'password'), $user->getStringProperty('_passwordHash'))) {
+        if (!$this->userPasswordHasher->verifyPassword($this->getStringArgument($input, 'password'), $user->getStringProperty('_passwordHash'))) {
             $this->io->finalMessage(sprintf(
                 "Error: Provided password for user with id '%s' is incorrect, unable to login.",
                 $identifier->toString()

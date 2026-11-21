@@ -38,6 +38,9 @@ class SecurityUtilService
     }
 
     /**
+     * Validates the password and transparently upgrades outdated password hashes (e.g. Argon2i) to the current
+     * algorithm. In that case the element manager's flush method is called.
+     *
      * @throws Server500LogicErrorException
      */
     public function validatePasswordMatches(NodeElementInterface $userNode, string $currentPassword): void
@@ -48,6 +51,9 @@ class SecurityUtilService
         $hashedPassword = $userNode->getStringProperty('_passwordHash');
         if (true !== $this->userPasswordHasher->verifyPassword($currentPassword, $hashedPassword)) {
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
+        }
+        if ($this->userPasswordHasher->needsRehash($hashedPassword)) {
+            $this->changeUserPassword($userNode, $currentPassword);
         }
     }
 

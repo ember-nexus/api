@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `expressionError.diagnostics`). Raw database messages are never forwarded, and bad queries now result in a `400`
   instead of a `500`. The debug data is always part of these error responses, independent of the `debug` request
   property. The new configuration option `search.explainFailures` (default `true`) disables the explanations and the debug data in error responses; failed search steps then result in a short `400` response. Failed search steps never result in a `500`.
+- User passwords are hashed using Argon 2 id instead of Argon 2 i, older hashes are updated during the next hash, closes #547.
 
 ## 0.1.36 - 2026-11-19
 ### Changed
