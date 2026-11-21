@@ -58,4 +58,33 @@ class SearchStepEventTest extends TestCase
         $this->assertSame($event, $event->setResolvedQuery(['match_all' => []]));
         $this->assertSame(['match_all' => []], $event->getResolvedQuery());
     }
+
+    public function testElementMetadataDefaultsToEmpty(): void
+    {
+        $event = new SearchStepEvent(SearchStepType::ELEMENT_HYDRATION, null, []);
+
+        $this->assertSame([], $event->getPreviousElementMetadata());
+        $this->assertSame([], $event->getElementMetadata());
+    }
+
+    public function testPreviousElementMetadataIsProvidedByConstructorAndNotPartOfTheDebugInput(): void
+    {
+        $previous = ['4b0d1aa3-fa47-47e8-b5e3-5ea23f6b7a5a' => [0 => ['score' => 1.5]]];
+
+        $event = new SearchStepEvent(SearchStepType::ELEMENT_HYDRATION, null, [], $previous);
+
+        $this->assertSame($previous, $event->getPreviousElementMetadata());
+        $this->assertSame(['type', 'query', 'parameters'], array_keys($event->getDebugData()['input']));
+    }
+
+    public function testElementMetadataCanBeSet(): void
+    {
+        $event = new SearchStepEvent(SearchStepType::ELASTICSEARCH_QUERY_DSL_MIXIN, [], []);
+        $metadata = ['4b0d1aa3-fa47-47e8-b5e3-5ea23f6b7a5a' => ['score' => 1.5]];
+
+        $this->assertSame($event, $event->setElementMetadata($metadata));
+
+        $this->assertSame($metadata, $event->getElementMetadata());
+        $this->assertSame([], $event->getPreviousElementMetadata());
+    }
 }

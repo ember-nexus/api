@@ -4,7 +4,7 @@ Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: ETag, Location
 Allow: DELETE, GET, HEAD, OPTIONS, POST, PUT
 Cache-Control: no-cache, private
-Content-Length: 373
 Content-Type: application/problem+json; charset=utf-8
-Date: Fri, 02 Oct 2026 23:03:01 GMT
+Date: Sat, 21 Nov 2026 09:32:36 GMT
+Transfer-Encoding: chunked
 X-Powered-By: Ember Nexus API

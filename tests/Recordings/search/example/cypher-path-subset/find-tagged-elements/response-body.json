@@ -5,7 +5,7 @@
       "type": "Plant",
       "id": "78dd0a4d-2b94-4997-b4a4-353de854047c",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "Strelitzia reginae or Bird of Paradise",
@@ -22,7 +22,7 @@
         ],
         "hasFile": true,
         "name": "Bird of Paradise",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "S. reginae",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Strelitzia_reginae",
@@ -41,10 +41,10 @@
       "type": "Tag",
       "id": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:30:58+00:00",
         "description": "Blue is one of the three primary colours in the RGB (additive) colour model, as well as in the RYB colour model (traditional colour theory). It lies between violet and cyan on the spectrum of visible light. The term blue generally describes colours perceived by humans observing light with a dominant wavelength that's between approximately 450 and 495 nanometres. The clear daytime sky and the deep sea appear blue because of an optical effect known as Rayleigh scattering. An optical effect called the Tyndall effect explains blue eyes. Distant objects appear more blue because of another optical effect called aerial perspective.\n\nBlue has been an important colour in art and decoration since ancient times. The semi-precious stone lapis lazuli was used in ancient Egypt for jewellery and ornament and later, in the Renaissance, to make the pigment ultramarine, the most expensive of all pigments. In the eighth century Chinese artists used cobalt blue to colour fine blue and white porcelain. In the Middle Ages, European artists used it in the windows of cathedrals. Europeans wore clothing coloured with the vegetable dye woad until it was replaced by the finer indigo from America. In the 19th century, synthetic blue dyes and pigments gradually replaced organic dyes and mineral pigments. Dark blue became a common colour for military uniforms and later, in the late 20th century, for business suits. Because blue has commonly been associated with harmony, it was chosen as the colour of the flags of the United Nations and the European Union.\n\nIn the United States and Europe, blue is the colour that both men and women are most likely to choose as their favourite, with at least one recent survey showing the same across several other countries, including China, Malaysia, and Indonesia. Past surveys in the US and Europe have found that blue is the colour most commonly associated with harmony, confidence, masculinity, knowledge, intelligence, calmness, distance, infinity, the imagination, cold, and sadness.",
         "name": "blue",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:30:58+00:00",
         "color": "#4363d8",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Blue"
@@ -54,7 +54,7 @@
       "type": "Plant",
       "id": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
       "data": {
-        "created": "2026-09-24T19:04:03+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "Mertensia virginica Virginia Bluebell seen in Brooklyn Botanic Garden",
@@ -71,7 +71,7 @@
         ],
         "hasFile": true,
         "name": "Bluebell",
-        "updated": "2026-09-24T19:04:03+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "M. virginica",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Mertensia_virginica",
@@ -90,7 +90,7 @@
       "type": "Plant",
       "id": "884dd581-bcdd-43f1-9dab-11524578d9e2",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "Centaurea cyanus (introduced species) near Peshastin, Chelan County Washington",
@@ -107,7 +107,7 @@
         ],
         "hasFile": true,
         "name": "Cornflower",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "C. cyanus",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Centaurea_cyanus",
@@ -128,8 +128,8 @@
       "start": "78dd0a4d-2b94-4997-b4a4-353de854047c",
       "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
-        "created": "2026-09-24T19:04:12+00:00",
-        "updated": "2026-09-24T19:04:12+00:00",
+        "created": "2026-11-21T09:31:22+00:00",
+        "updated": "2026-11-21T09:31:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -137,7 +137,7 @@
       "type": "Plant",
       "id": "ad80a619-2b53-4f27-a4bd-56a316c15251",
       "data": {
-        "created": "2026-09-24T19:04:03+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "Jacarandas in New Farm Park October 2006",
@@ -160,7 +160,7 @@
         ],
         "hasFile": true,
         "name": "Jacaranda",
-        "updated": "2026-09-24T19:04:03+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "J. mimosifolia",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Jacaranda_mimosifolia",
@@ -181,8 +181,8 @@
       "start": "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
       "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
-        "created": "2026-09-24T19:04:12+00:00",
-        "updated": "2026-09-24T19:04:12+00:00",
+        "created": "2026-11-21T09:31:22+00:00",
+        "updated": "2026-11-21T09:31:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -190,7 +190,7 @@
       "type": "Plant",
       "id": "d747bfe6-0d52-4119-87c6-1fc37ed9395b",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "Anchusa capensis in the San Francisco Botanical Garden",
@@ -201,7 +201,7 @@
         ],
         "hasFile": true,
         "name": "Cape Forget-me-not",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "A. capensis",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Anchusa_capensis",
@@ -220,7 +220,7 @@
       "type": "Plant",
       "id": "ef54daa7-f62c-47ea-8762-fae02bd44485",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:31:00+00:00",
         "images": [
           {
             "description": "My wonderful Saintpaulia",
@@ -237,7 +237,7 @@
         ],
         "hasFile": true,
         "name": "African Violet",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:31:00+00:00",
         "scientificName": "S. sect. Saintpaulia",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Streptocarpus_sect._Saintpaulia",
@@ -258,8 +258,8 @@
       "start": "ad80a619-2b53-4f27-a4bd-56a316c15251",
       "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
-        "created": "2026-09-24T19:04:12+00:00",
-        "updated": "2026-09-24T19:04:12+00:00",
+        "created": "2026-11-21T09:31:22+00:00",
+        "updated": "2026-11-21T09:31:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -269,8 +269,8 @@
       "start": "ef54daa7-f62c-47ea-8762-fae02bd44485",
       "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
-        "created": "2026-09-24T19:04:12+00:00",
-        "updated": "2026-09-24T19:04:12+00:00",
+        "created": "2026-11-21T09:31:22+00:00",
+        "updated": "2026-11-21T09:31:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -280,8 +280,8 @@
       "start": "884dd581-bcdd-43f1-9dab-11524578d9e2",
       "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
-        "created": "2026-09-24T19:04:12+00:00",
-        "updated": "2026-09-24T19:04:12+00:00",
+        "created": "2026-11-21T09:31:22+00:00",
+        "updated": "2026-11-21T09:31:22+00:00",
         "scenario": "general.botanicExample"
       }
     },
@@ -291,8 +291,8 @@
       "start": "83b35321-4a91-4e9f-a49b-66d718c32ba7",
       "end": "79ca27e5-93bb-43e6-a76b-096ea45e2e8e",
       "data": {
-        "created": "2026-09-24T19:04:14+00:00",
-        "updated": "2026-09-24T19:04:14+00:00",
+        "created": "2026-11-21T09:31:22+00:00",
+        "updated": "2026-11-21T09:31:22+00:00",
         "scenario": "general.botanicExample"
       }
     }
@@ -307,9 +307,9 @@
         }
       },
       "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
-      "start": 1790276705.139105,
-      "end": 1790276705.562573,
-      "duration": 0.42346787452697754
+      "start": 1795253561.354031,
+      "end": 1795253561.743285,
+      "duration": 0.3892538547515869
     },
     {
       "input": {
@@ -379,7 +379,7 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1790276705.562889,
+      "start": 1795253561.743575,
       "element-hydration:redundantElementIds": {
         "message": "Removed 5 redundant elementIds.",
         "removedElementIds": [
@@ -401,8 +401,8 @@
         "f63ef383-ad99-48c6-9699-9d71c7c9cd16",
         "f8d6e90d-455c-46d8-b02d-430ad02217ee"
       ],
-      "end": 1790276705.636983,
-      "duration": 0.074094
+      "end": 1795253561.821682,
+      "duration": 0.078107
     }
   ]
 }

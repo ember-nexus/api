@@ -4,26 +4,28 @@
     {
       "type": "elasticsearch-query-dsl-mixin",
       "query": {
-        "bool": {
-          "should": [
-            {
-              "match": {
-                "name": {
-                  "query": "blue",
-                  "fuzziness": "AUTO",
-                  "boost": 10.0
+        "query": {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "name": {
+                    "query": "blue",
+                    "fuzziness": "AUTO",
+                    "boost": 10.0
+                  }
+                }
+              },
+              {
+                "match": {
+                  "description": {
+                    "query": "blue"
+                  }
                 }
               }
-            },
-            {
-              "match": {
-                "description": {
-                  "query": "blue"
-                }
-              }
-            }
-          ],
-          "minimum_should_match": 1
+            ],
+            "minimum_should_match": 1
+          }
         }
       }
     },

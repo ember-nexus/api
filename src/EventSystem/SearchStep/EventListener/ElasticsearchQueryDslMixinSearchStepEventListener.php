@@ -11,6 +11,7 @@ use App\Security\AccessChecker;
 use App\Security\AuthProvider;
 use App\Service\ExpressionService;
 use App\Service\GraphStructureService;
+use App\Service\Search\ElasticsearchQueryDefinitionService;
 use App\Type\SearchStepType;
 use Elastic\Elasticsearch\Response\Elasticsearch;
 use Ramsey\Uuid\Rfc4122\UuidV4;
@@ -27,6 +28,7 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
         private ElasticEntityManager $elasticEntityManager,
         private ExpressionService $expressionService,
         private GraphStructureService $graphStructureService,
+        private ElasticsearchQueryDefinitionService $elasticsearchQueryDefinitionService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Server500InternalServerErrorExceptionFactory $server500InternalServerErrorExceptionFactory,
     ) {
@@ -114,11 +116,11 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     }
 
     /**
-     * @return array{hits: array{total: array{value: int}, max_score: float|null, hits: list<array{_id: string, _index: string, _score: float|null}>}}
+     * @return array{hits: array{total: array{value: int}, max_score: float|null, hits: list<array{_id: string, _index: string, _score: float|null, highlight?: array<string, list<string>>, sort?: list<mixed>}>}}
      */
     private function getResponseData(Elasticsearch $response): array
     {
-        /** @var array{hits: array{total: array{value: int}, max_score: float|null, hits: list<array{_id: string, _index: string, _score: float|null}>}} $data */
+        /** @var array{hits: array{total: array{value: int}, max_score: float|null, hits: list<array{_id: string, _index: string, _score: float|null, highlight?: array<string, list<string>>, sort?: list<mixed>}>}} $data */
         $data = $response->asArray();
 
         return $data;
@@ -131,16 +133,39 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
     {
         $elements = [];
         foreach ($this->getResponseData($response)['hits']['hits'] as $element) {
+            $metadata = [
+                'score' => $element['_score'],
+            ];
+            if (array_key_exists('highlight', $element)) {
+                $metadata['highlight'] = $element['highlight'];
+            }
+            if (array_key_exists('sort', $element)) {
+                $metadata['sort'] = $element['sort'];
+            }
             $elements[] = [
                 'id' => UuidV4::fromString($element['_id']),
                 'type' => $this->graphStructureService->getTypeFromElasticIndex($element['_index']),
-                'metadata' => [
-                    'score' => $element['_score'],
-                ],
+                'metadata' => $metadata,
             ];
         }
 
         return $elements;
+    }
+
+    /**
+     * @param array<mixed> $elements
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function getElementMetadata(array $elements): array
+    {
+        $elementMetadata = [];
+        /** @var array{id: UuidV4, metadata: array<string, mixed>} $element */
+        foreach ($elements as $element) {
+            $elementMetadata[$element['id']->toString()] = $element['metadata'];
+        }
+
+        return $elementMetadata;
     }
 
     /**
@@ -207,10 +232,13 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
      */
     private function buildCombinedQuery(SearchStepEvent $event): array
     {
-        $query = $this->getQueryFromEvent($event);
+        $input = $this->getQueryFromEvent($event);
         $parameters = $event->getParameters();
 
-        $this->executeExpressionsInQuery($query, $parameters);
+        // expressions are resolved first, as their results must be validated as well
+        $this->executeExpressionsInQuery($input, $parameters);
+        $definition = $this->elasticsearchQueryDefinitionService->parse($input);
+        $query = $definition->query;
         $event->setResolvedQuery($query);
 
         $page = $this->getPageFromParameters($parameters);
@@ -262,6 +290,14 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
         if (null === $minScore) {
             unset($combinedQuery['min_score']);
         }
+        if (null !== $definition->highlight) {
+            $combinedQuery['highlight'] = $definition->highlight;
+        }
+        if (null !== $definition->sort) {
+            $combinedQuery['sort'] = $definition->sort;
+            // Elasticsearch only calculates scores if they are needed for sorting, but the score is part of the result
+            $combinedQuery['track_scores'] = true;
+        }
 
         return $combinedQuery;
     }
@@ -308,8 +344,10 @@ class ElasticsearchQueryDslMixinSearchStepEventListener
             throw $this->server500InternalServerErrorExceptionFactory->createFromTemplate('Unknown response type for elastic search query.', ['response' => $response]);
         }
 
+        $elements = $this->formatElementResults($response);
+        $event->setElementMetadata($this->getElementMetadata($elements));
         $event->setResults([
-            'elements' => $this->formatElementResults($response),
+            'elements' => $elements,
             'totalHits' => $this->getResponseData($response)['hits']['total']['value'],
             'maxScore' => $this->getResponseData($response)['hits']['max_score'],
         ]);

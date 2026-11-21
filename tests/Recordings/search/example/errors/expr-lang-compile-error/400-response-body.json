@@ -2,7 +2,7 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:a60af62e-41fe-4789-a12f-3a44b0283b78",
+  "instance": "urn:uuid:21425992-0b66-4a89-a015-fb3976998cc6",
   "detail": "Expression execution failed.\n\ncompile error: unexpected token EOF (1:5)\n |  1 + \n | ....^",
   "expressionError": {
     "source": "expr-lang",
@@ -33,7 +33,7 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1792781086.041577
+      "start": 1795253586.17658
     }
   }
 }

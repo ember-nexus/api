@@ -5,7 +5,7 @@
       "type": "Plant",
       "id": "23508e6c-632a-496d-9bd6-8c62a03216af",
       "data": {
-        "created": "2026-09-24T19:04:03+00:00",
+        "created": "2026-11-21T09:46:33+00:00",
         "images": [
           {
             "description": "Lilium candidum, Israel",
@@ -22,7 +22,7 @@
         ],
         "hasFile": true,
         "name": "Lily",
-        "updated": "2026-09-24T19:04:03+00:00",
+        "updated": "2026-11-21T09:46:33+00:00",
         "scientificName": "L. candidum",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Lilium_candidum",
@@ -35,13 +35,16 @@
         "hash": {
           "sha256": "ee066b93ae72c719f863a428f03c86ecd28e52818528eacf4d4e32acb4b4b37c"
         }
+      },
+      "metadata": {
+        "score": 1.0101794
       }
     },
     {
       "type": "Plant",
       "id": "258c0dfe-b1d8-4839-beed-d00d1b544a96",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:46:33+00:00",
         "images": [
           {
             "description": "",
@@ -58,7 +61,7 @@
         ],
         "hasFile": true,
         "name": "Flame Lily",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:46:33+00:00",
         "scientificName": "G. superba",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Gloriosa_superba",
@@ -71,13 +74,16 @@
         "hash": {
           "sha256": "72e3e3770db795b2f04f0b5bb0be43e74df70de4faa0bf83a706bbde29e4ea0b"
         }
+      },
+      "metadata": {
+        "score": 1.0101794
       }
     },
     {
       "type": "Plant",
       "id": "8940d70b-5b6f-43b7-bee4-41d073396ff8",
       "data": {
-        "created": "2026-09-24T19:04:01+00:00",
+        "created": "2026-11-21T09:46:33+00:00",
         "images": [
           {
             "description": "in Seoul Forest, South Korea",
@@ -100,7 +106,7 @@
         ],
         "hasFile": true,
         "name": "Tulip",
-        "updated": "2026-09-24T19:04:01+00:00",
+        "updated": "2026-11-21T09:46:33+00:00",
         "scientificName": "Tulipa",
         "scenario": "general.botanicExample",
         "link": "https://en.wikipedia.org/wiki/Tulip",
@@ -113,6 +119,9 @@
         "hash": {
           "sha256": "c4c242897c43a74e9e4a8b5bf89e6b2cb1cbd99f8d621f33eea175cbf6dfab97"
         }
+      },
+      "metadata": {
+        "score": 1.0101794
       }
     }
   ],
@@ -135,7 +144,7 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1790276705.958542,
+      "start": 1795257786.435608,
       "indices": "*",
       "combinedQuery": {
         "_source": [
@@ -178,8 +187,8 @@
           }
         }
       },
-      "end": 1790276706.049568,
-      "duration": 0.091026
+      "end": 1795257786.527986,
+      "duration": 0.092378
     },
     {
       "input": {
@@ -218,14 +227,14 @@
         }
       },
       "step-handler": "element-hydration (App\\EventSystem\\SearchStep\\EventListener\\ElementHydrationSearchStepEventListener)",
-      "start": 1790276706.049865,
+      "start": 1795257786.528262,
       "accessibleElementIds": [
         "23508e6c-632a-496d-9bd6-8c62a03216af",
         "258c0dfe-b1d8-4839-beed-d00d1b544a96",
         "8940d70b-5b6f-43b7-bee4-41d073396ff8"
       ],
-      "end": 1790276706.069127,
-      "duration": 0.019262
+      "end": 1795257786.546551,
+      "duration": 0.018289
     }
   ]
 }

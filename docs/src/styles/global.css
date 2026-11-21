@@ -1033,3 +1033,17 @@ code[data-method="HEAD"],   code span[data-method="HEAD"]   { color: var(--c-met
 
 
 
+
+/* Highlighted text of search results (e.g. Elasticsearch highlights wrapped in <mark>). */
+.search-highlight-list mark {
+    background-color: var(--color-yellow-200);
+    color: inherit;
+    border-radius: 0.2em;
+    padding: 0 0.15em;
+}
+
+@media (prefers-color-scheme: dark) {
+    .search-highlight-list mark {
+        background-color: color-mix(in srgb, var(--color-yellow-500) 45%, transparent);
+    }
+}

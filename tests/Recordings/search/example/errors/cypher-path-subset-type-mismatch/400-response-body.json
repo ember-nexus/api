@@ -2,7 +2,7 @@
   "type": "http://api/error/400/bad-content",
   "title": "Bad content",
   "status": 400,
-  "instance": "urn:uuid:65d631d5-65f9-48cf-b3b8-6fa0666d5d02",
+  "instance": "urn:uuid:5f4fbe6c-4ca7-46ac-b862-da0dcf5d2f9c",
   "detail": "Search step 2 (type cypher-path-subset) was rejected by neo4j, see failedStep.diagnostics for the reason.",
   "debug": [
     {
@@ -20,7 +20,7 @@
         }
       },
       "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
-      "start": 1792781085.523448,
+      "start": 1795253586.012776,
       "indices": "*",
       "combinedQuery": {
         "_source": [
@@ -61,8 +61,8 @@
           }
         }
       },
-      "end": 1792781085.544158,
-      "duration": 0.02071
+      "end": 1795253586.032744,
+      "duration": 0.019968
     }
   ],
   "failedStep": {
@@ -80,7 +80,7 @@
                   "id": "16884ac8-ba7a-4c91-8449-4fdd803644b6",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 4.5426874
+                    "score": 4.5739636
                   }
                 },
                 {
@@ -94,14 +94,21 @@
                   "id": "1feedd9f-0c12-490c-8461-b12ff7447ac8",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 3.7307374
+                    "score": 3.7564187
                   }
                 },
                 {
                   "id": "63bcbffb-29a3-45b5-8cc1-8c41281bcae3",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 3.407996
+                    "score": 3.431453
+                  }
+                },
+                {
+                  "id": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
+                  "type": "Taxon",
+                  "metadata": {
+                    "score": 3.269838
                   }
                 },
                 {
@@ -112,17 +119,10 @@
                   }
                 },
                 {
-                  "id": "8288a39a-4b41-4ed5-8d0f-0b795048163c",
-                  "type": "Taxon",
-                  "metadata": {
-                    "score": 3.2474873
-                  }
-                },
-                {
                   "id": "9abc0ab3-fa1a-4138-80c1-49db5c4d082f",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 3.2221959
+                    "score": 3.2443726
                   }
                 },
                 {
@@ -136,35 +136,35 @@
                   "id": "7dd3a650-d60e-40c9-89d0-bccaf395369f",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.845529
+                    "score": 2.86511
                   }
                 },
                 {
                   "id": "2c0bb4b9-c1ec-41f3-b9d9-f59a8b8bef38",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.6971915
+                    "score": 2.71575
                   }
                 },
                 {
                   "id": "425235d6-75ab-4ccb-8208-783ced0decc6",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.5905507
+                    "score": 2.6083744
                   }
                 },
                 {
                   "id": "1a9579bd-1331-4d5c-93ec-a9ff8d9c576b",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.2319658
+                    "score": 2.2473185
                   }
                 },
                 {
                   "id": "47e135a7-c77a-4489-9262-1e425a4b7177",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 2.1584837
+                    "score": 2.17333
                   }
                 },
                 {
@@ -199,7 +199,7 @@
                   "id": "cec3972f-322f-432c-b86e-611c85a96b6c",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 1.9037968
+                    "score": 1.9168881
                   }
                 },
                 {
@@ -213,18 +213,18 @@
                   "id": "1852bdff-a4dd-4f91-9243-0e802775f757",
                   "type": "Taxon",
                   "metadata": {
-                    "score": 1.430909
+                    "score": 1.4407414
                   }
                 }
               ],
               "totalHits": 20,
-              "maxScore": 4.5426874
+              "maxScore": 4.5739636
             }
           ]
         }
       },
       "step-handler": "cypher-path-subset (App\\EventSystem\\SearchStep\\EventListener\\CypherPathSearchStepEventListener)",
-      "start": 1792781085.544559
+      "start": 1795253586.033044
     },
     "source": "neo4j",
     "code": "invalid-query",

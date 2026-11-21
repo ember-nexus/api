@@ -1,0 +1,31 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "query": {
+          "match": {
+            "description": "lily"
+          }
+        },
+        "sort": [
+          {
+            "name.keyword": {
+              "order": "desc"
+            }
+          }
+        ]
+      },
+      "parameters": {
+        "nodeTypes": [
+          "Plant"
+        ],
+        "pageSize": 3
+      }
+    },
+    {
+      "type": "element-hydration"
+    }
+  ]
+}

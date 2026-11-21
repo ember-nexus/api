@@ -1,0 +1,27 @@
+---
+type: example
+title: Sorting
+---
+import searchQuery from './13-sorting/query.sh?raw';
+import searchResultBody from './13-sorting/result.json';
+import searchResultHeaders from './13-sorting/header.txt?raw';
+
+This example uses the [long form](/reference/search/elasticsearch-query-dsl-mixin#step-query) of the query. The full
+text search for "lily" is sorted by the name of the plants in ascending order, instead of by relevance. The search is
+restricted to plants, and only the first five results are returned.
+
+<Code code={searchQuery} lang="bash" mark="sort" />
+
+<SearchResponseCard
+    responseBody={searchResultBody}
+    responseHeaders={searchResultHeaders}
+    graphLayout="grid"
+></SearchResponseCard>
+
+Text properties like `name` can not be sorted directly, therefore the example sorts by `name.keyword`, the exact value
+of the property. The [hydrated](/reference/search/element-hydration#metadata) elements keep the order and contain the
+values they were sorted by in `metadata.sort`. The score is still calculated and available as `metadata.score`, it
+just does not decide the order. To sort by relevance first and use a property as a tie-breaker, use
+`"sort": ["_score", {"name.keyword": "asc"}]`.
+
+The next page of results, requested with the step parameter `page`, continues the same order.

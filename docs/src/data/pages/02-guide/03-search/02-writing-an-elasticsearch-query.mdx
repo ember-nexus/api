@@ -14,7 +14,8 @@ constraints.
 If you have access to the Elasticsearch database and Kibana, then you can use [Kibana's console](https://www.elastic.co/docs/explore-analyze/query-filter/tools/console)
 to experiment and test custom queries, as well as explore the data schemas of Elasticsearch.  
 Note that **Kibana's console requires a full query**, while Ember Nexus API's [`POST /search`](/api/post-search)
-endpoint only accepts the **content of the `query` property**:
+endpoint only accepts the **content of the `query` property** (short form) or an object with the property `query`
+(long form, which also supports `highlight` and `sort`, see the [reference](/reference/search/elasticsearch-query-dsl-mixin#step-query)):
 
 import emberNexusQuery from "../../03-reference/03-search/01-elasticsearch-query-dsl-mixin/ember-nexus-query.txt?raw"
 import kibanaConsoleQuery from "../../03-reference/03-search/01-elasticsearch-query-dsl-mixin/kibana-console-query.txt?raw"

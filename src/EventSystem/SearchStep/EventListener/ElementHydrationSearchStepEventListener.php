@@ -215,17 +215,48 @@ class ElementHydrationSearchStepEventListener
     }
 
     /**
-     * @param UuidInterface[] $elementIds
+     * Adds the metadata of previous steps (e.g. Elasticsearch's score) as `metadata` after the native properties of the
+     * element (e.g. `data` and `file`). The metadata of all
+     * steps is merged into a single object in the order of the steps, so keys of later steps overwrite keys of earlier
+     * steps.
+     *
+     * @param mixed[]                               $rawElement
+     * @param array<int, array<string, mixed>>|null $stepMetadata
+     *
+     * @return mixed[]
+     */
+    private function addMetadataToRawElement(array $rawElement, ?array $stepMetadata): array
+    {
+        if (null === $stepMetadata) {
+            return $rawElement;
+        }
+        ksort($stepMetadata);
+        $metadata = array_merge([], ...array_values($stepMetadata));
+        if (0 === count($metadata)) {
+            return $rawElement;
+        }
+
+        $rawElement['metadata'] = $metadata;
+
+        return $rawElement;
+    }
+
+    /**
+     * @param UuidInterface[]                                 $elementIds
+     * @param array<string, array<int, array<string, mixed>>> $elementMetadata metadata of previous steps, indexed by element id
      *
      * @return array<mixed[]>
      */
-    private function getElementData(array $elementIds): array
+    private function getElementData(array $elementIds, array $elementMetadata = []): array
     {
         $elementData = [];
         foreach ($elementIds as $elementId) {
             $element = $this->elementManager->getElement($elementId);
             if ($element) {
-                $elementData[] = $this->elementToRawService->elementToRaw($element);
+                $elementData[] = $this->addMetadataToRawElement(
+                    $this->elementToRawService->elementToRaw($element),
+                    $elementMetadata[$elementId->toString()] ?? null
+                );
             }
         }
 
@@ -270,7 +301,7 @@ class ElementHydrationSearchStepEventListener
 
         $event->addDebugData('accessibleElementIds', $elementIds);
 
-        $elementData = $this->getElementData($elementIds);
+        $elementData = $this->getElementData($elementIds, $event->getPreviousElementMetadata());
 
         $event->setResults($elementData);
 

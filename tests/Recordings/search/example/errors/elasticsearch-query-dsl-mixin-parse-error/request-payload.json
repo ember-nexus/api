@@ -5,9 +5,11 @@
       "type": "elasticsearch-query-dsl-mixin",
       "query": {
         "query": {
-          "match": {
-            "description": {
-              "query": "lily"
+          "query": {
+            "match": {
+              "description": {
+                "query": "lily"
+              }
             }
           }
         }

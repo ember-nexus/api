@@ -1,0 +1,36 @@
+{
+  "type": "http://api/error/400/bad-content",
+  "title": "Bad content",
+  "status": 400,
+  "instance": "urn:uuid:85341a5c-af11-44ba-b7f4-768a53f2c969",
+  "detail": "The Elasticsearch feature 'script_score' at 'query.query.script_score' is not supported: scripts are not supported.",
+  "debug": [],
+  "failedStep": {
+    "index": 0,
+    "type": "elasticsearch-query-dsl-mixin",
+    "debug": {
+      "input": {
+        "type": "elasticsearch-query-dsl-mixin",
+        "query": {
+          "query": {
+            "script_score": {
+              "query": {
+                "match": {
+                  "description": "lily"
+                }
+              },
+              "script": {
+                "source": "_score * 2"
+              }
+            }
+          }
+        },
+        "parameters": {
+          "stepResults": []
+        }
+      },
+      "step-handler": "elasticsearch-query-dsl-mixin (App\\EventSystem\\SearchStep\\EventListener\\ElasticsearchQueryDslMixinSearchStepEventListener)",
+      "start": 1795253586.138165
+    }
+  }
+}

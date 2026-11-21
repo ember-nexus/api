@@ -1,0 +1,22 @@
+{
+  "debug": true,
+  "steps": [
+    {
+      "type": "elasticsearch-query-dsl-mixin",
+      "query": {
+        "query": {
+          "script_score": {
+            "query": {
+              "match": {
+                "description": "lily"
+              }
+            },
+            "script": {
+              "source": "_score * 2"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
