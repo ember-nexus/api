@@ -6,41 +6,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Added
-- **BREAKING CHANGE**: Support for UUIDv4 got dropped; instead the new format UUID sv2a7 got introduced. It is similar
-  to UUIDv7, but got more random bits, and is provided in base62sort encoding. It is used to improve general API
-  performance. Closes #532.
-- `backup:convert` migrates backups with legacy UUIDv4 ids, so old datasets stay usable without a live migration.
-- `backup:load` converts legacy UUIDv4 ids on the fly and can write the old-to-new mapping with
-  `--legacy-mapping-output`, so clients can translate stored references.
-- The Elasticsearch search step supports a long query definition: an object with the property `query` (the
-  Elasticsearch query, same as the short form which is still supported) and the optional properties `highlight`
-  (Elasticsearch's highlight options) and `sort` (Elasticsearch's sort definition, closes #456), closes #412. Highlights
-  of internal fields (starting with `_`) and of fields starting with a wildcard (`*`, `?`) are rejected. Highlight queries
-  are checked like the main query. Sorting by internal fields is rejected as well. The score of elements is still calculated if
-  results are sorted by something else.
+- Large performance gains: up to 90x faster `GET` endpoints, up to 40x faster `POST /` and `POST /<uuid>`, and file
+  endpoints reaching about 260 MiB/s for uploads and over 1 GiB/s for downloads.
+- Elements are now looked up by id with typed queries and id indices, which is the main reason for the gains above.
+  The new commands `mphf:build` (daily) and `index:ensure` (every ten minutes) maintain the required lookup table and
+  indices on their own. This needs a third S3 bucket (`S3_SYSTEM_BUCKET`) and Redis with
+  `maxmemory-policy noeviction`; without a lookup table the API keeps working, only slower. Closes #531.
+- **BREAKING CHANGE**: UUIDv4 is replaced by the new UUID sv2a7 format. It is similar to UUIDv7 with more random bits,
+  encoded as base62sort, and keeps ids sortable and cheap to index. Existing backups have to be converted with
+  `backup:convert` before loading. Closes #532.
+- **BREAKING CHANGE**: The `CREATED` relation is replaced by the server-managed properties `createdBy` and `updatedBy`,
+  which hold the id of the acting user. Clients can not set them, and `onCreatedByUser` conditions use `createdBy`.
+  `backup:convert` migrates old backups; elements created before this change have no `createdBy` and no longer match
+  `onCreatedByUser`.
+- `backup:load` refuses backups created before 0.2.0 and points to `backup:convert`.
+- The `summary.json` of backups is described by a JSON Schema, which `backup:create` is tested against.
+- Tokens expire: expired tokens no longer authenticate, are marked `EXPIRED` and are deleted after
+  `token.tokenDeleteExpiredTokensAutomaticallyInSeconds` by the new job `cron:expire-tokens`.
+- The Elasticsearch search step supports a long query definition: an object with `query` (the Elasticsearch query, as
+  in the short form) and the optional properties `highlight` and `sort` (closes #456, #412). Highlights and sorting on
+  internal fields are rejected.
 - Search steps can add metadata to elements. The Elasticsearch step adds `score`, `highlight` and `sort`; the element
-  hydration step returns the metadata of all previous steps as `metadata` after the native properties (`data`, `file`) of each element, the
-  metadata of all steps is merged into one object, later steps overwrite keys of earlier steps. The metadata is associated with the element id, so it also survives steps which do
-  not know about it, like Cypher path searches.
-- Elasticsearch queries which could read other documents or execute code are rejected with a `400`: scripts of any kind,
-  terms lookups, document references of `more_like_this`, `indexed_shape`, `percolate`, `wrapper` queries and joining
-  queries (`nested`, `has_child`, `has_parent`, `parent_id`). The check also applies to results of expressions.
+  hydration step returns the merged metadata of all previous steps as `metadata`, and it is kept across steps which
+  do not know about it, like Cypher path searches.
 
 ### Changed
-- The recorded Elasticsearch parse error example now wraps the query twice, as a single `query` property is the long
-  query definition now. Requests which wrapped their query in a `query` property before, and received an error, are now
-  valid requests.
-- Failed search steps are now explained instead of resulting in a generic server error (#453). The problem JSON contains
-  the debug data of the previous steps (`debug`) and of the failed step (`failedStep`); for Elasticsearch, Neo4j and
-  expr-lang failures the allowlisted data of the database is scoped to `failedStep.diagnostics` (or
-  `expressionError.diagnostics`). Raw database messages are never forwarded, and bad queries now result in a `400`
-  instead of a `500`. The debug data is always part of these error responses, independent of the `debug` request
-  property. The new configuration option `search.explainFailures` (default `true`) disables the explanations and the debug data in error responses; failed search steps then result in a short `400` response. Failed search steps never result in a `500`.
-- User passwords are hashed using Argon 2 id instead of Argon 2 i, older hashes are updated during the next hash, closes #547.
+- Failed search steps are explained instead of resulting in a generic server error (#453). The problem JSON contains
+  the debug data of the previous steps (`debug`) and the failed step (`failedStep`) with allowlisted database
+  diagnostics; raw database messages are never forwarded. Bad queries result in `400` instead of `500`. The new option
+  `search.explainFailures` (default `true`) reduces such responses to a short `400`.
+- Requests which wrapped their Elasticsearch query in a single `query` property and received an error are now valid,
+  as that is the long query definition.
+- User passwords are hashed with Argon 2 id instead of Argon 2 i; older hashes are updated on the next hash, closes
+  #547.
+- The default of `FRANKENPHP_NUM_THREADS` is the number of CPU cores instead of twice that number; set the variable
+  to change it. `FRANKENPHP_MAX_THREADS` allows up to 8 threads per core under load.
+- `backup:convert` sets the `version` of the converted backup to `0.2.0` (the original is kept as
+  `convertedFromVersion`), so `backup:load` accepts it.
+- **BREAKING CHANGE**: The production image no longer contains a default `.env` file with a publicly known `APP_SECRET`
+  and a default `ANONYMOUS_USER_UUID`. Both environment variables have to be set; the example Docker Compose files
+  set them.
+- Mutant tests are no longer part of the CI; `composer test:mutant` still runs them locally.
 
 ### Fixed
-- Password hashes (`_passwordHash` of users) and token hashes (`hash` and `_tokenHash` of tokens) are no longer indexed
-  into Elasticsearch.
+- `cron:expire-tokens` no longer fetches the same page of old tokens again and again if some of them can't be loaded.
+- `GET /` and its Etag honour the conditions `onLabel`, `onParentLabel`, `onState` and `onCreatedByUser` of
+  `HAS_READ_ACCESS` relations, like `GET /<uuid>`.
+
+### Security
+- Relations which grant access (`OWNS`, `IS_IN_GROUP`, `HAS_<ACCESS>_ACCESS`) can only be created by users who hold
+  that access on the target themselves, otherwise the API answers with `403`. Before, read access was enough to become
+  the owner of an element.
+- Node labels and relation types have to match `^[A-Za-z][A-Za-z0-9_]{0,127}$`, as other types broke `mphf:build`.
+- The token properties `hash`, `state` and `expirationDate` can not be written through the element endpoints.
+- `PATCH`/`PUT`/`DELETE /{id}` take the element lock only after the access check, so callers without access can
+  neither block edits nor learn from a `409` that an element exists.
+- The Cypher path subset rejects the token property `hash` only for nodes which can be tokens (label `Token`, or no or
+  a wildcard label); other nodes and relations can use properties named `hash`.
+- Cypher path subset queries using internal properties, dynamic property access or a parameter as property map are
+  rejected with `400`, are aborted by Neo4j after 30 seconds, and no longer reveal whether paths were removed due to
+  missing access rights.
+- Password and token hashes are no longer indexed into Elasticsearch.
+- Logging in with an unknown user takes as long as with a known one, so response times do not reveal registered e-mail
+  addresses.
 
 ## 0.1.36 - 2026-11-19
 ### Changed

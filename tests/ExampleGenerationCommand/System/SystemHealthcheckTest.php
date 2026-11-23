@@ -38,6 +38,7 @@ class SystemHealthcheckTest extends BaseCommandTestCase
                 'Alpine version:',
                 'FrankenPHP version:',
                 'Caddy version:',
+                'Type index:',
                 'PHP version:',
             ]
         );

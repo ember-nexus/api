@@ -83,10 +83,13 @@ class SecurityUtilService
     }
 
     /**
+     * @param string|null $passwordToVerify the password which is checked next; if the user does not exist, a dummy verification
+     *                                      with the same cost is done, so the response time does not reveal registered users
+     *
      * @throws Client401UnauthorizedException
      * @throws Server500LogicErrorException
      */
-    public function findUserByUniqueUserIdentifier(string $uniqueUserIdentifier): NodeElementInterface
+    public function findUserByUniqueUserIdentifier(string $uniqueUserIdentifier, ?string $passwordToVerify = null): NodeElementInterface
     {
         $uniqueIdentifier = $this->emberNexusConfiguration->getRegisterUniqueIdentifier();
         $res = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
@@ -99,6 +102,10 @@ class SecurityUtilService
             ]
         ));
         if (1 !== count($res)) {
+            if (null !== $passwordToVerify) {
+                // same cost as the verification of an existing account, see UserPasswordHasher::verifyAgainstDummyHash()
+                $this->userPasswordHasher->verifyAgainstDummyHash($passwordToVerify);
+            }
             throw $this->client401UnauthorizedExceptionFactory->createFromTemplate();
         }
         $rawUserId = $res->first()->get('id');

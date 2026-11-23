@@ -8,16 +8,19 @@ use App\Command\Cron\UpdateOwnershipCommand;
 use App\Service\CronExecutionGateService;
 use App\Service\CronTimeBudgetService;
 use App\Service\ElementManager;
+use App\Service\ElementTypeService;
 use App\Service\QueueService;
 use App\Service\SearchAccessCalculatorService;
 use App\Type\NodeElement;
 use App\Type\RabbitMQQueueType;
 use App\Type\Uuid;
 use Laudis\Neo4j\Contracts\ClientInterface;
+use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherMap;
 use LogicException;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -42,6 +45,7 @@ class UpdateOwnershipCommandTest extends TestCase
         ?ElasticEntityManager $elasticEntityManager = null,
         ?CypherEntityManager $cypherEntityManager = null,
         ?CronTimeBudgetService $cronTimeBudgetService = null,
+        ?ElementTypeService $elementTypeService = null,
     ): UpdateOwnershipCommand {
         $cronExecutionGateService = $this->prophesize(CronExecutionGateService::class);
         $cronExecutionGateService->shouldSkipExecution()->willReturn($isCronDisabled);
@@ -60,7 +64,16 @@ class UpdateOwnershipCommandTest extends TestCase
             $searchAccessCalculatorService ?? $this->prophesize(SearchAccessCalculatorService::class)->reveal(),
             $elasticEntityManager ?? $this->prophesize(ElasticEntityManager::class)->reveal(),
             $cypherEntityManager ?? $this->prophesize(CypherEntityManager::class)->reveal(),
+            $elementTypeService ?? $this->buildElementTypeService('Data'),
         );
+    }
+
+    private function buildElementTypeService(?string $nodeLabel): ElementTypeService
+    {
+        $elementTypeService = $this->prophesize(ElementTypeService::class);
+        $elementTypeService->resolveNodeLabel(Argument::any())->willReturn($nodeLabel);
+
+        return $elementTypeService->reveal();
     }
 
     private function noChildrenCypherEntityManager(): CypherEntityManager
@@ -142,6 +155,7 @@ class UpdateOwnershipCommandTest extends TestCase
             $this->prophesize(SearchAccessCalculatorService::class)->reveal(),
             $this->prophesize(ElasticEntityManager::class)->reveal(),
             $this->prophesize(CypherEntityManager::class)->reveal(),
+            $this->buildElementTypeService('Data'),
         );
 
         $this->expectException(LogicException::class);
@@ -307,6 +321,72 @@ class UpdateOwnershipCommandTest extends TestCase
 
         $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
         $this->assertStringContainsString('updated search access of 1 element(s)', $commandTester->getDisplay());
+    }
+
+    /**
+     * @return array<string, array{0: ?string, 1: bool}>
+     */
+    public static function childLookupProvider(): array
+    {
+        return ['resolved label queries children with escaped label' => ['Da`ta', true], 'unresolved label skips the query' => [null, false]];
+    }
+
+    #[DataProvider('childLookupProvider')]
+    public function testChildLookupUsesTheResolvedParentLabel(?string $label, bool $expectsQuery): void
+    {
+        $parentId = Uuid::fromString('02IiNr0G8viOVKjxnRNk163IJyKc3ShnMAwuH');
+        $childId = Uuid::fromString('02IiNr0G8viOVKjTVopQ38JnV8hXStL6rA4Kf');
+        $parent = (new NodeElement())->setId($parentId)->setLabel('Data');
+
+        $elementManager = $this->prophesize(ElementManager::class);
+        $elementManager->getElement(Argument::any())->willReturn($parent);
+
+        $searchAccessCalculatorService = $this->prophesize(SearchAccessCalculatorService::class);
+        $searchAccessCalculatorService->getIndexForElement($parent)->willReturn('node_data');
+        $searchAccessCalculatorService->calculateSearchAccess($parent)->willReturn(['groups' => [], 'users' => ['new-user']]);
+
+        $elasticEntityManager = $this->prophesize(ElasticEntityManager::class);
+        $elasticEntityManager->getOneByIdentifier('node_data', $parentId->toString())->willReturn(null);
+        $elasticEntityManager->merge(Argument::any())->willReturn($elasticEntityManager->reveal());
+        $elasticEntityManager->flush()->willReturn($elasticEntityManager->reveal());
+
+        $noSummary = null;
+        $client = $this->prophesize(ClientInterface::class);
+        if ($expectsQuery) {
+            $client->runStatement(Argument::that(
+                fn (Statement $statement) => str_contains($statement->getText(), 'MATCH (parent:`Da``ta` {id: $parentId})-[:OWNS]->(children)')
+            ))->shouldBeCalledOnce()->willReturn(new SummarizedResult($noSummary, [new CypherMap(['id' => $childId->toString()])]));
+        } else {
+            $client->runStatement(Argument::any())->shouldNotBeCalled();
+        }
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->willReturn($client->reveal());
+
+        $queueService = $this->prophesize(QueueService::class);
+        $queueService->consumeQueue(Argument::is(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE), Argument::type('callable'), Argument::any())
+            ->will(function ($args) use ($parentId) {
+                /** @var callable $handler */
+                $handler = $args[1];
+                $handler(['relationId' => null, 'startId' => $parentId->toString(), 'endId' => null]);
+
+                return 1;
+            });
+        $publish = $queueService->publishEvent(RabbitMQQueueType::ELASTICSEARCH_UPDATE_OWNERSHIP_QUEUE, ['elementId' => $childId->toString()]);
+        $expectsQuery ? $publish->shouldBeCalledTimes(1) : $publish->shouldNotBeCalled();
+
+        $command = $this->buildCommand(
+            queueService: $queueService->reveal(),
+            elementManager: $elementManager->reveal(),
+            searchAccessCalculatorService: $searchAccessCalculatorService->reveal(),
+            elasticEntityManager: $elasticEntityManager->reveal(),
+            cypherEntityManager: $cypherEntityManager->reveal(),
+            elementTypeService: $this->buildElementTypeService($label),
+        );
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([]);
+
+        $this->assertSame(Command::SUCCESS, $commandTester->getStatusCode());
     }
 
     public function testCommandHandlesAQueuedChildMessageJustLikeAnyOtherElement(): void

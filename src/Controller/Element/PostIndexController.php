@@ -11,6 +11,7 @@ use App\Factory\Exception\Client403ForbiddenExceptionFactory;
 use App\Factory\Exception\Client404NotFoundExceptionFactory;
 use App\Security\AccessChecker;
 use App\Security\AuthProvider;
+use App\Service\AccessGrantingRelationGuardService;
 use App\Service\CreateElementFromRawDataService;
 use App\Service\ElementManager;
 use App\Service\RequestUtilService;
@@ -31,6 +32,7 @@ class PostIndexController extends AbstractController
         private ElementManager $elementManager,
         private UrlGeneratorInterface $router,
         private CreateElementFromRawDataService $createElementFromRawDataService,
+        private AccessGrantingRelationGuardService $accessGrantingRelationGuardService,
         private RequestUtilService $requestUtilService,
         private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400MissingPropertyExceptionFactory $client400MissingPropertyExceptionFactory,
@@ -94,6 +96,10 @@ class PostIndexController extends AbstractController
             }
         }
 
+        if (null !== $endId) {
+            $this->accessGrantingRelationGuardService->assertMayCreate($userId, $type, $endId);
+        }
+
         $element = $this->createElementFromRawDataService->createElementFromRawData(
             $elementId,
             $type,
@@ -110,13 +116,6 @@ class PostIndexController extends AbstractController
                 ->setStart($userId)
                 ->setEnd($element->getId());
             $this->elementManager->create($newNodeOwnsRelation);
-
-            $newNodeCreatedRelation = (new RelationElement())
-                ->setId(Uuid::generate())
-                ->setType('CREATED')
-                ->setStart($userId)
-                ->setEnd($element->getId());
-            $this->elementManager->create($newNodeCreatedRelation);
         }
 
         $this->elementManager->flush();

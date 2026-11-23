@@ -1,6 +1,10 @@
 # The production image only contains the application, the connections to the other services are configured through its
 # environment (the repository is not mounted, so no `.env` file provides them).
 x-api-environment: &api-environment
+  # the production image has no default .env file: the secret of the Symfony kernel (test value only) and the id of the
+  # anonymous user, which is part of the reference dataset, have to be set
+  APP_SECRET: test-secret-which-is-not-used-in-production
+  ANONYMOUS_USER_UUID: 02IiNr0GOoKiPMLSxpKrArvUWmaEqZ5h7Uybr
   CYPHER_AUTH: bolt://neo4j:password@neo4j
   MONGO_AUTH: mongodb://mongodb:password@mongodb:27017
   ELASTIC_AUTH: elasticsearch:9200
@@ -105,10 +109,10 @@ services:
       - xpack.security.enrollment.enabled=true
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     expose:
       - "6379"
-    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+    command: redis-server --save 20 1 --maxmemory-policy noeviction --loglevel warning --requirepass redis-password
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -130,7 +134,7 @@ services:
     command: server /data --console-address ":9001"
 
   minio-init:
-    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    image: pgsty/mc:RELEASE.2026-11-12T00-00-00Z
     depends_on:
       - minio
     entrypoint: >
@@ -142,9 +146,11 @@ services:
 
       mc mb --ignore-existing minio/api-storage;
       mc mb --ignore-existing minio/api-upload;
+      mc mb --ignore-existing minio/ember-nexus-system;
 
       mc anonymous set none minio/api-storage;
       mc anonymous set none minio/api-upload;
+      mc anonymous set none minio/ember-nexus-system;
 
       mc admin user add minio accessKey secretKey || true;
       mc admin policy attach minio readwrite --user accessKey;

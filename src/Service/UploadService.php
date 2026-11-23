@@ -9,6 +9,7 @@ use App\Contract\UploadInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
 use App\Factory\Type\UploadFactory;
+use App\Helper\CypherHelper;
 use App\Type\NodeElement;
 use App\Type\Uuid;
 use Exception;
@@ -25,6 +26,7 @@ class UploadService
         private UploadFactory $uploadFactory,
         private CypherEntityManager $cypherEntityManager,
         private DeletionService $deletionService,
+        private ElementTypeService $elementTypeService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
@@ -184,9 +186,14 @@ class UploadService
      */
     private function getUploadIdsTargeting(Uuid $elementId): array
     {
+        // uploads can also target a relation of a node; those are only found for nodes, via their (typed) neighbourhood
+        $nodeLabel = $this->elementTypeService->resolveNodeLabel($elementId);
+        $targetsOfAttachedRelations = null === $nodeLabel
+            ? ''
+            : sprintf(' OR u.uploadTarget IN [(:%s {id: $elementId})-[r]-() | r.id]', CypherHelper::escapeIdentifier($nodeLabel));
         $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
             'MATCH (u:Upload) '.
-            'WHERE u.uploadTarget = $elementId OR u.uploadTarget IN [({id: $elementId})-[r]-() | r.id] '.
+            'WHERE u.uploadTarget = $elementId'.$targetsOfAttachedRelations.' '.
             'RETURN DISTINCT u.id',
             [
                 'elementId' => $elementId->toString(),

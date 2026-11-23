@@ -206,7 +206,7 @@ jobs:
           docker run --rm --network host \
             -v $(pwd)/docs:/docs -w /docs \
             -e BASE_URL=http://127.0.0.1:4322 \
-            mcr.microsoft.com/playwright:v1.65.1-noble npx playwright test
+            mcr.microsoft.com/playwright:v1.65.1-noble npx playwright test --workers=100%
       - name: Docs container logs
         if: always()
         run: docker logs docs-preview || true
@@ -278,6 +278,28 @@ jobs:
         run: |
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer test:unit"
 
+  test-unit-go-uuid-to-type-mphf-lookup:
+    runs-on: ubuntu-26.04
+    name: 'Unit Test UuidToTypeMphfLookup (Go)'
+    timeout-minutes: 5
+    needs:
+      - build-docker-image
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: lib/UuidToTypeMphfLookup/go.mod
+          # the module has no dependencies (no go.sum), so there is nothing to cache
+          cache: false
+      # the FrankenPHP extension package (./extension) needs cgo and FrankenPHP's toolchain, it is built and loaded by
+      # the Docker image and covered by the PHP tests
+      - name: Vet
+        working-directory: lib/UuidToTypeMphfLookup
+        run: go vet ./mphf/... ./cmd/...
+      - name: Unit Test
+        working-directory: lib/UuidToTypeMphfLookup
+        run: go test ./mphf/... ./cmd/...
+
   test-meta:
     runs-on: ubuntu-26.04
     name: 'Meta Test'
@@ -293,23 +315,6 @@ jobs:
       - name: Meta Test
         run: |
           docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && composer test:meta"
-
-  test-mutant:
-    runs-on: ubuntu-26.04
-    name: 'Mutant Test'
-    timeout-minutes: 15
-    needs:
-      - build-docker-image
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v5
-      - uses: ./.github/actions/load-docker-image
-        with:
-          artifact-name: docker-image-api-dev-amd
-          tar-filename: dev-amd.tar.gz
-      - name: Mutant Test
-        run: |
-          docker run -v $(pwd):/var/www/html --user "$(id -u):$(id -g)" api:dev sh -c "composer install --ignore-platform-req=php --quiet && ./bin/with-heartbeat composer test:mutant -- --no-progress"
 
   test-mess-detector:
     runs-on: ubuntu-26.04
@@ -334,6 +339,7 @@ jobs:
     timeout-minutes: 30
     needs:
       - test-unit
+      - test-unit-go-uuid-to-type-mphf-lookup
       - test-meta
       - phpstan
       - psalm
@@ -342,7 +348,7 @@ jobs:
     strategy:
       matrix:
         dockerCompose:
-          - "neo4j-5.7-minio"
+          - "neo4j-5.9-minio"
           - "neo4j-5.20-seaweedfs"
           - "neo4j-latest-versitygw"
     steps:
@@ -385,6 +391,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-unit-go-uuid-to-type-mphf-lookup
       - test-meta
       - phpstan
       - psalm
@@ -426,6 +433,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-unit-go-uuid-to-type-mphf-lookup
       - test-meta
       - phpstan
       - psalm
@@ -462,6 +470,7 @@ jobs:
     timeout-minutes: 15
     needs:
       - test-unit
+      - test-unit-go-uuid-to-type-mphf-lookup
       - test-meta
       - phpstan
       - psalm

@@ -16,10 +16,9 @@ which is created between any two nodes.
             <script type="application/json">{`
     {
         "elements": [
-            { "id": "user", "type": "User", "data": { "name": "User" }},
             { "id": "node", "type": "Data", "data": { "name": "Node", "hl": "1" }},
-            { "id": "owns", "type": "OWNS", "start": "user", "end": "node"},
-            { "id": "created", "type": "CREATED", "start": "user", "end": "node"}
+            { "id": "user", "type": "User", "data": { "name": "User" }},
+            { "id": "owns", "type": "OWNS", "start": "user", "end": "node"}
         ]
     }
   `}</script>
@@ -44,6 +43,12 @@ To create a relation, both `start` and `end` must be provided together - supplyi
 properties are also checked asymmetrically: the current user needs `HAS_CREATE_ACCESS` on the `start` node (a new
 relation is being attached to it), but only `HAS_READ_ACCESS` on the `end` node. Both `start` and `end` must reference nodes; using
 the id of an existing relation for either property is rejected.
+
+Relations which grant access (`OWNS`, `IS_IN_GROUP` and `HAS_<ACCESS>_ACCESS`) additionally require that the current
+user holds that access on the `end` node themselves, otherwise the request is rejected with `403 Forbidden`: `OWNS` and
+`IS_IN_GROUP` require every access type, `HAS_READ_ACCESS` requires read access, `HAS_UPDATE_ACCESS` requires update
+access and so on. A user can therefore pass on read access to an element they may only read, but can not make
+themselves its owner.
 
 <Note>
     A handful of types are reserved for internal use (`User`, `Token`, `Upload`) and can not be used as the `type` of a

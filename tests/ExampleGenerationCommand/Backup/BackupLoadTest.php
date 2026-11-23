@@ -35,7 +35,8 @@ class BackupLoadTest extends BaseCommandTestCase
         $this->assertCommandOutputIsIdenticalToDocumentedCommandOutput(
             self::PATH_TO_ROOT,
             'tests/Recordings/commands/assets/backup-load.html',
-            $commandOutput
+            $commandOutput,
+            ['Built ', 'Exported ', 'Building the index']
         );
     }
 }

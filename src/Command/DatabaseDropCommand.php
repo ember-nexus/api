@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Service\Index\IndexEnsurer;
+use App\Service\MaintenanceLockService;
+use App\Service\Mphf\MphfStorageService;
+use App\Service\Mphf\SystemBucketService;
 use App\Style\EmberNexusStyle;
 use App\Trait\CommandInputTrait;
+use App\Type\MaintenanceLock;
+use App\Type\MaintenanceLockType;
 use App\Type\RabbitMQQueueType;
 use AsyncAws\S3\S3Client;
 use EmberNexusBundle\Service\EmberNexusConfiguration;
@@ -45,6 +51,9 @@ class DatabaseDropCommand extends Command
         private AMQPStreamConnection $amqpStreamConnection,
         private S3Client $s3Client,
         private EmberNexusConfiguration $emberNexusConfiguration,
+        private MaintenanceLockService $maintenanceLockService,
+        private IndexEnsurer $indexEnsurer,
+        private SystemBucketService $systemBucketService,
     ) {
         parent::__construct();
     }
@@ -87,6 +96,33 @@ class DatabaseDropCommand extends Command
             $this->io->newLine();
         }
 
+        /** @var MaintenanceLock[] $locks */
+        $locks = [];
+        foreach ([MaintenanceLockType::DATABASE, MaintenanceLockType::DATABASE_INDICES, MaintenanceLockType::MPHF] as $lockType) {
+            $lock = $this->maintenanceLockService->claim($lockType);
+            if (null === $lock) {
+                foreach ($locks as $heldLock) {
+                    $this->maintenanceLockService->release($heldLock);
+                }
+                $this->io->error(sprintf('Unable to drop the databases, another maintenance task holds lock:maintenance:%s (e.g. an index or type index build is running).', $lockType->value));
+
+                return Command::FAILURE;
+            }
+            $locks[] = $lock;
+        }
+
+        try {
+            return $this->dropAll($input);
+        } finally {
+            // the Redis flush removes the locks as well, releasing is then a harmless no-op
+            foreach ($locks as $lock) {
+                $this->maintenanceLockService->release($lock);
+            }
+        }
+    }
+
+    private function dropAll(InputInterface $input): int
+    {
         $this->deleteCypher();
 
         $this->deleteMongo();
@@ -117,6 +153,12 @@ class DatabaseDropCommand extends Command
         $this->cypherEntityManager->getClient()->runStatement(
             Statement::create('MATCH (n) DETACH DELETE n')
         );
+        // deleting the data does not delete its indices, they would be left behind for types which never come back
+        $this->indexEnsurer->dropManagedIndices();
+        // the type index describes the deleted data
+        foreach ($this->systemBucketService->list(MphfStorageService::BUCKET_PREFIX) as $key) {
+            $this->systemBucketService->delete($key);
+        }
         $this->io->stopSection('Successfully deleted cypher data.');
     }
 

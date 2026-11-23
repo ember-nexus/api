@@ -30,6 +30,15 @@ area is removed:
 - **A fixed, minimal `RETURN`**: `returnItem` only allows a bare variable, not arbitrary expressions or `AS` aliases -
   the query can only return the variable `paths` (see [step reference](/reference/search/cypher-path-subset)).
 
+Beyond the grammar, a few constructs which the grammar itself accepts are rejected with `400 Bad Request`, as they
+could be used to read properties of elements the user can not access:
+
+- **Internal properties**: properties starting with `_` (e.g. `_passwordHash`) and the token property `hash`, in any
+  form: `n.hash`, ``n.`hash` ``, property maps like `(n {hash: "..."})` and relationship property maps.
+- **Dynamic property access**: `n[expr]` is only allowed with an integer literal as index (list access); `n[$key]` and
+  `n["_name"]` are rejected.
+- **Parameters as property maps**: `(n $properties)` is rejected, list the properties inside the query instead.
+
 `ORDER BY`, `SKIP` and `LIMIT` on the result, as well as `WHERE` filters on patterns, are still fully supported -
 see the [Cypher path query examples](/reference/search/cypher-path-subset#examples) for both in use.
 

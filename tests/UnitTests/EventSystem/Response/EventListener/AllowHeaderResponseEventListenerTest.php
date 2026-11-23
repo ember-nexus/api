@@ -23,6 +23,8 @@ class AllowHeaderResponseEventListenerTest extends TestCase
 {
     use ProphecyTrait;
 
+    private string $cacheDir;
+
     private function createListener(): AllowHeaderResponseEventListener
     {
         $routes = new RouteCollection();
@@ -36,7 +38,21 @@ class AllowHeaderResponseEventListenerTest extends TestCase
         $router = $this->prophesize(RouterInterface::class);
         $router->getRouteCollection()->willReturn($routes);
 
-        return new AllowHeaderResponseEventListener($router->reveal());
+        return new AllowHeaderResponseEventListener($router->reveal(), $this->cacheDir);
+    }
+
+    protected function setUp(): void
+    {
+        $this->cacheDir = sys_get_temp_dir().'/allow-header-test-'.bin2hex(random_bytes(6));
+        mkdir($this->cacheDir);
+    }
+
+    protected function tearDown(): void
+    {
+        foreach (glob($this->cacheDir.'/*') ?: [] as $file) {
+            unlink($file);
+        }
+        rmdir($this->cacheDir);
     }
 
     private function createEvent(?string $routeName, Response $response, int $requestType = HttpKernelInterface::MAIN_REQUEST): ResponseEvent
@@ -116,5 +132,20 @@ class AllowHeaderResponseEventListenerTest extends TestCase
         $this->createListener()->onKernelResponse($this->createEvent('any-method-with-restriction', $response));
 
         $this->assertFalse($response->headers->has('Allow'));
+    }
+
+    public function testWarmUpWritesTheMapAndTheListenerReadsItWithoutTheRouter(): void
+    {
+        $this->createListener()->warmUp($this->cacheDir);
+        $this->assertFileExists($this->cacheDir.'/allow-headers.php');
+
+        $router = $this->prophesize(RouterInterface::class);
+        $router->getRouteCollection()->shouldNotBeCalled();
+        $listener = new AllowHeaderResponseEventListener($router->reveal(), $this->cacheDir);
+        $response = new Response();
+        $listener->onKernelResponse($this->createEvent('post-register', $response));
+
+        $this->assertSame('OPTIONS, POST', $response->headers->get('Allow'));
+        $this->assertFalse($listener->isOptional());
     }
 }

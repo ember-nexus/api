@@ -1299,18 +1299,11 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         ];
 
         $elementManager = $this->prophesize(ElementManager::class);
+        // elements which don't exist are left out by the element manager
         $elementManager
-            ->getElement(Argument::is($elementIds[0]))
+            ->getElements($elementIds)
             ->shouldBeCalledOnce()
-            ->willReturn($elementA);
-        $elementManager
-            ->getElement(Argument::is($elementIds[1]))
-            ->shouldBeCalledOnce()
-            ->willReturn(null);
-        $elementManager
-            ->getElement(Argument::is($elementIds[2]))
-            ->shouldBeCalledOnce()
-            ->willReturn($elementB);
+            ->willReturn([$elementA, $elementB]);
 
         $elementToRawService = $this->prophesize(ElementToRawService::class);
         $elementToRawService
@@ -1484,11 +1477,12 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
     {
         $elementManager = $this->prophesize(ElementManager::class);
         $elementToRawService = $this->prophesize(ElementToRawService::class);
+        $elements = [];
         foreach ($elementIds as $elementId) {
             $element = new NodeElement();
             $element->setId($elementId);
             $element->setLabel('Something');
-            $elementManager->getElement(Argument::is($elementId))->willReturn($element);
+            $elements[] = $element;
             $elementToRawService->elementToRaw(Argument::is($element))->willReturn([
                 'type' => 'Something',
                 'id' => $elementId->toString(),
@@ -1496,6 +1490,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
                 'file' => ['size' => 1],
             ]);
         }
+        $elementManager->getElements($elementIds)->willReturn($elements);
         $listener = $this->buildElementHydrationSearchStepEventListener(
             elementManager: $elementManager->reveal(),
             elementToRawService: $elementToRawService->reveal()
@@ -1602,8 +1597,7 @@ class ElementHydrationSearchStepEventListenerTest extends TestCase
         $element->setId($accessibleId);
         $element->setLabel('Something');
         $elementManager = $this->prophesize(ElementManager::class);
-        $elementManager->getElement(Argument::is($accessibleId))->shouldBeCalledOnce()->willReturn($element);
-        $elementManager->getElement(Argument::is($inaccessibleId))->shouldNotBeCalled();
+        $elementManager->getElements([$accessibleId])->shouldBeCalledOnce()->willReturn([$element]);
         $elementToRawService = $this->prophesize(ElementToRawService::class);
         $elementToRawService->elementToRaw(Argument::is($element))->willReturn([
             'type' => 'Something',

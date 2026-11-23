@@ -173,4 +173,52 @@ class UuidTest extends TestCase
 
         return $bits;
     }
+
+    public function testStringIsCalculatedOnceAndDoesNotAffectComparison(): void
+    {
+        $uuid = Uuid::generate();
+        $other = Uuid::fromString($uuid->toString());
+        $untouched = Uuid::fromString($uuid->toString());
+
+        $first = $uuid->toString();
+        $this->assertSame($first, $uuid->toString());
+        $this->assertSame($first, $other->toString());
+        $this->assertSame($uuid->toHex(), Uuid::fromString($first)->toHex());
+        // loose comparison must not depend on which instance already calculated its string
+        $this->assertTrue($uuid == $untouched);
+        $this->assertTrue(in_array($untouched, [$uuid]));
+    }
+
+    public function testParsedBase62StringsAreServedFromTheHotCacheWithTheirStringAlreadyKnown(): void
+    {
+        $string = '02IiNr0F21ErqJMNbTf7FlE0ME3GTCIXfryHo';
+
+        $first = Uuid::fromString($string);
+        $second = Uuid::fromString(' '.$string.' ');
+
+        $this->assertSame($first, $second);
+        $this->assertSame($string, $first->toString());
+        $this->assertSame($string, Uuid::fromBytes($first->toBytes())->toString());
+    }
+
+    public function testHotCacheEvictsTheOldestEntryFirstAndKeepsTheMostRecentOnes(): void
+    {
+        $oldest = Uuid::generate();
+        $oldestString = $oldest->toString();
+        $parsedOldest = Uuid::fromString($oldestString);
+        $this->assertSame($parsedOldest, Uuid::fromString($oldestString));
+
+        $newest = null;
+        for ($i = 0; $i < 8200; ++$i) {
+            $newest = Uuid::fromString(Uuid::generate()->toString());
+        }
+
+        // the oldest entry was pushed out, so it is parsed again, but still correctly
+        $reparsed = Uuid::fromString($oldestString);
+        $this->assertNotSame($parsedOldest, $reparsed);
+        $this->assertSame($oldestString, $reparsed->toString());
+        $this->assertTrue($oldest->equals($reparsed));
+        // the most recent entry is still cached
+        $this->assertSame($newest, Uuid::fromString($newest->toString()));
+    }
 }

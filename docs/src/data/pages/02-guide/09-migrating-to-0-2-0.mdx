@@ -33,7 +33,7 @@ change: **ids of version 0.1.x are not valid in version 0.2.0 and data has to be
 ## Migrating an instance
 
 Elements are not migrated automatically. Instead, a backup is created, the databases are reset, and the backup is loaded
-again. The backup can be converted beforehand, or while loading.
+again. The backup has to be converted beforehand.
 
 1. Create a backup with the old version, using [`backup:create`](/command/backup-create). Stop all clients from writing
    to the instance afterwards.
@@ -43,10 +43,20 @@ again. The backup can be converted beforehand, or while loading.
 4. Load the converted backup using [`backup:load`](/command/backup-load).
 5. Update everything which references old ids, see below.
 
-Alternatively, step 2 can be skipped: [`backup:load`](/command/backup-load) converts backups with legacy ids on the fly
-and can write the mapping with `--legacy-mapping-output`. Backups with new ids can be loaded as they are, and a backup
-can even contain a mix of both formats. Converting beforehand is recommended, as the converted backup is a reproducible
-artifact which can be inspected and loaded multiple times.
+[`backup:load`](/command/backup-load) refuses backups which were created before 0.2.0 and asks for them to be converted
+first, so step 2 can not be skipped.
+
+### New requirements
+
+Version 0.2.0 looks up the type of elements to answer requests faster, see
+[element type index](/reference/configuration#element-type-index). Before starting the new version:
+
+- Create a third S3 bucket, the system bucket (`ember-nexus-system` by default, configurable with `S3_SYSTEM_BUCKET`),
+  next to the file and upload buckets. The Docker Compose example creates it.
+- Configure Redis with `maxmemory-policy noeviction` and persistence (e.g. `appendonly yes` with a mounted data
+  directory).
+- After loading the converted backup, run [`mphf:build`](/command/mphf-build) once. Otherwise requests are slower until
+  the daily build ran.
 
 ### How legacy ids are converted
 
@@ -57,6 +67,12 @@ artifact which can be inspected and loaded multiple times.
   which is the time of the conversion or the import.
 - Only the `id`, `start`, and `end` of nodes and relations are converted, as well as the names of files. Ids which are
   part of other property values are not converted.
+- `CREATED` relations are removed by `backup:convert`; the id of the creating user is stored in the `createdBy` property
+  of the created element. `backup:load` refuses backups created before 0.2.0, so a backup has to be converted first.
+  Only backups without a `version` or with a development version (`dev`) are loaded unconverted; their `CREATED`
+  relations are kept as plain relations, which no longer grant anything.
+- The `summary.json` of the converted backup has the `version` `0.2.0`; the original version is kept in
+  `convertedFromVersion`.
 - In backups created by `backup:create`, the nested folders are recalculated from the random end of the new id. Other
   folder structures are kept.
 

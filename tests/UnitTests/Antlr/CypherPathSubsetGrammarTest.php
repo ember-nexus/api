@@ -93,6 +93,15 @@ class CypherPathSubsetGrammarTest extends TestCase
             ['UNWIND $stepResults[0].elements AS el MATCH path=((plant:Plant)-[:IS_MEMBER_OF*..]->(:Taxon)) WHERE plant.id = el.id RETURN path'],
             ['MATCH path=((:Plant)-[:IS_MEMBER_OF*..]->(t:Taxon)) WHERE t.name IN $taxonNames RETURN path LIMIT 5'],
             ['MATCH path=((plant:Plant WHERE plant.name = "Passionflower")) RETURN path'],
+            ['MATCH path=(n:Data) WHERE n.hash = "x" RETURN path'],
+            ['MATCH path=(n:Data|User) WHERE n.hash = "x" RETURN path'],
+            ['MATCH path=(n:(Data&User)) WHERE n.hash = "x" RETURN path'],
+            ['MATCH path=(n IS Data) WHERE n.hash = "x" RETURN path'],
+            ['MATCH path=(n:Data {hash: "x"}) RETURN path'],
+            ['MATCH path=(n:Data)-[r:HAS]->(:Data) WHERE r.hash = "x" RETURN path'],
+            ['MATCH path=(n:Data)-[:HAS {hash: "x"}]->(:Data) RETURN path'],
+            ['MATCH path=(n:Data)-[:HAS]->(m:Data) WHERE n.hash = m.hash RETURN path'],
+            ['MATCH path=(n:Data)-[:HAS]->(n) WHERE n.hash = "x" RETURN path'],
         ];
     }
 
@@ -203,6 +212,47 @@ class CypherPathSubsetGrammarTest extends TestCase
         }
     }
 
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function forbiddenConstructs(): iterable
+    {
+        yield 'internal property' => ['MATCH path=(n:User) WHERE n._passwordHash = "x" RETURN path', "Path query is not allowed to use the internal property '_passwordHash'."];
+        yield 'escaped internal property' => ['MATCH path=(n:User) WHERE n.`_passwordHash` = "x" RETURN path', "Path query is not allowed to use the internal property '_passwordHash'."];
+        $hash = "Path query is not allowed to use the internal property 'hash'.";
+        yield 'token hash' => ['MATCH path=(n:Token) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'token hash in label set' => ['MATCH path=(n:Data|Token) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'token hash in label group' => ['MATCH path=(n:(Data|Token)) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'token hash with IS' => ['MATCH path=(n IS Token) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'token hash escaped label' => ['MATCH path=(n:`Token`) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'hash without label' => ['MATCH path=(n) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'hash with wildcard label' => ['MATCH path=(n:%) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'hash with negated label' => ['MATCH path=(n:!Data) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'hash on unknown variable' => ['UNWIND $items AS el MATCH path=(n:Data) WHERE el.hash = "x" RETURN path', $hash];
+        yield 'hash on variable also bound as token' => ['MATCH path=(n:Data)-[]->(n:Token) WHERE n.hash = "x" RETURN path', $hash];
+        yield 'hash on path' => ['MATCH path=(n:Data) WHERE path.hash = "x" RETURN path', $hash];
+        yield 'hash in token pattern' => ['MATCH path=(n:Token {hash: "x"}) RETURN path', $hash];
+        yield 'hash in unlabeled pattern' => ['MATCH path=(n {hash: "x"}) RETURN path', $hash];
+        yield 'hash in map literal' => ['MATCH path=(n:Data) WHERE n.a = {hash: "x"} RETURN path', $hash];
+        yield 'hash on chained access' => ['MATCH path=(n:Data) WHERE n.a.hash = "x" RETURN path', $hash];
+        yield 'internal property in pattern' => ['MATCH path=(n:User {_passwordHash: "x"}) RETURN path', "Path query is not allowed to use the internal property '_passwordHash'."];
+        yield 'dynamic property' => ['MATCH path=(n:User) WHERE n[$key] = "x" RETURN path', 'Path query is not allowed to use dynamic property access; index with an integer literal only.'];
+        yield 'parameter as property map' => ['MATCH path=(n:User $props) RETURN path', 'Path query is not allowed to use a parameter as property map; list the properties instead.'];
+    }
+
+    #[DataProvider('forbiddenConstructs')]
+    public function testForbiddenConstructsThrowException(string $query, string $detail): void
+    {
+        $cypherPathSubsetGrammar = $this->buildCypherPathSubsetGrammar(true);
+
+        try {
+            $cypherPathSubsetGrammar->validateQuery($query);
+            $this->fail();
+        } catch (Exception $e) {
+            $this->assertSame($detail, $e->getDetail());
+        }
+    }
+
     public function testQueryWithMoreThanOneMatchClauseThrowsException(): void
     {
         $cypherPathSubsetGrammar = $this->buildCypherPathSubsetGrammar(true);
@@ -234,5 +284,73 @@ class CypherPathSubsetGrammarTest extends TestCase
 
         $result = $cypherPathSubsetGrammar->validateQuery($query);
         $this->assertTrue($result);
+    }
+
+    /**
+     * @param ObjectProphecy<RedisClient> $redis
+     */
+    private function buildPreparingGrammar(ObjectProphecy $redis): CypherPathSubsetGrammar
+    {
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())->willReturn('https://mock.dev/123');
+        $stopwatch = $this->prophesize(Stopwatch::class);
+        $stopwatch->start(Argument::any())->willReturn($this->prophesize(StopwatchEvent::class)->reveal());
+        $stopwatch->stop(Argument::any())->willReturn($this->prophesize(StopwatchEvent::class)->reveal());
+
+        return new CypherPathSubsetGrammar(
+            new AntlrSyntaxErrorListenerFactory(new Client400BadGrammarExceptionFactory($urlGenerator->reveal())),
+            $stopwatch->reveal(),
+            $redis->reveal(),
+            new RedisKeyFactory(),
+            $this->prophesize(LoggerInterface::class)->reveal(),
+            new Client400BadContentExceptionFactory($urlGenerator->reveal()),
+        );
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function rewriteProvider(): array
+    {
+        $ids = CypherPathSubsetGrammar::IDS_RETURN_ITEMS;
+
+        return [
+            'plain' => ['MATCH path = ((:Type)) RETURN path', 'MATCH path = ((:Type)) RETURN '.$ids],
+            'escaped' => ['MATCH path = ((:Type)) RETURN `path`;', 'MATCH path = ((:Type)) RETURN '.$ids.';'],
+            'limit' => ['MATCH path = ((:Type)) RETURN path LIMIT 10', 'MATCH path = ((:Type)) RETURN '.$ids.' LIMIT 10'],
+            'skip and limit' => ['MATCH path = ((:Type)) RETURN path SKIP 5 LIMIT 10', 'MATCH path = ((:Type)) RETURN '.$ids.' SKIP 5 LIMIT 10'],
+            'multibyte characters before the return' => ['MATCH path = ((:Type {name: "äö€"})) RETURN path', 'MATCH path = ((:Type {name: "äö€"})) RETURN '.$ids],
+            'distinct stays as it is' => ['MATCH path = ((:Type)) RETURN DISTINCT path', 'MATCH path = ((:Type)) RETURN DISTINCT path'],
+        ];
+    }
+
+    #[DataProvider('rewriteProvider')]
+    public function testPrepareQueryReplacesThePathByItsIdsWhereItIsSafeAndCachesTheResult(string $query, string $expected): void
+    {
+        $redis = $this->prophesize(RedisClient::class);
+        $redis->get(Argument::any())->willReturn(null);
+        $redis->set(Argument::any(), Argument::that(static fn (mixed $value): bool => $value === $expected), 'EX', 3600)->shouldBeCalledOnce();
+        $redis->set(Argument::any(), Argument::that(static fn (mixed $value): bool => true === $value), 'EX', 3600)->shouldBeCalledOnce();
+
+        $this->assertSame($expected, $this->buildPreparingGrammar($redis)->prepareQuery($query));
+    }
+
+    public function testPrepareQueryUsesTheCachedQueryWithoutParsing(): void
+    {
+        $redis = $this->prophesize(RedisClient::class);
+        $redis->get(Argument::any())->willReturn('cached query');
+        $redis->set(Argument::cetera())->shouldNotBeCalled();
+
+        $this->assertSame('cached query', $this->buildPreparingGrammar($redis)->prepareQuery('this is not even cypher'));
+    }
+
+    public function testPrepareQueryRejectsInvalidQueries(): void
+    {
+        $redis = $this->prophesize(RedisClient::class);
+        $redis->get(Argument::any())->willReturn(null);
+        $redis->set(Argument::cetera())->shouldNotBeCalled();
+
+        $this->expectException(Exception::class);
+        $this->buildPreparingGrammar($redis)->prepareQuery('MATCH (n:Type) RETURN n');
     }
 }

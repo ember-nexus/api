@@ -24,6 +24,14 @@ The following safeguards are in place:
 With all the different safeguards in place and full test coverage across all guards, **this search step is considered
 safe**.
 
+The query can not read internal properties (starting with `_`) and can not access properties dynamically. The token
+property `hash` can not be used on tokens: it is rejected for nodes with the label `Token` (also within label sets,
+groups and `IS`), and for nodes whose label can not be determined, i.e. variables without a label expression or with
+a wildcard or negated one. Other nodes, like a `Data` node with its own `hash` property, and relations can use it.
+For example `MATCH path=(n:Data) WHERE n.hash = $hash RETURN path` is valid, `MATCH path=(n) WHERE n.hash = $hash
+RETURN path` is not. See [grammar](/reference/search/cypher-path-subset/grammar) for the full list of rejected
+constructs.
+
 ## Input parameters
 
 Any parameters available are passed as query variables to the database, i.e. as `$parameterName` inside the query

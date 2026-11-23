@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\EventSystem\ElementPropertyReset\EventListener;
 
 use App\Contract\NodeElementInterface;
+use App\EventSystem\ElementPropertyChange\EventListener\TokenElementPropertyChangeEventListener;
 use App\EventSystem\ElementPropertyReset\Event\ElementPropertyResetEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
@@ -20,7 +21,8 @@ class TokenElementPropertyResetEventListener
         if ('Token' !== $element->getLabel()) {
             return;
         }
-        $event->addPropertyNameToBeKept('token');
-        $event->addPropertyNameToBeKept('_tokenHash');
+        foreach (TokenElementPropertyChangeEventListener::PROTECTED_PROPERTIES as $propertyName) {
+            $event->addPropertyNameToBeKept($propertyName);
+        }
     }
 }

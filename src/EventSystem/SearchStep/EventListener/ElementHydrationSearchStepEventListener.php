@@ -249,14 +249,14 @@ class ElementHydrationSearchStepEventListener
     private function getElementData(array $elementIds, array $elementMetadata = []): array
     {
         $elementData = [];
-        foreach ($elementIds as $elementId) {
-            $element = $this->elementManager->getElement($elementId);
-            if ($element) {
-                $elementData[] = $this->addMetadataToRawElement(
-                    $this->elementToRawService->elementToRaw($element),
-                    $elementMetadata[$elementId->toString()] ?? null
-                );
-            }
+        if ([] === $elementIds) {
+            return $elementData;
+        }
+        foreach ($this->elementManager->getElements($elementIds) as $element) {
+            $elementData[] = $this->addMetadataToRawElement(
+                $this->elementToRawService->elementToRaw($element),
+                $elementMetadata[$element->getId()?->toString() ?? ''] ?? null
+            );
         }
 
         return $elementData;

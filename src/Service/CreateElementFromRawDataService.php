@@ -8,13 +8,17 @@ use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\ElementPropertyChange\Event\ElementPropertyChangeEvent;
 use App\EventSystem\RawValueToNormalizedValue\Event\RawValueToNormalizedValueEvent;
+use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Client400IncompleteMutualDependencyExceptionFactory;
 use App\Factory\Exception\Client400ReservedIdentifierExceptionFactory;
 use App\Factory\Exception\Client400ReservedTypeExceptionFactory;
+use App\Helper\Regex;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
 use App\Type\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+
+use function Safe\preg_match;
 
 class CreateElementFromRawDataService
 {
@@ -23,6 +27,7 @@ class CreateElementFromRawDataService
     public function __construct(
         private ElementManager $elementManager,
         private EventDispatcherInterface $eventDispatcher,
+        private Client400BadContentExceptionFactory $client400BadContentExceptionFactory,
         private Client400IncompleteMutualDependencyExceptionFactory $client400IncompleteMutualDependencyExceptionFactory,
         private Client400ReservedIdentifierExceptionFactory $client400ReservedIdentifierExceptionFactory,
         private Client400ReservedTypeExceptionFactory $client400ReservedTypeExceptionFactory,
@@ -48,7 +53,7 @@ class CreateElementFromRawDataService
         if (null === $startNodeId && null !== $endNodeId) {
             throw $this->client400IncompleteMutualDependencyExceptionFactory->createFromTemplate(['start', 'end'], ['end'], ['start']);
         }
-        if (null !== $this->elementManager->getElement($elementId)) {
+        if ($this->elementManager->elementExists($elementId)) {
             throw $this->client400ReservedIdentifierExceptionFactory->createFromTemplate($elementId->toString());
         }
 
@@ -60,6 +65,10 @@ class CreateElementFromRawDataService
             $rawValueToNormalizedValueEvent = new RawValueToNormalizedValueEvent($rawPropertyValue);
             $this->eventDispatcher->dispatch($rawValueToNormalizedValueEvent);
             $normalizedData[$rawPropertyName] = $rawValueToNormalizedValueEvent->getNormalizedValue();
+        }
+
+        if (1 !== preg_match(Regex::TYPE, $type)) {
+            throw $this->client400BadContentExceptionFactory->createFromTemplate('type', 'string of 1 to 128 characters, starting with a letter, followed by letters, digits or underscores', $type);
         }
 
         if (in_array($type, self::RESERVED_TYPES) && !$skipReservedTypeCheck) {

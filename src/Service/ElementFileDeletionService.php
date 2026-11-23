@@ -11,6 +11,7 @@ use App\Contract\S3\MergeFileChunksOperationInterface;
 use App\Contract\S3\UploadFileOperationInterface;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\S3\S3OperationFactory;
+use App\Helper\CypherHelper;
 use App\Type\S3\FileOperation;
 use App\Type\Uuid;
 use Laudis\Neo4j\Databags\Statement;
@@ -33,6 +34,7 @@ class ElementFileDeletionService
         private S3OperationFactory $s3OperationFactory,
         private S3Service $s3Service,
         private CypherEntityManager $cypherEntityManager,
+        private ElementTypeService $elementTypeService,
         private LoggerInterface $logger,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -123,8 +125,12 @@ class ElementFileDeletionService
      */
     private function getIdsOfAttachedRelationsWithFile(string $nodeId): array
     {
+        $label = $this->elementTypeService->resolveNodeLabel(Uuid::fromString($nodeId));
+        if (null === $label) {
+            return [];
+        }
         $queryResult = $this->cypherEntityManager->getClient()->runStatement(new Statement(
-            'MATCH ({id: $nodeId})-[r]-() WHERE r.hasFile = true RETURN DISTINCT r.id',
+            'MATCH (:'.CypherHelper::escapeIdentifier($label).' {id: $nodeId})-[r]-() WHERE r.hasFile = true RETURN DISTINCT r.id',
             [
                 'nodeId' => $nodeId,
             ]

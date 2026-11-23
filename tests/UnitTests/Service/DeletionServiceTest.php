@@ -7,6 +7,7 @@ namespace App\Tests\UnitTests\Service;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Service\DeletionService;
 use App\Service\ElementManager;
+use App\Service\ElementTypeService;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
 use App\Type\Uuid;
@@ -28,10 +29,18 @@ class DeletionServiceTest extends TestCase
 {
     use ProphecyTrait;
 
+    private function buildElementTypeService(?string $nodeLabel = 'Data'): ElementTypeService
+    {
+        $elementTypeService = $this->prophesize(ElementTypeService::class);
+        $elementTypeService->resolveNodeLabel(Argument::any())->willReturn($nodeLabel);
+
+        return $elementTypeService->reveal();
+    }
+
     /**
      * @return array{0: DeletionService, 1: ObjectProphecy<ElementManager>, 2: ObjectProphecy<ClientInterface>}
      */
-    private function buildService(): array
+    private function buildService(?string $nodeLabel = 'Data'): array
     {
         $elementManager = $this->prophesize(ElementManager::class);
         $client = $this->prophesize(ClientInterface::class);
@@ -41,6 +50,7 @@ class DeletionServiceTest extends TestCase
         $service = new DeletionService(
             $elementManager->reveal(),
             $cypherEntityManager->reveal(),
+            $this->buildElementTypeService($nodeLabel),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
 
@@ -79,6 +89,33 @@ class DeletionServiceTest extends TestCase
         $elementManager->getRelation(Argument::any())->shouldNotBeCalled();
         $elementManager->delete($node)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
         $elementManager->flush()->shouldBeCalledOnce()->willReturn($elementManager->reveal());
+
+        $service->delete($node);
+    }
+
+    public function testDeletingANodeWithUnresolvedLabelSkipsTheRelationQuery(): void
+    {
+        $node = (new NodeElement())->setId(Uuid::generate())->setLabel('Data');
+
+        [$service, $elementManager, $client] = $this->buildService(null);
+        $client->runStatement(Argument::any())->shouldNotBeCalled();
+        $elementManager->delete($node)->shouldBeCalledOnce()->willReturn($elementManager->reveal());
+        $elementManager->flush()->shouldBeCalledOnce()->willReturn($elementManager->reveal());
+
+        $service->delete($node);
+    }
+
+    public function testRelationQueryUsesTheEscapedResolvedLabel(): void
+    {
+        $node = (new NodeElement())->setId(Uuid::generate())->setLabel('Da`ta');
+
+        [$service, $elementManager, $client] = $this->buildService('Da`ta');
+        $summaryReference = null;
+        $client->runStatement(Argument::that(
+            fn (Statement $statement) => str_contains($statement->getText(), 'MATCH (node:`Da``ta` {id: $nodeId})-[relation]-()')
+        ))->shouldBeCalledOnce()->willReturn(new SummarizedResult($summaryReference, []));
+        $elementManager->delete($node)->willReturn($elementManager->reveal());
+        $elementManager->flush()->willReturn($elementManager->reveal());
 
         $service->delete($node);
     }

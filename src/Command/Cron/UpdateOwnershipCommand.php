@@ -6,9 +6,11 @@ namespace App\Command\Cron;
 
 use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
+use App\Helper\CypherHelper;
 use App\Service\CronExecutionGateService;
 use App\Service\CronTimeBudgetService;
 use App\Service\ElementManager;
+use App\Service\ElementTypeService;
 use App\Service\QueueService;
 use App\Service\SearchAccessCalculatorService;
 use App\Style\EmberNexusStyle;
@@ -46,6 +48,7 @@ class UpdateOwnershipCommand extends Command
         private SearchAccessCalculatorService $searchAccessCalculatorService,
         private ElasticEntityManager $elasticEntityManager,
         private CypherEntityManager $cypherEntityManager,
+        private ElementTypeService $elementTypeService,
     ) {
         parent::__construct();
     }
@@ -198,8 +201,12 @@ class UpdateOwnershipCommand extends Command
      */
     private function getChildrenIds(Uuid $parentId): array
     {
+        $label = $this->elementTypeService->resolveNodeLabel($parentId);
+        if (null === $label) {
+            return [];
+        }
         $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            "MATCH (parent {id: \$parentId})-[:OWNS]->(children)\n".
+            'MATCH (parent:'.CypherHelper::escapeIdentifier($label)." {id: \$parentId})-[:OWNS]->(children)\n".
             'RETURN children.id AS id',
             ['parentId' => $parentId->toString()]
         ));

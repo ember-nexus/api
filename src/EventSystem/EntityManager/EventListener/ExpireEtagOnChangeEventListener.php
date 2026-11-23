@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\EventSystem\EntityManager\EventListener;
 
+use App\Contract\NodeElementInterface;
+use App\Contract\RelationElementInterface;
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\EventSystem\EntityManager\Event\ElementPreDeleteEvent;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\RedisKeyFactory;
+use App\Helper\CypherHelper;
 use App\Service\AppStateService;
+use App\Service\ElementTypeService;
 use App\Type\AppStateType;
 use App\Type\RedisKey;
 use App\Type\Uuid;
@@ -42,6 +46,7 @@ class ExpireEtagOnChangeEventListener
         private CypherEntityManager $cypherEntityManager,
         private RedisKeyFactory $redisKeyTypeFactory,
         private AppStateService $appStateService,
+        private ElementTypeService $elementTypeService,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
     }
@@ -49,7 +54,7 @@ class ExpireEtagOnChangeEventListener
     #[AsEventListener]
     public function onElementPostCreateEvent(ElementPostCreateEvent $event): void
     {
-        $this->handleEvent($event);
+        $this->handleCreatedElement($event);
     }
 
     #[AsEventListener]
@@ -83,6 +88,98 @@ class ExpireEtagOnChangeEventListener
     }
 
     /**
+     * A created element has no neighbours yet apart from those created together with it, and each of those relations
+     * expires the collections of its own endpoints. So a created relation only needs what it carries itself, and a
+     * created node only needs the users whose index collection it appears in; nothing but the latter has to be
+     * queried, which is what the generic handling for merged and deleted elements can't assume.
+     */
+    private function handleCreatedElement(ElementPostCreateEvent $event): void
+    {
+        if (AppStateType::LOADING_BACKUP === $this->appStateService->getAppState()) {
+            // see handleEvent()
+            return;
+        }
+        $element = $event->getElement();
+        $elementId = $element->getId();
+        if (null === $elementId) {
+            throw new Exception('Unable to expire etag for element with no identifier.');
+        }
+
+        /**
+         * @var RedisKey[] $redisEtagKeysToExpire
+         */
+        $redisEtagKeysToExpire = [
+            $this->redisKeyTypeFactory->getEtagElementRedisKey($elementId),
+            // the file ETag depends on the element's name, its file property and its ETag
+            $this->redisKeyTypeFactory->getEtagFileRedisKey($elementId),
+        ];
+
+        if ($element instanceof RelationElementInterface) {
+            $startId = $element->getStart();
+            $endId = $element->getEnd();
+            if (null !== $startId) {
+                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey($startId);
+            }
+            if (null !== $endId) {
+                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagRelatedCollectionRedisKey($endId);
+            }
+            if ('OWNS' === $element->getType()) {
+                if (null !== $endId) {
+                    $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagParentsCollectionRedisKey($endId);
+                }
+                if (null !== $startId) {
+                    $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagChildrenCollectionRedisKey($startId);
+                }
+            }
+        } else {
+            foreach ($this->getUserIdsWithIndexAccessToNode($element, $elementId) as $userId) {
+                $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagIndexCollectionRedisKey($userId);
+            }
+        }
+
+        foreach ($redisEtagKeysToExpire as $redisEtagKeyToExpire) {
+            $this->redisClient->expire((string) $redisEtagKeyToExpire, 0);
+        }
+    }
+
+    /**
+     * @return Uuid[]
+     */
+    private function getUserIdsWithIndexAccessToNode(NodeElementInterface $node, Uuid $nodeId): array
+    {
+        $label = $node->getLabel();
+        if (null === $label) {
+            return [];
+        }
+        $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            'MATCH (node:'.CypherHelper::escapeIdentifier($label)." {id: \$elementId})\n".
+                "RETURN COLLECT {\n".
+                "    MATCH (node)<-[:OWNS]-()<-[:IS_IN_GROUP*0..]-(user:User)\n".
+                "    RETURN user.id\n".
+                '} as indexList',
+            [
+                'elementId' => $nodeId->toString(),
+            ]
+        ));
+        if (1 !== count($result)) {
+            return [];
+        }
+        $rawIndexList = $result[0]['indexList'];
+        if (!($rawIndexList instanceof CypherList)) {
+            throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property indexList as CypherList, not %s.', get_debug_type($rawIndexList))); // @codeCoverageIgnore
+        }
+        $userIds = [];
+        foreach ($rawIndexList as $userId) {
+            if (!is_string($userId)) {
+                throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property indexList.item as string, not %s.', get_debug_type($userId))); // @codeCoverageIgnore
+            }
+            $userIds[] = Uuid::fromString($userId);
+        }
+
+        return $userIds;
+    }
+
+    /**
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
      */
@@ -106,8 +203,12 @@ class ExpireEtagOnChangeEventListener
         // the file ETag depends on the element's name, its file property and its ETag
         $redisEtagKeysToExpire[] = $this->redisKeyTypeFactory->getEtagFileRedisKey($elementId);
 
-        $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            "MATCH (node {id: \$elementId})\n".
+        $resolved = $this->elementTypeService->resolve($elementId);
+        $nodeLabel = null !== $resolved && $resolved->isNode() ? CypherHelper::escapeIdentifier($resolved->getType()) : null;
+        $relationType = null !== $resolved && $resolved->isRelation() ? CypherHelper::escapeIdentifier($resolved->getType()) : null;
+
+        $result = null === $nodeLabel ? null : $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            'MATCH (node:'.$nodeLabel." {id: \$elementId})\n".
                 "RETURN COLLECT {\n".
                 "    MATCH (node)-[:OWNS]->(children)\n".
                 "    RETURN children.id\n".
@@ -118,7 +219,7 @@ class ExpireEtagOnChangeEventListener
                 "    MATCH (node)-[]-(related)\n".
                 "    RETURN related.id\n".
                 "} as relatedList, COLLECT {\n".
-                "    MATCH (user:User)-[:IS_IN_GROUP*0..]->()-[:OWNS]->(node)\n".
+                "    MATCH (node)<-[:OWNS]-()<-[:IS_IN_GROUP*0..]-(user:User)\n".
                 "    RETURN user.id\n".
                 '} as indexList',
             [
@@ -126,7 +227,7 @@ class ExpireEtagOnChangeEventListener
             ]
         ));
 
-        if (1 === count($result)) {
+        if (null !== $result && 1 === count($result)) {
             $rawChildrenList = $result[0]['childrenList'];
             if (!($rawChildrenList instanceof CypherList)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property childrenList as CypherList, not %s.', get_debug_type($rawChildrenList))); // @codeCoverageIgnore
@@ -169,15 +270,15 @@ class ExpireEtagOnChangeEventListener
             }
         }
 
-        $result = $this->cypherEntityManager->getClient()->runStatement(Statement::create(
-            "MATCH (start)-[relation {id: \$elementId}]->(end)\n".
+        $result = null === $relationType ? null : $this->cypherEntityManager->getClient()->runStatement(Statement::create(
+            'MATCH (start)-[relation:'.$relationType." {id: \$elementId}]->(end)\n".
                 'RETURN start.id, type(relation) as type, end.id',
             [
                 'elementId' => $elementId->toString(),
             ]
         ));
 
-        if (1 === count($result)) {
+        if (null !== $result && 1 === count($result)) {
             $rawStartId = $result[0]['start.id'];
             if (!is_string($rawStartId)) {
                 throw $this->server500LogicErrorExceptionFactory->createFromTemplate(sprintf('Expected cypher response to return property start.id as string, not %s.', get_debug_type($rawStartId))); // @codeCoverageIgnore

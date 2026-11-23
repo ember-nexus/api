@@ -10,6 +10,7 @@ use App\Factory\Type\S3\S3OperationFactory;
 use App\Service\ElementManager;
 use App\Service\ElementService;
 use App\Service\ElementToRawService;
+use App\Service\GraphStructureService;
 use App\Service\S3Service;
 use App\Service\StorageService;
 use App\Type\NodeElement;
@@ -129,6 +130,11 @@ class BackupCreateCommandTest extends TestCase
         $bag = $this->prophesize(ParameterBagInterface::class);
         $bag->get('version')->willReturn('0.0.0-test');
 
+        $graphStructureService = $this->prophesize(GraphStructureService::class);
+        $graphStructureService->loadGraphStructure()->shouldBeCalled();
+        $graphStructureService->getNodeTypes()->willReturn(['Data', 'User']);
+        $graphStructureService->getRelationTypes()->willReturn(['OWNS']);
+
         $command = new BackupCreateCommand(
             $elementManager->reveal(),
             $cypherEntityManager->reveal(),
@@ -143,6 +149,7 @@ class BackupCreateCommandTest extends TestCase
             $s3Service->reveal(),
             $fileOperationFactory->reveal(),
             $this->prophesize(LoggerInterface::class)->reveal(),
+            $graphStructureService->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
@@ -171,6 +178,16 @@ class BackupCreateCommandTest extends TestCase
         $this->assertSame('', $this->backupStorage->read(sprintf('%s/file/%s.bin', self::BACKUP_NAME, $idB)));
         $this->assertSame(2, $this->readSummary()['fileCount']);
         $this->assertStringContainsString('Successfully backed up 2 files.', $tester->getDisplay());
+    }
+
+    public function testSummaryContainsTheGraphStructure(): void
+    {
+        $this->runCommand([]);
+
+        $this->assertSame(
+            ['nodeTypes' => ['Data', 'User'], 'relationTypes' => ['OWNS']],
+            $this->readSummary()['graphStructure']
+        );
     }
 
     public function testNoFilesOptionSkipsFileExport(): void

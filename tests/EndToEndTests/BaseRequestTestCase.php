@@ -344,23 +344,11 @@ abstract class BaseRequestTestCase extends TestCase
 
     public function assertIsCreatedBy(string $token, string $nodeId, string $userId): void
     {
-        $relatedResponse = $this->runGetRequest(
-            sprintf('/%s/related', $nodeId),
-            $token
-        );
-        $this->assertIsCollectionResponse($relatedResponse);
-        $relatedResponseData = json_decode((string) $relatedResponse->getBody(), true);
-        foreach ($relatedResponseData['relations'] as $relation) {
-            if ('CREATED' === $relation['type']) {
-                $this->assertSame($userId, $relation['start']);
-
-                return;
-            }
-        }
-        $this->fail(sprintf(
-            'Unable to find CREATED relation for node with UUID %s.',
-            $nodeId
-        ));
+        $response = $this->runGetRequest(sprintf('/%s', $nodeId), $token);
+        $this->assertSame(200, $response->getStatusCode());
+        $data = $this->getBody($response)['data'];
+        $this->assertArrayHasKey('createdBy', $data, sprintf('Element %s has no createdBy property.', $nodeId));
+        $this->assertSame($userId, $data['createdBy']);
     }
 
     public function assertIsTokenWithState(ResponseInterface $response, string $state): void

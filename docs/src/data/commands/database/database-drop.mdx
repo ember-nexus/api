@@ -11,6 +11,10 @@ Resets the entire instance by deleting all data from every connected backend: al
 relations in the graph database, the MongoDB database, all objects in S3 object storage, all
 Elasticsearch indices, all Redis keys, and all RabbitMQ queues.
 
+The id indices created by [`index:ensure`](/command/index-ensure) and the element type index in the system bucket are
+deleted as well. The command takes the maintenance locks and refuses to run while an index or type index build is
+running.
+
 Options:
 
 - `-f`, `--force` - skips the interactive "Are you sure?" confirmation prompt. Without it, the

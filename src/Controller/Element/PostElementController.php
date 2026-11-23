@@ -101,13 +101,6 @@ class PostElementController extends AbstractController
             ->setEnd($element->getId());
         $this->elementManager->create($newNodeOwnsRelation);
 
-        $newNodeCreatedRelation = (new RelationElement())
-            ->setId(Uuid::generate())
-            ->setType('CREATED')
-            ->setStart($userId)
-            ->setEnd($element->getId());
-        $this->elementManager->create($newNodeCreatedRelation);
-
         $this->elementManager->flush();
 
         return new CreatedResponse(

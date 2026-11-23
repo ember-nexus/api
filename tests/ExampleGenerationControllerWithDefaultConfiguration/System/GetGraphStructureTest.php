@@ -18,7 +18,9 @@ class GetGraphStructureTest extends BaseRequestTestCase
         $this->assertHeadersInDocumentationAreIdenticalToHeadersFromRequest(
             self::PATH_TO_ROOT,
             $documentationHeadersPath,
-            $response
+            $response,
+            // the length depends on the node types which tests running earlier created, see below
+            ['Content-Length']
         );
         $this->assertBodyInDocumentationIsIdenticalToBodyFromRequest(
             self::PATH_TO_ROOT,
@@ -27,6 +29,8 @@ class GetGraphStructureTest extends BaseRequestTestCase
             true,
             [
                 'version',
+                // created by earlier tests which upload files, depending on the order of the tests it exists or not
+                '"Upload"',
             ]
         );
     }

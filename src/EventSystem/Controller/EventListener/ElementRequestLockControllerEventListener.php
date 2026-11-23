@@ -6,7 +6,10 @@ namespace App\EventSystem\Controller\EventListener;
 
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
+use App\Security\AccessChecker;
+use App\Security\AuthProvider;
 use App\Service\ElementRequestLockService;
+use App\Type\AccessType;
 use App\Type\EtagType;
 use App\Type\Uuid;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -27,6 +30,8 @@ class ElementRequestLockControllerEventListener
 
     public function __construct(
         private ElementRequestLockService $elementRequestLockService,
+        private AccessChecker $accessChecker,
+        private AuthProvider $authProvider,
         private Client409ConflictExceptionFactory $client409ConflictExceptionFactory,
     ) {
     }
@@ -57,6 +62,13 @@ class ElementRequestLockControllerEventListener
             return;
         }
         $elementId = Uuid::fromString($rawElementId);
+
+        $accessType = 'DELETE' === $request->getMethod() ? AccessType::DELETE : AccessType::UPDATE;
+        if (!$this->accessChecker->hasAccessToElement($this->authProvider->getUserId(), $elementId, $accessType)) {
+            // without access the controller answers with 403/404 anyway; such a request must neither take the lock
+            // (it would make legitimate edits fail) nor learn from a 409 that the element exists and is being edited
+            return;
+        }
 
         $token = $this->elementRequestLockService->acquire($elementId);
         if (null === $token) {

@@ -59,7 +59,11 @@ A handful of fields are always written the same way, independent of their conten
 | `created` / `updated` | <Check /> native DateTime       | <Check /> `UTCDateTime`               | <Check /> native `date` (sent as an ISO 8601 string) |
 | `hasFile`             | <Check /> boolean               | <Check /> boolean                     | <Check /> boolean                                    |
 
-`created` and `updated` are timestamps maintained automatically by the server. `hasFile` is a cheap boolean mirror of
+The `type` of nodes (their label) and relations has to start with a letter, followed by up to 127 letters, digits or
+underscores (`^[A-Za-z][A-Za-z0-9_]{0,127}$`); other values are rejected with `400 Bad Request`.
+
+`created` and `updated` are timestamps maintained automatically by the server. `createdBy` and `updatedBy` are the
+ids of the acting users, also maintained by the server (see [Reserved properties](/reference/security#reserved-properties)). `hasFile` is a cheap boolean mirror of
 whether an element currently has a file attached, kept alongside the element data itself so collection/search
 listings can show it without paying for the more expensive [file metadata](/reference/file#metadata) lookup.
 

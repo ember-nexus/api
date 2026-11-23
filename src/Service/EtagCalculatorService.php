@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Helper\CypherHelper;
 use App\Helper\DateTimeHelper;
+use App\Helper\ReadAccessCypherHelper;
 use App\Type\Etag;
 use App\Type\EtagCalculator;
 use App\Type\FileHashAlgorithm;
@@ -24,6 +26,7 @@ class EtagCalculatorService
         private EmberNexusConfiguration $emberNexusConfiguration,
         private CypherEntityManager $cypherEntityManager,
         private ElementManager $elementManager,
+        private ElementTypeService $elementTypeService,
         private LoggerInterface $logger,
         private Server500LogicErrorExceptionFactory $server500LogicErrorExceptionFactory,
     ) {
@@ -38,17 +41,22 @@ class EtagCalculatorService
             ]
         );
 
+        $resolved = $this->elementTypeService->resolve($elementId);
+        if (null === $resolved) {
+            return null;
+        }
+        $escapedType = CypherHelper::escapeIdentifier($resolved->getType());
         $result = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
-                "OPTIONAL MATCH (node {id: \$elementId})\n".
-                "OPTIONAL MATCH ()-[relation {id: \$elementId}]->()\n".
-                'RETURN node.updated, relation.updated',
+                $resolved->isNode()
+                    ? sprintf('MATCH (element:%s {id: $elementId}) RETURN element.updated AS updated', $escapedType)
+                    : sprintf('MATCH ()-[element:%s {id: $elementId}]->() RETURN element.updated AS updated', $escapedType),
                 [
                     'elementId' => $elementId->toString(),
                 ]
             )
         );
-        $updated = $result[0]['node.updated'] ?? $result[0]['relation.updated'] ?? null;
+        $updated = $result[0]['updated'] ?? null;
         if (null === $updated) {
             return null;
         }
@@ -77,11 +85,16 @@ class EtagCalculatorService
                 'parentId' => $parentId->toString(),
             ]
         );
+        $label = $this->elementTypeService->resolveNodeLabel($parentId);
+        if (null === $label) {
+            return null;
+        }
+        $escapedLabel = CypherHelper::escapeIdentifier($label);
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
         $result = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 sprintf(
-                    "MATCH (parent {id: \$parentId})\n".
+                    "MATCH (parent:%s {id: \$parentId})\n".
                     "MATCH (parent)-[:OWNS]->(children)\n".
                     "MATCH (parent)-[relations]->(children)\n".
                     "WITH children, relations\n".
@@ -96,6 +109,7 @@ class EtagCalculatorService
                     "  RETURN COLLECT(tuple) AS sortedTuples\n".
                     "}\n".
                     'RETURN sortedTuples, childrenCount',
+                    $escapedLabel,
                     $limit + 1
                 ),
                 [
@@ -146,11 +160,16 @@ class EtagCalculatorService
                 'childId' => $childId->toString(),
             ]
         );
+        $label = $this->elementTypeService->resolveNodeLabel($childId);
+        if (null === $label) {
+            return null;
+        }
+        $escapedLabel = CypherHelper::escapeIdentifier($label);
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
         $result = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 sprintf(
-                    "MATCH (child {id: \$childId})\n".
+                    "MATCH (child:%s {id: \$childId})\n".
                     "MATCH (child)<-[:OWNS]-(parents)\n".
                     "MATCH (child)<-[relations]-(parents)\n".
                     "WITH parents, relations\n".
@@ -165,6 +184,7 @@ class EtagCalculatorService
                     "  RETURN COLLECT(tuple) AS sortedTuples\n".
                     "}\n".
                     'RETURN sortedTuples, parentsCount',
+                    $escapedLabel,
                     $limit + 1
                 ),
                 [
@@ -215,11 +235,16 @@ class EtagCalculatorService
                 'centerId' => $centerId->toString(),
             ]
         );
+        $label = $this->elementTypeService->resolveNodeLabel($centerId);
+        if (null === $label) {
+            return null;
+        }
+        $escapedLabel = CypherHelper::escapeIdentifier($label);
         $limit = $this->emberNexusConfiguration->getCacheEtagUpperLimitInCollectionEndpoints();
         $result = $this->cypherEntityManager->getClient()->runStatement(
             Statement::create(
                 sprintf(
-                    "MATCH (center {id: \$centerId})\n".
+                    "MATCH (center:%s {id: \$centerId})\n".
                     "MATCH (center)-[relations]-(related)\n".
                     "WITH related, relations\n".
                     "LIMIT %d\n".
@@ -233,6 +258,7 @@ class EtagCalculatorService
                     "  RETURN COLLECT(tuple) AS sortedTuples\n".
                     "}\n".
                     'RETURN sortedTuples, relatedCount',
+                    $escapedLabel,
                     $limit + 1
                 ),
                 [
@@ -288,7 +314,8 @@ class EtagCalculatorService
             Statement::create(
                 sprintf(
                     "MATCH (user:User {id: \$userId})\n".
-                    "MATCH (user)-[:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+                    "MATCH (user)-[relation:OWNS|IS_IN_GROUP|HAS_READ_ACCESS]->(elements)\n".
+                    'WHERE '.ReadAccessCypherHelper::directReadRelationCondition('relation', 'elements').
                     "WITH elements\n".
                     "LIMIT %d\n".
                     "WITH elements\n".

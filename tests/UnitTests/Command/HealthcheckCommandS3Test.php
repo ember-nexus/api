@@ -79,6 +79,8 @@ class HealthcheckCommandS3Test extends TestCase
             $this->prophesize(AMQPStreamConnection::class)->reveal(),
             $s3Client->reveal(),
             $configuration->reveal(),
+            $this->prophesize(\App\Contract\MphfInterface::class)->reveal(),
+            $this->prophesize(\App\Factory\Type\RedisKeyFactory::class)->reveal(),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal(),
         );
 

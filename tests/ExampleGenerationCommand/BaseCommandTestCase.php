@@ -10,7 +10,7 @@ use Symfony\Component\Dotenv\Dotenv;
 
 abstract class BaseCommandTestCase extends TestCase
 {
-    private const string FALLBACK_REFERENCE_DATASET_VERSION = '0.0.33';
+    private const string FALLBACK_REFERENCE_DATASET_VERSION = '0.1.2';
 
     /**
      * Runs the command and returns its stdout. Stderr is captured as well: it contains e.g. progress bars, which would

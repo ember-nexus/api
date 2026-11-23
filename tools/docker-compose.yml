@@ -36,7 +36,7 @@ services:
 
   neo4j:
     container_name: neo4j
-    image: neo4j:5.25
+    image: neo4j:5.26
     environment:
       - NEO4J_AUTH=neo4j/password
     ports:
@@ -45,7 +45,7 @@ services:
 
   mongodb:
     container_name: mongodb
-    image: mongo:8.0
+    image: mongo:8.3
     ports:
       - "27017:27017"
     environment:
@@ -55,7 +55,7 @@ services:
 
   elasticsearch:
     container_name: elasticsearch
-    image: elasticsearch:8.16.1
+    image: elasticsearch:8.19.25
     mem_limit: 4gb
     ports:
       - "9200:9200"
@@ -66,7 +66,7 @@ services:
 
   kibana:
     container_name: kibana
-    image: kibana:8.16.1
+    image: kibana:8.19.25
     ports:
       - "5601:5601"
     depends_on:
@@ -76,10 +76,12 @@ services:
 
   redis:
     container_name: redis
-    image: redis:8.0-M02
+    image: redis:8.10
     ports:
       - "6379:6379"
-    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+    volumes:
+      - ./volumes/redis:/data
+    command: redis-server --save 20 1 --appendonly yes --loglevel warning --maxmemory-policy noeviction --requirepass redis-password
 
   redisinsight:
     container_name: redisinsight
@@ -89,7 +91,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:3-management
+    image: rabbitmq:4-management
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -111,7 +113,7 @@ services:
     command: server /data --console-address ":9001"
 
   minio-init:
-    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    image: pgsty/mc:RELEASE.2026-11-12T00-00-00Z
     depends_on:
       - minio
     entrypoint: >
@@ -123,9 +125,11 @@ services:
 
       mc mb --ignore-existing minio/api-storage;
       mc mb --ignore-existing minio/api-upload;
+      mc mb --ignore-existing minio/ember-nexus-system;
 
       mc anonymous set none minio/api-storage;
       mc anonymous set none minio/api-upload;
+      mc anonymous set none minio/ember-nexus-system;
 
       mc admin user add minio accessKey secretKey || true;
       mc admin policy attach minio readwrite --user accessKey;
@@ -140,16 +144,3 @@ services:
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-  k6:
-    container_name: k6
-    build:
-      context: ../tests/LoadTests
-    volumes:
-      - ../tests/LoadTests:/app
-      - ./volumes/k6-reports:/app/tmp
-    environment:
-      - API_BASE_URL=http://api
-      - API_TOKEN=secret-token:1nc1pFdBO2QLYRMMvULgtQ
-    depends_on:
-      - api

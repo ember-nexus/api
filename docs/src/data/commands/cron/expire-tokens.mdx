@@ -1,0 +1,22 @@
+---
+command: cron:expire-tokens
+name: cron:expire-tokens
+helpCommand: php bin/console cron:expire-tokens --help
+helpOutput: cron-expire-tokens-help.html
+exampleCommand: php bin/console cron:expire-tokens
+exampleOutput: cron-expire-tokens.html
+---
+
+Keeps the stored state of [tokens](/reference/security#token-lifecycle) truthful:
+
+- Tokens with state `ACTIVE` whose `expirationDate` has passed become `EXPIRED`.
+- Tokens which expired longer ago than the configured `token.tokenDeleteExpiredTokensAutomaticallyInSeconds` (default:
+  14 days, `false` disables deleting) are deleted, including their relations.
+
+Takes no arguments or options.
+
+<Note>
+    Expired tokens are already rejected during authentication, independent of this command - it only cleans up. Every
+    API instance schedules it every 10 minutes on its own (see
+    [Background tasks](/reference/configuration#background-tasks)), so it does not need to be invoked manually.
+</Note>

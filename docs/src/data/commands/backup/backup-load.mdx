@@ -21,12 +21,21 @@ Options:
 - `--skip-verify` - skips verifying file contents against their stored `file.hash` values. Without it, files that
   fail verification are skipped and reported as errors on the console and in the logs; the element keeps
   `hasFile=true` and the command's exit code stays `0`.
-- `--legacy-mapping-output` - if the backup contains legacy UUIDv4 element ids, the mapping to the new ids is written to this
-  CSV file, see [`backup:convert`](/command/backup-convert) for the format.
+- `--skip-mphf-build` - does not build the [element type index](/command/mphf-build) after loading; run `mphf:build`
+  afterwards instead.
 
-Backups with legacy UUIDv4 element ids are converted while loading, with the same logic as `backup:convert`. Elements
-without a `created` property share the time of the import as timestamp. Ids with timestamps in the future are imported
-as they are, and a warning is logged.
+The node labels and relation types are read from the `graphStructure` of the `summary.json`, and the id indices (see
+[`index:ensure`](/command/index-ensure)) for all of them are created before the first element is loaded, so that nodes
+and relations are never matched without them. Backups from before the summary contained the graph structure are
+loaded the old way: the indices are created after the nodes and after the relations. When everything is loaded, the
+cached graph structure is dropped and read again from the loaded database, and the element type index is built at the
+end. The command takes the maintenance locks, so these tasks stay quiet in the meantime.
+
+Backups are loaded as they are, their content is never rewritten. Which backups can be loaded is decided by the
+`version` property of the `summary.json`: backups created before 0.2.0 use an older format and are refused, with the
+suggestion to convert them using [`backup:convert`](/command/backup-convert) first. Backups of development builds
+(`dev`) and backups without a version are loaded. Ids with timestamps in the future are imported as they are, and a
+warning is logged.
 
 <Note>
     The target database must be empty - the command checks for existing nodes or relations up

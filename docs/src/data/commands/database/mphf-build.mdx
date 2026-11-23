@@ -1,0 +1,44 @@
+---
+command: mphf:build
+name: mphf:build
+helpCommand: php bin/console mphf:build --help
+helpOutput: mphf-build-help.html
+exampleCommand: php bin/console mphf:build
+exampleOutput: mphf-build.html
+---
+
+Builds the element type index: a compact, read-only table (a minimal perfect hash) which maps an element id to its node
+label or relationship type, so that requests can address elements with a typed query and use the id indices created by
+[`index:ensure`](/command/index-ensure). The table needs about one byte per element, is stored in the system bucket
+(`S3_SYSTEM_BUCKET`, default `ember-nexus-system`, key `mphf/<yyyymmdd-hhii>.mphf`) and loaded into memory-mapped
+storage by every API instance.
+
+How it works:
+
+1. The Redis overlay is switched. Elements created from now on are remembered in the newly active overlay key
+   (`mphf-overlay:A` / `mphf-overlay:B`), so nothing gets lost while the table is built.
+2. All element ids are exported from the graph database, per label and relationship type, and the table is built.
+3. The table is uploaded and published by setting the Redis key `mphf-version`. API instances notice the new version
+   within seconds and download it. Afterwards the previous overlay key is deleted and old table files beyond
+   `MPHF_RETENTION_FILES` are removed from the bucket.
+
+Alongside the table, the same export fills a Bloom filter of all element ids in Redis (`element-id-filter:A` /
+`element-id-filter:B`, about 2 bytes per element at the default error rate). Creating an element always checks that its
+id is not taken; if the filter says "definitely unknown", which is true for nearly every new id, that check needs no
+database query, otherwise the database decides as before. The filter is only trusted once a build has completed it
+(`element-id-filter:ready`), new ids are added to it before the element is written, and a Redis without Bloom support or
+a missing filter key silently falls back to the database check. Deleted elements stay in the filter, which only costs a
+database check if their id is reused.
+
+The command runs on every instance once a day (03:17 UTC) and takes the lock `lock:maintenance:mphf`, so only one build
+runs at a time; it is skipped (successfully) if another build, a backup load or a database reset is running. A failed
+build exits with a non-zero code and publishes nothing. Until a table exists the API resolves elements with a slower
+untyped query, so a fresh instance works without it.
+
+<Note title="Redis requirements">
+    The overlay and the version live in Redis and must not be evicted: configure Redis with
+    `maxmemory-policy noeviction` (or no `maxmemory`), as an evicted overlay entry makes an element unreachable until
+    the next build.
+</Note>
+
+Related environment variables are listed in the [configuration reference](/reference/configuration#element-type-index).

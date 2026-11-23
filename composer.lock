@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5f0456673073bf8790b8ce741de05c48",
+    "content-hash": "1e0356895599c0527cb6acad33af89be",
     "packages": [
         {
             "name": "antlr/antlr4-php-runtime",

@@ -23,8 +23,11 @@ Ember Nexus requires several databases to be available:
 - [Neo4j](https://neo4j.com)
 - [MongoDB](https://www.mongodb.com)
 - [Elasticsearch](https://www.elastic.co/elasticsearch)
-- [S3](https://aws.amazon.com/s3) compatible storage API, e.g. [MinIO](https://www.min.io)
-- [Redis](https://redis.io)
+- [S3](https://aws.amazon.com/s3) compatible storage API, e.g. [MinIO](https://www.min.io), with three buckets: for
+  stored files, for uploads in progress and for system data like the element type index, see
+  [file storage buckets](/reference/configuration#file-storage-buckets)
+- [Redis](https://redis.io), configured with persistence (`--appendonly yes`) and `--maxmemory-policy noeviction`, so
+  that a restart or a full memory does not lose data which is only rebuilt by the next `mphf:build`, see [element type index](/reference/configuration#element-type-index)
 - [RabbitMQ](https://www.rabbitmq.com)
 
 All the dependencies can be operated as Docker containers as well.

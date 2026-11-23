@@ -14,6 +14,7 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
 use LogicException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
@@ -156,12 +157,123 @@ class BackupConvertCommandTest extends TestCase
     {
         $this->createLegacyBackup();
         $this->runCommand(['source' => 'legacy']);
-        $this->runCommand(['source' => 'legacy-converted', '--target' => 'again']);
+        $this->runCommand(['source' => 'legacy-converted', '--target' => 'again', '--force' => true]);
 
         $this->assertSame(
             $this->backupStorage->read('legacy-converted/node/human/a.json'),
             $this->backupStorage->read('again/node/human/a.json')
         );
         $this->assertSame("UUIDv4;UUIDsv2a7\n", $this->backupStorage->read('again/uuid-mapping.csv'));
+    }
+
+    public function testCreatedRelationsBecomeCreatedByProperties(): void
+    {
+        $this->backupStorage->write('old/summary.json', "{\n  \"nodeCount\": 2,\n  \"relationCount\": 2,\n  \"fileCount\": 0,\n  \"hostname\": \"h\"\n}\n");
+        // the creator is read after the created element, the order of the files must not matter
+        $this->backupStorage->write('old/node/a-created.json', '{"type":"Data","id":"'.self::NODE_A.'","data":{"created":"2020-01-01T00:00:00+00:00"}}');
+        $this->backupStorage->write('old/node/b-user.json', '{"type":"User","id":"'.self::NODE_B.'","data":{"created":"2019-01-01T00:00:00+00:00"}}');
+        $this->backupStorage->write('old/relation/created.json', '{"type":"CREATED","id":"'.self::RELATION.'","start":"'.self::NODE_B.'","end":"'.self::NODE_A.'","data":{}}');
+        $this->backupStorage->write('old/relation/owns.json', '{"type":"OWNS","id":"11111111-1111-4111-8111-111111111111","start":"'.self::NODE_B.'","end":"'.self::NODE_A.'","data":{}}');
+
+        $tester = $this->runCommand(['source' => 'old']);
+        $this->assertSame(0, $tester->getStatusCode());
+
+        $user = json_decode($this->backupStorage->read('old-converted/node/b-user.json'), true);
+        $created = json_decode($this->backupStorage->read('old-converted/node/a-created.json'), true);
+        $this->assertSame($user['id'], $created['data']['createdBy']);
+        $this->assertSame(1546300800000, Uuid::fromString($user['id'])->getTimestampMs(), 'the creator keeps the time of its creation');
+        $this->assertArrayNotHasKey('createdBy', $user['data']);
+
+        $this->assertFalse($this->backupStorage->fileExists('old-converted/relation/created.json'));
+        $this->assertTrue($this->backupStorage->fileExists('old-converted/relation/owns.json'));
+
+        $summary = json_decode($this->backupStorage->read('old-converted/summary.json'), true);
+        $this->assertSame(2, $summary['nodeCount']);
+        $this->assertSame(1, $summary['relationCount']);
+        $this->assertSame(['nodeTypes' => ['Data', 'User'], 'relationTypes' => ['OWNS']], $summary['graphStructure']);
+        $this->assertSame(['nodeCount', 'relationCount', 'fileCount', 'graphStructure', 'hostname', 'version'], array_keys($summary));
+    }
+
+    /**
+     * @return array<string, array{string, bool}>
+     */
+    public static function versionProvider(): array
+    {
+        return [
+            'older release' => ['0.1.9', true],
+            'v prefix' => ['v0.1.0', true],
+            'development build' => ['dev', true],
+            'first new version' => ['0.2.0', false],
+            'pre-release of the new version' => ['0.2.0-rc1', false],
+            'newer release' => ['1.4.2', false],
+        ];
+    }
+
+    #[DataProvider('versionProvider')]
+    public function testOnlyBackupsOfOlderVersionsAreConverted(string $version, bool $converted): void
+    {
+        $this->createLegacyBackup();
+        $this->backupStorage->write('legacy/summary.json', json_encode(['nodeCount' => 2, 'version' => $version]));
+
+        if (!$converted) {
+            try {
+                $this->runCommand(['source' => 'legacy']);
+                $this->fail('Expected the conversion to be refused.');
+            } catch (LogicException $exception) {
+                $this->assertStringContainsString('--force', $exception->getMessage());
+                $this->assertStringContainsString($version, $exception->getMessage());
+            }
+            $this->assertFalse($this->backupStorage->directoryExists('legacy-converted'), 'nothing is written when refused');
+
+            return;
+        }
+        $this->assertSame(0, $this->runCommand(['source' => 'legacy'])->getStatusCode());
+        $this->assertTrue($this->backupStorage->directoryExists('legacy-converted'));
+    }
+
+    public function testForceConvertsBackupsOfNewerVersions(): void
+    {
+        $this->createLegacyBackup();
+        $this->backupStorage->write('legacy/summary.json', json_encode(['nodeCount' => 2, 'version' => '0.2.0']));
+
+        $tester = $this->runCommand(['source' => 'legacy', '--force' => true]);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('Converting it anyway', $tester->getDisplay());
+    }
+
+    public function testBackupWithoutVersionIsConvertedWithWarning(): void
+    {
+        $this->createLegacyBackup();
+        $this->backupStorage->write('legacy/summary.json', '{"nodeCount":2}');
+
+        $tester = $this->runCommand(['source' => 'legacy']);
+
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString("no 'version'", $tester->getDisplay());
+    }
+
+    public function testConvertedSummaryHasTheNewVersionAndKeepsTheOriginalOne(): void
+    {
+        $this->createLegacyBackup();
+        $this->backupStorage->write('legacy/summary.json', json_encode(['nodeCount' => 2, 'version' => '0.1.36', 'hostname' => 'h']));
+
+        $this->runCommand(['source' => 'legacy']);
+
+        $summary = json_decode($this->backupStorage->read('legacy-converted/summary.json'), true);
+        $this->assertSame(BackupConvertCommand::FIRST_NEW_FORMAT_VERSION, $summary['version']);
+        $this->assertSame('0.1.36', $summary['convertedFromVersion']);
+        $this->assertSame('h', $summary['hostname']);
+    }
+
+    public function testConvertedSummaryWithoutVersionGetsTheNewVersion(): void
+    {
+        $this->createLegacyBackup();
+
+        $this->runCommand(['source' => 'legacy']);
+
+        $summary = json_decode($this->backupStorage->read('legacy-converted/summary.json'), true);
+        $this->assertSame(BackupConvertCommand::FIRST_NEW_FORMAT_VERSION, $summary['version']);
+        $this->assertArrayNotHasKey('convertedFromVersion', $summary);
     }
 }

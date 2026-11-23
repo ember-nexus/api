@@ -44,6 +44,11 @@ minutes and 13 months.
 
 The limits are [configurable](/reference/configuration).
 
+Expired tokens are rejected during authentication as soon as their `expirationDate` has passed. The command
+[`cron:expire-tokens`](/command/cron-expire-tokens), which every API instance runs every 10 minutes, additionally sets
+the state of such tokens to `EXPIRED` and deletes them after
+`token.tokenDeleteExpiredTokensAutomaticallyInSeconds` (default: 14 days).
+
 **Tokens can become immortal**, when the property `expirationDate` is absent. This can not happen through API requests,
 i.e. it requires the import of a specially crafted backup or direct manipulation of the token inside the Neo4j database.
 
@@ -81,9 +86,13 @@ On every element:
 
 - `id` - assigned once, when the element is created.
 - `created` / `updated` - timestamps maintained automatically: `created` is set once, `updated` on every change.
+- `createdBy` / `updatedBy` - the id of the user who created the element, or last changed it. `createdBy` is set once
+  and never changes. Elements loaded from a backup which predates these properties have none. `createdBy` is what the
+  `onCreatedByUser` condition of `HAS_X_ACCESS` relations is checked against.
 - `file` / `hasFile` - set as a side effect of uploading, replacing, or deleting the element's file; see
   [Metadata](/reference/file#metadata) in the file reference.
 
 Additionally, on `User` nodes: the property configured as the registration identifier (`email` by default). On
-`Token` nodes: `token`.
+`Token` nodes: `token`, `hash`, `state` and `expirationDate`. They are set by the API when the token is created, used
+or expired, and rejected on every method, including `PUT`, which keeps their current values.
 

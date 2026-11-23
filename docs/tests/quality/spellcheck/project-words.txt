@@ -4,6 +4,7 @@
 # Ember Nexus / project vocabulary
 hypergraph
 backlinks
+MPHF
 
 # placeholder marker used on unwritten stub pages (not a real word — see
 # guide/*.mdx pages whose entire body is just "blub"; whitelisted so the
@@ -68,3 +69,10 @@ xcontent
 
 # UUID draft name
 uuidrev
+
+# Redis configuration directives, madvise hint and the timestamp placeholder of the MPHF file names
+appendonly
+hhii
+madvise
+maxmemory
+noeviction

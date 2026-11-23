@@ -4,6 +4,9 @@ set -e
 
 REFERENCE_DATASET_VERSION=$(grep -E '^REFERENCE_DATASET_VERSION=' .env | cut -d '=' -f 2)
 
-php bin/console backup:fetch reference-dataset "https://github.com/ember-nexus/reference-dataset/archive/refs/tags/$REFERENCE_DATASET_VERSION.zip" --force
+# REFERENCE_DATASET_URL overrides the release archive, e.g. with the one of bin/reference-dataset-wip
+REFERENCE_DATASET_URL="${REFERENCE_DATASET_URL:-https://github.com/ember-nexus/reference-dataset/archive/refs/tags/$REFERENCE_DATASET_VERSION.zip}"
+
+php bin/console backup:fetch reference-dataset "$REFERENCE_DATASET_URL" --force
 php bin/console database:drop -f
 php bin/console backup:load reference-dataset

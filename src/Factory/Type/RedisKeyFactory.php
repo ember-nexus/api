@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Factory\Type;
 
+use App\Type\MaintenanceLockType;
+use App\Type\MphfOverlaySlot;
 use App\Type\RedisKey;
 use App\Type\RedisPrefixType;
 use App\Type\Uuid;
@@ -16,6 +18,28 @@ class RedisKeyFactory
         return new RedisKey(
             RedisPrefixType::TOKEN,
             ''
+        );
+    }
+
+    /**
+     * Holds the node labels and relation types of the database, see {@see \App\Service\GraphStructureService}.
+     */
+    public function getGraphStructureRedisKey(): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::GRAPH_STRUCTURE,
+            ''
+        );
+    }
+
+    public function getRewrittenQueryCypherPathSubsetRedisKey(string $cypherQuery): RedisKey
+    {
+        /** @psalm-suppress WeakHash */
+        $hashedCypherQuery = sha1($cypherQuery);
+
+        return new RedisKey(
+            RedisPrefixType::REWRITTEN_QUERY_CYPHER_PATH_SUBSET,
+            $hashedCypherQuery
         );
     }
 
@@ -107,6 +131,79 @@ class RedisKeyFactory
         return new RedisKey(
             RedisPrefixType::CRON_DELETE_EXPIRED_UPLOAD,
             $uploadId
+        );
+    }
+
+    /**
+     * Holds the file name of the current MPHF build; absent means that no MPHF is available.
+     */
+    public function getMphfVersionRedisKey(): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::MPHF_VERSION,
+            ''
+        );
+    }
+
+    /**
+     * One of the two parent keys of the overlay, a hash which maps element ids to their types. Which one takes new
+     * writes is stored in {@see getMphfOverlayActiveRedisKey()}.
+     */
+    public function getMphfOverlayRedisKey(MphfOverlaySlot $slot): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::MPHF_OVERLAY,
+            $slot->value
+        );
+    }
+
+    /**
+     * One of the two Bloom filters of element ids, see {@see \App\Service\Mphf\ElementIdFilterService}.
+     */
+    public function getElementIdFilterRedisKey(MphfOverlaySlot $slot): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::ELEMENT_ID_FILTER,
+            $slot->value
+        );
+    }
+
+    /**
+     * Names the slot of the element id filter which takes new ids.
+     */
+    public function getElementIdFilterActiveRedisKey(): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::ELEMENT_ID_FILTER,
+            'active'
+        );
+    }
+
+    /**
+     * Names the slot of the element id filter which is complete, i.e. contains every element which exists. Absent
+     * while the filter is built, or if it was never built.
+     */
+    public function getElementIdFilterReadyRedisKey(): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::ELEMENT_ID_FILTER,
+            'ready'
+        );
+    }
+
+    public function getMphfOverlayActiveRedisKey(): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::MPHF_OVERLAY,
+            'active'
+        );
+    }
+
+    public function getMaintenanceLockRedisKey(MaintenanceLockType $type): RedisKey
+    {
+        return new RedisKey(
+            RedisPrefixType::LOCK_MAINTENANCE,
+            $type->value
         );
     }
 }

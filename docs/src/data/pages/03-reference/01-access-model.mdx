@@ -249,7 +249,7 @@ The following optional properties can be set on `HAS_X_ACCESS`:
 
 - `onLabel`: Limits access to a specific type of nodes.
 - `onParentLabel`: Limits access to children of a specific type of nodes.
-- `onCreatedByUser`: Requires that the element was created by the current user, i.e. the relation `CREATED` exists between the user and the element.
+- `onCreatedByUser`: Requires that the element was created by the current user, i.e. the element's `createdBy` property equals the id of the user.
 - `onState`: Limits access to elements which currently have a given workflow state.
 
 #### Limiting access by workflow state

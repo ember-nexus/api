@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\EventSystem\EntityManager\EventListener;
 
+use App\Contract\NodeElementInterface;
 use App\Contract\RelationElementInterface;
 use App\EventSystem\EntityManager\Event\ElementPostCreateEvent;
 use App\EventSystem\EntityManager\Event\ElementPostDeleteEvent;
 use App\EventSystem\EntityManager\Event\ElementPostMergeEvent;
 use App\Service\AppStateService;
+use App\Service\PendingSearchDocumentService;
 use App\Service\QueueService;
 use App\Type\AppStateType;
 use App\Type\RabbitMQQueueType;
@@ -24,7 +26,7 @@ class OwnershipChangeEventListener
 {
     /**
      * Relation types which can change which groups/users have (direct or indirect) search access to an element.
-     * `HAS_*_ACCESS` types other than search, `CREATED`, property-based rules and implicit rules are intentionally
+     * `HAS_*_ACCESS` types other than search, property-based rules and implicit rules are intentionally
      * excluded: they either don't feed search access at all, or enqueuing on them would risk an unbounded cascade.
      *
      * @var string[]
@@ -38,12 +40,19 @@ class OwnershipChangeEventListener
     public function __construct(
         private QueueService $queueService,
         private AppStateService $appStateService,
+        private PendingSearchDocumentService $pendingSearchDocumentService,
     ) {
     }
 
     #[AsEventListener]
     public function onElementPostCreate(ElementPostCreateEvent $event): void
     {
+        if ($this->ownsNodeCreatedInSameFlush($event->getElement())) {
+            // The new node has no descendants yet, apart from the ones which are created together with it and
+            // calculate their own search access, and a new owner does not change the access of the owner itself.
+            // Relations from the new node to existing elements are no OWNS-to-new-node case and still queue.
+            return;
+        }
         $this->handleEvent($event, 'create');
     }
 
@@ -57,6 +66,17 @@ class OwnershipChangeEventListener
     public function onElementPostDelete(ElementPostDeleteEvent $event): void
     {
         $this->handleEvent($event, 'delete');
+    }
+
+    private function ownsNodeCreatedInSameFlush(NodeElementInterface|RelationElementInterface $element): bool
+    {
+        if (!($element instanceof RelationElementInterface) || 'OWNS' !== $element->getType()) {
+            return false;
+        }
+        $endId = $element->getEnd();
+
+        // during the post create events, the documents of everything created in this flush are still pending
+        return null !== $endId && null !== $this->pendingSearchDocumentService->get($endId->toString());
     }
 
     private function handleEvent(

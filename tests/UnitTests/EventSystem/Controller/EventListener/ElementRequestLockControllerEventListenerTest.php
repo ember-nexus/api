@@ -8,6 +8,8 @@ use App\Attribute\EndpointSupportsEtag;
 use App\EventSystem\Controller\EventListener\ElementRequestLockControllerEventListener;
 use App\Exception\Client409ConflictException;
 use App\Factory\Exception\Client409ConflictExceptionFactory;
+use App\Security\AccessChecker;
+use App\Security\AuthProvider;
 use App\Service\ElementRequestLockService;
 use App\Type\EtagType;
 use App\Type\Uuid;
@@ -30,10 +32,17 @@ class ElementRequestLockControllerEventListenerTest extends TestCase
 
     private const string ELEMENT_ID = '02IiNr0G8viOVKjn71oeH0BK5KarxzLjlnY4f';
 
-    private function createListener(?ElementRequestLockService $elementRequestLockService = null, ?Client409ConflictExceptionFactory $client409ConflictExceptionFactory = null): ElementRequestLockControllerEventListener
+    private function createListener(?ElementRequestLockService $elementRequestLockService = null, ?Client409ConflictExceptionFactory $client409ConflictExceptionFactory = null, bool $hasAccess = true): ElementRequestLockControllerEventListener
     {
+        $accessChecker = $this->prophesize(AccessChecker::class);
+        $accessChecker->hasAccessToElement(Argument::cetera())->willReturn($hasAccess);
+        $authProvider = $this->prophesize(AuthProvider::class);
+        $authProvider->getUserId()->willReturn(Uuid::fromString(self::ELEMENT_ID));
+
         return new ElementRequestLockControllerEventListener(
             $elementRequestLockService ?? $this->prophesize(ElementRequestLockService::class)->reveal(),
+            $accessChecker->reveal(),
+            $authProvider->reveal(),
             $client409ConflictExceptionFactory ?? $this->prophesize(Client409ConflictExceptionFactory::class)->reveal(),
         );
     }
@@ -60,6 +69,19 @@ class ElementRequestLockControllerEventListenerTest extends TestCase
         $event = $this->createControllerEvent($closure, $request, HttpKernelInterface::SUB_REQUEST);
 
         $this->createListener()->onKernelController($event);
+    }
+
+    public function testRequestWithoutAccessDoesNotTakeTheLock(): void
+    {
+        $lockService = $this->prophesize(ElementRequestLockService::class);
+        $lockService->acquire(Argument::cetera())->shouldNotBeCalled();
+
+        $closure = #[EndpointSupportsEtag(EtagType::ELEMENT)]
+        fn () => true;
+        $request = Request::create('/'.self::ELEMENT_ID, 'PATCH');
+        $request->attributes->set('id', self::ELEMENT_ID);
+
+        $this->createListener($lockService->reveal(), null, false)->onKernelController($this->createControllerEvent($closure, $request));
     }
 
     public function testNonLockedMethodIsIgnored(): void

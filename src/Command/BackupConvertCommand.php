@@ -23,12 +23,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Throwable;
 
+use function Safe\preg_match;
+
 /**
  * Converts a backup with legacy UUIDv4 element ids into a backup with UUIDsv2a7 element ids.
  *
  * The source backup is never modified: all data is copied into a new backup folder, which must not exist yet.
  *
  * @psalm-suppress PropertyNotSetInConstructor $io
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[AsCommand(name: 'backup:convert', description: 'Converts a backup with legacy UUIDv4 element ids into a new backup with UUIDsv2a7 element ids.')]
 class BackupConvertCommand extends Command
@@ -36,6 +40,8 @@ class BackupConvertCommand extends Command
     use CommandInputTrait;
 
     public const string DEFAULT_MAPPING_FILE = 'uuid-mapping.csv';
+    /** First API version which creates backups in the new format (UUIDsv2a7 ids, createdBy instead of CREATED). */
+    public const string FIRST_NEW_FORMAT_VERSION = '0.2.0';
 
     private EmberNexusStyle $io;
     private LegacyUuidMap $legacyUuidMap;
@@ -46,6 +52,15 @@ class BackupConvertCommand extends Command
     private int $fileCount = 0;
     private int $otherCount = 0;
     private int $errorCount = 0;
+    private int $createdRelationCount = 0;
+    /** @var array<string, string> lower case old id of the created element => id of its creator (already mapped) */
+    private array $createdBy = [];
+    /** @var array<string, true> paths of the CREATED relation files, which are replaced by the createdBy property */
+    private array $createdRelationPaths = [];
+    /** @var array<string, true> */
+    private array $nodeTypes = [];
+    /** @var array<string, true> */
+    private array $relationTypes = [];
 
     public function __construct(
         #[Target('backup.storage')]
@@ -61,6 +76,7 @@ class BackupConvertCommand extends Command
     {
         $this->addArgument('source', InputArgument::REQUIRED, 'Name of the existing backup');
         $this->addOption('target', 't', InputOption::VALUE_REQUIRED, "Name of the new backup, defaults to '<source>-converted'");
+        $this->addOption('force', 'f', InputOption::VALUE_NONE, sprintf('Also convert backups which were created with version %s or newer', self::FIRST_NEW_FORMAT_VERSION));
         $this->addOption('mapping-output', null, InputOption::VALUE_REQUIRED, sprintf("Path of the CSV file which receives the id mapping, defaults to '%s' within the new backup", self::DEFAULT_MAPPING_FILE));
     }
 
@@ -89,6 +105,8 @@ class BackupConvertCommand extends Command
             throw new LogicException(sprintf("Target backup '%s' already exists; the source backup is never modified or overwritten", $this->targetName));
         }
 
+        $this->checkSourceVersion($this->isOptionActive($input, 'force'));
+
         // all legacy ids without 'created' property share the time of this conversion
         $this->legacyUuidMap = LegacyUuidMap::createFromNow();
 
@@ -103,6 +121,8 @@ class BackupConvertCommand extends Command
 
         $this->backupStorage->createDirectory($this->targetName);
 
+        $this->collectCreatedRelations($paths);
+
         // nodes first, so that relations can reference the already converted node ids
         $this->io->startSection('Step 1 of 4: Converting Nodes');
         foreach ($paths as $path) {
@@ -115,12 +135,22 @@ class BackupConvertCommand extends Command
 
         $this->io->startSection('Step 2 of 4: Converting Relations');
         foreach ($paths as $path) {
-            if ($this->isElementJson($path, 'relation')) {
-                $this->convertElementJson($path);
-                ++$this->relationCount;
+            if (!$this->isElementJson($path, 'relation')) {
+                continue;
             }
+            if (array_key_exists($path, $this->createdRelationPaths)) {
+                // replaced by the createdBy property of the created element
+                ++$this->createdRelationCount;
+                continue;
+            }
+            $this->convertElementJson($path);
+            ++$this->relationCount;
         }
-        $this->io->stopSection(sprintf('Converted <info>%d</info> relations.', $this->relationCount));
+        $this->io->stopSection(sprintf(
+            'Converted <info>%d</info> relations, replaced <info>%d</info> CREATED relations by createdBy properties.',
+            $this->relationCount,
+            $this->createdRelationCount
+        ));
 
         $this->io->startSection('Step 3 of 4: Copying Files');
         foreach ($paths as $path) {
@@ -139,7 +169,11 @@ class BackupConvertCommand extends Command
             if (str_starts_with($path, 'file/') && !str_ends_with($path, '/.gitignore')) {
                 continue;
             }
-            $this->copy($path, $path);
+            if ('summary.json' === $path) {
+                $this->convertSummary($path);
+            } else {
+                $this->copy($path, $path);
+            }
             ++$this->otherCount;
         }
         $this->writeMapping($mappingOutput);
@@ -156,6 +190,156 @@ class BackupConvertCommand extends Command
         ));
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Only backups of older versions are converted; the version is stored in the `version` property of the backup's
+     * summary.json by backup:create. Development builds (`dev`) and backups without a version can not be classified,
+     * they are converted with a warning.
+     */
+    private function checkSourceVersion(bool $force): void
+    {
+        $summary = $this->backupStorage->fileExists($this->sourceName.'/summary.json')
+            ? $this->readElementArray('summary.json')
+            : null;
+        $version = $summary['version'] ?? null;
+        if (!is_string($version) || '' === trim($version)) {
+            $this->io->warning("The backup has no 'version' in its summary.json, it is assumed to be created before ".self::FIRST_NEW_FORMAT_VERSION.'.');
+
+            return;
+        }
+        if (1 !== preg_match('/^v?(\d+)\.(\d+)\.(\d+)/', trim($version), $matches) || !isset($matches[1], $matches[2], $matches[3])) {
+            $this->io->warning(sprintf("The backup was created with the non-release version '%s', it is assumed to be created before %s.", $version, self::FIRST_NEW_FORMAT_VERSION));
+
+            return;
+        }
+        // pre-releases of the new version already write the new format, so only the numeric part is compared
+        if (version_compare($matches[1].'.'.$matches[2].'.'.$matches[3], self::FIRST_NEW_FORMAT_VERSION, '>=')) {
+            if (!$force) {
+                throw new LogicException(sprintf("Backup '%s' was created with version %s, but only backups created before %s have to be converted. Use --force to convert it anyway.", $this->sourceName, $version, self::FIRST_NEW_FORMAT_VERSION));
+            }
+            $this->io->warning(sprintf('The backup was created with version %s, which already uses the new format. Converting it anyway.', $version));
+        }
+    }
+
+    /**
+     * Older backups contain a `CREATED` relation from the creating user to each created element; it is replaced by the
+     * property `createdBy` (id of the user) of the created element. The node ids are mapped first, so they keep the
+     * timestamp of their creation, no matter in which order the files are read.
+     *
+     * @param list<string> $paths
+     */
+    private function collectCreatedRelations(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if ($this->isElementJson($path, 'node')) {
+                $array = $this->readElementArray($path);
+                if (null !== $array) {
+                    $this->legacyUuidMap->mapRawElement($array);
+                }
+            }
+        }
+        foreach ($paths as $path) {
+            if (!$this->isElementJson($path, 'relation')) {
+                continue;
+            }
+            $array = $this->readElementArray($path);
+            if (null === $array || 'CREATED' !== ($array['type'] ?? null)) {
+                continue;
+            }
+            $start = $array['start'] ?? null;
+            $end = $array['end'] ?? null;
+            if (!is_string($start) || !is_string($end)) {
+                continue;
+            }
+            $this->createdRelationPaths[$path] = true;
+            $key = strtolower(trim($end));
+            if (array_key_exists($key, $this->createdBy)) {
+                $this->io->warning(sprintf("Element '%s' has more than one CREATED relation, '%s' is ignored.", $end, $path));
+                continue;
+            }
+            $this->createdBy[$key] = $this->legacyUuidMap->mapId($start);
+        }
+    }
+
+    /**
+     * @return array<string, mixed>|null null if the file is not a valid JSON object, it is reported when it is converted
+     */
+    private function readElementArray(string $path): ?array
+    {
+        try {
+            /** @psalm-suppress MixedAssignment */
+            $array = \Safe\json_decode($this->backupStorage->read($this->sourceName.'/'.$path), true);
+        } catch (Throwable) {
+            return null;
+        }
+        /** @var array<string, mixed>|null $result */
+        $result = is_array($array) ? $array : null;
+
+        return $result;
+    }
+
+    /**
+     * Keeps the summary consistent with the converted elements: counts, graph structure and version. The original version
+     * is kept as `convertedFromVersion`.
+     */
+    private function convertSummary(string $path): void
+    {
+        $raw = $this->backupStorage->read($this->sourceName.'/'.$path);
+        try {
+            $summary = \Safe\json_decode($raw, true);
+            if (!is_array($summary)) {
+                throw new LogicException('Expected JSON object.');
+            }
+        } catch (Throwable) {
+            $this->copy($path, $path);
+
+            return;
+        }
+        $nodeTypes = array_keys($this->nodeTypes);
+        $relationTypes = array_keys($this->relationTypes);
+        sort($nodeTypes, SORT_STRING);
+        sort($relationTypes, SORT_STRING);
+        $graphStructure = ['nodeTypes' => $nodeTypes, 'relationTypes' => $relationTypes];
+        $converted = [];
+        /** @psalm-suppress MixedAssignment */
+        foreach ($summary as $key => $value) {
+            $converted[$key] = match ($key) {
+                'nodeCount' => $this->nodeCount,
+                'relationCount' => $this->relationCount,
+                'graphStructure' => $graphStructure,
+                // the converted backup uses the new format, backup:load refuses backups of older versions
+                'version' => self::FIRST_NEW_FORMAT_VERSION,
+                default => $value,
+            };
+            if ('version' === $key && is_string($value) && '' !== trim($value)) {
+                $converted['convertedFromVersion'] = $value;
+            }
+            if ('fileCount' === $key && !array_key_exists('graphStructure', $summary)) {
+                $converted['graphStructure'] = $graphStructure;
+            }
+        }
+        if (!array_key_exists('version', $converted)) {
+            $converted['version'] = self::FIRST_NEW_FORMAT_VERSION;
+        }
+        $json = $this->encodeJson($converted);
+        if (str_ends_with($raw, "\n")) {
+            $json .= "\n";
+        }
+        $this->backupStorage->write($this->targetName.'/'.$path, $json);
+    }
+
+    private function encodeJson(mixed $value): string
+    {
+        $json = \Safe\json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
+        // keep the 2 space indentation used by the backup files
+        $lines = [];
+        foreach (explode("\n", $json) as $line) {
+            $content = ltrim($line, ' ');
+            $lines[] = str_repeat(' ', intdiv(strlen($line) - strlen($content), 2)).$content;
+        }
+
+        return implode("\n", $lines);
     }
 
     private function writeMapping(?string $mappingOutput): void
@@ -181,6 +365,17 @@ class BackupConvertCommand extends Command
             /** @var array<string, mixed> $array */
             $mapped = $this->legacyUuidMap->mapRawElement($array);
             $changed = false;
+            $this->collectType($path, $array);
+            /** @psalm-suppress MixedAssignment */
+            $rawId = $array['id'] ?? null;
+            $createdBy = $this->createdBy[strtolower(trim(is_string($rawId) ? $rawId : ''))] ?? null;
+            if (null !== $createdBy) {
+                $data = $this->getOrCreateData($object);
+                if (!isset($data->createdBy)) {
+                    $data->createdBy = $createdBy;
+                    $changed = true;
+                }
+            }
             foreach (['id', 'start', 'end'] as $key) {
                 if (isset($mapped[$key]) && ($object->{$key} ?? null) !== $mapped[$key]) {
                     $object->{$key} = $mapped[$key];
@@ -201,18 +396,42 @@ class BackupConvertCommand extends Command
 
             return;
         }
-        $json = \Safe\json_encode($object, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
-        // keep the 2 space indentation used by the backup files
-        $lines = [];
-        foreach (explode("\n", $json) as $line) {
-            $content = ltrim($line, ' ');
-            $lines[] = str_repeat(' ', intdiv(strlen($line) - strlen($content), 2)).$content;
-        }
-        $json = implode("\n", $lines);
+        $json = $this->encodeJson($object);
         if (str_ends_with($raw, "\n")) {
             $json .= "\n";
         }
         $this->backupStorage->write($this->targetName.'/'.$this->targetPathForElement($path, $newId), $json);
+    }
+
+    /**
+     * @psalm-suppress MixedAssignment
+     */
+    private function getOrCreateData(stdClass $object): stdClass
+    {
+        $data = $object->data ?? null;
+        if ($data instanceof stdClass) {
+            return $data;
+        }
+        $data = new stdClass();
+        $object->data = $data;
+
+        return $data;
+    }
+
+    /**
+     * @param array<string, mixed> $array
+     */
+    private function collectType(string $path, array $array): void
+    {
+        $type = $array['type'] ?? null;
+        if (!is_string($type)) {
+            return;
+        }
+        if (str_starts_with($path, 'node/')) {
+            $this->nodeTypes[$type] = true;
+        } else {
+            $this->relationTypes[$type] = true;
+        }
     }
 
     private function convertFile(string $path): void

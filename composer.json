@@ -44,6 +44,7 @@
     "brianium/paratest": "^7.29",
     "friendsofphp/php-cs-fixer": "^3.95",
     "infection/infection": "^0.35",
+    "justinrainbow/json-schema": "^6.14",
     "phpbench/phpbench": "^1.7",
     "phpmd/phpmd": "^3.0",
     "phpspec/prophecy-phpunit": "^2.5",
@@ -67,6 +68,7 @@
       "php-http/discovery": true
     },
     "sort-packages": true,
+    "optimize-autoloader": true,
     "process-timeout": 0
   },
   "autoload": {

@@ -33,4 +33,25 @@ class UserPasswordHasherTest extends TestCase
         $this->assertTrue($userPasswordHasher->needsRehash($legacyHash));
         $this->assertFalse($userPasswordHasher->needsRehash($userPasswordHasher->hashPassword('1234')));
     }
+
+    public function testDummyVerificationCostsAsMuchAsARealOne(): void
+    {
+        $hasher = new UserPasswordHasher();
+        $realHash = $hasher->hashPassword('real-password');
+        $hasher->verifyAgainstDummyHash('warm up'); // creates the dummy hash
+
+        $time = static function (callable $callback): float {
+            $start = hrtime(true);
+            for ($i = 0; $i < 3; ++$i) {
+                $callback();
+            }
+
+            return (hrtime(true) - $start) / 3e6;
+        };
+        $real = $time(static fn () => $hasher->verifyPassword('wrong', $realHash));
+        $dummy = $time(static fn () => $hasher->verifyAgainstDummyHash('wrong'));
+
+        $this->assertGreaterThan(0.5 * $real, $dummy);
+        $this->assertLessThan(2 * $real, $dummy);
+    }
 }

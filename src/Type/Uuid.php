@@ -6,7 +6,9 @@ namespace App\Type;
 
 use App\Exception\InvalidUuidException;
 use JsonSerializable;
+use SplFixedArray;
 use Stringable;
+use WeakMap;
 
 use function Safe\unpack;
 
@@ -41,6 +43,36 @@ final class Uuid implements JsonSerializable, Stringable
     public const int MAX_TIMESTAMP_MS = 0xFFFFFFFFFFFF;
     public const string HEX_PATTERN = '/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-[0-9A-Fa-f]{14}$/';
     public const string LEGACY_V4_PATTERN = '/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/';
+
+    /**
+     * The base62 form is expensive to calculate and requested many times per request, the uuid itself is immutable.
+     * Kept outside of the object, so that loose comparisons (`==`, `in_array()`) of uuids stay independent of whether
+     * the string was calculated already.
+     *
+     * @var WeakMap<Uuid, string>|null
+     */
+    private static ?WeakMap $strings = null;
+
+    /**
+     * Hot cache of parsed base62sort strings: bulk endpoints parse the same ids over and over (the nodes of search
+     * paths are shared between paths), and a parse costs a regular expression, a base62 decode and a validation.
+     *
+     * It is first in, first out: a ring buffer remembers the insertion order, so that the oldest entry is the one to
+     * go when the cache is full and the most recent ones stay. Both structures are native (a hash map for the lookup,
+     * a SplFixedArray, which is a plain C array, for the order), nothing is moved or searched on insert.
+     *
+     * @var array<string, self>
+     */
+    private static array $parsed = [];
+
+    /**
+     * @var SplFixedArray<string|null>|null
+     */
+    private static ?SplFixedArray $parsedOrder = null;
+
+    private static int $parsedNext = 0;
+
+    private const int PARSE_CACHE_LIMIT = 8192;
 
     private function __construct(
         private readonly string $bytes,
@@ -97,6 +129,9 @@ final class Uuid implements JsonSerializable, Stringable
      */
     public static function fromBase62Sort(string $value): self
     {
+        if (isset(self::$parsed[$value])) {
+            return self::$parsed[$value];
+        }
         if (self::BASE62_LENGTH !== strlen($value)) {
             throw new InvalidUuidException(InvalidUuidReason::UNKNOWN_FORMAT, sprintf("'%s' does not have the expected length of %d.", $value, self::BASE62_LENGTH));
         }
@@ -108,7 +143,25 @@ final class Uuid implements JsonSerializable, Stringable
         }
         $body = self::decodeBase62(substr($value, strlen(self::BLOCK)), $value);
 
-        return self::fromBytes(self::BLOCK_BYTES.$body);
+        $uuid = self::fromBytes(self::BLOCK_BYTES.$body);
+        // a valid base62sort string is the canonical form of its bytes, so it doubles as the cached string form
+        self::$strings ??= new WeakMap();
+        self::$strings[$uuid] = $value;
+        self::remember($value, $uuid);
+
+        return $uuid;
+    }
+
+    private static function remember(string $value, self $uuid): void
+    {
+        self::$parsedOrder ??= new SplFixedArray(self::PARSE_CACHE_LIMIT);
+        $oldest = self::$parsedOrder[self::$parsedNext];
+        if (null !== $oldest) {
+            unset(self::$parsed[$oldest]);
+        }
+        self::$parsedOrder[self::$parsedNext] = $value;
+        self::$parsedNext = (self::$parsedNext + 1) % self::PARSE_CACHE_LIMIT;
+        self::$parsed[$value] = $uuid;
     }
 
     /**
@@ -216,7 +269,9 @@ final class Uuid implements JsonSerializable, Stringable
 
     public function toString(): string
     {
-        return self::BLOCK.self::encodeBase62(substr($this->bytes, 4));
+        self::$strings ??= new WeakMap();
+
+        return self::$strings[$this] ??= self::BLOCK.self::encodeBase62(substr($this->bytes, 4));
     }
 
     public function toHex(): string

@@ -6,10 +6,19 @@ services:
     volumes:
       - ./well-known-security.txt:/well-known-security.txt:ro
       - ./volumes/api:/var/www/html/var
+    # /dev/shm holds the element type index (MPHF_STORAGE=memory), Docker limits it to 64 MB by default
+    shm_size: 1gb
     ports:
       - "80:80"
     environment:
       - APP_ENV=prod
+      # The image contains no default .env file, both values have to be set.
+      # Secret of the Symfony kernel: replace it with your own random string (e.g. `openssl rand -hex 16`) and keep it
+      # private. Do not use the value of this example.
+      - APP_SECRET=f762ce98c98b7579d2d6a6c0e5eb1d39
+      # Id of the user which is used for requests without a token, see the anonymous user in the documentation. The value
+      # is the anonymous user of the reference dataset; replace it with the id of your own anonymous user.
+      - ANONYMOUS_USER_UUID=02IiNr0GOoKiPMLSxpKrArvUWmaEqZ5h7Uybr
       - CYPHER_AUTH=bolt://neo4j:password@neo4j
       - MONGO_AUTH=mongodb://mongodb:password@mongodb:27017
       - ELASTIC_AUTH=elasticsearch:9200
@@ -53,7 +62,7 @@ services:
 
   elasticsearch:
     container_name: elasticsearch
-    image: elasticsearch:8.19.17
+    image: elasticsearch:8.19.25
     ports:
       - "9200:9200"
     volumes:
@@ -69,7 +78,7 @@ services:
       - "6379:6379"
     volumes:
       - ./volumes/redis:/data
-    command: redis-server --save 20 1 --loglevel warning --requirepass redis-password
+    command: redis-server --save 20 1 --appendonly yes --maxmemory-policy noeviction --loglevel warning --requirepass redis-password
 
   rabbitmq:
     container_name: rabbitmq
@@ -96,11 +105,11 @@ services:
       - MINIO_ROOT_PASSWORD=CHANGEME123
     command: server /data --console-address ":9001"
 
-  # one-shot container that creates the two S3 buckets Ember Nexus expects (file.S3StorageBucket and
-  # file.S3UploadBucket); minio does not create these on its own
+  # one-shot container that creates the three S3 buckets Ember Nexus expects (file.S3StorageBucket,
+  # file.S3UploadBucket and the system bucket); minio does not create these on its own
   minio-init:
     container_name: minio-init
-    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    image: pgsty/mc:RELEASE.2026-11-12T00-00-00Z
     depends_on:
       - minio
     entrypoint: >
@@ -108,4 +117,5 @@ services:
       until mc alias set local http://minio:9000 ROOTNAME CHANGEME123; do sleep 1; done;
       mc mb --ignore-existing local/api-storage;
       mc mb --ignore-existing local/api-upload;
+      mc mb --ignore-existing local/ember-nexus-system;
       "

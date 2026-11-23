@@ -13,12 +13,16 @@ use App\Exception\Server500LogicErrorException;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
 use App\Factory\Type\RedisKeyFactory;
 use App\Service\AppStateService;
+use App\Service\ElementTypeService;
 use App\Type\AppStateType;
+use App\Type\ElementKind;
 use App\Type\NodeElement;
 use App\Type\RelationElement;
+use App\Type\ResolvedType;
 use App\Type\Uuid;
 use Exception;
 use Laudis\Neo4j\Contracts\ClientInterface;
+use Laudis\Neo4j\Databags\Statement;
 use Laudis\Neo4j\Databags\SummarizedResult;
 use Laudis\Neo4j\Types\CypherList;
 use Laudis\Neo4j\Types\CypherMap;
@@ -29,6 +33,7 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophecy\ObjectProphecy;
 use Syndesi\CypherEntityManager\Type\EntityManager as CypherEntityManager;
 
 #[Small]
@@ -62,7 +67,13 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
         $relationResult = new SummarizedResult($null, null === $relation ? [] : [new CypherMap($relation)]);
 
         $clientInterface = $this->prophesize(ClientInterface::class);
-        $clientInterface->runStatement(Argument::any())->willReturn($neighbourResult, $relationResult);
+        // only the query matching the resolved kind of the element is run
+        $clientInterface->runStatement(Argument::that(
+            fn (Statement $statement) => str_starts_with($statement->getText(), 'MATCH (node:`Data` {id: $elementId})')
+        ))->willReturn($neighbourResult);
+        $clientInterface->runStatement(Argument::that(
+            fn (Statement $statement) => str_starts_with($statement->getText(), 'MATCH (start)-[relation:`RELATED` {id: $elementId}]->(end)')
+        ))->willReturn($relationResult);
 
         $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
         $cypherEntityManager->getClient()->willReturn($clientInterface->reveal());
@@ -80,6 +91,7 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
             $cypherEntityManager->reveal(),
             new RedisKeyFactory(),
             new AppStateService(),
+            $this->buildElementTypeService(null === $relation ? new ResolvedType(ElementKind::NODE, 'Data') : new ResolvedType(ElementKind::RELATION, 'RELATED')),
             $server500LogicErrorExceptionFactory ?? $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
         $call($listener);
@@ -87,6 +99,14 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
         sort($expiredKeys);
         sort($expectedKeys);
         $this->assertSame($expectedKeys, $expiredKeys);
+    }
+
+    private function buildElementTypeService(?ResolvedType $resolved): ElementTypeService
+    {
+        $elementTypeService = $this->prophesize(ElementTypeService::class);
+        $elementTypeService->resolve(Argument::any())->willReturn($resolved);
+
+        return $elementTypeService->reveal();
     }
 
     private function createNode(): NodeElement
@@ -126,16 +146,93 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
         ];
     }
 
-    public function testPostCreateExpiresEtagsOfElementAndItsNeighbours(): void
+    public function testPostCreateOfNodeExpiresOwnEtagsAndIndexCollectionsOfUsersWithAccess(): void
     {
-        $event = new ElementPostCreateEvent($this->createNode());
+        $node = $this->createNode()->setLabel('Data');
+        $event = new ElementPostCreateEvent($node);
 
+        // neighbours of a created node are covered by the events of the relations created with it
         $this->runListener(
             fn (ExpireEtagOnChangeEventListener $listener) => $listener->onElementPostCreateEvent($event),
             $this->createNeighbours(),
             null,
-            $this->getExpectedKeysOfNode()
+            [
+                'etag:element:'.self::ELEMENT_ID,
+                'etag:file:'.self::ELEMENT_ID,
+                'etag:index:'.self::USER_ID,
+            ]
         );
+    }
+
+    public function testPostCreateOfNodeWithoutLabelOnlyExpiresItsOwnEtagsAndRunsNoQuery(): void
+    {
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+
+        $expiredKeys = $this->runCreateListenerWithoutQueries($cypherEntityManager, $this->createNode());
+
+        $this->assertSame(['etag:element:'.self::ELEMENT_ID, 'etag:file:'.self::ELEMENT_ID], $expiredKeys);
+    }
+
+    public function testPostCreateOfRelationDerivesTheKeysFromTheRelationAndRunsNoQuery(): void
+    {
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+
+        $expiredKeys = $this->runCreateListenerWithoutQueries($cypherEntityManager, $this->createRelation('RELATED'));
+
+        $this->assertSame([
+            'etag:element:'.self::ELEMENT_ID,
+            'etag:file:'.self::ELEMENT_ID,
+            'etag:related:'.self::START_ID,
+            'etag:related:'.self::END_ID,
+        ], $expiredKeys);
+    }
+
+    public function testPostCreateOfRelationWithoutEndpointsOnlyExpiresItsOwnEtags(): void
+    {
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+        $relation = (new RelationElement())->setId(Uuid::fromString(self::ELEMENT_ID))->setType('OWNS');
+
+        $expiredKeys = $this->runCreateListenerWithoutQueries($cypherEntityManager, $relation);
+
+        $this->assertSame(['etag:element:'.self::ELEMENT_ID, 'etag:file:'.self::ELEMENT_ID], $expiredKeys);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function runCreateListenerWithoutQueries(ObjectProphecy $cypherEntityManager, NodeElement|RelationElement $element): array
+    {
+        $expiredKeys = [];
+        $redisClient = $this->prophesize(Client::class);
+        $redisClient->expire(Argument::type('string'), 0)->will(function ($args) use (&$expiredKeys) {
+            $expiredKeys[] = $args[0];
+
+            return 1;
+        });
+
+        $listener = new ExpireEtagOnChangeEventListener(
+            $redisClient->reveal(),
+            $cypherEntityManager->reveal(),
+            new RedisKeyFactory(),
+            new AppStateService(),
+            $this->buildElementTypeService(null),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+        $listener->onElementPostCreateEvent(new ElementPostCreateEvent($element));
+
+        return $expiredKeys;
+    }
+
+    private function createRelation(string $type): RelationElement
+    {
+        return (new RelationElement())
+            ->setId(Uuid::fromString(self::ELEMENT_ID))
+            ->setType($type)
+            ->setStart(Uuid::fromString(self::START_ID))
+            ->setEnd(Uuid::fromString(self::END_ID));
     }
 
     public function testPostMergeExpiresEtagsOfElementAndItsNeighbours(): void
@@ -226,23 +323,48 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
 
     public function testOwnsRelationAlsoExpiresChildrenOfStartAndParentsOfEnd(): void
     {
-        $relation = new RelationElement();
-        $relation->setId(Uuid::fromString(self::ELEMENT_ID));
-        $event = new ElementPostCreateEvent($relation);
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
 
-        $this->runListener(
-            fn (ExpireEtagOnChangeEventListener $listener) => $listener->onElementPostCreateEvent($event),
-            null,
-            ['start.id' => self::START_ID, 'type' => 'OWNS', 'end.id' => self::END_ID],
-            [
-                'etag:element:'.self::ELEMENT_ID,
-                'etag:file:'.self::ELEMENT_ID,
-                'etag:related:'.self::START_ID,
-                'etag:related:'.self::END_ID,
-                'etag:children:'.self::START_ID,
-                'etag:parents:'.self::END_ID,
-            ]
+        $expiredKeys = $this->runCreateListenerWithoutQueries($cypherEntityManager, $this->createRelation('OWNS'));
+        sort($expiredKeys);
+
+        $expected = [
+            'etag:element:'.self::ELEMENT_ID,
+            'etag:file:'.self::ELEMENT_ID,
+            'etag:related:'.self::START_ID,
+            'etag:related:'.self::END_ID,
+            'etag:children:'.self::START_ID,
+            'etag:parents:'.self::END_ID,
+        ];
+        sort($expected);
+        $this->assertSame($expected, $expiredKeys);
+    }
+
+    public function testUnresolvedElementOnlyExpiresItsOwnEtagsAndRunsNoQuery(): void
+    {
+        $cypherEntityManager = $this->prophesize(CypherEntityManager::class);
+        $cypherEntityManager->getClient()->shouldNotBeCalled();
+        $expiredKeys = [];
+        $redisClient = $this->prophesize(Client::class);
+        $redisClient->expire(Argument::type('string'), 0)->will(function ($args) use (&$expiredKeys) {
+            $expiredKeys[] = $args[0];
+
+            return 1;
+        });
+
+        $listener = new ExpireEtagOnChangeEventListener(
+            $redisClient->reveal(),
+            $cypherEntityManager->reveal(),
+            new RedisKeyFactory(),
+            new AppStateService(),
+            $this->buildElementTypeService(null),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
+        $listener->onElementPostMergeEvent(new ElementPostMergeEvent($this->createNode()));
+        $listener->onElementPostDeleteEvent(new ElementPostDeleteEvent($this->createNode()));
+
+        $this->assertCount(4, $expiredKeys);
     }
 
     public function testDoesNothingWhileLoadingBackup(): void
@@ -257,6 +379,7 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
             $cypherEntityManager->reveal(),
             new RedisKeyFactory(),
             (new AppStateService())->setAppState(AppStateType::LOADING_BACKUP),
+            $this->buildElementTypeService(null),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
@@ -272,12 +395,29 @@ class ExpireEtagOnChangeEventListenerTest extends TestCase
             $this->prophesize(CypherEntityManager::class)->reveal(),
             new RedisKeyFactory(),
             new AppStateService(),
+            $this->buildElementTypeService(null),
             $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
         );
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Unable to expire etag for element with no identifier.');
         $listener->onElementPostMergeEvent(new ElementPostMergeEvent(new NodeElement()));
+    }
+
+    public function testCreatedElementWithoutIdThrows(): void
+    {
+        $listener = new ExpireEtagOnChangeEventListener(
+            $this->prophesize(Client::class)->reveal(),
+            $this->prophesize(CypherEntityManager::class)->reveal(),
+            new RedisKeyFactory(),
+            new AppStateService(),
+            $this->buildElementTypeService(null),
+            $this->prophesize(Server500LogicErrorExceptionFactory::class)->reveal()
+        );
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Unable to expire etag for element with no identifier.');
+        $listener->onElementPostCreateEvent(new ElementPostCreateEvent(new NodeElement()));
     }
 
     /**

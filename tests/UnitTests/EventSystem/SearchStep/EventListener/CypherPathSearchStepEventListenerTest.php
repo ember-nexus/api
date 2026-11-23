@@ -92,6 +92,38 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $this->assertSame('02IiNr0G8viOVKjhS6CYaiwTWkyr9YBtOkkrg', (string) $result['relationIds'][0]);
     }
 
+    public function testParseRawPathFromRowParsesRowOfRewrittenQuery(): void
+    {
+        $listener = $this->buildCypherPathSearchStepEventListener();
+        $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'parseRawPathFromRow');
+
+        $row = new CypherMap([
+            'nodeIds' => new CypherList(['02IiNr0G8viOVKjb3rgIk6d1avGq8DSTDo3gH', '02IiNr0G8viOVKjRq3mcc33Eok6ZQjl94VAvx']),
+            'relationIds' => new CypherList(['02IiNr0G8viOVKjhS6CYaiwTWkyr9YBtOkkrg']),
+        ]);
+
+        $result = $method->invokeArgs($listener, [$row]);
+
+        $this->assertSame(['02IiNr0G8viOVKjb3rgIk6d1avGq8DSTDo3gH', '02IiNr0G8viOVKjRq3mcc33Eok6ZQjl94VAvx'], array_map(strval(...), $result['nodeIds']));
+        $this->assertSame(['02IiNr0G8viOVKjhS6CYaiwTWkyr9YBtOkkrg'], array_map(strval(...), $result['relationIds']));
+    }
+
+    public function testParseRawPathFromRowOfRewrittenQueryChecksTheNumberOfRelations(): void
+    {
+        $urlGenerator = $this->prophesize(UrlGeneratorInterface::class);
+        $urlGenerator->generate(Argument::cetera())->willReturn('https://mock.dev/123');
+        $listener = $this->buildCypherPathSearchStepEventListener(
+            client400BadContentExceptionFactory: new Client400BadContentExceptionFactory($urlGenerator->reveal())
+        );
+        $method = new ReflectionMethod(CypherPathSearchStepEventListener::class, 'parseRawPathFromRow');
+
+        $this->expectException(Client400BadContentException::class);
+        $method->invokeArgs($listener, [new CypherMap([
+            'nodeIds' => new CypherList(['02IiNr0G8viOVKjb3rgIk6d1avGq8DSTDo3gH']),
+            'relationIds' => new CypherList(['02IiNr0G8viOVKjhS6CYaiwTWkyr9YBtOkkrg']),
+        ])]);
+    }
+
     public function testParseRawPathFromRowThrowsErrorWhenNumberOfElementsIsUnexpected(): void
     {
         /** @var ObjectProphecy<UrlGeneratorInterface> $urlGenerator */
@@ -180,12 +212,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $elementIdE = Uuid::fromString('02IiNr0G8viOVKlDlrFRpx2FVAG1rGyLfE9qN');
         $elementIdF = Uuid::fromString('02IiNr0G8viOVKkfFxcCxBFcKUChLvx0wLg14');
 
-        $event = new SearchStepEvent(
-            SearchStepType::CYPHER_PATH_SUBSET,
-            'some query',
-            []
-        );
-
         $stopwatch = $this->prophesize(Stopwatch::class);
         $stopwatch
             ->start(Argument::is('cypher-path-subset:checkUserAccessToMultipleElements'))
@@ -239,7 +265,7 @@ class CypherPathSearchStepEventListenerTest extends TestCase
             ],
         ];
 
-        $result = $method->invokeArgs($cypherPathSearchStepEventListener, [$event, $paths]);
+        $result = $method->invokeArgs($cypherPathSearchStepEventListener, [$paths]);
 
         $this->assertCount(2, $result);
         $this->assertSame($paths[0], $result[0]);
@@ -331,5 +357,10 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         } catch (Client400BadContentException $exception) {
             $this->assertSame("Endpoint expects property 'query' to be string, got array with one element.", $exception->getDetail());
         }
+    }
+
+    public function testUserQueriesAreAbortedAfterThirtySeconds(): void
+    {
+        $this->assertSame(30.0, CypherPathSearchStepEventListener::QUERY_TIMEOUT_IN_SECONDS);
     }
 }

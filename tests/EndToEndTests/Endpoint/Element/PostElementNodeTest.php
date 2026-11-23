@@ -49,16 +49,11 @@ class PostElementNodeTest extends BaseRequestTestCase
         }
         $this->assertNotNull($childOwnedId);
 
-        $userCreatedId = null;
+        // created-by is a property, not a relation
         foreach ($data['relations'] as $relation) {
-            if ('CREATED' === $relation['type']) {
-                $userCreatedId = $relation['id'];
-                $this->assertSame(self::ID_USER, $relation['start']);
-                $this->assertSame($childElementId, $relation['end']);
-                break;
-            }
+            $this->assertNotSame('CREATED', $relation['type']);
         }
-        $this->assertNotNull($userCreatedId);
+        $this->assertIsCreatedBy(self::TOKEN, $childElementId, self::ID_USER);
     }
 
     public function testCreateElementAsUSerChild(): void
@@ -98,15 +93,10 @@ class PostElementNodeTest extends BaseRequestTestCase
         }
         $this->assertNotNull($childOwnedId);
 
-        $userCreatedId = null;
+        // created-by is a property, not a relation
         foreach ($data['relations'] as $relation) {
-            if ('CREATED' === $relation['type']) {
-                $userCreatedId = $relation['id'];
-                $this->assertSame(self::ID_USER, $relation['start']);
-                $this->assertSame($childElementId, $relation['end']);
-                break;
-            }
+            $this->assertNotSame('CREATED', $relation['type']);
         }
-        $this->assertNotNull($userCreatedId);
+        $this->assertIsCreatedBy(self::TOKEN, $childElementId, self::ID_USER);
     }
 }
