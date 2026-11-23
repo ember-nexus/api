@@ -29,7 +29,7 @@ class RedisKeyFactoryTest extends TestCase
         $query = 'MATCH path = ((:Type)) RETURN path LIMIT 10';
 
         $getValidatedQueryCypherPathSubsetRedisKey = $redisKeyTypeFactory->getValidatedQueryCypherPathSubsetRedisKey($query);
-        $this->assertSame('validated-query:cypher-path-subset:132920224a38db1b499b5280b5714d895d58d111', (string) $getValidatedQueryCypherPathSubsetRedisKey);
+        $this->assertSame('validated-query:cypher-path-subset:a002ee63bb229183892a0f2fb89b74d68cf040e0cdaf37b1ebea4c7a7e2ea943', (string) $getValidatedQueryCypherPathSubsetRedisKey);
     }
 
     public function testGetEtagElementRedisKey(): void
