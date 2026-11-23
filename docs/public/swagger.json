@@ -13853,7 +13853,7 @@
                   "instanceConfiguration": {
                     "x-ember-nexus-recording": "api-endpoints/system/get-instance-configuration/200-response-body.json",
                     "value": {
-                      "version": "0.1.36",
+                      "version": "0.2.0",
                       "pageSize": {
                         "min": 5,
                         "default": 25,
@@ -16625,7 +16625,7 @@
   "info": {
     "title": "Ember Nexus API",
     "description": "Knowledge graph API with advanced search capabilities.",
-    "version": "0.1.36",
+    "version": "0.2.0",
     "license": {
       "name": "Source First License 1.1",
       "url": "https://github.com/ember-nexus/api/blob/main/LICENSE"

@@ -5,16 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+## 0.2.0 - 2026-11-23
 ### Added
 - Large performance gains: up to 90x faster `GET` endpoints, up to 40x faster `POST /` and `POST /<uuid>`, and file
   endpoints reaching about 260 MiB/s for uploads and over 1 GiB/s for downloads.
 - Elements are now looked up by id with typed queries and id indices, which is the main reason for the gains above.
   The new commands `mphf:build` (daily) and `index:ensure` (every ten minutes) maintain the required lookup table and
   indices on their own. This needs a third S3 bucket (`S3_SYSTEM_BUCKET`) and Redis with
-  `maxmemory-policy noeviction`; without a lookup table the API keeps working, only slower. Closes #531.
+  `maxmemory-policy noeviction`; without a lookup table the API keeps working, only slower. Closes [#531].
 - **BREAKING CHANGE**: UUIDv4 is replaced by the new UUID sv2a7 format. It is similar to UUIDv7 with more random bits,
   encoded as base62sort, and keeps ids sortable and cheap to index. Existing backups have to be converted with
-  `backup:convert` before loading. Closes #532.
+  `backup:convert` before loading. Closes [#532].
 - **BREAKING CHANGE**: The `CREATED` relation is replaced by the server-managed properties `createdBy` and `updatedBy`,
   which hold the id of the acting user. Clients can not set them, and `onCreatedByUser` conditions use `createdBy`.
   `backup:convert` migrates old backups; elements created before this change have no `createdBy` and no longer match
@@ -24,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tokens expire: expired tokens no longer authenticate, are marked `EXPIRED` and are deleted after
   `token.tokenDeleteExpiredTokensAutomaticallyInSeconds` by the new job `cron:expire-tokens`.
 - The Elasticsearch search step supports a long query definition: an object with `query` (the Elasticsearch query, as
-  in the short form) and the optional properties `highlight` and `sort` (closes #456, #412). Highlights and sorting on
+  in the short form) and the optional properties `highlight` and `sort` (closes [#456], #412). Highlights and sorting on
   internal fields are rejected.
 - Search steps can add metadata to elements. The Elasticsearch step adds `score`, `highlight` and `sort`; the element
   hydration step returns the merged metadata of all previous steps as `metadata`, and it is kept across steps which
@@ -34,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING CHANGE**: The container crashes on startup if the file `/well-known-security.txt` is missing, as announced
   in 0.1.1. Mount a `security.txt` file to this path, e.g. `./well-known-security.txt:/well-known-security.txt:ro`, see
   the [installation guide](https://ember-nexus.github.io/api/getting-started/installation). One-off commands like
-  `docker run <image> php bin/console ...` are not affected. Closes #225.
+  `docker run <image> php bin/console ...` are not affected. Closes [#225].
 - Failed search steps are explained instead of resulting in a generic server error (#453). The problem JSON contains
   the debug data of the previous steps (`debug`) and the failed step (`failedStep`) with allowlisted database
   diagnostics; raw database messages are never forwarded. Bad queries result in `400` instead of `500`. The new option
@@ -42,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Requests which wrapped their Elasticsearch query in a single `query` property and received an error are now valid,
   as that is the long query definition.
 - User passwords are hashed with Argon 2 id instead of Argon 2 i; older hashes are updated on the next hash, closes
-  #547.
+  [#547].
 - The default of `FRANKENPHP_NUM_THREADS` is the number of CPU cores instead of twice that number; set the variable
   to change it. `FRANKENPHP_MAX_THREADS` allows up to 8 threads per core under load.
 - `backup:convert` sets the `version` of the converted backup to `0.2.0` (the original is kept as
@@ -51,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and a default `ANONYMOUS_USER_UUID`. Both environment variables have to be set; the example Docker Compose files
   set them.
 - Mutant tests are no longer part of the CI; `composer test:mutant` still runs them locally.
-- Replace usages of SHA-1 with SHA-256, closes #555.
+- Replace usages of SHA-1 with SHA-256, closes [#555].
 
 ### Fixed
 - `cron:expire-tokens` no longer fetches the same page of old tokens again and again if some of them can't be loaded.
