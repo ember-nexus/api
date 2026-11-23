@@ -13,8 +13,9 @@ and similar matters can be communicated in a simple and secure manner.
 As this endpoint's response is entirely configurable by the end user, it should be considered optional and to be likely
 not machine-readable.
 
-**Note**: If no `security.txt` file has been configured on this instance, the endpoint returns a `404 Not Found`
-response instead.
+**Note**: The API refuses to start without a `security.txt` file, see the
+[installation guide](/getting-started/installation). The `404 Not Found` response is only a safeguard, e.g. if the
+file is removed while the API is running.
 
 See [RFC 9116](https://www.rfc-editor.org/info/rfc9116/) and [security.txt](https://securitytxt.org/) for details on how
 a proper `security.txt` response should look like.

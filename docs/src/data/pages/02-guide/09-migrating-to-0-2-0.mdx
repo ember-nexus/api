@@ -51,6 +51,9 @@ first, so step 2 can not be skipped.
 Version 0.2.0 looks up the type of elements to answer requests faster, see
 [element type index](/reference/configuration#element-type-index). Before starting the new version:
 
+- Mount a `security.txt` file to `/well-known-security.txt`. The container refuses to start without it, see
+  [security.txt](/getting-started/installation#securitytxt). Existing Docker Compose files need the additional volume
+  `./well-known-security.txt:/well-known-security.txt:ro`.
 - Create a third S3 bucket, the system bucket (`ember-nexus-system` by default, configurable with `S3_SYSTEM_BUCKET`),
   next to the file and upload buckets. The Docker Compose example creates it.
 - Configure Redis with `maxmemory-policy noeviction` and persistence (e.g. `appendonly yes` with a mounted data

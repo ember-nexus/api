@@ -32,6 +32,20 @@ Ember Nexus requires several databases to be available:
 
 All the dependencies can be operated as Docker containers as well.
 
+## security.txt
+
+Ember Nexus refuses to start if the file `/well-known-security.txt` is missing: the container exits with an error
+message. The file is served at `/.well-known/security.txt` and tells security researchers how to reach you if they find
+a vulnerability. Create the file next to the `docker-compose.yml` and mount it as shown in the examples below. See
+[securitytxt.org](https://securitytxt.org/) for a generator and the format of the file, which is specified in
+[RFC 9116](https://www.rfc-editor.org/info/rfc9116/).
+
+```text
+# well-known-security.txt
+Contact: mailto:security@your-domain.com
+Expires: 2030-01-01T00:00:00.000Z
+```
+
 ## Docker Compose
 
 import dockerCompose from "../../../../public/docker-compose.yml?raw"

@@ -452,11 +452,11 @@ class BackupLoadCommandTest extends TestCase
         $convert = new BackupConvertCommand(
             $this->backupStorage,
             new StorageService(
-                $this->createMock(EmberNexusConfiguration::class),
-                $this->createMock(Server500LogicErrorExceptionFactory::class)
+                $this->createStub(EmberNexusConfiguration::class),
+                $this->createStub(Server500LogicErrorExceptionFactory::class)
             ),
             new NullLogger(),
-            $this->createMock(Server500LogicErrorExceptionFactory::class)
+            $this->createStub(Server500LogicErrorExceptionFactory::class)
         );
         $this->assertSame(0, (new CommandTester($convert))->execute(['source' => self::BACKUP_NAME, '--target' => 'converted']));
 
