@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   do not know about it, like Cypher path searches.
 
 ### Changed
+- **BREAKING CHANGE**: The container crashes on startup if the file `/well-known-security.txt` is missing, as announced
+  in 0.1.1. Mount a `security.txt` file to this path, e.g. `./well-known-security.txt:/well-known-security.txt:ro`, see
+  the [installation guide](https://ember-nexus.github.io/api/getting-started/installation). One-off commands like
+  `docker run <image> php bin/console ...` are not affected. Closes #225.
 - Failed search steps are explained instead of resulting in a generic server error (#453). The problem JSON contains
   the debug data of the previous steps (`debug`) and the failed step (`failedStep`) with allowlisted database
   diagnostics; raw database messages are never forwarded. Bad queries result in `400` instead of `500`. The new option

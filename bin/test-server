@@ -48,6 +48,25 @@ fi
 
 FAILED=0
 
+# The production image refuses to start the web server without a security.txt (no volume is mounted here), but still
+# runs one-off commands.
+echo
+echo "=== Scenario missing security.txt"
+MISSING_OUTPUT=$(docker run --rm api:prod 2>&1)
+MISSING_STATUS=$?
+if [ "$MISSING_STATUS" -eq 0 ] || ! echo "$MISSING_OUTPUT" | grep -q "missing security.txt file"; then
+  echo "Expected the container to crash with an error about the missing security.txt, got status $MISSING_STATUS:"
+  echo "$MISSING_OUTPUT"
+  FAILED=1
+fi
+# php is FrankenPHP's CLI emulation in the production image (no plain php binary, see docker/api/mphf/php-wrapper.sh),
+# which only supports `php <script>` and `php -r <code>`, so no `php -v` here.
+if ! ONE_OFF_OUTPUT=$(docker run --rm api:prod php -r 'echo PHP_VERSION;' 2>&1); then
+  echo "Expected one-off commands to run without security.txt, got:"
+  echo "$ONE_OFF_OUTPUT"
+  FAILED=1
+fi
+
 # name, group, expected ready-check HTTP status and environment variables of the production container. The ready
 # check must wait for the exact status the booted container will answer with: plain "curl -s" (or "curl -sf") also
 # treats a 500 returned while the app is still starting up (e.g. warming its cache, connecting to Neo4j) as "ready",

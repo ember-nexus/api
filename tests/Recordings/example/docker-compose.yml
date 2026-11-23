@@ -5,6 +5,8 @@ services:
   ember-nexus-api:
     container_name: ember-nexus-api
     image: embernexus/api:latest
+    volumes:
+      - ./well-known-security.txt:/well-known-security.txt:ro
     ports:
       - "80:80"
     environment:

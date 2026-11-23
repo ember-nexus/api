@@ -21,6 +21,7 @@ httpbis
 antv
 dagre
 healthcheck
+securitytxt
 Symfony
 
 # CPU architectures (hardware requirements reference)
