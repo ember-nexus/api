@@ -97,10 +97,14 @@ class ExpireTokensCommand extends Command
         $threshold = (new DateTime())->sub(new DateInterval(sprintf('PT%sS', $afterSeconds)));
 
         $total = 0;
+        // keyset pagination: tokens which can't be loaded or deleted stay in the database, so the next page has to
+        // start after the last token of this page instead of fetching the same page again
+        $lastId = '';
         do {
             $result = $this->cypherEntityManager->getClient()->runStatement(new Statement(
-                'MATCH (t:Token) WHERE t.expirationDate < $threshold RETURN t.id AS id ORDER BY t.id LIMIT $pageSize',
-                ['threshold' => $threshold, 'pageSize' => self::PAGE_SIZE]
+                'MATCH (t:Token) WHERE t.expirationDate < $threshold AND t.id > $lastId '.
+                'RETURN t.id AS id ORDER BY t.id LIMIT $pageSize',
+                ['threshold' => $threshold, 'lastId' => $lastId, 'pageSize' => self::PAGE_SIZE]
             ));
             $count = 0;
             foreach ($result as $row) {
@@ -109,6 +113,7 @@ class ExpireTokensCommand extends Command
                     continue;
                 }
                 ++$count;
+                $lastId = $id;
                 $token = $this->elementManager->getElement(Uuid::fromString($id));
                 if (null === $token) {
                     continue;

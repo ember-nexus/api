@@ -212,12 +212,6 @@ class CypherPathSearchStepEventListenerTest extends TestCase
         $elementIdE = Uuid::fromString('02IiNr0G8viOVKlDlrFRpx2FVAG1rGyLfE9qN');
         $elementIdF = Uuid::fromString('02IiNr0G8viOVKkfFxcCxBFcKUChLvx0wLg14');
 
-        $event = new SearchStepEvent(
-            SearchStepType::CYPHER_PATH_SUBSET,
-            'some query',
-            []
-        );
-
         $stopwatch = $this->prophesize(Stopwatch::class);
         $stopwatch
             ->start(Argument::is('cypher-path-subset:checkUserAccessToMultipleElements'))
@@ -271,7 +265,7 @@ class CypherPathSearchStepEventListenerTest extends TestCase
             ],
         ];
 
-        $result = $method->invokeArgs($cypherPathSearchStepEventListener, [$event, $paths]);
+        $result = $method->invokeArgs($cypherPathSearchStepEventListener, [$paths]);
 
         $this->assertCount(2, $result);
         $this->assertSame($paths[0], $result[0]);

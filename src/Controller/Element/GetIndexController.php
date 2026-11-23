@@ -6,8 +6,8 @@ namespace App\Controller\Element;
 
 use App\Attribute\EndpointSupportsEtag;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
-use App\Security\AuthProvider;
 use App\Helper\ReadAccessCypherHelper;
+use App\Security\AuthProvider;
 use App\Service\CollectionService;
 use App\Type\EtagType;
 use App\Type\Response\CollectionResponse;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UnitTests\Command;
 
+use App\Command\BackupConvertCommand;
 use App\Command\BackupLoadCommand;
 use App\Factory\Exception\Client400BadContentExceptionFactory;
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
@@ -20,6 +21,7 @@ use App\Service\Mphf\MphfBuildResult;
 use App\Service\Mphf\MphfBuildService;
 use App\Service\RawToElementService;
 use App\Service\S3Service;
+use App\Service\StorageService;
 use App\Type\MaintenanceLock;
 use App\Type\MaintenanceLockType;
 use App\Type\NodeElement;
@@ -442,6 +444,23 @@ class BackupLoadCommandTest extends TestCase
         } catch (LogicException $exception) {
             $this->assertStringContainsString('backup:convert '.self::BACKUP_NAME, $exception->getMessage());
         }
+    }
+
+    public function testConvertedBackupOfAnOlderVersionIsLoaded(): void
+    {
+        $this->backupStorage->write(self::BACKUP_NAME.'/summary.json', '{"nodeCount":0,"relationCount":0,"fileCount":0,"version":"0.1.36"}');
+        $convert = new BackupConvertCommand(
+            $this->backupStorage,
+            new StorageService(
+                $this->createMock(EmberNexusConfiguration::class),
+                $this->createMock(Server500LogicErrorExceptionFactory::class)
+            ),
+            new NullLogger(),
+            $this->createMock(Server500LogicErrorExceptionFactory::class)
+        );
+        $this->assertSame(0, (new CommandTester($convert))->execute(['source' => self::BACKUP_NAME, '--target' => 'converted']));
+
+        $this->assertSame(0, $this->runCommand(['name' => 'converted'])->getStatusCode());
     }
 
     public function testBackupsOfNewDevelopmentAndUnknownVersionsAreLoaded(): void

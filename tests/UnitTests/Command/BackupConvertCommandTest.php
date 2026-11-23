@@ -157,7 +157,7 @@ class BackupConvertCommandTest extends TestCase
     {
         $this->createLegacyBackup();
         $this->runCommand(['source' => 'legacy']);
-        $this->runCommand(['source' => 'legacy-converted', '--target' => 'again']);
+        $this->runCommand(['source' => 'legacy-converted', '--target' => 'again', '--force' => true]);
 
         $this->assertSame(
             $this->backupStorage->read('legacy-converted/node/human/a.json'),
@@ -191,7 +191,7 @@ class BackupConvertCommandTest extends TestCase
         $this->assertSame(2, $summary['nodeCount']);
         $this->assertSame(1, $summary['relationCount']);
         $this->assertSame(['nodeTypes' => ['Data', 'User'], 'relationTypes' => ['OWNS']], $summary['graphStructure']);
-        $this->assertSame(['nodeCount', 'relationCount', 'fileCount', 'graphStructure', 'hostname'], array_keys($summary));
+        $this->assertSame(['nodeCount', 'relationCount', 'fileCount', 'graphStructure', 'hostname', 'version'], array_keys($summary));
     }
 
     /**
@@ -251,5 +251,29 @@ class BackupConvertCommandTest extends TestCase
 
         $this->assertSame(0, $tester->getStatusCode());
         $this->assertStringContainsString("no 'version'", $tester->getDisplay());
+    }
+
+    public function testConvertedSummaryHasTheNewVersionAndKeepsTheOriginalOne(): void
+    {
+        $this->createLegacyBackup();
+        $this->backupStorage->write('legacy/summary.json', json_encode(['nodeCount' => 2, 'version' => '0.1.36', 'hostname' => 'h']));
+
+        $this->runCommand(['source' => 'legacy']);
+
+        $summary = json_decode($this->backupStorage->read('legacy-converted/summary.json'), true);
+        $this->assertSame(BackupConvertCommand::FIRST_NEW_FORMAT_VERSION, $summary['version']);
+        $this->assertSame('0.1.36', $summary['convertedFromVersion']);
+        $this->assertSame('h', $summary['hostname']);
+    }
+
+    public function testConvertedSummaryWithoutVersionGetsTheNewVersion(): void
+    {
+        $this->createLegacyBackup();
+
+        $this->runCommand(['source' => 'legacy']);
+
+        $summary = json_decode($this->backupStorage->read('legacy-converted/summary.json'), true);
+        $this->assertSame(BackupConvertCommand::FIRST_NEW_FORMAT_VERSION, $summary['version']);
+        $this->assertArrayNotHasKey('convertedFromVersion', $summary);
     }
 }

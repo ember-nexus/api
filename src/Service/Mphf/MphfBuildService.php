@@ -117,9 +117,9 @@ class MphfBuildService
 
         // Requests which started before the switch may still register an element in the previously active key and
         // commit it only later; the export has to start after they are done. Work done since the switch counts.
-        $remaining = $concurrentRequests ? $this->mphfOverlaySwitchDelay - (microtime(true) - $switchedAt) : 0;
+        $remaining = $concurrentRequests ? (float) $this->mphfOverlaySwitchDelay - (microtime(true) - $switchedAt) : 0.0;
         if ($remaining > 0) {
-            usleep((int) ceil($remaining * 1_000_000));
+            usleep((int) ceil($remaining * 1_000_000.0));
         }
 
         $workDirectory = sys_get_temp_dir().'/ember-nexus-mphf-build-'.bin2hex(random_bytes(6));

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Security\AuditFindings;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
-use App\Type\Uuid;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**

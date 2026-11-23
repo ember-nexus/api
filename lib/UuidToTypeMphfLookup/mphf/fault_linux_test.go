@@ -28,6 +28,10 @@ func TestSafeLookupSurvivesTruncatedMapping(t *testing.T) {
 			t.Fatalf("lookup before truncation: %v %v", ok, err)
 		}
 	}
+	// built files are read only, the test plays the part of an external process which is allowed to modify them
+	if err := os.Chmod(path, 0o644); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.Truncate(path, 0); err != nil {
 		t.Fatal(err)
 	}

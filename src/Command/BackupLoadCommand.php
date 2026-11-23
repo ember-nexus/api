@@ -632,7 +632,7 @@ class BackupLoadCommand extends Command
     private function checkBackupVersion(array $summary): void
     {
         $version = $summary['version'] ?? null;
-        if (!is_string($version) || 1 !== preg_match('/^v?(\d+\.\d+\.\d+)/', trim($version), $matches)) {
+        if (!is_string($version) || 1 !== \Safe\preg_match('/^v?(\d+\.\d+\.\d+)/', trim($version), $matches) || !isset($matches[1])) {
             return;
         }
         if (version_compare($matches[1], BackupConvertCommand::FIRST_NEW_FORMAT_VERSION, '<')) {

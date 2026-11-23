@@ -252,6 +252,9 @@ RUN if [ "$(uname -m)" = "x86_64" ]; then \
 	fi
 
 COPY ./docker/api/php-embed/docker-php-ext-* ./docker/api/php-embed/docker-php-entrypoint /usr/local/bin/
+# Symfony's dotenv loader requires a .env file to exist. The image deliberately has no defaults: it is empty, all
+# configuration, including APP_SECRET and ANONYMOUS_USER_UUID, has to be provided as environment variables.
+RUN echo '# intentionally empty, configure the API through environment variables' > /var/www/html/.env
 COPY ./docker/api/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
@@ -441,7 +444,6 @@ COPY config /var/www/html/config
 COPY public /var/www/html/public
 COPY src /var/www/html/src
 COPY lib/EmberNexusBundle /var/www/html/lib/EmberNexusBundle
-COPY docker/api/.env.docker /var/www/html/.env
 COPY ./docker/api/php-embed/php.prod.ini "$PHP_INI_DIR/php.ini"
 COPY composer.json /var/www/html/composer.json
 COPY composer.lock /var/www/html/composer.lock

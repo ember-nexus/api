@@ -147,7 +147,7 @@ class CypherPathSearchStepEventListener
      *
      * @return array<array{nodeIds: Uuid[], relationIds: Uuid[]}>
      */
-    private function filterPathsToAccessibleOnly(SearchStepEvent $event, array $paths): array
+    private function filterPathsToAccessibleOnly(array $paths): array
     {
         $allElementIds = $this->getElementIdsFromPaths($paths);
 
@@ -215,7 +215,7 @@ class CypherPathSearchStepEventListener
             $paths[] = $this->parseRawPathFromRow($row);
         }
 
-        $filteredPaths = $this->filterPathsToAccessibleOnly($event, $paths);
+        $filteredPaths = $this->filterPathsToAccessibleOnly($paths);
 
         $event->setResults([
             'paths' => $filteredPaths,

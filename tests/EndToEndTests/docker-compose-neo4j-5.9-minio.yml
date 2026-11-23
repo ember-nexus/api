@@ -1,6 +1,10 @@
 # The production image only contains the application, the connections to the other services are configured through its
 # environment (the repository is not mounted, so no `.env` file provides them).
 x-api-environment: &api-environment
+  # the production image has no default .env file: the secret of the Symfony kernel (test value only) and the id of the
+  # anonymous user, which is part of the reference dataset, have to be set
+  APP_SECRET: test-secret-which-is-not-used-in-production
+  ANONYMOUS_USER_UUID: 02IiNr0GOoKiPMLSxpKrArvUWmaEqZ5h7Uybr
   CYPHER_AUTH: bolt://neo4j:password@neo4j
   MONGO_AUTH: mongodb://mongodb:password@mongodb:27017
   ELASTIC_AUTH: elasticsearch:9200
@@ -109,7 +113,7 @@ services:
 
   neo4j:
     container_name: neo4j
-    image: neo4j:5.7
+    image: neo4j:5.9
     expose:
       - "7474"
       - "7687"
@@ -138,7 +142,7 @@ services:
 
   redis:
     container_name: redis
-    image: redis:7-alpine
+    image: redis:8-alpine
     expose:
       - "6379"
     command: redis-server --save 20 1 --maxmemory-policy noeviction --loglevel warning --requirepass redis-password

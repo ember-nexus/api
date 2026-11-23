@@ -18,6 +18,8 @@ use App\Type\RelationElement;
 use App\Type\Uuid;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
+use function Safe\preg_match;
+
 class CreateElementFromRawDataService
 {
     public const array RESERVED_TYPES = ['User', 'Token', 'Upload'];

@@ -67,6 +67,10 @@
       "type": "string",
       "minLength": 1
     },
+    "convertedFromVersion": {
+      "description": "Only set by backup:convert: the version of the original backup. `version` is set to 0.2.0 by the conversion.",
+      "type": "string"
+    },
     "backupVersion": {
       "description": "Only set by the release workflow of the reference dataset: version of the dataset.",
       "type": "string"

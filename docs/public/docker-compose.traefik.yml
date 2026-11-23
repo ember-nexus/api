@@ -9,6 +9,13 @@ services:
       - 80
     environment:
       - APP_ENV=prod
+      # The image contains no default .env file, both values have to be set.
+      # Secret of the Symfony kernel: replace it with your own random string (e.g. `openssl rand -hex 16`) and keep it
+      # private. Do not use the value of this example.
+      - APP_SECRET=f762ce98c98b7579d2d6a6c0e5eb1d39
+      # Id of the user which is used for requests without a token, see the anonymous user in the documentation. The value
+      # is the anonymous user of the reference dataset; replace it with the id of your own anonymous user.
+      - ANONYMOUS_USER_UUID=02IiNr0GOoKiPMLSxpKrArvUWmaEqZ5h7Uybr
       - CYPHER_AUTH=bolt://neo4j:password@neo4j
       - MONGO_AUTH=mongodb://mongodb:password@mongodb:27017
       - ELASTIC_AUTH=elasticsearch:9200

@@ -80,6 +80,9 @@ class TokenIntegrityTest extends BaseRequestTestCase
         $this->assertEquals($before[$property] ?? null, $this->storedToken($tokenId)[$property] ?? null);
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter") the data provider also passes the value
+     */
     #[DataProvider('protectedProperties')]
     public function testPutWithoutProtectedPropertyKeepsThem(string $property, mixed $value = null): void
     {
@@ -104,6 +107,9 @@ class TokenIntegrityTest extends BaseRequestTestCase
         $this->assertSame(400, $this->runPostRequest('/'.$parent, $user['token'], ['type' => 'Token', 'data' => [$property => $value]])->getStatusCode());
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter") the data provider also passes the value
+     */
     #[DataProvider('protectedProperties')]
     public function testProtectedPropertyIsNotReturned(string $property, mixed $value = null): void
     {

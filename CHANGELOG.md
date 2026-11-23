@@ -39,8 +39,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   as that is the long query definition.
 - User passwords are hashed with Argon 2 id instead of Argon 2 i; older hashes are updated on the next hash, closes
   #547.
+- The default of `FRANKENPHP_NUM_THREADS` is the number of CPU cores instead of twice that number; set the variable
+  to change it. `FRANKENPHP_MAX_THREADS` allows up to 8 threads per core under load.
+- `backup:convert` sets the `version` of the converted backup to `0.2.0` (the original is kept as
+  `convertedFromVersion`), so `backup:load` accepts it.
+- **BREAKING CHANGE**: The production image no longer contains a default `.env` file with a publicly known `APP_SECRET`
+  and a default `ANONYMOUS_USER_UUID`. Both environment variables have to be set; the example Docker Compose files
+  set them.
+- Mutant tests are no longer part of the CI; `composer test:mutant` still runs them locally.
 
 ### Fixed
+- `cron:expire-tokens` no longer fetches the same page of old tokens again and again if some of them can't be loaded.
 - `GET /` and its Etag honour the conditions `onLabel`, `onParentLabel`, `onState` and `onCreatedByUser` of
   `HAS_READ_ACCESS` relations, like `GET /<uuid>`.
 
@@ -52,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The token properties `hash`, `state` and `expirationDate` can not be written through the element endpoints.
 - `PATCH`/`PUT`/`DELETE /{id}` take the element lock only after the access check, so callers without access can
   neither block edits nor learn from a `409` that an element exists.
+- The Cypher path subset rejects the token property `hash` only for nodes which can be tokens (label `Token`, or no or
+  a wildcard label); other nodes and relations can use properties named `hash`.
 - Cypher path subset queries using internal properties, dynamic property access or a parameter as property map are
   rejected with `400`, are aborted by Neo4j after 30 seconds, and no longer reveal whether paths were removed due to
   missing access rights.

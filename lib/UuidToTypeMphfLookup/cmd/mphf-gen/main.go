@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"math/rand/v2"
 	"os"
 )
@@ -15,16 +16,31 @@ import (
 const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 func main() {
-	count := flag.Int("count", 1000, "number of elements")
-	types := flag.Int("types", 30, "number of distinct types (zipf-ish distribution)")
-	seed := flag.Uint64("seed", 1, "random seed")
-	idsOnly := flag.Bool("ids-only", false, "write only ids")
-	flag.Parse()
+	if err := run(os.Args[1:], os.Stdout); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
+	}
+}
+
+func run(args []string, out io.Writer) error {
+	fs := flag.NewFlagSet("mphf-gen", flag.ContinueOnError)
+	count := fs.Int("count", 1000, "number of elements")
+	types := fs.Int("types", 30, "number of distinct types (zipf-ish distribution)")
+	seed := fs.Uint64("seed", 1, "random seed")
+	idsOnly := fs.Bool("ids-only", false, "write only ids")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if *count < 0 {
+		return fmt.Errorf("--count must not be negative")
+	}
+	if *types < 1 {
+		return fmt.Errorf("--types must be at least 1")
+	}
 
 	rng := rand.New(rand.NewPCG(*seed, 0xe3b0c44298fc1c14))
 	zipf := rand.NewZipf(rand.New(rand.NewPCG(*seed, 7)), 1.2, 4, uint64(*types-1))
-	w := bufio.NewWriterSize(os.Stdout, 1<<20)
-	defer w.Flush()
+	w := bufio.NewWriterSize(out, 1<<20)
 	var id [37]byte
 	copy(id[:6], "02IiNr")
 	ts := uint64(1_760_000_000_000)
@@ -49,4 +65,5 @@ func main() {
 			fmt.Fprintf(w, "%s;Type%03d\n", id[:], zipf.Uint64())
 		}
 	}
+	return w.Flush()
 }

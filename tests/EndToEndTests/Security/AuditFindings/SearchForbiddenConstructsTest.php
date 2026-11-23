@@ -55,14 +55,14 @@ class SearchForbiddenConstructsTest extends BaseRequestTestCase
         yield 'property map with public property' => ['MATCH path=(n:User {email: $email}) RETURN path', ['email' => 'nobody@localhost.dev']];
         yield 'untyped unbounded star' => ['MATCH path=(a)-[*]->(b) RETURN path LIMIT 1', []];
         yield 'untyped deep star' => ['MATCH path=(a)-[*..9]->(b) RETURN path LIMIT 1', []];
-        yield 'unbounded quantifier' => ['MATCH path=(a)-[:OWNS]->+(b) RETURN path LIMIT 1', []];
         yield 'typed unbounded star' => ['MATCH path=(a)-[:OWNS*]->(b) RETURN path LIMIT 1', []];
         yield 'typed star without upper bound' => ['MATCH path=(a)-[:OWNS*2..]->(b) RETURN path LIMIT 1', []];
         yield 'typed star above the limit' => ['MATCH path=(a)-[:OWNS*..9]->(b) RETURN path LIMIT 1', []];
+        yield 'unbounded quantifier' => ['MATCH path=(a)-[:OWNS]->+(b) RETURN path LIMIT 1', []];
+        yield 'bounded quantifier' => ['MATCH path=(a)-[:OWNS]->{1,3}(b) RETURN path LIMIT 1', []];
         yield 'bounded star' => ['MATCH path=(a)-[*..3]->(b) RETURN path LIMIT 1', []];
         yield 'bounded star range at the limit' => ['MATCH path=(a)-[*1..5]->(b) RETURN path LIMIT 1', []];
         yield 'fixed length' => ['MATCH path=(a)-[*2]->(b) RETURN path LIMIT 1', []];
-        yield 'bounded quantifier' => ['MATCH path=(a)-[:OWNS]->{1,3}(b) RETURN path LIMIT 1', []];
         yield 'property named like an internal one without prefix' => ['MATCH path=(n:Data) WHERE n.passwordHash IS NULL RETURN path LIMIT 1', []];
     }
 

@@ -51,7 +51,7 @@ services:
 
   redis:
     container_name: redis
-    image: redis:7-alpine
+    image: redis:8-alpine
     expose:
       - "6379"
     command: redis-server --save 20 1 --maxmemory-policy noeviction --loglevel warning --requirepass redis-password

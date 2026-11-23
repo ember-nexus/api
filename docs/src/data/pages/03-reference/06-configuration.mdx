@@ -12,7 +12,10 @@ A refactoring of the configuration process is planned in [issue #463](https://gi
 
 Ember Nexus specific variables:
 
-- `ANONYMOUS_USER_UUID`: The UUID of a user, which will be used if no token is supplied.
+- `APP_SECRET`: Required. Secret of the Symfony kernel; use a random string and keep it private. The production image
+  has no default value, so the container does not start without it.
+- `ANONYMOUS_USER_UUID`: Required. The UUID of a user, which will be used if no token is supplied. The production image
+  has no default value.
 - `ANONYMOUS_USER_READONLY`: Set to `false` to allow the anonymous user to also use write endpoints (`POST`,
 `PUT`, `PATCH`, `DELETE`, ...). Defaults to `true`, i.e. anonymous requests are restricted to read-only (`GET`,
 `HEAD`) endpoints, plus a handful of endpoints that do not require authentication by design, such as
@@ -94,6 +97,10 @@ Environment variables, all optional:
 - `S3_SYSTEM_BUCKET`: bucket for the lookup table files. Default `ember-nexus-system`.
 - `MPHF_ENABLED`: set to `false` to not use the lookup table. Default `true`.
 - `MPHF_STORAGE`: `memory` keeps downloaded tables in `/dev/shm`, `disk` in the temporary directory. Default `memory`.
+  The current and the previous table are kept at the same time. Docker limits `/dev/shm` to 64 MB by default, which
+  is not enough for two tables at around 25 to 30 million elements: the download of the new table fails with a
+  warning in the log, and the API silently stays on the old table or falls back to the slower verified or untyped
+  queries. Raise the limit with `shm_size` (Docker Compose, e.g. `shm_size: 1gb`) or `--shm-size`, or use `disk`.
 - `MPHF_DIR`: overrides the directory of the downloaded tables.
 - `MPHF_MADVISE_RANDOM`: hints the kernel about random access to the table. Default `true`.
 - `MPHF_STRICT`: if `true`, an id which is neither in the table nor in the overlay is treated as non-existing without a

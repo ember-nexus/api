@@ -68,7 +68,11 @@ Version 0.2.0 looks up the type of elements to answer requests faster, see
 - Only the `id`, `start`, and `end` of nodes and relations are converted, as well as the names of files. Ids which are
   part of other property values are not converted.
 - `CREATED` relations are removed by `backup:convert`; the id of the creating user is stored in the `createdBy` property
-  of the created element. Loading an unconverted backup keeps them as plain relations, which no longer grant anything.
+  of the created element. `backup:load` refuses backups created before 0.2.0, so a backup has to be converted first.
+  Only backups without a `version` or with a development version (`dev`) are loaded unconverted; their `CREATED`
+  relations are kept as plain relations, which no longer grant anything.
+- The `summary.json` of the converted backup has the `version` `0.2.0`; the original version is kept in
+  `convertedFromVersion`.
 - In backups created by `backup:create`, the nested folders are recalculated from the random end of the new id. Other
   folder structures are kept.
 

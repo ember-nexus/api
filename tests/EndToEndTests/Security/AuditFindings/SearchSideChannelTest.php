@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\EndToEndTests\Security\AuditFindings;
 
 use App\Tests\EndToEndTests\BaseRequestTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Audit finding "search leaks data from the whole database": the `cypher-path-subset` step evaluates the user's
@@ -72,7 +73,7 @@ class SearchSideChannelTest extends BaseRequestTestCase
         }
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('conditionsOnHiddenElements')]
+    #[DataProvider('conditionsOnHiddenElements')]
     public function testConditionOnInaccessibleNodeIsNotDistinguishableFromNoMatch(?string $caller, string $property, string $value): void
     {
         $query = 'MATCH path=(n) WHERE n.%s STARTS WITH "%s" RETURN path';
@@ -95,7 +96,7 @@ class SearchSideChannelTest extends BaseRequestTestCase
      */
     private function withoutInputs(array $normalized): array
     {
-        foreach ($normalized['debug'] ?? [] as $index => $step) {
+        foreach (array_keys($normalized['debug'] ?? []) as $index) {
             unset($normalized['debug'][$index]['input']);
         }
 

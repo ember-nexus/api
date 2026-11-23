@@ -23,12 +23,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Throwable;
 
+use function Safe\preg_match;
+
 /**
  * Converts a backup with legacy UUIDv4 element ids into a backup with UUIDsv2a7 element ids.
  *
  * The source backup is never modified: all data is copied into a new backup folder, which must not exist yet.
  *
  * @psalm-suppress PropertyNotSetInConstructor $io
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 #[AsCommand(name: 'backup:convert', description: 'Converts a backup with legacy UUIDv4 element ids into a new backup with UUIDsv2a7 element ids.')]
 class BackupConvertCommand extends Command
@@ -204,7 +208,7 @@ class BackupConvertCommand extends Command
 
             return;
         }
-        if (1 !== preg_match('/^v?(\d+)\.(\d+)\.(\d+)/', trim($version), $matches)) {
+        if (1 !== preg_match('/^v?(\d+)\.(\d+)\.(\d+)/', trim($version), $matches) || !isset($matches[1], $matches[2], $matches[3])) {
             $this->io->warning(sprintf("The backup was created with the non-release version '%s', it is assumed to be created before %s.", $version, self::FIRST_NEW_FORMAT_VERSION));
 
             return;
@@ -276,7 +280,8 @@ class BackupConvertCommand extends Command
     }
 
     /**
-     * Keeps the summary consistent with the converted elements: counts and the graph structure.
+     * Keeps the summary consistent with the converted elements: counts, graph structure and version. The original version
+     * is kept as `convertedFromVersion`.
      */
     private function convertSummary(string $path): void
     {
@@ -303,11 +308,19 @@ class BackupConvertCommand extends Command
                 'nodeCount' => $this->nodeCount,
                 'relationCount' => $this->relationCount,
                 'graphStructure' => $graphStructure,
+                // the converted backup uses the new format, backup:load refuses backups of older versions
+                'version' => self::FIRST_NEW_FORMAT_VERSION,
                 default => $value,
             };
+            if ('version' === $key && is_string($value) && '' !== trim($value)) {
+                $converted['convertedFromVersion'] = $value;
+            }
             if ('fileCount' === $key && !array_key_exists('graphStructure', $summary)) {
                 $converted['graphStructure'] = $graphStructure;
             }
+        }
+        if (!array_key_exists('version', $converted)) {
+            $converted['version'] = self::FIRST_NEW_FORMAT_VERSION;
         }
         $json = $this->encodeJson($converted);
         if (str_ends_with($raw, "\n")) {

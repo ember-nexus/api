@@ -37,6 +37,10 @@ services:
     environment:
       # additional php.ini directory, only used by scenarios which need a different PHP configuration
       - PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:${SERVER_TEST_INI_DIR:-/server-test-ini/default}
+      # the production image has no default .env file: secret of the Symfony kernel (test value only) and the id of the
+      # anonymous user
+      - APP_SECRET=test-secret-which-is-not-used-in-production
+      - ANONYMOUS_USER_UUID=02IiNr0GOoKiPMLSxpKrArvUWmaEqZ5h7Uybr
       - CYPHER_AUTH=bolt://neo4j:password@neo4j
       - MONGO_AUTH=mongodb://mongodb:password@mongodb:27017
       - ELASTIC_AUTH=elasticsearch:9200
@@ -78,7 +82,7 @@ services:
       - xpack.security.enrollment.enabled=true
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     expose:
       - "6379"
     command: redis-server --save 20 1 --maxmemory-policy noeviction --loglevel warning --requirepass redis-password

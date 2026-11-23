@@ -10,6 +10,8 @@ use App\Security\AccessChecker;
 use App\Type\AccessType;
 use App\Type\Uuid;
 
+use function Safe\preg_match;
+
 /**
  * Relations which grant access (`OWNS`, `IS_IN_GROUP`, `HAS_<ACCESS>_ACCESS`) may only be created by users who
  * themselves hold that access on the target. Without this, read access to an element would be enough to make oneself
@@ -32,7 +34,7 @@ class AccessGrantingRelationGuardService
             // ownership and group membership pass on everything: only a full owner may hand them out
             return AccessType::cases();
         }
-        if (1 === preg_match('/^HAS_([A-Z]+)_ACCESS$/', $relationType, $matches)) {
+        if (1 === preg_match('/^HAS_([A-Z]+)_ACCESS$/', $relationType, $matches) && isset($matches[1])) {
             $accessType = AccessType::tryFrom($matches[1]);
 
             return null === $accessType ? [] : [$accessType];
@@ -48,11 +50,7 @@ class AccessGrantingRelationGuardService
     {
         foreach ($this->getRequiredAccessTypes($relationType) as $accessType) {
             if (!$this->accessChecker->hasAccessToElement($userId, $endNodeId, $accessType)) {
-                throw $this->client403ForbiddenExceptionFactory->createFromTemplate(sprintf(
-                    'Creating a %s relation requires %s access to the target element.',
-                    $relationType,
-                    $accessType->value
-                ));
+                throw $this->client403ForbiddenExceptionFactory->createFromTemplate(sprintf('Creating a %s relation requires %s access to the target element.', $relationType, $accessType->value));
             }
         }
     }

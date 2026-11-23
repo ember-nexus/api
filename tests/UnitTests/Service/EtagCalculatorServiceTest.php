@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\UnitTests\Service;
 
 use App\Factory\Exception\Server500LogicErrorExceptionFactory;
+use App\Helper\ReadAccessCypherHelper;
 use App\Service\ElementManager;
 use App\Service\ElementTypeService;
-use App\Helper\ReadAccessCypherHelper;
 use App\Service\EtagCalculatorService;
 use App\Type\ElementKind;
 use App\Type\NodeElement;
