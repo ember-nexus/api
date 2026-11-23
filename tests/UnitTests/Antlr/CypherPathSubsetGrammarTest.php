@@ -270,7 +270,7 @@ class CypherPathSubsetGrammarTest extends TestCase
     public function testExpensiveQueryCheckIsSkippedIfQueryIsCached(): void
     {
         $query = 'MATCH path = ((:Type)) RETURN path';
-        $redisKey = 'validated-query:cypher-path-subset:5d76b75c07ec0ce124c70b158c8e1809b05161f1'; // sha1 hash of query
+        $redisKey = 'validated-query:cypher-path-subset:51a3a1e5ab8c30bc819ac03753ded3f272c709274383d98e7d90be35a4a4046f'; // sha256 hash of query
 
         $redisClient = $this->prophesize(RedisClient::class);
         $redisClient

@@ -12,7 +12,7 @@ under `name`, so it can subsequently be restored with `backup:load`.
 
 Both arguments are required: `name` is the local name to store the backup under, `source` is the
 URL of a ZIP archive (as produced by zipping a `backup:create` output folder). The command
-downloads the archive to a temporary file, prints its size and SHA1 checksum, then searches the
+downloads the archive to a temporary file, prints its size and SHA-256 checksum, then searches the
 archive for the `summary.json` that marks the backup's root folder and verifies the `node`,
 `relation`, and `file` folders exist there before extracting - it fails if any of these checks do
 not pass.

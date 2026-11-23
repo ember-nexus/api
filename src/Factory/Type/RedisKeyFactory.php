@@ -34,8 +34,7 @@ class RedisKeyFactory
 
     public function getRewrittenQueryCypherPathSubsetRedisKey(string $cypherQuery): RedisKey
     {
-        /** @psalm-suppress WeakHash */
-        $hashedCypherQuery = sha1($cypherQuery);
+        $hashedCypherQuery = hash('sha256', $cypherQuery);
 
         return new RedisKey(
             RedisPrefixType::REWRITTEN_QUERY_CYPHER_PATH_SUBSET,
@@ -45,8 +44,7 @@ class RedisKeyFactory
 
     public function getValidatedQueryCypherPathSubsetRedisKey(string $cypherQuery): RedisKey
     {
-        /** @psalm-suppress WeakHash */
-        $hashedCypherQuery = sha1($cypherQuery);
+        $hashedCypherQuery = hash('sha256', $cypherQuery);
 
         return new RedisKey(
             RedisPrefixType::VALIDATED_QUERY_CYPHER_PATH_SUBSET,

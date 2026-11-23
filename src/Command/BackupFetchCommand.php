@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use function Safe\file_get_contents;
 use function Safe\file_put_contents;
 use function Safe\filesize;
-use function Safe\sha1_file;
+use function Safe\hash_file;
 use function Safe\unlink;
 
 /**
@@ -76,8 +76,8 @@ class BackupFetchCommand extends Command
             $this->formatBytes($fileSize)
         ));
         $this->io->writeln(sprintf(
-            'SHA1 sum of file is <info>%s</info>.',
-            sha1_file($tempFilePath)
+            'SHA-256 sum of file is <info>%s</info>.',
+            hash_file('sha256', $tempFilePath)
         ));
         $provider = new FilesystemZipArchiveProvider($tempFilePath);
         $adapter = new ZipArchiveAdapter($provider);

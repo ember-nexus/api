@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and a default `ANONYMOUS_USER_UUID`. Both environment variables have to be set; the example Docker Compose files
   set them.
 - Mutant tests are no longer part of the CI; `composer test:mutant` still runs them locally.
+- Replace usages of SHA-1 with SHA-256, closes #555.
 
 ### Fixed
 - `cron:expire-tokens` no longer fetches the same page of old tokens again and again if some of them can't be loaded.
